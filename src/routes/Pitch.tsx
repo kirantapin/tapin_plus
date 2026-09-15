@@ -12,13 +12,14 @@ import VenueTicker from "../shell/VenueTicker";
 import SiteFoot from "../shell/SiteFoot";
 import BenefitCards from "../shell/BenefitCards";
 import SeatCapLine from "../shell/SeatCapLine";
+import { useReserveCta } from "../shell/useReserveCta";
+import SignInBar from "../shell/SignInBar";
 import { venues, logoField } from "../model/content";
 import {
   monthlyToday,
   guarantee,
   GUARANTEE_CONTACT,
   launchWindow,
-  reserveCta,
 } from "../model/content";
 
 /** The app's four destinations, in tab order. */
@@ -37,6 +38,9 @@ const APP_TABS = ["home", "deals", "spot", "points"];
 const SHOW_POINTS_DRILL = false;
 
 export default function Pitch({ invite }: { invite?: InviteId } = {}) {
+  /* Points at /in with "View your membership" once Stripe says this
+     person already holds one. See shell/useReserveCta.ts. */
+  const cta = useReserveCta();
   /* The invitation, from the URL or remembered from earlier this session. */
   useEffect(() => { if (invite) rememberInvite(invite); }, [invite]);
   const via: InviteId | null = invite ?? recallInvite();
@@ -216,8 +220,8 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 price" as the escape); the deck itself is unchanged and its own
                 close still lands on /reserve. */}
             <div className="hero-actions">
-              <Link className="action hero-cta" to="/reserve" state={{ background: location }} ref={heroCta}>
-                {reserveCta}
+              <Link className="action hero-cta" to={cta.to} state={cta.state} ref={heroCta}>
+                {cta.label}
               </Link>
               <Link className="action action-ghost hero-how" to="/how">
                 How it works
@@ -254,6 +258,11 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               </li>
             ))}
           </ul>
+
+          {/* Sign in / sign out, under the venue marks. NOT inside
+              `.hero-marks`, which is `display:none` below 1024px — this has to
+              reach the phone too, where most of the traffic is. */}
+          <SignInBar />
         </Panel>
       </VenueMosaic>
 
@@ -499,15 +508,15 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             <b className="tnum">${monthlyToday.toFixed(2)}</b>
             <span>a month</span>
           </p>
-          <Link className="action top-cta-go" to="/reserve" state={{ background: location }}>
-            {reserveCta}
+          <Link className="action top-cta-go" to={cta.to} state={cta.state}>
+            {cta.label}
           </Link>
         </div>
       </div>
 
       <div className={`sticky-cta is-pair${past ? "" : " is-away"}`}>
-        <Link className="action" to="/reserve" state={{ background: location }}>
-          {reserveCta}
+        <Link className="action" to={cta.to} state={cta.state}>
+          {cta.label}
         </Link>
         {/* A button, not a text link: Rob asked for the deck to be "secondary,
             but more prominent". */}

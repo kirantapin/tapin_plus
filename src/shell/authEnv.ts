@@ -1,76 +1,121 @@
 /**
- * WHETHER THIS BUILD CAN VERIFY A PHONE NUMBER.
+ * PHONE SIGN-IN, AND WHAT IT RECORDS.
  *
  * Sam, 13 Sep 2026: "before they can actually purchase they have to sign in with
  * their phone number so we can actually map the membership to their account and
  * send them text notifications when we get closer to the launch."
  *
- * Modelled on `checkoutEnv` deliberately, because it is the same class of fact:
- * a deploy detail rather than a design decision, and one that must be able to be
- * absent without the surface lying about what it can do.
+ * ══ THIS FILE USED TO SAY THE OPPOSITE OF WHAT IT NOW DOES ═════════════════
+ * It carried a long note explaining that the project deliberately had NO
+ * Supabase client — ~40kB to send two POSTs — and a `phoneAuth.live` pair that
+ * let the step collect a number without verifying it when nothing was
+ * configured. Both were right for a one-off anonymous deposit. Neither
+ * survived the subscription: `create_simple_intent` takes its customer from an
+ * access token, and a token has to be persisted and refreshed. The two raw
+ * fetches verified a code and then THREW THE SESSION AWAY. See `supabase.ts`.
  *
- * ══ NO SUPABASE CLIENT, AND THAT IS NOT AN OVERSIGHT ═══════════════════════
- * PRODUCT.md is explicit that this build carries no Supabase client. Adding
- * `@supabase/supabase-js` — about 40kB over the wire — to send two POSTs for a
- * feature that is not yet configured would be the wrong trade on a page whose
- * first paint is the argument for a purchase. GoTrue's OTP endpoints are plain
- * REST and take an anon key in a header, so `fetch` is the whole integration.
- *
- * ══ ALL-OR-NOTHING, LIKE THE CHARGE ════════════════════════════════════════
- * `live` is true only when BOTH the project URL and the anon key are present.
- * Half-configured, the step must not send a code it cannot verify — the same
- * reasoning that stops the checkout rendering a wallet it cannot confirm.
- *
- * WITH IT UNSET the step still runs and still collects the number: that is what
- * gets the membership mapped to a person and makes a launch text possible,
- * which is the whole of what Sam asked for. What is missing without it is proof
- * the number belongs to whoever typed it, and the step says so in those words
- * rather than implying a verification that did not happen.
+ * ══ THE STEP IS ALSO THE ONLY PLACE THE ACCOUNT IS WRITTEN ═════════════════
+ * Both entry points — the checkout sheet and the pitch's sign-in sheet — mount
+ * the same `PhoneStep`, and both land in `verifyCode` below. So this is the one
+ * function where the name and the marketing consent reach the auth user, and
+ * the reason neither can be lost by taking a different door in.
  */
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+import { supabase } from "../supabase";
 
 export const phoneAuth = {
-  /** True only when a code can actually be sent AND checked. */
-  live: Boolean(url && key),
-  url: (url ?? "").replace(/\/+$/, ""),
-  key: key ?? "",
+  /** The client throws at import when it is unconfigured, so by the time
+   *  anything reads this there is a project to talk to. */
+  live: true,
 };
 
-/** GoTrue: send the SMS. Resolves to an error string, or null on success. */
+/** Send the SMS. Resolves to an error string, or null on success. */
 export async function sendCode(phone: string): Promise<string | null> {
-  if (!phoneAuth.live) return null;
   try {
-    const res = await fetch(`${phoneAuth.url}/auth/v1/otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: phoneAuth.key },
-      body: JSON.stringify({ phone, create_user: true }),
+    const { error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: { shouldCreateUser: true },
     });
-    if (res.ok) return null;
     /* GoTrue's own message is better than anything invented here — it
        distinguishes an unroutable number from a rate limit, and a reader who
        hits the second needs to be told to wait rather than to retype. */
-    const body = (await res.json().catch(() => null)) as { msg?: string; error_description?: string } | null;
-    return body?.msg || body?.error_description || "We could not send that code.";
+    return error ? error.message || "We could not send that code." : null;
   } catch {
     return "We could not reach the network. Check your connection and try again.";
   }
 }
 
-/** GoTrue: check the code. Resolves to an error string, or null on success. */
+/**
+ * Check the code. Resolves to an error string, or null on success.
+ *
+ * On success supabase-js stores the session and fires `onAuthStateChange`, so
+ * `auth_context` picks it up and the wallet has a token — that is the whole
+ * reason this is no longer a bare fetch.
+ */
 export async function verifyCode(
   phone: string,
   token: string,
+  name?: string,
+  marketingOptIn?: boolean,
 ): Promise<string | null> {
-  if (!phoneAuth.live) return null;
   try {
-    const res = await fetch(`${phoneAuth.url}/auth/v1/verify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: phoneAuth.key },
-      body: JSON.stringify({ phone, token, type: "sms" }),
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token,
+      type: "sms",
     });
-    if (res.ok) return null;
-    return "That code did not match. Check it and try again.";
+    if (error) return "That code did not match. Check it and try again.";
+
+    /* ══ FIRST SIGN-IN ONLY ══════════════════════════════════════════════
+       Both fields below are written ONCE, when the account has no value for
+       them yet, and never on a re-login.
+
+       FOR THE CONSENT THAT IS NOT TIDINESS, IT IS THE WHOLE POINT. The
+       marketing box is unchecked by default and must stay that way (TCPA — see
+       PhoneStep). So a member who opted in months ago, signs in again and does
+       not re-tick it would arrive here with `false` and SILENTLY REVOKE their
+       own consent. Writing only into the gap makes that impossible.
+
+       FOR THE NAME it is the weaker version of the same argument: whatever the
+       account already carries is what the member last chose to be called, and
+       a stale value sitting in this session's `useName` store should not
+       quietly replace it.
+
+       WHICH MEANS THIS IS NOT "IS THIS A NEW USER". `created_at` against
+       `last_sign_in_at` would answer that, and answer it fragilely — a clock
+       skew or a retried verify and it is wrong. The question worth asking is
+       whether the value is already recorded, which is what is asked here, and
+       it also repairs an account that somehow missed one.
+
+       CHANGING EITHER IS A SETTINGS JOB, not a side effect of signing in.
+       There is no settings surface yet; when there is, it writes directly. */
+    const existing = (data.user?.user_metadata ?? {}) as Record<string, unknown>;
+    const profile: Record<string, unknown> = {};
+
+    if (name?.trim() && typeof existing.display_name !== "string") {
+      profile.display_name = name.trim();
+      profile.full_name = name.trim();
+    }
+
+    if (
+      typeof marketingOptIn === "boolean" &&
+      typeof existing.marketing_opt_in !== "boolean"
+    ) {
+      profile.marketing_opt_in = marketingOptIn;
+      profile.marketing_opt_in_at = new Date().toISOString();
+    }
+
+    /* DELIBERATELY NOT FATAL. The code matched and the session is real — the
+       sign-in has succeeded. Failing it because a metadata write did not land
+       would throw away a verification the member just completed, to fix a
+       label. Logged, and the next sign-in fills the gap. */
+    if (Object.keys(profile).length > 0) {
+      const { error: profileError } = await supabase.auth.updateUser({
+        data: profile,
+      });
+      if (profileError) console.error("Could not save the profile", profileError);
+    }
+
+    return null;
   } catch {
     return "We could not reach the network. Check your connection and try again.";
   }

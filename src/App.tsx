@@ -15,7 +15,6 @@ import AppDeals from "./routes/app/AppDeals";
 import AppSpot from "./routes/app/AppSpot";
 import AppPoints from "./routes/app/AppPoints";
 import AppPlace from "./routes/app/AppPlace";
-import SavingsLab from "./routes/SavingsLab";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -98,8 +97,6 @@ export default function App() {
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}
           <Route path="/in" element={<Membership />} />
-          {/* MOCKUP GALLERY, not a shipping surface. Nothing links here. */}
-          <Route path="/savings" element={<SavingsLab />} />
           {appRoutes}
         </Route>
       </Routes>

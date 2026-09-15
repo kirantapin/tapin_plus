@@ -32,5 +32,9 @@ export default defineConfig({
      dev`) it is "/" and nothing changes. */
   base: process.env.VITE_BASE_PATH || "/",
   plugins: [react()],
-  server: { port: Number(process.env.PORT) || 4500, strictPort: true },
+  server: {
+    port: Number(process.env.PORT) || 4500,
+    strictPort: true,
+    allowedHosts: [".ngrok.app", ".ngrok-free.app", ".ngrok.io"],
+  },
 });

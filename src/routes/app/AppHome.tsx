@@ -31,7 +31,7 @@ export default function AppHome() {
           full-width band holding four words. */}
       <div className="ah-top">
         <div className="ah-object">
-          <TapInCard name="Your name" className="app-card" />
+          <TapInCard className="app-card" />
         </div>
 
         <div className="ah-facts">

@@ -147,7 +147,9 @@ export default function PhoneStep({
     if (code.length < 6 || busy) return;
     setBusy(true);
     setError(null);
-    const err = await verifyCode(toE164(digits), code);
+    /* The name goes with it — it is written onto the auth user so the account
+       is identifiable as a person, not just a number. See authEnv.ts. */
+    const err = await verifyCode(toE164(digits), code, name.trim(), optIn);
     setBusy(false);
     if (err) {
       setError(err);

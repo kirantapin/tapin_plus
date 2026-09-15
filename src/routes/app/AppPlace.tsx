@@ -8,8 +8,8 @@ import {
   venues,
   logoField,
   heroIsBright,
-  reserveCta,
 } from "../../model/content";
+import { useReserveCta } from "../../shell/useReserveCta";
 import { sectionsFor, type MenuItem } from "../../model/menu";
 import {
   quote,
@@ -71,6 +71,7 @@ const BADGE_NOTE =
  * Italiano's does not have is a row that is not there (§6).
  */
 export default function AppPlace() {
+  const cta = useReserveCta();
   const { venueId } = useParams();
   const venue = venues.find((v) => v.id === venueId);
 
@@ -846,8 +847,8 @@ export default function AppPlace() {
           and a real business's name on a control that takes money asserts an
           endorsement that business never gave. */}
       <div className="app-cta">
-        <Link className="action" to="/reserve">
-          {reserveCta}
+        <Link className="action" to={cta.to}>
+          {cta.label}
         </Link>
       </div>
     {sheet ? (

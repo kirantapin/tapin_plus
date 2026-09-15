@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { asset } from "../asset";
 import { Link, useLocation } from "react-router-dom";
 import { Panel } from "../shell/Panel";
 import { Drill } from "../shell/Drill";
 import TapInCard from "../shell/TapInCard";
-import { TeeThumb } from "../shell/Tee";
 import VenueMosaic from "../shell/VenueMosaic";
 import SiteFoot from "../shell/SiteFoot";
 import AppliesTo from "../shell/AppliesTo";
 import { readablePhone } from "../shell/PhoneStep";
+import { useAuth } from "../context/auth_context";
 import {
   PLANS,
   type PlanId,
@@ -36,9 +35,16 @@ import {
  * THAT IS SAID ON THE PAGE RATHER THAN DESIGNED AROUND. A membership page that
  * silently depends on one browser's storage, and shows an empty state to the
  * same person on their laptop, is a page that looks broken to someone who has
- * just paid. So the reference is printed at full size, the limitation is
- * stated in plain words, and the recovery path is a human being — which is the
- * same address the refund runs through, and currently the only real one.
+ * just paid. So the limitation is stated in plain words and the recovery path
+ * is a human being — the same address the refund runs through.
+ *
+ * THE REFERENCE BLOCK IS GONE (15 Sep 2026, Sam). It printed `seat.id` at full
+ * size on the argument that it was the only proof of the charge outside
+ * Stripe. That stopped being true when the checkout became a subscription: the
+ * customer hangs off the Supabase user now, `subscription_status` answers for
+ * them on any device, and the branch below catches the member whose browser
+ * has no record. The id is still stored and still what the refer link is
+ * derived from — it is just no longer something the member has to keep.
  *
  * PHONE SIGN-IN HAS LANDED, AND IT IS HALF OF WHAT THIS PAGE NEEDS. Every
  * reservation now carries the number it was bought with, so the record finally
@@ -72,9 +78,6 @@ interface Reservation {
   saving: { amount: string; after: string; per: string } | null;
   locked: string;
   terms: Term[];
-  /** Written by the no-provider test path (checkoutEnv.testPurchase). Nothing
-   *  was charged and no seat is held, and this page says so at the top. */
-  test: boolean;
   /** As she typed it at the sheet. Null for a reservation made before the
    *  name field existed, in which case the card keeps its placeholder. */
   name: string | null;
@@ -125,7 +128,6 @@ function readReservation(): Reservation | null {
             : lockedRateLines.standard,
       terms:
         Array.isArray(parsed.terms) && parsed.terms.every(isTerm) ? parsed.terms : PLANS[plan].terms,
-      test: parsed.test === true || parsed.id.startsWith("test_"),
       name:
         typeof parsed.name === "string" && parsed.name.trim() ? parsed.name.trim() : null,
       phone: typeof parsed.phone === "string" ? parsed.phone : null,
@@ -153,7 +155,6 @@ function demoReservation(): Reservation | null {
     saving: founderSaving.monthly,
     locked: lockedRateLines.founding,
     terms: PLANS.monthly.terms,
-    test: true,
     name: "Sam",
     phone: "+15405550123",
     phoneVerified: false,
@@ -175,6 +176,8 @@ const heldOn = (iso: string): string => {
 export default function Membership() {
   /* Where the app window opens over, on a desktop (AppLayer). */
   const location = useLocation();
+  /* Stripe's answer, for the reader whose record is on another device. */
+  const { subscribed } = useAuth();
   /**
    * Read in an effect, not during render. This page is rendered on a server
    * nowhere today, but reading `window` in a component body is the kind of
@@ -205,7 +208,10 @@ export default function Membership() {
             as long as nothing collected one; a reservation from before the
             field existed still gets it, rather than an empty line. */}
         <TapInCard
-          name={seat?.name ?? "Your name"}
+          /* The name on the reservation, else the signed-in one, else the
+             placeholder — a record written before the field existed still
+             gets a name now if we hold one. */
+          name={seat?.name ?? undefined}
           /* The plan she bought, from her record — never the site's live
              default, which follows the flip. */
           plan={seat ? (seat.founding ? "Early Bird" : "Standard") : undefined}
@@ -223,21 +229,15 @@ export default function Membership() {
       {!ready ? null : seat && plan ? (
         <>
           <Panel className="ms-head">
-            {/* A test reservation says so first, in the slot the real state
-                uses, so the rest of the page can be read as what a real one
-                would look like without anyone mistaking it for one. */}
             <p className="t-caption ms-state">
-              {seat.test
-                ? "Test reservation — no seat is held"
-                : `Your ${seat.founding ? "Early Bird Special" : "seat"} is held`}
+              {`Your ${seat.founding ? "Early Bird Special" : "seat"} is held`}
             </p>
             <h1 className="ms-title">
               Opening in Blacksburg, {launchWindow}
             </h1>
             <p className="t-compact ms-sub">
-              {seat.test
-                ? "Nothing was charged. This is the page a real reservation lands on."
-                : "Nothing more is charged until then, and we will ask you first."}
+              Nothing more is charged until we open. Your membership then renews
+              automatically until you cancel.
             </p>
           </Panel>
 
@@ -291,31 +291,6 @@ export default function Membership() {
             <p className="t-compact ms-locked">{seat.locked}</p>
           </Panel>
 
-          {/* THE REFERENCE, AT FULL SIZE AND SELECTABLE. It is the only proof of
-              the charge that exists outside Stripe, and the member will need to
-              paste it into an email to get a refund — so it is not a caption,
-              it is the content of its own block. */}
-          <Panel label="Your reference">
-            <p className="ms-ref tnum">{seat.id}</p>
-            <p className="t-compact">
-              Keep this. Your reservation is saved on this device for now, and
-              this reference is how we find it. Email{" "}
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
-              with it to change or refund your seat.
-            </p>
-          </Panel>
-
-          {/* ══ BRING A FRIEND ═══════════════════════════════════════════
-              Sam, 15 Sep 2026: "make this post-purchase page a little bit more
-              interesting, maybe add some sharing features, like if you share
-              with X number of friends, you receive X credit." The mechanism
-              as drawn: a link of her own, a share control (the device's own
-              sheet where it has one, the clipboard where it does not), and a
-              count toward the bonus. THE AMOUNTS ARE A SKETCH — $5 each way
-              and $10 at three friends are placeholders until Sam sets them,
-              and the panel says so in its last line. The count is 0: nothing
-              records a referral yet. */}
-          <ReferPanel code={seat.id.replace(/^test_/, "").slice(0, 8)} />
           <Panel label="What you get when we open">
             <AppliesTo />
             <p className="t-compact ms-note">
@@ -349,13 +324,46 @@ export default function Membership() {
             </svg>
           </Link>
         </>
+      ) : subscribed ? (
+        /* ══ PAID, BUT NOT ON THIS DEVICE ══════════════════════════════════
+           Stripe says this person holds a subscription and `localStorage`
+           does not — a second device, a cleared cache, a different browser.
+           Before `subscription_status` existed this fell through to "no seat
+           on this device", which told a paying member we had no idea who they
+           were. WHAT IS MISSING HERE IS THE DETAIL, NOT THE FACT: the status
+           endpoint answers a boolean, so there is no plan, price, date or
+           reference to print. It says what is true and no more. */
+        <>
+          <Panel className="ms-head">
+            <p className="t-caption ms-state">Your seat is held</p>
+            <h1 className="ms-title">
+              Opening in Blacksburg, {launchWindow}
+            </h1>
+            <p className="t-compact ms-sub">
+              Nothing more is charged until we open. Your membership then renews
+              automatically until you cancel.
+            </p>
+          </Panel>
+          <Panel label="The details are on the device you reserved from">
+            <p className="t-compact">
+              Your plan, what you paid and your reference are saved in that
+              browser. Open this page there to see them, or email{" "}
+              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
+              and we will send them to you.
+            </p>
+          </Panel>
+        </>
       ) : (
         /* ══ NOT AN ERROR, AND IT MUST NOT LOOK LIKE ONE ═══════════════════
            The overwhelmingly likely reader here has not bought anything — /in
            is a route someone can simply type. The second, much rarer and much
            more upsetting reader HAS paid and is on a different device. One
            screen has to serve both without accusing either of anything, so it
-           leads with the ordinary case and puts the recovery underneath. */
+           leads with the ordinary case and puts the recovery underneath.
+
+           A member who is SIGNED IN no longer lands here at all — the branch
+           above catches them from `subscription_status`. This is for the
+           signed-out one, where the browser is still all we have. */
         <>
           <Panel className="ms-head">
             <h1 className="ms-title">No seat on this device</h1>
@@ -380,73 +388,5 @@ export default function Membership() {
       </div>
       <SiteFoot />
     </>
-  );
-}
-
-
-/* Sam, 15 Sep 2026 (late): "they should just unlock a free tshirt if they
-   refer 10 friends who purchase the membership." One reward, one number. */
-const REFER = { goal: 10 };
-
-function ReferPanel({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false);
-  const url =
-    typeof window === "undefined"
-      ? ""
-      : `${window.location.origin}${asset("")}?ref=${encodeURIComponent(code)}`;
-  const shown = url.replace(/^https?:\/\//, "");
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      /* No clipboard (some in-app browsers): the link is on screen to select. */
-    }
-  };
-  const share = async () => {
-    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
-    if (nav.share) {
-      try {
-        await nav.share({
-          title: "TapIn in Blacksburg",
-          text: "Early access to TapIn in Blacksburg — join with my link.",
-          url,
-        });
-        return;
-      } catch {
-        /* Dismissed, or unsupported target: fall through to the clipboard. */
-      }
-    }
-    copy();
-  };
-  return (
-    <Panel label="Bring a friend" className="ms-refer">
-      <div className="ms-refer-head">
-        <p className="ms-refer-lede">
-          Refer <b>{REFER.goal} friends</b> who get a membership with your link, and the{" "}
-          <b>TapIn t-shirt</b> is yours.
-        </p>
-        <TeeThumb className="ms-refer-tee" plate />
-      </div>
-      <div className="ms-refer-link">
-        <code className="ms-refer-url">{shown}</code>
-        <button type="button" className="ms-refer-copy" onClick={copy} aria-live="polite">
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-      <button type="button" className="action ms-refer-share" onClick={share}>
-        Share your link
-      </button>
-      <p className="ms-refer-track">
-        <span className="ms-refer-meter" aria-hidden="true">
-          <i style={{ ["--p" as string]: "0" }} />
-        </span>
-        <span className="tnum">0</span> of {REFER.goal} friends joined
-      </p>
-      <p className="t-compact ms-note">
-        The shirt ships when we open. Referral rewards are still being finalised.
-      </p>
-    </Panel>
   );
 }

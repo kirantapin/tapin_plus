@@ -1,8 +1,6 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { Panel } from "../shell/Panel";
 import TapInCard from "../shell/TapInCard";
-import { TeeThumb } from "../shell/Tee";
 import { useCardFlight } from "../shell/cardFlight";
 import { BenefitIcon, NavIcon } from "../shell/Icons";
 import CheckoutSheet from "../shell/CheckoutSheet";
@@ -11,7 +9,6 @@ import { useName } from "../model/nameStore";
 import { seatLine, seatsLeft, SEAT_CAP } from "../model/seats";
 import {
   PLANS,
-  type PlanId,
   lockedRateLine,
   lockedRateFor,
   benefits,
@@ -44,8 +41,6 @@ import {
  */
 
 export default function Reserve() {
-  /* Where the app window opens over, on a desktop (AppLayer). */
-  const location = useLocation();
   /* The PaymentIntent id once the charge has settled — and the page's proof it
      has. Never seeded from storage: a previous reservation is not this visit's,
      and rendering a stale receipt over a live checkout would be the worst
@@ -99,14 +94,11 @@ export default function Reserve() {
     const m = line.match(/^(\d+)\s(.*)$/);
     return m ? { n: m[1], rest: m[2] } : { n: null, rest: line };
   })();
-  /* Preselected from the pitch's plan card when she arrived through one
-     (14 Sep funnel audit: "pitch plan cards should carry state:{plan} so
-     /reserve doesn't re-ask"). */
-  const [planId, setPlanId] = useState<PlanId>(() => {
-    const p = (location.state as { plan?: PlanId } | null)?.plan;
-    return p && p in PLANS ? p : "monthly";
-  });
-  const plan = PLANS[planId];
+  /* ONE PLAN. The picker is gone (see the note where it stood), and monthly
+     is the only thing `create_simple_intent` can actually charge. A `?plan=`
+     in the router state is ignored rather than honoured — there is nothing
+     for it to select. */
+  const plan = PLANS.monthly;
   const refundTerm = plan.terms.find((t) => t.id === "refund")?.term;
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
@@ -158,7 +150,7 @@ export default function Reserve() {
 
         <div className="rs-card">
           <TapInCard
-            name={cardName.trim() || "Your name"}
+            name={cardName.trim() || undefined}
             innerRef={cardRef}
             className="reserve-card"
           />
@@ -169,80 +161,56 @@ export default function Reserve() {
         {/* The seat count used to open this panel. It is under the card now —
             see THE COUNT, UNDER THE OBJECT on the band above. */}
 
-        {/* Both prices are stated on the control itself, so the choice is
-            legible before it is made. */}
-        <div className="plan-pick" role="radiogroup" aria-label="Choose a plan">
-          {(["monthly", "pass", "year"] as PlanId[]).map((id) => {
-            const p = PLANS[id];
-            const on = id === planId;
-            const tile = (
-              <button
-                type="button"
-                role="radio"
-                aria-checked={on}
-                className={`plan-opt${on ? " is-on" : ""}`}
-                onClick={() => setPlanId(id)}
-              >
-                <b>{p.label}</b>
-                <span className="plan-figs">
-                  {/* THE STRUCK FIGURE IS WHAT EVERYONE ELSE WILL PAY, and it
-                      is labelled rather than left bare: $14.99 has never been
-                      charged to anyone, so a lone strike-through would imply a
-                      former price that did not exist. Announced to screen
-                      readers as words, because a line-through is a visual
-                      convention that reads aloud as nothing at all. */}
-                  {/* Nothing to strike once the founding seats are gone —
-                      this IS the price then, and a line through the number a
-                      reader is about to be charged would be a false compare. */}
-                  {/* NO STRUCK FIGURE. Sam, 14 Sep 2026: "remove the strike through
-                      on the reserve plan tiles too." The comparison lives in the
-                      "Save $X" line under the price and in the hero's plain sentence
-                      ("Price for everyone else is $14.99"); a struck number that no
-                      one has ever paid read as a fake former price to Rob's readers. */}
-                  {/* The price and its period are one row under the struck
-                      eyebrow — see reserve.css "THE STRIKE IS AN EYEBROW". */}
-                  <span className="plan-now">
-                    <b className="tnum">{p.price}</b>
-                    <span className="plan-per">{p.per}</span>
-                    {/* What everyone else pays, in words and not a strike
-                        (Sam, 14 Sep 2026: "we need to show what non-early
-                        birds would have to pay"). Same figure the hero's
-                        sentence uses; per plan, so the pass and the year
-                        state their own. */}
-                    {p.saving ? (
-                      <span className="plan-else">
-                        <span className="tnum">{p.saving.after}</span> for everyone else
-                      </span>
-                    ) : null}
+        {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
+           It offered monthly, the 3-month pass and the year-with-a-shirt as a
+           radiogroup. Two reasons it had to go, and the second is the serious
+           one.
+
+           SAM ASKED FOR IT: "get rid of those and just have the standard $6.99
+           one."
+
+           AND IT WAS NEVER REAL. `create_simple_intent` hardcodes ONE price in
+           subscription mode — every tile created the same subscription for the
+           same amount. Choosing "3 months" charged the monthly figure and
+           produced a monthly subscription, while the rows, the consent sentence
+           and the terms beside it all described a 3-month pass. That is a
+           control that looks like it did something and did not, on the one
+           surface where §4 says the stated terms must match what is charged.
+           Do not restore a tile without a price id behind it.
+
+           `PLANS.pass` and `PLANS.year` stay in content.ts: /in reads the plan
+           off a stored reservation, and a record written before today still has
+           to render the words its owner agreed to. */}
+        {/* THE TILE STAYS, AND IT IS ALREADY CHOSEN. One plan, so the group
+            holds one option and that option is selected — the reader sees what
+            they are buying in the same object that used to offer the choice,
+            rather than a panel of prose with no figure on it.
+
+            STILL A RADIO, not a div dressed as one: it is the single member of
+            a radiogroup, `aria-checked` is true, and it is focusable — a
+            screen reader should meet "Monthly, selected, 1 of 1", which is the
+            truth. Tapping it re-selects what is already selected, so there is
+            no handler; a control that cannot change state must not pretend it
+            can. */}
+        <div className="plan-pick is-solo" role="radiogroup" aria-label="Your plan">
+          <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
+            <b>{plan.label}</b>
+            <span className="plan-figs">
+              <span className="plan-now">
+                <b className="tnum">{plan.price}</b>
+                <span className="plan-per">{plan.per}</span>
+                {plan.saving ? (
+                  <span className="plan-else">
+                    <span className="tnum">{plan.saving.after}</span> for everyone else
                   </span>
-                </span>
-                {/* NO "SAVE $X" LINE. Both 14 Sep review agents: three tiles
-                    stated savings on three different bases, and the year's
-                    "Save $72" sat under "Later members pay $96 more" — two
-                    figures for one fact. One statement per tile now: the
-                    price, and what everyone else pays. */}
-                {/* The year's shirt — the one thing a plan includes that is
-                    not money, so it is a line of its own rather than folded
-                    into the price. Same string as its charge row. */}
-                {p.perk ? <span className="plan-perk">{p.perk}</span> : null}
-              </button>
-            );
-            /* The year's tile carries the shirt beside it — a second control
-               (the close-up) that cannot live inside the radio button. */
-            return p.perkImg ? (
-              <div className="plan-year" key={id}>
-                {tile}
-                <TeeThumb className="plan-tee" plate />
-              </div>
-            ) : (
-              <Fragment key={id}>{tile}</Fragment>
-            );
-          })}
+                ) : null}
+              </span>
+            </span>
+          </div>
         </div>
 
-        {/* Said once, under the choice — the value of a founding seat is that
-            the rate survives, and a reader choosing between two plans is
-            deciding about that as much as about cadence. */}
+        {/* The founding rate survives — said here because it is the whole value
+            of taking a seat now rather than later. */}
         <p className="t-compact plan-locked">{lockedRateFor(plan.price, plan.per)}</p>
 
         {/* THE REFUND, WHERE THE PLAN IS CHOSEN. 14 Sep funnel audit: "Full
@@ -357,10 +325,6 @@ export default function Reserve() {
                 plan: plan.id,
                 cents: plan.paidTodayCents,
                 at: new Date().toISOString(),
-                /* A test reservation (checkoutEnv.testPurchase) is written with
-                   the same shape and a flag, so every surface that reads it
-                   can say it is one. Nothing was charged; no seat is held. */
-                test: id.startsWith("test_"),
                 /* ══ WHAT SHE BOUGHT, NOT WHAT IT COSTS TODAY ═══════════════
                    Pre-deploy review, 14 Sep 2026: /in rendered today's PLANS,
                    so from the 27 Sep flip every $4.99 founder would have been
@@ -388,21 +352,18 @@ export default function Reserve() {
         }}
         noWallet={noWallet}
         onNoWallet={() => setNoWallet(true)}
+        /* ══ `tapin.blacksburg.identity` IS GONE (15 Sep 2026) ═══════════════
+           It held the number of someone who signed in and then did not pay, so
+           a launch text could still reach them. Nothing ever read it — the
+           value was entirely in it being there when a server finally existed.
+           One does now: signing in creates a Supabase auth user carrying the
+           verified number, the name and the marketing opt-in, and it is
+           created AT VERIFY, before the wallet opens. The abandoned-checkout
+           case the key was written for is already covered, on a record that
+           survives a cleared cache and is queryable. A second copy in this
+           browser could only go stale. */
         onIdentity={(id) => {
           identity.current = id;
-          /* WRITTEN BEFORE THE CHARGE, not after. If the wallet is dismissed or
-             the card is declined, the number is still the one useful thing this
-             visit produced — it is how a launch text reaches someone who meant
-             to reserve and did not finish. Its own key, because it is not a
-             reservation and must never be mistaken for one. */
-          try {
-            window.localStorage.setItem(
-              "tapin.blacksburg.identity",
-              JSON.stringify({ ...id, at: new Date().toISOString() }),
-            );
-          } catch {
-            /* private mode — the sheet carries it in memory for this visit */
-          }
         }}
       />
     </>

@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Drill } from "./Drill";
-import SimplePayButton from "./SimplePayButton";
-import { checkout } from "./checkoutEnv";
+import SubscriptionPayButton from "./SubscriptionPayButton";
 import PhoneStep, { readablePhone, type PhoneIdentity } from "./PhoneStep";
+import { useAuth } from "../context/auth_context";
 import {
   launchWindow,
   GUARANTEE_CONTACT,
   seatNoun,
-  reserveCta,
   type PlanId,
 } from "../model/content";
 
@@ -87,6 +86,10 @@ export default function CheckoutSheet({
    * state behind for the next attempt to inherit.
    */
   const [identity, setIdentity] = useState<PhoneIdentity | null>(null);
+  /* Stripe's answer, not this browser's. `null` means not known yet — only
+     a hard `true` replaces the checkout, so a slow or failed check shows the
+     wallet rather than telling a new buyer they have already paid. */
+  const { subscribed } = useAuth();
   const forfeitTerm = plan.terms.find((t) => t.id === "forfeit")?.term;
 
   /**
@@ -135,9 +138,7 @@ export default function CheckoutSheet({
            beneath say "seat", and the sheet's own name must agree with them. */
         aria-label={
           paid
-            ? paid.startsWith("test_")
-              ? "Test reservation"
-              : `Your ${seatNoun}`
+            ? `Your ${seatNoun}`
             : identity
               ? `Confirm your ${seatNoun}`
               : `Your details, to hold your ${seatNoun}`
@@ -149,9 +150,7 @@ export default function CheckoutSheet({
         <div className="cs-top">
           <p className="cs-title">
             {paid
-              ? paid.startsWith("test_")
-                ? "Test reservation"
-                : `Your ${seatNoun}`
+              ? `Your ${seatNoun}`
               : identity
                 ? "Confirm your seat"
                 : "Your details"}
@@ -162,8 +161,14 @@ export default function CheckoutSheet({
             onClick={onClose}
             aria-label={paid ? "Done" : "Close"}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
-              stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+            >
               <path d="m7 7 10 10M17 7 7 17" />
             </svg>
           </button>
@@ -171,25 +176,19 @@ export default function CheckoutSheet({
 
         {paid ? (
           <div className="receipt" role="status">
-            {/* A test id prints as a test at every step — the head, the money
-                line and the reference — so the receipt never reads as a
-                purchase to anyone who did not make one. */}
-            <p className="receipt-head">
-              {paid.startsWith("test_") ? "Test reservation — no seat is held." : `Your ${seatNoun} is held.`}
-            </p>
+            <p className="receipt-head">{`Your ${seatNoun} is held.`}</p>
             <p className="t-compact">
-              {paid.startsWith("test_")
-                ? `Nothing was charged. A real reservation pays ${plan.price} today — the first ${plan.period}, which starts when we open (expected ${launchWindow}) and holds the seat until then.`
-                : `${plan.price} paid today — your first ${plan.period}. It starts when we open, expected ${launchWindow}, and we will ask you before the next one.`}
+              {`${plan.price} paid today — your first ${plan.period}. It starts when we open, expected ${launchWindow}, then ${plan.price} a ${plan.period} automatically until you cancel.`}
             </p>
-            {/* THE ONLY RECORD THAT EXISTS. Nothing server-side writes this
-                reservation down, so the member's copy of the reference is the
-                member's copy — printed, not hidden behind a link. */}
+            {/* The subscription id. It is no longer "the only record that
+                exists" — the subscription hangs off the Supabase user and
+                `subscription_status` answers for it on any device — so it is
+                shown as a handle for support, not as something to keep safe. */}
             <p className="t-compact receipt-ref">
               Reference <span>{paid}</span>
             </p>
             <p className="t-compact">
-              Keep this reference. Email {GUARANTEE_CONTACT} for a refund any time
+              Email {GUARANTEE_CONTACT} to cancel, or for a full refund any time
               before we open.
             </p>
             {/* ══ THE DOOR TO THE PAGE AFTER THE PURCHASE ══════════════════
@@ -197,6 +196,23 @@ export default function CheckoutSheet({
                 page — the card with her name, what she holds, the reference,
                 the terms she agreed to — and the receipt hands her to it
                 rather than leaving her under a modal with a close button. */}
+            <Link className="action receipt-go" to="/in">
+              See your membership
+            </Link>
+          </div>
+        ) : subscribed ? (
+          /* ══ ALREADY BOUGHT ═════════════════════════════════════════════
+             Asked of Stripe through `subscription_status`, not of this
+             browser: the localStorage record is gone on a second device and
+             a real member would otherwise be walked back through a checkout
+             whose wallet answers 409. No rows, no consent and no control —
+             §4 governs a decision, and there is no decision left to take. */
+          <div className="receipt" role="status">
+            <p className="receipt-head">You already have a {seatNoun}.</p>
+            <p className="t-compact">
+              This number is already on an Early Bird {seatNoun}, so there is
+              nothing to pay now. Opening in Blacksburg, {launchWindow}.
+            </p>
             <Link className="action receipt-go" to="/in">
               See your membership
             </Link>
@@ -227,7 +243,9 @@ export default function CheckoutSheet({
             <p className="cs-who">
               <span>Holding for</span>
               <b>{identity.name}</b>
-              <span className="tnum cs-phone">{readablePhone(identity.phone)}</span>
+              <span className="tnum cs-phone">
+                {readablePhone(identity.phone)}
+              </span>
               <button
                 type="button"
                 className="cs-change"
@@ -250,66 +268,39 @@ export default function CheckoutSheet({
             {/* The qualifier on the refund, out where the refund is: what it
                 costs is the seat and the locked rate. Rendered verbatim from the
                 terms list, never retyped. */}
-            {forfeitTerm ? <p className="t-compact forfeit">{forfeitTerm}</p> : null}
+            {forfeitTerm ? (
+              <p className="t-compact forfeit">{forfeitTerm}</p>
+            ) : null}
 
             {/* Deliberately the least decorated text here. It is consent, not
                 marketing — reading size, reading contrast, no emphasis. */}
             <p className="consent">{plan.consent}</p>
 
+            {/* ══ THE REAL SUBSCRIPTION, ALWAYS ═══════════════════════════
+                15 Sep 2026. The fake-purchase ghost button and every "test
+                mode" line are gone: this slot renders the live wallet on every
+                build, wired to `create_simple_intent` in subscription mode.
+                The customer comes from the access token the phone step above
+                leaves behind, so there is nothing anonymous left to fake. */}
             <div className="pay-slot">
-              {checkout.live ? (
-                <>
-                  <SimplePayButton
-                    amount={plan.paidTodayCents}
-                    accountId={checkout.accountId}
-                    publishableKey={checkout.publishableKey}
-                    projectRef={checkout.functionsRef}
-                    postPurchase={onPaid}
-                    onUnavailable={onNoWallet}
-                  />
-                  {/* WALLETS ONLY — no card field. On a browser with neither
-                      Apple Pay nor Google Pay the element renders nothing at
-                      all, so the sheet has to say why rather than showing a
-                      gap where the control should be. */}
-                  {noWallet ? (
-                    <p className="t-compact not-live">
-                      Reserving needs Apple Pay or Google Pay. Open this page on
-                      your phone to hold a seat.
-                    </p>
-                  ) : null}
-                  {checkout.isTestKey ? (
-                    <p className="t-compact not-live">Test mode — no money moves.</p>
-                  ) : null}
-                </>
-              ) : checkout.testPurchase ? (
-                /* ══ A TEST RESERVATION, NAMED AS ONE ═══════════════════════
-                   Sam, 14 Sep 2026: "allow me to do a fake test purchase to
-                   see what it looks like after I purchase." No provider is
-                   configured, so the control cannot be the maroon one and
-                   cannot say Reserve: it is the ghost button, it says test,
-                   and the line under it says what does NOT happen. The id it
-                   mints is prefixed so the receipt and /in print it as a test
-                   too (see checkoutEnv.testPurchase for when this renders). */
-                <>
-                  <button
-                    className="action action-ghost"
-                    type="button"
-                    onClick={() => onPaid(`test_${Date.now().toString(36)}`)}
-                  >
-                    Make a test reservation
-                  </button>
-                  <p className="t-compact not-live">
-                    Test only — nothing is charged and no seat is held.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <button className="action" type="button" disabled>
-                    {reserveCta}
-                  </button>
-                  <p className="t-compact not-live">Prototype — nothing is charged.</p>
-                </>
-              )}
+              <SubscriptionPayButton
+                onSubscribed={({ subscriptionId }) => onPaid(subscriptionId)}
+                onUnavailable={onNoWallet}
+                /* The phone step is one screen back and it is what mints the
+                   session, so a missing token here means it did not take —
+                   send them back to it rather than into a 401. */
+                onNeedsSignIn={() => setIdentity(null)}
+              />
+              {/* WALLETS ONLY — no card field. On a browser with neither
+                  Apple Pay nor Google Pay the element renders nothing at all,
+                  so the sheet has to say why rather than showing a gap where
+                  the control should be. */}
+              {noWallet ? (
+                <p className="t-compact not-live">
+                  Reserving needs Apple Pay or Google Pay. Open this page on
+                  your phone to hold a seat.
+                </p>
+              ) : null}
             </div>
 
             <Drill summary="The full terms">

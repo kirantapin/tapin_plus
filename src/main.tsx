@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { AuthProvider } from "./context/auth_context";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
@@ -10,7 +11,6 @@ import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";
 import "./styles/app.css";
-import "./styles/savings-lab.css";
 import "./styles/arrival.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -20,7 +20,11 @@ createRoot(document.getElementById("root")!).render(
         route matches and the app renders nothing at all. The sibling
         prototype strips it the same way. At base "/" this is a no-op. */}
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <App />
+      {/* The session is read once, above the router: the checkout needs an
+          access token, and /in needs to know whether anyone is signed in. */}
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 );

@@ -567,13 +567,6 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-locked{margin:var(--s-lg) 0 0;padding-top:var(--s-lg);
   border-top:1px solid var(--hair-lit)}
 
-/* THE REFERENCE IS CONTENT, NOT A CAPTION. It is the only proof of the charge
-   outside a bank statement, and the member has to be able to read it aloud or
-   select it cleanly — so it breaks on any character rather than overflowing,
-   and it carries the tabular figures the rest of the build uses for money. */
-.ms-ref{margin:0 0 var(--s-lg);font-size:15px;font-weight:700;
-  letter-spacing:.01em;line-height:1.45;color:var(--ink-1);
-  overflow-wrap:anywhere;user-select:all}
 .ms-note{margin:var(--s-lg) 0 0}
 .ms-drill{margin-top:var(--s-lg)}
 .ms-see{margin-top:var(--s-md)}
@@ -1206,3 +1199,12 @@ html[data-flight="in"] .column > .sticky-cta{
   transform:scaleX(var(--p,0))}
 /* The date, under the bar, as a caption. */
 .rs-seat-close{margin:var(--s-sm) 0 0;font-size:12px;font-weight:500;letter-spacing:.01em;color:var(--ink-3)}
+
+/* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
+   The group is down to a single plan, so the grid stops being two columns and
+   the tile takes the width it used to share. Everything else — the chosen
+   maroon, the ramp inside it — is the `.plan-opt.is-on` treatment unchanged,
+   because this IS that state, permanently. It is not a button, so it has no
+   hover or press: nothing about it should suggest a second option exists. */
+.plan-pick.is-solo{grid-template-columns:1fr}
+.plan-pick.is-solo .plan-opt{cursor:default}

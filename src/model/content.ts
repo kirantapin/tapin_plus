@@ -68,24 +68,26 @@ interface VenueRecord extends Omit<Venue, "plus"> {
   policies: Policy[];
 }
 
-export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map((v) => ({
-  id: v.id,
-  name: v.name,
-  logo: asset(v.logo),
-  hero: asset(v.hero),
-  category: v.category,
-  street: v.street,
-  open: v.open,
-  liveUrl: v.liveUrl,
-  brandColor: v.brandColor,
-  plus: v.policies.length > 0,
-  /* The extraction's points policy reads "2× points" with a multiplier of 2.
+export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map(
+  (v) => ({
+    id: v.id,
+    name: v.name,
+    logo: asset(v.logo),
+    hero: asset(v.hero),
+    category: v.category,
+    street: v.street,
+    open: v.open,
+    liveUrl: v.liveUrl,
+    brandColor: v.brandColor,
+    plus: v.policies.length > 0,
+    /* The extraction's points policy reads "2× points" with a multiplier of 2.
      Sam, 15 Sep 2026: points are 1× now. The JSON is frozen; the override
      lives here, so no surface can print a multiplier. */
-  policies: v.policies.map((pol) =>
-    pol.kind === "points" ? { ...pol, label: "Points", multiplier: 1 } : pol,
-  ),
-}));
+    policies: v.policies.map((pol) =>
+      pol.kind === "points" ? { ...pol, label: "Points", multiplier: 1 } : pol,
+    ),
+  }),
+);
 
 export const plusVenues = venues.filter((v) => v.plus);
 
@@ -210,11 +212,13 @@ const BENEFIT_DETAIL: Record<string, string> = {
   points: "Redeem for free food, drinks, etc. at each place",
 };
 
-export const benefits = (moneyJson.benefits as unknown as Policy[]).map((b) => ({
-  ...b,
-  label: BENEFIT_LABEL[b.id] ?? b.label,
-  detail: BENEFIT_DETAIL[b.id] ?? b.detail,
-}));
+export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
+  (b) => ({
+    ...b,
+    label: BENEFIT_LABEL[b.id] ?? b.label,
+    detail: BENEFIT_DETAIL[b.id] ?? b.detail,
+  }),
+);
 
 /**
  * "Save at least what you pay, or we refund the difference."
@@ -223,21 +227,7 @@ export const benefits = (moneyJson.benefits as unknown as Policy[]).map((b) => (
  */
 export const guarantee: string = moneyJson.guarantee;
 
-/**
- * Who answers for the guarantee. Sam, this session.
- *
- * NOT in the frozen extraction, because it did not exist when that was taken —
- * a simulated walkthrough named the missing addressee as one of its two
- * sharpest objections, and Sam supplied one. A guarantee with nobody behind it
- * is a promise a careful reader discounts to zero, and the reader most likely
- * to notice is the one working out what happens if this goes wrong.
- *
- * It is NOT a support address and must not be dressed as one: the product has
- * no support desk, and implying staffed hours would be the same class of claim
- * as inventing a member count.
- */
-/* Sam, 14 Sep 2026: "questions should be sent to sam@tapin.app." */
-export const GUARANTEE_CONTACT = "sam@tapin.app";
+export const GUARANTEE_CONTACT = "support@tapin.app";
 
 /* Money primitives, declared before the first string that spends them. `usd`
    used to sit beside PASS_TODAY further down; it is up here now because the
@@ -281,7 +271,8 @@ export const cardPlan = FOUNDING_OPEN ? "Early Bird" : "Standard";
  * to price — printed where a member would look for it: the Tickets slot of a
  * venue's My Spot, and the standing-benefits note on the app's Home.
  */
-export const eventsNote = "Member prices on events TapIn Plus places host on TapIn.";
+export const eventsNote =
+  "Member prices on events TapIn Plus places host on TapIn.";
 
 /** The post-founders rates. See the block beside the pass repricing below for
  *  why these override the extraction rather than editing it. */
@@ -562,13 +553,21 @@ export const passPlan = {
   paidTodayCents: Math.round(PASS_TODAY * 100),
   termMonths: PASS_MONTHS,
   chargeRows: [
-    { id: "today", label: `${usd(PASS_TODAY)} today`, detail: `Your first ${PASS_MONTHS} months` },
+    {
+      id: "today",
+      label: `${usd(PASS_TODAY)} today`,
+      detail: `Your first ${PASS_MONTHS} months`,
+    },
     {
       id: "then",
       label: `Then ${usd(PASS_TODAY)} every ${PASS_MONTHS} months`,
       detail: `From when we open, ${WINDOW} · until you cancel`,
     },
-    { id: "refund", label: "Full refund before we open", detail: "No reason needed" },
+    {
+      id: "refund",
+      label: "Full refund before we open",
+      detail: "No reason needed",
+    },
   ] as ChargeRow[],
   consent:
     `By reserving, you authorize TapIn to charge ${usd(PASS_TODAY)} today for your first ` +
@@ -609,7 +608,10 @@ export const passPlan = {
       id: "guarantee",
       term: `Save at least what you pay, or we refund the difference. Checked every ${PASS_MONTHS} months against your TapIn orders.`,
     },
-    { id: "refund", term: "Full refund any time before we open, no reason needed." },
+    {
+      id: "refund",
+      term: "Full refund any time before we open, no reason needed.",
+    },
     {
       id: "forfeit",
       term: "A refund gives up your seat and your locked rate. Joining later means whatever the price is then.",
@@ -661,14 +663,22 @@ export const yearPlan = {
   paidTodayCents: cents(YEAR_TODAY),
   termMonths: YEAR_MONTHS,
   chargeRows: [
-    { id: "today", label: `${usd(YEAR_TODAY)} today`, detail: "Your first year" },
+    {
+      id: "today",
+      label: `${usd(YEAR_TODAY)} today`,
+      detail: "Your first year",
+    },
     {
       id: "then",
       label: `Then ${usd(YEAR_TODAY)} a year`,
       detail: `From when we open, ${WINDOW} · until you cancel`,
     },
     TEE_ROW,
-    { id: "refund", label: "Full refund before we open", detail: "No reason needed" },
+    {
+      id: "refund",
+      label: "Full refund before we open",
+      detail: "No reason needed",
+    },
   ] as ChargeRow[],
   consent:
     `By reserving, you authorize TapIn to charge ${usd(YEAR_TODAY)} today for your first ` +
@@ -706,7 +716,10 @@ export const yearPlan = {
       id: "guarantee",
       term: "Save at least what you pay, or we refund the difference. Checked every year against your TapIn orders.",
     },
-    { id: "refund", term: "Full refund any time before we open, no reason needed." },
+    {
+      id: "refund",
+      term: "Full refund any time before we open, no reason needed.",
+    },
     {
       id: "forfeit",
       term: "A refund gives up your seat and your locked rate. Joining later means whatever the price is then.",
@@ -715,36 +728,49 @@ export const yearPlan = {
 };
 
 /* ---------------------------------------------------------------------------
-   THE DEPOSIT MODEL — WHY THE RECURRING SENTENCE IS GONE. READ BEFORE EDITING.
+   THE RECURRING MODEL — THE SENTENCE IS BACK. READ BEFORE EDITING.
 
-   Sam, 13 Sep 2026, choosing between four charge mechanics: "deposit now, bill
-   at launch." The seat is held with ONE charge today; membership billing starts
-   at launch under its own authorization, asked for then.
+   This block used to be `depositise`, and it existed to DELETE the recurring
+   sentence. Its reasoning, kept because it is the reason this one is worded the
+   way it is: the checkout built a PaymentIntent — one charge, no mandate saved,
+   no schedule — so "then $X a month automatically until you cancel" would have
+   been false at the moment of consent, under Virginia's automatic-renewal
+   statute and ROSCA, on the page whose §4 exists to satisfy them. It ended:
+   "When the recurring path exists this block is deleted and the extraction
+   speaks again."
 
-   THIS IS NOT A COPY PREFERENCE — IT IS THE ONLY SENTENCE THE CODE CAN KEEP.
-   The checkout charges through `create_simple_intent`, which builds a
-   PaymentIntent: a single charge, no mandate saved, no schedule attached. The
-   extraction's sentence says "then $4.99 a month automatically until you
-   cancel." Wire a wallet to that and TapIn takes $4.99 once, never charges
-   again, and the sentence the member consented under is false the moment she
-   taps it — under Virginia's automatic-renewal statute and ROSCA, on the page
-   whose §4 exists to satisfy them. Recurring needs `setup_future_usage` plus a
-   launch-time Subscription, or a Subscription with a billing anchor; neither
-   `create_intent` nor `payment_provider_proxy` has either today (checked).
+   15 Sep 2026: THE RECURRING PATH EXISTS. `create_simple_intent` in
+   subscription mode creates a Stripe Subscription with
+   `save_default_payment_method: on_subscription` and a trial — the card is
+   kept and billed automatically when the trial ends. So the deposit wording
+   became the false one: it told a member "nothing else is charged now, we will
+   ask you before your next month" while enrolling her in exactly the
+   negative-option offer it denied. This states the mechanic instead.
 
-   SO THE OFFER MATCHES THE MECHANIC, rather than the mechanic being wired to a
-   sentence it cannot honour. When the recurring path exists this block is
-   deleted and the extraction speaks again.
+   WHAT THE MEMBER MUST BE TOLD, and why each clause is here rather than tidy:
+   the amount charged today, that a payment method is STORED, the recurring
+   amount and cadence, that it renews AUTOMATICALLY, that it continues UNTIL
+   CANCELLED, and how to stop it. Those are the auto-renewal disclosures. Do not
+   compress them into "then $X/mo" — the cadence without the automatic renewal
+   is the disclosure failure both statutes name.
+
+   ⚠ ONE FACT THIS COPY DOES NOT ASSERT: the date of the first renewal. The
+   edge function's `SUBSCRIPTION_TRIAL_END` is 1 Feb 2027, and every surface
+   here promises the service opens in Spring 2027 — so as written the first
+   automatic charge lands BEFORE the membership it pays for begins. Naming a
+   date in the consent sentence would make that contradiction load-bearing.
+   The cadence is stated, the date is not, and the mismatch is Sam's and the
+   edge function's to settle. Do not add a date here until they agree.
 
    WHY NOT AN EDIT TO docs/data/money-and-terms.json: that file's guarantee is
-   that it was produced by executing production, not by retyping. Production
-   still sells the recurring offer. Overriding here records the gap; editing
-   there would hide it. Same reasoning as the pass repricing above.
+   that it was produced by executing production, not by retyping. Overriding
+   here records the gap; editing there would hide it. Same reasoning as the
+   pass repricing above.
 
-   BOTH PLANS GO THROUGH ONE FUNCTION so the monthly and the pass can never
-   drift apart in a clause. Only the figures move.
+   EVERY PLAN GOES THROUGH ONE FUNCTION so they cannot drift apart in a clause.
+   Only the figures move.
    --------------------------------------------------------------------------- */
-function depositise(
+function subscribise(
   paidToday: string,
   terms: Term[],
   /** Founding round still open. Governs the WORDS, never the arithmetic. */
@@ -764,16 +790,29 @@ function depositise(
   const seat = founding ? "Early Bird Special" : "seat";
   return {
     chargeRows: [
-      { id: "today", label: `${paidToday} today`, detail: `Your first ${period} — it holds your ${seat} too` },
-      { id: "then", label: "Nothing more until we open", detail: `Your ${period} starts then · expected ${WINDOW}` },
+      {
+        id: "today",
+        label: `${paidToday} today`,
+        detail: `Your first ${period} — it holds your ${seat} too`,
+      },
+      {
+        id: "then",
+        label: `Then ${paidToday} a ${period}`,
+        detail: `Automatically, until you cancel · your ${period} starts when we open, expected ${WINDOW}`,
+      },
       ...extraRows,
-      { id: "refund", label: "Full refund before we open", detail: "No reason needed" },
+      {
+        id: "refund",
+        label: "Full refund before we open",
+        detail: "No reason needed",
+      },
     ],
     consent:
       `By reserving, you authorize TapIn to charge ${paidToday} today for your first ` +
       `${period}, which starts when we open (expected ${WINDOW}) and holds your ${seat} ` +
-      `until then. Nothing else is charged now — we will ask you before your next ` +
-      `${period}. Full refund any time before we open.`,
+      `until then. We keep your payment method on file and charge ${paidToday} every ` +
+      `${period} after that, automatically, until you cancel. Cancel any time. Full ` +
+      `refund any time before we open.`,
     terms: terms.map((t) =>
       /* ══ TWO TERMS STOP BEING TRUE WHEN THE ROUND CLOSES ══════════════════
          `rate` promises a locked founding rate and tells the reader what NEW
@@ -793,19 +832,20 @@ function depositise(
               term: "A refund gives up your seat. Joining later means whatever the price is then.",
             }
           : t.id === "today"
-        ? {
-            id: "today",
-            term: `You pay ${paidToday} today. It is your first ${period}, and it holds your ${seat} until we open.`,
-          }
-        : t.id === "starts"
-          ? {
-              id: "starts",
-              term:
-                `Your membership starts when we open, expected ${WINDOW}. Your first ${period} runs ` +
-                `from then, and we will ask you before your next ${period} is charged. Nothing is ` +
-                `charged between now and then.`,
-            }
-          : t,
+            ? {
+                id: "today",
+                term: `You pay ${paidToday} today. It is your first ${period}, and it holds your ${seat} until we open.`,
+              }
+            : t.id === "starts"
+              ? {
+                  id: "starts",
+                  term:
+                    `Your membership starts when we open, expected ${WINDOW}. Your first ${period} runs ` +
+                    `from then, and every ${period} after that renews automatically at ${paidToday} ` +
+                    `until you cancel. We keep your payment method on file to do that. Cancel any time ` +
+                    `by emailing ${GUARANTEE_CONTACT}.`,
+                }
+              : t,
     ),
   };
 }
@@ -835,25 +875,41 @@ function depositise(
    actually charged and whether a saving exists at all are all downstream of
    these two lines. There is no second place to edit.
    ═══════════════════════════════════════════════════════════════════════════ */
-const MONTHLY_NOW = FOUNDING_OPEN
-  ? FOUNDING_MONTHLY
-  : AFTER_MONTHLY;
+const MONTHLY_NOW = FOUNDING_OPEN ? FOUNDING_MONTHLY : AFTER_MONTHLY;
 const PASS_NOW = FOUNDING_OPEN ? PASS_TODAY : AFTER_PASS;
 const YEAR_NOW = FOUNDING_OPEN ? YEAR_TODAY : AFTER_YEAR;
 
 const monthlyDeposit = {
   ...monthlyPlan,
-  ...depositise(usd(MONTHLY_NOW), monthlyPlan.terms, FOUNDING_OPEN, [], "month"),
+  ...subscribise(
+    usd(MONTHLY_NOW),
+    monthlyPlan.terms,
+    FOUNDING_OPEN,
+    [],
+    "month",
+  ),
   paidTodayCents: cents(MONTHLY_NOW),
 };
 const passDeposit = {
   ...passPlan,
-  ...depositise(usd(PASS_NOW), passPlan.terms, FOUNDING_OPEN, [], `${PASS_MONTHS} months`),
+  ...subscribise(
+    usd(PASS_NOW),
+    passPlan.terms,
+    FOUNDING_OPEN,
+    [],
+    `${PASS_MONTHS} months`,
+  ),
   paidTodayCents: cents(PASS_NOW),
 };
 const yearDeposit = {
   ...yearPlan,
-  ...depositise(usd(YEAR_NOW), yearPlan.terms, FOUNDING_OPEN, [TEE_ROW], "year"),
+  ...subscribise(
+    usd(YEAR_NOW),
+    yearPlan.terms,
+    FOUNDING_OPEN,
+    [TEE_ROW],
+    "year",
+  ),
   paidTodayCents: cents(YEAR_NOW),
 };
 
@@ -952,7 +1008,11 @@ export const offers = moneyJson.offers;
  * kept here only because that file is frozen extracted data and adding a field
  * to it is Sam's call, not mine.
  */
-const LIGHT_FIELD_MARKS = new Set(["italianospizza", "sweetopia", "themilkparlor"]);
+const LIGHT_FIELD_MARKS = new Set([
+  "italianospizza",
+  "sweetopia",
+  "themilkparlor",
+]);
 
 export const logoField = (id: string): "light" | "dark" =>
   LIGHT_FIELD_MARKS.has(id) ? "light" : "dark";

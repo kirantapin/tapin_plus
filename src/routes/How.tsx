@@ -5,7 +5,8 @@ import { stashCardOrigin } from "../shell/cardFlight";
 import { illustrate } from "../model/savings";
 import { useSpend } from "../model/spendStore";
 import { wholeUsd } from "../model/order";
-import { launchWindow, reserveCta } from "../model/content";
+import { launchWindow } from "../model/content";
+import { useReserveCta } from "../shell/useReserveCta";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
@@ -258,6 +259,7 @@ const devSlide = (): number | null => {
 };
 
 export default function How() {
+  const cta = useReserveCta();
   const start = devSlide();
   const [i, setI] = useState(start ?? 0);
   const [paused, setPaused] = useState(start !== null);
@@ -662,10 +664,10 @@ export default function How() {
               {stepBack}
               <Link
                 className="action"
-                to="/reserve"
+                to={cta.to}
                 onClick={() => stashCardOrigin(document.querySelector(".sc-close .tcard"))}
               >
-                {reserveCta}
+                {cta.label}
               </Link>
             </div>
           </>

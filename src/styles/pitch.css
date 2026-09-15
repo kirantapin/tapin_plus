@@ -1496,3 +1496,36 @@ a.vcard:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
 .hero-brand{display:flex;align-items:center;gap:var(--s-md)}
 .hero-brand .logo{margin:0}
 .hero-plus{align-self:center;margin-top:2px}
+
+/* ══ SIGN IN / SIGN OUT, AT THE FOOT OF THE HERO PANEL ═══════════════════════
+   The last thing in `.hero`, under the venue marks on a desktop and under the
+   two buttons on a phone (`.hero-marks` is display:none there).
+
+   A hairline above it, because it is a DIFFERENT KIND OF THING from what it
+   follows: everything above sells, this one only says who you are. Without
+   the rule it reads as a third action in the same stack. The CTA's shape and
+   full width, so it is plainly the same class of control — ghost, never
+   maroon, so it cannot compete with the button that sells. */
+.signin-bar{
+  margin:var(--s-2xl) 0 0;padding:var(--s-xl) 0 0;
+  border-top:1px solid var(--hair);
+  /* A column, so the caption is a block the same width as the button above
+     it — centring text inside a full-width parent only LOOKS centred while
+     the button is also full width, which it is not on a desktop. */
+  display:flex;flex-direction:column;align-items:stretch;
+}
+.signin-go{width:100%}
+.signin-who{margin:var(--s-md) 0 0;text-align:center;color:var(--ink-3)}
+
+@media (min-width:1024px){
+  /* Match `.hero-actions`, which goes auto-width and left-aligned here. A
+     panel-wide sign-out button beside two content-width buttons was the
+     awkwardness: the caption looked off-centre because it was centred on the
+     panel while the button it belongs to was not. Now both shrink together
+     and the caption centres on the button. */
+  .hero-band:not(.is-compact) .signin-bar{align-items:flex-start}
+  .hero-band:not(.is-compact) .signin-go{
+    width:auto;padding-inline:var(--s-2xl);
+  }
+  .hero-band:not(.is-compact) .signin-who{align-self:stretch;text-align:left}
+}

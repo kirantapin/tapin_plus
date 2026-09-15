@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useAuth } from "../context/auth_context";
 import TapInLogo from "./TapInLogo";
 import { cardPlan } from "../model/content";
 
@@ -82,7 +83,10 @@ export default function TapInCard({
   innerRef,
   onName,
 }: {
-  name: string;
+  /** Omit it and the card names the signed-in member, falling back to the
+   *  "Your name" placeholder. Pass one to override — the deck and the
+   *  checkout do, because their card follows a field as it is typed. */
+  name?: string;
   seat?: string;
   region?: string;
   plan?: string;
@@ -98,6 +102,16 @@ export default function TapInCard({
    */
   onName?: (n: string) => void;
 }) {
+  /* ══ THE CARD NAMES THE MEMBER ═══════════════════════════════════════════
+     Whoever is signed in, wherever the card is drawn — it is a membership
+     card, and a membership card with "Your name" on it in front of someone
+     whose name we hold reads as a mock-up of itself. Explicit wins: the deck
+     and the checkout pass a value that follows a field keystroke by keystroke,
+     and an editable card must show exactly what is in its own input, empty
+     included. The placeholder is the last resort, not the default. */
+  const { displayName } = useAuth();
+  const shown = name ?? displayName ?? "Your name";
+
   const ref = useRef<HTMLDivElement | null>(null);
   const nameRef = useRef<HTMLInputElement | null>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0, lx: 50, ly: 50, on: false });
@@ -183,7 +197,7 @@ export default function TapInCard({
             ref={nameRef}
             className="tcard-name tcard-name-input"
             type="text"
-            value={name}
+            value={name ?? shown}
             placeholder="Your name"
             onChange={(e) => onName(e.target.value)}
             onKeyDown={(e) => {
@@ -203,7 +217,7 @@ export default function TapInCard({
             aria-label="Your name, as you'd like it on the card — optional"
           />
         ) : (
-          <p className="tcard-name">{name}</p>
+          <p className="tcard-name">{shown}</p>
         )}
 
         <div className="tcard-rule" />
