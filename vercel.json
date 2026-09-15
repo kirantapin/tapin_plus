@@ -104,12 +104,5 @@
         }
       ]
     }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/blacksburg",
-      "permanent": false
-    }
   ]
 }
