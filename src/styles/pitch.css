@@ -1509,13 +1509,9 @@ a.vcard:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
 .signin-bar{
   margin:var(--s-2xl) 0 0;padding:var(--s-xl) 0 0;
   border-top:1px solid var(--hair);
-  /* A column, so the caption is a block the same width as the button above
-     it — centring text inside a full-width parent only LOOKS centred while
-     the button is also full width, which it is not on a desktop. */
   display:flex;flex-direction:column;align-items:stretch;
 }
 .signin-go{width:100%}
-.signin-who{margin:var(--s-md) 0 0;text-align:center;color:var(--ink-3)}
 
 @media (min-width:1024px){
   /* Match `.hero-actions`, which goes auto-width and left-aligned here. A
@@ -1523,9 +1519,8 @@ a.vcard:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
      awkwardness: the caption looked off-centre because it was centred on the
      panel while the button it belongs to was not. Now both shrink together
      and the caption centres on the button. */
-  .hero-band:not(.is-compact) .signin-bar{align-items:flex-start}
+  .hero-band:not(.is-compact) .signin-bar{align-items:flex-start;text-align:left}
   .hero-band:not(.is-compact) .signin-go{
     width:auto;padding-inline:var(--s-2xl);
   }
-  .hero-band:not(.is-compact) .signin-who{align-self:stretch;text-align:left}
 }

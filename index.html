@@ -7,6 +7,17 @@
     <meta name="theme-color" content="#120A0E" />
     <title>TapIn — Blacksburg</title>
     <!--
+      THE MARK, WITH THE DOT IN MAROON. public/favicon.svg — the production
+      icon on a --canvas plate, because the mark is white and a light-mode tab
+      strip would swallow a transparent one.
+
+      Vite rewrites these absolute paths with the build's base, so they follow
+      VITE_BASE_PATH rather than 404ing under a path prefix. `apple-touch-icon`
+      is the PNG: iOS ignores SVG when a page is saved to the home screen.
+    -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/tapin_icon_white.png" />
+    <!--
       DIRECTION · desktop, 14 Sep 2026
       THESIS: one argument in four movements — statement, evidence, decision,
         close — on alternating grounds. Refuses the category page: a stack of

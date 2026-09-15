@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <title>TapIn</title>
+  <!--
+    The TapIn mark on its own dark plate, with the dot in Chicago Maroon
+    (#861F41, the maroon token). Paths are public/tapin_icon.svg unchanged,
+    scaled and centred; only the fills differ.
+
+    WHY A PLATE RATHER THAN A TRANSPARENT MARK: the mark is white, and a tab
+    strip is white in every light mode browser, so a transparent version would
+    vanish there. The plate is #120A0E, the canvas token, the same field the
+    site renders on and the same value as the theme-color meta in index.html.
+
+    NO ORANGE, including the dot (PRODUCT.md: "No orange anywhere, including
+    the wordmark dot"). The dot is the one place maroon is spent here.
+
+    THIS FILE IS XML. A comment may not contain two hyphens in a row, so CSS
+    custom properties cannot be named here in their real form. Writing one cost
+    an afternoon of a favicon that silently never loaded.
+  -->
+  <rect width="96" height="96" rx="21" fill="#120A0E"/>
+  <g transform="translate(18 17.6) scale(0.714)">
+    <path d="M69.3056 29.2633C77.3245 29.2633 83.8252 22.7125 83.8252 14.6317C83.8252 6.55082 77.3245 0 69.3056 0C61.2867 0 54.7861 6.55082 54.7861 14.6317C54.7861 22.7125 61.2867 29.2633 69.3056 29.2633Z" fill="#861F41"/>
+    <path d="M48.32 36.2534V11.9067H0V36.2534H48.32Z" fill="#FFFFFF"/>
+    <path d="M48.32 60.6C34.9761 60.6 24.16 71.4997 24.16 84.9466H0V84.295C0.352701 57.8158 21.6323 36.4311 47.9673 36.2534H72.4212V84.9466H48.32V60.6Z" fill="#FFFFFF"/>
+  </g>
+</svg>

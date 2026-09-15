@@ -1208,3 +1208,11 @@ html[data-flight="in"] .column > .sticky-cta{
    hover or press: nothing about it should suggest a second option exists. */
 .plan-pick.is-solo{grid-template-columns:1fr}
 .plan-pick.is-solo .plan-opt{cursor:default}
+
+/* ══ THE WALLET NEEDS AIR ABOVE IT ═══════════════════════════════════════════
+   §4 wants the consent sentence and the control that takes money visible
+   TOGETHER — it does not want them touching. The wallet sat directly under the
+   last line of consent, so the sentence read as a caption on the button rather
+   than as the thing being agreed to. This is the same step the rows already
+   take from the price above them; nothing is pushed out of view by it. */
+.pay-slot{margin-top:var(--s-xl)}

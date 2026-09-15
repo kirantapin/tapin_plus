@@ -156,14 +156,13 @@ const SubscriptionPayForm = ({
         return;
       }
 
-      const { paymentIntent, error: confirmError } = await stripe.confirmPayment(
-        {
+      const { paymentIntent, error: confirmError } =
+        await stripe.confirmPayment({
           elements,
           clientSecret: subscription.client_secret,
           confirmParams: { return_url: window.location.href },
           redirect: "if_required",
-        },
-      );
+        });
 
       if (confirmError) {
         setError(confirmError.message || GENERIC_ERROR);
@@ -213,6 +212,7 @@ const SubscriptionPayForm = ({
           },
           layout: { maxColumns: 1, maxRows: 2 },
           buttonHeight: 48,
+          buttonTheme: { applePay: "black", googlePay: "black" },
         }}
         /* No wallet on this device: the element renders nothing at all, so the
            caller has to be told or the sheet shows a gap where the control

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PhoneStep, { readablePhone } from "./PhoneStep";
+import PhoneStep from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 
 /**
@@ -33,8 +33,6 @@ export default function SignInBar() {
      "Sign in" at someone who is already signed in, every reload. */
   if (userSession === undefined) return null;
 
-  const phone = userSession?.user?.phone;
-
   return (
     <>
       {/* The CTA's own shape and size, in the ghost variant. NOT the maroon
@@ -49,11 +47,6 @@ export default function SignInBar() {
         >
           {userSession ? "Sign out" : "Sign in"}
         </button>
-        {userSession && phone ? (
-          <p className="t-compact signin-who">
-            Signed in as {readablePhone(`+${phone}`)}
-          </p>
-        ) : null}
       </div>
 
       {open ? (
