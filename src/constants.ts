@@ -11,3 +11,9 @@ export const STRIPE_PUBLISHABLE_KEY = useStripeSandbox
    production — see the note in context/event_tracking_context.tsx. */
 export const POSTHOG_PROJECT_TOKEN = import.meta.env.VITE_POSTHOG_PROJECT_TOKEN!;
 export const POSTHOG_HOST = "https://us.i.posthog.com";
+
+/* Every event this project sends carries it. The merchant app scopes events to
+   whichever restaurant is being viewed; there is no such axis here — this whole
+   build is one storefront — so the value is fixed, and it exists so Blacksburg
+   traffic can be told apart from the merchant app's inside one PostHog project. */
+export const RESTAURANT_ID = "tapinplus";

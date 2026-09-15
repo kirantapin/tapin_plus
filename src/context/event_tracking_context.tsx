@@ -12,6 +12,7 @@ import {
   POSTHOG_PROJECT_TOKEN,
   POSTHOG_HOST,
   IN_PRODUCTION,
+  RESTAURANT_ID,
 } from "../constants";
 
 /**
@@ -60,10 +61,15 @@ import {
  * mounted once in App.
  *
  * ══ OFF OUTSIDE PRODUCTION, AND LOUD INSTEAD ═══════════════════════════════
- * `enabled` is `IN_PRODUCTION`, so a dev server and every preview build send
- * nothing to PostHog — but `logEvents` is on there, so each call prints what it
- * WOULD have sent. You can read the funnel off the console without polluting
- * the project, which is the same trade the merchant app makes.
+ * `ENABLED` is `IN_PRODUCTION` — which is `environment === "production"`, i.e.
+ * `VITE_VERCEL_ENV`. On anything else `posthog.init` NEVER RUNS: the library is
+ * never configured, no request reaches PostHog, no session is recorded, and no
+ * distinct_id is minted. Every method below checks the same flag, so this holds
+ * even if something calls one before the provider has mounted.
+ *
+ * `LOG_EVENTS` is its inverse, so a dev server prints exactly what it would
+ * have sent. You can read the funnel off the console without polluting the
+ * project — the same trade the merchant app makes.
  */
 
 type EventsAPI = {
@@ -119,6 +125,18 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
       },
       capture_performance: { web_vitals: false },
     });
+
+    /* ══ restaurant_id ON EVERY EVENT ══════════════════════════════════════
+       A SUPER PROPERTY, not one of the `globalProps` below, and the difference
+       is the whole point: `globalProps` is a local bag merged inside `track()`,
+       so it reaches named events only. Autocapture, `$pageview`, `$rageclick`
+       and the replay events are captured by posthog itself and would carry
+       nothing. `register` attaches this to all of them.
+
+       It persists to localStorage and survives reloads. It does NOT survive
+       `posthog.reset()` on sign-out, which clears super properties along with
+       the distinct_id — so it is registered again below whenever that runs. */
+    posthog.register({ restaurant_id: RESTAURANT_ID });
   }, []);
 
   const api = useMemo<EventsAPI>(
@@ -149,8 +167,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
         if (LOG_EVENTS) console.log("[logout]");
         if (!ENABLED) return;
         try {
-          /* Clears distinct_id and super properties. */
+          /* Clears distinct_id AND super properties, so restaurant_id has to
+             be put back or every event after a sign-out loses it. */
           posthog.reset();
+          posthog.register({ restaurant_id: RESTAURANT_ID });
         } catch {
           console.error("Error resetting PostHog");
         }
@@ -168,6 +188,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
       },
 
       getGlobalProps: (key) => {
+        /* Reads go through the guard too. Uninitialised, posthog's accessors
+           are not guaranteed to be no-ops, and a disabled build must not
+           depend on them behaving. */
+        if (!ENABLED) return undefined;
         try {
           return posthog.get_property(key);
         } catch {
@@ -195,6 +219,7 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
       },
 
       getSessionProperty: (key) => {
+        if (!ENABLED) return undefined;
         try {
           const current = posthog.get_session_id?.();
           const stored = posthog.getSessionProperty?.(`${key}_session_id`);
