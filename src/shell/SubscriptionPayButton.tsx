@@ -174,6 +174,17 @@ const SubscriptionPayForm = ({
         return;
       }
 
+      void supabase.functions
+        .invoke("create_simple_intent", {
+          body: { mode: "subscription_welcome", userAccessToken: accessToken },
+        })
+        .then((res) => {
+          if (res.error || res.data?.sent === false) {
+            console.error("Welcome text was not sent", res.error ?? res.data);
+          }
+        })
+        .catch((err) => console.error("Welcome text threw", err));
+
       /* The subscription exists now, so the flag the checkout reads is stale.
          Refreshed before the caller's follow-up so a re-render lands on the
          membership rather than back on the wallet. */

@@ -1,7 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Panel } from "../shell/Panel";
-import { INVITES, rememberInvite, recallInvite, type InviteId } from "../model/invite";
+import {
+  INVITES,
+  rememberInvite,
+  recallInvite,
+  type InviteId,
+} from "../model/invite";
 import TapInLogo from "../shell/TapInLogo";
 import { NavIcon } from "../shell/Icons";
 import AppliesTo from "../shell/AppliesTo";
@@ -42,7 +47,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
      person already holds one. See shell/useReserveCta.ts. */
   const cta = useReserveCta();
   /* The invitation, from the URL or remembered from earlier this session. */
-  useEffect(() => { if (invite) rememberInvite(invite); }, [invite]);
+  useEffect(() => {
+    if (invite) rememberInvite(invite);
+  }, [invite]);
   const via: InviteId | null = invite ?? recallInvite();
   /* Where the app window opens over, on a desktop (AppLayer). */
   const location = useLocation();
@@ -90,10 +97,20 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
             <path
               d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"
-              fill="none" stroke="currentColor" strokeWidth="1.9"
-              strokeLinecap="round" strokeLinejoin="round"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            <circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.9" />
+            <circle
+              cx="12"
+              cy="10"
+              r="2.4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+            />
           </svg>
           Opening in Blacksburg, {launchWindow}
         </p>
@@ -110,8 +127,15 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             <div className="invite">
               <span className="invite-marks">
                 <TapInLogo className="logo" />
-                <span className="invite-x" aria-hidden="true">×</span>
-                <img className="invite-logo" src={INVITES[via].logo} alt={INVITES[via].alt} decoding="async" />
+                <span className="invite-x" aria-hidden="true">
+                  ×
+                </span>
+                <img
+                  className="invite-logo"
+                  src={INVITES[via].logo}
+                  alt={INVITES[via].alt}
+                  decoding="async"
+                />
               </span>
               <p className="invite-line">{INVITES[via].line}</p>
             </div>
@@ -159,25 +183,32 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               could say what TapIn IS from the first screen, and "$5 back" read
               as cashback. The word "membership" now leads, and the credit is
               called what TRUTH calls it. */}
-          <h1 className="t-display">One membership. $5 credit every week at places you already go.</h1>
+          <h1 className="t-display">
+            $5 credit every week, at every place you already go.
+          </h1>
           {/* The other two, and where. ONE line: 37signals' own reporting on
               their winning hero is that adding further explanation beneath it
               performed 22% WORSE, so the fix is the first line, never a stack. */}
           <p className="t-lead">
-            Restaurants and bars around Blacksburg. Plus 15% off and points toward rewards.
+            Restaurants and bars around Blacksburg. Plus 15% off and points
+            toward rewards.
           </p>
           {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
               of these places today, and a reader can check that in ten
               seconds. The two addresses are the only two that exist. */}
           <p className="t-compact hero-proof">
             TapIn already runs ordering at{" "}
-            {venues.filter((v) => v.liveUrl).map((v, k, arr) => (
-              <Fragment key={v.id}>
-                <a href={v.liveUrl} target="_blank" rel="noopener noreferrer">{v.name}</a>
-                {k < arr.length - 1 ? " and " : ""}
-              </Fragment>
-            ))}
-            {" "}— see it live.
+            {venues
+              .filter((v) => v.liveUrl)
+              .map((v, k, arr) => (
+                <Fragment key={v.id}>
+                  <a href={v.liveUrl} target="_blank" rel="noopener noreferrer">
+                    {v.name}
+                  </a>
+                  {k < arr.length - 1 ? " and " : ""}
+                </Fragment>
+              ))}{" "}
+            — see it live.
           </p>
 
           {/* ══ PRICE, ACTION AND REFUND, IN ONE BLOCK ═══════════════════════
@@ -197,7 +228,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           <div className="hero-buy">
             <p className="hero-price">
               <b className="tnum">${monthlyToday.toFixed(2)}</b>
-              <span>a month</span>
+              <span>deposit</span>
             </p>
             {/* §2: the only seat sentence any surface may print, from the
                 constant, never typed — rendered by the one component that
@@ -220,7 +251,12 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 price" as the escape); the deck itself is unchanged and its own
                 close still lands on /reserve. */}
             <div className="hero-actions">
-              <Link className="action hero-cta" to={cta.to} state={cta.state} ref={heroCta}>
+              <Link
+                className="action hero-cta"
+                to={cta.to}
+                state={cta.state}
+                ref={heroCta}
+              >
                 {cta.label}
               </Link>
               <Link className="action action-ghost hero-how" to="/how">
@@ -312,15 +348,16 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             transfer programme under a panel about live benefits. Retained
             behind a flag with the deck's transfer plate. */}
         {SHOW_POINTS_DRILL ? (
-        <div className="panel-drill">
-          <Drill summary="What points are worth">
-            <p className="t-compact">
-              A point is worth about a cent at the place you earned it, and worth most spent
-              there. Moving a balance into one TapIn balance — good anywhere on the network, or
-              out to gift cards and airline miles — is coming.
-            </p>
-          </Drill>
-        </div>
+          <div className="panel-drill">
+            <Drill summary="What points are worth">
+              <p className="t-compact">
+                A point is worth about a cent at the place you earned it, and
+                worth most spent there. Moving a balance into one TapIn balance
+                — good anywhere on the network, or out to gift cards and airline
+                miles — is coming.
+              </p>
+            </Drill>
+          </div>
         ) : null}
       </Panel>
 
@@ -506,7 +543,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           <TapInLogo className="top-cta-logo" />
           <p className="top-cta-price">
             <b className="tnum">${monthlyToday.toFixed(2)}</b>
-            <span>a month</span>
+            <span>deposit</span>
           </p>
           <Link className="action top-cta-go" to={cta.to} state={cta.state}>
             {cta.label}
