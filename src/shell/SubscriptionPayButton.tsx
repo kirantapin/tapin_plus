@@ -9,6 +9,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { supabase, environment } from "../supabase";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { useAuth } from "../context/auth_context";
+import { useEventTracking } from "../context/event_tracking_context";
 
 /**
  * Apple Pay / Google Pay wired to `create_simple_intent` in SUBSCRIPTION mode.
@@ -102,6 +103,7 @@ const SubscriptionPayForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const { accessToken, refreshSubscription } = useAuth();
+  const { track } = useEventTracking();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -173,6 +175,13 @@ const SubscriptionPayForm = ({
         setError(GENERIC_ERROR);
         return;
       }
+
+      track("purchase", {
+        subscription_id: subscription.subscription_id,
+        payment_intent_id: paymentIntent.id,
+        amount_cents: FIRST_INVOICE_TOTAL_CENTS,
+        intent_type: subscription.intent_type,
+      });
 
       void supabase.functions
         .invoke("create_simple_intent", {
