@@ -4,6 +4,7 @@ import { Panel } from "../shell/Panel";
 import { Drill } from "../shell/Drill";
 import TapInCard from "../shell/TapInCard";
 import VenueMosaic from "../shell/VenueMosaic";
+import VenueTicker from "../shell/VenueTicker";
 import SiteFoot from "../shell/SiteFoot";
 import AppliesTo from "../shell/AppliesTo";
 import { readablePhone } from "../shell/PhoneStep";
@@ -98,26 +99,41 @@ function readReservation(): Reservation | null {
     const parsed = JSON.parse(raw) as Partial<Reservation>;
     if (!parsed || typeof parsed.id !== "string") return null;
     const plan: PlanId =
-      parsed.plan === "pass" ? "pass" : parsed.plan === "year" ? "year" : "monthly";
+      parsed.plan === "pass"
+        ? "pass"
+        : parsed.plan === "year"
+          ? "year"
+          : "monthly";
     const cents = typeof parsed.cents === "number" ? parsed.cents : 0;
     /* A record from before these fields existed can only have been written
        while the founding round was open, and the founding charges are the
        only amounts it could hold — so the cents paid are the proof. */
     const founding =
       parsed.founding === true ||
-      (parsed.founding === undefined && [499, 699, 999, 1199, 1699, 1799, 2299, 2499, 4796, 5499, 6796, 7999].includes(cents));
+      (parsed.founding === undefined &&
+        [
+          499, 699, 999, 1199, 1699, 1799, 2299, 2499, 4796, 5499, 6796, 7999,
+        ].includes(cents));
     const isTerm = (t: unknown): t is Term =>
-      !!t && typeof (t as Term).id === "string" && typeof (t as Term).term === "string";
+      !!t &&
+      typeof (t as Term).id === "string" &&
+      typeof (t as Term).term === "string";
     const s = parsed.saving;
     const savedShape =
-      !!s && typeof s.amount === "string" && typeof s.after === "string" && typeof s.per === "string";
+      !!s &&
+      typeof s.amount === "string" &&
+      typeof s.after === "string" &&
+      typeof s.per === "string";
     return {
       id: parsed.id,
       plan,
       cents,
       at: typeof parsed.at === "string" ? parsed.at : "",
       founding,
-      price: typeof parsed.price === "string" ? parsed.price : `$${(cents / 100).toFixed(2)}`,
+      price:
+        typeof parsed.price === "string"
+          ? parsed.price
+          : `$${(cents / 100).toFixed(2)}`,
       per: typeof parsed.per === "string" ? parsed.per : PLANS[plan].per,
       saving: savedShape ? s : founding ? founderSaving[plan] : null,
       locked:
@@ -127,9 +143,13 @@ function readReservation(): Reservation | null {
             ? lockedRateLines.founding
             : lockedRateLines.standard,
       terms:
-        Array.isArray(parsed.terms) && parsed.terms.every(isTerm) ? parsed.terms : PLANS[plan].terms,
+        Array.isArray(parsed.terms) && parsed.terms.every(isTerm)
+          ? parsed.terms
+          : PLANS[plan].terms,
       name:
-        typeof parsed.name === "string" && parsed.name.trim() ? parsed.name.trim() : null,
+        typeof parsed.name === "string" && parsed.name.trim()
+          ? parsed.name.trim()
+          : null,
       phone: typeof parsed.phone === "string" ? parsed.phone : null,
       phoneVerified: parsed.phoneVerified === true,
       marketingOptIn: parsed.marketingOptIn === true,
@@ -177,7 +197,7 @@ export default function Membership() {
   /* Where the app window opens over, on a desktop (AppLayer). */
   const location = useLocation();
   /* Stripe's answer, for the reader whose record is on another device. */
-  const { subscribed } = useAuth();
+  const { userSession, subscribed } = useAuth();
   /**
    * Read in an effect, not during render. This page is rendered on a server
    * nowhere today, but reading `window` in a component body is the kind of
@@ -193,83 +213,188 @@ export default function Membership() {
 
   const plan = seat ? PLANS[seat.plan] : null;
 
+  /* ══ MEMBERS ONLY — CURRENTLY OFF ═════════════════════════════════════════
+     Kiran, 15 Sep 2026, while building on this page: "I've commented that logic
+     out so we can develop our next feature." It is a flag rather than a comment
+     block so the gate keeps compiling and stays one word from live — commented
+     out, it rots and its unused imports break the build.
+
+     BOTH FLAGS ARE THREE-STATE AND NEITHER MAY BE READ EARLY. `userSession` is
+     `undefined` until the first auth event lands, `subscribed` is `null` until
+     the status call returns. Treating either as "no" would bounce a paying
+     member off their own membership on every reload, and bounce a fresh buyer
+     off the receipt they were just handed. So: not known yet → wait; signed out
+     → go; signed in and not subscribed → go; signed in and subscribed → render.
+
+     The dev demo seam (`/in?demo`) is exempt, or the page could not be
+     inspected without walking a real purchase. */
+  /* ══ NOT A MEMBER? SHOW LESS, DO NOT BOUNCE ═══════════════════════════════
+     Kiran, 15 Sep 2026: "I don't know if we should navigate away — let's keep
+     the existing display except we don't show the what you hold section."
+
+     Right, and better than the redirect it replaces. A bounce punishes a reader
+     for typing a URL and, worse, would have thrown a real member off their own
+     membership for the moment `subscribed` was still resolving. This page has
+     nothing secret on it: the card, the places and what the membership gets you
+     are all on the pitch too. The only part that asserts a purchase is "What you
+     hold" — the plan, the price, the date, the number it was bought with — so
+     that is the only part that is withheld, and a way in is offered instead.
+
+     THREE-STATE, STILL. `undefined`/`null` mean not known yet, and neither may
+     read as "no": a member reloading would flash the join panel at themselves.
+     So the join CTA appears only once both flags have actually answered. */
+  const authKnown = userSession !== undefined;
+  const statusKnown = !userSession || subscribed !== null;
+  const memberKnown = authKnown && statusKnown;
+  const isMember = subscribed === true;
+  /* The dev seam stands in for a member, or the page could not be inspected
+     without walking a real purchase. */
+  const demo =
+    seat !== null &&
+    import.meta.env.DEV &&
+    new URLSearchParams(location.search).has("demo");
+  const showHoldings = isMember || demo;
+  const showJoin = memberKnown && !isMember && !demo;
+
   return (
     <>
-      <VenueMosaic compact>
-        <Link className="how-back reserve-back" to="/" aria-label="Back to the pitch">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <path d="m14.5 5.5-7 6.5 7 6.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
-        {/* The card is the subject of this page, which is the one surface where
+      {/* ══ ONE STICKY LEFT TRACK ══════════════════════════════════════════
+          The band and the join CTA travel together on a desktop: the wrapper
+          is what sticks, so the CTA holds still with the card WITHOUT sitting
+          on the photography — the mosaic is an absolute backdrop filling the
+          band, so anything inside it is on top of the pictures.
+
+          `display:contents` below 1024, so a phone sees exactly the column it
+          always had and this wrapper costs nothing there. */}
+      <div className="ms-left">
+        <VenueMosaic compact>
+          <Link
+            className="how-back reserve-back"
+            to="/"
+            aria-label="Back to the pitch"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
+            >
+              <path
+                d="m14.5 5.5-7 6.5 7 6.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          {/* The card is the subject of this page, which is the one surface where
             that is literally true — everywhere else it illustrates a membership
             being offered, and here it is one that has been bought. */}
-        {/* THE CARD CARRIES HER NAME NOW. "Your name" was the placeholder for
+          {/* THE CARD CARRIES HER NAME NOW. "Your name" was the placeholder for
             as long as nothing collected one; a reservation from before the
             field existed still gets it, rather than an empty line. */}
-        <TapInCard
-          /* The name on the reservation, else the signed-in one, else the
+          <TapInCard
+            /* The name on the reservation, else the signed-in one, else the
              placeholder — a record written before the field existed still
              gets a name now if we hold one. */
-          name={seat?.name ?? undefined}
-          /* The plan she bought, from her record — never the site's live
+            name={seat?.name ?? undefined}
+            /* The plan she bought, from her record — never the site's live
              default, which follows the flip. */
-          plan={seat ? (seat.founding ? "Early Bird" : "Standard") : undefined}
-          className="reserve-card"
-        />
-      </VenueMosaic>
+            plan={
+              seat ? (seat.founding ? "Early Bird" : "Standard") : undefined
+            }
+            className="reserve-card"
+          />
+        </VenueMosaic>
 
-      {/* ══ ONE WRAPPER, FOR THE DESKTOP GRID ══════════════════════════════
-          `display:contents` below 1024px (reserve.css), so the phone keeps the
-          identical column it shipped with. From 1024 the card's photo tile
-          takes the left track and everything in here reads down the right —
-          the same object-beside-its-details composition the checkout uses,
-          because this page is that checkout's receipt. */}
+        {/* ══ THE WAY IN, WITH THE CARD ══════════════════════════════════════
+          For a reader who has not bought. INSIDE the band, not in a grid row
+          of its own: on a desktop the band is the sticky left track, so a
+          sibling row scrolled away under it while the card stayed — which is
+          exactly what it must not do, because the sentence refers to the card
+          it is sitting beneath. In here it holds still with the object it is
+          offering, and centres on it. On a phone it is the next thing after
+          the card either way. It renders only once we know the reader is not
+          a member; see the note above. */}
+        {showJoin ? (
+          <div className="ms-join">
+            <Link className="action" to="/reserve">
+              {reserveCta}
+            </Link>
+          </div>
+        ) : null}
+      </div>
+
       <div className="ms-body">
-      {!ready ? null : seat && plan ? (
-        <>
-          <Panel className="ms-head">
-            <p className="t-caption ms-state">
-              {`Your ${seat.founding ? "Early Bird Special" : "seat"} is held`}
-            </p>
-            <h1 className="ms-title">
-              Opening in Blacksburg, {launchWindow}
-            </h1>
-            <p className="t-compact ms-sub">
-              Nothing more is charged until we open. Your membership then renews
-              automatically until you cancel.
-            </p>
-          </Panel>
+        {!ready ? null : seat && plan ? (
+          <>
+            <Panel className="ms-head">
+              <p className="t-caption ms-state">
+                {`Your ${seat.founding ? "Early Bird Special" : "seat"} is held`}
+              </p>
+              <h1 className="ms-title">
+                Opening in Blacksburg, {launchWindow}
+              </h1>
+              <p className="t-compact ms-sub">
+                Nothing more is charged until we open. Your membership then
+                renews automatically until you cancel.
+              </p>
+            </Panel>
 
-          <Panel label="What you hold">
-            <ul className="ms-facts">
-              <li>
-                <b>{plan.label}</b>
-                <span>
-                  {seat.price} {seat.per}, locked
-                </span>
-              </li>
-              {/* Only a founding member has a saving to be told about. A seat
+            {/* ══ WHERE IT WORKS, THE PITCH'S OWN RAIL ═══════════════════════
+                Kiran, 15 Sep 2026. The same `VenueTicker` the pitch runs under
+                the same "Where it works" label — one component, so the six
+                places and the two coming cannot drift between the page that
+                sells the membership and the page that holds it.
+
+                NOT A PANEL, and that is TapIn's card rule rather than a
+                layout preference: the ticker's tiles are cards, and a card
+                never sits inside a card. It comes out onto the field with the
+                label above it, exactly as it does on the pitch.
+
+                Under the head panel on both widths — on a phone that is the
+                next thing down the column, and on a desktop it is the next
+                thing in the right-hand track beside the membership card. */}
+            <section className="places ms-places">
+              <p className="t-caption places-label">Where it works</p>
+              {/* `rail`, because this lives in a 520px track. Without it the
+                  ticker switches to its 7-across grid off a VIEWPORT media
+                  query at 1280 — seven tiles across half a column — and stops
+                  rendering the duplicate track the seamless scroll needs, so
+                  the rail simply stopped moving past that width. */}
+              <VenueTicker rail />
+            </section>
+
+            {showHoldings ? (
+              <Panel label="What you hold">
+                <ul className="ms-facts">
+                  <li>
+                    <b>{plan.label}</b>
+                    <span>
+                      {seat.price} {seat.per}, locked
+                    </span>
+                  </li>
+                  {/* Only a founding member has a saving to be told about. A seat
                   bought at the standard rate shows the plan and the date and
                   says nothing about a discount it never had. From the record:
                   a founder's saving is hers whatever the site charges today. */}
-              {seat.saving ? (
-                <li>
-                  <b>
-                    {seat.saving.amount} saved {seat.saving.per}
-                  </b>
-                  <span>
-                    Members joining later pay {seat.saving.after} {seat.per}
-                  </span>
-                </li>
-              ) : null}
-              {seat.at ? (
-                <li>
-                  <b>Held {heldOn(seat.at)}</b>
-                  <span>Full refund any time before we open</span>
-                </li>
-              ) : null}
-              {/* THE NUMBER IS THE ACCOUNT, so it belongs in what you hold
+                  {seat.saving ? (
+                    <li>
+                      <b>
+                        {seat.saving.amount} saved {seat.saving.per}
+                      </b>
+                      <span>
+                        Members joining later pay {seat.saving.after} {seat.per}
+                      </span>
+                    </li>
+                  ) : null}
+                  {seat.at ? (
+                    <li>
+                      <b>Held {heldOn(seat.at)}</b>
+                      <span>Full refund any time before we open</span>
+                    </li>
+                  ) : null}
+                  {/* THE NUMBER IS THE ACCOUNT, so it belongs in what you hold
                   rather than in a settings screen that does not exist. Its
                   second line says what this number will be used for. The
                   seat texts — held, refunded, we're open — go to everyone,
@@ -277,55 +402,73 @@ export default function Membership() {
                   depends on the box, because only that needed consent. The
                   earlier copy made "when we open" conditional on the tick,
                   which was wrong on both counts. */}
-              {seat.phone ? (
-                <li>
-                  <b className="tnum">{readablePhone(seat.phone)}</b>
-                  <span>
-                    We&rsquo;ll text this number about your seat and when we open
-                    {seat.marketingOptIn ? ", plus offers from TapIn places" : ""}
-                    {seat.phoneVerified ? "" : " · not yet verified"}
-                  </span>
-                </li>
-              ) : null}
-            </ul>
-            <p className="t-compact ms-locked">{seat.locked}</p>
-          </Panel>
+                  {seat.phone ? (
+                    <li>
+                      <b className="tnum">{readablePhone(seat.phone)}</b>
+                      <span>
+                        We&rsquo;ll text this number about your seat and when we
+                        open
+                        {seat.marketingOptIn
+                          ? ", plus offers from TapIn places"
+                          : ""}
+                        {seat.phoneVerified ? "" : " · not yet verified"}
+                      </span>
+                    </li>
+                  ) : null}
+                </ul>
+                <p className="t-compact ms-locked">{seat.locked}</p>
+              </Panel>
+            ) : null}
 
-          <Panel label="What you get when we open">
-            <AppliesTo />
-            <p className="t-compact ms-note">
-              15% off, a $5 weekly credit and points at the TapIn Plus places. The
-              15% skips alcohol. Points land on everything.
-            </p>
-            <div className="ms-drill">
-              <Drill summary="The full terms">
-                <ol className="terms">
-                  {/* The terms she agreed to, from the record — not today's. */}
-                  {seat.terms.map((t) => (
-                    <li key={t.id}>{t.term}</li>
-                  ))}
-                </ol>
-              </Drill>
-            </div>
-          </Panel>
+            <Panel label="What you get when we open">
+              <AppliesTo />
+              <p className="t-compact ms-note">
+                15% off, a $5 weekly credit and points at the TapIn Plus places.
+                The 15% skips alcohol. Points land on everything.
+              </p>
+              <div className="ms-drill">
+                <Drill summary="The full terms">
+                  <ol className="terms">
+                    {/* The terms she agreed to, from the record — not today's. */}
+                    {seat.terms.map((t) => (
+                      <li key={t.id}>{t.term}</li>
+                    ))}
+                  </ol>
+                </Drill>
+              </div>
+            </Panel>
 
-          <Panel className="closing">
-            <p className="guarantee">{guarantee}</p>
-            <p className="t-compact guarantee-contact">
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-            </p>
-          </Panel>
+            <Panel className="closing">
+              <p className="guarantee">{guarantee}</p>
+              <p className="t-compact guarantee-contact">
+                <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+              </p>
+            </Panel>
 
-          <Link className="applink ms-see" to="/app" state={{ background: location }}>
-            <b>See inside the app</b>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="applink-go">
-              <path d="m10 7 5 5-5 5" fill="none" stroke="currentColor"
-                strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-        </>
-      ) : subscribed ? (
-        /* ══ PAID, BUT NOT ON THIS DEVICE ══════════════════════════════════
+            <Link
+              className="applink ms-see"
+              to="/app"
+              state={{ background: location }}
+            >
+              <b>See inside the app</b>
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="applink-go"
+              >
+                <path
+                  d="m10 7 5 5-5 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </>
+        ) : subscribed ? (
+          /* ══ PAID, BUT NOT ON THIS DEVICE ══════════════════════════════════
            Stripe says this person holds a subscription and `localStorage`
            does not — a second device, a cleared cache, a different browser.
            Before `subscription_status` existed this fell through to "no seat
@@ -333,28 +476,28 @@ export default function Membership() {
            were. WHAT IS MISSING HERE IS THE DETAIL, NOT THE FACT: the status
            endpoint answers a boolean, so there is no plan, price, date or
            reference to print. It says what is true and no more. */
-        <>
-          <Panel className="ms-head">
-            <p className="t-caption ms-state">Your seat is held</p>
-            <h1 className="ms-title">
-              Opening in Blacksburg, {launchWindow}
-            </h1>
-            <p className="t-compact ms-sub">
-              Nothing more is charged until we open. Your membership then renews
-              automatically until you cancel.
-            </p>
-          </Panel>
-          <Panel label="The details are on the device you reserved from">
-            <p className="t-compact">
-              Your plan, what you paid and your reference are saved in that
-              browser. Open this page there to see them, or email{" "}
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
-              and we will send them to you.
-            </p>
-          </Panel>
-        </>
-      ) : (
-        /* ══ NOT AN ERROR, AND IT MUST NOT LOOK LIKE ONE ═══════════════════
+          <>
+            <Panel className="ms-head">
+              <p className="t-caption ms-state">Your seat is held</p>
+              <h1 className="ms-title">
+                Opening in Blacksburg, {launchWindow}
+              </h1>
+              <p className="t-compact ms-sub">
+                Nothing more is charged until we open. Your membership then
+                renews automatically until you cancel.
+              </p>
+            </Panel>
+            <Panel label="The details are on the device you reserved from">
+              <p className="t-compact">
+                Your plan, what you paid and your reference are saved in that
+                browser. Open this page there to see them, or email{" "}
+                <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
+                and we will send them to you.
+              </p>
+            </Panel>
+          </>
+        ) : (
+          /* ══ NOT AN ERROR, AND IT MUST NOT LOOK LIKE ONE ═══════════════════
            The overwhelmingly likely reader here has not bought anything — /in
            is a route someone can simply type. The second, much rarer and much
            more upsetting reader HAS paid and is on a different device. One
@@ -364,27 +507,27 @@ export default function Membership() {
            A member who is SIGNED IN no longer lands here at all — the branch
            above catches them from `subscription_status`. This is for the
            signed-out one, where the browser is still all we have. */
-        <>
-          <Panel className="ms-head">
-            <h1 className="ms-title">No seat on this device</h1>
-            <p className="t-compact ms-sub">
-              Reservations are saved on the device they were made on for now.
-            </p>
-          </Panel>
-          <Panel label="If you have reserved">
-            <p className="t-compact">
-              Open this page in the browser you reserved from, or email{" "}
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
-              with the reference from your receipt and we will find it.
-            </p>
-          </Panel>
-          <div className="ms-cta">
-            <Link className="action" to="/reserve">
-              {reserveCta}
-            </Link>
-          </div>
-        </>
-      )}
+          <>
+            <Panel className="ms-head">
+              <h1 className="ms-title">No seat on this device</h1>
+              <p className="t-compact ms-sub">
+                Reservations are saved on the device they were made on for now.
+              </p>
+            </Panel>
+            <Panel label="If you have reserved">
+              <p className="t-compact">
+                Open this page in the browser you reserved from, or email{" "}
+                <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>{" "}
+                with the reference from your receipt and we will find it.
+              </p>
+            </Panel>
+            <div className="ms-cta">
+              <Link className="action" to="/reserve">
+                {reserveCta}
+              </Link>
+            </div>
+          </>
+        )}
       </div>
       <SiteFoot />
     </>

@@ -778,25 +778,33 @@ html[data-flight="in"] .column > .sticky-cta{
     margin-inline:auto;padding:48px 0 64px;
     align-items:start;
   }
-  .column:has(.ms-body) > .hero-band.is-compact{
+  .column:has(.ms-body) > .ms-left{
     grid-column:1;grid-row:1;
     position:sticky;top:48px;
+    /* STRETCH, not center. The band fills the track on its own that way, which
+       is what it did before this wrapper existed; centring made it shrink to
+       its content and squashed the mosaic with it. The CTA below centres
+       itself with an auto inline margin instead. */
+    display:flex;flex-direction:column;align-items:stretch;gap:var(--s-2xl);
+  }
+  .column:has(.ms-body) .ms-left > .hero-band.is-compact{
+    position:relative;
     width:auto;max-width:none;margin:0;
     min-height:340px;padding:var(--s-2xl);
     display:flex;align-items:center;justify-content:center;
     border-radius:var(--r-panel);overflow:hidden;box-shadow:var(--rest);
   }
-  .column:has(.ms-body) > .hero-band.is-compact > .mosaic{
+  .column:has(.ms-body) .ms-left > .hero-band.is-compact > .mosaic{
     position:absolute;inset:0;margin:0;height:auto;
     grid-template-columns:repeat(3,minmax(0,1fr));
     grid-template-rows:repeat(2,minmax(0,1fr));
   }
-  .column:has(.ms-body) > .hero-band.is-compact > .mosaic::after{
+  .column:has(.ms-body) .ms-left > .hero-band.is-compact > .mosaic::after{
     background:linear-gradient(180deg,rgba(18,10,14,.58) 0%,rgba(18,10,14,.72) 100%);
   }
-  .column:has(.ms-body) > .hero-band.is-compact > .reserve-card{
+  .column:has(.ms-body) .ms-left > .hero-band.is-compact > .reserve-card{
     position:relative;z-index:1;margin:0;width:100%;max-width:420px}
-  .column:has(.ms-body) > .hero-band.is-compact > .reserve-back{
+  .column:has(.ms-body) .ms-left > .hero-band.is-compact > .reserve-back{
     position:absolute;left:var(--s-xl);top:var(--s-xl);margin:0;z-index:2}
   .column:has(.ms-body) > .ms-body{
     grid-column:2;grid-row:1;
@@ -1216,3 +1224,114 @@ html[data-flight="in"] .column > .sticky-cta{
    than as the thing being agreed to. This is the same step the rows already
    take from the price above them; nothing is pushed out of view by it. */
 .pay-slot{margin-top:var(--s-xl)}
+
+/* ══ "WHERE IT WORKS" ON /in ═════════════════════════════════════════════════
+   The pitch's own `.places` rail, reused on the membership page under the head
+   panel. Everything it needs is already in pitch.css; only two things differ
+   because of where it sits here.
+
+   PHONE: `.ms-body` is `display:contents`, so the section lays out as a child
+   of `.column` and the rail's negative gutter margin bleeds to the screen edge
+   exactly as it does on the pitch. Nothing to add.
+
+   DESKTOP: the pitch's full-bleed treatment comes from `.column > .places`,
+   which cannot match here — this section's DOM parent is `.ms-body` — so the
+   rail simply sits in the 520px right-hand track beside the membership card.
+   That is what we want; it only needs to be allowed to shrink, because a flex
+   item defaults to `min-width:auto` and the ticker's track is far wider than
+   the column, which would otherwise push the whole grid wide. */
+/* CONTAINED, HARD. This sits in a 520px grid track next to a STICKY membership
+   card, and the rail it wraps is built to bleed: a negative gutter margin on a
+   phone, a full-bleed `.column > .places` treatment on the pitch, and an
+   overflow-x scroller inside. Anything that escapes this box lands in the
+   48px column gap and paints over the card, which is exactly what it did.
+   `overflow:hidden` on the section is the backstop; the resets below remove the
+   bleed at its source so the backstop never has to clip anything. */
+.ms-places{min-width:0;overflow:hidden}
+.ms-places .ticker-rail{max-width:100%;margin-inline:0}
+
+/* ══ NO FADE ON THE LEADING EDGE ═════════════════════════════════════════════
+   The rail's mask is `transparent 0 → #000 36px` at its left. On the pitch that
+   is right: the rail bleeds past the column's gutter, so the fade lands in the
+   bleed and the first tile is at full strength exactly where the reading column
+   begins. Here the rail does not bleed — it is flush with a 520px track — so
+   those 36px fell ON the first tile, which read as the rail starting empty and
+   filling up as it moved (Kiran: "the very first image is off the div").
+
+   The trailing fade stays. It is doing real work: it says the list continues
+   past the frame, which is true, and nothing is flush against that edge. */
+.ms-places .ticker-rail{
+  -webkit-mask-image:linear-gradient(90deg,#000 0,
+    #000 calc(100% - 44px),transparent 100%);
+  mask-image:linear-gradient(90deg,#000 0,
+    #000 calc(100% - 44px),transparent 100%);
+}
+
+/* ══ THE RAIL STAYS A RAIL HERE ══════════════════════════════════════════════
+   The ticker sizes itself off the VIEWPORT, which is the right call on the
+   pitch, where it runs full bleed — and the wrong one here, where it lives in a
+   520px track beside the membership card. Two rules of its own fought this
+   column:
+
+   · `.ticker-tile{width:176px}` from 1024 — a fixed pixel width that knows
+     nothing about what contains it, so the tiles never adjust.
+   · `is-open` is set by a viewport media query at 1280 (VenueTicker.tsx), and
+     pitch.css then reflows the rail to `repeat(7, 1fr)`. Seven columns across
+     520px is ~70px a tile: the "completely mis positioned" state.
+
+   So on this page the grid state is refused and the rail keeps scrolling at
+   every width, with the tiles measured as a FRACTION OF THE RAIL rather than of
+   the window — three in view, whatever the column turns out to be. Phone is
+   untouched: below 1024 this section is a child of `.column` and behaves
+   exactly as it does on the pitch. */
+@media (min-width:1024px){
+  /* BOTH SELECTORS, and the second is not redundant: pitch.css sets
+     `.ticker.is-open .ticker-tile{width:auto}` at three classes, which outranks
+     a two-class rule here — so with only `.ms-places .ticker-tile` the tiles
+     fell back to sizing on their own content and every one came out a different
+     width. Four classes takes it back.
+
+     A PIXEL WIDTH, NOT A PERCENTAGE OF THE RAIL. The percentage resolved
+     against the scroll container's content box, which the ticker also measures
+     on mount to size its track — and between 1024 and 1279 the rail auto-scrolls
+     off that measurement. Get the two out of step and it parks past the end of
+     its own content, which renders as an empty section (Kiran: "at 1092px width
+     it disappears"). The column this sits in is a fixed 520px at every desktop
+     width, so a percentage was buying nothing that a constant does not. */
+  .ms-places .ticker-tile{width:168px;flex:0 0 auto}
+  /* "View all places" would open the 7-across grid, which is a page-width
+     object and unreadable in this column — the same reason `rail` is passed.
+     The rail shows every place on its own. */
+  .ms-places .ticker-all{display:none}
+}
+
+/* ══ THE JOIN CTA ON /in ═════════════════════════════════════════════════════
+   Lives inside the card band, so on a desktop it is carried by that band's
+   `position:sticky` and holds still with the card. As a grid row of its own it
+   scrolled away while the card stayed, which read as the sentence detaching
+   from the thing it describes.
+
+   PHONE: `.hero-band > :not(.mosaic)` pushes every child down 216px to clear
+   the photography — right for the card, wrong for the block under it, so the
+   margin is taken back here. */
+/* PHONE: the wrapper does nothing at all. `display:contents` removes its box,
+   so the band and the CTA lay out as direct children of `.column` exactly as
+   they did before it existed — no margin, no stacking context, no change. */
+.ms-left{display:contents}
+
+.ms-join{display:flex;flex-direction:column;gap:var(--s-lg);
+  margin-top:var(--s-2xl)}
+.ms-join-line{margin:0;font-size:15px;font-weight:500;line-height:1.5;
+  color:var(--ink-2);text-wrap:pretty}
+
+@media (min-width:1024px){
+  /* Below the band, on the page's own field — off the photography, which is
+     what the mosaic backdrop made impossible from inside it. Measured to the
+     card rather than to the full 520px track so the two read as one object. */
+  .column:has(.ms-body) > .ms-left > .ms-join{
+    width:100%;max-width:420px;margin:0 auto;
+    align-items:center;text-align:center;
+  }
+  .ms-join .action{width:100%;display:inline-flex;
+    align-items:center;justify-content:center}
+}

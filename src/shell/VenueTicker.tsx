@@ -135,12 +135,32 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       const dt = Math.min((t - last) / 1000, 0.05);
       last = t;
       if (!paused.current) {
-        /* One track's width. scrollWidth spans both copies, so half of it is
-           precisely where the second copy shows what the first did — subtracting
-           it is invisible. */
-        const track = box.scrollWidth / 2;
+        /* ══ THE PERIOD IS MEASURED, NOT DIVIDED ═══════════════════════════
+           This was `box.scrollWidth / 2`, on the reasoning that the list is
+           rendered twice so half the scroll width is one copy. It is not, and
+           the difference is what put a hole in the rail.
+
+           The rail is a flex row with a `gap`. Two copies of eight tiles are
+           sixteen tiles and FIFTEEN gaps, plus the rail's own inline padding;
+           one period is eight tiles and EIGHT gaps. Half the scroll width is
+           therefore short by half a gap (and off by half the padding), so every
+           wrap slipped a few pixels in the same direction. The error
+           accumulated until empty space opened at the leading edge — which is
+           precisely the artefact the duplicate track exists to prevent.
+
+           The first clone sits exactly one period from the first tile, so its
+           offset IS the period. Read from the DOM, it stays correct whatever
+           the gap, the padding or the tile width turn out to be — including in
+           the 520px column on /in, where they all differ from the pitch. */
+        const kids = box.children;
+        const half = kids.length >> 1;
+        const period =
+          half > 0 && kids[half]
+            ? (kids[half] as HTMLElement).offsetLeft -
+              (kids[0] as HTMLElement).offsetLeft
+            : box.scrollWidth / 2;
         const next = box.scrollLeft + PX_PER_SEC * dt;
-        box.scrollLeft = next >= track ? next - track : next;
+        box.scrollLeft = period > 0 && next >= period ? next - period : next;
       }
       frame = requestAnimationFrame(step);
     };
