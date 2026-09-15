@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/auth_context";
+import { EventTrackingProvider } from "./context/event_tracking_context";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
@@ -22,9 +23,14 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       {/* The session is read once, above the router: the checkout needs an
           access token, and /in needs to know whether anyone is signed in. */}
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      {/* Tracking wraps auth, not the other way round: `auth_context` calls
+          `identify` when a session appears, so the events API has to exist
+          above it. Same order as the merchant app's index.js. */}
+      <EventTrackingProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </EventTrackingProvider>
     </BrowserRouter>
   </StrictMode>,
 );

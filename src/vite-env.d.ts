@@ -37,6 +37,9 @@ interface ImportMetaEnv {
         or the two would disagree about which mode the build is in. ───────── */
   readonly VITE_STRIPE_PUBLISHABLE_KEY?: string;
   readonly VITE_STRIPE_PUBLISHABLE_KEY_SANDBOX?: string;
+
+  /* ── PostHog. Only read by `constants.ts`. ──────────────────────────────── */
+  readonly VITE_POSTHOG_PROJECT_TOKEN?: string;
 }
 
 interface ImportMeta {

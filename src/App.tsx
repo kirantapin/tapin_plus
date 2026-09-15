@@ -1,10 +1,11 @@
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Route, Routes, useLocation, useParams, type Location } from "react-router-dom";
 import Shell from "./shell/Shell";
 import AppLayer from "./shell/AppLayer";
 import ReserveLayer from "./shell/ReserveLayer";
 import Arrival from "./shell/Arrival";
 import { useMedia } from "./shell/useMedia";
+import { useEventTracking } from "./context/event_tracking_context";
 import Pitch from "./routes/Pitch";
 import How from "./routes/How";
 import Reserve from "./routes/Reserve";
@@ -50,6 +51,20 @@ const appRoutes = (
 
 export default function App() {
   const location = useLocation();
+
+  /* ══ ONE PAGEVIEW PER ROUTE, BY HAND ═══════════════════════════════════════
+     `capture_pageview` is off (see event_tracking_context). PostHog's automatic
+     pageview fires once per document load, and this is one document — without
+     this, `/`, `/how`, `/reserve` and `/in` would all be a single pageview and
+     there would be no funnel to read.
+
+     PATHNAME ONLY, deliberately. `/reserve` opens as a layer over the page
+     beneath and carries `state.background`; keying on the whole location would
+     fire a second view when nothing but that state changed. */
+  const { track } = useEventTracking();
+  useEffect(() => {
+    track("$pageview", { $current_url: window.location.href, path: location.pathname });
+  }, [location.pathname, track]);
   const desktop = useMedia("(min-width: 1024px)");
   const isApp = location.pathname === "/app" || location.pathname.startsWith("/app/");
 

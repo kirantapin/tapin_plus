@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
+import { useEventTracking } from "./event_tracking_context";
 
 interface AuthContextProps {
   userSession: Session | null | undefined;
@@ -104,9 +105,28 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   );
   const displayName = named?.trim() ?? null;
 
+  const {
+    identify,
+    logout: resetTracking,
+    setGlobalProps,
+    clearGlobalProps,
+  } = useEventTracking();
+  const userId = userSession?.user?.id;
+
+  useEffect(() => {
+    if (userSession === undefined) return;
+    if (userId) {
+      identify(userId);
+      setGlobalProps({ user_id: userId });
+    } else {
+      clearGlobalProps(["user_id"]);
+    }
+  }, [userSession, userId, identify, setGlobalProps, clearGlobalProps]);
+
   const logout = async () => {
     await supabase.auth.signOut();
     setSubscribed(null);
+    resetTracking();
   };
 
   return (
