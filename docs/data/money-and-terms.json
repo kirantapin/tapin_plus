@@ -1,0 +1,184 @@
+{
+  "guarantee": "Save at least what you pay, or we refund the difference.",
+  "seatCap": 100,
+  "seatCapLine": "100 founding seats at $4.99 · $9.99 after that",
+  "plans": {
+    "monthly": {
+      "paidTodayCents": 499,
+      "termMonths": 1,
+      "renewal": 4.99,
+      "chargeRows": [
+        {
+          "id": "today",
+          "label": "$4.99 today",
+          "detail": "Your first month"
+        },
+        {
+          "id": "then",
+          "label": "Then $4.99 a month",
+          "detail": "From when we open, Spring 2027 · until you cancel"
+        },
+        {
+          "id": "refund",
+          "label": "Full refund before we open",
+          "detail": "No reason needed"
+        }
+      ],
+      "terms": [
+        {
+          "id": "today",
+          "term": "You pay $4.99 today for your first month. Every month after that is $4.99, the founding rate."
+        },
+        {
+          "id": "enrols",
+          "term": "Reserving enrolls you now. The membership starts when we open."
+        },
+        {
+          "id": "starts",
+          "term": "Your first month starts when we open, expected Spring 2027. Your next charge is a month after that. Nothing more is charged before then."
+        },
+        {
+          "id": "rate",
+          "term": "$4.99 a month is locked for as long as you keep the membership. After the first 100 seats, new members pay $9.99."
+        },
+        {
+          "id": "guarantee",
+          "term": "Save at least what you pay, or we refund the difference. Checked every month against your TapIn orders."
+        },
+        {
+          "id": "refund",
+          "term": "Full refund any time before we open, no reason needed."
+        },
+        {
+          "id": "forfeit",
+          "term": "A refund gives up your seat and your locked rate. Joining later means whatever the price is then."
+        }
+      ],
+      "consent": "By reserving, you authorize TapIn to charge $4.99 today for your first month, which starts when we open (expected Spring 2027), then $4.99 a month automatically until you cancel. Cancel any time. Full refund before we open."
+    },
+    "pass": {
+      "paidTodayCents": 1999,
+      "termMonths": 3,
+      "renewal": 21.99,
+      "chargeRows": [
+        {
+          "id": "today",
+          "label": "$19.99 today",
+          "detail": "Your first 3 months"
+        },
+        {
+          "id": "then",
+          "label": "Then $21.99 every 3 months",
+          "detail": "From when we open, Spring 2027 · until you cancel"
+        },
+        {
+          "id": "refund",
+          "label": "Full refund before we open",
+          "detail": "No reason needed"
+        }
+      ],
+      "terms": [
+        {
+          "id": "today",
+          "term": "You pay $19.99 today for your first 3 months — $6.66 a month. After that it renews at $21.99 every 3 months."
+        },
+        {
+          "id": "enrols",
+          "term": "Reserving enrolls you now. The membership starts when we open."
+        },
+        {
+          "id": "starts",
+          "term": "Your 3 months start when we open, expected Spring 2027. Your first renewal is 3 months after that. Nothing more is charged before then."
+        },
+        {
+          "id": "rate",
+          "term": "$21.99 every 3 months is locked for as long as you keep the pass."
+        },
+        {
+          "id": "guarantee",
+          "term": "Save at least what you pay, or we refund the difference. Checked every 3 months against your TapIn orders."
+        },
+        {
+          "id": "refund",
+          "term": "Full refund any time before we open, no reason needed."
+        },
+        {
+          "id": "forfeit",
+          "term": "A refund gives up your seat and your locked rate. Joining later means whatever the price is then."
+        }
+      ],
+      "consent": "By reserving, you authorize TapIn to charge $19.99 today for your first 3 months, which start when we open (expected Spring 2027), then $21.99 every 3 months automatically until you cancel. Cancel any time. Full refund before we open."
+    }
+  },
+  "pricing": {
+    "standardMonthly": 9.99,
+    "foundingMonthly": 4.99,
+    "passMonths": 3,
+    "passPrice": 19.99,
+    "passRenewal": 21.99,
+    "promoMonthly": 6.99,
+    "promoMonths": 2,
+    "retentionNextMonth": 6.99
+  },
+  "preorder": {
+    "launchWindow": "Spring 2027",
+    "seats": 100,
+    "refundableUntilLaunch": true
+  },
+  "benefits": [
+    {
+      "id": "percent",
+      "kind": "percent",
+      "label": "15% off",
+      "detail": "Food and non-alcoholic drinks",
+      "percentOff": 15
+    },
+    {
+      "id": "credit",
+      "kind": "credit",
+      "label": "$5 credit",
+      "detail": "Earned on a $10+ order, once a week",
+      "creditUsd": 5,
+      "minOrderUsd": 10,
+      "cadence": "weekly"
+    },
+    {
+      "id": "points",
+      "kind": "points",
+      "label": "2× points",
+      "detail": "Food and non-alcoholic drinks",
+      "multiplier": 2
+    }
+  ],
+  "offers": [
+    {
+      "id": "italianos-welcome",
+      "venueId": "italianospizza",
+      "label": "10% off",
+      "detail": "One order, one time",
+      "percentOff": 10,
+      "usesPerMember": 1,
+      "audience": "members"
+    },
+    {
+      "id": "olaika-entree-with-drink",
+      "venueId": "olaika",
+      "label": "50% off an entrée",
+      "detail": "With any drink",
+      "percentOff": 50,
+      "usesPerMember": null,
+      "audience": "members"
+    }
+  ],
+  "savingsModel": {
+    "benefit": {
+      "percentOff": 0.15,
+      "credit": 5,
+      "creditMin": 10,
+      "pointsPerDollar": 10,
+      "pointValue": 0.01,
+      "plusPlaces": 5
+    },
+    "visitSize": 15
+  }
+}

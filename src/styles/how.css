@@ -1,0 +1,1527 @@
+/* ============================================================================
+   /how — the deck, recomposed. 13 Sep 2026.
+
+   ONE SHEET on the fixed .ground (§9: type never sits on the bare ground).
+
+   NO FIXED ART FRAME. The old `.scene-art{min-height:150px}` bottom-aligned
+   inside `.how-stage{justify-content:center}` is what manufactured BOTH
+   defects at once: it forced every composition into a slot, so every scene was
+   a thumbnail and the page around it became chrome — which is the category
+   onboarding pattern, by construction, however the art is drawn.
+
+   Measured before, 375x812: scene composition 127px of a 612px stage (21%),
+   175px void above the art, 175px below the copy — 57% of the stage empty.
+   Subject footprint against the whole screen: entry pass 4.3%, My Spot tray
+   5.7%, offer card 6%.
+
+   Each scene is now sized by its own content at the sheet's full measure. The
+   stage packs to the bottom and the copy block carries a floor, so the
+   headline's top edge and the art's bottom edge land at identical y on all
+   seven slides — no JS, no measurement, no per-slide tuning.
+
+   MOTION LAW: every keyframe set ENDS at its resting state; displacement lives
+   in the `from`. This is correctness, not style — base.css sets
+   animation-duration:.01ms !important and animation-delay:0s !important under
+   `reduce` but never sets animation:none, so a `both`-filled animation still
+   runs and PARKS ON ITS 100% KEYFRAME. An author-normal declaration inside a
+   `reduce` block loses to that. Which is why this file no longer has one: the
+   five hand-landed end states it used to advertise were largely dead code, and
+   the blank points scene was caused by `drawIn` ending at opacity:0 rather
+   than by any override failing.
+
+   MAROON, on this route, is now spent exactly twice: `.band.on` (the option
+   she chose) and `.action` on the close (the action that takes money).
+   ============================================================================ */
+
+/* -- the sheet ------------------------------------------------------------- */
+.how{
+  display:flex;flex-direction:column;gap:var(--s-xl);
+  /* ══ A FIXED FRAME, NOT A MINIMUM ════════════════════════════════════════
+     Sam, 13 Sep 2026: "the height of the parent container for this carousel
+     shouldn't be changing like you have it."
+
+     Right, and it is the fault under the one I was chasing. This was
+     `min-height` with a stage set to `flex:1 0 auto`, so a tall scene GREW the
+     sheet — which meant the deck's frame changed size between slides and the
+     page scrolled. A deck is a frame with changing contents; if the frame moves
+     it is a stack of pages with a progress bar on top.
+
+     Fixed height makes the overflow problem structural rather than cosmetic:
+     a scene either fits the stage or it is a scene that needs to be shorter.
+     The two max-height tiers below are what make every one of them fit.
+
+     24 + 740 + 48 = 812 exactly at the reference size. (It was
+     calc(100dvh - 48px) before that, which measured 836 against an 812 viewport
+     and rubber-banded 24px.) */
+  /* svh, with dvh as the fallback line: the SMALL viewport is the one with
+     Safari's bars showing, so the sheet is sized to fit when the bars are
+     there and simply leaves field below when they collapse — instead of
+     growing under the reader's thumb mid-scroll. Sam, 14 Sep 2026: "for some
+     of the slides I have to scroll on my phone" — not reproducible at seven
+     emulated viewports, and this is the one real-device mechanism left. */
+  height:calc(100dvh - 72px);
+  height:calc(100svh - 72px);
+  background:var(--card);
+  border:1px solid var(--hair);
+  border-radius:var(--r-panel);
+  box-shadow:var(--rest);
+  padding:var(--s-xl);
+  --copy-min:110px;   /* 2-line 26px head (58.24) + 8 + 2-line 15px line (43.5) */
+  /* §7's FLOOR for the qualification beside a money figure — never fine print.
+     It used to drive the headline too, which is how the two ended up identical;
+     see the note on .scene-head.is-figure. */
+  --fig:17px;
+}
+
+/* -- rail ------------------------------------------------------------------ */
+.how-top{flex:0 0 auto;display:flex;align-items:center;gap:var(--s-lg);height:36px}
+/* Sometimes an <a> (step 1, leaving for the pitch) and sometimes a <button>
+   (every other step, going back one). `border:0` and `padding:0` so the two
+   render identically — a button carries UA chrome an anchor does not. */
+.how-back{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-pill);
+  display:flex;align-items:center;justify-content:center;padding:0;border:0;
+  color:var(--ink-2);background:var(--inner);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform 150ms var(--ease)}
+.how-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+.how-back svg{width:20px;height:20px}
+.how-back:active{transform:scale(.94)}
+
+/* ══ THE RAIL ═════════════════════════════════════════════════════════════
+   REVERTED 13 Sep 2026 to the inline form. It was moved flush to the sheet's
+   top edge and clipped by the corner radius, which is what Sam asked for — and
+   at 4px, hard against a 1px border, the seven tracks stopped reading as
+   indicators and started reading as a rendering seam along the card's edge.
+   "Something happened to the carousel." The flush version is not recoverable
+   by tuning: anything thick enough to read as a control at the very edge is
+   thick enough to look like a mis-drawn border, and anything thin enough not
+   to is invisible. So it sits in the chrome row again, where a mark has the
+   sheet's own field behind it.
+
+   THE COUNTDOWN FILL WENT WITH IT and can come back here on request — a 20px
+   current mark is enough to fill legibly. It is out for now because it arrived
+   with the flush layout and is not what was asked to be kept.
+
+   Position by WIDTH and INK; nothing fills over time. The old 3px track was
+   `--inner` on `--card` = 1.08:1 — invisible, so only the filled part ever
+   read — and its seven segments were 34.7 x 3px tap targets against WCAG
+   2.5.8's 24x24 floor. The holding slide's own mark rendered className="",
+   pixel-identical to four unstarted ones. */
+/* ══ ONE BAR IN NINE PARTS, NOT NINE DASHES ═══════════════════════════════
+   Sam, 14 Sep 2026: "indicator still looks really ugly."
+
+   It was nine DETACHED marks — 20px long, 8px apart, and on the last slide the
+   eight completed ones were pixel-identical to each other and near-identical to
+   the current. A row of hyphens is what it read as, because that is what it
+   was: nothing tied the marks into a single quantity, so there was no "how far
+   through" to see, only nine small objects.
+
+   The segments now butt together inside one rail with a 2px seam between them.
+   A continuous run of bright ink followed by a run of dim ink reads as progress
+   before it is looked at — the eye gets the proportion, not a count of dashes —
+   and the current segment is where the countdown fill lives.
+
+   FLEXED, NOT FIXED. Equal `1 1 0` tracks mean the rail is always the same
+   length whatever the slide count, and the old fixed `--seg-w` is gone with the
+   wide gaps that needed it.
+
+   ══ WCAG 2.5.8 IS MET BY SPACING, NOT BY BOX SIZE — AND THAT IS DELIBERATE ══
+   Nine equal segments in a phone's rail are ~21px wide, under the 24x24 box
+   floor, and this file has form here: the ORIGINAL rail was replaced partly
+   because its marks were 34.7x3px targets. So the seam is 3px rather than 2,
+   which puts 24.4px between adjacent segment CENTRES — the Target Size
+   (Minimum) spacing exception, which passes a sub-24px target when no
+   24px-diameter circle centred on it overlaps a neighbour's. Vertically each
+   button is 32px, well clear. Do not reduce the gap below 3px without
+   re-deriving that number; it is load-bearing, not decorative. */
+/* `flex:1`, not `0 1 auto`: with `1 1 0` children the rail's content basis is
+   literally zero, so `auto` collapsed the whole bar to its eight 2px seams —
+   16px of rail. It has to GROW into the space between the back button and the
+   count, capped so it stays chrome rather than becoming the widest object in
+   the row. */
+.how-progress{flex:1 1 auto;max-width:340px;display:flex;gap:3px;
+  list-style:none;margin:0;padding:0;min-width:0}
+.how-progress li{flex:1 1 0;min-width:0;display:block}
+.seg{display:flex;align-items:center;justify-content:center;
+  width:100%;height:32px;padding:0;border:0;background:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+/* SCALED, NOT RESIZED. This animated its own inline size until the design
+   detector flagged it, and the flag was right in principle: a box measurement
+   is laid out, a transform is composited. Fixed at the wide value and scaled
+   down from the centre — which is where the old rule visually grew from — so
+   nothing about the motion changes except which thread runs it. At 1px the
+   radius squashes to .4px, below a device pixel on every screen this ships
+   to. */
+/* 3px, and no transform. The scaleX existed to make a fixed-width mark look
+   shorter when unvisited — a length difference that only worked because the
+   marks were detached. In a continuous bar length is the segment's share of the
+   whole and must not move; STATE IS CARRIED BY INK ALONE, which is also what
+   makes the run of completed segments read as one filled stretch. */
+.seg i{display:block;width:100%;height:3px;border-radius:var(--r-pill);
+  background:var(--ink-4);                       /* 5.75:1 on --card */
+  transition:background-color 300ms var(--ease)}
+/* --hair-lit was rejected for the upcoming mark and this is arithmetic, not
+   taste: rgba(255,255,255,.25) over --card #2A0F1C composites to #5F4B55,
+   which measures 2.22:1 — under the 3:1 non-text floor. --stone is 3.99:1 and
+   is banned from `color:` anyway. */
+.seg i[data-state="done"]{background:var(--ink-2)}
+/* ══ THE CURRENT MARK IS A TRACK, AND IT FILLS ═════════════════════════════
+   Sam, 13 Sep 2026: "I need to be able to see the carousel indicators animating
+   as it gets closer to moving to the next slide."
+
+   WIDTH SAYS WHERE YOU ARE; BRIGHTNESS SAYS HOW LONG IS LEFT. The mark was
+   already the only one at full width, so "current" was never in doubt — which
+   frees its INK to carry the second fact. It starts at the unvisited ink and
+   fills to white over the slide's own dwell, so at a glance the rail shows both
+   position and time without adding an object to the chrome.
+
+   scaleX on a child, never width on the mark: a box measurement is laid out
+   and a transform is composited, and this runs for up to twelve seconds. */
+.seg i[data-state="now"]{background:var(--ink-4);
+  position:relative;overflow:hidden}
+.seg i[data-run]::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:var(--ink-1);transform-origin:left center;transform:scaleX(1);
+  animation:segFill var(--dwell,6000ms) linear both}
+/* FROZEN IN PLACE, not reset. `data-paused` rather than dropping `data-run`,
+   because an unmatched rule would snap the fill back to empty — which reads as
+   the deck restarting rather than waiting for the reader. */
+.seg i[data-paused]::after{animation-play-state:paused}
+/* Ends FULL, per this file's motion law: a reduced-motion park lands on a solid
+   white mark, which is exactly what this rail looked like before the fill. */
+@keyframes segFill{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+.seg:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+
+/* ══ THE HANDOFF ══════════════════════════════════════════════════════════
+   The step you just left brightens to the current step's ink and settles back
+   to done. It fires on the attribute becoming "done" — CSS starts an animation
+   when the rule first matches, which is that instant — and ends at the resting
+   colour, so it obeys this sheet's motion law and needs no reduced-motion
+   override. Suppressed going back: otherwise the brightest thing on the rail
+   is always to the right of where you are, and "back" looks like "forward". */
+@keyframes segHandoff{from{background:var(--ink-1)}to{background:var(--ink-2)}}
+.how-progress[data-dir="fwd"] .seg i[data-state="done"]{
+  animation:segHandoff 460ms var(--ease) both}
+
+.how-top{flex:0 0 auto;display:flex;align-items:center;gap:var(--s-lg);height:36px}
+/* ══ THE SLASH WAS READING AS A STRIKETHROUGH ═════════════════════════════
+   "9 / 9" at 11px with `letter-spacing:.08em` put ~1px of air on either side of
+   an oblique that is already nearly the cap height — so the three glyphs fused
+   into 9—9 and the pair looked struck out rather than counted.
+
+   Tracking is for LETTERS. There are none here: two numerals and an operator.
+   It comes off, the size goes up a step so the digits carry themselves, and the
+   slash is given its own ink so it separates the two figures instead of
+   colliding with them. Tabular figures so the rail does not shift width as the
+   count climbs into double digits. */
+.how-count{flex:0 0 auto;margin:0;font-size:13px;font-weight:600;
+  letter-spacing:0;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  display:flex;align-items:baseline;gap:5px;
+  animation:countIn 300ms var(--ease) both}
+.how-count b{font-weight:700;color:var(--ink-1)}
+.how-count i{font-style:normal;color:var(--ink-4)}
+@keyframes countIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+.how-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* -- stage: bottom-packed, no frame, no min-height on the art -------------- */
+/* `1 1 auto` + `min-height:0`, NOT `1 0 auto`. A flex item's default minimum is
+   its content, so `1 0 auto` let a tall scene push the sheet open from the
+   inside no matter what height the sheet was given.
+
+   overflow-y:auto is a SAFETY VALVE, not a layout. At every real phone size the
+   two max-height tiers keep every scene inside the stage and it never engages —
+   but a pathological viewport (a tiny window, a 200% text zoom) must degrade to
+   a scroll rather than destroying the footer and the reader's way forward. */
+/* ══ `safe`, AND IT IS THE WHOLE POINT OF THE TWO LINES ══════════════════════
+   The paragraph above promises that a pathological viewport "degrades to a
+   scroll rather than destroying the footer". Plain `flex-end` does not keep
+   that promise — it breaks it in the one direction nobody checks. When content
+   exceeds the stage, flex-end pushes the overflow out the TOP, where there is
+   no scroll to reach it: `scrollHeight` stays equal to `clientHeight`, so the
+   obvious guard reports a clean slide while the top of the artifact is sheared
+   off. Sam caught it on the redeem slide from a screenshot; four automated
+   sweeps that measured `scrollHeight - clientHeight` had all said zero.
+
+   `safe flex-end` falls back to flex-start the moment alignment would cause
+   that loss, so overflow lands at the BOTTOM, inside the scrollable direction,
+   visible and reachable. Both lines are declared: an engine that cannot parse
+   the second keeps the first and behaves as before.
+
+   This is a backstop, not a licence — every slide is still measured to fit. */
+/* ══ CENTRED, ON EVERY SLIDE ═══════════════════════════════════════════════
+   Sam, 14 Sep 2026: "can we make sure that all of these carousel slides have
+   the same layout? Ideally centered height wise."
+
+   Until now seven slides bottom-packed (to pin the headline's top edge across
+   the deck) and two — the value and the close — top-packed, because their
+   figure block had no headline in the pinned slot. Two packings is two
+   layouts, which is the thing he noticed. One packing now: the art-and-copy
+   group sits in the middle of the stage on all nine, and the copy floor
+   below keeps the group's height — and so the headline's line — from
+   swinging between slides whose art differs. `safe` keeps the flex-start
+   fallback when a slide is taller than the stage, so overflow still lands
+   at the bottom, reachable. */
+.how-stage{flex:1 1 auto;min-height:0;overflow-y:auto;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  justify-content:safe center;
+  gap:var(--s-2xl);min-width:0;
+  touch-action:pan-y}
+.scene-art{width:100%}
+/* THE FLOOR IS WHAT PINS THE HEADLINE. Overflow from a short copy block falls
+   BELOW the line, above the foot, where nothing is tracking it — never above
+   the headline. Measured swing today: 30.1px on the head, 30.6px on the art,
+   plus a 31px jolt on the two tagged slides. All three go to zero. */
+.scene-copy{min-height:var(--copy-min)}
+/* `pretty`, not `balance`, on a headline that can carry a tag: balance counts
+   the pill as a word and stranded "see [Example]" on a line of its own.
+   `pretty` only guards the last line against an orphan. */
+.scene-head{margin:0;font-size:26px;font-weight:700;letter-spacing:-.03em;
+  line-height:1.12;color:var(--ink-1);text-wrap:pretty}
+/* §8: in the claim's own LINE and the claim's own INK. */
+.scene-tag{display:inline-block;margin-left:var(--s-md);vertical-align:.12em;
+  padding:3px 10px;border-radius:var(--r-pill);
+  font-size:15px;font-weight:700;letter-spacing:0;line-height:1.2;
+  color:var(--ink-1);border:1px solid var(--hair-lit)}
+.scene-line{margin:var(--s-md) 0 0;font-size:15px;font-weight:500;line-height:1.45;
+  max-width:34ch;color:var(--ink-2);text-wrap:pretty}
+
+/* -- foot: sticky, opaque, NEVER animated --------------------------------- */
+/* No longer sticky: that existed to keep the seat line, the charge line and
+   Reserve reachable while the sheet grew past the viewport. With a fixed frame
+   the foot is simply the last child and is always on screen. */
+.how-foot{flex:0 0 auto;display:flex;flex-direction:column;gap:var(--s-lg);
+  padding-top:var(--s-lg);background:var(--card)}
+/* The timing line and the way out share one row: the deck keeps exactly one
+   thing that looks like a button. */
+.how-when{display:flex;align-items:center;justify-content:space-between;gap:var(--s-lg);
+  margin:0;font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.how-skip{flex:0 0 auto;padding:6px 2px;border:0;background:none;font:inherit;
+  font-size:13px;font-weight:700;letter-spacing:.005em;color:var(--ink-2);
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:var(--hair-lit);-webkit-tap-highlight-color:transparent;
+  transition:color 150ms var(--ease),text-decoration-color 150ms var(--ease)}
+@media (hover:hover){.how-skip:hover{color:var(--ink-1);text-decoration-color:currentColor}}
+.how-skip:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;border-radius:var(--r-sm)}
+/* The seat sentence, the lock and the charge line left this foot on 14 Sep
+   (Sam: pricing and disclosures at checkout). Their rules went with them. */
+
+/* Back and forward as one object. `.how-prev` is square and secondary, Next
+   takes the rest of the row — so the pair reads as one control with a primary
+   side, not as two buttons of equal claim. The close swaps Next for the maroon
+   Reserve and keeps the same geometry. */
+.how-nav{display:flex;align-items:stretch;gap:var(--s-lg)}
+.how-nav > .action,.how-nav > .how-next{flex:1;min-width:0}
+.how-prev{flex:0 0 auto;width:52px;min-height:52px;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:var(--r-card);border:1px solid var(--hair-lit);
+  background:var(--inner);color:var(--ink-2);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease),background-color 150ms var(--ease),
+    opacity 150ms var(--ease)}
+.how-prev svg{width:20px;height:20px}
+.how-prev:active{transform:scale(.96);background:var(--press)}
+.how-prev:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
+/* DISABLED, NOT HIDDEN, on step 1. Hiding it would give Next the whole row on
+   the one slide everybody leaves, then shrink it by 64px on the next — the
+   button would move under the reader's thumb at the one advance that is
+   guaranteed to happen. */
+.how-prev:disabled{opacity:.34;cursor:default}
+.how-prev:disabled:active{transform:none;background:var(--inner)}
+
+.how-next{display:block;width:100%;min-height:52px;padding:0 var(--s-2xl);
+  border-radius:var(--r-card);border:1px solid var(--hair-lit);
+  background:var(--inner);color:var(--ink-1);font:inherit;font-size:16px;
+  font-weight:700;letter-spacing:-.01em;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease),background-color 150ms var(--ease)}
+.how-next:active{transform:scale(.98);background:var(--press)}
+.how-next:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
+
+/* -- 1 · what do you spend -------------------------------------------------
+   Four full-width rows, not a 2x2 grid. The grid existed because the labels
+   are different widths and a flex row stranded "$300+" in a 3+1 break; rows
+   solve that better — every label starts at the same left edge, on the deck's
+   one axis — and the tap target goes from 120x48 to 295x80. */
+.bands{display:flex;flex-direction:column;gap:var(--s-lg)}
+.band{display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);
+  min-height:80px;padding:0 var(--s-xl);border-radius:var(--r-card);
+  background:var(--inner);border:1px solid var(--hair-lit);color:var(--ink-1);
+  font:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease),background-color 150ms var(--ease),
+    border-color 150ms var(--ease),color 150ms var(--ease)}
+.band b{font-size:24px;font-weight:700;letter-spacing:-.025em}
+/* 13px. The old .band-hint was 12px, under the documented secondary floor, and
+   "a month" is a phrase rather than a tracked micro-label. */
+.band span{font-size:13px;font-weight:600;letter-spacing:.005em;color:var(--ink-3)}
+.band:active{transform:scale(.96)}
+/* Maroon is the fill that carries white, and a chosen state is exactly what a
+   brand fill is for. */
+.band.on{background:var(--maroon);border-color:var(--maroon);color:var(--on-maroon)}
+.band.on span{color:var(--on-maroon)}
+.band:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
+
+/* The control's second instance (four inline pills under the value slide's
+   figure, 13 Sep) is gone: Sam, 14 Sep 2026, asked for the chosen amount as a
+   way back to this slide instead. See `.vs-basis` in the value-scene block. */
+
+/* -- 2 / 3 · the order, and the same order waiting -------------------------
+   The 15% sits ABOVE the total and moves it. The points and the credit sit
+   BELOW it and do not. That vertical split is the entire lesson. */
+.ticket{background:var(--inner);border:1px solid var(--hair-lit);
+  border-radius:var(--r-card);padding:var(--s-xl);box-shadow:var(--rest)}
+.ticket.is-order{animation:riseIn 380ms var(--ease) both}
+.ticket.is-spot{animation:dropIn 460ms 200ms var(--ease) both}
+.tk-where{display:flex;align-items:center;gap:var(--s-lg);margin:0 0 var(--s-lg)}
+.tk-where .collar{width:34px;height:34px;border-radius:11px}
+.tk-where .collar img{border-radius:8px}
+.tk-where .collar::after{border-radius:8px}
+.tk-where b{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+/* .tk-state, NOT `.tk-where span` — the collar IS a <span>, so the descendant
+   selector matched it too and `margin-left:auto` shoved the merchant's own
+   mark 41px off the ticket's left edge. Measured, not theorised. */
+.tk-state{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3)}
+.tk-item{display:flex;align-items:center;gap:var(--s-lg);margin:0 0 var(--s-lg);
+  font-size:15px;font-weight:500;color:var(--ink-2)}
+/* Flat card, floating photo: the ticket takes --rest, the dishes --float. The
+   house inversion, and what turns a schematic into a real order. */
+.tk-item img{width:40px;height:40px;flex:0 0 auto;border-radius:var(--r-sm);
+  object-fit:cover;background:var(--subtle);box-shadow:var(--float)}
+.tk-item .tnum{margin-left:auto;font-weight:600;color:var(--ink-1)}
+.tk-rule{height:1px;background:var(--hair-lit);margin:var(--s-lg) 0;padding:0;border:0}
+.tk-off{display:flex;justify-content:space-between;gap:var(--s-lg);margin:0;
+  font-size:15px;font-weight:600;color:var(--ink-1);
+  animation:rowIn 340ms 500ms var(--ease) both}
+.tk-total{display:flex;justify-content:space-between;align-items:baseline;
+  margin:var(--s-lg) 0 0;font-size:20px;font-weight:700;color:var(--ink-1)}
+/* A CROSSFADE HAS NO HONEST RESTING STATE — two children in one 78px box would
+   both paint. So the rest state is declared here and the keyframes animate FROM
+   the displaced value; `both` applies the `from` before the delay elapses, so
+   $15.00 shows for the first 820ms. Under `reduce` the delay is zeroed and it
+   lands immediately on the finished total, legible, in one box. */
+.tk-swap{position:relative;display:inline-block;min-width:78px;text-align:right}
+.tk-swap .was{opacity:0;animation:swapOut 300ms 820ms var(--ease) both}
+.tk-swap .now{position:absolute;right:0;top:0;opacity:1;
+  animation:swapIn 300ms 820ms var(--ease) both}
+
+/* BELOW THE RULE AND NOT DIMMER. These used to rank last at 12px --ink-4
+   (5.34:1) — the quietest thing on the slide — and the credit is $50 of the
+   $76.25 close, its single largest component. The split is carried by POSITION
+   and by a total that has visibly already changed. Never by dimming. */
+.tk-earned{list-style:none;margin:0;padding:0;
+  animation:rowIn 340ms 1250ms var(--ease) both}
+.tk-earned li{margin-top:var(--s-lg)}
+.tk-earned b{display:block;font-size:15px;font-weight:700;color:var(--ink-1)}
+.tk-earned span{display:block;margin-top:2px;font-size:13px;font-weight:500;
+  color:var(--ink-3)}
+
+.tk-paid{display:flex;justify-content:space-between;align-items:baseline;margin:0;
+  font-size:20px;font-weight:700;color:var(--ink-1)}
+.spot-label{margin:0 0 var(--s-lg);font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+/* What she paid, and what the menu says. The struck figure is DEliberately the
+   quieter of the two and sits to the LEFT: read in order it is "was twelve, is
+   ten twenty", which is the direction the saving actually runs. */
+.spot-figs{display:flex;align-items:baseline;gap:var(--s-lg)}
+.spot-was{font-size:15px;font-weight:600;color:var(--ink-4);
+  text-decoration:line-through;text-decoration-thickness:1px}
+/* The window. "90 days" as a phrase is a number nobody weighs; a bar still
+   almost full is. The trough drops to --hair so the fill reads as the filled
+   part — at --hair-lit the two were a quarter-opacity white against a pale
+   grey and the bar looked uniformly lit, which is no bar at all. */
+/* ══ THREE BEATS: THE WINDOW, THE CREDIT, THE KEEP ══════════════════════════
+   Sam, 14 Sep 2026: "the visualization here would be someone has 1 hour left to
+   use their min $10 spend to get $5 credit added to their account, instead of
+   missing out on the deal they can purchase now and save items to their spot
+   for later redemption."
+
+   That is a cause, an effect and a consequence, and the scene plays them in
+   that order on ONE object, so the ticket is the same ticket throughout:
+
+     0.66s  the ticket lands (dropIn) reading "2 min left" in its state slot —
+            the week's credit window, nearly out, on an order not yet placed.
+     0.90s  the credit lands: "$5 credit banked · 300 points" arrives under the
+            paid line. The order cleared the $10 floor; the week was not lost.
+     1.50s  the state slot swaps in place: "2 min left" → "Saved for later".
+            The pressure resolves into the state. Same crossfade as the order
+            slide's total.
+     1.70s  the window row arrives and the meter draws from the left to 1:58 —
+            then keeps draining, a second at a time, under the finished order.
+
+   Everything is transform and opacity; the entrance is 2.4s of a 6s dwell and
+   runs once per mount. Every keyframe set ends at its resting state, so under
+   `reduce` the slide lands directly on the finished ticket — saved, credit
+   banked, window drawn — and the line above it carries the two minutes.
+
+   THIS IS A MEMBER'S MOMENT, NOT THE BUYER'S. §10 bans "a real limit dressed
+   as urgency" on the sale; this window is the mechanic being demonstrated on a
+   demonstration order (Sam, 14 Sep 2026: "the $5 credit ending in 2 minutes,
+   and that you can still add the deal and just save items"), drawn in body
+   type with no colour and no pulse. The clock counts because Sam asked for it
+   to; it counts down under an order that is already safe, which is the point.
+   The window it depicts — the weekly $5 credit — is real (money-and-terms.json:
+   "on a $10+ order, once a week"); its fixed close is not yet recorded in
+   TRUTH §5, which the 14 Sep review flagged for Sam. */
+.spot-state{position:relative;display:inline-flex;align-items:center;
+  justify-content:flex-end;min-width:64px;text-align:right}
+.spot-win{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  color:var(--ink-1);font-weight:600;
+  animation:swapOut 300ms 1500ms var(--ease) both}
+.spot-win svg{width:14px;height:14px;flex:0 0 auto;display:block;color:var(--ink-2)}
+.spot-saved{position:absolute;right:0;top:0;opacity:0;white-space:nowrap;
+  animation:swapIn 300ms 1500ms var(--ease) both}
+/* Not dimmer than the paid line's meta, and the figure in full ink: the credit
+   is the whole reason she ordered before the hour ran out. */
+.spot-earned{margin:var(--s-md) 0 0;font-size:13px;font-weight:500;color:var(--ink-3);
+  animation:rowIn 340ms 900ms var(--ease) both}
+.spot-earned b{font-weight:700;color:var(--ink-1)}
+.spot-window{margin-top:var(--s-lg);padding-top:var(--s-lg);
+  border-top:1px solid var(--hair-lit);
+  animation:rowIn 340ms 1700ms var(--ease) both}
+/* The trough draws from the left once (`drawX` ends at scaleX(1)); the fill
+   inside it is scaled to the seconds it has and drains from there. TWO
+   ELEMENTS, ONE TRANSFORM EACH: the entrance lives on the trough and the drain
+   on the fill, because an animation with `fill:both` on the same node would
+   outrank the transitioned transform for good. Transform, not width — a
+   width transition relayouts every second for no reason a scale does not
+   cover. Ink, never an alarm colour: §10. */
+.spot-meter{display:block;height:4px;border-radius:var(--r-pill);
+  background:var(--hair);overflow:hidden;transform-origin:left;
+  animation:drawX 600ms 1800ms var(--ease) both}
+.spot-meter i{display:block;height:100%;width:100%;border-radius:inherit;
+  background:var(--ink-3);transform-origin:left;
+  transform:scaleX(var(--p,1));transition:transform 1s linear}
+.spot-ends{display:block;margin-top:var(--s-md);font-size:13px;font-weight:500;
+  color:var(--ink-3)}
+.spot-ends b{font-weight:700;color:var(--ink-1)}
+
+/* -- 4 · offers ------------------------------------------------------------ */
+/* min-height, because an offer worth showing has to have the presence of the
+   pass and the ticket beside it. At its natural 112px it was 21% of the stage
+   and the airiest slide in the deck — the same thumbnail problem one layer
+   down from the frame that used to cause it.
+
+   BUT `justify-content:space-between` PUT THE VOID INSIDE THE CARD. Giving the
+   card height and then pinning its two rows to opposite ends just moved the
+   emptiness one layer in — the card was hollow through its middle, which is a
+   worse read than a short card. The gap belongs under the content, so the rows
+   stack from the top and the height is slack the card carries rather than a
+   hole it frames. */
+.offer{display:flex;flex-direction:column;gap:var(--s-lg);
+  min-height:172px;background:var(--inner);border:1px solid var(--hair-lit);
+  border-radius:var(--r-card);padding:var(--s-xl);box-shadow:var(--rest);
+  animation:riseIn 380ms var(--ease) both}
+.offer-who{display:flex;align-items:center;gap:var(--s-lg);margin:0 0 var(--s-lg)}
+.offer-who .collar{width:34px;height:34px;border-radius:11px}
+.offer-who .collar img{border-radius:8px}
+.offer-who .collar::after{border-radius:8px}
+.offer-who b{font-size:15px;font-weight:700;color:var(--ink-1)}
+.offer-state{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3)}
+.offer-amt{margin:0;font-size:32px;font-weight:700;letter-spacing:-.03em;
+  color:var(--ink-1)}
+/* A real offer has a condition; a bare percentage was the weaker illustration. */
+.offer-cond{margin:calc(-1 * var(--s-md)) 0 0;font-size:15px;font-weight:500;color:var(--ink-3)}
+/* NOT A RUBBER STAMP ANY MORE. "Used" was a rotated stamp — the visual
+   language of a thing already spent — on the one slide whose job is to make a
+   reader want it. This is a confirmation: upright, a check, and the sentence
+   the app would actually show. It is also what the product does; TapIn applies
+   policies to a cart rather than marking a coupon redeemed. */
+/* IN FLOW, NOT ABSOLUTE. As a corner stamp it landed on top of the condition
+   line the moment the offer gained one — the old "USED" had nothing under it
+   to hit. In flow the card reads as a sequence instead: the offer, what it
+   needs, then what happened. */
+.stamp{align-self:flex-start;margin-top:auto;
+  display:flex;align-items:center;gap:var(--s-sm);
+  padding:7px 12px 7px 9px;border-radius:var(--r-pill);
+  background:var(--card);border:1px solid var(--hair-lit);color:var(--ink-1);
+  font-size:13px;font-weight:700;letter-spacing:-.005em;
+  /* ══ IT IS WRITTEN, NOT POPPED ════════════════════════════════════════════
+     `stampIn` was opacity-plus-scale — the generic badge arrival, and it said
+     "a label appeared" on the one beat whose whole job is to say "the discount
+     went ONTO your order". A cart line does not appear; it is added to a list.
+
+     So the pill reveals left to right under a clip, the way a row completes,
+     and the tick DRAWS rather than fading in behind it. The reveal is the
+     event; the tick is the confirmation, and it lands after because that is the
+     order the two things happen in.
+
+     `inset(... round)` interpolates cleanly between two insets sharing a
+     radius, so the border is revealed with the fill rather than being drawn
+     around an empty box first. Ends at inset(0) — resting state, per this
+     file's motion law, so the reduced-motion park leaves it fully written. */
+  animation:stampWrite 420ms 1000ms var(--ease) both}
+@keyframes stampWrite{
+  from{opacity:0;transform:translateY(5px);
+    clip-path:inset(0 100% 0 0 round var(--r-pill))}
+  to{opacity:1;transform:none;clip-path:inset(0 0 0 0 round var(--r-pill))}
+}
+.stamp svg{width:15px;height:15px;flex:0 0 auto}
+/* 22 is the measured length of this checkmark's two segments at this viewBox —
+   6.4 up-stroke plus 15.1 down-stroke. Ends at 0: drawn is the resting state. */
+.stamp svg path{stroke-dasharray:22;stroke-dashoffset:0;
+  animation:tickDraw 300ms 1300ms var(--ease) both}
+@keyframes tickDraw{from{stroke-dashoffset:22}to{stroke-dashoffset:0}}
+
+/* -- 5 · entry earns -------------------------------------------------------
+   Not a queue being skipped — three benefits docking onto an entry pass.
+   The perforation is SOLID: dashed is being retired from this sheet with the
+   My Spot tray, not relocated to another object on it. */
+.pass{position:relative;display:flex;flex-direction:column;justify-content:flex-end;
+  min-height:220px;padding:var(--s-xl);padding-left:calc(52px + var(--s-xl));
+  background:var(--inner);border:1px solid var(--hair-lit);
+  border-radius:var(--r-card);box-shadow:var(--raised);overflow:hidden;
+  animation:riseIn 380ms var(--ease) both}
+.pass::before{content:"";position:absolute;left:52px;top:0;bottom:0;width:1px;
+  background:var(--hair-lit);z-index:2}
+
+/* The merchant's own photograph, on the same veil curve the pitch's venue
+   cards use — so a room a reader recognises sits behind the pass instead of a
+   drawn rectangle. The stub lane keeps its flat fill, which is what makes the
+   perforation still read as a tear line rather than a crop. */
+.pass-shot{position:absolute;left:52px;right:0;top:0;bottom:0;
+  width:calc(100% - 52px);height:100%;object-fit:cover;display:block;
+  filter:saturate(.92) brightness(.72)}
+.pass-veil{position:absolute;left:52px;right:0;top:0;bottom:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(18,10,14,.20) 0%,rgba(18,10,14,.30) 34%,
+    rgba(18,10,14,.86) 100%)}
+.pass-mark{position:absolute;right:var(--s-lg);top:var(--s-lg);z-index:2;
+  width:34px;height:34px;border-radius:11px}
+.pass-mark img{border-radius:8px}
+.pass-mark::after{border-radius:8px}
+/* Centred in the stub lane, both ways. Anchoring it to the floor and rotating
+   about the bottom-left corner put it wherever the pass's height happened to
+   land it. */
+.pass-kind{position:absolute;left:0;top:0;width:52px;height:100%;margin:0;z-index:2;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  font-size:13px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
+/* One group, one arrival. A phrase is not a micro-label: the old 11px
+   text-transform:none .dock was never legal. */
+/* ══ THEY ACTUALLY DOCK NOW ═══════════════════════════════════════════════
+   This comment has said "three benefits docking onto an entry pass" since the
+   scene was built, and the motion was `popIn` on the <ul> — all three fading up
+   together, in place, as one block. Nothing docked and nothing arrived from
+   anywhere; the sentence described an intention the CSS never carried out.
+
+   Each chip now travels in from the pass's own spine — the left edge, where the
+   COVER CHARGE rule is — and seats. They are three separate benefits attaching
+   to one object, so they arrive one after another rather than as a group, and
+   the stagger is capped at 200ms end to end: long enough to read as three
+   events, short enough that the last one is not still moving when a reader has
+   finished the headline. */
+.docks{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:var(--s-md);
+  margin:0;padding:0;list-style:none}
+.dock{animation:dockIn 420ms var(--ease) both}
+.dock:nth-child(1){animation-delay:540ms}
+.dock:nth-child(2){animation-delay:640ms}
+.dock:nth-child(3){animation-delay:740ms}
+/* The 2px past centre is a SEAT, not a bounce — a magnet closing the last of a
+   gap. No elastic curve, no overshoot the eye reads as springiness, and 100% is
+   the resting transform so the reduced-motion park lands correctly. */
+@keyframes dockIn{
+  from{opacity:0;transform:translateX(-22px)}
+  72%{opacity:1;transform:translateX(2px)}
+  to{opacity:1;transform:none}
+}
+/* On photography now, so the chips need their own ground — §9's rule that type
+   never sits on a bare image, and the same glass the pitch allows over photos. */
+.dock{font-size:15px;font-weight:700;letter-spacing:-.01em;padding:8px 14px;
+  border-radius:var(--r-pill);border:1px solid var(--hair-lit);color:var(--ink-1);
+  background:var(--glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+
+/* -- 6 · points: earn, gather, spend ---------------------------------------
+   The loop in three movements down one column. The old scene showed only the
+   middle one — five marks converging on a plate — which is the least
+   interesting third: it never said what the points were earned on, and never
+   said what they buy.
+
+   THE PLATE IS OUTLINED, NOT A MAROON PILL. A brand fill on the label of an
+   unbuilt feature fits none of tokens.css's four roles, so that was decoration
+   in the brand colour — the §10 livery risk. Outlining it also draws the
+   distinction the Coming tag is making: the earn rows are things that happen,
+   the container does not exist yet. */
+.pts{display:flex;flex-direction:column;gap:var(--s-lg)}
+/* §8: the status in the slide's own type, on the one line it governs. That is a
+   floor on the status, not a licence to match the quietest thing near it. */
+.pt-soon{flex:0 0 auto;padding:3px 9px;border-radius:var(--r-pill);
+  border:1px solid var(--hair-lit);color:var(--ink-1);
+  font-size:13px;font-weight:700;letter-spacing:0;line-height:1.2}
+
+/* Hairlines, not cards. Three tinted cards were the heaviest objects on the
+   slide and made the balance they feed read as a footnote under them. */
+.pt-earn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.pt-earn li{display:flex;align-items:center;gap:var(--s-lg);padding:var(--s-md) 0;
+  border-top:1px solid var(--hair-lit);
+  animation:rowIn 380ms var(--ease) both;
+  animation-delay:calc(160ms + var(--n) * 140ms)}
+.pt-earn li:first-child{border-top:0;padding-top:0}
+.pt-mark{width:32px;height:32px;border-radius:10px}
+.pt-mark img{border-radius:8px}
+.pt-mark::after{border-radius:8px}
+.pt-what{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.pt-what b{font-size:14px;font-weight:600;color:var(--ink-1);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-what > span{font-size:12px;font-weight:500;color:var(--ink-4);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The only gains on the slide, so the only figures in the brightest ink. Never
+   a colour: §10 rules out green-for-good theatre and §9 allows one hue anyway. */
+.pt-add{flex:0 0 auto;font-size:15px;font-weight:700;color:var(--ink-1)}
+
+/* The balance and what it is for, as ONE object. They were three captioned
+   sections and two lists — ten text blocks down a slide carrying one idea. */
+.one-plate{display:flex;flex-direction:column;gap:var(--s-xs);margin:0;
+  padding:var(--s-lg) var(--s-xl);background:none;
+  border:1px solid var(--hair-lit);border-radius:var(--r-panel);
+  animation:popIn 360ms 700ms var(--ease) both}
+.one-head{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s-lg);margin:0;font-size:15px;font-weight:700;color:var(--ink-1)}
+.one-head b{font-size:17px;font-weight:700}
+.one-for{margin:0;font-size:13px;font-weight:500;color:var(--ink-3)}
+
+/* ══ THE UNBUILT HALF, AS THE SECOND PLATE ═════════════════════════════════
+   Sam, 13 Sep 2026, on the 4:1: change the positioning and the look.
+
+   It was a loose line of 13px grey under a bordered plate, with the "Coming"
+   chip on a line of its own. Two faults, both positional: a badge sitting next
+   to the thing it governs rather than on it, and a statement about the balance
+   rendered as a footnote to the balance instead of as its sibling.
+
+   It is a plate now, at the first plate's measure and with the first plate's
+   border — the slide reads as two destinations for one set of points. It is
+   HELD BACK BY FILL, NOT BY INK: dashed, unfilled, and every string in it at
+   the same size it would be if it shipped tomorrow. §8 wants the status legible,
+   which is a floor on contrast, not a licence to grey it out.
+
+   The dash is the one place this build uses one, and it is used for the thing it
+   actually means — a container that is not closed yet. The My Spot tray's dashed
+   perforation was retired because it was decoration on a real object; this is
+   not that. */
+.pt-move{display:flex;flex-direction:column;gap:var(--s-sm);margin:0;
+  padding:var(--s-lg) var(--s-xl);
+  border:1px dashed var(--hair-lit);border-radius:var(--r-panel);
+  animation:popIn 360ms 880ms var(--ease) both}
+.pt-move-head{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-lg);margin:0;font-size:15px;font-weight:700;color:var(--ink-1)}
+
+/* ══ 4 → 1, SHOWN ═════════════════════════════════════════════════════════
+   The ratio was a clause inside a sentence ("four at a place make one TapIn
+   point") and four readers could not say which direction they were losing. As
+   two labelled figures with an arrow between them there is no direction left to
+   misread — which matters more here than on any other line in the deck, because
+   CONVERSION-RESEARCH.md's objection to publishing a non-1:1 rate at all is
+   precisely that it induces optimism. If it is going to be published, it had
+   better be unambiguous. */
+.pt-rate{display:flex;align-items:center;gap:var(--s-lg);margin:0}
+.pt-rate-cell{display:flex;align-items:baseline;gap:var(--s-sm);min-width:0}
+.pt-rate-cell b{font-size:22px;font-weight:700;letter-spacing:-.02em;
+  line-height:1;color:var(--ink-1)}
+.pt-rate-cell span{font-size:13px;font-weight:500;color:var(--ink-3);
+  white-space:nowrap}
+/* The verb. It draws itself as the plate settles — the one stroke on this slide
+   that says a thing MOVES, on the only block about movement. */
+.pt-arrow{flex:0 0 auto;width:22px;height:22px;color:var(--ink-4)}
+.pt-arrow path{stroke-dasharray:26;stroke-dashoffset:0;
+  animation:arrowDraw 420ms 1180ms var(--ease) both}
+@keyframes arrowDraw{from{stroke-dashoffset:26}to{stroke-dashoffset:0}}
+.pt-move-for{margin:0;font-size:13px;font-weight:500;color:var(--ink-3)}
+
+/* -- 7 · how you actually get it -------------------------------------------
+   The sheet declares the LIGHT ramp locally, the mirror of what card.css does
+   when the membership card keeps its dark material inside the light app. It is
+   not a theme fork: this object really is light, because V3.1's self-redeem
+   screen forces a light palette to be legible held out to staff in a dark bar.
+   Rendering it in the deck's dark would be drawing something the product does
+   not do. */
+/* FOUR RAILS, NOT THREE, AND THE SLIDE DID NOT GROW TO TAKE THE FOURTH.
+   "Scanned at the counter" was confirmed real on 13 Sep 2026 and added; a row
+   is ~51px and the slide had 25px of slack, so at 375x812 the sheet overflowed
+   the stage by 26px — out the TOP, where `justify-content:flex-end` puts it,
+   which is the one direction `scrollHeight` cannot see and a reader cannot
+   scroll to. The deck's rule is a fixed frame, so the fourth row is paid for
+   out of this scene's own padding rather than out of the container's height:
+   gap, head, item and row padding each give back one step. Type sizes are not
+   touched — 15px/13px is the floor and quiet is weight, not smallness. */
+.rd{display:flex;flex-direction:column;gap:var(--s-lg)}
+.rd-sheet{
+  --ink-1:#1B1014; --ink-2:#513C43; --ink-3:#624D55; --ink-4:#756069;
+  --hair:rgba(27,16,20,.10); --hair-lit:rgba(27,16,20,.16);
+  --collar-ring:rgba(27,16,20,.16);
+  background:#FFFFFF;color:var(--ink-1);
+  border-radius:var(--r-card);padding:var(--s-lg) var(--s-xl) var(--s-xl);
+  /* A light card on a dark field needs a real drop, not this build's usual
+     near-invisible one — those values were authored for light-on-light. */
+  box-shadow:0 18px 44px rgba(0,0,0,.46);
+  animation:riseIn 380ms var(--ease) both}
+.rd-head{display:flex;align-items:center;gap:var(--s-lg);margin:0 0 var(--s-md);
+  padding-bottom:var(--s-md);border-bottom:1px solid var(--hair)}
+.rd-mark{width:30px;height:30px;border-radius:9px}
+.rd-mark img{border-radius:7px}
+.rd-mark::after{border-radius:7px}
+.rd-head b{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+/* The item's name rides the head instead of owning a row of its own — the code
+   below is the subject now, and the sheet needs the height for it.
+   ITS OWN CLASS, NOT `.rd-head span`: the collar Mark renders IS a span, and a
+   descendant selector here would have shoved the merchant's mark across the
+   sheet. That exact trap cost an hour on .tk-where earlier this session. */
+.rd-one{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3)}
+
+/* The code. Sized in px rather than by aspect-ratio on a flex child, because
+   this sheet is inside a fixed-height stage and a percentage-height square is
+   the reliable way to make a slide grow without anyone noticing. */
+.rd-qr{display:block;width:96px;height:96px;margin:var(--s-lg) auto 0;
+  color:var(--ink-1);fill:currentColor;
+  /* ITS OWN KEYFRAMES. `popIn` ends on translate(-50%,-50%) — it was written
+     for an element pinned at its centre — and with `both` that end state
+     stayed on this in-flow square, so the code sat 48px up and left of where
+     the margins put it, over the head (Sam, 15 Sep 2026: "off-center"). */
+  animation:rdPop 360ms 420ms var(--ease) both}
+@keyframes rdPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+
+/* Four routes, two across. A grid rather than a stack: it is 60px shorter than
+   the list it replaces, which is what bought the fourth route its room on a
+   fixed-height slide, and it stops the four reading as a ranked order. */
+.rd-ways{list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--s-md);
+  animation:rowIn 340ms 640ms var(--ease) both}
+.rd-ways li{display:flex;flex-direction:column;gap:var(--s-md);
+  padding:var(--s-md) var(--s-lg);border:1px solid var(--hair);
+  border-radius:var(--r-control);background:var(--inner)}
+.rd-glyph{display:block;width:22px;height:22px;color:var(--ink-3)}
+.rd-glyph svg{display:block;width:100%;height:100%}
+/* TWO LINES OF ROOM WHETHER OR NOT TWO ARE USED. At this measure "Show a staff
+   member" and "Scanned at the counter" wrap and the other two do not, so the
+   grid resolved its rows to 90px and 73px — four tiles of two different heights
+   in a 2x2, which reads as a mistake because it is one. The box is reserved,
+   the rows agree, and no label had to be cut to a stub to make them. em, not px,
+   so it tracks the type rather than having to be re-derived beside it. */
+.rd-way-label{font-size:13px;font-weight:600;line-height:1.3;color:var(--ink-1);
+  min-height:2.6em}
+
+/* -- 8 · the close ---------------------------------------------------------
+   ══ IT ARRIVES NOW, AND THE FLIP IS STILL SAFE ═════════════════════════════
+   Sam, 13 Sep 2026: "can this slide animate in."
+
+   This block used to read "NO ENTRANCE ANIMATION ANYWHERE ON THIS SLIDE",
+   because `getBoundingClientRect` returns the TRANSFORMED box and the card's
+   rect is what the flight into /reserve takes off from — a card measured
+   mid-entrance hands the clone an origin the card never occupied.
+
+   That constraint has moved to where it belongs: `stashCardOrigin` now settles
+   every animation on the card and its ancestors before it measures — finishing
+   the finite ones, cancelling the perpetual ones — so the rect is the still
+   card whether the reader waited or tapped straight through. The guarantee is
+   enforced at the measurement rather than by forbidding motion on the deck's
+   final beat.
+
+   ══ IT ARRIVES, THEN NEVER QUITE SITS STILL ════════════════════════════════
+   Sam, 14 Sep 2026: "can you add a perpetual animation for this card in the
+   carousel."
+
+   THREE LAYERS, ONE TRANSFORM EACH — card.css's own rule for the mini card,
+   applied at full size. When two animations touch one property the last in the
+   list wins outright, and the pointer tilt on `.tcard` is a transform too, so
+   nothing here may animate the card element itself:
+
+     .sc-close       the arrival (once), then the float — one list, the float's
+                     delay ending exactly where the arrival's fill begins, so
+                     the hand-off is a still frame at the neutral pose
+     .card-stage     the drift: a slow lean in 3D on a period that does not
+                     divide the float's (9.7s against 6.4s), so the pair never
+                     settles into a visible loop
+     .tcard::after   the light pass — a soft band crossing the face, 2.6s of
+                     every 7.3s, resting off the card for the rest; the only
+                     motion INSIDE the object, and the pointer's own specular
+                     (.tcard-sheen) is untouched by it
+
+   MOVED OFF `.tcard`, WHICH FIXES A LIVE FAULT: the arrival was authored on the
+   card itself with `fill:both`, and a finished fill parks its 100% keyframe —
+   `transform:none` — on the element for good. An animation outranks an inline
+   style in the cascade, so the close slide's tilt has been dead since the
+   arrival was added on 13 Sep. On the wrapper, the card's transform is the
+   tilt's alone again.
+
+   Amplitudes are physical, not theatrical. 6px of rise on a 295px card is a
+   held object breathing, not a hover effect; ±2.4° of lean is what a card does
+   in a hand that is not perfectly still; the pass peaks at .075 white, under
+   the .15 of the pointer specular, so a lamp crossing the surface never reads
+   brighter than the light the reader is holding. Every keyframe set rests at
+   100% on its neutral pose. */
+.sc-close{
+  perspective:1100px;
+  animation:closeArrive 520ms 120ms var(--ease) both,
+            cardFloat 6.4s 640ms ease-in-out infinite;
+}
+.sc-close .card-stage{
+  position:relative;transform-style:preserve-3d;
+  animation:cardDrift 9.7s 640ms ease-in-out infinite;
+}
+.sc-close .tcard::after{
+  content:"";position:absolute;inset:-40% -60%;pointer-events:none;
+  background:linear-gradient(112deg,
+    rgba(255,255,255,0) 42%,
+    rgba(255,255,255,.028) 47%,
+    rgba(255,255,255,.075) 50%,
+    rgba(255,255,255,.028) 53%,
+    rgba(255,255,255,0) 58%);
+  transform:translateX(-100%);
+  animation:cardPass 7.3s 1.4s var(--ease) infinite;
+}
+/* STILL WHILE SHE TYPES. The float and the drift keep running on the close
+   (Sam asked for them), but a card moving under a caret is the tilt problem
+   in slow motion, so both pause for as long as the name field has focus and
+   resume where they left off on blur. */
+.sc-close:focus-within,
+.sc-close:focus-within .card-stage{animation-play-state:paused}
+@keyframes closeArrive{
+  from{opacity:0;transform:translateY(16px) scale(.965)}
+  to{opacity:1;transform:none}
+}
+@keyframes cardFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+@keyframes cardDrift{
+  0%,100%{transform:rotateY(-2.4deg) rotateX(.8deg)}
+  50%{transform:rotateY(2.4deg) rotateX(-.8deg)}
+}
+@keyframes cardPass{
+  0%{transform:translateX(-100%)}
+  36%,100%{transform:translateX(100%)}
+}
+/* base.css already collapses every animation to one .01ms iteration under
+   reduced motion, which parks these on their neutral 100% frames; this makes
+   the intent explicit and takes the pass off the face entirely. */
+@media (prefers-reduced-motion:reduce){
+  .sc-close,.sc-close .card-stage{animation:none}
+  .sc-close .tcard::after{display:none}
+}
+/* The close and the value slide used to top-pack while the other seven
+   bottom-packed. Both overrides are gone: every slide centres now (see
+   .how-stage), and the close keeps the same copy floor as the rest so its
+   group is the same height as everyone else's. */
+/* The six-glyph coverage row, at the deck's measure. `covers` and its grid come
+   from the shared component; this only gives it room inside the stage. */
+/* -- 2 · what it reaches --------------------------------------------------
+   Real dishes at real prices on the merchants' own photography, replacing the
+   pitch's six-glyph coverage row. The glyph row is right for a scannable panel
+   and wrong here: this deck's contract is "demonstrate the mechanism instead of
+   naming it", and six labelled icons is naming. */
+/* --s-md, not --s-lg: this scene went from two blocks to four when the spend
+   control moved onto it, so the gap is now spent three times instead of once
+   and 12px each was 36px of the slide's fixed budget. The tiles, the aside, the
+   caption and the pills are four beats of one object, not four sections. */
+.value-scene{display:flex;flex-direction:column;gap:var(--s-md)}
+/* 2x2 on a phone, one row on desktop. Four tiles three-across would have
+   wrapped 3+1; four across at 295px would be 70px thumbnails. */
+.vs-grid{list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-sm)}
+.vs-grid li{display:flex;flex-direction:column;gap:var(--s-xs);min-width:0;
+  animation:riseIn 380ms var(--ease) both}
+.vs-grid li:nth-child(2){animation-delay:80ms}
+.vs-grid li:nth-child(3){animation-delay:160ms}
+.vs-grid li:nth-child(4){animation-delay:240ms}
+/* Flat tile, floating photo — the house inversion, and what stops three
+   pictures reading as a contact sheet. */
+/* 4:3, not square. Going from three tiles across to a 2x2 (the cover pass made
+   four) doubled the grid's height and pushed this slide past the fixed frame —
+   the one thing the whole recomposition exists to prevent. A landscape crop
+   costs nothing here: these are dishes and a room, not portraits. */
+/* 8:5 now, not 4:3 — the spend control moved onto this slide (Sam asked to be
+   able to change the figure where it is shown) and a fixed frame has to pay for
+   a new block out of an existing one. Two rows of tiles shed 11px each at this
+   crop, which is more than the caption and the pills cost. It is also the right
+   place to take it from: a dish photographed on a table loses nothing to a
+   wider crop, and the four tiles were the most generous thing on the slide. */
+.vs-shot{position:relative;display:block;aspect-ratio:5/3;border-radius:var(--r-card);
+  overflow:hidden;background:var(--inner);box-shadow:var(--float)}
+.vs-shot img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.95) brightness(.92)}
+/* The Burg's hero is the one bright outlier in the set — measured mean relative
+   luminance .891 against .036-.220 for the rest — so it is seated the same way
+   the pitch's mosaic seats it, rather than dimming all four to hide one. */
+/* THE PASS TILE NO LONGER CARRIES A DIM OF ITS OWN. brightness(.46) was here to
+   seat ONE photograph — The Burg's, a brand card on white at 0.891 luminance,
+   the measured outlier among six heroes that otherwise sit between 0.036 and
+   0.22. It was written as `.is-pass` because the pass happened to be that
+   venue's; that coupled a treatment to a ROLE when the fact it was correcting
+   was about an IMAGE. When cover moved to The Milk Parlor — a dark crowd
+   photograph — the same rule crushed it to near black.
+   The dim now keys off the measured brightness the rest of the build already
+   uses, so any venue can hold any role and still be seated correctly. */
+.vs-shot img[data-bright="true"]{filter:saturate(.9) brightness(.46)}
+.vs-mark{position:absolute;left:6px;bottom:6px;width:26px;height:26px;border-radius:8px}
+.vs-mark img{border-radius:6px;filter:none}
+.vs-mark::after{border-radius:6px}
+.vs-grid b{font-size:13px;font-weight:600;line-height:1.25;color:var(--ink-1);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs-price{font-size:13px;font-weight:500;color:var(--ink-3);margin-top:-2px}
+/* The four categories the frozen extraction cannot illustrate. Named, never
+   drawn: there is no event, ticket, cover or merch record anywhere, and a night
+   invented at a real venue is a claim about that venue. */
+.vs-also{margin:0;font-size:13px;font-weight:500;color:var(--ink-3)}
+/* What the membership takes off THIS item — the slide's claim, itemised. It is
+   the strongest line on the tile because the headline's figure is made of
+   lines like it; the menu price above it is the basis and stays quiet. */
+.vs-save{font-size:13px;font-weight:700;color:var(--ink-1);margin-top:-2px}
+
+/* The basis and the way back to the spend slide live in the headline now —
+   see `.how-spend` beside `.scene-head.is-figure`. */
+/* Centred. Every other slide's composition runs to the sheet's full measure, so
+   the card is the one thing narrower than its column — and left-aligned it read
+   as an object that had failed to fill the row rather than one placed on it. */
+.sc-close{width:100%;max-width:295px;margin-inline:auto}
+/* The caption under the card. Sam, 14 Sep 2026: the card takes a name now,
+   optionally, and a card cannot say that about itself. Centred with the card
+   on a phone; arrives a beat after it and never moves with it. */
+.sc-hint{margin:var(--s-lg) 0 0;text-align:center;font-size:13px;font-weight:500;
+  color:var(--ink-3);animation:rowIn 340ms 760ms var(--ease) both}
+/* ══ THE FIGURE SLIDES NOW READ LIKE THE OTHER SEVEN ══════════════════════
+   Sam, 13 Sep 2026: "there's some inconsistent text weighting and sizing for
+   these carousel animations, like the secondary text here is too large."
+
+   MEASURED, and it was worse than it looked. Seven slides ran a clean 26px/700
+   headline over a 15px/500 line in --ink-2. The value and close slides ran
+   22px/700 over 22px/400 in --ink-1 — so on the two slides carrying the money
+   the HEADLINE WAS SMALLER than everywhere else while the qualification was 7px
+   larger and pure white. Same size, same colour, differing only in weight:
+   nothing on those two slides read as primary.
+
+   The cause was one token doing two jobs. `--fig` was documented as "the figure
+   AND the disclaimer read this. One knob." — a faithful reading of §7's old
+   "in the same type as the figure", which meant a floor and was implemented as
+   an equality. §7 is reworded; the headline rejoins the deck at 26px and --fig
+   now governs only the qualification. */
+.scene-head.is-figure{font-size:26px;letter-spacing:-.03em;line-height:1.12;
+  font-variant-numeric:tabular-nums}
+/* §7: not smaller, not greyer, never behind a disclosure — and the condition
+   does NOT get quieter treatment than the disclaimer beside it. They are one
+   block, one size, one ink. */
+/* Still §7-compliant, and visibly so: 17px is TWO STEPS ABOVE this deck's own
+   15px body, at 500 rather than 400 and in --ink-2 (7.36:1). It is the largest
+   secondary line in the deck — which is the point — and it is no longer
+   competing with the figure it qualifies. */
+/* ══ THE SPEND FIGURE IS THE WAY BACK TO THE QUESTION ══════════════════════
+   Sam, 14 Sep 2026: "'based on $X spend per month, you'd save X amount per
+   month' in the same sentence and just make the $amount spend per month
+   clickable."
+
+   An inline button set in the headline's own type — size, weight, ink, line —
+   so the sentence still reads as one sentence. The one word in it that is
+   hers to change wears the deck's link underline (the same device .how-skip
+   uses), a step quieter than the ink so it marks the word without shouting,
+   and rises to the ink under a pointer. No fill, no border: a pill inside a
+   26px headline would be a badge, and this is a word. */
+.how-spend{display:inline-block;margin:0;padding:0;border:0;background:none;
+  font:inherit;line-height:inherit;color:inherit;vertical-align:baseline;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:4px;
+  text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.12em;
+  text-decoration-color:var(--ink-3);
+  transition:text-decoration-color 150ms var(--ease),opacity 150ms var(--ease)}
+@media (hover:hover){.how-spend:hover{text-decoration-color:currentColor}}
+.how-spend:active{opacity:.8}
+.how-spend:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
+
+.close-say{margin:var(--s-lg) 0 0;font-size:var(--fig);font-weight:500;
+  line-height:1.4;color:var(--ink-2);text-wrap:pretty}
+
+/* -- keyframes · EVERY SET ENDS AT ITS RESTING STATE ----------------------- */
+@keyframes riseIn {from{opacity:0;transform:translateY(9px)}  to{opacity:1;transform:none}}
+@keyframes rowIn  {from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none}}
+@keyframes popIn  {from{opacity:0;transform:translateY(8px) scale(.94)}
+                   to{opacity:1;transform:none}}
+@keyframes dropIn {from{opacity:0;transform:translateY(-52px) scale(.96)}
+                   to{opacity:1;transform:none}}
+@keyframes swapOut{from{opacity:1;transform:none} to{opacity:0;transform:translateY(-7px)}}
+@keyframes swapIn {from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:none}}
+@keyframes drawX  {from{transform:scaleX(0)} to{transform:scaleX(1)}}
+
+/* -- <=379px ---------------------------------------------------------------
+   .column already redefines --gutter to --s-xl below 380, which correctly
+   takes the bleeding elements with it. Content measure becomes 256. */
+@media (max-width:379px){
+  .how{
+    --copy-min:140px /* at this measure the 26px head runs to 3 lines on slide 1 */
+  }
+}
+
+/* -- 768-1023 --------------------------------------------------------------
+   NOTHING, deliberately. layout.css:222 holds `.column{max-width:480px}` until
+   1024, so a 520 or 600px rule in this band would be INERT — the column is
+   still 480 and the sheet cannot exceed it. Widening the column touches
+   layout.css, which is shared with the pitch and the checkout: separate pass.
+   What the tablet gains here is what the phone gains — a composition that
+   fills its measure instead of a 290px illustration floating in it. */
+
+/* -- >=1024 ----------------------------------------------------------------
+   SPECIFICITY, NOT SOURCE ORDER, and the old comment here blamed the wrong
+   one. layout.css caps every column child with
+   `.column > *:not(.sticky-cta):not(.announce)` — (0,3,0), because :not()
+   takes its argument's weight. The shipped `.column > .how` was (0,2,0) and
+   LOST, so the deck has been rendering at 720 this whole time and the 30-line
+   comment above it blamed source order, which is why nobody re-checked it.
+   `.how.how` matches the (0,3,0). Verify with getComputedStyle, not by reading
+   this rule. */
+@media (min-width:1024px){
+  .column > .how.how{max-width:600px}
+  .how{
+    --copy-min:84px;   /* 1-line 26px head (29) + 8 + 2-line 15px line (43.5) */
+    --fig:16px;
+    height:min(760px,calc(100dvh - 64px));      /* fixed here too — same reason */
+    margin-top:var(--s-2xl);
+    padding:var(--s-2xl);
+  }
+  /* ONE MEASURE, NOT JUST ONE AXIS. The art was capped at 420 against a 552
+     copy measure, so every slide ended with the composition stopping 130px
+     short of its own headline — a ragged right edge on all nine. The rule this
+     file already states is "one left axis for art, headline, line, seat, charge
+     and button, at every width"; it was silent about the right, and the right
+     is where it showed. The art now runs the sheet's measure like everything
+     else.
+
+     `.scene-line` keeps its 34ch cap and is therefore shorter than both. That
+     is ordinary typography — a supporting line set to a reading measure — not
+     the same defect: it is a text block choosing its width, not a composition
+     failing to fill one. */
+  .how-next{width:auto;min-width:220px;align-self:flex-start}
+  .vs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .sc-close{max-width:320px}
+}
+
+/* ============================================================================
+   THE DECK ON A DESKTOP — THE ART HAS A STAGE, THE COPY AND CONTROLS ONE COLUMN.
+
+   Sam, 14 Sep 2026, on the split that preceded this: "this is close, can we
+   /impeccable layout for the animation on desktop." Read against the 1440
+   screenshot rather than the numbers: the art column came FIRST, so a reader
+   met four 565px maroon-and-plum bars before the question they answer; the
+   copy floated mid-height in its own column, 96px from the control it belongs
+   to, and the buttons sat in a third place again at the sheet's foot. Three
+   groups that are one thought — question, answer, act — in three corners of a
+   1,180px card, with nothing filling the rest.
+
+   ══ THE SPATIAL THESIS ══════════════════════════════════════════════════════
+   The composition (left, on its stage) → the headline (top right) → the
+   control (bottom right). Sam, 14 Sep 2026, on the first cut of this grid:
+   "on desktop can we have the carousel animations on the left instead?" — so
+   the demonstration leads, the way the phone deck reads top to bottom (art,
+   then copy), and the copy and controls are ONE group in the right column,
+   anchored top and bottom to the same edges as the stage beside them.
+
+   THE STAGE IS A PLATE. `--subtle` — one step DOWN from the sheet, the same
+   step the pitch's evidence band takes — running the full height of the
+   stage-plus-foot rows. It is the reason the compositions stop reading as
+   objects stranded in a void: every scene is centred in a recessed room whose
+   edges the eye can see, and the tickets, bands, offer card and membership
+   card all sit at --inner/--card above it, one step lighter, as things on a
+   surface. It is a tonal step, not a box: no border, no shadow (base.css —
+   hierarchy is carried by steps and hairlines, never elevation).
+
+   `.how-stage{display:contents}` is what lets the sheet's grid place the copy
+   and the art directly. The stage keeps its element — the swipe handlers, the
+   `key` remount and the pointer capture all still work on an element with no
+   box, because events are a DOM matter — it just stops generating a box that
+   the two-column layout had to fight through. The phone never sees this rule.
+
+   The foot moves INTO the left column (rows 2 and 3 are the copy and the
+   controls; the plate spans both), so "Opening Spring 2027 · Skip to the
+   price" and the Back/Next pair sit under the question they close, at the
+   plate's foot — the arrangement Ploy and Pangram both use, mirrored. Columns
+   are 1.14/.86: the art is the subject; the copy is a headline, a line and two
+   buttons.
+   ============================================================================ */
+@media (min-width:1024px){
+  /* ══ THE SHEET IS CENTRED IN THE WINDOW ══════════════════════════════════
+     Sam, 14 Sep 2026: "this should be centered on desktop too." The deck is a
+     fixed-height object that never scrolls; an object that fits the window
+     sits in it. `min-height`, not `height`, so a short window still gets the
+     sheet's own height and the page scrolls rather than clipping the deck. */
+  .column:has(.how){min-height:100dvh;justify-content:center;padding-bottom:0}
+  .column > .how.how{max-width:min(1180px,calc(100% - 96px))}
+
+  .how{
+    display:grid;
+    grid-template-columns:minmax(0,1.14fr) minmax(0,.86fr);
+    grid-template-rows:auto minmax(0,1fr) auto;
+    column-gap:48px;row-gap:var(--s-2xl);
+    /* No floor: the copy is top-anchored in its own track now. */
+    --copy-min:0px;
+    height:min(720px,calc(100dvh - 64px));
+    margin-top:0;
+    padding:var(--s-2xl);
+  }
+  .how-top{grid-column:1 / -1;grid-row:1}
+  .how-stage{display:contents}
+
+  /* ON THE PLATE'S TOP LINE. A 32px/1.08 line box carries ~11px of slack above
+     the cap, so any positive padding pushed the headline BELOW the plate's edge
+     (measured 15px low with 4px). The negative margin pulls the box up into the
+     row-gap, where nothing sits, and lands the cap within a pixel of the edge —
+     the one alignment this layout stakes itself on, since the copy and the
+     controls share nothing else with the plate but its two edges. */
+  .scene-copy{grid-column:2;grid-row:2;align-self:start;min-height:0;
+    padding-top:0;margin-top:calc(-1 * var(--s-lg))}
+  /* THE CLOSE SITS WHERE THE OTHER EIGHT SIT. It used to be the one slide
+     with `align-self:end` — "figure, terms and the button as ONE stack at the
+     foot" — and measured at 1440 that put its headline at y=519 against
+     y=163 on every other slide: a 356px jump on the final screen, which is
+     the one a reader ends on. Sam, 14 Sep 2026: "the placement of some of
+     the text on these carousels seems to vary significantly." The money
+     terms are not lost by this: the seat line, the charge line and the
+     Reserve button already form the foot, so the figure's neighbours at the
+     bottom are unchanged — only the headline stops moving. */
+  .scene-art{
+    grid-column:1;grid-row:2 / 4;align-self:stretch;
+    display:flex;align-items:center;justify-content:center;
+    min-height:0;max-width:none;
+    padding:var(--s-2xl) calc(var(--s-2xl) * 1.5);
+    background:var(--subtle);border-radius:var(--r-card);
+    overflow:hidden;
+  }
+  /* Every composition takes the plate's measure, capped where a wider version
+     would stop being the object it depicts. The card keeps its own cap below. */
+  .scene-art > *{width:100%;max-width:520px;margin:0}
+  .sc-close{max-width:430px;margin-inline:0}
+  .sc-hint{text-align:left}
+
+  .how-foot{grid-column:2;grid-row:3;padding-top:0;background:none;gap:var(--s-xl)}
+  /* One left axis for the whole foot: the timing line and the way out sit
+     24px apart over Back/Next, instead of the phone's space-between flinging
+     the link to a right edge nothing else in the column touches. */
+  .how-when{justify-content:flex-start;gap:var(--s-2xl)}
+  /* The controls sit under the question, sized to their words, on the copy's
+     own left axis. MATCHED SPECIFICITY: the phone rule is
+     `.how-nav > .how-next{flex:1;min-width:0}` at (0,2,0); `width:auto` as
+     well, because base.css's `.action` is `width:100%` and a flex item with an
+     auto basis takes its width from that property. */
+  .how-nav{justify-content:flex-start}
+  .how-nav > .action,
+  .how-nav > .how-next{flex:0 0 auto;width:auto;min-width:200px}
+
+  /* The copy steps up with the sheet: 32 is the ramp's display size, 17 the
+     line — both on tokens.css's enumerated ramp, and the figure slides take
+     the same head so the two money screens do not read smaller than the rest. */
+  .scene-head{font-size:32px;letter-spacing:-.03em;line-height:1.08;text-wrap:balance}
+  .scene-head.is-figure{font-size:32px}
+  .scene-line{margin-top:var(--s-lg);font-size:17px;line-height:1.45;max-width:36ch}
+  .close-say{margin-top:var(--s-lg)}
+
+  /* ══ THE SCENES, SIZED TO THE PLATE ══════════════════════════════════════
+     The plate hands the art a ~520px-wide, ~560px-tall room; each composition
+     is sized up to it rather than kept at the size a 295px phone sheet tuned.
+     Nothing here is allowed to make a slide scroll. */
+
+  /* 0 · spend — the one slide that IS a control. Four 520px bars with "$50"
+     and "a month" at opposite ends read as a poster; 2x2 tiles read as four
+     choices, each a 250x120 target with the figure over its unit. */
+  .scene-art > .bands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:var(--s-lg)}
+  .scene-art > .bands .band{flex-direction:column;align-items:flex-start;
+    justify-content:center;gap:var(--s-xs);min-height:160px;padding:var(--s-2xl)}
+  .scene-art > .bands .band b{font-size:30px;letter-spacing:-.03em}
+
+  /* 1 · what it reaches — TWO BY TWO at the phone's 5:3 crop. Four across was
+     the phone's short-tier answer widened: 121px tiles that truncated "Classic
+     Pepperoni" on an 1,180px sheet and left the plate two-thirds empty. Two
+     rows of 254x152 photographs fill the room (~506 of 561px) and the spend
+     row still sits under them. */
+  .vs-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-lg)}
+  .vs-shot{aspect-ratio:5/3}
+  .vs-grid b{font-size:15px}
+  .vs-price{font-size:14px}
+  .vs-mark{left:10px;bottom:10px;width:34px;height:34px;border-radius:10px}
+  .value-scene{gap:var(--s-lg)}
+  .vs-save{font-size:14px}
+
+  /* 3 · the offer, 5 · the pass — both were min-height boxes tuned to a phone. */
+  /* The offer figure stays the card's biggest word and one step UNDER the
+     slide's 32px headline, so the head leads; the confirmation stacks up
+     under the condition instead of 70px of hollow card away. */
+  .offer{min-height:240px;padding:var(--s-2xl)}
+  .offer-amt{font-size:30px}
+  .offer > .stamp{margin-top:0}
+  /* The pass fills its room: at 320 it was a landscape card with 145px of
+     plate above and below against 49 beside. */
+  .pass{min-height:440px}
+
+  /* 2 / 4 · the tickets, 6 · points — rows, so they gain by row height. */
+  .ticket{padding:var(--s-2xl)}
+  .tk-item img{width:48px;height:48px}
+  .tk-item,.tk-where{margin-bottom:var(--s-xl)}
+  /* The tickets' type steps up with their box — padding and thumbnails had,
+     the words had not, so a 15px dish name sat beside a 48px photograph in a
+     520px row. All on the ramp; "Paid" and the total still lead at 20/22. */
+  .tk-item{font-size:16px}
+  .tk-off,.tk-earned b{font-size:17px;font-weight:700}
+  .tk-earned span,.tk-state,.spot-earned{font-size:14px}
+  .tk-where b,.spot-label{font-size:12px}
+  .tk-total{font-size:22px}
+  /* Points: the rows and marks take the plate's scale, and the hierarchy is
+     put right — the balance leads at 24, gains and the 4→1 rate share 20,
+     so the unbuilt Coming card no longer carries the largest figures. */
+  .scene-art .pts{gap:var(--s-xl)}
+  .scene-art .pt-earn li{padding:var(--s-xl) 0;gap:var(--s-xl)}
+  .pt-mark{width:48px;height:48px}
+  .scene-art .one-head b{font-size:24px}
+  .scene-art .pt-add{font-size:20px}
+  .scene-art .pt-rate-cell b{font-size:20px}
+
+  /* 7 · redeem — the code is the subject. */
+  .rd-qr{width:168px;height:168px}
+  .rd-ways li{padding:var(--s-xl)}
+  .rd-way-label{font-size:15px}
+  .rd-glyph{width:26px;height:26px}
+}
+
+/* ============================================================================
+   RETAINED, NOT CONSUMED.
+
+   SceneHandover / SceneMoreTown / SceneNights stay built in Scenes.tsx and
+   their rules stay here verbatim, so each is one line from returning. NOTE:
+   they were written against the old fixed, centred .scene-art frame, so
+   restoring one means re-sizing it to the sheet's measure first — it will not
+   simply drop in.
+
+   `.sc-note` was deleted: no scene used it.
+   `.t2`'s maroon fill is dormant and is not shipped. If Nights returns it has
+   to pass the same four-role test `.one-balance` just failed.
+   ============================================================================ */
+.sc{width:100%;max-width:290px}
+.sc-center{display:flex;flex-direction:column;align-items:center;gap:var(--s-lg)}
+
+.sc-two{display:flex;align-items:center;justify-content:center;gap:var(--s-lg);width:100%}
+.half{flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--s-md)}
+.half .gl{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.3;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--ink-2)}
+.half span{font-size:12px;font-weight:600;color:var(--ink-3);text-align:center}
+.h1{animation:riseIn 440ms 180ms var(--ease) both}
+.h2{animation:riseIn 440ms 860ms var(--ease) both}
+.or{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-4);
+  animation:riseIn 380ms 560ms var(--ease) both}
+
+.street{display:flex;align-items:flex-end;gap:9px;height:76px}
+.shop{width:32px;background:var(--inner);border:1px solid var(--hair);
+  border-radius:5px 5px 0 0;transform-origin:bottom;
+  animation:grow 380ms var(--ease) both}
+.s0{height:48px;animation-delay:120ms}
+.s1{height:64px;animation-delay:210ms}
+.s2{height:40px;animation-delay:300ms}
+.s3{height:58px;animation-delay:390ms}
+.s4{height:46px;animation-delay:480ms}
+@keyframes grow{from{opacity:0;transform:scaleY(.15)}to{opacity:1;transform:none}}
+
+.tix{position:relative;width:100%;height:96px;display:flex;align-items:center;
+  justify-content:center}
+.tix-card{position:absolute;width:124px;height:78px;border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair)}
+.t1{animation:tixL 420ms 180ms var(--ease) both}
+.t2{background:var(--maroon);border-color:var(--maroon);
+  animation:tixR 420ms 620ms var(--ease) both}
+@keyframes tixL{from{opacity:0;transform:none}to{opacity:1;transform:translateX(-32px) rotate(-7deg)}}
+@keyframes tixR{from{opacity:0;transform:none}to{opacity:1;transform:translateX(32px) rotate(7deg)}}
+
+/* ============================================================================
+   SHORT VIEWPORTS — A DECK SLIDE MUST FIT.
+
+   Sam, 13 Sep 2026: "some of these carousel slides are too tall… they shouldn't
+   have to scroll through a carousel slide." Correct, and it was my omission: the
+   recomposition gave every scene its own content height with no ceiling, and the
+   only thing defended against clipping was the close.
+
+   MEASURED at 375x667 (iPhone SE, the common short phone): spend +131px,
+   points +141, order +124, redeem +118, myspot +22 — five of eight scrolled.
+   At 390x640 it was six of eight.
+
+   The budget at 375x667, worked out rather than guessed:
+     viewport            667
+     − column pad 24/48  595   the sheet
+     − sheet pad 16/16   563
+     − rail 36 + gap 16  511
+     − foot ~94 + gap 16 401   the stage
+     − copy floor + gap  267   WHAT THE ART MAY BE
+   Against art heights of 356 / 350 / 366 / 343, that is ~90-100px to find.
+
+   WHY A HEIGHT QUERY AND NOT A CAP ON THE ART. A max-height plus overflow would
+   clip a composition — the thing this whole redesign exists to stop — and these
+   scenes do not shrink gracefully by scaling. So the deck gets a genuine short
+   mode: the same compositions at a tighter rhythm. Nothing is removed, and no
+   figure, name or price changes.
+
+   760px, not 667: the breakpoint is where the TALLEST scene stops fitting, not
+   where a named device sits. Every value below is a step on the documented
+   4/6/8/12/16/24 scale.
+
+   ══ AND AT ANY NARROW WIDTH, WHATEVER THE HEIGHT ═══════════════════════════
+   Found 13 Sep 2026 at 360x780 — a tall Android, which no earlier sweep had
+   covered because every one of them used a 375-or-wider width. That viewport
+   fell through BOTH tiers: 780 is above 760, so no art compression ran, while
+   360 is under 380, where `--copy-min` rises to 140px because a 26px headline
+   wraps to three lines at that measure. Widest copy floor, zero art relief —
+   spend, order and redeem overflowed by 18, 12 and 21px.
+
+   The fix is the comma, not a fourth tier. Everything below makes a scene
+   SHORTER, which is exactly what a narrow column needs for the same reason a
+   short one does: text wraps to more lines, so the art has to give room back.
+   Nothing here is height-specific in its reasoning.
+
+   369, NOT the 379 the gutter block uses. Those two numbers are not the same
+   question. 379 is "does the column need tighter gutters", which is true of a
+   375-wide iPhone. This is "does the ART have to give room back", which at 375
+   it does not — that width has been measured fitting at 2x2 all session, and
+   sweeping the whole short-art tier onto it compressed nine slides to solve a
+   problem none of them had. 369 splits the 360-class from the 375-class, which
+   is where the behaviour actually differs. */
+@media (max-height:760px), (max-width:369px){
+  /* The copy floor drops with the headline it is sized from: a 22px head at two
+     lines plus a 15px line at two is 49.3 + 8 + 43.5 = 101 → 92 is the 1-line
+     head case, which is what six of the eight slides actually have. */
+  .how{--copy-min:92px}
+  .how-stage{gap:var(--s-xl)}
+  .scene-head{font-size:22px;line-height:1.14}
+  .how-foot{gap:var(--s-md)}
+
+  /* 2 · what it reaches — ONE ROW, NOT A 2x2. The fourth tile (the cover pass)
+     turned a single row into two and cost ~190px, which is most of a short
+     phone's art budget. Four across at this measure gives 69px thumbs: small,
+     but this is a breadth slide — the point is that there are four different
+     kinds of thing, and four small true pictures make that point better than
+     two big ones and a scroll. */
+  .value-scene{gap:var(--s-md)}
+  /* The spend control lives on this slide now, so the scene has four blocks
+     where it had two — the gap is spent three times and this tier takes it
+     down a step rather than taking anything off the tiles again. */
+  .value-scene{gap:var(--s-sm)}
+  .bands.is-inline .band{min-height:30px}
+  .vs-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-sm)}
+  .vs-shot{aspect-ratio:1}
+  .vs-grid b{font-size:12px}
+  .vs-price{font-size:12px}
+
+  /* 1 · spend — the single biggest win: 4 x 80 + 3 x 12 = 356 becomes
+     4 x 58 + 3 x 8 = 256. The row is still a 295x58 target, far above the
+     120x48 the old 2x2 grid gave. */
+  .bands{gap:var(--s-md)}
+  .band{min-height:58px}
+  .band b{font-size:20px}
+
+  /* 2 / 3 · the ticket */
+  .ticket{padding:var(--s-lg)}
+  .tk-where{margin-bottom:var(--s-md)}
+  .tk-item{margin-bottom:var(--s-md)}
+  .tk-item img{width:32px;height:32px}
+  .tk-rule{margin:var(--s-md) 0}
+  .tk-total{margin-top:var(--s-md)}
+  .tk-earned li{margin-top:var(--s-md)}
+
+  /* 4 · offers */
+  .offer{min-height:0;gap:var(--s-md);padding:var(--s-lg)}
+  .offer-amt{font-size:26px}
+
+  /* 5 · entry */
+  .pass{min-height:150px;padding:var(--s-lg);padding-left:calc(52px + var(--s-lg))}
+  .dock{font-size:14px;padding:6px 12px}
+
+  /* 6 · points */
+  .pts{gap:var(--s-lg)}
+  .pt-block{gap:var(--s-sm)}
+  .pt-earn li{padding:var(--s-sm) 0}
+  .pt-mark{width:28px;height:28px;border-radius:9px}
+  .one-plate{padding:var(--s-md) var(--s-lg)}
+
+  /* 7 · redeem. The gap, head, item and row paddings this tier used to tighten
+     now sit at those values in the BASE — the fourth route was paid for there —
+     so this tier aims at what is left: the sheet's box, the code inside it, and
+     the padding around each tile. The code shrinks before the labels do; a
+     square has slack that 13px of type does not. */
+  .rd{gap:var(--s-md)}
+  .rd-sheet{padding:var(--s-md) var(--s-lg) var(--s-lg)}
+  .rd-qr{width:100px;height:100px;margin-top:var(--s-md)}
+  .rd-ways li{padding:var(--s-md)}
+
+  /* 3 · my spot — the credit row is new; its interval tightens with the rest. */
+  .spot-earned{margin-top:var(--s-sm)}
+
+  /* 8 · close */
+  .close-say{margin-top:var(--s-md)}
+}
+
+/* ---------------------------------------------------------------------------
+   SECOND TIER. The 760 block took the worst overflow from +131 to +12, but
+   order, redeem and especially points still ran over on the shortest phones
+   (points +43 at 375x667, +70 at 390x640) — they carry the most content and
+   the first tier's savings were spread evenly rather than aimed.
+
+   This tier is aimed. Type floors are NOT crossed: 13px stays the secondary
+   floor and 11px stays reserved for a tracked uppercase micro-label, so the
+   savings come from rhythm and object size, never from making words smaller
+   than they are allowed to be.
+   --------------------------------------------------------------------------- */
+@media (max-height:700px){
+  .how{--copy-min:80px}
+  .scene-head{font-size:20px}
+  .scene-line{margin-top:var(--s-sm)}
+
+  /* order — measured 283 into a 270 budget at 390x640, so the ticket's own box
+     gives back the 13. Nothing here touches type: the rows keep 15px and the
+     meta keeps 13px, which is the floor. */
+  .ticket{padding:var(--s-md)}
+  .tk-where{margin-bottom:var(--s-sm)}
+  .tk-item{margin-bottom:var(--s-sm)}
+  .tk-item img{width:28px;height:28px}
+  .tk-rule{margin:var(--s-sm) 0}
+  .tk-earned li{margin-top:var(--s-sm)}
+  .tk-total{font-size:18px}
+
+  /* points — the tallest scene, and the one that needed real surgery */
+  .pts{gap:var(--s-md)}
+  .pt-block{gap:var(--s-xs)}
+  .pt-earn li{padding:var(--s-xs) 0;gap:var(--s-md)}
+  .pt-mark{width:24px;height:24px;border-radius:8px}
+  .pt-mark img,.pt-mark::after{border-radius:6px}
+  .one-plate{padding:var(--s-sm) var(--s-lg)}
+  /* The 4:1 plate is the tallest new thing on this slide, so it pays for its
+     own room here: the box tightens and the figure drops one step. 22 -> 19 is
+     still display size against a 13px label — the pair keeps its contrast,
+     which is the whole reason the ratio reads as a ratio. */
+  .pt-move{padding:var(--s-sm) var(--s-lg);gap:var(--s-xs)}
+  .pt-rate{gap:var(--s-md)}
+  .pt-rate-cell b{font-size:19px}
+  .pt-arrow{width:18px;height:18px}
+
+  /* redeem — THE TILES TURN ON THEIR SIDE, and that is the only move in this
+     file that changes a composition rather than trimming one. Stacked, each
+     tile spends 20px of height on its glyph and another 8 on the gap beneath
+     it; laid side by side the glyph costs nothing, because the two-line label
+     beside it is already taller. 56px back from four tiles, with every word
+     kept — the alternative was cutting "Scanned at the counter" down to a stub
+     on small phones only, so the deck would have said different things on
+     different handsets. The 2x2 stays 2x2; only the inside of a tile moves. */
+  .rd{gap:var(--s-sm)}
+  .rd-qr{width:76px;height:76px}
+  .rd-mark{width:26px;height:26px}
+  .rd-ways{gap:var(--s-sm)}
+  .rd-ways li{flex-direction:row;align-items:center;gap:var(--s-md);
+    padding:var(--s-md) var(--s-lg)}
+  .rd-glyph{flex:0 0 auto;width:20px;height:20px}
+
+  /* my spot */
+  .spot-window{margin-top:var(--s-md);padding-top:var(--s-md)}
+  .spot-ends{margin-top:var(--s-sm)}
+  .spot-earned{margin-top:var(--s-sm)}
+  /* The caption names the surface; on the shortest phones the slide's own line
+     does ("it waits in My Spot"), so the 25px goes to the credit row instead. */
+  .spot-label{display:none}
+}
+
+
+/* Two offer cards, one column, in money-and-terms.json's own order (Sam, 14 Sep
+   2026: Italiano's 10% joins Olaika's). The second is the same object at rest:
+   no stamp, its status in the corner. */
+.offers{display:flex;flex-direction:column;gap:var(--s-lg);width:100%}
+.offers .offer{min-height:0}

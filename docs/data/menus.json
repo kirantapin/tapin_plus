@@ -1,0 +1,644 @@
+{
+  "coffeeholicsva": {
+    "venue": "Coffeeholics",
+    "sections": [
+      {
+        "label": "Espresso Drinks",
+        "items": [
+          {
+            "id": "coffeeholicsva-157-5",
+            "name": "Americano",
+            "price": 3.25,
+            "img": "/items/coffeeholicsva_americano.jpg",
+            "desc": "Espresso & water"
+          },
+          {
+            "id": "coffeeholicsva-157-26",
+            "name": "Breve",
+            "price": 3.75,
+            "img": "/items/coffeeholicsva_breve.jpg",
+            "desc": "Steamed Half & Half and Espresso"
+          },
+          {
+            "id": "coffeeholicsva-157-37",
+            "name": "Cappuccino",
+            "price": 4.25,
+            "img": "/items/coffeeholicsva_cappuccino.jpg",
+            "desc": "Espresso, Steamed Milk and Foam"
+          },
+          {
+            "id": "coffeeholicsva-157-62",
+            "name": "Cortado",
+            "price": 3.75,
+            "img": "/items/coffeeholicsva_cortado.jpg",
+            "desc": "Espresso & Steamed Milk"
+          }
+        ]
+      },
+      {
+        "label": "Sandwiches",
+        "items": [
+          {
+            "id": "coffeeholicsva-160-35",
+            "name": "California Club",
+            "price": 12,
+            "img": "/items/coffeeholicsva_california_club.jpg",
+            "desc": "Hickory Smoked Turkey, Bacon, Swiss, Avocado, Mixed Greens, Hot Honey on a Croissant"
+          },
+          {
+            "id": "coffeeholicsva-160-47",
+            "name": "French Onion Steak Melt",
+            "price": 13,
+            "img": "/items/coffeeholicsva_chicken_pesto_panini.jpg",
+            "desc": "Steak, Swiss, Grilled Onions & Garlic Aioli on Brioche"
+          },
+          {
+            "id": "coffeeholicsva-160-49",
+            "name": "Chipotle Turkey Melt",
+            "price": 12,
+            "img": "/items/coffeeholicsva_chipotle_chicken_panini.jpg",
+            "desc": "Turkey, Red Pepper, Avocado, Pepper Jack Cheese & Chipotle Sauce"
+          },
+          {
+            "id": "coffeeholicsva-160-76",
+            "name": "Fajita Chicken Bagel",
+            "price": 0,
+            "img": "/items/coffeeholicsva_fajita_chicken_bagel.jpg",
+            "desc": "Grilled Chicken, onions & peppers, cheese, lettuce, tomato mayo on plain bagel"
+          }
+        ]
+      },
+      {
+        "label": "Snacks & Sweets",
+        "items": [
+          {
+            "id": "coffeeholicsva-163-11",
+            "name": "Baked Cookie",
+            "price": 3,
+            "img": "/items/coffeeholicsva_baked_cookie.jpg",
+            "desc": null
+          },
+          {
+            "id": "coffeeholicsva-163-31",
+            "name": "Brownie",
+            "price": 4,
+            "img": "/items/coffeeholicsva_brownie.jpg",
+            "desc": null
+          },
+          {
+            "id": "coffeeholicsva-163-33",
+            "name": "Butter Croissant",
+            "price": 3.5,
+            "img": "/items/coffeeholicsva_butter_croissant.jpg",
+            "desc": null
+          },
+          {
+            "id": "coffeeholicsva-163-46",
+            "name": "Cheesecake",
+            "price": 5.5,
+            "img": "/items/coffeeholicsva_cheesecake.jpg",
+            "desc": null
+          }
+        ]
+      }
+    ]
+  },
+  "olaika": {
+    "venue": "Olaika",
+    "sections": [
+      {
+        "label": "Burgers",
+        "items": [
+          {
+            "id": "olaika-2-14",
+            "name": "Classic Burger",
+            "price": 12.99,
+            "img": "/items/olaika_classic_burger.jpg",
+            "desc": "Lettuce, tomato, cheddar, bacon, house sauce."
+          },
+          {
+            "id": "olaika-2-15",
+            "name": "Órale Wey Burger — Mexican Style",
+            "price": 13.99,
+            "img": "/items/olaika_orale_wey_burger.jpg",
+            "desc": "American cheese, guacamole, sautéed jalapeños, caramelized onions, chipotle mayo."
+          },
+          {
+            "id": "olaika-2-16",
+            "name": "Aloha Burger — Hawaiian Style",
+            "price": 13.99,
+            "img": "/items/olaika_aloha_burger.jpg",
+            "desc": "Grilled pineapple, crispy bacon, teriyaki glaze, Swiss cheese."
+          },
+          {
+            "id": "olaika-2-17",
+            "name": "Olaika Burger — Peruvian Style",
+            "price": 14.99,
+            "img": "/items/olaika_olaika_burger.jpg",
+            "desc": "Angus beef, sautéed onions & tomatoes, huancaína mayo, fried egg."
+          }
+        ]
+      },
+      {
+        "label": "Pizzas",
+        "items": [
+          {
+            "id": "olaika-3-19",
+            "name": "Classic Pepperoni",
+            "price": 11.99,
+            "img": "/items/olaika_classic_pepperoni.jpg",
+            "desc": "Spicy pepperoni, mozzarella, tomato base."
+          },
+          {
+            "id": "olaika-3-20",
+            "name": "Il Formaggio",
+            "price": 11.99,
+            "img": "/items/olaika_ll_formaggio.jpg",
+            "desc": "Mozzarella, basil pesto, sun-dried tomato, arugula."
+          },
+          {
+            "id": "olaika-3-21",
+            "name": "Veggie Supreme",
+            "price": 11.99,
+            "img": "/items/olaika_veggie_supreme.jpg",
+            "desc": "Mushrooms, bell peppers, olives, red onion, mozzarella."
+          },
+          {
+            "id": "olaika-3-22",
+            "name": "Aloha Pie — Hawaiian Style",
+            "price": 11.99,
+            "img": "/items/olaika_aloha_pie.jpg",
+            "desc": "Ham, pineapple, mozzarella, with light tomato base."
+          }
+        ]
+      },
+      {
+        "label": "Wings & Boneless",
+        "items": [
+          {
+            "id": "olaika-4-26",
+            "name": "Buffalo",
+            "price": 9.99,
+            "img": "/items/olaika_buffalo_wings.jpg",
+            "desc": "The classic."
+          },
+          {
+            "id": "olaika-4-27",
+            "name": "Honey BBQ",
+            "price": 9.99,
+            "img": "/items/olaika_honey_bbq.jpg",
+            "desc": "Sweet and smoky."
+          },
+          {
+            "id": "olaika-4-28",
+            "name": "Garlic Parmesan",
+            "price": 9.99,
+            "img": "/items/olaika_garlic_parmesan.jpg",
+            "desc": "Savory and buttery."
+          },
+          {
+            "id": "olaika-4-29",
+            "name": "Spicy Korean (Gochujang)",
+            "price": 9.99,
+            "img": "/items/olaika_spicy_korean.jpg",
+            "desc": "Sweet heat with umami."
+          }
+        ]
+      }
+    ]
+  },
+  "theburg": {
+    "venue": "The Burg",
+    "sections": [
+      {
+        "label": "Main Dishes",
+        "items": [
+          {
+            "id": "theburg-516-527",
+            "name": "Ceviche — Peru",
+            "price": 17.69,
+            "img": "/items/theburg_ceviche_peru.jpg",
+            "desc": "Raw fish marinated with lime juice, accompanied with sweet potato, onions, and corn."
+          },
+          {
+            "id": "theburg-516-528",
+            "name": "Lomo Saltado — Peru",
+            "price": 18.92,
+            "img": "/items/theburg_lomo_saltado_peru.jpg",
+            "desc": "Juicy, stir-fried sirloin with onions and tomatoes, served with french fries and white rice."
+          },
+          {
+            "id": "theburg-516-529",
+            "name": "Milanesa Napolitana — Argentina",
+            "price": 17.69,
+            "img": "/items/theburg_milanesa_napolitana_argentina.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-516-538",
+            "name": "Arroz Chaufa — Peru",
+            "price": 18.81,
+            "img": "/items/theburg_arroz_chaufa_peru.jpg",
+            "desc": "Peruvian fried rice with green onions, red bell pepper, scrambled eggs."
+          }
+        ]
+      },
+      {
+        "label": "Tacos — Mexico",
+        "items": [
+          {
+            "id": "theburg-517-530",
+            "name": "Steak",
+            "price": 3.5,
+            "img": "/items/theburg_steak.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-517-531",
+            "name": "Chicken",
+            "price": 3.5,
+            "img": "/items/theburg_chicken.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-517-532",
+            "name": "Chorizo",
+            "price": 3.5,
+            "img": "/items/theburg_chorizo.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-517-533",
+            "name": "Pastor",
+            "price": 3.5,
+            "img": "/items/theburg_pastor.jpg",
+            "desc": null
+          }
+        ]
+      },
+      {
+        "label": "Appetizers",
+        "items": [
+          {
+            "id": "theburg-522-551",
+            "name": "Causa Limena — Peru",
+            "price": 7.79,
+            "img": "/items/theburg_causa_rellena_peru.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-522-552",
+            "name": "Empanada — Argentina",
+            "price": 3.34,
+            "img": "/items/theburg_empanada_argentina.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-522-553",
+            "name": "Flautas — Mexico",
+            "price": 8.79,
+            "img": "/items/theburg_flautas_mexico.jpg",
+            "desc": null
+          },
+          {
+            "id": "theburg-522-554",
+            "name": "Nachos — Mexico",
+            "price": 8.69,
+            "img": "/items/theburg_nachos_mexico.jpg",
+            "desc": null
+          }
+        ]
+      }
+    ]
+  },
+  "themilkparlor": {
+    "venue": "The Milk Parlor",
+    "sections": [
+      {
+        "label": "Munchies",
+        "items": [
+          {
+            "id": "themilkparlor-1-10",
+            "name": "Munchie Sampler",
+            "price": 12.5,
+            "img": "/items/themilkparlor_munchie_sampler.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-1-11",
+            "name": "Chicken Tender Basket",
+            "price": 10,
+            "img": "/items/themilkparlor_chicken_tender_basket.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-1-12",
+            "name": "Loaded Fries Basket",
+            "price": 12.75,
+            "img": "/items/themilkparlor_loaded_fries_basket.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-1-13",
+            "name": "Jumbo Mozzarella Sticks",
+            "price": 9.5,
+            "img": "/items/themilkparlor_jumbo_mozzarella_sticks.jpg",
+            "desc": null
+          }
+        ]
+      },
+      {
+        "label": "Sandwiches",
+        "items": [
+          {
+            "id": "themilkparlor-2-3",
+            "name": "The Good Good",
+            "price": 7.75,
+            "img": "/items/themilkparlor_the_good_good.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-2-4",
+            "name": "The Spicy Redneck",
+            "price": 12.95,
+            "img": "/items/themilkparlor_the_spicy_redneck.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-2-5",
+            "name": "The Garden Gnome",
+            "price": 12.5,
+            "img": "/items/themilkparlor_the_garden_gnome.jpg",
+            "desc": null
+          },
+          {
+            "id": "themilkparlor-2-6",
+            "name": "The Ford Capri",
+            "price": 12.95,
+            "img": "/items/themilkparlor_the_ford_capri.jpg",
+            "desc": null
+          }
+        ]
+      },
+      {
+        "label": "Dessert",
+        "items": [
+          {
+            "id": "themilkparlor-25-26",
+            "name": "Ice Cream Sandwich",
+            "price": 5,
+            "img": "/items/themilkparlor_ice_cream_sandwich.jpg",
+            "desc": null
+          }
+        ]
+      }
+    ]
+  },
+  "italianospizza": {
+    "venue": "Italiano's Pizza",
+    "sections": [
+      {
+        "label": "Specialty Pizzas",
+        "items": [
+          {
+            "id": "italianospizza-612-613",
+            "name": "Italian Supreme Pizza",
+            "price": 14,
+            "img": "/items/italianospizza_italian_supreme_pizza.jpg",
+            "desc": null
+          },
+          {
+            "id": "italianospizza-612-615",
+            "name": "Italiano’s Meat Pizza",
+            "price": 14,
+            "img": "/items/italianospizza_italiano_s_meat_pizza.jpg",
+            "desc": null
+          },
+          {
+            "id": "italianospizza-612-616",
+            "name": "Italiano’s Veggie Pizza",
+            "price": 14,
+            "img": "/items/italianospizza_italiano_s_veggie_pizza.jpg",
+            "desc": null
+          },
+          {
+            "id": "italianospizza-612-617",
+            "name": "Italiano’s Chicken Pizza",
+            "price": 14,
+            "img": "/items/italianospizza_italiano_s_chicken_pizza.jpg",
+            "desc": null
+          }
+        ]
+      },
+      {
+        "label": "Appetizers",
+        "items": [
+          {
+            "id": "italianospizza-536-543",
+            "name": "Wings - Breaded",
+            "price": 10.99,
+            "img": "/items/italianospizza_wings_breaded.jpg",
+            "desc": "With house sauce, available in mild, hot, or BBQ. all wings come with ranch unless you request blue cheese or BBQ."
+          },
+          {
+            "id": "italianospizza-536-544",
+            "name": "Wings - Non-Breaded",
+            "price": 10.99,
+            "img": "/items/italianospizza_wings_non_breaded.jpg",
+            "desc": "With house sauce, available in mild, hot, or BBQ. all wings come with ranch unless you request blue cheese or BBQ."
+          },
+          {
+            "id": "italianospizza-536-545",
+            "name": "Garlic Knots with Cheese",
+            "price": 8.99,
+            "img": "/items/italianospizza_garlic_knots_with_cheese.jpg",
+            "desc": "Rolled baked garlic bread with Cheese"
+          },
+          {
+            "id": "italianospizza-536-594",
+            "name": "Garlic Knots",
+            "price": 5.99,
+            "img": "/items/italianospizza_garlic_knots.jpg",
+            "desc": "Rolled baked garlic bread."
+          }
+        ]
+      },
+      {
+        "label": "Pasta",
+        "items": [
+          {
+            "id": "italianospizza-534-540",
+            "name": "Chicken Fettucine Alfredo",
+            "price": 13.99,
+            "img": "/items/italianospizza_chicken_fettucine_alfredo.jpg",
+            "desc": "Cooked in a cream sauce with broccoli."
+          },
+          {
+            "id": "italianospizza-534-541",
+            "name": "Spicy Chicken Pasta",
+            "price": 13.5,
+            "img": "/items/italianospizza_spicy_chicken_pasta.jpg",
+            "desc": "Spicy. Ziti noodles in creamy, spicy sauce."
+          },
+          {
+            "id": "italianospizza-534-542",
+            "name": "Baked Spaghetti",
+            "price": 13.99,
+            "img": "/items/italianospizza_baked_spaghetti.jpg",
+            "desc": "Spaghetti, tomato sauce. Add meatballs, hamburger topping, or sausage for an additional charge."
+          },
+          {
+            "id": "italianospizza-534-582",
+            "name": "Baked Ziti",
+            "price": 13.99,
+            "img": "/items/italianospizza_baked_ziti.jpg",
+            "desc": "Ziti pasta, mozzarella cheese."
+          }
+        ]
+      }
+    ]
+  },
+  "sweetopia": {
+    "venue": "Sweetopia",
+    "_provenance": "Read from https://www.tapin.app/sweetopia on 12 Sep 2026, at Sam's direction, because this venue was absent from the extraction run that produced every other key in this file. Names, the single price and the item photographs are all from that page; the photos came from TapIn's own item-images storage bucket, the same production source as the other 57, and were resampled to 162px like them. There are no descriptions on the page. The `id` values are generated from the names and are NOT production ids — re-extracting will replace them.",
+    "sections": [
+      {
+        "label": "Rolled Ice Cream",
+        "items": [
+          {
+            "id": "sweetopia-rolled-banana-foster",
+            "name": "Banana Foster",
+            "price": 7.2,
+            "img": "/items/sweetopia_banana_foster.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-blackberry-mama",
+            "name": "Blackberry Mama",
+            "price": 7.2,
+            "img": "/items/sweetopia_blackberry_mama.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-brookie",
+            "name": "Brookie",
+            "price": 7.2,
+            "img": "/items/sweetopia_brookie.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-banana-caramel-crunch",
+            "name": "Banana Caramel Crunch",
+            "price": 7.2,
+            "img": "/items/sweetopia_banana_caramel_crunch.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-coffee",
+            "name": "Coffee",
+            "price": 7.2,
+            "img": "/items/sweetopia_coffee.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-cookies-cream",
+            "name": "Cookies & Cream",
+            "price": 7.2,
+            "img": "/items/sweetopia_cookies_and_cream.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-coconut-crunch",
+            "name": "Coconut Crunch",
+            "price": 7.2,
+            "img": "/items/sweetopia_coconut_crunch.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-chai",
+            "name": "Chai",
+            "price": 7.2,
+            "img": "/items/sweetopia_chai.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-chocolate",
+            "name": "Chocolate",
+            "price": 7.2,
+            "img": "/items/sweetopia_chocolate.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-chocolate-pecan",
+            "name": "Chocolate Pecan",
+            "price": 7.2,
+            "img": "/items/sweetopia_chocolate_pecan.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-cherry-vanilla",
+            "name": "Cherry Vanilla",
+            "price": 7.2,
+            "img": "/items/sweetopia_cherry_vanilla.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-funfetti",
+            "name": "Funfetti",
+            "price": 7.2,
+            "img": "/items/sweetopia_funfetti.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-strawberries-nutella",
+            "name": "Strawberries & Nutella",
+            "price": 7.2,
+            "img": "/items/sweetopia_strawberries_and_nutella.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-strawberry-blondie",
+            "name": "Strawberry Blondie",
+            "price": 7.2,
+            "img": "/items/sweetopia_strawberry_blondie.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-strawberry-brownies",
+            "name": "Strawberry Brownies",
+            "price": 7.2,
+            "img": "/items/sweetopia_strawberry_brownies.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-strawberry-shortcake",
+            "name": "Strawberry Shortcake",
+            "price": 7.2,
+            "img": "/items/sweetopia_strawberry_shortcake.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-elvis-roll",
+            "name": "Elvis Roll",
+            "price": 7.2,
+            "img": "/items/sweetopia_elvis_roll.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-reese-lover",
+            "name": "Reese Lover",
+            "price": 7.2,
+            "img": "/items/sweetopia_reese_lover.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-oreo-mint-monster",
+            "name": "Oreo Mint Monster",
+            "price": 7.2,
+            "img": "/items/sweetopia_oreo_mint_monster.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-vanilla",
+            "name": "Vanilla",
+            "price": 7.2,
+            "img": "/items/sweetopia_vanilla.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-pecan-mudslide",
+            "name": "Pecan Mudslide",
+            "price": 7.2,
+            "img": "/items/sweetopia_pecan_mudslide.jpg"
+          },
+          {
+            "id": "sweetopia-rolled-honeylav",
+            "name": "Honeylav",
+            "price": 7.2,
+            "img": "/items/sweetopia_honeylav.jpg"
+          }
+        ]
+      }
+    ]
+  }
+}

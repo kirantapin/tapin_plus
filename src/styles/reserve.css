@@ -1,0 +1,1208 @@
+/* ============================================================================
+   /reserve — the checkout.
+
+   TRUTH.md §4 governs this file. The three charge rows, the consent sentence
+   and the Reserve control are one unbroken block: nothing between them may be
+   collapsible, and nothing may push them apart. If a future change needs space,
+   take it from somewhere else on the page.
+   ============================================================================ */
+
+/* -- the plan choice -------------------------------------------------------
+   The plan choice. A radiogroup, not a toggle: two named options both visible
+   at once, because a reader deciding between them has to be able to compare
+   them without operating anything. Maroon on the chosen one — a brand fill for
+   a chosen state is exactly what the token is for, and it is the same treatment
+   the walkthrough's spend bands use. */
+.plan-pick{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-md)}
+.plan-opt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  /* 44pt floor with room to spare. */
+  min-height:58px;padding:var(--s-lg);border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair);font:inherit;
+  text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:background-color 150ms var(--ease),border-color 150ms var(--ease),
+    transform 150ms var(--ease)}
+.plan-opt b{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+.plan-opt span{font-size:12px;font-weight:500;color:var(--ink-4)}
+/* What the founding rate saves, on the tile that picks it. It is the third and
+   quietest line by WEIGHT, not by being hard to read: 12px is the tile's own
+   meta size and the ink is the same ramp step as the price above it, so the
+   row reads plan → price → what that price is worth without any of the three
+   competing. Nothing about it is a badge — a saving stated as a pill would be
+   urgency dressing on a control that takes money (§10). */
+/* Visually gone, still announced. The strike-through on the tile is a purely
+   visual convention — a screen reader reads "$14.99 $4.99 a month" with nothing
+   to say which is which — so the meaning is carried in words for anyone not
+   seeing the line. First use in this build, hence the utility rather than a
+   one-off. */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+  border:0}
+
+/* The figures on a plan tile: what everyone else pays, struck, then what you
+   pay. Baseline-aligned so the two numbers sit on one line rather than reading
+   as two separate facts, and the struck one is a step down in size as well as
+   in ink — it is context for the price, not a competing price. */
+/* ══ THE STRIKE IS AN EYEBROW, NOT A NEIGHBOUR ═════════════════════════════
+   Sam, 14 Sep 2026: redesign the placement of the strikethrough prices.
+
+   On one line — "$14.99 $4.99 a month" — the struck figure stood to the LEFT
+   of the price at nearly its size, so the first number the eye met on a tile
+   about $4.99 was $14.99, and on the year tile "$139.96 $47.96 a year" was a
+   row of three figures fighting for one baseline. And on the two narrow phone
+   tiles the row wrapped, stranding a struck number on a line of its own.
+
+   Stacked instead: the struck rate sits ABOVE the price as a 12px eyebrow —
+   reference, not competitor — the price and its period share the line
+   beneath at full size, and the saving closes the column. Read top-down it is
+   still was → is → what that is worth, which is the direction the saving
+   runs, and nothing on any tile can wrap. */
+.plan-figs{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.plan-now{display:flex;align-items:baseline;gap:var(--s-sm)}
+.plan-was{font-size:12px;font-weight:600;line-height:1.2;color:var(--ink-4);
+  text-decoration-thickness:1px}
+.plan-opt .plan-figs b{font-size:15px;font-weight:700;letter-spacing:-.01em;
+  color:var(--ink-1)}
+.plan-per{font-size:12px;font-weight:500;color:var(--ink-4)}
+.plan-opt.is-on .plan-was,
+.plan-opt.is-on .plan-per{color:var(--on-maroon);opacity:.72}
+/* FULL STRENGTH ON THE PRICE. `.plan-opt.is-on span{opacity:.82}` below also
+   matches the `.plan-figs` wrapper, and opacity on a parent dims every child —
+   so the white price inside it rendered at 82% and read as grey on maroon
+   (Sam, 14 Sep 2026: "the price text should still be highlighted when I
+   select"). The wrapper goes back to 1; only the unit beside the price fades. */
+.plan-opt.is-on .plan-figs{opacity:1;color:var(--on-maroon)}
+.plan-opt.is-on .plan-figs b{color:var(--on-maroon)}
+.plan-save{font-weight:600}
+/* ══ THE THIRD PLAN, AND THE ONE THING IT INCLUDES THAT IS NOT MONEY ═════════
+   Sam, 14 Sep 2026: a yearly prepay at the founder rate, four passes in one
+   charge, with a t-shirt. Three tiles in a two-column picker: the year takes
+   the full second row rather than squeezing three 95px tiles across a phone,
+   and full width is also where a $139.96 strike and a $47.96 price fit on one
+   line. The shirt is the tile's last line, in the tile's own meta type — a
+   fact about the plan, not a badge on it. */
+/* The seats, as one bar — see Reserve.tsx "THE SEATS, DRAWN". The same
+   trough-and-fill the walkthrough's credit meter uses, a step thicker because
+   it is the statement here rather than a detail on a ticket. The fill is
+   scaled, not sized, and it does not animate: a bar that draws itself in is a
+   bar asking to be watched, which is the urgency §10 rules out. */
+.seat-bar{height:6px;border-radius:var(--r-pill);background:var(--hair);
+  overflow:hidden;margin:0 0 var(--s-md)}
+.seat-bar i{display:block;height:100%;width:100%;border-radius:inherit;
+  background:var(--ink-2);transform-origin:left;transform:scaleX(var(--p,0))}
+
+/* BESIDE THE TEXT, NOT UNDER IT. Sam, 14 Sep 2026, after seeing the full-width
+   plate: "I liked the older version of this more, where we just had the
+   T-shirt on the side, but we can keep the included and the magnifying glass
+   badge." So: the side thumbnail again, a step larger than the first one
+   (112, not 84) so the tag and the glass have room on it, and the tile
+   reserves that room at its right and never grows taller than the picture
+   plus its inset. */
+.plan-pick > .plan-year{grid-column:1 / -1;position:relative;--tee-h:112px}
+.plan-year > .plan-opt{width:100%;
+  padding-right:calc(var(--tee-h) + var(--s-md) + var(--s-lg));
+  min-height:calc(var(--tee-h) + 2 * var(--s-lg))}
+.plan-perk{font-weight:600;color:var(--ink-3)}
+.plan-opt.is-on .plan-perk{color:var(--on-maroon);opacity:.9}
+/* The shirt beside the year's text, centred on the tile's height, inside the
+   room the padding above reserves — the radio button and the close-up are
+   two controls that read as one tile. See shell/Tee.tsx and layout.css.
+   `.plan-year .plan-tee`, two classes: layout.css's `.tee-thumb.is-plate` is
+   also two, and this file loads later, so the placement wins on order. */
+.plan-year .plan-tee{position:absolute;right:var(--s-md);top:50%;transform:translateY(-50%);
+  width:var(--tee-h);height:var(--tee-h)}
+
+/* What a year of the founding rate is worth. Body size, not a figure display:
+   it is an argument, and the money that matters on this page is still the
+   $4.99 above it. */
+.rs-worth{margin:var(--s-lg) 0 0;font-size:15px;font-weight:500;line-height:1.45;
+  color:var(--ink-2)}
+.rs-worth b{font-weight:700;color:var(--ink-1)}
+.plan-opt.is-on .plan-save{opacity:1}
+/* The grandfathering, once, between the choice and the charge rows. It must not
+   read as one of the rows — those are what happens to her money — so it keeps
+   body ink and sits on the panel rather than in the list. */
+.plan-locked{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl)}
+.plan-opt:active{transform:scale(.98)}
+.plan-opt:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+/* Two channels, never colour alone: the fill AND the border move. */
+.plan-opt.is-on{background:var(--maroon);border-color:var(--maroon)}
+/* The chosen plan is a maroon fill, so both its lines take the ink maroon
+   carries rather than the surface's. The detail keeps its .82 so the pair still
+   reads as label-and-detail rather than two equal lines. */
+.plan-opt.is-on b{color:var(--on-maroon)}
+.plan-opt.is-on span{color:var(--on-maroon);opacity:.82}
+
+/* -- the three charge rows -------------------------------------------------
+   Peers, not a hierarchy. "$4.99 today" is not allowed to be louder than
+   "Then $4.99 a month" — the whole point of §4 is that the first payment is
+   never stated without what follows it. */
+.charges{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.charges li{display:flex;flex-direction:column;gap:3px;padding:var(--s-lg) 0}
+.charges li:first-child{padding-top:0}
+.charges li + li{border-top:1px solid var(--hair-lit)}
+.charges b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
+.charges span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+
+/* What a refund costs, directly under the row that offers it. Not fine print
+   and not an alarm: the same treatment any other qualifying line gets, sitting
+   where the promise it qualifies is. */
+.forfeit{margin:0;padding-top:var(--s-lg);
+  border-top:1px solid var(--hair-lit)}
+
+/* -- the consent sentence --------------------------------------------------
+   Deliberately the least decorated text on the page. Reading size, reading
+   contrast, no emphasis, no italics, no smaller type. Anything that makes this
+   look like fine print defeats the reason it is here. */
+.consent{margin:var(--s-xl) 0 0;font-size:15px;font-weight:400;line-height:1.5;
+  letter-spacing:0;color:var(--ink-2)}
+
+.checkout .action{margin-top:var(--s-xl)}
+/* Disabled because nothing in this build can take money, and a money surface
+   says so rather than looking live. */
+.action:disabled{opacity:.5;cursor:not-allowed}
+.action:disabled:active{transform:none;filter:none}
+.not-live{margin:var(--s-md) 0 0;text-align:center}
+
+/* The full terms may live behind this ONLY because the rows and the consent
+   sentence above stay visible. That is the condition §4 sets, not a preference. */
+.terms{margin:0;padding:0 0 0 var(--s-xl);display:flex;flex-direction:column;
+  gap:var(--s-lg)}
+.terms li{font-size:13px;font-weight:500;line-height:1.5;letter-spacing:.005em;
+  color:var(--ink-3)}
+.terms li::marker{color:var(--ink-4)}
+
+/* Secondary action: maroon is the fill for the thing that takes money, so a
+   control that only replays a walkthrough must not wear it. */
+.action-ghost{background:var(--inner);color:var(--ink-1);
+  border:1px solid var(--hair-lit);box-shadow:none}
+.replay{margin-top:var(--s-sm)}
+
+/* Clear the sticky bar when the anchor jumps here, so the charge rows do not
+   land underneath it. */
+#checkout{scroll-margin-top:var(--s-xl);scroll-margin-bottom:110px}
+
+/* The wallet buttons, when there is a recurring path to attach them to. Stripe
+   renders its own button chrome inside an iframe, so this only owns the space
+   around it and the error line. */
+.pay{display:flex;flex-direction:column;gap:var(--s-lg);margin-top:var(--s-xl)}
+.pay-error{color:var(--ink-2)}
+
+/* ============================================================================
+   THE SPLIT — mobile stacks, desktop decides beside its argument.
+
+   Sam: "the desktop layout should be different than the mobile, not just
+   stacked." Below 1024 these three wrappers generate no boxes at all, so the
+   phone layout is byte-identical to the one that shipped before they existed.
+   ============================================================================ */
+/* ══ WHAT IT COVERS, AND WHERE — PICTURED ═══════════════════════════════════
+   Sam, 14 Sep 2026: "a strong visual of what those things are, like for Food,
+   Cover, Merch, etc." and "the places they can use it."
+
+   SIX TILES, ONE OBJECT. The photographed categories and the glyph categories
+   share one proportion, one radius and one label position, so the grid reads
+   as six of a kind rather than three pictures and three placeholders. A photo
+   tile is the house full-bleed card — the merchant's photograph, a multi-stop
+   veil rising from the foot to carry a white label, the merchant's mark
+   seated in the corner, no hairline (Sam, 13 Sep: "get rid of this hairline
+   stroke around these cards"). A glyph tile is the flat house plate with the
+   category's own glyph at tile scale. Then the six places as a plain list of
+   marks: real names, real logos, nothing ranked.
+
+   The veil is the venue cards' curve (pitch.css .vcard::after), not a two-stop
+   fade — base.css records why: constant slope reads as an edge. */
+/* The panel is `.flush`: its rows and its note carry their own --s-xl inset,
+   so these take the same one — measured at 375, the rows start at x=33 and an
+   un-inset grid started at 17, sixteen pixels proud of everything above it. */
+.reach-head{margin:var(--s-xl) 0 var(--s-md);padding:0 var(--s-xl);color:var(--ink-3)}
+.reach-grid{list-style:none;margin:0 var(--s-xl);padding:0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-sm)}
+.reach-tile{position:relative;aspect-ratio:4/3;border-radius:var(--r-card);
+  overflow:hidden;background:var(--inner);border:1px solid var(--hair);
+  display:flex;align-items:center;justify-content:center}
+.reach-tile.has-shot{border:0;box-shadow:var(--float)}
+.reach-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:saturate(.95) brightness(.92)}
+.reach-tile img[data-bright="true"]{filter:saturate(.9) brightness(.46)}
+/* ══ A BRIGHTER MAROON FOR THE TWO TILES WITHOUT A PHOTOGRAPH ══════════════
+   Sam, 14 Sep 2026, after a dark gradient and then a silver one: "I don't like
+   the gradients… it can be just a brighter maroon, like a brighter primary
+   color." So: one flat plate, the brand's own hue lifted in lightness (mixed
+   in oklch so the hue holds rather than going pink), white label and glyph on
+   it, the photo tiles' veil switched off. His call on the fill: the house
+   rule keeps maroon for the chosen plan and the button, and these two plates
+   are the recorded exception. */
+.reach-tile:not(.has-shot),
+.reach-tile.is-object{
+  background:color-mix(in oklch, var(--maroon) 84%, var(--on-maroon));
+  border:0;box-shadow:var(--float)}
+.reach-tile.is-object::after{content:none}
+.reach-tile:not(.has-shot) > svg{color:var(--on-maroon)}
+/* A cut-out object (the shirt) rather than a photograph: contained, not
+   cropped, on the plate, with a little room round it. */
+.reach-tile.is-object img{object-fit:contain;padding:8px 8px 26px;filter:none}
+.reach-tile.has-shot::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(0,0,0,0) 38%,
+    rgba(0,0,0,.10) 52%,
+    rgba(0,0,0,.30) 66%,
+    rgba(0,0,0,.58) 82%,
+    rgba(0,0,0,.86) 100%)}
+.reach-tile > svg{width:36px;height:36px;color:var(--ink-2);display:block;
+  /* Sits a little above centre so the label's corner does not crowd it. */
+  transform:translateY(-6px)}
+.reach-mark{position:absolute;left:8px;top:8px;z-index:1;width:30px;height:30px;
+  border-radius:9px}
+.reach-mark img{border-radius:7px}
+.reach-mark::after{border-radius:7px}
+.reach-label{position:absolute;left:var(--s-md);bottom:var(--s-md);z-index:1;
+  font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+/* White on a photograph, whatever the page's ink is — the same token the
+   maroon fill carries, declared once and never themed. */
+.reach-tile.has-shot .reach-label{color:var(--on-maroon)}
+/* …and on the two maroon plates too: white, as on every maroon fill. The
+   shirt tile is also `has-shot`, so the veil rule above would still paint
+   its dark foot over the plate — switched off here, after it and heavier. */
+.reach-grid .reach-tile.is-object .reach-label,
+.reach-grid .reach-tile:not(.has-shot) .reach-label{color:var(--on-maroon)}
+.reach-grid .reach-tile.is-object::after{content:none}
+
+.reach-places{list-style:none;margin:0 var(--s-xl);padding:0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-md) var(--s-lg)}
+.reach-places li{display:flex;align-items:center;gap:var(--s-md);min-width:0}
+.reach-collar{width:36px;height:36px;border-radius:11px}
+.reach-collar img{border-radius:8px}
+.reach-collar::after{border-radius:8px}
+.reach-place{display:flex;flex-direction:column;gap:2px;min-width:0}
+.reach-place b{font-size:13px;font-weight:600;color:var(--ink-1);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 13px, not 12: a category is a word, not a tracked micro-label. */
+.reach-place span{font-size:13px;font-weight:500;color:var(--ink-4)}
+
+.rs-split,.rs-read,.rs-decide,.rs-stick{display:contents}
+
+@media (min-width:1024px){
+  /* `.column > .rs-split`, not `.rs-split`: layout.css caps every column child
+     at 720 with `.column > *:not(.sticky-cta)`, which is two classes' worth of
+     specificity. The bare class loses to it silently — the trap that has now
+     cost this build two passes. */
+  .column > .rs-split{
+    display:grid;
+    /* The argument takes what is left; the decision takes a fixed, deliberately
+       NARROWER measure. One 720px cap was doing two jobs and doing the second
+       badly: measured on the live page it gave the consent sentence a 101-
+       character line, against the ~70 its own comment claimed. 460 puts it at
+       about 62. A consent sentence is the last thing that should be set wide. */
+    grid-template-columns:minmax(0,1fr) 460px;
+    /* Two rows, declared rather than implied, so the decision can span to a
+       real `-1` line. */
+    grid-template-rows:auto auto;
+    column-gap:calc(var(--s-2xl) * 2);
+    row-gap:var(--s-2xl);
+    width:100%;max-width:min(1180px,calc(100% - 96px));margin-inline:auto;
+    align-items:start;
+  }
+  .rs-read{grid-column:1;display:flex;flex-direction:column;gap:var(--s-2xl)}
+  /* `display:block` is load-bearing, not tidiness. Left at `display:contents`
+     the wrapper generated no box, `.checkout` became the grid item itself, and
+     it auto-placed into row 1 — so its sticky containing block was the height
+     of the FIRST reading block alone and the panel had ~60px of travel instead
+     of 329. It looked like it was working. Stretched over both rows on purpose:
+     a sticky child can only travel as far as its own container is tall. */
+  /* `align-self:stretch` undoes the grid's own `align-items:start` for this one
+     item, and it is the second half of the same bug: with the wrapper shrunk to
+     its content the sticky child had a containing block exactly its own height
+     and ZERO travel, so the panel scrolled away at the foot of the page and the
+     §4 block stopped being co-visible at precisely the moment it matters most.
+     Measured: co-visible false at max scroll before this line, true after. The
+     reading blocks keep `start`; only the decision stretches. */
+  .rs-decide{display:block;grid-column:2;grid-row:1 / -1;align-self:stretch}
+  /* The reading column is ~670px here: three tiles across, three places
+     across, so both blocks stay two rows deep instead of stretching to six. */
+  .reach-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-md)}
+  .reach-places{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .reach-label{font-size:16px}
+
+  /* THE DECISION STAYS ON SCREEN. This is the whole point of the split, and it
+     is a §4 argument before it is an aesthetic one: measured on the live page
+     before this change, the charge rows, the consent sentence and the button
+     were co-visible at roughly a THIRD of the page's scroll positions. Beside a
+     sticky column they are co-visible at all of them, which is what PRODUCT.md
+     asks for and what the old fixed bottom bar was only pretending to deliver. */
+  /* THE GUARANTEE RIDES WITH THE DECISION. Sam, 14 Sep 2026: "on desktop the
+     guarantee should be on the right side below the checkout." It cannot
+     simply sit under a sticky panel — a sticky element holds its place while
+     in-flow siblings scroll through it — so the checkout and the guarantee
+     are one sticky group (`.rs-stick`), which is `display:contents` on a
+     phone and so changes nothing there. */
+  .rs-decide > .rs-stick{position:sticky;top:var(--s-2xl);
+    display:flex;flex-direction:column;gap:var(--s-2xl)}
+
+  /* THE BOTTOM BAR GOES. It carried a second control named "Reserve a founding
+     seat" in full maroon — and that one could not take money, because it was an
+     anchor to #checkout, while the real button sat disabled 1700px down the
+     page. Two identical calls to action where the louder one is the decoy. Its
+     only job was to carry a phone reader to a block that is now permanently on
+     screen, so on desktop it has nothing left to do.
+     `:has(#checkout)` carries an id inside it, so this is (1,1,0) and beats
+     layout.css's (0,2,0) clearance rule rather than fighting it. */
+  .column:has(#checkout) > .sticky-cta{display:none}
+  .column:has(#checkout){padding-bottom:64px}
+
+  /* The charge rows become label-left / condition-right. Stacked, three rows
+     took 182px of a panel whose height is the binding constraint on §4; paired
+     on a baseline they take about 120, and the hairline then divides two things
+     it is actually between. */
+  .charges li{flex-direction:row;align-items:baseline;
+    justify-content:space-between;gap:var(--s-2xl)}
+  .charges span{text-align:right;flex:0 1 auto}
+
+  /* Secondary actions stop out-measuring the primary one. Full-width ghost
+     buttons in a 570px reading column were physically larger than the button
+     that takes the money. */
+  .rs-read .replay{max-width:260px;margin-top:0}
+}
+
+/* TWO WAYS THE STICKY PANEL DROPS BACK INTO FLOW, because a sticky element
+   taller than the window can never show its own bottom — it pins at the top and
+   the rest is unreachable.
+   1. The terms drill is open. That is the one thing on this panel that can
+      double its height, and §4 permits the terms behind a disclosure precisely
+      because they are not part of the co-visible block. `:has()` is already
+      load-bearing in layout.css, so this depends on nothing new.
+   2. The window is short. Every media query in this build is width-only; the
+      §4 block's own height was watched by nothing at all. */
+@media (min-width:1024px){
+  .rs-split:has(.drill[open]) > .rs-decide > .checkout{position:static}
+}
+@media (min-width:1024px) and (max-height:780px){
+  .rs-decide > .rs-stick{position:static}
+}
+
+/* -- rhythm inside the checkout --------------------------------------------
+   The panel opened on a UA default: .seat-note had no margin rule in any
+   stylesheet and no `p` reset existed, so its first interval was whatever the
+   browser felt like. And three ranks of interval now do three jobs, where 16
+   and 12 previously did nearly all of them and 24 never appeared inside a panel
+   at all: 12 inside an object, 16 between objects, 24 between GROUPS — which is
+   the boundary above the §4 triad, the one place on this page that most needs
+   to read as a seam. */
+.seat-note{margin:0 0 var(--s-xl)}
+.plan-pick{margin:0 0 var(--s-2xl)}
+
+/* ── THE RECEIPT ───────────────────────────────────────────────────────────
+   Replaces the rows, the consent and the button once the charge has settled —
+   it does not sit beside them. Nothing on this page should be pressable twice
+   after money has moved.
+
+   The reference is the LOUDEST thing in the block after the confirmation,
+   because it is the only record of the charge that exists anywhere: no order
+   is written server-side, so the member's copy is the copy. Tabular figures so
+   a reference can be read aloud or typed without transcription errors.
+
+   One hairline and no shadow — elevation declared once, same as every other
+   surface here. */
+.receipt{border:1px solid var(--hair);border-radius:14px;
+  padding:var(--s-xl);display:flex;flex-direction:column;gap:var(--s-md)}
+.receipt-head{margin:0;font-size:17px;font-weight:600;color:var(--ink-1)}
+.receipt .t-compact{margin:0}
+.receipt-ref span{font-variant-numeric:tabular-nums;color:var(--ink-1);
+  font-weight:600;word-break:break-all}
+
+/* ── THE WAY BACK ──────────────────────────────────────────────────────────
+   `.how-back` already supplies the circle, the chevron box and the press
+   response; this only repositions it and changes what it sits on.
+
+   `position:absolute` and `margin-top:0` are both overrides, not choices:
+   pitch.css drops every non-mosaic child below the photographs, and without
+   these the back control rides down with the card and lands on the wordmark.
+
+   BOTH SELECTORS ARE REQUIRED. The compact rule is
+   `.hero-band.is-compact > :not(.mosaic)` — THREE classes, (0,3,0) — so a lone
+   `.hero-band > .reserve-back` at (0,2,0) loses and the margin survives. It did:
+   measured at margin-top 124px, overlapping the card, while looking plausible
+   in a screenshot. Matching the compact selector's specificity is what makes
+   this file's later position decide it.
+
+   FROSTED, not the solid --inner it wears on /how. It sits over photography,
+   the one place this build allows glass; white on --glass measures 6.28:1 even
+   against a pure-white photograph, and the mosaic already darkens every image
+   beneath it. The hairline is what separates it from a bright frame. */
+.hero-band > .reserve-back,
+.hero-band.is-compact > .reserve-back{
+  position:absolute;left:var(--gutter);top:var(--s-xl);margin-top:0;z-index:2;
+  background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--hair);color:var(--ink-1);
+}
+/* 36px of circle, 44px of target — the same invisible expander the app
+   preview's back control uses, sized to stay inside the band. */
+.hero-band > .reserve-back::after{content:"";position:absolute;inset:-4px;border-radius:inherit}
+
+/* ============================================================================
+   THE ARRIVAL — what the card flight lands into.
+
+   The flight itself was never broken. Measured on the live page: the card
+   travels 122px and scales 0.86 → 1 under an expo-out that is ~95% done by
+   300ms of its 820 — so it nudged a tenth of a screen while the whole checkout
+   was already painted around it. Sam read that as "takes me directly to the
+   checkout flow", which is exactly what it looked like.
+
+   So the page now holds still and comes up BEHIND the landing card. One
+   authored moment on this route, not scattered entrances: everything except
+   the photo band and the card rises together on one delay tuned to the
+   flight's own perceptual finish (~340ms), landing before the 820ms clone
+   retires. The card is the only thing moving until then, which is the whole
+   point of flying it.
+
+   THE SELECTOR LISTS `.rs-read > *` AND `.rs-decide > *` DELIBERATELY. Those
+   two wrappers are `display:contents` below 1024, so they generate no box and
+   an animation on them does nothing at all — the animatable boxes are their
+   children. `.column > *` would only ever reach `.hero-band`, `.rs-split` (no
+   box) and `.sticky-cta`.
+
+   Gated on the attribute, which only exists while a flight is actually in
+   flight — so a reader who lands on /reserve directly, or from anywhere that
+   did not stash an origin, gets no entrance at all. base.css zeroes duration
+   and delay under `reduce`, and useCardFlight never sets the attribute there
+   in the first place.
+   ============================================================================ */
+html[data-flight="in"] .rs-read > *,
+html[data-flight="in"] .rs-decide > *,
+html[data-flight="in"] .column > .sticky-cta{
+  animation:arriveIn 420ms 340ms var(--ease) both;
+}
+/* Ends at its resting state, like every other keyframe set in this build. */
+@keyframes arriveIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ============================================================================
+   THE CHECKOUT SHEET — where the disclosures and the charge live.
+
+   Sam, 13 Sep 2026: "we only need the disclosure and terms right at checkout."
+
+   A SHEET ON A PHONE, A PANEL ON A DESKTOP, and both are the same element: it
+   docks to the bottom edge below 700px, which is where a thumb is, and centres
+   above it. Scrolls internally rather than growing — the full terms are eight
+   numbered paragraphs and the wallet must never be pushed off a short screen.
+   ============================================================================ */
+.cs-scrim{
+  position:fixed;inset:0;z-index:60;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0;
+  background:rgba(10,5,8,.62);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  animation:csFade 180ms var(--ease) both;
+}
+.cs-sheet{
+  position:relative;
+  width:100%;max-width:520px;
+  max-height:min(92dvh,860px);
+  overflow-y:auto;overscroll-behavior:contain;
+  background:var(--card);
+  border:1px solid var(--hair);
+  border-radius:var(--r-panel) var(--r-panel) 0 0;
+  box-shadow:0 -18px 48px rgba(0,0,0,.46);
+  padding:var(--s-xl);
+  padding-bottom:calc(var(--s-xl) + env(safe-area-inset-bottom,0px));
+  animation:csRise 260ms var(--ease) both;
+}
+.cs-sheet:focus{outline:none}
+.cs-sheet:focus-visible{outline:2px solid var(--ink-1);outline-offset:-3px}
+.cs-top{display:flex;align-items:center;gap:var(--s-lg);
+  margin:0 0 var(--s-xl)}
+.cs-title{flex:1;margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em;
+  color:var(--ink-1)}
+.cs-close{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-pill);
+  display:flex;align-items:center;justify-content:center;padding:0;border:0;
+  background:var(--inner);color:var(--ink-2);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease)}
+.cs-close svg{width:17px;height:17px}
+.cs-close:active{transform:scale(.94)}
+.cs-close:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+/* The first charge row already carries the sheet's own top padding. */
+.cs-sheet .charges li:first-child{padding-top:0}
+/* The receipt's one action: on to /in. A group's interval above it. */
+.receipt .receipt-go{margin-top:var(--s-2xl)}
+
+@keyframes csFade{from{opacity:0}to{opacity:1}}
+@keyframes csRise{from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:none}}
+
+/* Above a phone the sheet stops being a sheet: centred, fully rounded, and off
+   the bottom edge, because there is no thumb to reach from down there. */
+@media (min-height:700px) and (min-width:560px){
+  .cs-scrim{align-items:center;padding:var(--s-2xl)}
+  .cs-sheet{border-radius:var(--r-panel);
+    box-shadow:0 24px 64px rgba(0,0,0,.5);
+    animation-name:csPop}
+  @keyframes csPop{from{opacity:0;transform:translateY(10px) scale(.985)}
+    to{opacity:1;transform:none}}
+}
+
+/* The sheet's motion is decoration on a surface that takes money — first thing
+   to go when the reader has asked for less of it. */
+@media (prefers-reduced-motion:reduce){
+  .cs-scrim,.cs-sheet{animation:none}
+}
+
+/* ============================================================================
+   /in — the membership, after it has been bought.
+
+   Deliberately NOT a second checkout. The page's job is to reassure and to
+   hold one string the member will need, so nothing on it is a figure display
+   and nothing takes money. It reuses the checkout's own panels and type rather
+   than inventing a third surface language for one screen.
+   ============================================================================ */
+.ms-head{text-align:left}
+.ms-state{margin:0 0 var(--s-md);color:var(--ink-3)}
+.ms-title{margin:0;font-size:24px;font-weight:700;letter-spacing:-.025em;
+  line-height:1.2;color:var(--ink-1)}
+.ms-sub{margin:var(--s-md) 0 0}
+
+.ms-facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ms-facts li{display:flex;flex-direction:column;gap:3px;padding:var(--s-lg) 0}
+.ms-facts li:first-child{padding-top:0}
+.ms-facts li + li{border-top:1px solid var(--hair-lit)}
+.ms-facts b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
+.ms-facts span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.ms-locked{margin:var(--s-lg) 0 0;padding-top:var(--s-lg);
+  border-top:1px solid var(--hair-lit)}
+
+/* THE REFERENCE IS CONTENT, NOT A CAPTION. It is the only proof of the charge
+   outside a bank statement, and the member has to be able to read it aloud or
+   select it cleanly — so it breaks on any character rather than overflowing,
+   and it carries the tabular figures the rest of the build uses for money. */
+.ms-ref{margin:0 0 var(--s-lg);font-size:15px;font-weight:700;
+  letter-spacing:.01em;line-height:1.45;color:var(--ink-1);
+  overflow-wrap:anywhere;user-select:all}
+.ms-note{margin:var(--s-lg) 0 0}
+.ms-drill{margin-top:var(--s-lg)}
+.ms-see{margin-top:var(--s-md)}
+.ms-cta{margin-top:var(--s-lg)}
+
+/* ============================================================================
+   THE PHONE STEP — who is buying, before what they are buying.
+
+   A form on a surface that takes money, so every control is at reading size
+   and nothing is decorated: 16px on the inputs specifically, because iOS Safari
+   zooms the viewport on focus at anything smaller and a zoomed checkout is a
+   checkout the reader has to pinch back out of mid-purchase.
+   ============================================================================ */
+.ph{display:flex;flex-direction:column}
+.ph-lede{margin:0 0 var(--s-xl);font-size:15px;font-weight:500;line-height:1.5;
+  color:var(--ink-2)}
+.ph-label{display:block;margin:0 0 var(--s-md);font-size:13px;font-weight:600;
+  letter-spacing:.005em;color:var(--ink-3)}
+/* The second label opens a new field group under the first. */
+.ph-label-2{margin-top:var(--s-xl)}
+/* The country code is a fixed affordance, not an editable field: this build
+   serves one town in Virginia, and an international picker would be a control
+   with one useful row in it. */
+.ph-field{display:flex;align-items:center;gap:var(--s-md);
+  padding:0 var(--s-lg);border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair-lit);
+  transition:border-color 150ms var(--ease)}
+.ph-field:focus-within{border-color:var(--ink-2)}
+.ph-cc{flex:0 0 auto;font-size:16px;font-weight:600;color:var(--ink-4)}
+.ph-input{flex:1;min-width:0;min-height:52px;padding:0;border:0;background:none;
+  font:inherit;font-size:16px;font-weight:600;letter-spacing:0;color:var(--ink-1)}
+.ph-input:focus{outline:none}
+.ph-input::placeholder{color:var(--ink-4);font-weight:500}
+/* The code is read back digit by digit off a lock screen, so it is spaced like
+   a code rather than set like a word. */
+.ph-code{letter-spacing:.28em;font-size:19px}
+
+/* ══ OPTIONAL, AND BUILT TO LOOK IT ═══════════════════════════════════════
+   Unchecked by default and never a gate — see PhoneStep's header on why
+   bundling marketing consent into a required field is not available to us.
+   A real checkbox rather than a styled span: it is a consent control, and the
+   platform's own affordance is the one a reader already trusts. */
+/* What the number will be used for, stated under the field. Not a control —
+   it is the disclosure that lets the seat texts ride the number. */
+.ph-tx{margin:var(--s-md) 0 0;color:var(--ink-3)}
+.ph-opt{display:flex;align-items:flex-start;gap:var(--s-md);
+  margin:var(--s-lg) 0 0;cursor:pointer}
+.ph-opt input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;
+  accent-color:var(--maroon);cursor:pointer}
+.ph-opt span{font-size:13px;font-weight:500;line-height:1.45;color:var(--ink-3)}
+.ph-opt input:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+
+.ph .action{margin-top:var(--s-xl)}
+.ph-back{margin:var(--s-lg) 0 0;padding:0;border:0;background:none;font:inherit;
+  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px}
+.ph-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+/* Always in the DOM so the live region exists before it has anything to say —
+   a region inserted at the same moment as its text is frequently not announced.
+   Collapses to nothing when empty rather than holding a gap. */
+.ph-err{margin:0;color:var(--ink-2)}
+.ph-err:empty{margin:0}
+
+/* Who the seat is being held for, restated above the charge. */
+.cs-who{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--s-md);
+  margin:0 0 var(--s-xl);padding-bottom:var(--s-lg);
+  border-bottom:1px solid var(--hair-lit);
+  font-size:13px;font-weight:500;color:var(--ink-3)}
+.cs-who b{font-size:15px;font-weight:700;color:var(--ink-1)}
+/* The number beside the name: same size, a step quieter, so the line reads
+   person-then-account rather than two competing facts. */
+.cs-phone{font-size:15px;font-weight:500;color:var(--ink-3)}
+.cs-change{margin-left:auto;padding:0;border:0;background:none;font:inherit;
+  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px}
+.cs-change:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+
+/* ============================================================================
+   THE CHECKOUT ON A DESKTOP — ONE GRID, THE OBJECT AND ITS PRICE.
+
+   Sam, 14 Sep 2026: "/impeccable layout for this page." Looked at in his
+   screenshot: a 435px strip of photographs across the whole window on a page
+   PRODUCT.md calls "the decision and nothing else", the card straddling that
+   strip's bottom edge at an arbitrary spot, the back control floating mid-band
+   (it inherited the card's computed margin-left), and under it two columns
+   whose left half had just been handed the pitch's 224px statement cards,
+   stacked. Nothing on the page shared an edge with anything else.
+
+   ══ THE SPATIAL THESIS ══════════════════════════════════════════════════════
+   A checkout is two columns and has always been: WHAT YOU ARE BUYING on the
+   left, WHAT IT COSTS on the right, sticky. So `.column` itself becomes the
+   grid on this route, and the photographs stop being a page-wide strip: they
+   become the tile the card sits on, at the top of the left column — the object
+   on its own ground, at the same width as the argument beneath it. Below it,
+   the three benefits as three divided rows (a checkout reads a list, not a
+   statement), the scope strip, then the guarantee and the two doors as a row.
+   The decision panel spans every row on the right and stays on screen.
+
+   `.rs-split{display:contents}` here — its three wrappers become the grid's
+   own items — and the phone never sees any of it. `:has(#checkout)` carries
+   an id, (1,·,·), so nothing in layout.css or pitch.css can take these back.
+   ============================================================================ */
+@media (min-width:1024px){
+  .column:has(#checkout){
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 460px;
+    grid-template-rows:auto auto auto;
+    column-gap:48px;row-gap:var(--s-2xl);
+    width:min(1180px,calc(100% - 96px));max-width:none;
+    margin-inline:auto;padding:48px 0 64px;
+    align-items:start;
+  }
+  .column:has(#checkout) > .rs-split{display:contents}
+
+  /* ── the object on its ground ─────────────────────────────────────────── */
+  .column:has(#checkout) > .hero-band.is-compact{
+    grid-column:1;grid-row:1;
+    position:relative;width:auto;max-width:none;margin:0;
+    min-height:340px;padding:var(--s-2xl);
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-panel);overflow:hidden;
+    /* Its own edge on the field; the photographs inside are the fill. */
+    box-shadow:var(--rest);
+  }
+  .column:has(#checkout) > .hero-band.is-compact > .mosaic{
+    position:absolute;inset:0;margin:0;height:auto;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(2,minmax(0,1fr));
+  }
+  /* A flat, deep veil rather than the phone's fade-to-page: this is a tile
+     with edges, not a band that dissolves into the column beneath it. The
+     card is a dark maroon object and needs a quiet room, not a bright one. */
+  .column:has(#checkout) > .hero-band.is-compact > .mosaic::after{
+    background:linear-gradient(180deg,rgba(18,10,14,.58) 0%,rgba(18,10,14,.72) 100%);
+  }
+  .column:has(#checkout) > .hero-band.is-compact > .reserve-card{
+    position:relative;z-index:1;margin:0;width:100%;max-width:420px;
+  }
+  /* `margin:0`, the whole shorthand: the compact rule's `margin:150px 0 0
+     calc(...)` reached this control through `:not(.mosaic)` and the earlier
+     override only zeroed margin-top — which is how the back chevron came to
+     float 1,200px from the left edge. */
+  .column:has(#checkout) > .hero-band.is-compact > .reserve-back{
+    position:absolute;left:var(--s-xl);top:var(--s-xl);margin:0;z-index:2;
+  }
+
+  /* ── the argument, as a checkout reads it ─────────────────────────────── */
+  .column:has(#checkout) .rs-read{grid-column:1}
+  .column:has(#checkout) .rs-decide{grid-column:2;grid-row:1 / -1}
+
+  /* Three rows, one list. The pitch states the benefits at display size; a
+     buyer with the price beside her needs them as a list she can check off.
+     Tile, figure, condition — divided by the house hairline, no card in a
+     card. Row and lead alike: the phone's stacked-tile pair and the pitch's
+     column cards are both undone here at higher weight. */
+  .rs-read .bcards{display:flex;flex-direction:column;gap:0;padding:0 var(--s-xl)}
+  .rs-read .bcard-pair{display:contents}
+  .rs-read .bcard,.rs-read .bcard.is-lead{
+    flex-direction:row;align-items:center;gap:var(--s-xl);
+    min-height:0;padding:var(--s-lg) 0;
+    background:none;border:0;border-radius:0;box-shadow:none;
+    border-top:1px solid var(--hair-lit);
+  }
+  .rs-read .bcard.is-lead{border-top:0;padding-top:0}
+  .rs-read .bcard-tile,.rs-read .bcard.is-lead .bcard-tile{
+    width:44px;height:44px;border-radius:var(--r-control)}
+  .rs-read .bcard-tile svg,.rs-read .bcard.is-lead .bcard-tile svg{width:22px;height:22px}
+  .rs-read .bcard-text{flex:1;display:flex;align-items:baseline;flex-wrap:wrap;
+    gap:var(--s-xs) var(--s-lg)}
+  .rs-read .bcard-text b,.rs-read .bcard.is-lead .bcard-text b{
+    font-size:17px;letter-spacing:-.015em;line-height:1.3}
+  .rs-read .bcard-text span,.rs-read .bcard.is-lead .bcard-text span{
+    margin:0;font-size:14px;line-height:1.4;color:var(--ink-3)}
+  /* The scope strip under the list keeps the phone's six-across glyph grid
+     (the first pitch desktop block widens it to six); only its top interval
+     closes up to the list. */
+  .rs-read .covers-head{margin-top:var(--s-lg)}
+
+  /* ── the close: the two doors as one row (the promise now sits under the
+        checkout, in the decision column — see .rs-stick) ─────────────────── */
+  .column:has(#checkout) .rs-read:last-of-type{
+    flex-direction:row;flex-wrap:wrap;gap:var(--s-lg);align-items:center}
+  .column:has(#checkout) .rs-read:last-of-type > .replay{
+    flex:0 0 auto;width:auto;max-width:none;margin:0;
+    min-height:44px;padding:0 var(--s-2xl);font-size:15px;
+    display:inline-flex;align-items:center;justify-content:center}
+}
+
+/* ============================================================================
+   /in ON A DESKTOP — the card, and what it says, side by side.
+
+   The receipt of the checkout above, so it takes the checkout's grid: the
+   object on its photo tile at the left, the details down a reading track on
+   the right. The tile stays on screen while the details scroll — this is the
+   one page where the card is literally the thing being described. The wrapper
+   is `display:contents` on a phone.
+   ============================================================================ */
+.ms-body{display:contents}
+
+@media (min-width:1024px){
+  .column:has(.ms-body){
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 520px;
+    grid-template-rows:auto;
+    column-gap:48px;
+    width:min(1180px,calc(100% - 96px));max-width:none;
+    margin-inline:auto;padding:48px 0 64px;
+    align-items:start;
+  }
+  .column:has(.ms-body) > .hero-band.is-compact{
+    grid-column:1;grid-row:1;
+    position:sticky;top:48px;
+    width:auto;max-width:none;margin:0;
+    min-height:340px;padding:var(--s-2xl);
+    display:flex;align-items:center;justify-content:center;
+    border-radius:var(--r-panel);overflow:hidden;box-shadow:var(--rest);
+  }
+  .column:has(.ms-body) > .hero-band.is-compact > .mosaic{
+    position:absolute;inset:0;margin:0;height:auto;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:repeat(2,minmax(0,1fr));
+  }
+  .column:has(.ms-body) > .hero-band.is-compact > .mosaic::after{
+    background:linear-gradient(180deg,rgba(18,10,14,.58) 0%,rgba(18,10,14,.72) 100%);
+  }
+  .column:has(.ms-body) > .hero-band.is-compact > .reserve-card{
+    position:relative;z-index:1;margin:0;width:100%;max-width:420px}
+  .column:has(.ms-body) > .hero-band.is-compact > .reserve-back{
+    position:absolute;left:var(--s-xl);top:var(--s-xl);margin:0;z-index:2}
+  .column:has(.ms-body) > .ms-body{
+    grid-column:2;grid-row:1;
+    display:flex;flex-direction:column;gap:var(--s-2xl);
+    width:auto;max-width:none;margin:0;
+  }
+  .ms-body .ms-cta .action{width:auto;min-width:300px;display:inline-flex;
+    align-items:center;justify-content:center}
+}
+
+/* The mystery row's mark: the collar's frame with a question mark in it, dashed
+   because it is not a place yet — the same idiom the network tile uses. */
+.reach-mystery{display:flex;align-items:center;justify-content:center;
+  background:var(--inner);border:1px dashed var(--hair-lit);color:var(--ink-2);
+  font-size:18px;font-weight:700;line-height:1}
+
+/* The legal footer spans both tracks of the checkout's and the membership's
+   grids, under everything. */
+@media (min-width:1024px){
+  .column:has(#checkout) > .site-foot,
+  .column:has(.ms-body) > .site-foot{grid-column:1 / -1;padding-top:var(--s-2xl)}
+  .column:has(#checkout) > .site-foot nav,
+  .column:has(.ms-body) > .site-foot nav{justify-content:flex-start}
+}
+
+/* ══ THREE PLANS, THREE ROWS ══════════════════════════════════════════════
+   Sam, 14 Sep 2026: "three rows here instead, not a row of three." Each plan
+   is a full-width tile, so its price and unit sit on one line and the year's
+   shirt plate keeps the room at its right that the 2+1 grid gave it. Later in
+   the cascade than the 2+1 rule above, same specificity. */
+.plan-pick{grid-template-columns:1fr;gap:var(--s-md)}
+.plan-pick > .plan-year{grid-column:auto}
+
+/* The everyone-else price takes its own line under the price, in the unit's
+   type — the same on all three tiles, so the year's longer figure does not
+   wrap differently from the others. */
+.plan-now{flex-wrap:wrap}
+.plan-else{flex:1 0 100%;font-size:12px;font-weight:500;color:var(--ink-4)}
+.plan-opt.is-on .plan-else{color:var(--on-maroon);opacity:.72}
+
+/* ============================================================================
+   THE CHECKOUT AS A FULL-PAGE MODAL — see shell/ReserveLayer.tsx.
+
+   Sam, 14 Sep 2026. The page inside is /reserve as it was — `.sheet-column`
+   is a `.column`, so the photo band, the two-movement desktop grid and the
+   sticky bar's clearance all apply unchanged. This block is only the frame,
+   the X, the seat count's new place, and the benefits as chips.
+   ============================================================================ */
+.reserve-layer{position:fixed;inset:0;z-index:40}
+.reserve-scrim{position:absolute;inset:0;background:rgba(10,5,8,.62);
+  animation:layerFade 180ms var(--ease) both}
+/* ══ IN AND OUT, ONE MATERIAL ══════════════════════════════════════════════
+   Sam, 15 Sep 2026: "/impeccable animate for the slide in and out." A sheet
+   is a physical thing arriving from the bottom edge: it rises on the house
+   curve — an exponential ease-out, fast off the edge and settling — under a
+   scrim that is already fading in, so the page beneath is dimmed by the time
+   the sheet covers it. Leaving is the same object going back where it came
+   from, quicker and with an ease-IN: it accelerates into the edge rather than
+   decelerating into it, because nothing is being placed. Transform and
+   opacity only; 420 in, 260 out. */
+/* ONE STEP UP FROM THE PAGE. On --page the dialog was the same dark as the
+   dimmed page behind it, and the panels inside had nothing to stand on (Sam,
+   15 Sep 2026: "the background for this pop up is a bit too dark, it's hard
+   to see the content"). --subtle is the next rung of the ramp: the panel
+   reads on it, the plan cards read on the panel. */
+.reserve-sheet{position:absolute;inset:0;
+  /* THE WHOLE MODAL, ONE RUNG LIGHTER (Sam, 15 Sep 2026: "make the modal
+     background lighter too"). The ramp is remapped inside the dialog rather
+     than the ground alone lifted, so the panels and the plan cards keep the
+     same steps above the surface they had: ground → panel → card. */
+  --page:#2A0F1C;--subtle:#341425;--card:#341425;--inner:#3E1A2E;--press:#4A2238;
+  background:var(--page);
+  animation:sheetUp 420ms var(--ease) both}
+.reserve-layer.is-closing{pointer-events:none}
+.reserve-layer.is-closing .reserve-sheet{animation:sheetDown 260ms cubic-bezier(.4,0,1,1) both}
+.reserve-layer.is-closing .reserve-scrim{animation:layerFadeOut 260ms linear both}
+@keyframes sheetDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes layerFadeOut{from{opacity:1}to{opacity:0}}
+.reserve-sheet:focus{outline:none}
+/* Its own scroller, a separate box from the animated surface: see the note
+   on fixed children in ReserveLayer.tsx. */
+.sheet-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain}
+/* Back from the app window: the modal was already open. No re-entrance. */
+.reserve-layer.is-still:not(.is-closing) .reserve-scrim,
+.reserve-layer.is-still:not(.is-closing) .reserve-sheet{animation:none}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .reserve-scrim,.reserve-sheet{animation:none}
+}
+
+/* ── the sticky header: wordmark, place, X ─────────────────────────────── */
+/* Over the scroller, not in it. Glass, because the photo band runs under it
+   at the top — the one place this build allows glass — and over the dark page
+   it composites to a deeper dark, not grey. */
+.sheet-head{position:absolute;top:0;left:0;right:0;z-index:3;
+  height:56px;display:flex;align-items:center;justify-content:center;
+  padding:0 var(--gutter);
+  /* NOT GLASS. Sam, 15 Sep 2026: "the sticky header wouldn't show until I
+     scroll." WebKit does not paint a backdrop-filter layer inside an ancestor
+     that has animated (the sheet slid up) until the next compositing pass —
+     usually a scroll. A near-opaque fill of the page needs no such pass and
+     reads the same over the band. */
+  background:color-mix(in srgb, var(--page) 94%, transparent);
+  border-bottom:1px solid var(--hair)}
+/* One word, centred on the viewport; the X sits on the right edge of the
+   same bar without pushing the word off-centre. */
+.sheet-title{margin:0;font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+.sheet-close{position:absolute;right:var(--gutter);top:50%;transform:translateY(-50%)}
+.sheet-close:active{transform:translateY(-50%) scale(.94)}
+.sheet-place{display:inline-flex;align-items:center;gap:4px;height:26px;
+  padding:0 10px 0 7px;border:1px solid var(--hair-lit);border-radius:var(--r-pill);
+  font-size:12px;font-weight:600;letter-spacing:.01em;color:var(--ink-2);white-space:nowrap}
+.sheet-place svg{width:14px;height:14px}
+.sheet-close{color:var(--ink-1);background:var(--inner);border:1px solid var(--hair)}
+/* The bar under it needs less runway than the page gave it: the bar is 88px
+   tall and the footer may sit under its fade. */
+.sheet-column:has(.sticky-cta){padding-bottom:96px}
+
+/* ── the count, under the object: a tile, not a line ───────────────────── */
+/* Sam, 14 Sep 2026: "/impeccable redesign the early bird seats taken
+   component." What was there: a 56px pill and a sentence that wrapped around
+   it, floating on the band — fine print. What this is: the card's stub. The
+   same width as the card, the number lifted so the count reads before the
+   words, a meter drawn in tens so it is a meter and not a scrollbar, and the
+   round's close date as a caption on the meter's line. Still body ink, still
+   no clock and no colour that reads as an alarm (§10): the count is Sam's
+   artificial figure and is dressed as exactly what it is. */
+/* The strip under the card (Sam, 15 Sep 2026: redesign the tile). One line of
+   body type on a quiet fill, the meter drawn as the strip's own bottom edge —
+   a continuous rule, not cells, so it cannot read as a scrollbar. */
+.seat-strip{position:relative;overflow:hidden;
+  padding:var(--s-lg) var(--s-xl) calc(var(--s-lg) + 3px);
+  background:var(--inner);border:1px solid var(--hair);border-radius:var(--r-control)}
+/* The strip leads the band now (Sam: the count above the membership), so it
+   takes the band's offset and the card follows it by one interval. */
+.hero-band.is-compact > .seat-strip{margin-top:124px}
+.hero-band.is-compact > .seat-strip + .reserve-card{margin-top:var(--s-md)}
+.seat-count{margin:0;display:flex;align-items:baseline;gap:var(--s-sm);flex-wrap:wrap;
+  font-size:14px;line-height:1.3;color:var(--ink-2)}
+.seat-count b{font-size:17px;line-height:1;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+.seat-closes{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3);white-space:nowrap}
+.seat-meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hair-lit)}
+.seat-meter i{position:absolute;inset:0;background:var(--ink-1);
+  transform-origin:left;transform:scaleX(var(--p,0))}
+
+/* ── the benefits as four chips ─────────────────────────────────────────── */
+/* Label only — the detail lines are one tap away on the pitch beneath; this
+   is the pre-checkout, and what it needs is the reminder, not the argument.
+   Selectors are as long as they are to outrank the desktop `.rs-read .bcard`
+   row rules above and the pitch's mobile panel rules, both later than the
+   base list. */
+.rs-read .panel:has(.bcards.is-chips){background:none;border:0;box-shadow:none;padding:0}
+.rs-read .panel:has(.bcards.is-chips) > .panel-label{padding:0;margin:0 0 var(--s-md)}
+.rs-read .panel:has(.bcards.is-chips) > .panel-note{padding:0;margin:var(--s-md) 0 0}
+.rs-read .panel:has(.bcards.is-chips) > .bcards{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-md);padding:0}
+.bcards.is-chips .bcard,
+.bcards.is-chips .bcard.is-lead,
+.bcards.is-chips > .bcard:first-child{
+  align-items:center;gap:var(--s-md);padding:var(--s-md) var(--s-lg);
+  border:1px solid var(--hair);border-radius:var(--r-control);background:var(--inner)}
+.bcards.is-chips .bcard .bcard-tile,
+.bcards.is-chips .bcard.is-lead .bcard-tile{width:28px;height:28px;border-radius:var(--r-sm);box-shadow:none}
+.bcards.is-chips .bcard .bcard-tile svg,
+.bcards.is-chips .bcard.is-lead .bcard-tile svg{width:16px;height:16px}
+.bcards.is-chips .bcard .bcard-text{display:block;flex:1;min-width:0}
+.bcards.is-chips .bcard .bcard-text b,
+.bcards.is-chips .bcard.is-lead .bcard-text b{font-size:14px;letter-spacing:-.01em}
+.bcards.is-chips .bcard .bcard-text span,
+.bcards.is-chips .bcard.is-lead .bcard-text span{display:none}
+
+@media (min-width:1024px){
+  /* The tile stacks card over count; the X keeps to the tile's top-right. */
+  .column:has(#checkout) > .hero-band.is-compact{flex-direction:column;gap:var(--s-md)}
+  .column:has(#checkout) > .hero-band.is-compact > .seat-strip{
+    position:relative;z-index:1;margin:0;width:100%;max-width:420px}
+  /* The header is 56px of glass; the grid starts under it. */
+
+}
+
+/* The refund under the plan tiles (14 Sep audit). A term, in the quiet ink,
+   one interval under the lock line. */
+.plan-refund{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl);color:var(--ink-3)}
+
+/* ── the footer's brand row (checkout only) ───────────────────────────────── */
+.site-foot.has-brand{display:flex;flex-direction:column;align-items:center;gap:var(--s-lg);
+  padding-top:var(--s-2xl)}
+.foot-brand{display:inline-flex;align-items:center;gap:var(--s-md);margin:0}
+.foot-logo{display:block;height:20px;width:auto;color:var(--ink-1)}
+
+/* ── the four chips: two equal rows ───────────────────────────────────────── */
+/* "Points toward rewards" wraps to two lines and made its row 14px taller
+   than the row above it — four chips at two heights read as a mistake.
+   Equal rows, and the label centred in whatever height the row has. */
+.rs-read .panel:has(.bcards.is-chips) > .bcards{grid-auto-rows:1fr;align-items:stretch}
+.bcards.is-chips .bcard{min-height:56px}
+/* The block's head in the modal: the one sentence-case section head this
+   page has, as on the pitch's own version of the block — not a tracked
+   caption floating over a grid of chips. */
+.rs-read .panel:has(.bcards.is-chips) > .panel-label{font-size:17px;font-weight:700;
+  letter-spacing:-.01em;text-transform:none;color:var(--ink-1)}
+
+
+/* ── where it works, on the checkout: the carousel in its own container ──── */
+.rs-where{padding-bottom:var(--s-xl)}
+.rs-where .ticker{margin-top:calc(-1 * var(--s-xs))}
+/* The rail's own gutter is the panel's gutter, so the first tile starts where
+   the label does and the fade runs off the panel's edge. */
+.rs-where .ticker-rail{padding:0 var(--s-xl)}
+.rs-where .ticker-tile{width:132px}
+/* What you get: four bullets with their glyphs, then the six marks. */
+.rs-what{margin:var(--s-xl) var(--s-xl) var(--s-md);color:var(--ink-3)}
+.rs-list{list-style:none;margin:0 var(--s-xl);padding:0;display:flex;flex-direction:column;gap:var(--s-md)}
+.rs-list li{display:flex;align-items:center;gap:var(--s-lg);font-size:15px;line-height:1.35;color:var(--ink-2)}
+.rs-list li b{font-weight:700;color:var(--ink-1)}
+.rs-li-icon{flex:0 0 auto;width:34px;height:34px;border-radius:var(--r-sm);
+  display:grid;place-items:center;background:var(--inner);border:1px solid var(--hair);color:var(--ink-2)}
+.rs-li-icon svg{width:18px;height:18px;display:block}
+.rs-covers{margin:var(--s-xl) var(--s-xl) 0}
+.rs-covers .covers-head{margin:0 0 var(--s-md);color:var(--ink-3)}
+.rs-covers .covers{grid-template-columns:repeat(6,1fr);gap:var(--s-md) var(--s-sm)}
+@media (max-width:420px){.rs-covers .covers{grid-template-columns:repeat(3,1fr)}}
+.rs-where > .panel-note{margin-top:var(--s-md)}
+/* No card dress on the container's outer ring at desktop either — the panel
+   is the container; the pitch's card-row rules keyed on .bcards no longer
+   match anything here. */
+
+/* ── the desktop pop-up ─────────────────────────────────────────────────────
+   Sam, 15 Sep 2026: "this should be a pop up on desktop not a modal that
+   slides up from the bottom … /impeccable animate for the fade in and out …
+   have the background be darker when the pop up is displaying." Below 1024
+   the sheet is unchanged. From 1024 the same surface is a window: centred,
+   inset from the viewport, rounded, and it ARRIVES rather than slides — a
+   fade with a 3.5% settle on the house curve, 240ms, over a scrim that goes
+   to 78% so the page beneath reads as scenery. Leaving is the reverse at
+   180ms with an ease-in. The header and the scroller are unchanged: they are
+   absolute inside the surface and follow it. */
+@media (min-width:1024px){
+  .reserve-scrim{background:rgba(6,3,5,.64)}
+  .reserve-sheet{
+    inset:auto;top:50%;left:50%;
+    width:min(1180px,calc(100vw - 64px));
+    height:min(calc(100vh - 56px),980px);
+    transform:translate(-50%,-50%);
+    border-radius:var(--r-panel);overflow:hidden;
+    border:1px solid var(--hair-lit);
+    box-shadow:0 40px 120px -20px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04) inset;
+    animation:rsPopIn 240ms var(--ease) both;
+  }
+  .reserve-layer.is-closing .reserve-sheet{animation:rsPopOut 180ms cubic-bezier(.4,0,1,1) both}
+  .reserve-layer.is-closing .reserve-scrim{animation:layerFadeOut 180ms linear both}
+  .reserve-layer.is-still:not(.is-closing) .reserve-sheet{animation:none}
+}
+/* NAMED FOR THIS FILE. `popIn` already exists in how.css (a plain rise); a
+   second `popIn` here, loaded later, replaced it site-wide and put the deck's
+   QR code 48px off its mark (15 Sep 2026). Keyframe names are global. */
+@keyframes rsPopIn{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.965)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes rsPopOut{
+  from{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  to{opacity:0;transform:translate(-50%,-50%) scale(.975)}
+}
+@media (prefers-reduced-motion:reduce){
+  .reserve-layer.is-closing .reserve-sheet,.reserve-layer.is-closing .reserve-scrim{animation:none}
+}
+
+
+/* ── bring a friend (the page after the purchase) ─────────────────────────── */
+.ms-refer-lede{margin:0;font-size:15px;line-height:1.5;color:var(--ink-2);text-wrap:pretty}
+.ms-refer-lede b{font-weight:700;color:var(--ink-1)}
+.ms-refer-link{display:flex;align-items:center;gap:var(--s-md);margin:var(--s-lg) 0 0;
+  padding:var(--s-sm) var(--s-sm) var(--s-sm) var(--s-lg);
+  border:1px solid var(--hair-lit);border-radius:var(--r-control);background:var(--inner)}
+.ms-refer-url{flex:1;min-width:0;font:500 13px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-refer-copy{flex:0 0 auto;height:34px;padding:0 var(--s-lg);border:0;border-radius:var(--r-sm);
+  background:var(--card);color:var(--ink-1);font:600 13px/1 var(--font);cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.ms-refer-copy:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+.ms-refer-share{margin-top:var(--s-lg)}
+.ms-refer-track{display:flex;align-items:center;gap:var(--s-lg);margin:var(--s-lg) 0 0;
+  font-size:13px;font-weight:500;color:var(--ink-3)}
+.ms-refer-track .tnum{font-weight:700;color:var(--ink-1)}
+.ms-refer-meter{position:relative;flex:1 1 auto;max-width:160px;height:3px;border-radius:2px;
+  background:var(--hair-lit);overflow:hidden}
+.ms-refer-meter i{position:absolute;inset:0;background:var(--ink-1);transform-origin:left;
+  transform:scaleX(var(--p,0))}
+.ms-refer > .ms-note{margin-top:var(--s-md)}
+
+
+/* ============================================================================
+   THE COMPACT CHECKOUT — 15 Sep 2026. A dialog on the desktop, a sheet that is
+   not the whole screen on a phone; inside, the card, the count, the plans,
+   the checklist and the guarantee. The header and the scroller are in flow
+   now, so the surface takes the height of its content.
+   ========================================================================== */
+.reserve-sheet{display:flex;flex-direction:column}
+.sheet-head{position:relative;flex:0 0 auto}
+.sheet-scroll{position:relative;inset:auto;flex:1 1 auto;min-height:0}
+.sheet-column.column{padding-top:var(--s-xl);padding-bottom:var(--s-2xl)}
+.sheet-column.column > .rs-modal{width:100%}
+@media (max-width:1023px){
+  .reserve-sheet{inset:auto 0 0 0;height:auto;max-height:92vh;
+    border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
+  .reserve-scrim{background:rgba(6,3,5,.6)}
+}
+@media (min-width:1024px){
+  /* Sam, 15 Sep 2026: "more of a horizontal layout for this on desktop."
+     Two movements side by side: the argument (the card, the count, what you
+     get, the guarantee) down the left, the decision (the plans and the one
+     button) on the right, each column as tall as the other. The dialog
+     widens to carry both; nothing scrolls until the window is short. */
+  .reserve-sheet{width:min(1000px,calc(100vw - 48px));height:auto;max-height:calc(100vh - 48px)}
+  .sheet-column.column{padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
+}
+.rs-modal{display:flex;flex-direction:column;gap:var(--s-lg)}
+.rs-card > *{max-width:320px;margin:0 auto}
+.rs-seats{margin:0;text-align:center;font-size:14px;font-weight:500;color:var(--ink-2);text-wrap:balance}
+.rs-seats b{font-size:17px;font-weight:700;color:var(--ink-1)}
+.rs-seats-close{color:var(--ink-3)}
+.rs-modal > .checkout{margin:0}
+.rs-includes{list-style:none;margin:var(--s-sm) 0 0;padding:0 var(--s-sm);display:flex;flex-direction:column;gap:var(--s-md)}
+.rs-includes li{display:flex;align-items:flex-start;gap:var(--s-md);font-size:14px;line-height:1.4;color:var(--ink-2)}
+.rs-includes svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px;color:var(--ink-1)}
+.rs-includes b{font-weight:700;color:var(--ink-1)}
+.rs-modal > .rs-closing{margin:var(--s-sm) 0 0}
+
+/* The two-column modal, AFTER the base rules above so source order lets it win
+   (the first cut sat above them and lost, 15 Sep 2026). */
+@media (min-width:1024px){
+  /* The column primitive caps its width and its children's for the phone;
+     inside the dialog the grid needs the whole 1000px. */
+  .sheet-column.column{max-width:none;width:100%}
+  .sheet-column.column > .rs-modal{max-width:none;width:100%}
+  .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
+    grid-template-areas:"seats plans" "card plans" "includes plans" "closing plans";
+    grid-template-rows:auto auto 1fr auto;
+    column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
+  .rs-card{grid-area:card}
+  /* The card at the size you would hold one, centred over its count;
+     the panels beneath take the column. */
+  .rs-card > *{max-width:380px;margin:0 auto}
+  .rs-seat-card{grid-area:seats;max-width:380px;width:100%;margin:0 auto}
+  /* POLISH, 15 Sep 2026 ("layout still seems a bit off on desktop"). The
+     right column ended 50px short of the left, so the two movements did not
+     finish together. The panel now stretches to the row and is a flex
+     column: the plans at its head, the two lines under them, and the button
+     seated at its foot — on the same baseline as the refund card. */
+  .rs-modal > .checkout{grid-area:plans;align-self:stretch;display:flex;flex-direction:column;
+    position:static}
+  .rs-modal > .checkout > .plan-refund{margin-top:0}
+  .rs-modal > .checkout > .pay-slot{margin-top:auto;padding-top:var(--s-lg)}
+  /* The left column, one rhythm: the count sits close under the card, the
+     checklist one interval below it, the guarantee at the foot. */
+  .rs-modal > .rs-includes-panel{grid-area:includes;margin:0}
+  .rs-modal > .rs-closing{grid-area:closing;align-self:end;margin:0}
+}
+
+/* The referral head: the sentence beside the shirt it earns. */
+.ms-refer-head{display:flex;align-items:center;gap:var(--s-lg)}
+.ms-refer-head .ms-refer-lede{flex:1;min-width:0}
+.ms-refer-tee{--tee-h:88px;flex:0 0 auto}
+
+/* ── the docked Checkout, phone only ──────────────────────────────────────── */
+/* Sticky to the sheet's foot while the real button is below the fold; slides
+   away when it is on screen. Bleeds to the sheet's edges over its own fade. */
+/* PINNED TO THE SCROLLER'S OWN BOTTOM. A negative offset here pushed the
+   button's lower half past the sheet's clipped edge on a phone (Sam, 15 Sep
+   2026: "the checkout sticky button doesn't seem to be showing correctly").
+   bottom:0 keeps the whole control inside the visible sheet. */
+.rs-dock{position:sticky;bottom:0;z-index:5;
+  margin:var(--s-md) calc(-1 * var(--gutter)) 0;
+  padding:var(--s-lg) var(--gutter) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,rgba(42,15,28,0) 0%,var(--page) 45%);
+  transition:transform 200ms var(--ease),opacity 200ms var(--ease)}
+.rs-dock .action{margin:0}
+.rs-dock.is-away{transform:translateY(110%);opacity:0;pointer-events:none}
+@media (min-width:1024px){.rs-dock{display:none}}
+@media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
+
+/* What you get, as a panel: the list's own inset, one row per benefit. */
+.rs-modal > .rs-includes-panel{margin:0;padding-bottom:var(--s-xl)}
+.rs-includes-panel > .panel-label{margin-bottom:var(--s-md)}
+.rs-includes-panel .rs-list{margin:0 var(--s-xl);gap:var(--s-md)}
+.rs-includes-panel .rs-list li{font-size:14px;line-height:1.35}
+
+/* ── the count card ───────────────────────────────────────────────────────── */
+.rs-seat-card{padding:var(--s-md) var(--s-lg) var(--s-lg);
+  border:1px solid var(--hair);border-radius:var(--r-control);background:var(--inner)}
+.rs-seat-line{display:flex;align-items:baseline;gap:var(--s-sm);flex-wrap:wrap;margin:0;
+  font-size:14px;line-height:1.3;color:var(--ink-2)}
+.rs-seat-line b{font-size:20px;line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--ink-1)}
+/* One continuous bar (Sam, 15 Sep 2026: "a single line, not little blocks"),
+   rounded, the fill scaled from the left so the fraction is exact. */
+.rs-meter{position:relative;display:block;height:5px;margin-top:var(--s-md);border-radius:3px;
+  background:var(--hair-lit);overflow:hidden}
+.rs-meter i{position:absolute;inset:0;border-radius:3px;background:var(--ink-1);transform-origin:left;
+  transform:scaleX(var(--p,0))}
+/* The date, under the bar, as a caption. */
+.rs-seat-close{margin:var(--s-sm) 0 0;font-size:12px;font-weight:500;letter-spacing:.01em;color:var(--ink-3)}

@@ -1,0 +1,108 @@
+{
+  "model": {
+    "percentOff": 0.15,
+    "credit": 5,
+    "creditMin": 10,
+    "pointsPerDollar": 10,
+    "pointValue": 0.01,
+    "plusPlaces": 5,
+    "visitSize": 15
+  },
+  "anchor": {
+    "monthlySpend": 300,
+    "alcoholShare": 0.5,
+    "nonAlcoholSpend": 150
+  },
+  "illustration": {
+    "spend": 300,
+    "alcoholShare": 0.5,
+    "nonAlcohol": 150,
+    "visit": 15,
+    "visits": 20,
+    "places": 5,
+    "percent": 22.5,
+    "credit": 100,
+    "points": 30,
+    "steady": 152.5,
+    "firstMonth": 127.5,
+    "price": 4.99,
+    "net": 147.51
+  },
+  "atOnePlace": {
+    "twiceAMonth": {
+      "spend": 30,
+      "alcoholShare": 0,
+      "credit": 10,
+      "percent": 4.5,
+      "points": 3,
+      "total": 17.5
+    },
+    "weekly": {
+      "spend": 60,
+      "alcoholShare": 0,
+      "credit": 20,
+      "percent": 9,
+      "points": 6,
+      "total": 35
+    }
+  },
+  "band": {
+    "100": {
+      "saving": 45.75,
+      "weekly": 11.44,
+      "netMonthly": 40.76,
+      "visits": 6,
+      "places": 2,
+      "firstMonth": 35.75
+    },
+    "150": {
+      "saving": 76.25,
+      "weekly": 19.06,
+      "netMonthly": 71.26,
+      "visits": 10,
+      "places": 3,
+      "firstMonth": 61.25
+    },
+    "200": {
+      "saving": 99.13,
+      "weekly": 24.78,
+      "netMonthly": 94.14,
+      "visits": 13,
+      "places": 4,
+      "firstMonth": 79.13
+    },
+    "250": {
+      "saving": 122,
+      "weekly": 30.5,
+      "netMonthly": 117.01,
+      "visits": 16,
+      "places": 4,
+      "firstMonth": 102
+    },
+    "300": {
+      "saving": 152.5,
+      "weekly": 38.13,
+      "netMonthly": 147.51,
+      "visits": 20,
+      "places": 5,
+      "firstMonth": 127.5
+    },
+    "400": {
+      "saving": 168.25,
+      "weekly": 42.06,
+      "netMonthly": 163.26,
+      "visits": 26,
+      "places": 5,
+      "firstMonth": 143.25
+    },
+    "600": {
+      "saving": 205,
+      "weekly": 51.25,
+      "netMonthly": 200.01,
+      "visits": 40,
+      "places": 5,
+      "firstMonth": 180
+    }
+  },
+  "rule": "15% applies to everything except alcohol. Points and credit EARN on everything, alcohol included. Credit may not be SPENT on alcohol, which does not change what is accrued. Credit is capped at one per week per Plus place = 20 a month."
+}

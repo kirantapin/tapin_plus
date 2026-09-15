@@ -1,0 +1,260 @@
+/* ============================================================================
+   The world.
+
+   THIS HEADER USED TO CITE A RULE THAT DOES NOT EXIST. It read: "One committed
+   dark surface — this is the product's spec, not a preference, so there is no
+   light theme (docs/TRUTH.md §9)." Checked, 12 Sep 2026: `grep -n "light
+   theme" docs/TRUTH.md` returns nothing. §9's only words about the field are
+   inside a neutrals bullet — "Hokie Stone Gray #75787B, Yardline White
+   #FFFFFF, on a dark field (#120A0E in the old build)" — which is provenance
+   about the OLD build, not a prohibition. The ban was written here, in a code
+   comment, and then given a section number it was never entitled to. A comment
+   that cites a document for its own assertion is worse than an uncited one: it
+   reads as governance and survives review unchallenged. It did — it was quoted
+   back to Sam as a rule he would be overriding.
+
+   WHAT §9 ACTUALLY CONSTRAINS, and all of it still holds:
+     - Chicago Maroon only. No orange, including the wordmark dot.
+     - Maroon is a FILL that carries white (9.19:1) and never dark ink (2.13:1).
+       Note what that does NOT say: it governs ink ON maroon, not maroon as ink
+       on some other ground. On a light field maroon measures 9.19:1 on white,
+       so maroon-as-text becomes newly available — a capability, not a breach,
+       and one worth spending carefully.
+     - Hokie Stone Gray is non-text. It fails AA for body text on dark (4.00:1
+       on --card) and on light (4.44:1 on white), so the rule survives its own
+       contrast argument in both worlds. scripts/guards.py stays as written.
+     - "One authored animated dark ground", and "text never sits on the bare
+       moving ground — it sits on glass". This is the real constraint any light
+       surface has to answer, because §9 specifies the ground as dark.
+
+   Every value here is either quoted from TRUTH.md, recovered from TapIn's own
+   ~/desktop-ui/DESIGN.md, or measured. Nothing is picked by eye.
+   ============================================================================ */
+
+/* Gilroy is TapIn's face and is not on Google Fonts. Four weights plus Heavy.
+   Heavy takes a SEPARATE FAMILY NAME on purpose: registering it as Gilroy@800
+   silently re-faced every existing bold in the merchant app. And the weight is
+   a single value, never a `100 900` range — a browser that cannot parse the
+   range drops the rule and falls back to plain Gilroy. That happened on Sam's
+   phone (~/desktop-ui/src/index.css:80-92). */
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Medium.woff") format("woff");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-SemiBold.woff") format("woff");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Bold.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy Heavy";src:url("/fonts/Gilroy-Heavy.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+
+:root{
+  /* Tells the UA which world its own paint belongs to — form controls, the
+     scrollbar, the flash before first paint. Without it the light app would
+     get a dark native scrollbar down its white edge. */
+  color-scheme:dark;
+
+  /* -- surfaces -------------------------------------------------------------
+     A five-step tonal ramp. --page is TRUTH §9's canonical field; the steps
+     above it are Sam's own dark-reference.html values (--canvas-2 / --surface /
+     --surface-2) plus one continuing step, so this is his ramp coming home
+     rather than an invention. Hierarchy is carried by these steps plus
+     hairlines — NOT by elevation (DESIGN.md). */
+  --page:#120A0E;
+  --subtle:#1F0916;
+  --card:#2A0F1C;
+  --inner:#341425;
+  --press:#3E1A2E;
+
+  /* -- ink ------------------------------------------------------------------
+     One hue axis (h~347), chroma held flat, four steps. Measured on --card:
+     17.74 / 9.83 / 7.75 / 5.74 — every one clears AA for body text. */
+  --ink-1:#FFFFFF;   /* headings; the only ink that goes on maroon (9.19:1) */
+  --ink-2:#C9BEC3;
+  --ink-3:#B2A9AD;
+  --ink-4:#9A9094;
+
+  /* Chicago Maroon. A FILL that carries white, never dark ink (2.13:1), and
+     never type on a dark surface — it measures 1.93:1 on --card.
+
+     SPENT ONLY ON A CHOSEN OR ACTING THING. The rule started as "twice: the
+     wordmark dot and the Reserve button" and the build has outgrown the count,
+     so here is the rule the count was standing in for. A solid maroon fill is
+     allowed on: the action that takes money, the option a reader has chosen
+     (.band.on), a membership mark (the PLUS chip, the card's own field), and
+     one segment of the savings breakdown, which is the same quantity in three
+     values of one hue rather than three hues. It is NOT allowed as a panel
+     background, a section header, a hover state, or anything decorative — a
+     large brand-coloured block is the closest this design comes to reading as
+     university livery, which §10 rules out. Derived tints via color-mix are a
+     different thing and are not counted here. Eight solid uses as of this
+     writing; if a ninth does not fit one of those roles, it is decoration. */
+  --maroon:#861F41;
+
+  /* THE WORDMARK'S DOT. Sam, 14 Sep 2026: "we can make the dot in the tapin
+     logo the brighter red color I think." On the plum panel the maroon dot was
+     nearly invisible (1.9:1). This is TapIn's own badge red from the merchant
+     app (#D14245, one of the two literals ~/desktop-ui permits), not an orange
+     — §9's "no orange" holds. Spent on the dot and nowhere else. */
+  --dot:#D14245;
+
+  /* THE INK MAROON CARRIES, AND IT IS NOT A THEME VALUE. §9: maroon is a fill
+     that carries white (9.19:1) and never dark ink (2.13:1). That is a property
+     of the PAIR, so it cannot come from the ink ramp — and when the app surface
+     went light it did exactly that: `.action` reads `--ink-1`, which now
+     resolves to near-black, and the Reserve button shipped a near-black label
+     on maroon at 2.13:1. This token is declared once and never overridden, so
+     the rule holds on whichever surface the fill lands. */
+  --on-maroon:#FFFFFF;
+
+  /* Hokie Stone Gray is NON-TEXT (TRUTH §9). 3.99:1 on --card, and it falls to
+     2.89:1 over glass on the lit ground. It may tint a fill or stroke an icon.
+     It must never appear on a `color:` declaration — grep before merge. */
+  --stone:#75787B;
+
+  /* -- hairlines ------------------------------------------------------------
+     --hair is the house value, hexToRgba(ink, .1). --hair-lit is for dividers
+     INSIDE a panel, where .10 measures 1.33:1 and simply vanishes. */
+  --hair:rgba(255,255,255,.10);
+  --hair-lit:rgba(255,255,255,.25);
+
+  /* Glass. A maroon-biased tint on the reference's own hue family, so it reads
+     as a warm plate rather than a grey film. Used ONLY over photography — see
+     the note in pitch.css. blur() takes a standard deviation, so 22px is already
+     a ~130px kernel; 40 averaged the whole backdrop to a constant. */
+  --glass:rgba(26,10,18,.66);
+
+  /* -- elevation ------------------------------------------------------------
+     TapIn's whole shadow vocabulary. Near-invisible on purpose: a generic card
+     shadow is ~10x heavier than this. Definition comes from the hairline. */
+  --rest:0 1px 2px rgba(20,22,24,.06);
+  --raised:0 2px 8px rgba(20,22,24,.10);
+  --float:0 4px 12px rgba(20,22,24,.13);
+
+  /* -- geometry -------------------------------------------------------------
+     Radii nest INWARD: a control inside a panel is one step tighter. */
+  --r-pill:9999px;
+  --r-panel:16px;
+  --r-card:14px;
+  --r-control:12px;
+  --r-sm:8px;
+
+  /* Spacing is DESIGN.md's documented scale: 4 / 6 / 8 / 12 / 16 / 24. The
+     half-steps are load-bearing and must not be rounded up. 22 and 30 are NOT
+     on this scale and are not used, however often the old mockup reaches for
+     them. */
+  --s-xs:4px; --s-sm:6px; --s-md:8px; --s-lg:12px; --s-xl:16px; --s-2xl:24px;
+  --gutter:24px;
+
+  --font:"Gilroy",Arial,system-ui,sans-serif;
+  --font-heavy:"Gilroy Heavy","Gilroy",Arial,sans-serif;
+
+  /* The house curve, and the house durations: 150ms answers a press, 300ms
+     slides chrome, 500ms brings a section in. */
+  --ease:cubic-bezier(.22,1,.36,1);
+
+  /* The transparent end of the field, for the fade bars that dock a button
+     over scrolling content. It exists as a token because `transparent` is
+     rgba(0,0,0,0) and the bars hardcoded the dark field's own rgba — so on a
+     light surface they faded to a grey smear instead of to the page. */
+  --page-0:rgba(18,10,14,0);
+
+  /* The ring that seats a merchant's mark on the surface behind it. White at
+     .20 on a dark field; on light it has to invert or the collar loses its
+     edge entirely. Declared here so .collar reads one token in both worlds. */
+  --collar-ring:rgba(255,255,255,.20);
+}
+
+/* ============================================================================
+   THE LIGHT SURFACE — the app, and only the app.
+
+   Sam, 12 Sep 2026: "build a light version of the app (including the preview)
+   while keeping the dark theme for the landing pages and carousels."
+
+   THIS IS A SURFACE SPLIT, NOT A USER PREFERENCE, so it is keyed on the route
+   rather than on prefers-color-scheme: `<html data-surface="app">`, set by the
+   shell. The landing pages keep §9's authored dark ground — the mosaic, the
+   night scene and the glass hero are all built on it and all live there.
+
+   WHY THE SPLIT IS DEFENSIBLE AND NOT JUST TWO LOOKS. The dark field is doing
+   a Persuade job: it is a stage, and the six photographs are the subject. The
+   app is Operate — it is read, scanned and totted up, and TapIn's real
+   merchant storefront (~/desktop-ui) is light for exactly that reason. The
+   product this page is selling IS light. So a prospect walking the preview is
+   now seeing the thing rather than a dark mock of it.
+
+   THE RAMP IS MEASURED AGAINST THE DARK ONE, not picked by eye. The dark ink
+   steps measure 17.74 / 9.83 / 7.75 / 5.74 on --card; these measure 18.57 /
+   10.11 / 7.74 / 5.78 — the same perceptual ladder with the field inverted.
+   The floor across ALL FIVE surfaces is 4.52:1, so every step clears AA body
+   text on every ground it can land on, which the dark ramp also does.
+
+   TWO §9 RULES SURVIVE INTACT, and both were checked rather than assumed:
+     - Hokie Stone Gray stays NON-TEXT. It measures 4.44:1 on --card here —
+       still short of 4.5, so the ban survives its own contrast argument in the
+       light world too and scripts/guards.py needs no exemption.
+     - Maroon stays a FILL carrying white: 9.19:1, the same number, because the
+       ratio is between the two of them and not between maroon and the page.
+       Maroon on white is also 9.19:1, which makes maroon-as-ink newly legal
+       here — a capability this file's header already anticipated. It is NOT
+       spent yet. Nothing below sets `color:var(--maroon)`; when something
+       does, it answers the same "chosen or acting thing" test as the fill.
+   ============================================================================ */
+/* ON <html> FOR THE FULL-PAGE APP, ON `.app-window` FOR THE DESKTOP WINDOW —
+   the same ramp either way, so the app is light inside its window while the
+   page beneath keeps the dark ground (AppLayer). */
+html[data-surface="app"],
+.app-window[data-surface="app"],
+.isheet-root[data-surface="app"]{
+  color-scheme:light;
+
+  /* The same five-step ramp, inverted. --card is the white the panels sit at,
+     --page the field they sit on, and --inner the tint a nested thing takes
+     INSIDE a panel — which is darker here where it was lighter on the dark
+     field, because "recessed" and "raised" swap sides when the ground does. */
+  --page:#F7F3F4;
+  --subtle:#F0E9EC;
+  --card:#FFFFFF;
+  --inner:#F6F0F2;
+  --press:#EBE1E5;
+
+  --ink-1:#1B1014;
+  --ink-2:#513C43;
+  --ink-3:#624D55;
+  --ink-4:#756069;
+
+  /* Hairlines invert too. A light surface shows an edge far more readily than
+     a dark one, so these are LOWER than the dark values, not higher: .10 black
+     on white is a visible rule where .10 white on --card is 1.33:1 and gone. */
+  --hair:rgba(27,16,20,.10);
+  --hair-lit:rgba(27,16,20,.16);
+
+  --page-0:rgba(247,243,244,0);
+  --collar-ring:rgba(27,16,20,.16);
+
+  /* The elevation tokens need no light variant — they were already TapIn's own
+     light-mode shadow values (rgba(20,22,24,.06/.10/.13)), carried over into
+     the dark build where they read as almost nothing. Here they do the job
+     they were authored for. */
+}
+
+/* ---------------------------------------------------------------------------
+   Type. The enumerated ramp is 11 12 13 14 15 16 17 18 20 22 24 26 30 32 —
+   anything outside it is drift.
+
+   Tracking follows one rule, and the shells got it backwards: NEGATIVE on
+   large text, POSITIVE on small, and ~0 through the middle. Reading copy sits
+   at 15px minimum, secondary at 13px, and 11px is legal ONLY for a tracked
+   uppercase micro-label. A phrase is not a label: if it reads as a sentence it
+   takes the reading floor, whatever container it is in.
+   --------------------------------------------------------------------------- */
+.t-display{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.06;color:var(--ink-1)}
+.t-headline{font-size:24px;font-weight:700;letter-spacing:-.025em;line-height:1.2;color:var(--ink-1)}
+.t-title{font-size:18px;font-weight:700;letter-spacing:-.015em;line-height:1.3;color:var(--ink-1)}
+.t-lead{font-size:16px;font-weight:500;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
+.t-body{font-size:15px;font-weight:400;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
+.t-compact{font-size:13px;font-weight:500;letter-spacing:.005em;line-height:1.4;color:var(--ink-3)}
+.t-label{font-size:12px;font-weight:600;letter-spacing:.025em;line-height:1.3;color:var(--ink-3)}
+/* The caption role: tracked uppercase. .08em is DESIGN.md's documented value —
+   the shells used .12em, 50% over, which reads as type set by feel. */
+.t-caption{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1.3;color:var(--ink-3)}
+
+/* Figures that line up in a column. Never on the §2 seat line, which is
+   running text that opens with a narrow 1. */
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}

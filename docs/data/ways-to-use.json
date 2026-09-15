@@ -1,0 +1,63 @@
+{
+  "artistNamesAllowed": false,
+  "slides": [
+    {
+      "id": "myspot",
+      "scene": "myspot",
+      "status": "live",
+      "dwellMs": 12000,
+      "headline": "Buy now, pick up whenever",
+      "line": "Save it to My Spot at the member price. It waits there for you.",
+      "tag": null
+    },
+    {
+      "id": "entry",
+      "scene": "entry",
+      "status": "live",
+      "headline": "Get in without the queue",
+      "line": "Buy entry or a line skip, then show it at the door. Some places scan instead.",
+      "tag": null
+    },
+    {
+      "id": "handover",
+      "scene": "handover",
+      "status": "live",
+      "headline": "Two ways to collect",
+      "line": "The kitchen pings you when it is ready. Or show your phone and they hand it over.",
+      "tag": null
+    },
+    {
+      "id": "moretown",
+      "scene": "moretown",
+      "status": "soon",
+      "headline": "More of your week",
+      "line": "The barber, the corner store, and the rest of where you already go.",
+      "tag": "Coming"
+    },
+    {
+      "id": "parties",
+      "scene": "parties",
+      "status": "soon",
+      "headline": "Members-only nights",
+      "line": "TapIn throws them, from local bands to touring headliners. You bring someone.",
+      "tag": "Coming"
+    },
+    {
+      "id": "points",
+      "scene": "points",
+      "status": "soon",
+      "headline": "Points that go somewhere",
+      "line": "Earn at each place, spend as one balance: gift cards, airline miles, credit.",
+      "dwellMs": 8600,
+      "tag": "Coming"
+    },
+    {
+      "id": "offers",
+      "scene": "offers",
+      "status": "example",
+      "headline": "Offers only members see",
+      "line": "Partners run their own, on top of the three standing benefits.",
+      "tag": "Example"
+    }
+  ]
+}

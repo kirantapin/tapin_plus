@@ -1,0 +1,284 @@
+/* ============================================================================
+   The TapIn membership card.
+
+   Premium here cannot come from metal — §9 allows exactly one brand colour and
+   START-HERE rules out the pinned mockup's gold. So the work is done by
+   MATERIAL and LIGHT: a maroon field raked from one corner into the dark, a lit
+   top edge, and a specular highlight that tracks the pointer. Swap maroon for
+   gold and this gets worse, not better, which is the test that matters.
+   ============================================================================ */
+
+.card-stage{perspective:1100px;width:100%;max-width:420px;margin:0 auto}
+
+/* ══ THE CARD IS A DARK OBJECT IN BOTH WORLDS ══════════════════════════════
+   It is a maroon card. That is true on a dark page and on a light one, and it
+   is the one thing here that is a physical thing rather than a surface — so it
+   carries its own material instead of following the page's ramp.
+
+   It used to follow it, and the light surface is what exposed that: the field
+   is raked "from one corner into the dark" by mixing maroon into var(--page),
+   which on a near-white page mixed it into near-white and left a pale pink
+   rectangle with black type on it. The ink went with it — `color:var(--ink-1)`
+   resolved to near-black, so the name on the card inverted too.
+
+   The fix is not a light-mode variant of the card. It is to say, once, that
+   this object's inside is dark: the four ink steps and both hairlines are
+   redeclared here at their dark-world values, and --page is shadowed by the
+   card's own deep tone. Every rule below then reads exactly as written and
+   needs no theme fork — and §9 is satisfied the ordinary way, because the card
+   is a maroon FILL carrying white at 9.19:1. */
+.tcard,.minicard-face{
+  --page:#120A0E;
+  --ink-1:#FFFFFF;
+  --ink-2:#C9BEC3;
+  --ink-3:#B2A9AD;
+  --hair:rgba(255,255,255,.10);
+  --hair-lit:rgba(255,255,255,.25);
+
+  /* The lit corner, named once so the falloff below can vary its alpha without
+     six nested color-mix expressions. Still derived from the token — nothing
+     here is a picked literal. */
+  --lit:color-mix(in srgb, var(--maroon) 78%, #000);
+}
+
+/* ══ THE CORNER LIGHT ══════════════════════════════════════════════════════
+   MULTI-STOP FALLOFF, for exactly the reason base.css already records about
+   the ground: "a two-stop gradient has constant slope". The card was still on
+   the two-stop version — full at 0%, `transparent` at 56% — and a ramp that
+   arrives at zero with its slope unchanged leaves a derivative discontinuity
+   the eye reads as an EDGE. That is the arc across the card's face.
+
+   It was invisible while the card was a phone element. The desktop layout took
+   it to 720x454, the same alpha ramp stretched over ~500px, and an 8-bit ramp
+   that long bands as well as breaking. Hence "the shimmer".
+
+   The stop positions are the ground's own curve, not new ones: base.css runs
+   .42/.27/.13/.04/0 at 0/22/42/62/80, which is 100/64/31/10/0 as proportions.
+   Same light, same falloff, one surface smaller. */
+.tcard,.minicard-face{
+  --card-light:radial-gradient(130% 150% at 4% -8%,
+    var(--lit) 0%,
+    color-mix(in srgb, var(--lit) 64%, transparent) 22%,
+    color-mix(in srgb, var(--lit) 31%, transparent) 42%,
+    color-mix(in srgb, var(--lit) 10%, transparent) 62%,
+    color-mix(in srgb, var(--lit) 0%, transparent) 80%);
+  /* The base the light falls on. Unchanged. */
+  --card-field:linear-gradient(148deg,
+    color-mix(in srgb, var(--maroon) 50%, var(--page)) 0%,
+    color-mix(in srgb, var(--maroon) 18%, var(--page)) 54%,
+    var(--page) 100%);
+}
+
+.tcard{
+  position:relative;display:flex;flex-direction:column;
+  /* ISO card proportions. A membership card that is not card-shaped is a box. */
+  aspect-ratio:1.586;
+  border-radius:20px;overflow:hidden;
+  padding:var(--s-xl) var(--s-2xl) var(--s-2xl);
+  background:var(--card-light),var(--card-field);
+  border:1px solid var(--hair);
+  /* A lit top edge is how a physical card reads under a lamp. It is the one
+     place this build uses an inset highlight — on an object simulating a real
+     surface, not on a flat panel, where it would be the dark-UI reflex. */
+  box-shadow:0 26px 60px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.11);
+  transform-style:preserve-3d;
+  transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform 460ms var(--ease), box-shadow 460ms var(--ease);
+  /* NO `cursor:pointer`. Nothing happens when this is clicked — it tilts under
+     a pointer and that is all. A hand cursor promises a destination the card
+     does not have, and on /reserve it sits inches above a button that does. */
+  -webkit-tap-highlight-color:transparent;
+  color:var(--ink-1);
+  /* NOT SELECTABLE (Sam, 12 Sep 2026: "I shouldn't be able to highlight this").
+     This is an object, not a document. It is tilted by dragging a pointer
+     across it — which is exactly the gesture that selects text — so the
+     interaction that makes it feel like a physical card was also the one that
+     turned it into seven highlighted words. The words are printed ON the card;
+     there is nothing here anyone would want to copy. */
+  user-select:none;-webkit-user-select:none;
+}
+/* The DROP is the one thing that does belong to the page rather than to the
+   card, because it is cast onto it. 52% black under 60px of blur is what it
+   takes to lift a dark card off a dark field; the same value on a near-white
+   one reads as a bruise. Lighter, tighter, and tinted with the field's own hue
+   so it reads as shade rather than as grey paint. */
+html[data-surface="app"] .tcard,
+.app-window[data-surface="app"] .tcard{
+  box-shadow:0 16px 38px rgba(27,16,20,.20), 0 2px 6px rgba(27,16,20,.08),
+    inset 0 1px 0 rgba(255,255,255,.11);
+}
+
+/* Following a pointer needs to feel attached, not chased. */
+.tcard.is-tilting{transition-duration:90ms}
+.tcard:active{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(.985)}
+
+/* The specular highlight that tracks the pointer — the literal shimmer, and it
+   carried the same defect as the field beneath it: three stops ending flat on
+   `transparent`, so the highlight had a visible rim instead of a soft edge. Same
+   falloff curve as the corner light, so the two read as one light source rather
+   than as a glow laid over a gradient. Slightly wider and weaker at the peak,
+   because a specular that is brighter than the lit corner reads as a second lamp. */
+.tcard-sheen{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(58% 70% at var(--lx,50%) var(--ly,50%),
+    rgba(255,255,255,.15) 0%,
+    rgba(255,255,255,.096) 22%,
+    rgba(255,255,255,.047) 42%,
+    rgba(255,255,255,.015) 62%,
+    rgba(255,255,255,0) 80%);
+  transition:opacity 320ms var(--ease);
+}
+.tcard.is-tilting .tcard-sheen{opacity:1}
+
+/* The points glyph as a watermark, cropped by the card's own edge — drawn from
+   the product's vocabulary rather than a decorative flourish.
+
+   PROPORTIONAL, NOT 232px. A card is one printed artifact: every mark on it
+   scales with the object. At a fixed 232 the glyph was 79% of the 295px card
+   on /how and 55% of the 420px one, so the small card — the one on the screen
+   that asks for money — wore the biggest star, and its top point crossed the
+   member's name. Percentages of the card's own box hold the composition at
+   every width, and pulling it further into the corner keeps it under the type
+   rather than through it. */
+.tcard-mark{
+  position:absolute;right:-11%;bottom:-28%;width:54%;height:auto;aspect-ratio:1;
+  color:rgba(255,255,255,.11);pointer-events:none;
+}
+
+/* ══ THE RAIL HAS TO FIT, AND IT DID NOT ═══════════════════════════════════
+   Measured on the close slide at 375x812: logo 64.9 + 12 + MEMBERSHIP 91.2 +
+   12 + BLACKSBURG 94.4 = 274.5 into 261 of content. **13px over**, and the
+   card is `overflow:hidden`, so the city was silently guillotined at the right
+   edge — the one word on the card that says which city this is.
+
+   The cause was tracking, not length. Both labels ran at **.16em**, which is
+   DOUBLE tokens.css's documented caption value of .08em — and that file
+   already records .12em as "50% over, which reads as type set by feel". So the
+   fix is not a hack for one breakpoint; it is the card rejoining the scale.
+   .08em at 11px recovers ~19px across the two labels, and the tighter gap
+   another 8.
+
+   11px is legal here and only here: tokens.css permits it for a TRACKED
+   UPPERCASE MICRO-LABEL, which is exactly what both of these are. */
+.tcard-rail{display:flex;align-items:center;gap:var(--s-sm);min-width:0}
+.tcard-logo{height:17px;width:auto;flex:0 0 auto;color:var(--ink-1)}
+.tcard-kind{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-2);white-space:nowrap}
+.tcard-no{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.08em;
+  color:var(--ink-2);white-space:nowrap}
+/* The city, not a serial. It sits quieter than a number would, because it is
+   the rail's counterweight rather than a thing to read. */
+.tcard-where{text-transform:uppercase;color:var(--ink-3)}
+
+/* Pushed to the lower half: the name is the subject, and it sits where a name
+   sits on a card you hand over. */
+.tcard-name{margin:auto 0 0;font-size:34px;font-weight:700;letter-spacing:-.03em;
+  line-height:1;color:var(--ink-1);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ══ THE NAME LINE AS A FIELD (the deck's close only) ══════════════════════
+   Sam, 14 Sep 2026: "they'd just click on the membership card to add their
+   name, it's optional though." The input takes .tcard-name's type wholesale
+   and sheds everything a field normally wears — box, fill, system font — so
+   an empty one is indistinguishable from the static "Your name" and a filled
+   one is her card. The caret is the only tell at rest; the caption under the
+   card says the rest. On focus the placeholder steps back to --ink-3 so the
+   words she is about to replace read as a prompt rather than as her name. */
+.tcard.is-editable{cursor:text}
+.tcard-name-input{appearance:none;-webkit-appearance:none;background:none;border:0;
+  padding:0;width:100%;min-width:0;font-family:inherit;color:var(--ink-1);
+  caret-color:var(--ink-1);outline:none;
+  /* The card is user-select:none; the field must not inherit that. */
+  user-select:text;-webkit-user-select:text}
+.tcard-name-input::placeholder{color:var(--ink-1);opacity:1}
+.tcard-name-input:focus::placeholder{color:var(--ink-3)}
+/* The house focus ring is 2px white at 2px — on the card's own field that is
+   a box drawn over the composition. A hairline seated on the card's rule
+   instead, so keyboard focus is visible without redrawing the card. */
+.tcard-name-input:focus-visible{outline:1px solid var(--hair-lit);outline-offset:8px;
+  border-radius:4px}
+
+.tcard-rule{height:1px;background:var(--hair-lit);margin:var(--s-lg) 0}
+
+.tcard-facts{display:flex;margin:0}
+.tcard-facts > div{padding-right:var(--s-2xl)}
+.tcard-facts > div + div{padding-left:var(--s-2xl);border-left:1px solid var(--hair-lit)}
+.tcard-facts dt{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+.tcard-facts dd{margin:5px 0 0;font-size:18px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-1)}
+
+/* ---------------------------------------------------------------------------
+   The mini card — the deck's spine.
+   ONE TRANSFORM PER ELEMENT. Bob and tilt live on separate layers because two
+   animations touching one property means the last one wins and the other never
+   runs at all. Their periods (5.4s / 7.1s) do not divide, so the pair never
+   settles into a visible loop.
+   --------------------------------------------------------------------------- */
+/* The same object at deck scale, and the same rule — it bobs and tilts under
+   the cursor, so a drag across it selected its logo alt-text and nothing else
+   useful. */
+.minicard{width:76px;height:48px;margin:0 auto;flex:0 0 auto;perspective:340px;
+  user-select:none;-webkit-user-select:none}
+.minicard-bob{position:relative;width:100%;height:100%;
+  animation:miniBob 5.4s ease-in-out infinite}
+.minicard-tilt{width:100%;height:100%;transform-style:preserve-3d;
+  animation:miniTilt 7.1s ease-in-out infinite}
+.minicard-face{
+  position:relative;width:100%;height:100%;border-radius:8px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--card-light),var(--card-field);
+  border:1px solid var(--hair);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.11);
+  color:var(--ink-1);
+}
+.minicard-logo{height:11px;width:auto;position:relative;z-index:1}
+.minicard-mark{position:absolute;right:-12px;bottom:-15px;width:58px;height:58px;
+  color:rgba(255,255,255,.13)}
+/* Breathes on the bob's own period, which now actually happens. */
+.minicard-shadow{position:absolute;left:12%;right:12%;bottom:-9px;height:9px;
+  border-radius:50%;background:rgba(0,0,0,.5);filter:blur(6px);
+  animation:miniShadow 5.4s ease-in-out infinite}
+
+@keyframes miniBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes miniTilt{0%,100%{transform:rotateY(-9deg)}50%{transform:rotateY(9deg)}}
+@keyframes miniShadow{0%,100%{opacity:.5;transform:scaleX(1)}50%{opacity:.28;transform:scaleX(.86)}}
+
+/* ══ AT 320 THE RAIL STILL WILL NOT HOLD THREE ═════════════════════════════
+   Tracking and sizing bought the 375 card its fit (13px over → 10px of slack),
+   but at 320 the card is only 254 wide and the rail still ran 3px past its
+   own edge. No further type reduction is available: 11px is the floor
+   tokens.css sets for a tracked uppercase micro-label, and .08em is the
+   documented tracking — going under either would be the same drift this pass
+   just corrected, one size down.
+
+   So something goes, and it is the least informative element. MEMBERSHIP is
+   the card's category, and the card says that already in its own body: PLAN
+   Founding, STARTS Spring 2027, on an ISO-proportioned object with a lockup.
+   The other two are identity — whose card it is, and which city it is for,
+   the second of which is §10's counterweight in place of a seat number.
+
+   359px, not 400: every phone from the iPhone SE2 up (375, 390, 393, 412, 430)
+   keeps Sam's full composition. Only the 320-class screens drop it, and there
+   it is a fit decision rather than a taste one. FLAGGED, not buried. */
+@media (max-width:359px){
+  .tcard-kind{display:none}
+}
+
+@media (max-width:400px){
+  .tcard{padding:var(--s-lg) var(--s-xl) var(--s-xl);border-radius:16px}
+  .tcard-logo{height:16px}
+  .tcard-name{font-size:28px}
+  .tcard-facts dd{font-size:16px}
+  .tcard-facts > div{padding-right:var(--s-xl)}
+  .tcard-facts > div + div{padding-left:var(--s-xl)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .tcard{transform:none !important;transition:none}
+  .tcard-sheen{display:none}
+  /* The mini card stays — it just stops moving. Removing it would take the
+     spine out of the deck for the readers who most need a fixed reference. */
+  .minicard-bob,.minicard-tilt,.minicard-shadow{animation:none}
+  .minicard-tilt{transform:none}
+}

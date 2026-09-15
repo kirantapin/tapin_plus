@@ -1,0 +1,461 @@
+/* ============================================================================
+   Page layout for the money path. Phone-first; on a wide screen the column
+   stays a column rather than stretching into a page the product is not.
+   ============================================================================ */
+
+.column{
+  position:relative;z-index:1;
+  max-width:480px;margin:0 auto;
+  padding:var(--s-2xl) var(--gutter) 48px;
+  display:flex;flex-direction:column;gap:var(--s-xl);
+}
+/* Rhythm, not metronome: the argument panels sit at one interval, then a wider
+   one opens before the close, so the guarantee and the action read as a
+   separate movement rather than two more sections. */
+.column > .closing{margin-top:var(--s-md)}
+
+.panel{padding:var(--s-xl)}
+.panel-label{margin:0 0 var(--s-lg)}
+
+/* A panel whose content is a full-bleed list or segment bar: the label keeps
+   its inset, the rows run to the panel's own edge so the dividers can too. */
+.panel.flush{padding:var(--s-xl) 0 0}
+/* .flush opens its bottom edge because its LAST child is expected to close it —
+   a .panel-note carries `padding: 12 16 16`. /reserve's flush panel holds only
+   the Applies-to strip, which has no note, so that panel had literally zero
+   bottom padding and its glyph labels sat on the border. The contract was
+   implicit; this makes the fallback explicit without double-padding the panels
+   that do supply a note. */
+.panel.flush:not(:has(.panel-note)){padding-bottom:var(--s-xl)}
+.panel.flush .panel-label{padding:0 var(--s-xl)}
+.panel.flush > .list,
+.panel.flush > .segments{margin-top:var(--s-lg)}
+/* A closing note inside a flush panel. The segments and rows already carry
+   their own bottom padding, so this only adds the difference. */
+/* The top inset is a full step, not a hair: the note now follows the Applies-to
+   strip, whose bottom row is a line of labels, and at --s-xs the sentence
+   collided with them and read as a fourth caption. */
+.panel.flush > .panel-note{padding:var(--s-lg) var(--s-xl) var(--s-xl);margin:0}
+
+/* -- hero ------------------------------------------------------------------ */
+/* The real lockup. Sized by height so the vector sets its own width, and it
+   takes the surface's ink through currentColor — only the dot is a token. */
+.logo{display:block;height:26px;width:auto;color:var(--ink-1)}
+/* `pretty`: the new headline stranded "go." alone on a third line at 375px.
+   Pretty pulls a word down so the last line is never one word. */
+.hero h1{margin:var(--s-xl) 0 0;text-wrap:pretty}
+/* `pretty` rather than the default: it is the one wrapping mode that costs a
+   little extra shaping work to avoid an ORPHAN, and the lead was dropping
+   "places." onto a line of its own under two full ones. */
+.hero p{margin:var(--s-lg) 0 0;max-width:34ch;text-wrap:pretty}
+/* The price, in the first viewport. Quieter than the thesis above it — it is
+   there to be found, not to lead. Balanced so it never strands "that". */
+.hero .hero-seat{margin-top:var(--s-md);max-width:none;color:var(--ink-3);
+  text-wrap:balance}
+
+/* -- the figure ------------------------------------------------------------ */
+.figure{display:flex;align-items:baseline;gap:var(--s-md);margin:0}
+.figure .amount{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1;
+  color:var(--ink-1)}
+.figure .unit{font-size:15px;font-weight:500;letter-spacing:0;color:var(--ink-3)}
+.rule{height:1px;background:var(--hair-lit);margin:var(--s-xl) 0;border:0}
+.first-month{display:flex;align-items:baseline;gap:var(--s-md);margin:0}
+.first-month .amount{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--ink-1)}
+.first-month .unit{font-size:15px;font-weight:500;color:var(--ink-3)}
+/* §7: the page must say it is an illustration in the same type as the figure.
+   That is a reading-floor sentence set in the body face beside the number —
+   not 11px fine print under it. */
+.basis{margin:var(--s-lg) 0 0}
+.basis b{color:var(--ink-2);font-weight:600}
+/* The condition rides in the same line and the same type as the disclaimer §7
+   requires — it is the other half of what makes the figure honest, so it does
+   not get quieter treatment than the sentence beside it. */
+.basis-if{color:var(--ink-2);font-weight:600}
+
+/* -- segmented benefits ---------------------------------------------------- */
+.segments{grid-template-columns:repeat(3,1fr)}
+/* Two-class specificity so it beats `.segment span` below — the detail and the
+   glyph are both spans, and the glyph must not inherit the caption's metrics. */
+.segment .seg-icon{display:block;margin:0 0 var(--s-md);color:var(--ink-3);font-size:0}
+.segment .seg-icon svg{width:22px;height:22px;display:block}
+.segment b{display:block;font-size:15px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-1)}
+/* 13px, not 11: this is the string carrying the alcohol exclusion, and a phrase
+   that reads as a sentence takes the reading floor. Setting the condition four
+   steps below the claim is the coupon-app inversion. */
+.segment span{display:block;font-size:13px;font-weight:500;line-height:1.35;
+  letter-spacing:.005em;color:var(--ink-3);margin-top:var(--s-xs);text-wrap:balance}
+
+/* -- rows ------------------------------------------------------------------ */
+.row{display:flex;align-items:center;gap:var(--s-lg);padding:var(--s-lg) var(--s-xl);
+  width:100%;text-align:left;border:0;background:none;font:inherit;color:inherit}
+.row .meta{flex:1;min-width:0}
+.row .n{display:flex;align-items:baseline;gap:var(--s-sm);min-width:0}
+/* 14px sits mid-ramp, so tracking is neutral. Negative tracking belongs on
+   large text only — the shells had it backwards on every row. */
+.row .nm{font-size:14px;font-weight:700;letter-spacing:0;color:var(--ink-1);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.row .c{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3);
+  margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The Plus mark. 11px tracked caps is exactly the house caption role, and at
+   that size the chip is 17px tall — the line box of the 14px name beside it, so
+   it sits inside the name's line instead of stretching it. */
+/* Maroon, white ink. A gilt version lived for an hour on 15 Sep 2026 and
+   Sam called it back ("looks kind of tacky … we can just revert"). */
+.plus{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:18px;
+  padding:0 7px 0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;
+  line-height:1;color:var(--on-maroon);background:var(--maroon);border-radius:var(--r-pill);
+  flex:0 0 auto;align-self:baseline}
+/* The TapIn mark inside a PLUS flag or chip (shell/PlusFlag.tsx). */
+/* Sized here AND on the element: the PNG is 96px, and a flag that inflated to
+   it on Sam's screen (15 Sep 2026) ellipsised PLUS to "…". */
+.plus-mark,.vflag .plus-mark,.plus .plus-mark{display:block;width:11px;height:11px;max-width:11px;
+  flex:0 0 auto;color:currentColor}
+.plus-word{display:block;line-height:1}
+
+/* -- ways to use ----------------------------------------------------------- */
+.way{display:block;padding:var(--s-lg) var(--s-xl)}
+.way .h{display:flex;align-items:baseline;gap:var(--s-md);flex-wrap:wrap}
+.way .h b{font-size:15px;font-weight:700;letter-spacing:0;color:var(--ink-1)}
+.way p{margin:var(--s-xs) 0 0;font-size:13px;font-weight:500;line-height:1.4;
+  letter-spacing:.005em;color:var(--ink-3)}
+/* Not fine print. The tag sits on the row in the row's own type, because the
+   difference between "your card does this" and "your card will do this" is the
+   difference between a promise and a claim. */
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1;padding:4px 8px;border-radius:var(--r-pill);flex:0 0 auto;
+  color:var(--ink-2);border:1px solid var(--hair-lit)}
+
+/* -- guarantee and the action --------------------------------------------- */
+.guarantee{margin:0;font-size:18px;font-weight:700;letter-spacing:-.015em;
+  line-height:1.35;color:var(--ink-1);text-wrap:balance}
+/* The §2 seat line, verbatim and unstyled beyond the body role. NOT tabular:
+   it is running text that opens with a narrow 1, and tabular figures punch a
+   hole beside it. */
+.seat-line{margin:var(--s-lg) 0 0;text-wrap:balance}
+/* The address under the guarantee. A link, and the only mailto in the build —
+   underlined, because a link that is only a colour change is not a link to
+   anyone who cannot see the colour. */
+/* ══ THE GUARANTEE WEARS A MARK ════════════════════════════════════════════
+   Sam, 14 Sep 2026: "maybe add some kind of icon too." The same tile the
+   benefit rows wear — 44px, the inner fill, a hairline — carrying a shield
+   with a check, seated beside the promise so the panel reads as one row of
+   the same family as the three benefits above it. Only where the tile is
+   present: /in and the pitch print the same panel without one. */
+.closing:has(.guarantee-tile){display:flex;align-items:flex-start;gap:var(--s-lg)}
+.guarantee-tile{flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair-lit);color:var(--ink-2)}
+.guarantee-tile svg{width:22px;height:22px;display:block}
+.guarantee-body{min-width:0;flex:1}
+.guarantee-contact{margin:var(--s-lg) 0 0}
+.guarantee-contact a{color:var(--ink-2);text-underline-offset:3px}
+.guarantee-contact a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+.after-action{margin:var(--s-lg) 0 0;text-align:center}
+
+/* -- disclosure ------------------------------------------------------------
+   The default on this project is one idea visible per section with the support
+   behind a tap. Built on <details> so it is keyboard-operable and searchable. */
+.drill{margin:var(--s-lg) 0 0}
+.drill > summary{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-md);list-style:none;cursor:pointer;padding:var(--s-md) 0;
+  font-size:13px;font-weight:600;letter-spacing:.005em;color:var(--ink-3);
+  -webkit-tap-highlight-color:transparent;transition:color 150ms var(--ease)}
+.drill > summary::-webkit-details-marker{display:none}
+.drill > summary::marker{content:""}
+.drill > summary svg{width:18px;height:18px;flex:0 0 auto;
+  transition:transform 220ms var(--ease)}
+.drill[open] > summary svg{transform:rotate(180deg)}
+.drill > summary:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px;
+  border-radius:var(--r-sm)}
+@media (hover:hover){.drill > summary:hover{color:var(--ink-2)}}
+.drill-body{display:flex;flex-direction:column;gap:var(--s-lg);
+  padding:var(--s-sm) 0 var(--s-md);animation:drillOpen 240ms var(--ease) both}
+.drill-body > p{margin:0}
+.drill-body .legend{margin:0}
+@keyframes drillOpen{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+
+/* A disclosure inside a flush panel still needs the panel's own inset. */
+.panel-drill{padding:0 var(--s-xl) var(--s-sm)}
+
+/* The sticky action. Not glass: glass belongs over photography, and this bar
+   rides over panels and the ground. A fade into the page's own field is the
+   honest device — the button floats, the bar itself is barely there. */
+.sticky-cta{
+  position:fixed;left:0;right:0;bottom:0;z-index:20;
+  padding:var(--s-2xl) var(--gutter) calc(var(--s-lg) + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 42%);
+  pointer-events:none;
+}
+.sticky-cta .action{max-width:432px;margin:0 auto;pointer-events:auto}
+/* The secondary way out of the bar. A link, not a second .action: two stacked
+   buttons put ~140px of chrome over the page and the clearance below is tuned
+   to one button. 44px tall, so it is still a real touch target. */
+.sticky-alt{display:flex;align-items:center;justify-content:center;min-height:48px;
+  margin:var(--s-md) auto 0;max-width:432px;pointer-events:auto;
+  padding:0 var(--s-2xl);border-radius:var(--r-card);
+  background:var(--inner);border:1px solid var(--hair-lit);
+  font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1);
+  text-decoration:none;-webkit-tap-highlight-color:transparent}
+.sticky-alt:active{background:var(--press)}
+.sticky-alt:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+/* Clear the bar so the last panel is never trapped under it — and only on the
+   surface that actually has one, so /how keeps its full height. */
+.column:has(.sticky-cta){padding-bottom:120px}
+/* The pair is 44px taller than the single button the 120px was measured for. */
+.column:has(.sticky-cta.is-pair){padding-bottom:184px}
+
+/* The segments stayed 3-across: they carried detail sentences when this
+   breakpoint was written, and without them three tiles fit at 375px with room
+   to spare (110px each against a 70px widest label). */
+@media (max-width:380px){
+  /* REDEFINE THE TOKEN, don't override the padding. The old rule set the
+     column's padding to 16 while --gutter stayed 24, and the hero band bleeds
+     out of the gutter with `margin: 0 calc(-1 * var(--gutter))` — so below
+     380px the band hung 8px off each edge and the document scrolled sideways
+     (measured 328 against a 320 client width). Moving the token takes the band,
+     the mosaic and the sticky bar with it. */
+  .column{--gutter:var(--s-xl);padding-left:var(--gutter);padding-right:var(--gutter)}
+}
+
+/* ============================================================================
+   DESKTOP — the landing pages.
+
+   THE COLUMN STOPS BEING THE MEASURE AND BECOMES THE PAGE. On a phone one
+   480px column is the whole layout, so the column can own both jobs: how wide
+   the page is, and how wide a paragraph is. At 1440 those are different
+   questions with different answers, and keeping one number for both is exactly
+   what made this page a phone stranded in a field.
+
+   So `.column` gives up its cap and its gutters, and every child declares the
+   measure IT wants. Three of them want three different things, and each for a
+   stated reason:
+
+     - The hero band wants the window. It is six photographs of six real places
+       and the first thing a stranger sees; cropped to 480px it is a thumbnail
+       of an argument.
+     - The places panel wants the room to show six tiles as six. At 480 they
+       are two columns of three and the headline's promise arrives by scrolling.
+     - Everything else wants a paragraph's width, which does not change with the
+       window. 720px at 15-16px is about 70 characters — the measure the phone
+       layout already reads at, arrived at deliberately rather than inherited.
+   ============================================================================ */
+@media (min-width:1024px){
+  .column{max-width:none;margin:0;padding:0 0 64px;gap:var(--s-2xl)}
+  /* Not the two FIXED, FULL-BLEED bars: both are positioned with left:0/right:0
+     against the viewport, and a max-width here pulls them off the window's
+     edges — the sticky CTA loses its fade into two bright margins, and the
+     announcement bar renders 720px wide floating in the middle of a 1400px
+     screen with 340px of background either side. Measured, not guessed: that
+     is exactly what it did before .announce joined this list. */
+  /* ══ :where() — THE CAP IS A DEFAULT, NOT A WALL ═══════════════════════════
+     This was `.column > *:not(.sticky-cta):not(.announce)`, and every exception
+     had to be bolted onto the chain. That is a trap, because `:not()` TAKES ITS
+     ARGUMENT'S SPECIFICITY: each addition silently raised the whole selector
+     and broke whatever had been winning against the previous weight.
+
+     It has now cost this build six passes. The most recent, 13 Sep 2026, was
+     self-inflicted within one session: adding `:not(.announce)` to full-bleed
+     the pitch's announcement bar took this rule from (0,2,0) to (0,3,0) — and
+     thereby capped BOTH `.column > .hero-band{max-width:none}` and
+     `.column > .rs-split{max-width:min(1180px,...)}`, which are (0,2,0) and had
+     been winning on source order. The checkout's two-column desktop grid
+     collapsed from 1180 to 720, its reading column to a 212px sliver, and the
+     photo band stopped bleeding. Nothing in either file changed.
+
+     `:where()` contributes ZERO specificity, so this selector is now (0,1,0):
+     the cap still applies to everything by default, and ANY rule that names a
+     child beats it without having to know this one exists. The `:not()`s still
+     filter; they just no longer arm the trap. Adding an exception here is now
+     a matter of writing its own rule, which is what everyone was already
+     trying to do. */
+  .column > :where(*:not(.sticky-cta):not(.announce)){
+    width:100%;max-width:720px;margin-inline:auto}
+
+  /* The band bleeds the full window. Written as `.column > .hero-band` and not
+     `.hero-band`, because the rule above is a class plus a :not() and would
+     otherwise out-specify it — the cap would silently survive. */
+  .column > .hero-band{max-width:none;margin:0;padding:0}
+  /* What sits ON the band — the glass hero, the checkout's card — is tuned in
+     pitch.css, which owns those rules and loads after this file. Putting the
+     desktop version here instead lost on source order at equal specificity:
+     the cap applied and the offset silently did not. */
+
+  /* THE ONE STEP ADDED TO THE TYPE RAMP, and it is added openly rather than
+     smuggled. tokens.css enumerates 11-32 and calls anything outside it drift;
+     that ramp was written for a build with no viewport above 380px. 32px is a
+     phone's display size, and on a 1440 hero it reads as a subhead. 44 is the
+     top step of the same ramp continued at its own interval, it is used HERE
+     and nowhere else, and it is the only size in this file off the list. */
+  .hero h1{font-size:44px;letter-spacing:-.035em;line-height:1.04}
+  .hero p{max-width:42ch}
+
+  /* Six places want the room to be seen as six; the grid itself is pitch.css's
+     and is widened there, for the same source-order reason. */
+  .column > .panel.flush:has(.places-grid){max-width:min(1120px,calc(100% - 96px))}
+
+  /* The pair of actions is taller than the single button the phone value was
+     measured against, and the page's own foot is bigger here. */
+  .column:has(.sticky-cta){padding-bottom:150px}
+  .column:has(.sticky-cta.is-pair){padding-bottom:190px}
+}
+
+/* -- the hero's buy block --------------------------------------------------
+   Price, action and refund in one block, in the first screenful. The price was
+   13px here; the incumbent pages all carry the figure, the control and the
+   risk-reversal together above the fold. */
+.hero-buy{margin:var(--s-xl) 0 0;padding-top:var(--s-xl);
+  border-top:1px solid var(--hair)}
+.hero-price{display:flex;align-items:baseline;gap:var(--s-md);margin:0}
+.hero-price b{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1;
+  color:var(--ink-1)}
+.hero-price span{font-size:15px;font-weight:500;color:var(--ink-3)}
+/* Tight to the figure, so it reads as that figure's qualifier rather than as a
+   second, competing price line. It does repeat "$4.99" — §2 fixes this sentence
+   as the only seat line any surface may print, so the repetition is the
+   contract's, not a choice. Pulling it close is what stops it reading as a
+   stray line. */
+.hero .hero-seat{margin:var(--s-xs) 0 0}
+/* Primary and the walkthrough door as one pair: stacked on a phone, a row on a
+   desktop (pitch.css). The pair carries the interval the button used to. */
+.hero-actions{display:flex;flex-direction:column;gap:var(--s-md);margin-top:var(--s-xl)}
+.hero-cta{margin-top:0}
+/* LEFT, not centred. Centred it wrapped to two lines and orphaned "reason
+   needed." under a full line, which is the misplaced-looking text — a centred
+   ragged pair under a full-width button reads as debris. Left-aligned it sits
+   on the same spine as everything above it and wraps cleanly. */
+.hero-refund{margin:var(--s-md) 0 0}
+
+/* The docked bar stays out while the hero's own button is on screen — two
+   identical maroon controls at once is the decoy shape, not redundancy. */
+.sticky-cta.is-away{opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity 200ms var(--ease),transform 200ms var(--ease),visibility 0s 200ms}
+.sticky-cta{transition:opacity 200ms var(--ease),transform 200ms var(--ease)}
+
+/* The lock beside the hero's seat line — same fix as the deck's close. */
+/* ══ THE TWO PRICES IN THE SEAT SENTENCE ═══════════════════════════════════
+   Sam, 14 Sep 2026: "the $14.99 should be a stroke through price instead of
+   just sitting there." Rendered by shell/SeatCapLine.tsx on every surface that
+   prints §2's sentence — the deck's close, the pitch hero and the plans note —
+   so the three cannot dress it three ways. The reader's rate steps up to the
+   ink; the rate everyone after the founding seats pays steps down AND is
+   struck, so the eye lands on $4.99 and sees $14.99 crossed out beside it. The
+   strike is 1px: a heavier line through 13px figures reads as a redaction. */
+.seat-now{font-weight:700;color:var(--ink-1)}
+.seat-after{color:var(--ink-4);text-decoration:line-through;text-decoration-thickness:1px}
+
+/* ══ THE SHIRT: A THUMBNAIL, AND ITS CLOSE-UP ═══════════════════════════════
+   Sam, 14 Sep 2026. Shared by the pitch's year card and /reserve's year tile
+   (shell/Tee.tsx). The thumbnail is a small lit plate — the tee is black on a
+   transparent ground and needs something under it on a dark tile; the house
+   hairline fill is enough — with a zoom cursor, because it opens something.
+   The close-up is a native dialog: a white plate for the product shot (the
+   one place white is spent as a ground, because the object is black), the
+   caption on the scrim in the page's ink, a round close in the plate's corner.
+   Everything is transform and opacity; the dialog itself does not animate. */
+.tee-thumb{display:flex;align-items:center;justify-content:center;
+  width:84px;height:84px;padding:6px;border-radius:var(--r-control);
+  border:1px solid var(--hair-lit);background:var(--hair);cursor:zoom-in;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 160ms var(--ease)}
+.tee-thumb img{width:100%;height:100%;object-fit:contain;display:block}
+/* NOTHING MOVES, ON HOVER OR ON PRESS. Sam, 14 Sep 2026: "the hover
+   animation makes this move too much" and then "when I click on the tshirt
+   image it also has a weird animation" — the press scale, on a thumbnail that
+   is about to be replaced by a full-screen view, read as a stutter. Hover is a
+   lift in fill only; a press opens the close-up and does nothing else. */
+@media (hover:hover){.tee-thumb:hover{background:var(--hair-lit)}}
+.tee-thumb:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+
+/* ══ THE SHELF (the year tile's plate) ═════════════════════════════════════
+   The shirt is a thing she will own, so it is shown as a thing: standing on
+   the lit plate the covers tiles share, on a soft ground shadow that gives it
+   weight, with the plan's own word for it in the corner and a closer-look
+   glyph where a hand expects one. Nothing here moves on hover or press (Sam,
+   14 Sep 2026, twice); the one authored moment is the close-up arriving. */
+.tee-thumb.is-plate{overflow:hidden;padding:8px 8px 12px;
+  background:
+    radial-gradient(125% 125% at 6% 0%,
+      color-mix(in srgb, var(--maroon) 34%, var(--inner)) 0%,
+      color-mix(in srgb, var(--maroon) 16%, var(--inner)) 28%,
+      var(--inner) 56%,
+      color-mix(in srgb, var(--inner) 62%, var(--page)) 100%)}
+.tee-thumb.is-plate img{position:relative;z-index:1;object-position:center bottom}
+/* The ground under the shirt: an offset, blurred shadow — depth, not a halo. */
+.tee-thumb.is-plate::after{content:"";position:absolute;left:26%;right:26%;bottom:7px;
+  height:9px;border-radius:50%;background:rgba(0,0,0,.6);filter:blur(6px);
+  transform:translateY(2px)}
+/* 11px is permitted for exactly this: a tracked uppercase micro-label. */
+.tee-tag{position:absolute;left:6px;top:6px;z-index:2;padding:2px 7px;
+  border-radius:var(--r-pill);border:1px solid var(--hair-lit);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-2);background:color-mix(in srgb, var(--page) 55%, transparent)}
+.tee-zoom{position:absolute;right:6px;bottom:6px;z-index:2;width:24px;height:24px;
+  border-radius:var(--r-pill);border:1px solid var(--hair-lit);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-2);
+  background:color-mix(in srgb, var(--page) 55%, transparent)}
+.tee-zoom svg{width:13px;height:13px;display:block}
+.plan-opt.is-on ~ .tee-thumb.is-plate .tee-tag,
+.plan-opt.is-on ~ .tee-thumb.is-plate .tee-zoom{color:var(--on-maroon)}
+
+.tee-view{border:0;padding:0;margin:auto;background:transparent;color:var(--ink-1);
+  width:min(92vw,640px);max-width:none;max-height:none;overflow:visible}
+.tee-view::backdrop{background:rgba(0,0,0,.74)}
+.tee-view-plate{position:relative;padding:var(--s-2xl);border-radius:var(--r-panel);
+  background:var(--on-maroon);box-shadow:var(--raised)}
+/* The one authored moment: the close-up rises into place from a visible
+   start, exponential ease-out, once per open. Transform and opacity only. */
+.tee-view[open] .tee-view-plate,
+.tee-view[open] .tee-view-cap{animation:teeRise 260ms var(--ease) both}
+.tee-view[open] .tee-view-cap{animation-delay:60ms}
+@keyframes teeRise{from{opacity:.4;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.tee-view-plate img{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain}
+.tee-view-close{position:absolute;top:var(--s-md);right:var(--s-md);
+  width:36px;height:36px;border-radius:var(--r-pill);border:0;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--page);color:var(--on-maroon);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;transition:transform 150ms var(--ease)}
+.tee-view-close svg{width:18px;height:18px}
+.tee-view-close:active{transform:scale(.94)}
+.tee-view-close:focus-visible{outline:2px solid var(--on-maroon);outline-offset:2px}
+.tee-view-cap{margin:var(--s-lg) 0 0;text-align:center;font-size:13px;font-weight:600;
+  letter-spacing:.005em;color:var(--ink-2)}
+
+.hero .hero-locked{margin:var(--s-xs) 0 0;max-width:none;color:var(--ink-2);
+  text-wrap:pretty}
+
+/* ══ THE SHIRT ON WHITE ═════════════════════════════════════════════════════
+   Sam, 14 Sep 2026: "maybe we give the tshirt a white background?" The shirt
+   is black; on the plum plate it read as a silhouette. White is one of the two
+   literals the palette permits (§9 Yardline White), and it is a product
+   photograph, so the plate reads as a product shot. The plate's own chrome —
+   the Included tag, the zoom glyph — goes to dark ink on it, INCLUDING when
+   the year plan is chosen: the sibling rule above paints them white on maroon,
+   and white on a white plate is invisible. The ground shadow lightens to read
+   as shade on paper rather than a smear. */
+/* Both instances — the checkout's plate and the pitch's plan-row thumb. */
+.tee-thumb,.tee-thumb.is-plate{background:#FFFFFF;border-color:rgba(27,16,20,.16)}
+@media (hover:hover){.tee-thumb:hover,.tee-thumb.is-plate:hover{background:#F3EEF0}}
+.tee-thumb.is-plate::after{background:rgba(0,0,0,.26);filter:blur(5px)}
+.tee-thumb.is-plate .tee-tag,
+.tee-thumb.is-plate .tee-zoom,
+.plan-opt.is-on ~ .tee-thumb.is-plate .tee-tag,
+.plan-opt.is-on ~ .tee-thumb.is-plate .tee-zoom{
+  color:#1B1014;border-color:rgba(27,16,20,.16);background:rgba(255,255,255,.86)}
+
+/* ── the legal footer ─────────────────────────────────────────────────────
+   Three quiet links, 13px, underlined so they read as links without colour.
+   Centred on a phone; the desktop grids place it (pitch.css, reserve.css). */
+.site-foot{padding:var(--s-lg) 0 0}
+.site-foot nav{display:flex;flex-wrap:wrap;justify-content:center;
+  gap:var(--s-md) var(--s-xl)}
+.site-foot a{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-4);
+  text-decoration:underline;text-underline-offset:3px;
+  text-decoration-color:var(--hair-lit);
+  transition:color 150ms var(--ease)}
+@media (hover:hover){.site-foot a:hover{color:var(--ink-2)}}
+.site-foot a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}

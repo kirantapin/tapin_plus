@@ -1,0 +1,948 @@
+/* ============================================================================
+   The locked app preview.
+
+   Everything here is state, not controls. "A control that looks tappable but
+   does nothing" is a defect, and the entire app is inoperable until Spring
+   2027 — so where the real app would have a button, this has the state that
+   button would produce.
+
+   THE APP IS THE LIGHT SURFACE (Sam, 12 Sep 2026); the landing pages keep the
+   authored dark ground. Same product either way — Chicago Maroon as a fill,
+   Gilroy, hairline definition, elevation carried by tonal steps and not by
+   shadow — but this is the Operate half of the build, and TapIn's real
+   merchant storefront is light for the same reason: it is read and totted up
+   rather than looked at. Nothing in this file names a surface colour; every
+   rule below goes through the ramp in tokens.css, which is what let the flip
+   be a token change rather than a rewrite.
+   ============================================================================ */
+
+/* The banner's height, spent once, here. Everything that docks under it reads
+   this token rather than repeating a literal — which is how .place-mini came to
+   carry a hardcoded `top:52px` tuned to a bar that no longer exists. On :root
+   because .column has to read it too, and .column is the banner's ancestor
+   rather than its descendant. */
+:root{--banner-h:calc(52px + env(safe-area-inset-top,0px))}
+
+/* --nav-h is the tab bar's real height, measured rather than guessed: 69.5px at
+   375x812, which is 8 + 52.5 + 8 + a 1px border. The token rounds to 70, and
+   70 + --s-md reproduces the 78px literal this used to carry, so the four tab
+   screens do not move by a pixel. The safe-area inset is spent HERE and only
+   here — .app-nav pads by it and --nav-h carries it, so nothing docked against
+   --nav-h may add it again. */
+.app{--nav-h:calc(70px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;gap:var(--s-xl);
+  padding-bottom:calc(var(--nav-h) + var(--s-md))}
+
+/* A merchant page carries a second fixed bar. Clearance is the tab bar plus the
+   CTA's opaque box (52px button + 8px foot) — and NOT more, because .app sits
+   inside .column, which already contributes its own 48px foot below this. */
+.app.is-place{padding-bottom:calc(var(--nav-h) + 60px)}
+
+/* ── THE PREVIEW BANNER ────────────────────────────────────────────────────
+   Flush with the top of the viewport and edge to edge, per Sam. It is the top
+   half of the app's chrome and is built to match the bottom half exactly: the
+   same --subtle fill, the same single hairline facing the content, the same
+   safe-area handling. The preview now reads as a thing inside a frame.
+
+   NO RADIUS, by his call — and none was available anyway. A rounded corner on
+   an element flush with the viewport's own square corner reads as a mistake
+   rather than as a shape.
+
+   The fixed bar is a child of .column, which sets `position:relative` and
+   `z-index:1`. That makes a stacking context but NOT a containing block, so
+   the banner still resolves against the viewport and goes genuinely full
+   bleed; the z-index below is inside .column's context, alongside .app-nav's
+   20 and .app-cta's 19, which is the comparison that matters. */
+.app-banner{position:fixed;top:0;left:0;right:0;z-index:21;
+  background:var(--subtle);border-bottom:1px solid var(--hair);
+  padding-top:env(safe-area-inset-top,0px)}
+/* The row inside tracks the column, so the chevron sits on the same left edge
+   as the content beneath it instead of being flung to the corner of a 1400px
+   screen. The sentence centres on the VIEWPORT rather than on the space left
+   over beside the chevron — it is the banner's subject, and a subject that
+   sits 18px off-centre reads as a layout accident. */
+.app-banner-in{position:relative;display:flex;align-items:center;
+  justify-content:center;min-height:52px;
+  max-width:480px;margin:0 auto;padding:0 var(--gutter)}
+.app-back{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%)}
+/* 36px of circle, 44px of target. The expander is invisible and sits inside
+   the bar's own height, so it reaches nothing beside it. */
+.app-back::after{content:"";position:absolute;inset:-4px;border-radius:inherit}
+.app-back:active{transform:translateY(-50%) scale(.94)}
+
+/* The pill is gone: it WAS the banner, and a pill inside a bar is chrome drawn
+   twice. What is left is the sentence and its dot. */
+.app-lock{display:flex;align-items:center;gap:var(--s-md);margin:0;min-width:0;
+  font-size:12px;font-weight:600;letter-spacing:.01em;color:var(--ink-3)}
+.app-lock-dot{width:6px;height:6px;border-radius:50%;background:var(--maroon);flex:0 0 auto}
+
+/* Clear the fixed bar. The column's own 24px top padding is REPLACED rather
+   than added to, so the gap under the banner is one step of the scale and not
+   an accident of two rules stacking. :has() is already how this file's sibling
+   handles the sticky CTA's clearance. */
+.column:has(.app){padding-top:calc(var(--banner-h) + var(--s-xl))}
+
+.app-body{display:flex;flex-direction:column;gap:var(--s-xl)}
+.app-card{max-width:none}
+
+/* -- tallies --------------------------------------------------------------- */
+.app-tally{display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--hair);border:1px solid var(--hair);border-radius:var(--r-panel);
+  overflow:hidden}
+.app-tally > div{background:var(--card);padding:var(--s-lg) var(--s-xl)}
+.app-tally b{display:block;font-size:22px;font-weight:700;letter-spacing:-.025em;
+  color:var(--ink-1)}
+.app-tally span{display:block;margin-top:3px;font-size:12px;font-weight:500;
+  color:var(--ink-4)}
+.app-tally-lg b{font-size:28px;letter-spacing:-.03em}
+
+/* -- sections -------------------------------------------------------------- */
+.app-sec{background:var(--card);border:1px solid var(--hair);
+  border-radius:var(--r-panel);box-shadow:var(--rest);padding:var(--s-xl) 0}
+.app-sec > h2{margin:0 var(--s-xl) var(--s-lg);display:flex;align-items:center;
+  gap:var(--s-md)}
+.app-note{margin:var(--s-lg) var(--s-xl) 0}
+
+.app-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  padding:0 var(--s-xl)}
+.app-benefit{position:relative;padding:0 var(--s-sm)}
+.app-benefit + .app-benefit::before{content:"";position:absolute;left:0;top:2px;bottom:2px;
+  width:1px;background:var(--hair)}
+.app-benefit svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--ink-3);display:block}
+.app-benefit b{display:block;margin-top:var(--s-md);font-size:14px;font-weight:700;
+  letter-spacing:0;color:var(--ink-1)}
+
+/* -- rows ------------------------------------------------------------------ */
+.app-list{list-style:none;margin:0;padding:0}
+.app-list > li{display:flex;align-items:center;gap:var(--s-lg);
+  padding:var(--s-lg) var(--s-xl);position:relative}
+.app-list > li + li::before{content:"";position:absolute;left:var(--s-xl);right:var(--s-xl);
+  top:0;height:1px;background:var(--hair-lit)}
+.app-row-text{flex:1;min-width:0}
+.app-row-text b{display:block;font-size:14px;font-weight:700;letter-spacing:0;
+  color:var(--ink-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The detail line WRAPS. It was clipped to one line and "Earned on a $10+ order,
+   once a month" became "once a…" — an ellipsis on the one clause that bounds the
+   benefit. A line that breaks is cheaper than a term that disappears. */
+.app-row-text span{display:block;margin-top:2px;font-size:12px;font-weight:500;
+  color:var(--ink-4);text-wrap:pretty}
+.app-collar{width:38px;height:38px;border-radius:var(--r-control)}
+.app-collar img{border-radius:9px}
+.app-collar::after{border-radius:9px}
+.app-glyph{width:38px;height:38px;flex:0 0 auto;display:flex;align-items:center;
+  justify-content:center;border-radius:var(--r-control);background:var(--inner);
+  border:1px solid var(--hair);color:var(--ink-3)}
+.app-glyph svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* A whole row that is a link. The padding moves onto the anchor so the target
+   is the row, not the text inside it. */
+.app-list.is-linked > li{padding:0}
+.app-row-link{display:flex;align-items:center;gap:var(--s-lg);width:100%;
+  padding:var(--s-lg) var(--s-xl);text-decoration:none;color:inherit;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color 150ms var(--ease)}
+.app-row-link:active{background:var(--inner)}
+.app-row-link:focus-visible{outline:2px solid var(--ink-1);outline-offset:-3px;
+  border-radius:var(--r-sm)}
+.app-go{flex:0 0 auto;width:18px;height:18px;color:var(--ink-4)}
+.app-go svg{width:100%;height:100%;display:block}
+
+/* A row in a list of links that is NOT one. It sits inside .is-linked, where
+   every sibling has an anchor and a chevron, so it has to read as a different
+   kind of thing on sight rather than only on tap: its own padding back, no
+   chevron, no balance slot, and the name in the quieter ink the linked rows
+   give their meta line. */
+.app-list.is-linked > li.app-soon{padding:var(--s-lg) var(--s-xl)}
+.app-soon{display:flex;align-items:center;gap:var(--s-lg)}
+.app-soon .app-row-text b{color:var(--ink-3)}
+.app-soon .app-glyph{color:var(--ink-4)}
+.app-soon .tag{flex:0 0 auto}
+
+/* State, not a control. */
+/* The storefront measured this exact class of text at 3.2:1, raised it to full
+   ink at weight 500 and lifted 12px to 13px, on the finding that "quiet is a
+   matter of WEIGHT, not of being hard to read" — the one line a customer has to
+   believe in a queue was rendering smaller than the description above it.
+   This carried "Automatic", "Members only" and "Ready when you are" at 11/700
+   tracked uppercase in the faintest ink on the ramp. tokens.css already says
+   the same thing in its own words: a phrase that reads as a sentence takes the
+   reading floor, whatever container it is in. "Ready when you are" is a
+   sentence, so the tracked-caps label role was never the right one. */
+.app-state{flex:0 0 auto;font-size:13px;font-weight:500;letter-spacing:0;
+  color:var(--ink-2);text-align:right;max-width:104px;line-height:1.35}
+.app-bal{flex:0 0 auto;font-size:15px;font-weight:700;color:var(--ink-2)}
+.app-bal-none{color:var(--ink-4);font-weight:500}
+
+/* -- my spot --------------------------------------------------------------- */
+.app-spot{list-style:none;margin:0;padding:0 var(--s-xl);display:flex;
+  flex-direction:column;gap:var(--s-lg)}
+.app-spot > li{border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--inner);padding:var(--s-lg)}
+.app-spot-top{display:flex;align-items:center;gap:var(--s-lg)}
+.app-items{list-style:none;margin:var(--s-lg) 0 0;padding:var(--s-lg) 0 0;
+  border-top:1px solid var(--hair)}
+.app-items li{display:flex;justify-content:space-between;gap:var(--s-lg);
+  margin-bottom:var(--s-sm);font-size:13px;font-weight:500;color:var(--ink-3)}
+.app-items b{font-weight:600;color:var(--ink-2)}
+.app-paid{display:flex;justify-content:space-between;align-items:baseline;
+  margin:var(--s-md) 0 0;font-size:13px;font-weight:600;color:var(--ink-3)}
+.app-paid-figs{display:flex;align-items:baseline;gap:var(--s-md)}
+.app-paid b{font-size:16px;font-weight:700;color:var(--ink-1)}
+/* The pre-member price, shown quiet and struck so the saving is visible
+   without the member price having to shout. */
+.app-was{font-size:13px !important;font-weight:500 !important;color:var(--ink-4) !important;
+  text-decoration:line-through}
+
+/* -- points ---------------------------------------------------------------- */
+.app-points{list-style:none;margin:0;padding:0 var(--s-xl);display:flex;
+  flex-direction:column;gap:var(--s-lg)}
+.app-points > li{border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--inner);padding:var(--s-lg)}
+.app-points-top{display:flex;align-items:center;gap:var(--s-lg)}
+
+/* Both values, side by side. The trade is the fact, not a reveal. */
+.app-trade{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  gap:var(--s-md);margin-top:var(--s-lg);padding-top:var(--s-lg);
+  border-top:1px solid var(--hair)}
+.app-trade-side b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-3)}
+.app-trade-side span{display:block;margin-top:2px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;color:var(--ink-4)}
+/* Where it is worth most gets the full ink; the portable balance does not. */
+.app-trade-side.is-best b{color:var(--ink-1)}
+.app-trade-or{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-4)}
+
+/* -- tab bar --------------------------------------------------------------- */
+.app-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:var(--s-md) var(--s-md) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
+  background:var(--subtle);border-top:1px solid var(--hair)}
+/* Chrome, so not selectable: a double-click on a destination is someone
+   navigating impatiently, and highlighting the word "Points" is never what
+   they meant. The content the tabs lead to stays fully selectable. */
+.app-nav{user-select:none;-webkit-user-select:none}
+.app-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;/* 44pt minimum touch target */min-height:48px;padding:var(--s-sm) 0;
+  text-decoration:none;color:var(--ink-4);
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  -webkit-tap-highlight-color:transparent;
+  transition:color 150ms var(--ease)}
+.app-tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+/* Two channels, never colour alone. */
+.app-tab.active{color:var(--ink-1);font-weight:700}
+.app-tab:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+
+/* ============================================================================
+   One merchant
+   ============================================================================ */
+
+/* The sticky-header exception that used to live here is GONE. It made the
+   merchant page's own header stick because that was the one screen where the
+   sentence saying the app is not open had to stay beside a live control. The
+   banner is fixed on every screen now, so the rule has nothing left to except
+   — and keeping it would have stuck a second bar under the first. */
+
+/* The identity block (.place-shot, .place-collar, .place-id, .place-live*)
+   is gone: the merchant page is drawn as the storefront draws it now — see
+   THE STOREFRONT, at the end of this file. */
+
+/* -- the ticket ------------------------------------------------------------ */
+.place-ticket .app-items{margin:0 var(--s-xl)}
+.place-lines li{font-size:14px}
+.place-pay{margin:var(--s-lg) var(--s-xl) 0;padding-top:var(--s-lg);
+  border-top:1px solid var(--hair)}
+/* Her own credit coming off, then what is actually due. Both sit BELOW the
+   member price, because the 15% and the credit are different kinds of thing:
+   one is a rate on the ticket, the other is a balance she already holds. */
+.place-credit{margin:var(--s-md) var(--s-xl) 0;color:var(--ink-3)}
+.place-credit b{font-size:14px;font-weight:600;color:var(--ink-3)}
+.place-due{margin:var(--s-md) var(--s-xl) 0;padding-top:var(--s-md);
+  border-top:1px solid var(--hair)}
+.place-due b{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--ink-1)}
+/* The member-price row steps back when a credit row follows it: the last figure
+   in a column is the one a reader takes as the answer, so it has to be the one
+   she actually pays. */
+.place-ticket .place-credit + .place-due span{font-weight:600;color:var(--ink-2)}
+.place-pay:has(+ .place-credit) b:not(.app-was){font-size:14px;color:var(--ink-3)}
+
+/* Below all of it, and quieter: these do not move what she pays. */
+.place-earns{list-style:none;margin:var(--s-lg) var(--s-xl) 0;padding:0;
+  display:flex;flex-direction:column;gap:var(--s-sm)}
+.place-earns li{font-size:13px;font-weight:500;color:var(--ink-4)}
+.place-earns b{font-weight:700;color:var(--ink-3)}
+/* "And you earn". The two rows under it used to be orphan figures with no verb
+   — a reader had nothing telling her these were earned rather than charged. */
+.place-earns-head{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-4)}
+.place-offer{margin:var(--s-lg) var(--s-xl) 0}
+.place-left{margin:var(--s-md) var(--s-xl) 0}
+/* The alternative benefit, as a sentence under the price — quieter than the
+   rows, because it is what did NOT happen. */
+.place-alt{margin:var(--s-md) var(--s-xl) 0;color:var(--ink-4)}
+.place-alt b{font-weight:600;color:var(--ink-3)}
+/* The credit row swaps a rule for an amount when the basket crosses $10, and
+   swaps back when it drops under. Keyed on that state, so React remounts it and
+   the animation runs in both directions — a one-way transition would be a
+   reward, and a reward is the urgency §10 rules out. Nothing else on the page
+   reacts: the total genuinely does not change, because the credit is a balance
+   and not a discount. No colour, no fill, no badge, no "unlocked". */
+.place-earn-swap{animation:earnSwap 300ms var(--ease) both}
+@keyframes earnSwap{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:none}
+}
+/* The swap is the only thing on this page that animates, and the row still
+   changes its words without it — so there is nothing to replace it with. */
+@media (prefers-reduced-motion:reduce){
+  .place-earn-swap{animation:none}
+}
+
+/* -- the menu -------------------------------------------------------------- */
+.place-sec + .place-sec{margin-top:var(--s-xl)}
+.place-sec-head{margin:0 var(--s-xl) var(--s-md);font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4)}
+.place-menu{list-style:none;margin:0;padding:0}
+.place-item{display:flex;align-items:center;gap:var(--s-xl);width:100%;
+  /* 44pt minimum; the thumbnail alone is 54. */
+  padding:var(--s-md) var(--s-xl);border:0;background:none;font:inherit;
+  text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:background-color 150ms var(--ease)}
+.place-item:active{background:var(--inner)}
+.place-item:focus-visible{outline:2px solid var(--ink-1);outline-offset:-3px;
+  border-radius:var(--r-sm)}
+.place-item.is-on{background:color-mix(in srgb, var(--maroon) 14%, transparent)}
+
+/* ══ FLAT CARD, FLOATING PHOTO ═════════════════════════════════════════════
+   Reconciled against the real storefront in ~/desktop-ui (V3.1), 12 Sep 2026 —
+   Sam asked for design continuity with the app a customer already uses at
+   tapin.app/<restaurant_id>.
+
+   THIS IS THE SIGNATURE, named independently by three of seven extractions as
+   the single thing that makes a surface read as TapIn: the card is almost
+   unshadowed and the photograph inside it genuinely lifts. The storefront's
+   values are `0 1px 2px rgba(20,22,24,.06)` on the card against
+   `0 4px 12px rgba(20,22,24,.13)` on the thumbnail — the photo's shadow is six
+   times the card's — and this build already holds both, exactly, as --rest and
+   --float. --float was the one elevation token nothing had spent.
+
+   The row had the ring and no lift, so the menu read as a table of contents.
+   76x76 at a 16px radius is the shipped geometry; the ring is 1px at 16% ink,
+   which is --hair-lit to the value. */
+.place-thumb{flex:0 0 auto;width:76px;height:76px;border-radius:var(--r-panel);
+  overflow:hidden;background:var(--inner);border:1px solid var(--hair-lit);
+  box-shadow:var(--float)}
+.place-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.place-thumb.is-empty{background:var(--subtle)}
+
+.place-item-text{flex:1;min-width:0}
+/* The storefront's ladder: name 16/700, description 14/400 muted, price 16/500.
+   This build was one step small on all three AND inverted the last relationship
+   — a 700-weight price shouting over a 700-weight name. The storefront sets the
+   price at `font-medium` deliberately: it is quieter than the name by WEIGHT,
+   not by being harder to read. 14/15/16 are all on this file's own type ramp,
+   so none of this costs drift. */
+.place-item-text b{display:block;font-size:16px;font-weight:700;letter-spacing:0;
+  color:var(--ink-1)}
+/* HEIGHT EQUALITY IS THE LAW, and it is what makes a TapIn list read as a list
+   rather than a pile. ONE line, with line-height and max-height set to the same
+   1.5rem so the box is reserved whether or not there is a description — 31 of
+   these 57 items carry one, and the span was simply absent for the other 26, so
+   a single section rendered rows at three different heights. The model now
+   emits a zero-width space instead, which is the storefront's own device. */
+.place-item-text span{display:block;margin-top:2px;font-size:14px;font-weight:400;
+  color:var(--ink-4);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;
+  overflow:hidden;line-height:1.5rem;max-height:1.5rem}
+.place-item-price{flex:0 0 auto;font-size:16px;font-weight:500;color:var(--ink-1)}
+
+/* Two channels, never colour alone: the glyph changes from a plus to a tick and
+   the ring fills. aria-pressed carries it for anyone not looking. */
+.place-tick{flex:0 0 auto;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--hair-lit);color:var(--ink-4);
+  transition:background-color 150ms var(--ease),color 150ms var(--ease),
+    border-color 150ms var(--ease)}
+.place-tick svg{width:15px;height:15px;display:block}
+.place-item.is-on .place-tick{background:var(--maroon);border-color:var(--maroon);
+  color:var(--on-maroon)}
+
+/* -- the running total ------------------------------------------------------
+   Pinned under the Preview bar once the ticket has scrolled away, because the
+   ticket and the item that crosses $10 are co-visible for 4.7% of this page's
+   scroll range — so the tap that is the whole point of the page produced no
+   visible figure. One line, and it is a real control: it scrolls back to the
+   ticket, which is all it claims to do. It docks off --banner-h rather than the
+   literal `top:52px` it used to carry — that number was measured against the
+   old sticky header and would have been silently wrong the moment the banner
+   changed height or a notch added a safe-area inset. z-index 14 keeps it under
+   the banner's 21, so the sentence saying this app is not open is never
+   covered by a price. */
+.place-mini{position:fixed;left:0;right:0;top:calc(var(--banner-h) + var(--s-md));z-index:14;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s-lg);
+  width:min(100% - var(--gutter) * 2, 480px);margin:0 auto;
+  padding:var(--s-md) var(--s-lg);border:1px solid var(--hair);
+  border-radius:var(--r-pill);background:var(--card);box-shadow:var(--float);
+  font:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  animation:miniIn 180ms var(--ease) both}
+.place-mini-n{font-size:12px;font-weight:600;letter-spacing:.01em;color:var(--ink-4)}
+.place-mini-figs{display:flex;align-items:baseline;gap:var(--s-md)}
+.place-mini-figs b{font-size:15px;font-weight:700;color:var(--ink-1)}
+.place-mini-figs .app-was{font-size:12px;font-weight:500;color:var(--ink-4)}
+.place-mini:active{background:var(--inner)}
+.place-mini:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+@keyframes miniIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.place-mini{animation:none}}
+
+/* -- the join bar ---------------------------------------------------------- */
+/* DOCKED ABOVE THE TAB BAR, not stacked with it. .app-nav is fixed at z-index
+   20 and renders after <main>, so a second fixed bar at bottom:0 ties on
+   z-index and loses on source order — it would simply be covered. Raising this
+   one instead would hide the tab bar behind a maroon button and take away the
+   way back to Home and Deals. It also cannot be .sticky-cta: that is bottom:0
+   and trips layout.css's 120px clearance rule, which would pile onto the 78px
+   an app screen already clears.
+   No env() here. The inset is spent once, by .app-nav, and --nav-h carries it;
+   adding it again lifts the button ~34px on a home-indicator iPhone and opens a
+   page-coloured band underneath. */
+.app-cta{position:fixed;left:0;right:0;bottom:var(--nav-h);z-index:19;
+  padding:var(--s-xl) var(--gutter) var(--s-md);
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 58%);
+  pointer-events:none}
+.app-cta .action{max-width:432px;margin:0 auto;pointer-events:auto}
+
+@media (max-width:360px){
+  .app-benefits{grid-template-columns:1fr;gap:var(--s-lg)}
+  .app-benefit + .app-benefit::before{left:0;right:0;top:calc(var(--s-lg) * -.5);
+    bottom:auto;width:auto;height:1px}
+}
+
+/* ============================================================================
+   DESKTOP — the app, at a laptop.
+
+   Sam, 12 Sep 2026: "can you build a desktop version of the app and the
+   landing pages". Until now this build had NO breakpoint above 380px, so at
+   1440 the preview was a 480px phone column marooned in the middle of the
+   field with four tab items flung to the far corners of a full-width bar — the
+   bar being the part that actually read as broken, because a tab bar is chrome
+   that belongs against the content it navigates.
+
+   THE BOTTOM BAR BECOMES A LEFT RAIL. That is the one move this whole block
+   turns on, and it is not a restyle: a bottom bar is a thumb-reach affordance
+   and there is no thumb here. Vertically the four destinations get their real
+   names beside their glyphs at a readable size instead of 11px underneath
+   them, and the rail composes with the banner Sam asked for in the same hour —
+   chrome across the top, chrome down the side, content in the corner they
+   make. Same markup, same order, same active semantics; NavLink still owns
+   `.active` and nothing here touches the DOM.
+
+   ONE COLUMN, NOT A STRETCHED ONE. The content stays a single measure and
+   centres in the space the rail leaves. A points list and a saved-order ticket
+   do not become better information for being 1100px wide, and the honest
+   desktop version of a focused app is a focused app with air around it — not
+   the phone layout pulled to the window's edges.
+   ============================================================================ */
+@media (min-width:1024px){
+  /* Measured to the longest label at 14px ("My Spot" plus its glyph and the
+     row's own padding) with room left over, so no destination ever wraps. */
+  :root{--rail-w:248px}
+
+  /* The banner is full-bleed, so its row is too. The chevron goes to the real
+     left gutter — directly over the rail, which is where "out of here" lives
+     on this layout — and the sentence keeps the viewport's own centre. */
+  .app-banner-in{max-width:none;padding:0 var(--s-2xl)}
+
+  .app-nav{
+    top:var(--banner-h);right:auto;bottom:0;width:var(--rail-w);
+    display:flex;flex-direction:column;align-items:stretch;gap:2px;
+    padding:var(--s-lg);
+    border-top:0;border-right:1px solid var(--hair);
+  }
+  /* A row, not a stack: glyph, then name, at the reading floor rather than the
+     11px a bottom bar has to squeeze into. */
+  .app-tab{
+    flex-direction:row;justify-content:flex-start;gap:var(--s-lg);
+    min-height:44px;padding:0 var(--s-lg);border-radius:var(--r-control);
+    font-size:14px;letter-spacing:0;
+    transition:background-color 150ms var(--ease),color 150ms var(--ease);
+  }
+  .app-tab svg{width:20px;height:20px}
+  /* The current destination is a filled row. Still two channels — the fill AND
+     the weight — because colour alone was never the rule here either. */
+  .app-tab.active{background:var(--inner);color:var(--ink-1)}
+
+  /* Clear the rail, then centre what is left. .app is a flex item of .column,
+     so `margin-inline:auto` is what centres it; a max-width alone would pin it
+     against the rail. */
+  .column:has(.app){
+    max-width:none;margin:0;
+    padding-left:calc(var(--rail-w) + var(--s-2xl));
+    padding-right:var(--s-2xl);
+    padding-bottom:var(--s-2xl);
+  }
+  /* ONE MEASURE ACROSS THE PRODUCT. 720 is the width layout.css gives every
+     reading surface on the landing pages, and the app takes the same one — so
+     a prospect moving from the pitch into the preview sees the content column
+     stay exactly where it was, with only the chrome around it changing.
+
+     `.column > .app` and not `.app`: layout.css caps every column child with
+     `.column > *:not(.sticky-cta)`, which is two classes' worth of
+     specificity. A bare `.app` here loses to it silently — this rule was
+     written as `max-width:600px` and measured 720 on screen, which is exactly
+     the failure the pitch.css block below documents, caught the second time by
+     measuring rather than by looking. */
+  .column > .app{width:100%;max-width:720px;margin-inline:auto;
+    padding-bottom:var(--s-2xl)}
+  /* The foot clearance on every screen was bought for a bottom bar that is no
+     longer at the bottom. The merchant page still docks its join button, so it
+     alone keeps a real one. */
+  .app.is-place{padding-bottom:96px}
+
+  /* Both fixed bars inside the app start at the rail's edge rather than the
+     window's, or they would run underneath it. */
+  .app-cta{left:var(--rail-w);bottom:0;padding:var(--s-xl) var(--s-2xl) var(--s-xl)}
+  /* Both bars already centre on the content column's own axis, because they
+     span the same box it is centred in. The pill takes the column's WIDTH as
+     well: at the phone's 480 inside a 600 measure it sat narrower than every
+     panel it floats over, which reads as a bar belonging to some other layout.
+     The button keeps its 432 — a column-wide button is a slab, and a narrower
+     action centred on a wider column is the ordinary relationship. */
+  .place-mini{left:var(--rail-w);width:min(100% - var(--s-2xl) * 2,720px)}
+
+  /* THE CARD TAKES THE COLUMN. Capped at the phone's 420 it sat 90px narrower
+     than every panel beneath it and centred — so the one screen element that
+     is not a panel was also the only one not on the column's left edge, which
+     reads as a stray rather than as a hero. It is the subject of this screen;
+     it gets the measure. The cap only ever existed to stop a 1.586 card
+     growing taller than a phone, which is not a risk at 600. */
+  .app .card-stage{max-width:none}
+}
+
+@media (min-width:1024px) and (hover:hover){
+  .app-tab:hover{background:var(--inner)}
+  .app-tab:hover:not(.active){color:var(--ink-2)}
+}
+
+/* ============================================================================
+   THE DESKTOP APP — each screen declares its own shape.
+
+   Sam, 12 Sep 2026: "desktop still needs quite a bit of work", and the desktop
+   app should be a redesign rather than the phone layout in a wider frame.
+   Reference pulled from Mobbin: Coinbase One, Rocket Money, Origin, Monarch and
+   Revolut Business all resolve to the same thing on an account surface — a
+   rail, then a PRIMARY region, then a narrower run of facts beside it, with
+   figures set as a row rather than as a full-width band. None of them runs one
+   narrow column down the middle, which is exactly what this app was doing.
+
+   The wrappers below are `display:contents` under 1024px, so every phone screen
+   keeps the DOM order, the gap and the layout it already shipped with.
+   ============================================================================ */
+.ah-top,.ah-object,.ah-facts{display:contents}
+
+@media (min-width:1024px){
+  /* THE MEASURE IS PER SCREEN, keyed off the shell's data-screen. Widening
+     every screen at once would leave the four that are still single lists
+     sparse instead of fixed — a wider column is not a desktop layout. Screens
+     not named here keep the 720 they already read well at. */
+  .column > .app[data-screen="home"]{max-width:1100px}
+
+  /* The hero row: the object, then the facts. 460 is the card at a size you
+     could hold rather than a slab — it is the same track the checkout uses on
+     /reserve, so the two surfaces share one measure for the same object. */
+  .ah-top{display:grid;grid-template-columns:460px minmax(0,1fr);
+    gap:var(--s-2xl);align-items:start}
+  .ah-object{display:block}
+  .ah-facts{display:flex;flex-direction:column;gap:var(--s-xl)}
+  .app[data-screen="home"] .card-stage{max-width:none}
+
+  /* The two figures get room to be figures. They were a 720-wide band carrying
+     "2,500 points" and "$5.00 credit waiting" — about 90px of glyphs in 720px
+     of panel. */
+  .ah-facts .app-tally b{font-size:26px}
+
+  /* Six places across 1100px as a single-file list is a row of six ribbons with
+     a 600px hole in the middle of each. Two tracks halves the run and puts the
+     balance back within reading distance of the name. The divider becomes a
+     grid gap, so the rule that separated stacked rows is no longer drawn
+     between two things that sit side by side. */
+  .app[data-screen="home"] .app-list.is-linked{
+    display:grid;grid-template-columns:1fr 1fr;
+    column-gap:1px;background:var(--hair)}
+  .app[data-screen="home"] .app-list.is-linked > li{background:var(--card)}
+  /* The stacked-row hairline only ever belonged between vertical neighbours.
+     In two tracks it would draw across the top of the right-hand column too. */
+  .app[data-screen="home"] .app-list.is-linked > li + li::before{left:0;right:0}
+  .app[data-screen="home"] .app-list.is-linked > li:nth-child(2)::before{content:none}
+  /* Six venues fill three rows of two; the seventh item is not a venue. Left in
+     the flow it took one track and left a dead cell beside it — and the dead
+     cell is what a reader notices, not the row. Spanning both tracks fixes the
+     hole AND says the true thing: "More joining" is a statement about the
+     network, not a seventh place, which is why it already has no chevron, no
+     balance and no link. */
+  .app[data-screen="home"] .app-list.is-linked > .app-soon{grid-column:1 / -1}
+
+  /* The marks get room. Sampled from the files rather than judged by eye: these
+     six logos carry full dynamic range (Coffeeholics spans 251 of 255 on red,
+     near-black corners to a bright purple centre) but four of them are dark or
+     monochrome discs, and at the phone's 38px they resolve to a coloured blob.
+     A desktop row is 549px wide with space to spare, so the one element that
+     identifies the merchant stops being the smallest thing in it. */
+  .app[data-screen="home"] .app-collar{width:48px;height:48px;border-radius:var(--r-card)}
+  .app[data-screen="home"] .app-collar img,
+  .app[data-screen="home"] .app-collar::after{border-radius:11px}
+}
+
+/* -- the merchant page ----------------------------------------------------- */
+.pl-body,.pl-main-a,.pl-main-b,.pl-side{display:contents}
+
+@media (min-width:1024px){
+  .column > .app[data-screen="place"]{max-width:1100px}
+
+  .pl-body{display:grid;grid-template-columns:minmax(0,1fr) 400px;
+    grid-template-rows:auto auto;
+    column-gap:var(--s-2xl);row-gap:var(--s-xl);align-items:start}
+  .pl-main-a{display:block;grid-column:1;grid-row:1}
+  .pl-main-b{display:flex;flex-direction:column;gap:var(--s-xl);
+    grid-column:1;grid-row:2}
+  /* Stretched across both rows, and `display:block` rather than contents — the
+     two halves of the bug that gave /reserve's sticky panel zero travel. */
+  .pl-side{display:block;grid-column:2;grid-row:1 / -1;align-self:stretch}
+  .pl-side > .place-ticket{position:sticky;top:calc(var(--banner-h) + var(--s-xl))}
+
+  /* THE RUNNING-TOTAL PILL GOES. It is compensation for a ticket that has
+     scrolled out of view, and beside the menu the ticket never does. Leaving it
+     would pin a second copy of the same figures over a page that is already
+     showing them. */
+  .app[data-screen="place"] .place-mini{display:none}
+
+  /* The menu gets the room, so the thumbnails stop being stamps and the
+     description line stops wrapping to two at 40 characters. */
+  .app[data-screen="place"] .place-item{padding:var(--s-lg) var(--s-xl)}
+}
+
+/* -- deals ----------------------------------------------------------------- */
+@media (min-width:1024px){
+  .column > .app[data-screen="deals"]{max-width:1040px}
+  /* Two unlike lists, side by side rather than stacked: the standing three are
+     automatic and identical everywhere, the one-time offers are a place's own
+     and have to be added. Stacked, a reader reads six rows and takes them for
+     one list of six benefits — which is the exact confusion this screen's own
+     comment says it was built to prevent. */
+  .app[data-screen="deals"] .app-body{display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:var(--s-xl);align-items:start}
+  .app[data-screen="deals"] .app-body > .app-sec:first-child{grid-row:1 / span 2}
+}
+
+/* -- my spot --------------------------------------------------------------- */
+@media (min-width:1024px){
+  .column > .app[data-screen="spot"]{max-width:1040px}
+  /* Two tickets are two objects, not a column. Side by side they can be
+     compared, which is the only thing anyone does with a list of saved orders. */
+  .app[data-screen="spot"] .app-spot{display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-lg);
+    align-items:start}
+}
+
+/* -- points ---------------------------------------------------------------- */
+@media (min-width:1024px){
+  .column > .app[data-screen="points"]{max-width:1100px}
+  /* The five venue cards are a comparison — each carries the same two figures
+     and the point is that they differ. In one column that comparison is made by
+     memory; in two it is made by eye. */
+  .app[data-screen="points"] .app-points{display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-lg);
+    align-items:start}
+  .app[data-screen="points"] .app-tally b{font-size:30px}
+}
+
+/* ============================================================================
+   THE APP AS A WINDOW — desktop only. See shell/AppLayer.tsx for the routing.
+
+   Sam, 14 Sep 2026: "on desktop the app preview should be more of a pop up
+   layered above the page someone clicked to get through to them instead of a
+   full width and height app."
+
+   The window IS the app's desktop layout with edges. `transform:translateZ(0)`
+   is load-bearing: it makes `.app-window` the containing block for the app's
+   `position:fixed` chrome — the banner, the 248px rail, the join bar — so all
+   of it docks to the window's edges and none of app.css's own rules change.
+   `.app-scroll` is a separate element so the chrome does not scroll with the
+   content: fixed descendants are positioned against the transformed ancestor,
+   not the scroller between. The three `.column:has(.app)` rules above have a
+   `.app-scroll` twin here, and nothing else is duplicated.
+   ============================================================================ */
+html.is-layered{overflow:hidden}
+
+.app-layer{position:fixed;inset:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  padding:48px}
+.app-layer-scrim{position:absolute;inset:0;
+  background:rgba(10,5,8,.62);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  animation:layerFade 180ms var(--ease) both}
+.app-window{
+  position:relative;z-index:1;
+  width:min(1180px,100%);height:100%;
+  border-radius:var(--r-panel);overflow:hidden;
+  background:var(--page);color:var(--ink-2);
+  border:1px solid var(--hair);
+  box-shadow:0 30px 80px rgba(0,0,0,.55);
+  transform:translateZ(0);
+  animation:layerPop 260ms var(--ease) both;
+}
+.app-window:focus{outline:none}
+.app-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain;
+  padding:calc(var(--banner-h) + var(--s-xl)) var(--s-2xl) var(--s-2xl)
+    calc(var(--rail-w) + var(--s-2xl))}
+/* The per-screen measures, as `.column > .app[...]` declares them above. */
+.app-scroll > .app{width:100%;max-width:720px;margin-inline:auto;padding-bottom:var(--s-2xl)}
+.app-scroll > .app.is-place{padding-bottom:96px}
+.app-scroll > .app[data-screen="home"],
+.app-scroll > .app[data-screen="place"],
+.app-scroll > .app[data-screen="points"]{max-width:1100px}
+.app-scroll > .app[data-screen="deals"],
+.app-scroll > .app[data-screen="spot"]{max-width:1040px}
+/* The window's close, in the banner's right gutter, the mirror of the chevron. */
+.app-close{position:absolute;right:var(--s-2xl);top:50%;transform:translateY(-50%)}
+.app-close::after{content:"";position:absolute;inset:-4px;border-radius:inherit}
+.app-close:active{transform:translateY(-50%) scale(.94)}
+
+@keyframes layerFade{from{opacity:0}to{opacity:1}}
+@keyframes layerPop{from{opacity:0;transform:translateZ(0) translateY(10px) scale(.985)}
+  to{opacity:1;transform:translateZ(0)}}
+@media (prefers-reduced-motion:reduce){
+  .app-layer-scrim,.app-window{animation:none}
+}
+
+
+/* ============================================================================
+   THE STOREFRONT — the merchant page as the merchant's own page.
+
+   Sam, 14 Sep 2026: "it should look basically like a modified version of the
+   real merchant pages." Read from the live page (tapin.app/coffeeholicsva) and
+   V3.1's restaurant.tsx: a 208px full-bleed hero, a 96px round mark with a 2px
+   white ring overlapping its foot by 24px, an OPEN pill under the mark, and
+   from there down the page is the restaurant's primaryColor with cards one
+   step lighter (adjustColor +15) and white type. Sections are 24px/700 heads;
+   the menu is separate cards, each with a 76px photograph lifted off it and a
+   round white + at the right.
+
+   HOW IT IS SCOPED. `.pl-page` carries the brand as `--pl-brand` (inline, from
+   venues.json) and REMAPS THE INK RAMP LOCALLY for the branded theme — the
+   same trick the membership card uses to stay a dark object on a light page —
+   so the ticket, the rows and the running-total pill render on the brand with
+   no per-component fork. `data-mode="light"` (a brand that cannot carry white:
+   Sweetopia) keeps the app's own light ramp and spends the brand as accent,
+   which is the storefront's own fallback. Maroon appears once: the action.
+   ============================================================================ */
+.pl-page{
+  --pl-bg:var(--pl-brand);
+  --pl-card:color-mix(in srgb, var(--pl-brand) 86%, var(--on-maroon));
+  --pl-fill:rgba(255,255,255,.14);
+  --pl-fill-2:rgba(255,255,255,.22);
+  position:relative;
+  /* Out to the column's edges, and up under the banner: the page is the
+     merchant's ground, not a card on ours. */
+  margin:calc(-1 * var(--s-xl)) calc(-1 * var(--gutter)) 0;
+  padding:0 var(--gutter) var(--s-2xl);
+  background:var(--pl-bg);color:var(--ink-1);
+  display:flex;flex-direction:column;gap:0;
+}
+/* The ramp, inverted onto the brand — ONLY on the branded theme. The light
+   theme inherits the app's own light ramp untouched (a custom property set to
+   `initial` is the guaranteed-invalid value, and every var() reading it would
+   fall to nothing: the cards vanished on Sweetopia the first time round). */
+.pl-page[data-mode="brand"]{
+  --ink-1:var(--on-maroon);
+  --ink-2:rgba(255,255,255,.88);
+  --ink-3:rgba(255,255,255,.74);
+  --ink-4:rgba(255,255,255,.62);
+  --card:var(--pl-card);
+  --inner:rgba(255,255,255,.10);
+  --subtle:rgba(255,255,255,.06);
+  --hair:rgba(255,255,255,.14);
+  --hair-lit:rgba(255,255,255,.24);
+  --rest:0 1px 2px rgba(0,0,0,.18);
+  --float:0 4px 12px rgba(0,0,0,.28);
+}
+.pl-page[data-mode="light"]{
+  --pl-bg:var(--page);
+  --pl-card:var(--card);
+  --pl-fill:color-mix(in srgb, var(--pl-brand) 12%, var(--card));
+  --pl-fill-2:color-mix(in srgb, var(--pl-brand) 20%, var(--card));
+}
+
+/* -- the hero ---------------------------------------------------------------- */
+.pl-hero{position:relative;height:208px;margin:0 calc(-1 * var(--gutter));
+  background:var(--pl-card)}
+.pl-hero > img{width:100%;height:100%;object-fit:cover;display:block}
+/* A brand card on white (The Burg) at hero scale is a white page head; the
+   storefront shows it as shot, so only the mildest seating here. */
+.pl-hero > img[data-bright="true"]{filter:saturate(.95) brightness(.9)}
+.pl-logo{position:absolute;left:18px;bottom:-24px;z-index:2;width:96px;height:96px;
+  border-radius:50%;overflow:hidden;background:var(--on-maroon);
+  border:2px solid var(--on-maroon);
+  box-shadow:0 8px 24px rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.1)}
+.pl-logo img{width:100%;height:100%;object-fit:cover;display:block}
+/* "● OPEN": the storefront's green pill, in its position under the mark. Green
+   is the one colour a status may take; it names a fact from the record. */
+.pl-open{position:absolute;left:34px;bottom:-44px;z-index:3;
+  display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;
+  border-radius:var(--r-pill);background:#2F6B4F;color:var(--on-maroon);
+  font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pl-open i{width:8px;height:8px;border-radius:50%;background:var(--on-maroon)}
+
+/* -- identity ---------------------------------------------------------------- */
+.pl-id{padding-top:60px}
+.pl-name{display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-md);margin:0;
+  font-size:28px;font-weight:700;letter-spacing:-.025em;line-height:1.1;color:var(--ink-1)}
+.pl-name .plus{align-self:center;background:var(--pl-fill-2);color:var(--ink-1)}
+.pl-page[data-mode="light"] .pl-name .plus{background:var(--pl-brand);color:var(--on-maroon)}
+.pl-where{display:flex;align-items:center;gap:6px;margin:var(--s-sm) 0 0;
+  font-size:15px;font-weight:500;color:var(--ink-3)}
+.pl-where svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* The action row: the storefront's chips, as anchors. Scrolls sideways past
+   the gutter the way the real one does; the live address is the last chip and
+   the only one that leaves the page — it carries the outbound mark. */
+.pl-chips{display:flex;gap:var(--s-md);margin:var(--s-lg) calc(-1 * var(--gutter)) 0;
+  padding:0 var(--gutter);overflow-x:auto;scrollbar-width:none}
+.pl-chips::-webkit-scrollbar{display:none}
+.pl-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:44px;
+  padding:0 var(--s-lg);border-radius:var(--r-card);background:var(--pl-fill);
+  color:var(--ink-1);font-size:15px;font-weight:600;text-decoration:none;
+  white-space:nowrap;-webkit-tap-highlight-color:transparent;
+  transition:background-color 150ms var(--ease),transform 150ms var(--ease)}
+.pl-chip svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.pl-chip:active{transform:scale(.97)}
+@media (hover:hover){.pl-chip:hover{background:var(--pl-fill-2)}}
+.pl-chip:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+.pl-chip.is-live{background:none;border:1px solid var(--hair-lit);font-weight:500}
+.pl-chip.is-live svg{width:14px;height:14px;stroke-width:2}
+.pl-live-note{margin:var(--s-md) 0 0;font-size:13px;font-weight:500;color:var(--ink-3);
+  max-width:46ch}
+
+/* -- sections ---------------------------------------------------------------- */
+.pl-sec{margin-top:var(--s-2xl)}
+.pl-h2{margin:0 0 var(--s-lg);font-size:24px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-1)}
+.pl-note{margin:var(--s-lg) 0 0;font-size:13px;font-weight:500;line-height:1.45;
+  color:var(--ink-3);text-wrap:pretty}
+.pl-note.is-lead{margin-top:0;font-size:15px;color:var(--ink-2)}
+
+/* The highlight slider: photograph, then the words on its foot under the
+   venue cards' veil. 280 wide at 16:10, snapping, bleeding past the gutter. */
+.pl-high{list-style:none;margin:0 calc(-1 * var(--gutter));padding:0 var(--gutter);
+  display:flex;gap:var(--s-lg);overflow-x:auto;scroll-snap-type:x mandatory;
+  scrollbar-width:none}
+.pl-high::-webkit-scrollbar{display:none}
+.pl-high-card{position:relative;flex:0 0 280px;aspect-ratio:16/10;scroll-snap-align:start;
+  border-radius:var(--r-panel);overflow:hidden;background:var(--pl-card);
+  box-shadow:var(--float)}
+.pl-high-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pl-high-card::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 34%,rgba(0,0,0,.12) 50%,
+    rgba(0,0,0,.36) 66%,rgba(0,0,0,.62) 82%,rgba(0,0,0,.86) 100%)}
+.pl-high-text{position:absolute;left:var(--s-lg);right:var(--s-lg);bottom:var(--s-lg);
+  z-index:1;display:flex;flex-direction:column;gap:3px;color:var(--on-maroon)}
+.pl-high-text b{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.pl-high-text span{font-size:13px;font-weight:500;line-height:1.35;opacity:.86}
+
+/* My Spot: the storefront's segmented panel — three equal cells, divided by
+   hairlines, on one card. Glyph, label, state; no chevrons, nothing tappable. */
+.pl-spot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  background:var(--pl-card);border-radius:var(--r-panel);padding:var(--s-lg) 0;
+  box-shadow:var(--rest)}
+.pl-cell{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;
+  padding:var(--s-sm) var(--s-lg)}
+.pl-cell + .pl-cell::before{content:"";position:absolute;left:0;top:var(--s-sm);
+  bottom:var(--s-sm);width:1px;background:var(--hair)}
+.pl-cell svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--ink-2);display:block;
+  margin-bottom:4px}
+.pl-cell b{font-size:15px;font-weight:700;color:var(--ink-1)}
+.pl-cell span{font-size:13px;font-weight:500;line-height:1.35;color:var(--ink-3);
+  text-wrap:pretty}
+.pl-cell em{font-style:normal;font-weight:700;color:var(--ink-1)}
+
+/* -- order ------------------------------------------------------------------- */
+.pl-cats{display:flex;gap:var(--s-sm);margin:0 calc(-1 * var(--gutter)) var(--s-sm);
+  padding:0 var(--gutter);overflow-x:auto;scrollbar-width:none}
+.pl-cats::-webkit-scrollbar{display:none}
+.pl-cat{flex:0 0 auto;display:inline-flex;align-items:center;height:38px;
+  padding:0 var(--s-lg);border-radius:var(--r-pill);background:var(--pl-fill);
+  color:var(--ink-1);font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent}
+@media (hover:hover){.pl-cat:hover{background:var(--pl-fill-2)}}
+.pl-cat:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+
+/* The storefront's section head: 18px, uppercase, the ink. */
+.pl-page .place-sec{scroll-margin-top:calc(var(--banner-h) + var(--s-lg))}
+.pl-page .place-sec + .place-sec{margin-top:var(--s-2xl)}
+.pl-page .place-sec-head{margin:var(--s-xl) 0 var(--s-md);font-size:18px;font-weight:700;
+  letter-spacing:.01em;text-transform:uppercase;color:var(--ink-1)}
+/* Separate cards, as the real menu is drawn — the one place this build's
+   "a list is one object" rule yields, because the ask is the storefront's own
+   look and the storefront's menu is cards. */
+.pl-page .place-menu{display:flex;flex-direction:column;gap:var(--s-md)}
+.pl-page .place-item{align-items:center;gap:var(--s-lg);min-height:100px;
+  padding:var(--s-md);border-radius:var(--r-panel);background:var(--pl-card);
+  box-shadow:var(--rest);
+  transition:background-color 150ms var(--ease),box-shadow 150ms var(--ease),
+    transform 150ms var(--ease)}
+.pl-page .place-item:active{transform:scale(.99);background:var(--pl-card)}
+.pl-page .place-item:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-panel)}
+/* Chosen: the ring the storefront's selected states use, and the + becomes a
+   tick. Colour is never the only channel. */
+.pl-page .place-item.is-on{background:var(--pl-card);
+  box-shadow:0 0 0 2px var(--ink-1),var(--rest)}
+.pl-page .place-thumb{border:0}
+.pl-page .place-item-text{display:flex;flex-direction:column;gap:2px}
+.pl-page .place-item-text b{font-size:16px;font-weight:700;color:var(--ink-1)}
+.pl-page .place-item-text > span:not(.place-item-price){font-size:14px;color:var(--ink-3);
+  line-height:1.4rem;max-height:1.4rem}
+/* The price under the name, as the storefront sets it (16/500), not beside
+   the +. */
+.pl-page .place-item-price{display:block;margin-top:2px;font-size:16px;font-weight:500;
+  color:var(--ink-1)}
+/* The +: a white disc with the brand's own ink, the storefront's control. */
+.pl-page .place-tick{width:34px;height:34px;border:0;background:var(--on-maroon);
+  color:var(--pl-brand);box-shadow:var(--rest)}
+.pl-page[data-mode="light"] .place-tick{background:var(--pl-brand);color:var(--on-maroon)}
+.pl-page .place-tick svg{width:18px;height:18px}
+.pl-page .place-item.is-on .place-tick{background:var(--on-maroon);color:var(--pl-brand)}
+.pl-page[data-mode="light"] .place-item.is-on .place-tick{background:var(--pl-brand);
+  color:var(--on-maroon)}
+
+/* -- the ticket and the rest, on the brand ----------------------------------- */
+.pl-page .app-sec{background:var(--pl-card);border:0;box-shadow:var(--rest)}
+/* The ticket keeps a group's interval from whatever precedes it on a phone. */
+.pl-page .pl-side > .place-ticket{margin-top:var(--s-2xl)}
+.pl-page .place-mini{background:var(--pl-card);border:0;box-shadow:var(--float)}
+/* The action's fade docks onto the brand ground, not the app's page. */
+.pl-page .app-cta{background:linear-gradient(180deg,transparent 0%,var(--pl-bg) 58%)}
+.pl-page[data-mode="light"] .app-cta{background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 58%)}
+
+/* The phone's page order keeps the ticket between the identity and the menu;
+   the desktop grid below places it beside the menu. */
+@media (min-width:1024px){
+  .pl-page{margin:0;padding:0 var(--s-2xl) var(--s-2xl);border-radius:var(--r-panel);
+    overflow:hidden}
+  .pl-hero{margin:0 calc(-1 * var(--s-2xl));height:260px}
+  .pl-logo{left:var(--s-2xl)}
+  .pl-open{left:calc(var(--s-2xl) + 16px)}
+  .pl-chips,.pl-high,.pl-cats{margin-inline:0;padding-inline:0}
+  .pl-high-card{flex-basis:320px}
+  .pl-page .pl-body{margin-top:0}
+  .pl-page .pl-main-b{gap:0}
+  .pl-page .pl-side > .place-ticket{margin-top:0;top:calc(var(--banner-h) + var(--s-xl))}
+}

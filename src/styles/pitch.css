@@ -1,0 +1,1498 @@
+/* ============================================================================
+   The pitch's visual language.
+
+   The six hero photographs are frozen production snapshots and were sitting
+   unused. Bringing them in does two things at once: it shows the product
+   instead of describing it, and it is the ONLY thing that makes frosted glass
+   legitimate here — TapIn's overlay_chrome.ts reserves glass for chrome over
+   photography, and warns that on a plain surface it "composites to flat grey
+   and the white hairline lands at 1.00:1", reading as a smudge rather than a
+   material. Over a photograph it has something to borrow.
+   ============================================================================ */
+
+/* -- the hero band: six places, shown -------------------------------------- */
+.hero-band{
+  position:relative;
+  margin:calc(-1 * var(--s-2xl)) calc(-1 * var(--gutter)) 0;
+  padding:0 var(--gutter);
+}
+.mosaic{
+  position:absolute;inset:0;display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  /* minmax(0,1fr), not 1fr: a plain `1fr` track keeps an automatic minimum of
+     min-content, so the six photographs sized to themselves and the grid ran
+     617px of image inside a 510px band — row two was clipped by the band's own
+     overflow. The zero minimum lets the track win. */
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:2px;overflow:hidden;
+}
+/* Measured, not eyeballed: five of the six heroes sit between 0.036 and 0.22
+   relative luminance. Only theburg's is a brand card on white, at 0.891. So the
+   collage runs at strength and the single outlier is seated to sit among the
+   photographs rather than punch a hole through them. */
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.92) brightness(.82)}
+.mosaic img[data-bright="true"]{filter:saturate(.9) brightness(.40)}
+/* A neutral scrim, never a tinted one: tinting it would borrow the photograph's
+   own skin, and these are six different merchants' photographs. It works hardest
+   at the bottom, where the glass panel has to sit on something. */
+.mosaic::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(18,10,14,.30) 0%,rgba(18,10,14,.52) 34%,rgba(18,10,14,.84) 72%,var(--page) 100%);
+}
+/* Whatever rides the band — the glass hero on the pitch, the card on the
+   checkout — overlaps its lower edge. */
+.hero-band > :not(.mosaic){position:relative;margin-top:216px}
+/* The checkout wants a shorter band: there, the card is the subject. */
+.hero-band.is-compact > :not(.mosaic){margin-top:124px}
+
+/* Glass, earned: this panel sits over photography. */
+.hero{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(22px) saturate(1.25);
+  backdrop-filter:blur(22px) saturate(1.25);
+  border:1px solid var(--hair-lit);
+  box-shadow:var(--raised),inset 0 1px 0 rgba(255,255,255,.16);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .hero{background:#1B0D16}
+}
+
+/* -- savings, driven by the reader ----------------------------------------
+   ONE TAPPED QUESTION, not a drag. `.band`/`.bands` are how.css's controls,
+   which loads AFTER this file — so nothing here may restyle them or it loses
+   silently. The question block only positions them. */
+.spendq{margin:0 0 var(--s-xl)}
+.spendq-ask{margin:0 0 var(--s-lg);font-size:15px;font-weight:600;
+  letter-spacing:0;line-height:1.4;color:var(--ink-2)}
+/* Two across here, not the deck's four-row stack: this is a panel on a scrolling
+   page rather than a slide with a stage to fill. */
+.spendq .bands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--s-md)}
+.spendq .band{min-height:64px}
+/* Whose number it is. Never omitted: the figure below is meaningless without it. */
+.save-basis{margin:0 0 var(--s-sm)}
+
+.save-figure{display:flex;align-items:baseline;gap:var(--s-md);margin:0;flex-wrap:wrap}
+.save-figure .amount{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1;
+  color:var(--ink-1)}
+.save-figure .unit{font-size:15px;font-weight:500;letter-spacing:0;color:var(--ink-3)}
+
+/* One quantity split three ways, so it reads as a single bar and not a chart:
+   three VALUES of the one brand colour, never three hues. color-mix keeps them
+   derived from the token rather than hand-picked literals. */
+.breakdown{display:flex;gap:2px;height:12px;margin:var(--s-lg) 0 0;overflow:hidden;
+  border-radius:var(--r-pill);background:var(--subtle)}
+.breakdown i{display:block;min-width:3px;transition:flex-grow 180ms var(--ease)}
+.b-pct{background:var(--maroon)}
+.b-credit{background:color-mix(in srgb,var(--maroon) 56%,var(--inner))}
+.b-points{background:color-mix(in srgb,var(--maroon) 24%,var(--inner))}
+
+.legend{list-style:none;margin:var(--s-lg) 0 0;padding:0;
+  display:flex;flex-direction:column;gap:var(--s-md)}
+.legend li{display:flex;align-items:center;gap:var(--s-md);
+  font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.legend li i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.legend li span{flex:1;min-width:0}
+.legend li b{font-size:14px;font-weight:700;color:var(--ink-1)}
+
+/* The control. Its thumb is white, not maroon: maroon is the brand's fill and
+   is already spent on the mark, the Plus chips and the action — a fifth use on
+   a slider handle would make it decoration rather than signal. */
+.spend{margin:var(--s-xl) 0 0}
+.spend label{display:block;font-size:13px;font-weight:500;letter-spacing:.005em;
+  color:var(--ink-3);margin:0 0 var(--s-md)}
+.spend label b{font-size:15px;font-weight:700;color:var(--ink-1)}
+.spend input[type="range"]{-webkit-appearance:none;appearance:none;display:block;
+  width:100%;height:26px;background:none;cursor:pointer;margin:0}
+.spend input[type="range"]::-webkit-slider-runnable-track{
+  height:4px;border-radius:2px;background:var(--inner)}
+.spend input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:22px;height:22px;margin-top:-9px;border-radius:50%;border:0;
+  background:var(--ink-1);box-shadow:var(--raised);
+  transition:transform 150ms var(--ease)}
+.spend input[type="range"]:active::-webkit-slider-thumb{transform:scale(1.14)}
+.spend input[type="range"]::-moz-range-track{height:4px;border-radius:2px;background:var(--inner)}
+.spend input[type="range"]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;
+  background:var(--ink-1);box-shadow:var(--raised)}
+.spend input[type="range"]:focus-visible{outline:2px solid var(--ink-1);outline-offset:4px;
+  border-radius:var(--r-sm)}
+.spend-ends{display:flex;justify-content:space-between;margin-top:2px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-4)}
+
+.first-note{margin:var(--s-lg) 0 0}
+.first-note b{color:var(--ink-1);font-weight:700}
+
+/* -- same money, fewer places ---------------------------------------------
+   The argument the figure above was never making. Two columns of the same
+   money: anonymous rings on the left, the real marks on the right. The rings
+   are deliberately small, many and unnamed — that IS the spread. */
+.conc{margin:var(--s-xl) 0 0;padding-top:var(--s-xl);border-top:1px solid var(--hair)}
+.conc-head{margin:0 0 var(--s-lg)}
+/* Two ROWS, not two columns. Side by side, each column was ~140px and the
+   merchant marks fell to 22px, at which size a logo is just its brand colour —
+   the row that has to be recognised stopped being recognisable. Full width
+   gives the marks 34px and gives the ring row its own length, which is the
+   other half of the argument: the faint row is WIDER than the real one. */
+.conc-pair{display:flex;flex-direction:column;gap:1px;
+  background:var(--hair);border:1px solid var(--hair);border-radius:var(--r-card);
+  overflow:hidden}
+.conc-side{background:var(--inner);padding:var(--s-lg)}
+/* The network row carries the maroon bias — the one row worth looking at. */
+.conc-side.is-net{background:color-mix(in srgb, var(--maroon) 12%, var(--inner))}
+
+.conc-field{display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+  /* Held equal so the two rows read as the same object at two settings. */
+  min-height:34px}
+.conc-field i{width:12px;height:12px;border-radius:50%;
+  box-shadow:inset 0 0 0 1.5px var(--hair-lit);opacity:.5}
+.conc-collar{width:34px;height:34px;border-radius:11px;padding:2.5px}
+.conc-collar img{border-radius:8px}
+.conc-collar::after{inset:2.5px;border-radius:8px}
+
+.conc-foot-row{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s-lg);margin:var(--s-md) 0 0}
+.conc-where{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-4)}
+.conc-back{flex:0 0 auto;font-size:20px;font-weight:700;
+  letter-spacing:-.025em;color:var(--ink-3)}
+.conc-side.is-net .conc-back{color:var(--ink-1)}
+.conc-foot{margin:var(--s-lg) 0 0}
+.conc-foot b{color:var(--ink-1);font-weight:700}
+
+/* -- what the benefits cover ---------------------------------------------- */
+/* The rule runs out from the label rather than boxing it: it ties the scope row
+   to the benefits above without adding a second container to a panel that
+   already has one. */
+.covers-head{display:flex;align-items:center;gap:var(--s-lg);
+  margin:var(--s-xl) var(--s-xl) var(--s-lg);color:var(--ink-4)}
+.covers-head::after{content:"";flex:1;height:1px;background:var(--hair)}
+
+.covers{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-lg) var(--s-md);
+  padding:0 var(--s-xl);margin:0}
+.cover{display:flex;flex-direction:column;align-items:center;gap:var(--s-sm);text-align:center}
+.cover svg{width:22px;height:22px;color:var(--ink-3);display:block}
+.cover span{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-4);
+  text-align:center}
+
+/* -- the way into the app preview -----------------------------------------
+   A panel-shaped link, not a button: maroon is spent on the control that takes
+   money, and this one only opens a preview. The glyph row is the illustration
+   — those four marks are literally the app's four destinations. */
+.applink{display:flex;align-items:center;gap:var(--s-lg);
+  padding:var(--s-lg) var(--s-xl);
+  background:var(--card);border:1px solid var(--hair);border-radius:var(--r-panel);
+  box-shadow:var(--rest);text-decoration:none;color:var(--ink-1);
+  -webkit-tap-highlight-color:transparent;
+  transition:background 160ms var(--ease),transform 160ms var(--ease)}
+.applink:active{background:var(--inner);transform:scale(.995)}
+.applink b{flex:1;min-width:0;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.applink-glyphs{display:flex;gap:var(--s-md);flex:0 0 auto;color:var(--ink-4)}
+.applink-glyphs svg{width:17px;height:17px;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;display:block}
+.applink-go{width:20px;height:20px;flex:0 0 auto;color:var(--ink-3)}
+/* Four glyphs plus a label plus a chevron is tight at 320; the glyph row gives
+   up its gaps before the label gives up its line. */
+@media (max-width:380px){
+  .applink{gap:var(--s-md)}
+  .applink-glyphs{gap:var(--s-sm)}
+  .applink-glyphs svg{width:16px;height:16px}
+}
+
+/* -- members-only nights ---------------------------------------------------
+   Distinguished by a maroon-biased tint and edge, not by a maroon field: a
+   large brand-coloured block is the closest this design comes to reading as
+   university livery, which §10 rules out. The scene inside it is darker than
+   the panel, so the panel reads as the frame and the scene as the room. */
+.panel.nights{
+  padding:0;overflow:hidden;
+  background:color-mix(in srgb, var(--maroon) 13%, var(--card));
+  border-color:color-mix(in srgb, var(--maroon) 42%, var(--hair));
+}
+.nights-body{padding:var(--s-lg) var(--s-xl) var(--s-xl)}
+.nights-top{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-lg);margin:0 0 var(--s-sm)}
+.nights-title{margin:0;font-size:18px;font-weight:700;
+  letter-spacing:-.015em;color:var(--ink-1)}
+
+/* The scene ---------------------------------------------------------------- */
+/* A drawn scene, not text. The two passes carry 8px labels printed on them —
+   the same "this is an object" case as the membership card. */
+.night{position:relative;aspect-ratio:16/9;overflow:hidden;isolation:isolate;
+  user-select:none;-webkit-user-select:none;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(134,31,65,.20), transparent 60%),
+    var(--page)}
+/* Vignette. Without it the scene's corners are the same value as the panel
+   border and the frame dissolves — but at 70px/20px/.85 it also swallowed the
+   pool it was meant to frame, and the passes ended up floating in black
+   instead of standing in light. Light at the top and sides, open at the base. */
+.night::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(130% 105% at 50% 8%,
+    transparent 32%, rgba(18,10,14,.42) 72%, rgba(18,10,14,.78) 100%)}
+
+/* The pool of light the passes stand in. Bright enough to be the light SOURCE
+   of the frame — the first pass of this sat at .72 behind 16px of blur and read
+   as a smudge, which left the passes looking pasted on rather than lit. */
+.night-pool{position:absolute;left:50%;bottom:-34%;width:104%;height:88%;
+  transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(closest-side,
+    color-mix(in srgb, var(--maroon) 40%, #FFD3B4 60%) 0%,
+    color-mix(in srgb, var(--maroon) 74%, #FFB98F 26%) 26%,
+    color-mix(in srgb, var(--maroon) 96%, transparent) 52%,
+    transparent 78%);
+  filter:blur(11px);opacity:1;
+  animation:nightPool 9.3s ease-in-out infinite}
+/* The far wall catching the pool — this is what makes the passes read as lit
+   from below rather than pasted onto a dark rectangle. */
+.night-haze{position:absolute;left:0;right:0;bottom:14%;height:52%;
+  background:linear-gradient(to top,
+    rgba(160,52,88,.5) 0%, rgba(134,31,65,.26) 42%, transparent 100%);
+  filter:blur(12px)}
+
+.night-lights{position:absolute;inset:0}
+.night-lights i{position:absolute;width:var(--d);height:var(--d);
+  margin:calc(var(--d) / -2) 0 0 calc(var(--d) / -2);border-radius:50%;
+  background:#FFE9D8;box-shadow:0 0 calc(var(--d) * 2.4) calc(var(--d) * .7) rgba(255,214,180,.4);
+  opacity:var(--o);filter:blur(.4px);
+  animation:nightGlow 6.1s ease-in-out infinite}
+
+.night-passes{position:absolute;left:50%;bottom:15%;transform:translateX(-50%);
+  width:132px;height:88px}
+/* 76 + 76 in a 132 box = 20px of overlap: enough to read as depth, not enough
+   to bury the far pass's own label, which is what 86 did. */
+.night-pass{position:absolute;bottom:0;width:76px;height:100%}
+.night-pass-face{width:100%;height:100%;border-radius:10px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:9px 10px;
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--maroon) 88%, #FFF 12%) 0%,
+      var(--maroon) 46%,
+      color-mix(in srgb, var(--maroon) 72%, #000 28%) 100%);
+  box-shadow:0 10px 22px rgba(10,4,8,.6), inset 0 1px 0 rgba(255,255,255,.28)}
+.night-pass span{font-size:8px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.82)}
+.night-mark{height:9px;width:auto;color:#FFF;opacity:.95}
+
+/* The guest's pass sits behind, smaller and dimmer, so the pair reads as depth
+   rather than as two of the same thing side by side. */
+.night-pass.is-guest{left:0;transform:rotate(-10deg) scale(.93);opacity:.9;
+  animation:nightSwayA 7.4s ease-in-out infinite}
+.night-pass.is-guest .night-pass-face{filter:brightness(.66) saturate(.88)}
+.night-pass.is-you{right:0;transform:rotate(7deg);
+  animation:nightSwayB 5.9s ease-in-out infinite}
+
+@keyframes nightPool{
+  0%,100%{opacity:.88;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.04)}
+}
+@keyframes nightGlow{0%,100%{opacity:.34}50%{opacity:.72}}
+@keyframes nightSwayA{
+  0%,100%{transform:rotate(-10deg) scale(.93) translateY(0)}
+  50%{transform:rotate(-8.6deg) scale(.93) translateY(-3px)}
+}
+@keyframes nightSwayB{
+  0%,100%{transform:rotate(7deg) translateY(0)}
+  50%{transform:rotate(5.8deg) translateY(-4px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .night-pool,.night-lights i,.night-pass{animation:none}
+}
+
+/* -- the places, as a rail of photographs ---------------------------------- */
+/* A grid, not a rail. The headline promises SIX places; a horizontal rail shows
+   two and hides four behind a gesture with no affordance, which is why it read
+   as broken rather than as scrollable. Three rows of two delivers the headline
+   literally and removes the scroll problem instead of decorating it. */
+.places-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--s-lg);
+  padding:0 var(--s-xl) var(--s-xl);margin:0;
+}
+.vcard{display:block;min-width:0}
+/* Six of the eight tiles are links now. They already looked tappable, so the
+   job here is only to make them behave like it — a press response, a focus
+   ring, and inherited colour so the anchor changes nothing about the type. */
+a.vcard{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease)}
+a.vcard:active{transform:scale(.985)}
+a.vcard:focus-visible{outline:2px solid var(--ink-1);outline-offset:4px;
+  border-radius:var(--r-card)}
+.vshot{position:relative;aspect-ratio:16/11;border-radius:var(--r-card);overflow:hidden;
+  background:var(--subtle);border:1px solid var(--hair)}
+/* Two of the six "heroes" are brand cards on white, not rooms. Untreated they
+   punch a hole in a dark screen, so every shot is seated slightly and carries a
+   scrim from the top as well as the bottom — enough to sit the white cards down
+   without draining the photographs. */
+.vshot img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.86) saturate(.94)}
+.vshot::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(18,10,14,.20) 0%,rgba(18,10,14,.04) 34%,rgba(18,10,14,.78) 100%)}
+/* The collar rides the photograph's bottom edge — merchant mark on merchant
+   image, which is where a venue's own colour is allowed to appear. */
+/* Same seating as the mosaic gives its one bright hero — see the note there.
+   Slightly lighter here because a tile is small and already framed. */
+.vshot img[data-bright="true"]{filter:saturate(.9) brightness(.52)}
+.vshot .collar{position:absolute;left:8px;bottom:8px;z-index:1;width:34px;height:34px;
+  border-radius:var(--r-control)}
+.vshot .collar img{border-radius:8px}
+.vshot .collar::after{border-radius:8px}
+.vcard .vname{display:flex;align-items:baseline;gap:var(--s-sm);margin:var(--s-md) 0 0;min-width:0}
+.vcard .vname b{font-size:14px;font-weight:700;letter-spacing:0;color:var(--ink-1);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vcard .vmeta{font-size:12px;font-weight:500;letter-spacing:.01em;color:var(--ink-4);
+  margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Tiles with no photograph: a signed venue that has no art yet, and the growing
+   network itself. Neither may be mistaken for an open place. */
+.vshot.is-empty{display:flex;align-items:center;justify-content:center;
+  background:var(--subtle);color:var(--ink-4)}
+.vshot.is-empty::after{content:none}
+.vshot.is-empty svg{width:30px;height:30px}
+/* A monogram, not another venue's artwork borrowed to fill the hole. */
+.monogram{font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--ink-3)}
+/* Dashed only for the network tile — it is the one that is not a place at all. */
+.vcard.is-more .vshot.is-empty{border:1px dashed var(--hair-lit)}
+.vcard.is-more .vmeta{white-space:normal;overflow:visible;line-height:1.35}
+.tag-sm{font-size:10px;padding:3px 6px;align-self:baseline}
+
+/* -- ways to use ----------------------------------------------------------
+   Split by status rather than set as seven equal paragraphs. The three that
+   work today get a sentence; the four that do not yet exist get a name and
+   their tag and nothing more. That halves the prose AND is more honest than
+   the flat list was — describing an unbuilt feature at the same length as a
+   working one is what §8 warns against. */
+.ways{display:block}
+.way{display:flex;gap:var(--s-lg);align-items:flex-start;
+  padding:var(--s-lg) var(--s-xl);margin:0}
+.way + .way{border-top:1px solid var(--hair)}
+.way-icon{flex:0 0 auto;color:var(--ink-3);display:block}
+/* Optical, not mathematical: the glyph is nudged to sit on the headline's
+   x-height rather than its line box, which reads a pixel high otherwise. */
+.way-icon svg{width:21px;height:21px;display:block;margin-top:1px}
+.way-text{min-width:0}
+.way-text b{display:block;font-size:14px;font-weight:700;letter-spacing:0;color:var(--ink-1)}
+.way-text p{margin:var(--s-xs) 0 0;font-size:13px;font-weight:500;line-height:1.4;
+  letter-spacing:.005em;color:var(--ink-3)}
+
+.ways-soon{display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--hair);border-top:1px solid var(--hair)}
+.soon{background:var(--card);padding:var(--s-lg) var(--s-xl);margin:0;
+  display:flex;flex-direction:column;gap:var(--s-md);align-items:flex-start}
+.soon .way-icon{color:var(--ink-4)}
+.soon .way-icon svg{width:20px;height:20px;margin:0}
+.soon b{font-size:13px;font-weight:700;letter-spacing:0;color:var(--ink-2)}
+.soon .tag{font-size:10px;padding:3px 6px}
+
+@media (max-width:360px){
+  .ways-soon{grid-template-columns:1fr}
+}
+
+/* ============================================================================
+   DESKTOP.
+
+   These rules live HERE and not in layout.css's desktop block, and the reason
+   is worth stating because it cost a pass to find: every selector below is
+   also written in this file at base, layout.css loads first, and a media query
+   adds no specificity. Authored next to the phone layout they simply lost on
+   source order — the places panel widened to 1120 while its grid stayed two
+   columns, so the six tiles doubled in size instead of arriving three across.
+   ============================================================================ */
+@media (min-width:1024px){
+  /* The band is the window now, so the panel on it can stop being the whole
+     band's width and go back to being a panel: a reading measure, sitting low
+     over a tall scene, with the photography reading as the room it is in
+     rather than as a strip behind it. */
+  .hero-band > :not(.mosaic){max-width:560px;margin:380px auto 0}
+  /* ON THE CHECKOUT THE CARD SITS OVER THE DECISION COLUMN, not in the middle
+     of the window. It is the object being bought and the panel beneath it is
+     what buys it, so the two stand in one vertical line and the photography
+     keeps the rest of the band. Centred, the card aligned with neither column
+     and read as a third stray measure.
+
+     The offset is the split's own arithmetic, not a guess: the shell is
+     centred, so the decision track starts at half the leftover plus the shell
+     minus the track. Percentages in a margin resolve against the containing
+     block, which is the full-bleed band, so `100%` here is the window. */
+  .hero-band.is-compact{--shell:min(1180px,calc(100% - 96px));--track:460px}
+  .hero-band.is-compact > :not(.mosaic){
+    max-width:var(--track);
+    /* 150, not the phone's 220. The band's height is not authored anywhere —
+       it is whatever this offset plus the card comes to, and at 220 that was
+       510px of photography before a reader reached anything on a checkout. On
+       THIS surface the card is the subject and the photographs only establish
+       where it works, so the band closes sooner and the decision beside it
+       clears the fold. Measured: §4 co-visibility 57% -> 71% of scroll
+       positions, and the first screen stops being half band. */
+    margin:150px 0 0 calc((100% - var(--shell)) / 2 + var(--shell) - var(--track));
+  }
+
+  /* Three across. The headline promises six places and this is the first
+     viewport where all six can actually be seen at once. */
+  .places-grid{grid-template-columns:repeat(3,1fr);gap:var(--s-xl);
+    padding:0 var(--s-2xl) var(--s-2xl)}
+
+  /* The tiles are ~330px wide here against 210 on a phone, so the marks and
+     the type scale with them rather than sitting small in a big frame. */
+  .vshot .collar{width:40px;height:40px;left:10px;bottom:10px}
+  .vcard .vname b{font-size:15px}
+  .vcard .vmeta{font-size:13px}
+
+  /* Room enough for the four coverage glyphs to breathe. */
+  .covers{grid-template-columns:repeat(6,1fr)}
+}
+
+/* ============================================================================
+   THE PLACES — a ticker that opens into a grid.
+   ============================================================================ */
+.ticker-rail{
+  display:flex;gap:var(--s-md);margin:0;padding:0 var(--s-xl);list-style:none;
+  overflow-x:auto;
+  /* NO scroll-snap. Snap arrests a scroll at a boundary, which is the one thing
+     a continuous ticker must never do — it was correct for the stepped version
+     this replaced and is a bug in this one. */
+  overscroll-behavior-x:contain;
+  /* BOTH AXES. `pan-x` alone made a finger that landed on a tile unable to
+     scroll the page at all (Sam, 15 Sep 2026: "I should be able to scroll
+     vertically when I swipe on this component"). With both allowed the
+     browser locks to whichever axis the swipe starts on, which is what a
+     rail inside a page is supposed to do. */
+  touch-action:pan-x pan-y pinch-zoom;
+  /* THE EDGES FADE RATHER THAN CUT. A tile guillotined at the panel's inside
+     edge reads as clipping — as something broken — which is most of what made
+     this look wrong. Faded, the same partial tile reads as a list continuing
+     past the frame, which is what it is. The fade is the width of the rail's
+     own inset, so the first tile is at full strength exactly where the panel's
+     content begins. */
+  /* Wide enough to read AS a fade. At 16px it was a hairline of softness on a
+     card edge, which looks like a rendering artifact rather than an intent —
+     and the rail bleeds to the screen edge now, so there is room for it. */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 36px,
+    #000 calc(100% - 44px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 36px,
+    #000 calc(100% - 44px),transparent 100%);
+}
+.ticker-tile{
+  /* Small enough that three and a bit are in view. Two-at-a-time is the exact
+     complaint that got the last rail removed from this page: at that size the
+     reader is looking at a pair of big cards, not at a list going past. */
+  flex:0 0 auto;width:clamp(132px,34vw,156px);
+}
+/* A tile that is not a link. There is no page behind Slake, so it takes none of
+   the anchor's press, hover or focus behaviour. */
+.vcard.is-idle{cursor:default}
+
+/* ── OPEN: the same tiles, reflowed ─────────────────────────────────────────
+   The rail stops being a scroller and becomes a grid. The duplicate track is
+   already gone from the DOM by this point, so what reflows is exactly the eight
+   real places. */
+.ticker.is-open .ticker-rail{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--s-lg);
+  overflow:visible;
+  /* ══ THE PAGE SCROLLS AGAIN, AND THIS LINE IS WHY IT DID NOT ═══════════════
+     Sam, 13 Sep 2026: "when I expand this I'm not able to scroll with my
+     finger, this is for the home page." Correct, and the cause is two rules
+     that were each right on their own.
+
+     The closed rail declares `touch-action:pan-x pinch-zoom` so a diagonal
+     swipe drives the ticker sideways without also dragging the page down. That
+     is a promise to the browser about the WHOLE element: horizontal panning is
+     handled here, vertical panning is not available. Opening the grid removed
+     the scroller (`overflow:visible`) and the mask, but left the promise
+     standing — so the eight tiles became a ~1,100px-tall block of the home page
+     that silently swallowed every vertical swipe. The taller the grid, the more
+     of the page was dead: on a phone this is most of the screen.
+
+     `auto` gives the gesture back. It is not a reset for tidiness — the grid no
+     longer scrolls in any direction of its own, so there is nothing left for it
+     to claim, and every touch over it belongs to the page. */
+  touch-action:auto;
+  /* Nothing is cut off any more, so nothing should fade — a mask here would
+     just dim the first and last columns for no reason. */
+  -webkit-mask-image:none;mask-image:none;
+}
+.ticker.is-open .ticker-tile{width:auto}
+/* Each tile arrives, and the two that were already on screen arrive first. 200ms
+   on the house curve is the storefront's interval for a card. */
+.ticker.is-open .ticker-tile{animation:tileIn 200ms var(--ease) both}
+@keyframes tileIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+
+/* ── THE CONTROL ────────────────────────────────────────────────────────────
+   A button, not a link: it opens the list in place rather than going anywhere,
+   and a link that does not navigate is the defect this build keeps correcting. */
+.ticker-all{
+  display:inline-flex;align-items:center;gap:var(--s-xs);
+  margin:var(--s-md) 0 0 var(--s-xl);
+  /* The 44 floor is met by the expander below, not by padding — padding here
+     would open a visible gap between the rail and its own control. */
+  min-height:28px;padding:0;border:0;background:none;
+  position:relative;
+  font:inherit;font-size:14px;font-weight:700;letter-spacing:-.005em;
+  color:var(--ink-1);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.ticker-all::after{content:"";position:absolute;inset:-8px -12px}
+.ticker-all svg{width:18px;height:18px;flex:0 0 auto;color:var(--ink-3);
+  transition:transform 150ms var(--ease)}
+@media (hover:hover){.ticker-all:hover svg{transform:translateX(2px)}}
+.ticker.is-open .ticker-all svg{transform:none}
+.ticker-all:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px;
+  border-radius:var(--r-sm)}
+
+@media (min-width:1024px){
+  .ticker-tile{width:176px}
+  .ticker-rail{padding-inline:var(--s-2xl)}
+  /* ══ THE GRID IS THE DESKTOP STATE, NOT AN EXPANDED ONE ═══════════════════
+     `.is-open` is set by width from 1280px rather than by a tap (see
+     VenueTicker's header); between 1024 and 1279 the rail still runs and this
+     grid is what "View all places" opens. From 1280 the movements block at the
+     end of this file reflows it to one row of seven.
+     Eight tiles read as two rows of four at this measure rather than four rows
+     of two — and at 1,280px a 4-across row gives each card ~300px, which is
+     where the venue name and its street both still fit on one line.
+
+     THE PADDING AND MASK GO WITH THE MOTION. Both existed to make a SCROLLER
+     legible: the inset kept the first tile off the panel's edge and the fade
+     said the row continued past the frame. Neither is true of a grid, and a
+     fade over a static edge reads as a rendering fault rather than as a hint. */
+  .ticker.is-open .ticker-rail{
+    grid-template-columns:repeat(4,1fr);
+    padding-inline:0;
+    -webkit-mask-image:none;mask-image:none;
+  }
+  /* SQUARE OUT HERE, not the rail's 3:4. At 311px a portrait card is 415px
+     tall, so two rows made the venues an 841px block — taller than the hero and
+     the tallest thing on the page, for a section that is evidence rather than
+     the argument. A square keeps the photograph generous and the row readable
+     without the section taking over the page. */
+  .ticker.is-open .vcard{aspect-ratio:1}
+}
+
+/* ============================================================================
+   THE BENEFIT CARDS — the storefront's card, ported.
+
+   Flat card, floating tile. That inversion is what reads as TapIn on an
+   ordering surface and it is the one elevation relationship this build had
+   never spent: --rest seats the card at almost nothing, --float genuinely lifts
+   the tile inside it, and the tile's shadow is roughly six times the card's.
+   Both values are already TapIn's own, carried over from ~/desktop-ui.
+   ============================================================================ */
+/* ══ ONE DIVIDED LIST, ON EVERY SURFACE ═══════════════════════════════════
+   Sam, 14 Sep 2026, looking at the checkout's desktop rows: "I like this
+   layout — wondering if we can stack the benefits like this on mobile too."
+   So the base IS that layout: four rows, tile beside label and condition,
+   divided by the house hairline, no card per row. The pitch's desktop
+   statement (four tall cards) is the one place that dresses them differently,
+   and it does so in its own scoped block further down. */
+.bcards{display:flex;flex-direction:column;gap:0;padding:0 var(--s-xl)}
+.bcard-pair{display:contents}
+.bcard{
+  display:flex;align-items:center;gap:var(--s-lg);
+  padding:var(--s-lg) 0;min-width:0;
+  border-top:1px solid var(--hair-lit);
+}
+.bcards > .bcard:first-child{border-top:0;padding-top:0}
+.bcard-tile{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair-lit);
+  box-shadow:var(--float);color:var(--ink-2);
+}
+.bcard-tile svg{width:22px;height:22px;display:block}
+/* The deals glyph is the app's tab icon and takes its stroke from CSS, as it
+   does in the applink row; the benefit glyphs carry their own. */
+.bcard.is-offers .bcard-tile svg{fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.bcard-text{min-width:0;display:block}
+.bcard-text b{display:block;font-size:17px;font-weight:700;letter-spacing:-.015em;
+  color:var(--ink-1)}
+/* 13px is the meta floor; the condition is the half that makes the claim true. */
+.bcard-text span{display:block;margin-top:3px;font-size:13px;font-weight:500;
+  line-height:1.4;letter-spacing:.005em;color:var(--ink-3);text-wrap:pretty}
+
+/* Two cards at 160px each is where the labels start breaking — "2× points" and
+   its condition both fit on one line above it and neither does below. */
+/* Desktop: the three cards are composed in THE PAGE BELOW THE HERO, at the end
+   of this file, as the first of its four movements. */
+
+/* ══ THE STATEMENT ON A PHONE ═══════════════════════════════════════════
+   BACK IN ITS PANEL. Sam, 14 Sep 2026, on the un-panelled version: "it's still
+   a bit too dense, I liked what we had way earlier… there was a parent
+   container similar to 'what you'd save'." So on the phone this is the same
+   object as the savings panel beside it: a `.panel.flush` with its caption,
+   the four divided rows inside it, then the scope strip and the alcohol
+   sentence under the panel's own hairline caption. Nothing here overrides the
+   panel, the caption or the note — base.css and layout.css draw those — only
+   the strip's grid and the rows' inset are set. The desktop block below
+   un-panels it into the four-card movement. */
+.column > .panel:has(.bcards) > .bcards{padding:0 var(--s-xl)}
+/* THE SCOPE AS A 3x2 GRID (Sam: "more like a 2 row grid"). Three auto-sized
+   columns put Food/Tickets, Drinks/Line skips, Cover/Merch in aligned columns,
+   glyph beside word, inset to the panel. */
+.column > .panel:has(.bcards) > .covers{display:grid;
+  grid-template-columns:repeat(3,auto);justify-content:start;
+  column-gap:var(--s-2xl);row-gap:var(--s-lg);padding:0 var(--s-xl);margin:0}
+.column > .panel:has(.bcards) .cover{flex-direction:row;align-items:center;
+  gap:var(--s-sm);text-align:left}
+.column > .panel:has(.bcards) .cover svg{width:20px;height:20px}
+.column > .panel:has(.bcards) .cover span{font-size:13px;font-weight:500;
+  letter-spacing:.005em;color:var(--ink-2);white-space:nowrap}
+
+/* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
+   Everything `.nights*` below, and `NightScene` in src/shell, is still built and
+   is one JSX block from returning — Sam took the block off the pitch on 13 Sep
+   2026 with "let's get rid of this for now too", and "for now" is the operative
+   half. Nothing else references these rules; they are kept deliberately rather
+   than left behind, the same way Scenes.tsx keeps its three cut scenes.
+   ============================================================================ */
+
+/* ============================================================================
+   THE VENUE CARD — the merchant's photograph IS the card.
+
+   Sam, 12 Sep 2026: "make the entire card the merchant's image for the
+   background, then have a gradient so that I can still see the merchant's title
+   and logo clearly."
+
+   This is the storefront's "photographic" card family: a flyer-led card with the
+   mark and the type sitting ON the image under a veil, rather than a thumbnail
+   with two lines loose beneath it. It also gives the empty state a home — Slake
+   keeps the identical foot, so a venue without a photograph reads as one of the
+   set rather than as the one that broke.
+
+   ══ THE VEIL IS SOLVED, NOT EYEBALLED ══════════════════════════════════════
+   White type over photography needs a guaranteed floor, and the honest way to
+   get one is to compute the worst case: a PURE WHITE photograph. White text over
+   a veil of alpha a on white composites to 4.5:1 at a = 0.60 — measured, not
+   assumed. So the ramp only has to reach ~0.62 where the name sits and ~0.82 at
+   the foot, and everything above that stays open. An eyeballed veil would have
+   been far heavier and would have thrown away the photography this page is
+   mostly made of.
+
+   Multi-stop, for the reason base.css records about the ground: a two-stop ramp
+   has constant slope and leaves a visible edge where it lands.
+   ============================================================================ */
+.vcard{
+  position:relative;display:block;overflow:hidden;
+  aspect-ratio:3/4;
+  border-radius:var(--r-panel);
+  /* --page, not --inner, and the photo overdraws by a pixel (below): at the
+     fractional widths a 7-across grid produces, the card's fill showed through
+     the photograph's antialiased edge as a light hairline inside every tile
+     (Sam, 14 Sep 2026: "still seeing a hairline stroke within each of these
+     cards"). A dark fill under a dark photograph has nothing to show. */
+  background:var(--page);
+  /* NO EDGE AT ALL. It was a border first (which produced a double edge — the
+     photo clips to the padding box, a step inside the border box, so a sliver
+     of card fill showed between them), then an inset hairline, and Sam's answer
+     to that was to take the stroke off entirely.
+
+     He is right, and it is the stronger call: the photograph runs to the card's
+     own corner radius, so the image IS the edge. A hairline over a photograph
+     draws a line around something that already has one. What remains is --rest,
+     which seats the card without describing it. */
+  box-shadow:var(--rest);
+}
+a.vcard{transition:transform 160ms var(--ease)}
+/* .99 for a card — the storefront's press ladder by object size. No hover fill:
+   the card is a photograph, and tinting one is not a hover state. */
+a.vcard:active{transform:scale(.99)}
+a.vcard:focus-visible{outline:2px solid var(--ink-1);outline-offset:3px}
+
+.vcard .vshot{position:absolute;inset:-1px;border:0;border-radius:0;box-shadow:none;
+  aspect-ratio:auto;background:var(--page)}
+.vcard .vshot img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.96)}
+/* The Burg's hero is a brand card on white — 0.891 relative luminance against
+   0.220 for the next brightest. Seated, it sits among the photographs instead of
+   punching a hole through the rail. */
+.vcard .vshot img[data-bright="true"]{filter:saturate(.9) brightness(.5)}
+
+/* The card owns the veil now, so the old thumbnail scrim must not also run. */
+.vcard .vshot::after{content:none}
+
+.vcard::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(18,10,14,0)   0%,
+    rgba(18,10,14,.10) 38%,
+    rgba(18,10,14,.34) 56%,
+    rgba(18,10,14,.62) 72%,
+    rgba(18,10,14,.82) 88%,
+    rgba(18,10,14,.90) 100%);
+}
+
+/* Signed, no photograph yet. A quiet recessed fill with the initial set high,
+   clear of the foot, so the veil and the type land exactly where they do on a
+   card that has an image. */
+.vcard .vshot.is-empty{display:flex;align-items:flex-start;justify-content:center;
+  padding-top:18%;background:var(--inner)}
+.vcard .vshot.is-empty .monogram{font-size:32px;color:var(--ink-4)}
+
+.vcard-foot{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-sm);
+  height:100%;justify-content:flex-end;padding:var(--s-lg);
+}
+/* The mark sits above the name, on the image, which is the one place a venue's
+   own colour is allowed to appear. */
+.vcard-foot .collar{position:static;width:34px;height:34px;
+  border-radius:var(--r-control);margin-bottom:2px}
+.vcard-foot .collar img{border-radius:9px}
+.vcard-foot .collar::after{border-radius:9px}
+
+.vcard .vname{display:block;margin:0;min-width:0;max-width:100%}
+.vcard .vname b{display:block;font-size:15px;font-weight:700;letter-spacing:-.01em;
+  color:#FFF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The corner flag. Maroon is legitimate here by the token's own rule — a
+   membership mark is one of the four things a solid fill is spent on. */
+.vflag{
+  position:absolute;top:0;right:0;z-index:2;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 9px 5px 8px;border-radius:0 0 0 var(--r-card);
+  background:var(--maroon);color:var(--on-maroon);
+  font-size:11px;font-weight:700;letter-spacing:.08em;line-height:1;
+  max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;
+}
+/* Signed, not open: the same shape, without the membership fill it has not
+   earned — a venue that is not on the membership yet must not wear its mark. */
+.vflag.is-soon{background:rgba(18,10,14,.72);color:rgba(255,255,255,.86);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+/* Over photography, not over a panel: the meta takes a white at reduced alpha
+   rather than the ramp's --ink-4, which was mixed for an opaque surface. */
+.vcard .vmeta{margin:0;font-size:12px;font-weight:500;letter-spacing:.01em;
+  color:rgba(255,255,255,.78);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:100%}
+
+/* ── WHERE IT WORKS, on the field ──────────────────────────────────────────── */
+.places-label{margin:0 0 var(--s-lg);padding:0 var(--s-xs)}
+.places-note{margin:var(--s-lg) 0 0;padding:0 var(--s-xs)}
+/* The rail bleeds past the column's gutter so the ticker runs to the screen's
+   edge; the label and the note keep the reading inset. */
+.places .ticker-rail{margin-inline:calc(-1 * var(--gutter));
+  padding-inline:var(--gutter)}
+.places .ticker-all{margin-left:var(--s-xs)}
+
+/* ============================================================================
+   DESKTOP, REWORKED.
+
+   Sam: "desktop here needs a lot of attention, this whole layout feels very
+   off." Measured on a 1475px window it was: ~560px of photo wall before a word
+   of the offer, then every panel at one 720px measure with ~377px of dead field
+   down each side. Two faults, and they are the same two /reserve had — the hero
+   spends the first screen on establishing rather than on the offer, and one
+   measure does every job.
+
+   The fix is rhythm rather than more width: the band closes sooner, and the
+   page alternates wide and narrow instead of running one column. Benefits and
+   places are WIDE because they are grids that want room; the savings figure,
+   the guarantee and the close stay at a reading measure, which does not grow
+   with the window.
+   ============================================================================ */
+@media (min-width:1024px){
+  /* ══════════════════════════════════════════════════════════════════════════
+     THE HERO BECOMES A GRID. THE PHOTOGRAPHY BECOMES A COLUMN.
+
+     Sam, 13 Sep 2026: "I was thinking this would be more like a grid, since
+     there is so much unused space on the right and left."
+
+     MEASURED AT 1440 BEFORE THIS: the glass panel was 560px wide, centred at
+     x=440, floating in the middle of a 1440px band — 880px of photography to
+     either side of it doing nothing but being wallpaper. Below it the page ran
+     at three unrelated measures (1440 band / 1040 benefits and places / 720
+     everything else) starting from four different left edges, so no two blocks
+     on the page shared an alignment. That is not a layout; it is a phone column
+     with two exceptions bolted on.
+
+     THE FIX IS ONE GRID AND ONE LEFT EDGE. Everything below aligns to `--grid`.
+     Up here the band splits: the ARGUMENT (headline, price, action) takes the
+     left tracks, the SIX PLACES take the right tracks and bleed to the window's
+     edge. The photography stops being a backdrop and becomes evidence beside
+     the claim, at equal weight.
+
+     IT ALSO FIXES SOMETHING THE PROJECT ALREADY KNEW ABOUT. Moreau, Markman &
+     Lehmann (JCR 2001), quoted in docs/CONVERSION-RESEARCH.md: the category cued
+     FIRST dominates categorisation, and "a wall of venue photography cues 'local
+     coupon app'". The old composition led with exactly that wall — 635px of it,
+     70% of the first viewport, with the headline as a smaller object floating on
+     top. Now the headline holds its own column from the first pixel.
+
+     THE PANEL STILL OVERLAPS THE SEAM, and that is not decoration: `.hero` is
+     glass, and glass over the flat field composites to a grey rectangle with a
+     border. Its right edge runs into the photo column so the material has
+     something to blur — the same reason this build only allows glass on the two
+     surfaces that sit over photography.
+
+     SCOPED `:not(.is-compact)`: the checkout shares this component, and its band
+     is positioned by a margin calculated off the split's own arithmetic. Turning
+     that one into a grid would silently discard the offset. */
+  .hero-band:not(.is-compact){
+    --grid:min(1280px,calc(100% - 96px));
+    display:grid;
+    grid-template-columns:
+      [bleed-start] minmax(var(--s-2xl),1fr)
+      [grid-start] minmax(0,calc(var(--grid) * .46))
+      [seam] minmax(0,calc(var(--grid) * .54))
+      [grid-end] minmax(var(--s-2xl),1fr) [bleed-end];
+    align-items:center;
+    min-height:min(78vh,640px);
+  }
+  /* ══ THE COLLAGE TAKES THE WHOLE WIDTH ═══════════════════════════════════
+     Sam, 13 Sep 2026: "these banner images are wide by nature, so I think we
+     can fill the background of the desktop page width with the banner collage."
+
+     He is right about the material, and that is the deciding fact: these are
+     six landscape photographs. Confined to the right 54% each cell cropped to
+     roughly 257x319 — PORTRAIT — so every one of them was being cut down the
+     sides to fit a column its subject does not suit. Across the full 1440 the
+     cells run landscape again and the photographs are shown as they were shot.
+
+     THE GRID SURVIVES THE CHANGE. The argument still occupies the left tracks
+     and still starts at the shell's left edge — what changed is that the
+     photography now runs behind it rather than stopping at a seam. The card is
+     glass with a 22px blur, so it has something to blur again, which is the
+     condition this build puts on using the material at all. */
+  /* ══ THE HARD SPLIT ═══════════════════════════════════════════════════════
+     Sam picked this shape from a desktop pattern review on 13 Sep 2026, against
+     Blue Apron, OpenTable, 7shifts and Square — all four put a panel on
+     photography, and the strongest of them commit to it: a solid block meeting
+     the image on a straight vertical seam, full height, zero radius, running to
+     the window's own edge.
+
+     What was here before was a rounded glass card floating in the middle of a
+     full-width collage, which is the PHONE composition enlarged. It is why the
+     page read as weak at 1440 however wide the grid got: nothing about it was
+     decided by the extra width.
+
+     THE PANEL IS SOLID, AND IT HAS TO BE. `.hero` is glass everywhere else, and
+     this file's own header records why that is only legitimate over photography
+     — on a plain surface it "composites to flat grey and the white hairline
+     lands at 1.00:1". With the photographs moved entirely to the other side of
+     the seam there is nothing left to blur, so the material changes with the
+     composition rather than being carried over as a habit. */
+  .hero-band:not(.is-compact) > .mosaic{
+    position:relative;inset:auto;
+    grid-column:seam / bleed-end;grid-row:1;align-self:stretch;
+    /* TWO ACROSS, THREE DOWN. The phone's 3x2 in a 771x640 column cut every
+       cell to 257x320 — PORTRAIT crops of six landscape photographs (1024x528),
+       and The Burg's wordmark card amputated to "E BU". Sam's own words about
+       this material: "these banner images are wide by nature." 2x3 gives
+       385x213 at 1440, the photographs' own proportion, and the wordmark
+       survives the crop. Seen in the review screenshot, not in any number. */
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:repeat(3,minmax(0,1fr));
+  }
+  /* TWO RAMPS, NOT ONE. Vertical closes the band into the page at its foot, as
+     on a phone. Horizontal is new and is what makes a full-width collage work
+     under a left-hand card: it weights the left side so the glass sits on a
+     calm field instead of on whichever photograph happens to be there, and
+     releases by ~70% so the right of the frame keeps its photography at
+     strength. Same ink as the phone's scrim, never a tint — these are six
+     different merchants' photographs and a hue would borrow one venue's skin. */
+  /* NOTHING READS ON IT NOW, so the veil is almost gone: the type lives on the
+     panel and the photographs only have to sit in the same world as it. What
+     remains is a short fade at the seam — so the split reads as two materials
+     meeting rather than as an image cropped — and the foot, which closes the
+     band into the page exactly as it does on a phone. */
+  .hero-band:not(.is-compact) > .mosaic::after{
+    background:
+      linear-gradient(90deg,rgba(18,10,14,.55) 0%,rgba(18,10,14,.10) 12%,
+        rgba(18,10,14,0) 26%),
+      linear-gradient(180deg,rgba(18,10,14,.14) 0%,rgba(18,10,14,.16) 62%,
+        rgba(18,10,14,.60) 90%,var(--page) 100%);
+  }
+  .hero-band:not(.is-compact) > :not(.mosaic){
+    /* ══ CONTENT ON THE GRID, FILL OFF THE EDGE ═══════════════════════════
+       The panel occupies the SAME track the blocks below start from, so its
+       headline lands on their exact x with no arithmetic at all — and a
+       pseudo-element carries the fill left, off the window.
+
+       THE OBVIOUS VERSION IS WRONG AND WAS BUILT FIRST: span `bleed-start` and
+       pad the content in by the outer track. Custom properties substitute
+       TEXTUALLY, so a `--rail:calc((100% - var(--grid)) / 2)` defined on the
+       band re-resolves its `100%` against the CONSUMER — the 669px panel, not
+       the 1440px band — and paid out 48px where the grid's own gutter is 80.
+       The headline sat 32px left of every heading beneath it. A `100vw` version
+       fixes that and then disagrees with the blocks by the scrollbar's width on
+       any platform that still reserves one. Letting the grid place it is the
+       only version with no number in it to get wrong. */
+    grid-column:grid-start / seam;grid-row:1;
+    align-self:stretch;
+    display:flex;flex-direction:column;justify-content:center;
+    position:relative;z-index:1;
+    max-width:none;margin:0;
+    /* THE FOOT PAYS THE BAR BACK. The band reserves `--clear` at its top so
+       this panel's content starts below the fixed bar, but the fill (::before)
+       runs up under the bar — so the type block was centred in a box 58px
+       shorter than the one it appeared to sit in, and landed 29px low
+       (measured 91px above the wordmark, 55px below the marks). Repaying the
+       same amount at the bottom centres it in the box the eye sees. */
+    /* 64 on the seam side, not 24: Sam, 14 Sep 2026 — "it encroaches too close
+       to the collage on the right". The copy also takes a measure of its own
+       below, so a wide panel never hands the headline the whole track. */
+    padding:var(--s-2xl) 64px calc(var(--s-2xl) + var(--clear,0px)) 0;
+    background:none;
+    border:0;border-radius:0;
+    box-shadow:none;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  /* The fill. `left:-100vw` runs it past the window's edge; a negative offset
+     cannot grow the document's scroll width, so nothing scrolls sideways. It
+     sits inside the panel's own stacking context, so -1 puts it behind the type
+     and still above the collage beside it. */
+  .hero-band:not(.is-compact) > :not(.mosaic)::before{
+    content:"";position:absolute;z-index:-1;
+    /* UP UNDER THE BAR, like the mosaic. The panel sits below the band's
+       reserved `--clear` padding, so a fill that started at its own top left a
+       24px strip of bare field between the announcement bar and the plum on
+       the left half only — the photographs on the right ran to the top and the
+       two halves met the bar at different heights. `--clear` is inherited from
+       the band; the fallback keeps the rule valid where no bar exists. */
+    top:calc(-1 * var(--clear,0px));bottom:0;right:0;left:-100vw;
+    background:var(--card);
+  }
+
+  /* ══ THE STRIP ABOVE THE COLLAGE ═════════════════════════════════════════
+     Sam: "looks like there's a weird gap at the top of the collage on desktop."
+
+     It was 58px of the column's own padding. `.column:has(.announce)` reserves
+     the fixed bar's height plus a step so CONTENT clears it — right for every
+     block on the page except the one that is supposed to run under it. On a
+     phone the band cancels that with its negative top margin; the desktop rule
+     resets `margin:0` to kill the phone's gutters and took the cancellation
+     with it, leaving the reserved padding showing as bare field.
+
+     So the band climbs back over the padding and re-pays it as its own
+     padding-top: the photographs now start at the window's top edge, and the
+     glass card is still pushed clear of the bar because the grid is centring
+     inside a box whose content area begins below it. Uses the same expression
+     as the padding it is cancelling rather than the 58px it computes to. */
+  .column:has(.announce) > .hero-band:not(.is-compact){
+    --clear:calc(var(--announce-h) + env(safe-area-inset-top,0px) + var(--s-2xl));
+    margin-top:calc(-1 * var(--clear));
+    padding-top:var(--clear);
+  }
+  /* The mosaic ignores that padding and fills the border box, which is the
+     whole point — the collage runs edge to edge under the bar while the card
+     stays inside the padding. */
+  .column:has(.announce) > .hero-band:not(.is-compact) > .mosaic{
+    margin-top:calc(-1 * var(--clear));
+    height:calc(100% + var(--clear));
+  }
+
+  /* Everything under the band is composed in THE PAGE BELOW THE HERO, at the
+     end of this file — one place, so the page's rhythm reads in one screen. */
+}
+
+/* ── THE ANNOUNCEMENT BAR ──────────────────────────────────────────────────
+   Thin, square, edge to edge, fixed to the top. Anatomy inherited from
+   app.css's preview banner so the two read as one product: --subtle fill, ONE
+   hairline facing the content, safe-area padding, no radius.
+
+   NO RADIUS is not a preference — a rounded corner on an element flush with
+   the viewport's own square corner reads as a mistake. Same call Sam made for
+   the preview banner.
+
+   THE FILL IS --maroon, THE SAME PAINT AS THE RESERVE BUTTON (Sam, 13 Sep) —
+   so the one colour that means "this product" carries both the announcement and
+   the action. The hairline went with the recolour: a solid maroon band against
+   a near-black page separates itself, and white-at-10% over maroon is a line
+   nobody sees. Elevation stays declared once — now by colour, and no shadow.
+
+   THE INK IS --on-maroon, AND THIS IS NOT INTERCHANGEABLE. It measured
+   --ink-3 while the band was --subtle, which is 8.27:1 there and **4.01:1 on
+   maroon** — a body-text fail. --on-maroon is 9.19:1 and is declared once and
+   never themed, which is why it exists. The same substitution shipped as a live
+   2.13:1 bug on the Reserve button; do not reach for an --ink-* here.
+
+   34px, against the preview banner's 52px: that one holds a back control and
+   its 44px target, this one holds a sentence. --ink-3 on --subtle measures
+   8.27:1, and --subtle is opaque so the animated ground underneath cannot
+   move it.
+
+   These rules live HERE and not in layout.css because a later file wins on
+   equal specificity and layout.css is loaded first — a pitch rule written
+   there can be silently overridden by pitch.css, how.css or app.css. */
+:root{--announce-h:34px}
+.announce{position:fixed;top:0;left:0;right:0;z-index:21;
+  background:var(--maroon);
+  padding-top:env(safe-area-inset-top,0px)}
+/* The row tracks the column, so the sentence centres on the same measure the
+   content below it uses rather than on a 1400px viewport. */
+.announce-in{display:flex;align-items:center;justify-content:center;gap:6px;
+  margin:0 auto;min-height:var(--announce-h);
+  max-width:480px;padding:0 var(--gutter);
+  font-size:12px;font-weight:600;letter-spacing:.01em;
+  color:var(--on-maroon);text-wrap:nowrap}
+.ann-pin{width:12px;height:12px;flex:0 0 auto;display:block;
+  margin-top:-1px;color:var(--on-maroon)}
+/* Clear the fixed bar. The column's own 24px top padding is REPLACED rather
+   than added to, so the gap under the bar is one step of the scale — the same
+   idiom app.css uses for its banner. */
+.column:has(.announce){
+  padding-top:calc(var(--announce-h) + env(safe-area-inset-top,0px) + var(--s-2xl));
+}
+
+/* ── the six marks in the hero panel ──────────────────────────────────────
+   DESKTOP ONLY. The phone hero is already a full screen and gains nothing from
+   six more objects; `display:none` rather than a media query around the JSX so
+   the markup is identical on both and nothing has to be kept in sync. */
+.hero-marks{display:none}
+
+@media (min-width:1024px){
+  .hero-marks{
+    display:flex;flex-wrap:wrap;gap:var(--s-md);
+    list-style:none;margin:var(--s-2xl) 0 0;padding:0;
+    /* The row is evidence, not navigation — nothing here is a link, because a
+       logo that opens a venue page would send a reader OUT of the argument at
+       the exact moment it is being made. The names are one scroll down on the
+       ticker, which is the surface that does route. */
+  }
+  /* `display:flex` on the ROW ITEM, and it is load-bearing. base.css's
+     `.collar` sets a width and a height but never a `display` — everywhere else
+     in the build it sits inside a flex container, which blockifies it for free.
+     In a list item it stays `inline`, where width and height do not apply at
+     all: the 34px box was ignored and the logo rendered at its natural 537px,
+     which took the hero band to 3,705px tall. */
+  .hero-marks li{display:flex}
+  .hero-marks .collar{display:block;width:34px;height:34px;border-radius:11px}
+  .hero-marks .collar img{border-radius:8px}
+  .hero-marks .collar::after{border-radius:8px}
+
+  /* The hero's own type, now that it has a column of its own rather than a
+     card's inside measure. 42ch keeps the lead at a paragraph's width against
+     a panel that is ~590px wide at 1440. */
+  /* `align-self:flex-start` IS THE FIX FOR A CENTRED WORDMARK. The panel is a
+     flex column, whose items stretch by default; the logo is an SVG with
+     `width:auto`, so it stretched to the panel's width and the vector centred
+     itself inside that box by preserveAspectRatio — a left-aligned mark drawn
+     in the middle of a left-aligned column. Seen in the 1440 screenshot, not
+     in any measurement, because the box WAS at x=0. */
+  .hero .logo{align-self:flex-start;margin-bottom:var(--s-2xl)}
+  /* The copy's measure inside the panel: two lines of headline at 44px, a
+     paragraph's width for the lead, and the price block no wider than either. */
+  .hero-band:not(.is-compact) .hero h1{max-width:22ch}
+  .hero-band:not(.is-compact) .hero-buy{max-width:560px}
+  /* SIZED TO ITS WORDS, like the header's. `.action` is a phone bar
+     (`display:block;width:100%`); in a 565px panel that is a slab, and the
+     page then carried the same control at three widths. 300 keeps it a
+     generous target and lets it read as a button beside the price. */
+  .hero-band:not(.is-compact) .hero-cta{display:inline-flex;align-items:center;
+    justify-content:center;width:auto;min-width:300px;align-self:flex-start}
+  .hero-band:not(.is-compact) .hero-actions{flex-direction:row;align-items:stretch;
+    gap:var(--s-lg);align-self:flex-start}
+  .hero-band:not(.is-compact) .hero-how{display:inline-flex;align-items:center;
+    justify-content:center;width:auto;padding-inline:var(--s-2xl)}
+  .hero-buy{border-top-color:var(--hair-lit)}
+}
+
+/* ============================================================================
+   THE DESKTOP HEADER — a persistent way to buy, once the hero's has gone.
+
+   Below 1024 this does not exist: the bottom bar is the right shape for a thumb
+   and two bars on a phone is one too many. Above it, the reverse — a control
+   docked to the bottom of a 900px window is a phone habit, and the references
+   all put it at the top with the price beside it.
+   ============================================================================ */
+.top-cta{display:none}
+
+@media (min-width:1024px){
+  /* NOT CAPPED BY THE COLUMN. `.column > :where(...)` caps every child at the
+     reading measure, and this is `position:fixed` chrome that must reach both
+     edges — it was rendering 720px wide, floating in the middle of a 1440px
+     window. Its own rule at (0,2,0) beats the `:where()` cap, which is exactly
+     the escape hatch that fix was made for. */
+  .column > .top-cta{max-width:none;margin:0}
+  .top-cta{
+    display:block;position:fixed;z-index:20;left:0;right:0;
+    /* Under the announcement bar, never over it: that one carries the town and
+       the date, and is the first thing a stranger reads. */
+    top:calc(var(--announce-h) + env(safe-area-inset-top,0px));
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(20px) saturate(1.2);
+    backdrop-filter:blur(20px) saturate(1.2);
+    border-bottom:1px solid var(--hair);
+    transition:transform 260ms var(--ease),opacity 200ms var(--ease);
+  }
+  /* AWAY, NOT GONE. It slides up behind the announcement bar rather than
+     fading in place — a bar that materialises over content reads as an
+     interruption, and one that arrives from the edge reads as chrome. */
+  .top-cta.is-away{
+    transform:translateY(-100%);opacity:0;pointer-events:none;
+  }
+  .top-cta-in{
+    display:flex;align-items:center;gap:var(--s-2xl);
+    width:100%;max-width:min(1280px,calc(100% - 96px));
+    margin-inline:auto;padding:var(--s-md) 0;
+  }
+  .top-cta-logo{height:20px;width:auto;flex:0 0 auto}
+  /* The price sits with the action, not with the mark: a reader scanning this
+     bar is deciding, and the two halves of that decision belong together. */
+  .top-cta-price{display:flex;align-items:baseline;gap:var(--s-sm);
+    margin:0 0 0 auto;white-space:nowrap}
+  .top-cta-price b{font-size:17px;font-weight:700;letter-spacing:-.015em;
+    color:var(--ink-1)}
+  .top-cta-price span{font-size:13px;font-weight:500;color:var(--ink-3)}
+  /* `.action` is `display:block;width:100%` — right for a page control and
+     wrong for one in a bar, where it stretched across half the header. Sized to
+     its own words instead. */
+  .top-cta-go{flex:0 0 auto;width:auto;padding:10px var(--s-2xl);font-size:14px;
+    border-radius:var(--r-control);box-shadow:none}
+
+  /* One control at a time, still. The bottom bar is the phone's answer and the
+     header is the desktop's; showing both would be the two-identical-buttons
+     defect this build already removed once. */
+  .column > .sticky-cta{display:none}
+
+  /* The fixed header overlaps the page, so anchored jumps have to clear it. */
+  .column{scroll-padding-top:96px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .top-cta{transition:none}
+}
+
+/* ── the two plans, stated on the pitch ───────────────────────────────────
+   READ-ONLY. Deliberately not the `.plan-opt` control from /reserve: these are
+   facts on a page that does not take money, and borrowing the selected-state
+   maroon would make one of them look chosen. Same figures, no affordance. */
+.pitch-decide,.pitch-close{display:contents}
+
+.plans{list-style:none;margin:0;padding:0;
+  display:grid;grid-template-columns:1fr;gap:var(--s-md)}
+.plan-card{padding:var(--s-lg) var(--s-xl);border-radius:var(--r-control);
+  background:var(--inner);border:1px solid var(--hair)}
+.plan-card-name{display:block;font-size:15px;font-weight:700;
+  letter-spacing:-.01em;color:var(--ink-1)}
+/* Stacked like /reserve's tiles (reserve.css "THE STRIKE IS AN EYEBROW"): the
+   struck rate above as a 12px reference, the price and its period on the
+   line beneath, so the first figure the eye meets is the one she pays. */
+.plan-card-figs{display:flex;flex-direction:column;align-items:flex-start;
+  gap:2px;margin:var(--s-sm) 0 0}
+.plan-card-figs .plan-now{display:flex;align-items:baseline;gap:var(--s-sm)}
+.plan-card-figs b{font-size:22px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-1)}
+/* The year's shirt, on the pitch's summary card. Same size as the saving line
+   under it in the tile order; a fact about the plan, not a badge. */
+.plan-card-perk{margin:var(--s-xs) 0 0;font-size:13px;font-weight:600;color:var(--ink-3)}
+/* The shirt on the pitch's year card: same object as /reserve's, seated in
+   the card's right-hand room. */
+.plan-card{position:relative}
+/* Tall enough that the 84px thumbnail sits inside the card's own edges at
+   every tier, rather than crossing the hairline beneath. */
+.plan-card:has(.plan-card-tee){padding-right:112px;min-height:calc(84px + 2 * var(--s-lg))}
+.plan-card-tee{position:absolute;right:var(--s-lg);top:50%;transform:translateY(-50%)}
+.plan-card-save{margin:var(--s-xs) 0 0;font-size:13px;font-weight:600;
+  color:var(--ink-3)}
+/* The action stands a step off the last plan. The seat sentence used to hold
+   this gap; when it left the button landed flush on the year card (Sam,
+   14 Sep 2026: "add a space between a year and early access"). */
+.plans-go{margin-top:var(--s-xl)}
+
+@media (min-width:1024px){
+  /* ONE COLUMN in the decision's right-hand track: at ~520px two cards would be
+     250px each and the struck price, the price and the cadence would wrap onto
+     three lines apiece. Stacked, each plan is a full row and reads in one pass. */
+  .plans{grid-template-columns:1fr;gap:var(--s-lg)}
+  .plan-card-figs b{font-size:26px}
+}
+
+/* ============================================================================
+   THE PAGE BELOW THE HERO — FOUR MOVEMENTS, NOT A STACK OF PANELS.
+
+   Sam, 14 Sep 2026, on the third desktop pass: "this is still completely out
+   of whack." LOOKED AT, finally, in a 1440px screenshot rather than measured:
+   everything under the hero was the same object — a --card rectangle at
+   --r-panel, one after another, each holding smaller --card rectangles. A card
+   holding three cards, a 4+3 photo grid with a hole in it, two boxed panels,
+   two more boxed panels. Nothing changed ground, scale or measure from one
+   section to the next, so the page had no rhythm; it was the phone column with
+   its boxes widened, three passes running. Every one of those passes verified
+   by getBoundingClientRect and passed. Numbers do not see a stack.
+
+   The composition is now four movements on alternating grounds, and each is a
+   different KIND of object:
+
+     1. THE STATEMENT, on the field. The three benefits as three tall cards
+        with display figures, and the scope strip under them — no panel around
+        them. A card inside a card is the storefront's one hard rule and this
+        page was breaking it in the first block after the hero.
+     2. THE EVIDENCE, on a full-bleed --subtle band. All seven places in ONE
+        ROW from 1280, edge to edge on the grid — a lineup, which is what the
+        section is. Between 1024 and 1279 the row is the auto-running ticker
+        the phone already ships, bled to the window on the same band.
+     3. THE DECISION, on the field. Two panels sharing a top edge and a foot:
+        the figure and its question; the two plans and the action.
+     4. THE CLOSE, on the field, under a rule. The guarantee as a sentence at
+        display size — not in a box — with the door to the app beside it.
+
+   SECTION LABELS BECOME HEADINGS OUT HERE. The 11px tracked caption is the
+   phone's panel label; at 1440 it was an eyebrow floating over each block, and
+   in the savings panel it stacked on a second caption. Same strings, set as
+   the headings they are — no new copy, no new claims.
+   ============================================================================ */
+@media (min-width:1024px){
+  .column:has(.pitch-decide){
+    --grid:min(1280px,calc(100% - 96px));
+    /* Movements, not panels: the interval between blocks is a section's, not a
+       card's. 64 is the column's own foot value, used at section scale. */
+    gap:64px;
+  }
+  /* THE PAGE ENDS ON THE CLOSE BAND. layout.css clears the phone's sticky bar
+     with `.column:has(.sticky-cta.is-pair){padding-bottom:190px}` — (0,3,0),
+     because `:has()` takes its argument's weight — and that clearance survived
+     onto the desktop as a 190px strip of bare field under the band (Sam, 14 Sep
+     2026: "remove the black bar at the bottom"). The bar itself is
+     `display:none` up here, so the clearance has nothing to clear. Matched
+     specificity, later in the cascade. */
+  .column:has(.pitch-decide):has(.sticky-cta){padding-bottom:0}
+
+  /* ── headings ─────────────────────────────────────────────────────────── */
+  .column > .panel:has(.bcards) > .panel-label,
+  .places > .places-label{
+    margin:0 0 var(--s-2xl);padding:0;
+    font-size:24px;font-weight:700;letter-spacing:-.025em;line-height:1.2;
+    text-transform:none;color:var(--ink-1);
+  }
+  .pitch-decide .panel > .panel-label{
+    margin:0 0 var(--s-xl);padding:0;
+    font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.2;
+    text-transform:none;color:var(--ink-1);
+  }
+
+  /* ── 1 · the statement ────────────────────────────────────────────────── */
+  /* The panel un-panels: no fill, no edge, no inset. What is left is a flex
+     row that wraps — heading and cards take full lines, then the scope strip
+     runs as one line beneath them. */
+  .column > .panel:has(.bcards){
+    width:100%;max-width:var(--grid);margin-inline:auto;
+    background:none;border:0;border-radius:0;box-shadow:none;padding:0;
+    display:flex;flex-wrap:wrap;align-items:center;
+    column-gap:var(--s-2xl);row-gap:0;
+  }
+  .column > .panel:has(.bcards) > .panel-label{flex:1 0 100%}
+  .column > .panel:has(.bcards) > .bcards{
+    flex:1 0 100%;
+    /* Four, since the offers card joined (14 Sep 2026). */
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-lg);
+    padding:0 0 var(--s-2xl);margin:0 0 var(--s-2xl);
+    border-bottom:1px solid var(--hair);
+  }
+  /* SCOPED TO THE PITCH, every one of them. The first cut wrote these as
+     bare `.bcards` descendants, which is global at 1024 — and /reserve renders
+     the same BenefitCards inside its reading column, where the three arrived
+     as 224px statement cards stacked in a 670px panel, tile at the top and
+     figure at the foot. Seen in Sam's screenshot of the checkout. */
+  .column > .panel:has(.bcards) .bcard-pair{display:contents}
+  /* Tall cards: the tile at the top, the figure and its condition at the foot.
+     Display size on the figure, because these three ARE the offer — the hero
+     says "$5 back", and this is where that figure is stated as a benefit. */
+  /* Sam, 15 Sep 2026: "sizing and spacing for text here seems off on
+     desktop." It was: the lead's 30px figure against 24px on the other three,
+     and space-between anchoring each text block to the card's foot, so a
+     two-line condition lifted its title 22px above its neighbours'. One size
+     for the four figures, one gap, and the text hangs from the tile — titles
+     on one line across the row, the conditions ragged at the foot where a
+     ragged edge belongs. */
+  .column > .panel:has(.bcards) .bcard,.column > .panel:has(.bcards) .bcard.is-lead{
+    flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    gap:var(--s-xl);min-height:0;padding:var(--s-2xl) var(--s-2xl) var(--s-2xl);
+    /* The card dress lives here now that the base is a divided list. */
+    background:var(--card);border:1px solid var(--hair);border-radius:var(--r-panel);
+    box-shadow:var(--rest);
+  }
+  .column > .panel:has(.bcards) .bcard-tile,.column > .panel:has(.bcards) .bcard.is-lead .bcard-tile{
+    width:56px;height:56px;border-radius:var(--r-card)}
+  .column > .panel:has(.bcards) .bcard-tile svg,.column > .panel:has(.bcards) .bcard.is-lead .bcard-tile svg{width:26px;height:26px}
+  .column > .panel:has(.bcards) .bcard-text b{font-size:24px;letter-spacing:-.025em;line-height:1.05}
+  /* The credit no longer leads by size: it leads by position (first) and by
+     the hero, and a bigger figure in one card of four broke the row's line. */
+  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text b{font-size:24px;letter-spacing:-.025em}
+  .column > .panel:has(.bcards) .bcard-text span,.column > .panel:has(.bcards) .bcard.is-lead .bcard-text span{
+    margin-top:var(--s-md);font-size:15px;line-height:1.45;color:var(--ink-2)}
+  /* The phone's `flex:1` on the lead's text box survives into the column and
+     grows it, so "$5 credit" sat ~30px above "15% off" and the three
+     conditions shared no baseline. Sized to content, all three land on the
+     card's foot. */
+  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text{flex:0 0 auto}
+
+  /* The scope strip: the caption, six glyph-and-word pairs, and the alcohol
+     sentence at the far end — one line under the cards, on the field. The
+     caption's rule goes: the strip is not boxing anything now. */
+  .column > .panel:has(.bcards) > .covers-head{flex:0 0 auto;margin:0;color:var(--ink-3)}
+  .column > .panel:has(.bcards) > .covers-head::after{content:none}
+  .column > .panel:has(.bcards) > .covers{
+    flex:0 0 auto;display:flex;flex-wrap:nowrap;gap:var(--s-2xl);padding:0;margin:0}
+  .column > .panel:has(.bcards) .cover{flex-direction:row;align-items:center;
+    gap:var(--s-sm);text-align:left}
+  .column > .panel:has(.bcards) .cover svg{width:20px;height:20px}
+  /* 13px: these are words a reader scans, not tracked micro-labels. */
+  .column > .panel:has(.bcards) .cover span{font-size:13px;font-weight:500;
+    letter-spacing:.005em;color:var(--ink-2)}
+  /* Takes the rest of the line and sets right; below ~1100 it drops to its own
+     line and stays right, which still reads as the strip's footnote. */
+  .column > .panel:has(.bcards) > .panel-note{
+    flex:1 1 260px;min-width:0;margin:0;padding:0;text-align:right}
+  .column > .panel:has(.bcards) > .panel-drill{flex:1 0 100%;padding:0;
+    margin-top:var(--s-lg)}
+  /* A reading measure for the answer; unbounded, the summary's chevron sat
+     1,200px from its own words. */
+  .column > .panel:has(.bcards) > .panel-drill .drill{max-width:460px;margin:0}
+  /* The chevron sits by the words, not at the measure's far end. */
+  .column > .panel:has(.bcards) > .panel-drill .drill > summary{
+    justify-content:flex-start;gap:var(--s-md)}
+
+  /* ── 2 · the evidence ─────────────────────────────────────────────────── */
+  /* Full bleed, one step up from the field, content on the grid. The padding
+     expression is the grid's own margin: percentages here resolve against the
+     column, which is the window, so the row's left edge is the hero's. */
+  .column > .places{
+    width:100%;max-width:none;margin-inline:0;
+    background:var(--subtle);
+    padding:48px calc((100% - var(--grid)) / 2);
+  }
+  .places .ticker-rail{margin-inline:0;padding-inline:0}
+  .places .ticker-all{margin-left:0}
+  .places-note{margin-top:var(--s-xl);padding:0}
+
+  /* ── 3 · the decision ─────────────────────────────────────────────────── */
+  /* `stretch`, and the action pinned to the foot: the two panels are one
+     movement, so they share a top edge AND a bottom one, and the button that
+     closes the decision sits on the shared baseline whatever the left column's
+     drill does above it. */
+  .column > .pitch-decide{
+    display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+    gap:var(--s-2xl);align-items:stretch;
+    width:100%;max-width:var(--grid);margin-inline:auto;
+  }
+  .column > .pitch-decide > *{max-width:none;margin:0}
+  .pitch-decide .panel{display:flex;flex-direction:column;padding:var(--s-2xl)}
+  .pitch-decide .spendq{margin-top:var(--s-xl)}
+  .pitch-decide .panel-note{margin:var(--s-lg) 0 var(--s-xl)}
+  /* Both panels end on the same foot: the action on the right, the drill on
+     the left — not a button on the baseline beside a column that stopped 60px
+     short of it. */
+  .plans-go{margin-top:auto;width:auto;min-width:300px;align-self:flex-start;
+    display:inline-flex;align-items:center;justify-content:center}
+  .pitch-decide .panel > .drill{margin-top:auto}
+  /* The basis is the condition that makes the figure true, and it was the
+     smallest type on the page — an 11px tracked caption between a 20px heading
+     and a 32px figure. Reading size, sentence case; the string is unchanged. */
+  .pitch-decide .save-basis{font-size:13px;font-weight:600;letter-spacing:.005em;
+    text-transform:none;color:var(--ink-2);margin:0 0 var(--s-sm)}
+  /* NO CARD IN A CARD. The two plans were --inner rounded plates inside the
+     --card panel — the storefront's one hard rule, broken in the block that
+     asks for the decision. As rows of one list, divided by a hairline, they
+     are one object with two entries, which is what two plans are. */
+  .pitch-decide .plans{gap:0}
+  .pitch-decide .plan-card{background:none;border:0;border-radius:0;
+    padding:var(--s-lg) 0}
+  .pitch-decide .plan-card:first-child{padding-top:0}
+  .pitch-decide .plan-card + .plan-card{border-top:1px solid var(--hair-lit)}
+  /* Four bands in a row, figure over its unit, instead of a 2x2 of 290px bars
+     with "$50" and "a month" at opposite ends. (0,2,0) so how.css's `.band`,
+     which loads later, cannot take these back. */
+  .spendq .bands{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-md)}
+  .spendq .band{flex-direction:column;align-items:flex-start;justify-content:center;
+    gap:2px;min-height:64px;padding:var(--s-md) var(--s-lg)}
+  .spendq .band b{font-size:20px;letter-spacing:-.02em}
+
+  /* ── 4 · the close ────────────────────────────────────────────────────── */
+  /* Not a box. The strongest sentence on the page, set on the field at display
+     size under a rule, with the one remaining door beside it at its own width.
+     Two equal panels here read as two more sections; this reads as an ending. */
+  .column > .pitch-close{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    gap:var(--s-2xl);align-items:center;
+    /* THE SECOND GROUND, AND THE PAGE ENDS ON IT. field / band / field / band:
+       the close takes the same --subtle the evidence band has, full bleed, and
+       runs to the window's foot — so the page finishes on a surface rather
+       than trailing off 46px under a contact line. The hairline it had is
+       gone: the ground change is the seam. */
+    width:100%;max-width:none;margin-inline:0;
+    background:var(--subtle);
+    padding:64px calc((100% - var(--grid)) / 2) 96px;
+  }
+  .column > .pitch-close > *{max-width:none;margin:0}
+  .pitch-close .closing{background:none;border:0;box-shadow:none;padding:0}
+  .pitch-close .guarantee{font-size:32px;font-weight:700;letter-spacing:-.03em;
+    line-height:1.12;max-width:24ch}
+  .pitch-close .guarantee-contact{margin-top:var(--s-lg)}
+  .pitch-close .applink{width:auto;flex:0 0 auto;padding:var(--s-xl) var(--s-2xl);
+    gap:var(--s-lg);border-radius:var(--r-panel)}
+  .pitch-close .applink b{flex:0 0 auto;font-size:17px;letter-spacing:-.015em}
+  .pitch-close .applink-glyphs svg{width:20px;height:20px}
+  @media (hover:hover){.pitch-close .applink:hover{background:var(--inner)}}
+}
+
+/* The laptop band, 1024–1279: the places run as the ticker the phone ships,
+   bled to the window's edges under the heading. `50% - 50vw` is minus the
+   band's own padding — 50% of the rail's container (the grid) less half the
+   window — and the page hides its scrollbar, so vw is the window. */
+@media (min-width:1024px) and (max-width:1279px){
+  .places .ticker-rail{margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%)}
+}
+
+/* ══ ALL SEVEN IN ONE ROW ═════════════════════════════════════════════════
+   VenueTicker switches to its static grid at 1280, not 1024: below that a
+   seven-across row puts the tiles under the 132px the phone rail proves, so
+   the laptop keeps the moving rail. Here the row is the lineup — six live
+   places and the one that is signed — at 3:4, so the photographs stay the
+   portraits the phone rail shows rather than the squares that made the 4+3
+   grid an 840px block with a hole in it. */
+@media (min-width:1280px){
+  .ticker.is-open .ticker-rail{grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:var(--s-md);padding-inline:0}
+  .ticker.is-open .vcard{aspect-ratio:3/4}
+}
+
+/* The legal footer closes the last movement: full width under the guarantee
+   and the door, left on the copy's axis. */
+@media (min-width:1024px){
+  .pitch-close > .site-foot{grid-column:1 / -1;margin-top:var(--s-xl);padding-top:var(--s-lg);
+    border-top:1px solid var(--hair)}
+  .pitch-close > .site-foot nav{justify-content:flex-start}
+}
+
+
+/* ============================================================================
+   THE INVITATION — /welcome. See model/invite.ts and the hero in Pitch.tsx.
+   ============================================================================ */
+.invite{display:flex;flex-direction:column;gap:var(--s-lg);margin-bottom:var(--s-2xl)}
+.invite-marks{display:flex;align-items:center;gap:var(--s-lg)}
+.invite .logo{margin:0}
+.invite-x{font-size:18px;line-height:1;color:var(--ink-3)}
+/* A JPG has no transparency, so it is shown as the tile it is: cropped square,
+   the card's small radius, a hairline so its own ground has an edge. */
+.invite-logo{display:block;width:44px;height:44px;object-fit:cover;border-radius:10px;
+  border:1px solid var(--hair-lit);background:#FFFFFF}
+.invite-line{margin:0;font-size:16px;line-height:1.4;color:var(--ink-1);max-width:36ch;text-wrap:pretty}
+@media (min-width:1024px){
+  .hero .invite{align-self:flex-start}
+  .hero .invite .logo{margin-bottom:0}
+}
+
+/* The proof line under the lead (14 Sep audit). Links in the lead's ink,
+   underlined, because they leave the page. */
+.hero-proof{margin:var(--s-md) 0 0;color:var(--ink-3)}
+.hero-proof a{color:var(--ink-2);text-underline-offset:3px}
+.hero-proof a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;border-radius:var(--r-sm)}
+/* A plan card is a link to /reserve with its plan chosen: the anchor covers
+   the card and the shirt's own button sits above it, so both still work. */
+.plan-card{position:relative}
+.plan-card-go{position:absolute;inset:0;z-index:1;border-radius:inherit}
+.plan-card-go:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+.plan-card-tee{z-index:2}
+@media (hover:hover){.plan-card:has(.plan-card-go:hover){background:var(--inner)}}
+
+/* "How it works" under the savings figure: one interval below the drill,
+   full width inside the panel's own inset. */
+.save-how{display:flex;justify-content:center;margin:var(--s-lg) 0 0}
+
+/* The wordmark with the PLUS chip beside it, on the hero. */
+.hero-brand{display:flex;align-items:center;gap:var(--s-md)}
+.hero-brand .logo{margin:0}
+.hero-plus{align-self:center;margin-top:2px}

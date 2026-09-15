@@ -1,0 +1,196 @@
+[
+  {
+    "id": "coffeeholicsva",
+    "name": "Coffeeholics",
+    "logo": "/logos/coffeeholicsva.jpeg",
+    "hero": "/heroes/coffeeholicsva.jpg",
+    "locality": "Blacksburg",
+    "category": "Coffee",
+    "street": "Draper Road",
+    "open": true,
+    "liveUrl": "https://www.tapin.app/coffeeholicsva",
+    "policies": [
+      {
+        "id": "percent",
+        "kind": "percent",
+        "label": "15% off",
+        "detail": "Food and non-alcoholic drinks",
+        "percentOff": 15
+      },
+      {
+        "id": "credit",
+        "kind": "credit",
+        "label": "$5 credit",
+        "detail": "Earned on a $10+ order, once a week",
+        "creditUsd": 5,
+        "minOrderUsd": 10,
+        "cadence": "weekly"
+      },
+      {
+        "id": "points",
+        "kind": "points",
+        "label": "2× points",
+        "detail": "Food and non-alcoholic drinks",
+        "multiplier": 2
+      }
+    ],
+    "brandColor": "#6b319e"
+  },
+  {
+    "id": "theburg",
+    "name": "The Burg",
+    "logo": "/logos/theburg.jpeg",
+    "hero": "/heroes/theburg.jpg",
+    "locality": "Blacksburg",
+    "category": "Drinks",
+    "street": "Draper Road",
+    "open": true,
+    "liveUrl": "https://www.tapin.app/theburg",
+    "policies": [
+      {
+        "id": "percent",
+        "kind": "percent",
+        "label": "15% off",
+        "detail": "Food and non-alcoholic drinks",
+        "percentOff": 15
+      },
+      {
+        "id": "credit",
+        "kind": "credit",
+        "label": "$5 credit",
+        "detail": "Earned on a $10+ order, once a week",
+        "creditUsd": 5,
+        "minOrderUsd": 10,
+        "cadence": "weekly"
+      },
+      {
+        "id": "points",
+        "kind": "points",
+        "label": "2× points",
+        "detail": "Food and non-alcoholic drinks",
+        "multiplier": 2
+      }
+    ],
+    "brandColor": "#0f0f0f"
+  },
+  {
+    "id": "themilkparlor",
+    "name": "The Milk Parlor",
+    "logo": "/logos/themilkparlor.jpeg",
+    "hero": "/heroes/themilkparlor.jpg",
+    "locality": "Blacksburg",
+    "category": "Drinks",
+    "street": "Draper Road",
+    "open": false,
+    "policies": [
+      {
+        "id": "percent",
+        "kind": "percent",
+        "label": "15% off",
+        "detail": "Food and non-alcoholic drinks",
+        "percentOff": 15
+      },
+      {
+        "id": "credit",
+        "kind": "credit",
+        "label": "$5 credit",
+        "detail": "Earned on a $10+ order, once a week",
+        "creditUsd": 5,
+        "minOrderUsd": 10,
+        "cadence": "weekly"
+      },
+      {
+        "id": "points",
+        "kind": "points",
+        "label": "2× points",
+        "detail": "Food and non-alcoholic drinks",
+        "multiplier": 2
+      }
+    ],
+    "brandColor": "#130f11"
+  },
+  {
+    "id": "olaika",
+    "name": "Olaika",
+    "logo": "/logos/olaika.jpeg",
+    "hero": "/heroes/olaika.jpg",
+    "locality": "Blacksburg",
+    "category": "Food",
+    "street": "Jackson Street",
+    "open": true,
+    "policies": [
+      {
+        "id": "percent",
+        "kind": "percent",
+        "label": "15% off",
+        "detail": "Food and non-alcoholic drinks",
+        "percentOff": 15
+      },
+      {
+        "id": "credit",
+        "kind": "credit",
+        "label": "$5 credit",
+        "detail": "Earned on a $10+ order, once a week",
+        "creditUsd": 5,
+        "minOrderUsd": 10,
+        "cadence": "weekly"
+      },
+      {
+        "id": "points",
+        "kind": "points",
+        "label": "2× points",
+        "detail": "Food and non-alcoholic drinks",
+        "multiplier": 2
+      }
+    ],
+    "brandColor": "#14414a"
+  },
+  {
+    "id": "sweetopia",
+    "name": "Sweetopia",
+    "logo": "/logos/sweetopia.jpeg",
+    "hero": "/heroes/sweetopia.jpg",
+    "locality": "Blacksburg",
+    "category": "Food",
+    "street": "College Avenue",
+    "open": true,
+    "policies": [
+      {
+        "id": "percent",
+        "kind": "percent",
+        "label": "15% off",
+        "detail": "Food and non-alcoholic drinks",
+        "percentOff": 15
+      },
+      {
+        "id": "credit",
+        "kind": "credit",
+        "label": "$5 credit",
+        "detail": "Earned on a $10+ order, once a week",
+        "creditUsd": 5,
+        "minOrderUsd": 10,
+        "cadence": "weekly"
+      },
+      {
+        "id": "points",
+        "kind": "points",
+        "label": "2× points",
+        "detail": "Food and non-alcoholic drinks",
+        "multiplier": 2
+      }
+    ],
+    "brandColor": "#f77186"
+  },
+  {
+    "id": "italianospizza",
+    "name": "Italiano's Pizza",
+    "logo": "/logos/italianospizza.jpeg",
+    "hero": "/heroes/italianospizza.jpg",
+    "locality": "Blacksburg",
+    "category": "Food",
+    "street": "North Main",
+    "open": true,
+    "policies": [],
+    "brandColor": "#133427"
+  }
+]

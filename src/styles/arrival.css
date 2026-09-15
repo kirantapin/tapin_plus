@@ -1,0 +1,122 @@
+/* ============================================================================
+   THE ARRIVAL — shell/Arrival.tsx. One authored moment, on the landing page's
+   first paint. The choreography is here, in order, so it can be read top to
+   bottom as a timeline:
+
+     0 – 260   the T mark settles onto the field
+   180 – 420   the dot drops and lands — the tap, with one small overshoot
+   300 – 700   t · a · p · I · n arrive in order, 45ms apart
+   640 – 900   the pin drops onto the town; the town rises to meet it
+  1250 – 1730  the veil lifts; the lockup drifts up and out with it
+
+   Everything is transform + opacity, so it composites; the ring uses a scale,
+   not a box-shadow. The veil is the page's own colour, so the lift reveals a
+   page that was finished underneath from the first frame.
+   ========================================================================== */
+
+.arrival{
+  position:fixed;inset:0;z-index:80;
+  display:grid;place-items:center;
+  background:var(--page);
+  /* Above the page's own scroll but never above a browser dialog; the
+     landing page mounts no layer of its own while this shows. */
+  pointer-events:auto;
+}
+.arrival-lockup{
+  display:flex;flex-direction:column;align-items:center;gap:22px;
+  /* Nudged above true centre: an eye reads the optical centre a little high,
+     and the pin's fall wants room beneath it. */
+  transform:translateY(-4vh);
+}
+.arrival-logo{width:168px;height:auto;color:var(--ink-1);overflow:visible}
+@media (min-width:1024px){
+  .arrival-logo{width:212px}
+}
+
+/* The mark, in its pieces. TapInLogo's path order: 1 t · 2 a · 3 p · 4 I · 5 n ·
+   6 the dot · 7 the T's bar · 8 the T's stem. Each gets its own transform box so
+   it moves about itself, not the SVG's origin. */
+.arrival-logo path{
+  transform-box:fill-box;transform-origin:center;
+  opacity:0;
+  animation:arrivalRise 260ms var(--ease) both;
+}
+.arrival-logo path:nth-child(7),
+.arrival-logo path:nth-child(8){animation-delay:0ms}
+/* The dot: from above, with the one overshoot the sequence allows. It is the
+   tap. */
+.arrival-logo path:nth-child(6){
+  animation:arrivalDot 240ms cubic-bezier(.34,1.56,.64,1) 180ms both;
+}
+.arrival-logo path:nth-child(1){animation-delay:300ms}
+.arrival-logo path:nth-child(2){animation-delay:345ms}
+.arrival-logo path:nth-child(3){animation-delay:390ms}
+.arrival-logo path:nth-child(4){animation-delay:435ms}
+.arrival-logo path:nth-child(5){animation-delay:480ms}
+
+@keyframes arrivalRise{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes arrivalDot{
+  from{opacity:0;transform:translateY(-16px) scale(.35)}
+  60%{opacity:1}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* The town. The pin drops in from above and the name rises from below, so
+   they meet on the line — one gesture from two directions. */
+.arrival-place{
+  display:flex;align-items:center;gap:8px;margin:0;
+  font-size:17px;font-weight:600;letter-spacing:-.01em;color:var(--ink-2);
+}
+.arrival-pin{
+  position:relative;display:inline-grid;place-items:center;
+  width:22px;height:22px;color:var(--ink-1);
+  opacity:0;
+  animation:arrivalPin 260ms cubic-bezier(.34,1.4,.64,1) 640ms both;
+}
+.arrival-pin svg{width:22px;height:22px;position:relative;z-index:1}
+.arrival-town{
+  display:inline-block;opacity:0;
+  animation:arrivalRise 280ms var(--ease) 700ms both;
+}
+@keyframes arrivalPin{
+  from{opacity:0;transform:translateY(-18px)}
+  55%{opacity:1}
+  to{opacity:1;transform:translateY(0)}
+}
+/* There was a ring spreading from the pin's foot here — a map's "you are
+   here". Sam, 15 Sep 2026: "get rid of the weird circle around the location
+   icon … it looks a bit tacky." Gone; the pin's drop is the whole gesture. */
+
+/* The lift. The veil goes, the lockup drifts up with it — the same house
+   curve the page's sheets use, so it leaves the way everything else here
+   moves. `both` so the last frame holds until the component unmounts. */
+.arrival.is-lifting{
+  animation:arrivalVeil 460ms var(--ease) both;
+  pointer-events:none;
+}
+.arrival.is-lifting .arrival-lockup{
+  animation:arrivalLeave 460ms var(--ease) both;
+}
+/* Anything still arriving when the skip lands finishes now, not on its own
+   schedule — a lockup that keeps assembling while its veil is going reads
+   as a glitch. */
+.arrival.is-lifting .arrival-logo path,
+.arrival.is-lifting .arrival-pin,
+.arrival.is-lifting .arrival-town{animation-duration:1ms;animation-delay:0ms}
+@keyframes arrivalVeil{
+  from{opacity:1}
+  to{opacity:0}
+}
+@keyframes arrivalLeave{
+  from{transform:translateY(-4vh)}
+  to{transform:translateY(calc(-4vh - 18px)) scale(1.02)}
+}
+
+/* Reduced motion never mounts this (Arrival.tsx checks first); this is the
+   belt to that brace, for a preference that flips while it is showing. */
+@media (prefers-reduced-motion:reduce){
+  .arrival{display:none}
+}
