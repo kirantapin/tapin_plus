@@ -41,8 +41,14 @@ import { useEventTracking } from "../context/event_tracking_context";
  * Must match the first invoice total — the monthly price plus the early-access
  * invoice item, in cents. Keep in step with SUBSCRIPTION_PRICE_ID and
  * EARLY_ACCESS_PRICE_ID in the edge function.
+ *
+ * ⚠ 15 Sep 2026: 699 → 399 with `FOUNDING_MONTHLY` in content.ts. THIS NUMBER
+ * IS NOT THE PRICE — it is what Elements is told the sheet will collect, and
+ * the real figure is the Stripe price id the edge function charges. If they
+ * disagree the wallet shows one amount and the invoice takes another. The
+ * Stripe prices must move too.
  */
-const FIRST_INVOICE_TOTAL_CENTS = environment !== "production" ? 200 : 699;
+const FIRST_INVOICE_TOTAL_CENTS = environment !== "production" ? 200 : 399;
 
 type IntentType = "payment" | "setup";
 

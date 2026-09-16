@@ -186,6 +186,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           <h1 className="t-display">
             $5 credit every week, at every place you already go.
           </h1>
+
           {/* The other two, and where. ONE line: 37signals' own reporting on
               their winning hero is that adding further explanation beneath it
               performed 22% WORSE, so the fix is the first line, never a stack. */}
@@ -194,8 +195,8 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             toward rewards.
           </p>
           {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
-              of these places today, and a reader can check that in ten
-              seconds. The two addresses are the only two that exist. */}
+                of these places today, and a reader can check that in ten
+                seconds. The two addresses are the only two that exist. */}
           <p className="t-compact hero-proof">
             TapIn already runs ordering at{" "}
             {venues
@@ -210,6 +211,21 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               ))}{" "}
             — see it live.
           </p>
+
+          {/* ══ THE PLACES, UNDER THE COPY ═══════════════════════════════
+              Kiran, 15 Sep 2026. The headline names a benefit; this answers
+              "where" with the six photographs instead of a sentence, in the
+              slot the two supporting lines used to hold before they moved
+              below the actions.
+
+              `rail`, always. The ticker switches to a 7-across grid off a
+              VIEWPORT media query at 1280, which is a page-width object — in a
+              glass panel it would be seven ~90px tiles. The prop keeps it a
+              scrolling rail at every width and keeps the duplicate track that
+              makes the scroll seamless. */}
+          <div className="hero-rail">
+            <VenueTicker rail />
+          </div>
 
           {/* ══ PRICE, ACTION AND REFUND, IN ONE BLOCK ═══════════════════════
               The price was the smallest type in this panel, at 13px. Every

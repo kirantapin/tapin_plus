@@ -296,7 +296,18 @@ export const eventsNote =
    FOUNDING_OPEN, as before; the standard ladder is the one that was
    founding an hour earlier (9.99 / 24.99 / 79.99), and the founding ladder
    keeps the same shape under it (3 months = 2½, a year = 8). */
-const FOUNDING_MONTHLY = 6.99;
+/* ✅ 15 Sep 2026: $6.99 → $3.99. Every figure downstream — the hero price, the
+   charge rows, the consent sentence, the terms, `paidTodayCents` and the amount
+   the wallet is mounted with — derives from this one line, so there is no
+   second place to edit on the client.
+
+   ⚠ THE SERVER DOES NOT READ THIS. `create_simple_intent` charges a Stripe
+   PRICE ID (`EARLY_ACCESS_PRICE_ID` / `SUBSCRIPTION_PRICE_ID`), and
+   `FIRST_INVOICE_TOTAL_CENTS` in SubscriptionPayButton is a hand-kept copy of
+   the same figure. Until both are moved to 399, the consent sentence says
+   $3.99 and Stripe invoices $6.99 — which is the one thing TRUTH §4 exists to
+   prevent. Do not deploy this alone. */
+const FOUNDING_MONTHLY = 3.99;
 /* Sam, 15 Sep 2026 (later still): "for everyone else, we do $14.99 a month,
    25% discount for 3 months, and 40% discount for a full year." 3 × 14.99 =
    44.97, less 25% = 33.73 → $33.99 (24% off at the .99); 12 × 14.99 = 179.88,
@@ -382,7 +393,22 @@ export const seatCapParts: SeatCapPart[] = FOUNDING_OPEN
     ];
 export const seatCapLine: string = seatCapParts.map((p) => p.text).join("");
 
-export const launchWindow: string = moneyJson.preorder.launchWindow;
+/**
+ * ✅ 15 Sep 2026: "Spring 2027" → "Halloween 2026".
+ *
+ * OVERRIDDEN HERE, NOT EDITED IN THE EXTRACTION, for the same reason the prices
+ * are: `docs/data/money-and-terms.json` is a snapshot of what production
+ * renders, and its worth is that it was produced by running that code rather
+ * than retyped. Overriding records the gap; editing it would hide one.
+ *
+ * ⚠ IT IS NOW SIX WEEKS OUT, NOT EIGHTEEN MONTHS, and several things were
+ * written on the old assumption: the edge function's `SUBSCRIPTION_TRIAL_END`
+ * is 1 Feb 2027 (three months AFTER launch now, so the first renewal would fall
+ * well after the service opens), the welcome SMS says "We launch Spring 2027",
+ * and the founding round still closes "the end of September". All three need a
+ * decision, and two of them are server-side.
+ */
+export const launchWindow = "Halloween 2026";
 
 /**
  * When founding pricing closes. Sam, this session: "closes at the end of
@@ -547,7 +573,7 @@ export const lockedRateLine: string = FOUNDING_OPEN
   : lockedRateLines.standard;
 /** $11.99 across 3 months. Derived, so the two can never disagree. */
 const PASS_PER_MONTH = usd(Math.round((PASS_TODAY / PASS_MONTHS) * 100) / 100);
-const WINDOW = moneyJson.preorder.launchWindow as string;
+const WINDOW = launchWindow;
 
 export const passPlan = {
   paidTodayCents: Math.round(PASS_TODAY * 100),

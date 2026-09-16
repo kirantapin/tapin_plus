@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../context/auth_context";
 import TapInLogo from "./TapInLogo";
+import { launchWindow } from "../model/content";
 import { cardPlan } from "../model/content";
 
 /**
@@ -78,7 +79,11 @@ export default function TapInCard({
      contradiction the 14 Sep review found on every other control. /in passes
      the plan she actually bought instead of taking this default. */
   plan = cardPlan,
-  starts = "Spring 2027",
+  /* THE LAUNCH WINDOW, FROM THE CONSTANT — never a literal. It was
+     "Spring 2027" hardcoded here, so when the window moved the card went on
+     printing the old date beside a checkout that had moved. One source, so the
+     object a member holds cannot disagree with the page that sold it. */
+  starts = launchWindow,
   className = "",
   innerRef,
   onName,
