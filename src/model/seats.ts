@@ -62,15 +62,26 @@ void moneyJson;
  * and is called out here for exactly that reason. His call, asked for in those
  * words.
  */
-/* Sam, 15 Sep 2026: "say 45 of them are left available." His words; his
-   call; still an invented figure, and this file's header says so. */
-const SEATS_AT_OPEN = 35;
+/* Kiran, 16 Sep 2026: the number of spots left is 11. Sam's earlier figures
+   (45, then 35) drifted down three a day from 15 Sep; this one does not — see
+   SEATS_PER_DAY. Still an invented figure, and this file's header says so. */
+const SEATS_AT_OPEN = 11;
 
-/** Sam's rate, exactly as asked (13 Sep: "decrease by 3 daily"). From 45 on
- *  15 Sep, three a day reaches 0 on 30 Sep — the same day the round closes
- *  ("Early bird will close at the end of september", Sam, 15 Sep), so the
- *  counter and the date agree for the whole round. */
-const SEATS_PER_DAY = 3;
+/**
+ * ══ THE COUNTER NO LONGER MOVES ════════════════════════════════════════════
+ * Was 3 a day (Sam, 13 Sep: "decrease by 3 daily"), which took 45 on 15 Sep to
+ * 0 on 30 Sep so the number and the close date agreed for the whole round.
+ *
+ * Kiran, 16 Sep 2026 asked for the figure to BE 11. A drifting 11 is 8
+ * tomorrow, so the drift is off rather than the number being right for one day
+ * and wrong after. The consequence is deliberate and worth knowing: the counter
+ * is now a fixed claim rather than a countdown, and it never reaches zero —
+ * so `FOUNDING_OPEN` stays true and the $3.99 → $14.99 flip will not fire on
+ * its own. Closing the round is now an edit, not a date.
+ *
+ * Put a positive number back here and the countdown resumes unchanged.
+ */
+const SEATS_PER_DAY = 0;
 
 /**
  * Day zero, when the counter still reads SEATS_AT_OPEN. Local midnight, because

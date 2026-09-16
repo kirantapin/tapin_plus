@@ -1335,3 +1335,19 @@ html[data-flight="in"] .column > .sticky-cta{
   .ms-join .action{width:100%;display:inline-flex;
     align-items:center;justify-content:center}
 }
+
+/* ══ NO SECOND SCRIM INSIDE THE RESERVE LAYER ════════════════════════════════
+   `/reserve` is itself a layer: `.reserve-scrim` already dims the pitch behind
+   it at rgba(10,5,8,.62). The checkout sheet then laid its OWN `.cs-scrim` at
+   the same value with a 3px blur on top, so the phone step sat under two of
+   them — about 86% black, which is the "weird black overlay" and not a
+   deliberate depth cue. Compounding dim is what you get for free by nesting two
+   things that were each designed to be the only modal on screen.
+
+   The element stays, because it is doing the layout: `.cs-scrim` is the fixed
+   flex box that positions the sheet at the bottom of the viewport and catches
+   the backdrop click that dismisses it. Only its paint is dropped. */
+.reserve-layer .cs-scrim{
+  background:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
