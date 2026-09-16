@@ -188,17 +188,26 @@ export default function Reserve() {
 
             STILL A RADIO, not a div dressed as one: it is the single member of
             a radiogroup, `aria-checked` is true, and it is focusable — a
-            screen reader should meet "Monthly, selected, 1 of 1", which is the
-            truth. Tapping it re-selects what is already selected, so there is
+            screen reader should meet "Early Bird Deposit, selected, 1 of 1",
+            which is the truth. Tapping it re-selects what is already selected, so there is
             no handler; a control that cannot change state must not pretend it
             can. */}
         <div className="plan-pick is-solo" role="radiogroup" aria-label="Your plan">
           <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
-            <b>{plan.label}</b>
+            {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
+                Kiran, 15 Sep 2026. What is taken today is one charge that holds
+                the seat; the recurring rate and its cadence are the consent
+                sentence's job, two lines below, where they are disclosed
+                together with the control. A tile reading "Monthly · $3.99 a
+                month" put the schedule on the object and said it twice.
+
+                Follows the flip: after the Early Bird spots are gone there is
+                nothing early about it, and `plan.label` is not a substitute
+                because it names the cadence this tile no longer states. */}
+            <b>{FOUNDING_OPEN ? "Early Bird Deposit" : "Deposit"}</b>
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
-                <span className="plan-per">{plan.per}</span>
                 {plan.saving ? (
                   <span className="plan-else">
                     <span className="tnum">{plan.saving.after}</span> for everyone else
