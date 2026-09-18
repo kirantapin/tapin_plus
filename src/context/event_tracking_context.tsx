@@ -14,6 +14,7 @@ import {
   IN_PRODUCTION,
   RESTAURANT_ID,
 } from "../constants";
+import { load as loadMetaPixel, mirror as mirrorToMetaPixel } from "./meta_pixel";
 
 /**
  * POSTHOG, PORTED FROM THE MERCHANT APP (`~/tapin/src/context/event_tracking_context.tsx`).
@@ -137,6 +138,13 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
        `posthog.reset()` on sign-out, which clears super properties along with
        the distinct_id — so it is registered again below whenever that runs. */
     posthog.register({ restaurant_id: RESTAURANT_ID });
+
+    /* ══ META PIXEL, BESIDE IT ════════════════════════════════════════════
+       Same gate (`ENABLED`), and the pixel adds "…and an id is configured" of
+       its own, so a build without VITE_META_PIXEL_ID makes no request to
+       facebook.net. It sends only the handful of events its ad optimiser can
+       bid against, forwarded from `track()` below — see meta_pixel.ts. */
+    loadMetaPixel(ENABLED);
   }, []);
 
   const api = useMemo<EventsAPI>(
@@ -151,6 +159,11 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
           /* Analytics must never break a page that takes money. */
           console.error("Error capturing event:", event, merged);
         }
+        /* OUTSIDE that try, so a PostHog failure does not cost the ad platform
+           its conversion — and in its own, so the reverse is also true. The
+           call is silent for any event meta_pixel's table does not name, which
+           is most of them; nothing here decides what Meta gets. */
+        mirrorToMetaPixel(event, merged);
       },
 
       identify: (userId) => {

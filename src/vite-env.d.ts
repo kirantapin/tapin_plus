@@ -40,6 +40,10 @@ interface ImportMetaEnv {
 
   /* ── PostHog. Only read by `constants.ts`. ──────────────────────────────── */
   readonly VITE_POSTHOG_PROJECT_TOKEN?: string;
+
+  /* ── Meta Pixel. Only read by `constants.ts`. Unset means the pixel never
+        loads and no request reaches facebook.net — see context/meta_pixel.ts. */
+  readonly VITE_META_PIXEL_ID?: string;
 }
 
 interface ImportMeta {

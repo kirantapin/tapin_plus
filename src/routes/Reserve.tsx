@@ -6,6 +6,7 @@ import { BenefitIcon, NavIcon } from "../shell/Icons";
 import CheckoutSheet from "../shell/CheckoutSheet";
 import type { PhoneIdentity } from "../shell/PhoneStep";
 import { useName } from "../model/nameStore";
+import { useEventTracking } from "../context/event_tracking_context";
 import { seatLine, seatsLeft, SEAT_CAP } from "../model/seats";
 import {
   PLANS,
@@ -76,6 +77,16 @@ export default function Reserve() {
   const [noWallet, setNoWallet] = useState(false);
   /** The checkout sheet. Everything that discloses or charges lives in it. */
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  /* ══ THE SHEET OPENING IS THE MID-FUNNEL EVENT ═════════════════════════════
+     One `checkout_opened` per open, not per render — both buttons below set the
+     same flag, and this fires on the transition to true only. It reaches Meta
+     as InitiateCheckout (context/meta_pixel.ts); a /reserve pageview is not the
+     same thing, since most of that traffic never opens the sheet. */
+  const { track } = useEventTracking();
+  useEffect(() => {
+    if (sheetOpen) track("checkout_opened");
+  }, [sheetOpen, track]);
   /**
    * The signed-in number, held here so it survives the charge and can be
    * written into the reservation alongside the PaymentIntent id. A ref rather
