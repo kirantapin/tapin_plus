@@ -307,7 +307,18 @@ export const eventsNote =
    the same figure. Until both are moved to 399, the consent sentence says
    $3.99 and Stripe invoices $6.99 — which is the one thing TRUTH §4 exists to
    prevent. Do not deploy this alone. */
-const FOUNDING_MONTHLY = 3.99;
+/* ✅ 18 Sep 2026: $3.99 → $4.99. The three client-side copies of this figure
+   moved together — here, `FIRST_INVOICE_TOTAL_CENTS` in SubscriptionPayButton,
+   and `FOUNDING_MONTHLY_USD` in model/savings.ts, which had been left at $9.99
+   through the last two repricings and so was quoting the slider's net saving
+   against a price nobody was being charged.
+
+   ⚠ THE STRIPE PRICE IDS STILL HAVE TO MOVE. Same warning as the line above,
+   and it has not been discharged by this edit: the edge function charges a
+   price id, not this number. Until `EARLY_ACCESS_PRICE_ID` /
+   `SUBSCRIPTION_PRICE_ID` are repointed at a 499 price, the page says $4.99
+   and Stripe invoices $3.99. Do not deploy this alone. */
+const FOUNDING_MONTHLY = 4.99;
 /* Sam, 15 Sep 2026 (later still): "for everyone else, we do $14.99 a month,
    25% discount for 3 months, and 40% discount for a full year." 3 × 14.99 =
    44.97, less 25% = 33.73 → $33.99 (24% off at the .99); 12 × 14.99 = 179.88,

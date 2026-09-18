@@ -53,7 +53,16 @@ export const WEEKS_PER_MONTH = 4;
  *  This supersedes TRUTH.md §2's $7.99 — and note $4.99 had previously been on
  *  §2's "retired, do not reintroduce" list as the early-bird rate. */
 /* Sam, 15 Sep 2026: $9.99 (was $6.99 on 14 Sep). Mirrors content.ts's FOUNDING_MONTHLY. */
-export const FOUNDING_MONTHLY_USD = 9.99;
+/* 18 Sep 2026: $4.99, with content.ts.
+   ⚠ IT HAD STOPPED MIRRORING. The comment above claims this tracks
+   FOUNDING_MONTHLY, but content.ts went 9.99 → 6.99 → 3.99 and this line did
+   not follow, so the slider spent those repricings subtracting a $9.99 price
+   from the modelled saving — `netUsd` below, the one figure on the slider that
+   answers "is this worth it?", was understated by $6 a month against a price
+   nobody was charged. It is a copy, not a derivation, which is why it drifted;
+   the two files do not import from each other. Treat any edit to either as an
+   edit to both until they are unified. */
+export const FOUNDING_MONTHLY_USD = 4.99;
 
 /**
  * Points are 10 per dollar at 1c = 10% back, but ONLY the extra 1x is the

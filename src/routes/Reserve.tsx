@@ -209,7 +209,7 @@ export default function Reserve() {
                 Kiran, 15 Sep 2026. What is taken today is one charge that holds
                 the seat; the recurring rate and its cadence are the consent
                 sentence's job, two lines below, where they are disclosed
-                together with the control. A tile reading "Monthly · $3.99 a
+                together with the control. A tile reading "Monthly · $4.99 a
                 month" put the schedule on the object and said it twice.
 
                 Follows the flip: after the Early Bird spots are gone there is

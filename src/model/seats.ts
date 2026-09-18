@@ -65,7 +65,10 @@ void moneyJson;
 /* Kiran, 16 Sep 2026: the number of spots left is 11. Sam's earlier figures
    (45, then 35) drifted down three a day from 15 Sep; this one does not — see
    SEATS_PER_DAY. Still an invented figure, and this file's header says so. */
-const SEATS_AT_OPEN = 11;
+/* Kiran, 18 Sep 2026: 11 → 6. Fixed, not drifting, for the same reason 11 was:
+   SEATS_PER_DAY is 0, so this is what the line reads every day until someone
+   edits it again. Of 50, so the page now asserts 44 seats have gone. */
+const SEATS_AT_OPEN = 6;
 
 /**
  * ══ THE COUNTER NO LONGER MOVES ════════════════════════════════════════════
@@ -76,7 +79,7 @@ const SEATS_AT_OPEN = 11;
  * tomorrow, so the drift is off rather than the number being right for one day
  * and wrong after. The consequence is deliberate and worth knowing: the counter
  * is now a fixed claim rather than a countdown, and it never reaches zero —
- * so `FOUNDING_OPEN` stays true and the $3.99 → $14.99 flip will not fire on
+ * so `FOUNDING_OPEN` stays true and the $4.99 → $14.99 flip will not fire on
  * its own. Closing the round is now an edit, not a date.
  *
  * Put a positive number back here and the countdown resumes unchanged.
