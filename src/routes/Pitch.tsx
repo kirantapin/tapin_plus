@@ -227,14 +227,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               makes the scroll seamless. */}
           <div className="hero-rail">
             <VenueTicker rail />
-            {/* Sam, 14 Sep 2026: "places that are added are added to the
-                membership and those who purchase don't incur an additional
-                fee." It used to sit under the SECOND copy of this rail, a
-                thousand pixels down; that copy is gone (20 Sep) and the fact
-                belongs with the places either way. */}
-            <p className="t-compact hero-rail-note">
-              New places are added to your membership at no extra cost.
-            </p>
           </div>
 
           {/* ══ PRICE, ACTION AND REFUND, IN ONE BLOCK ═══════════════════════

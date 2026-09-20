@@ -187,6 +187,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       bright: heroIsBright(v.id),
       plus: v.plus,
       tag: undefined as string | undefined,
+      more: false,
     })),
     ...comingVenues.map((v) => ({
       key: v.id,
@@ -202,7 +203,31 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       bright: false,
       plus: false,
       tag: "Coming" as string | undefined,
+      more: false,
     })),
+    /* ══ THE NETWORK ITSELF, AS A CARD ═══════════════════════════════════════
+       Sam, 20 Sep 2026: "the 'new places are added to your membership at no
+       extra cost' can be a card in the carousel." It was a two-line caption
+       under the rail; as a tile it sits where the fact applies and takes a
+       slot the rail already had room for, instead of another line of small
+       type under it.
+       It is the one tile that is not a place, so it is the one tile with no
+       photograph and a dashed plate (.vcard.is-more) — and it is idle, because
+       there is nothing behind it to open. */
+    {
+      key: "more",
+      venue: undefined as Venue | undefined,
+      name: "More places",
+      meta: "Added to your membership at no extra cost",
+      hero: undefined as string | undefined,
+      logo: undefined as string | undefined,
+      brand: undefined as string | undefined,
+      field: undefined as string | undefined,
+      bright: false,
+      plus: false,
+      tag: undefined as string | undefined,
+      more: true,
+    },
   ];
 
   const body = (t: (typeof tiles)[number], clone: boolean) => {
@@ -224,7 +249,14 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
                the same way on every card whether or not there is an image
                under it — which is what stops this one looking broken beside
                six that have one. */
-            <span className="monogram">{t.name.charAt(0)}</span>
+            t.more ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            ) : (
+              <span className="monogram">{t.name.charAt(0)}</span>
+            )
           )}
         </span>
 
@@ -263,14 +295,18 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
             Plus. We should have a little bit of a flag so that people know that
             they're a Tap In Plus partner." */}
         {t.plus && !t.tag ? <PlusFlag className="vflag" /> : null}
-        {!t.plus && !t.tag ? <span className="vflag is-soon">Offers only</span> : null}
+        {/* Not on the network card: "Offers only" describes a venue's tier, and
+            that tile is not a venue. */}
+        {!t.plus && !t.tag && !t.more ? (
+          <span className="vflag is-soon">Offers only</span>
+        ) : null}
         {t.tag ? <span className="vflag is-soon">{t.tag}</span> : null}
       </>
     );
     if (!t.venue) {
       /* Signed, not open. There is no page behind Slake and there must not
          appear to be, so it takes none of the button's behaviour. */
-      return <span className="vcard is-idle">{inner}</span>;
+      return <span className={`vcard is-idle${t.more ? " is-more" : ""}`}>{inner}</span>;
     }
     /* A BUTTON, NOT A LINK. It opens the merchant's benefits over this page
        rather than navigating anywhere — the app preview it used to point at
