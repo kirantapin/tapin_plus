@@ -2679,16 +2679,21 @@ button.vcard:focus-visible {
   }
 }
 
-/* ══ ALL SEVEN IN ONE ROW ═════════════════════════════════════════════════
-   VenueTicker switches to its static grid at 1280, not 1024: below that a
-   seven-across row puts the tiles under the 132px the phone rail proves, so
-   the laptop keeps the moving rail. Here the row is the lineup — six live
-   places and the one that is signed — at 3:4, so the photographs stay the
-   portraits the phone rail shows rather than the squares that made the 4+3
-   grid an 840px block with a hole in it. */
+/* ══ ALL EIGHT IN ONE ROW ═════════════════════════════════════════════════
+   VenueTicker switches to its static grid at 1280, not 1024: below that an
+   eight-across row puts the tiles under the 132px the phone rail proves, so
+   the laptop keeps the moving rail. Here the row is the lineup: six live
+   places, the one that is signed, and the network card that says more are
+   coming, at 3:4, so the photographs stay the portraits the phone rail shows
+   rather than the squares that made the 4+3 grid an 840px block with a hole
+   in it.
+
+   IT WAS SEVEN. The network card (VenueTicker, 20 Sep 2026) made the lineup
+   eight, and a seven-column row leaves the eighth alone on a second row,
+   which is the one arrangement this rule exists to prevent. */
 @media (min-width: 1280px) {
   .ticker.is-open .ticker-rail {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: var(--s-md);
     padding-inline: 0;
   }
