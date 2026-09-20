@@ -494,14 +494,30 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             the guarantee is stronger standing alone than it was carrying a price
             underneath it. */}
         <Panel className="closing">
-          <p className="guarantee">{guarantee}</p>
-          {/* A person to write to, which the walkthrough named as one of its two
-              sharpest objections: a guarantee with no addressee is a promise with
-              nobody behind it, and the reader most likely to care is the one
-              working out what happens if this goes wrong. Sam's, this session. */}
-          <p className="t-compact guarantee-contact">
-            <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-          </p>
+          {/* THE SHIELD, BACK ON THE LEFT. Sam, 20 Sep 2026: "for the primary
+              tapin spot though we can have the guarantee icon next to this on
+              the left like we had." /reserve's refund card has carried it all
+              along, and layout.css already flexes `.closing:has(
+              .guarantee-tile)` into the two-part shape — so this is the same
+              markup, not a second version of it, and the two surfaces state
+              the promise the same way. */}
+          <span className="guarantee-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
+              strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
+              <path d="m9.2 12.2 1.9 1.9 3.8-4" />
+            </svg>
+          </span>
+          <div className="guarantee-body">
+            <p className="guarantee">{guarantee}</p>
+            {/* A person to write to, which the walkthrough named as one of its two
+                sharpest objections: a guarantee with no addressee is a promise with
+                nobody behind it, and the reader most likely to care is the one
+                working out what happens if this goes wrong. Sam's, this session. */}
+            <p className="t-compact guarantee-contact">
+              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+            </p>
+          </div>
         </Panel>
 
         {/* THE PAIR INVERTED, 13 Sep 2026. It used to be Reserve (straight to the
