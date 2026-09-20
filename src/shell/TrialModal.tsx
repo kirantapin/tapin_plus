@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { campaignTrials, campaignVenue } from "../model/campaign";
 import { useReserveCta } from "./useReserveCta";
-import { monthlyToday, standardAfter } from "../model/content";
+import {
+  monthlyToday,
+  standardAfter,
+  logoField,
+  venues,
+} from "../model/content";
 
 /**
  * HOW TO TRY IT FREE — the campaign page's one modal.
@@ -51,6 +56,9 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
      background since the silo was asked for; this one was added later and
      did not. It uses the same hook now, which is the point of the hook. */
   const cta = useReserveCta();
+  /* The rest of the network, from the records. Same list and same marks the
+     page's own closing row draws, so the two say it identically. */
+  const others = venues.filter((o) => o.id !== campaignVenue?.id && o.plus);
 
   const close = () => {
     if (closing) return;
@@ -197,7 +205,43 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
               stated once — no clock, no counter, and nothing here says the
               rise is sooner than the seat line already says it is. */}
           <div className="ct-more">
-            <p className="ct-more-h">Want this every week?</p>
+            {/* ══ AND EVERYWHERE ELSE ════════════════════════════════════
+                Sam, 20 Sep 2026: "on the try it once, it should have the same
+                mention. 'Want this every week? And at every location?'"
+
+                The trial is one order at one shop, so the escalation has two
+                steps and the modal was only making one of them. His second
+                question is the other, and the marks under it are the page's
+                own closing row — the same list from the same records, so a
+                reader meets the network described identically in both places
+                rather than twice in two voices. */}
+            <p className="ct-more-h">Want this every week? And at every location?</p>
+            {others.length ? (
+              <div className="cg-also ct-also">
+                <span className="cg-also-marks" aria-hidden="true">
+                  {others.map((o) => (
+                    <span
+                      key={o.id}
+                      className="collar"
+                      data-field={logoField(o.id)}
+                      style={{ ["--brand" as string]: o.brandColor }}
+                    >
+                      <img src={o.logo} alt="" decoding="async" />
+                    </span>
+                  ))}
+                </span>
+                <p className="t-compact">
+                  Also at{" "}
+                  {others.map((o, k, arr) => (
+                    <Fragment key={o.id}>
+                      {o.name}
+                      {k === arr.length - 1 ? "" : k === arr.length - 2 ? " and " : ", "}
+                    </Fragment>
+                  ))}
+                  .
+                </p>
+              </div>
+            ) : null}
             <p className="t-compact ct-more-p">
               ${monthlyToday.toFixed(2)} now, {standardAfter} once the spots are gone.
             </p>
