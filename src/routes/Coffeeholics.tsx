@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import TapInLogo from "../shell/TapInLogo";
 import PlusFlag from "../shell/PlusFlag";
@@ -61,6 +61,51 @@ export default function Coffeeholics() {
     document.documentElement.setAttribute("data-surface", "cg");
     return () => document.documentElement.removeAttribute("data-surface");
   }, []);
+
+  /* ══ THE DOCKED PAIR ARRIVES WHEN THE HERO LEAVES ══════════════════════
+     Sam, 20 Sep 2026: "need two sticky buttons, one is 'try it once for
+     free' the other is 'get early access'."
+
+     Out while the top of the page is on screen, in once it is not — the same
+     rule the pitch's bar follows, and for the same reason layout.css gives:
+     a docked control competing with the one the reader is already looking at
+     is the decoy shape, not redundancy. An observer rather than a scroll
+     handler, so nothing runs on the frames between. */
+  const buy = useRef<HTMLDivElement>(null);
+  const [past, setPast] = useState(true);
+  useEffect(() => {
+    const el = buy.current;
+    if (!el) return;
+    /* ══ ONE ANCHOR: THE BUY BLOCK ════════════════════════════════════════
+       The bar is out only while the page's own filled "Get early access" is
+       on screen. Two controls for one destination at the same moment is the
+       decoy shape layout.css warns about, and that is the only moment it can
+       happen here.
+
+       IT IS NOT ALSO KEYED TO THE HERO, which is what this tried first. The
+       pitch hides its bar until the reader passes a buy block near the top;
+       this page's buy block is at the BOTTOM, and the whole page is about
+       1,500px against an 812px viewport — so "past the hero and before the
+       buy block" was a window roughly a hundred pixels wide, and measured
+       across four scroll positions the bar never appeared once. On a page
+       under two screens tall there is nothing to defer: both actions are
+       reachable from the first frame, which is what an advert's landing page
+       is for. */
+    const io = new IntersectionObserver(([e]) => setPast(!e.isIntersecting), {
+      rootMargin: "0px 0px -72px 0px",
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  /* The trials live in their own panel because there are two of them and one
+     button cannot carry both tokens. The docked button goes there rather than
+     picking one and quietly dropping the other. */
+  const toTrials = () => {
+    document
+      .getElementById("cg-try")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   /* The record, not a typed name: this venue's photograph, mark, category and
      street change here when they change anywhere. */
@@ -166,7 +211,7 @@ export default function Coffeeholics() {
           TWO BUTTONS, NOT ONE. They are separate policies on separate tokens —
           one link cannot carry both, and collapsing them into a single "order
           now" would quietly drop whichever one it did not point at. */}
-      <section className="panel cg-today">
+      <section className="panel cg-today" id="cg-try">
         <p className="t-caption panel-label">Try it today, free</p>
         <ul className="cg-trials">
           {campaignTrials.map((t) => (
@@ -212,7 +257,7 @@ export default function Coffeeholics() {
           Those two are a trial. Members get them at Coffeeholics every week, and at
           every other place on the membership around Blacksburg.
         </p>
-        <div className="cg-buy">
+        <div className="cg-buy" ref={buy}>
           <p className="hero-price cg-price">
             <b className="tnum">${monthlyToday.toFixed(2)}</b>
             <span>a month, from when we open on {launchWindow}</span>
@@ -263,6 +308,18 @@ export default function Coffeeholics() {
       </section>
 
       <SiteFoot />
+
+      <div className={`sticky-cta is-pair cg-sticky${past ? "" : " is-away"}`}>
+        {/* A button, not a link: it moves the reader to the two offers on this
+            page rather than navigating, because there are two tokens and one
+            href can only carry one of them. */}
+        <button type="button" className="action" onClick={toTrials}>
+          Try it once for free
+        </button>
+        <Link className="sticky-alt" to="/reserve">
+          Get early access
+        </Link>
+      </div>
     </>
   );
 }

@@ -317,7 +317,19 @@
   --raised: 0 2px 10px rgba(26, 16, 22, 0.1);
   --float: 0 6px 20px rgba(26, 16, 22, 0.14);
 
-  /* The merchant's, as an accent token so nothing below repeats the literal. */
+  /* ══ THE BRAND FILL IS THE MERCHANT'S, ON THIS SURFACE ONLY ═════════════
+     Sam, 20 Sep 2026: "the colors still aren't really coffeeholics colors
+     like for tapin plus and the header bar."
+
+     Both of those spend `--maroon`, and so does `.action`, `.vflag` and every
+     other chosen-or-acting thing. Re-tinting them one selector at a time
+     would have left the token meaning two different things on one page, so
+     the token itself is redefined and every one of them follows. tokens.css's
+     rule is unchanged and still holds: a solid brand fill is spent only on a
+     thing that is chosen or acting. It is simply Coffeeholics' fill here.
+
+     White on #6b319e measures 8.21:1, so `--on-maroon` needs no change. */
+  --maroon: #6b319e;
   --cg-brand: #6b319e;
 }
 
@@ -357,6 +369,24 @@
 }
 :root[data-surface="cg"] .cg-today .panel-label {
   color: var(--cg-brand);
+}
+
+/* ── THE DOCKED PAIR ───────────────────────────────────────────────────────
+   The site's own `.sticky-cta.is-pair`: one filled action, one outlined, with
+   the column clearance layout.css already tunes for exactly this shape.
+
+   THE FILLED SLOT IS THE FREE ONE. The page's last in-flow control is already
+   a filled "Get early access"; putting a second identical one in the bar is
+   the decoy shape layout.css warns about four rules down from here. So the
+   bar carries the thing the page does not end with, and the outlined slot
+   keeps the other reachable from anywhere. */
+.cg-sticky .sticky-alt {
+  background: #FFFFFF;
+  border-color: color-mix(in srgb, var(--cg-brand) 34%, transparent);
+  color: var(--cg-brand);
+}
+.cg-sticky .sticky-alt:active {
+  background: color-mix(in srgb, var(--cg-brand) 8%, #FFFFFF);
 }
 
 /* -- the other places, under the membership --------------------------------
