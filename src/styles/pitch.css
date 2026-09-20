@@ -1076,9 +1076,14 @@ button.vcard:focus-visible {
   padding: 0 var(--s-xl);
   list-style: none;
   overflow-x: auto;
-  /* NO scroll-snap. Snap arrests a scroll at a boundary, which is the one thing
-     a continuous ticker must never do — it was correct for the stepped version
-     this replaced and is a bug in this one. */
+  /* SNAP, AGAIN. It was removed when this became a continuous ticker: snap
+     arrests a scroll at a boundary, which is the one thing a ticker must
+     never do. The motion is gone (Sam, 20 Sep 2026: "let's not make this an
+     infinity scroll thing"), so nothing is being arrested and the rail can
+     land on a tile instead of between two. `proximity`, not `mandatory` — a
+     swipe that means to travel should not be caught by every tile it passes. */
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--s-xl);
   overscroll-behavior-x: contain;
   /* BOTH AXES. `pan-x` alone made a finger that landed on a tile unable to
      scroll the page at all (Sam, 15 Sep 2026: "I should be able to scroll
@@ -1111,6 +1116,7 @@ button.vcard:focus-visible {
   );
 }
 .ticker-tile {
+  scroll-snap-align: start;
   /* Small enough that three and a bit are in view. Two-at-a-time is the exact
      complaint that got the last rail removed from this page: at that size the
      reader is looking at a pair of big cards, not at a list going past. */

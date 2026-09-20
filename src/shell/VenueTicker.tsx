@@ -1,5 +1,5 @@
 import PlusFlag from "./PlusFlag";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import VenuePopup from "./VenuePopup";
 import { venues, comingVenues, heroIsBright, logoField, type Venue } from "../model/content";
 
@@ -102,75 +102,25 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
   /** The grid is shown when the reader asked for it, or when there is room. */
   const grid = desktop || open;
   const rail = useRef<HTMLUListElement>(null);
-  /** True while the reader is hovering, focused inside, or driving the rail. */
-  const paused = useRef(false);
-  const idle = useRef<number | undefined>(undefined);
+  /* ══ NO AUTO-SCROLL ═══════════════════════════════════════════════════
+     Sam, 20 Sep 2026: "let's not make this an infinity scroll thing."
 
-  /* Keyed on INPUT, never on `scroll`: a scroll listener cannot tell the
-     reader's scroll from the ticker's own, and keying the pause on it made the
-     first version suppress itself permanently after one advance. */
-  const nudge = useCallback(() => {
-    paused.current = true;
-    window.clearTimeout(idle.current);
-    idle.current = window.setTimeout(() => {
-      paused.current = false;
-    }, 2200);
-  }, []);
+     What stood here was a genuine ticker: a requestAnimationFrame loop
+     driving `scrollLeft` at 26px/s, a duplicate track so the wrap had no
+     visible edge, a period measured from the DOM because half the scroll
+     width was off by half a gap, and a pause keyed on pointer, wheel, focus
+     and touch. All of it existed to make a row move by itself, and a row
+     that moves by itself is now the thing not wanted.
 
-  useEffect(() => () => window.clearTimeout(idle.current), []);
+     It leaves an ordinary horizontal scroller, which is what the rail was
+     underneath: a real scrolling element, so swipe, trackpad and shift-wheel
+     keep working, and every tile is in the tab order exactly once now that
+     there is no clone to hide from it.
 
-  useEffect(() => {
-    if (grid) return;
-    const box = rail.current;
-    if (!box) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    let last = 0;
-    /* Slow enough to read a venue name as it passes. Per SECOND and multiplied
-       by the real frame delta, so it travels at one speed on a 120Hz display
-       and a 60Hz one alike. */
-    const PX_PER_SEC = 26;
-
-    const step = (t: number) => {
-      if (!last) last = t;
-      /* Clamped: after a background tab wakes, the first delta can be seconds
-         and would teleport the rail. */
-      const dt = Math.min((t - last) / 1000, 0.05);
-      last = t;
-      if (!paused.current) {
-        /* ══ THE PERIOD IS MEASURED, NOT DIVIDED ═══════════════════════════
-           This was `box.scrollWidth / 2`, on the reasoning that the list is
-           rendered twice so half the scroll width is one copy. It is not, and
-           the difference is what put a hole in the rail.
-
-           The rail is a flex row with a `gap`. Two copies of eight tiles are
-           sixteen tiles and FIFTEEN gaps, plus the rail's own inline padding;
-           one period is eight tiles and EIGHT gaps. Half the scroll width is
-           therefore short by half a gap (and off by half the padding), so every
-           wrap slipped a few pixels in the same direction. The error
-           accumulated until empty space opened at the leading edge — which is
-           precisely the artefact the duplicate track exists to prevent.
-
-           The first clone sits exactly one period from the first tile, so its
-           offset IS the period. Read from the DOM, it stays correct whatever
-           the gap, the padding or the tile width turn out to be — including in
-           the 520px column on /in, where they all differ from the pitch. */
-        const kids = box.children;
-        const half = kids.length >> 1;
-        const period =
-          half > 0 && kids[half]
-            ? (kids[half] as HTMLElement).offsetLeft -
-              (kids[0] as HTMLElement).offsetLeft
-            : box.scrollWidth / 2;
-        const next = box.scrollLeft + PX_PER_SEC * dt;
-        box.scrollLeft = period > 0 && next >= period ? next - period : next;
-      }
-      frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [grid]);
+     SNAP COMES BACK WITH IT. Snap was removed as incompatible with
+     continuous motion — it exists to arrest a scroll at a boundary, which is
+     the one thing a ticker must never do. Nothing is arresting any more, so
+     the rail can land on a tile instead of between two. See pitch.css. */
 
   const tiles = [
     ...venues.map((v) => ({
@@ -230,7 +180,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
     },
   ];
 
-  const body = (t: (typeof tiles)[number], clone: boolean) => {
+  const body = (t: (typeof tiles)[number]) => {
     const inner = (
       <>
         {/* THE PHOTOGRAPH IS THE CARD (Sam, 12 Sep 2026: "make the entire card
@@ -318,7 +268,6 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
         type="button"
         className="vcard"
         onClick={() => setPopup(v)}
-        tabIndex={clone ? -1 : undefined}
         aria-haspopup="dialog"
       >
         {inner}
@@ -331,22 +280,6 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       <ul
         className="ticker-rail no-scrollbar"
         ref={rail}
-        onPointerDown={nudge}
-        onTouchStart={nudge}
-        onWheel={nudge}
-        onKeyDown={nudge}
-        onPointerEnter={() => {
-          paused.current = true;
-        }}
-        onPointerLeave={() => {
-          paused.current = false;
-        }}
-        onFocusCapture={() => {
-          paused.current = true;
-        }}
-        onBlurCapture={() => {
-          paused.current = false;
-        }}
       >
         {tiles.map((t, i) => (
           <li
@@ -357,20 +290,13 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
                wait for every row above it. */
             style={grid ? { animationDelay: `${Math.min(i, 5) * 40}ms` } : undefined}
           >
-            {body(t, false)}
+            {body(t)}
           </li>
         ))}
 
-        {/* The second track, present only while the ticker runs. Hidden from
-            assistive technology and from the Tab order, so the page still offers
-            each venue exactly once. */}
-        {!grid
-          ? tiles.map((t) => (
-              <li key={`clone-${t.key}`} className="ticker-tile" aria-hidden="true">
-                {body(t, true)}
-              </li>
-            ))
-          : null}
+        {/* NO SECOND TRACK. It existed only to hide the wrap of a moving
+            rail, and cost every tile a duplicate that had to be kept out of
+            the tab order and away from assistive technology. */}
       </ul>
 
       {/* Gone on desktop: everything it would reveal is already on screen. */}
