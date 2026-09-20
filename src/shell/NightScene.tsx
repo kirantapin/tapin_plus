@@ -34,7 +34,7 @@ const LIGHTS = [
 
 export default function NightScene() {
   return (
-    <div className="night" role="img" aria-label="Two TapIn passes — yours and a guest's">
+    <div className="night" role="img" aria-label="Two TapIn passes, yours and a guest's">
       {/* The room: a pool of warm light low in the frame, and the dark above it. */}
       <span className="night-pool" aria-hidden="true" />
       <span className="night-haze" aria-hidden="true" />

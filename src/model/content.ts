@@ -39,15 +39,28 @@ export interface Venue {
    *
    * Sam, 13 Sep 2026, giving the two: tapin.app/theburg and
    * tapin.app/coffeeholicsva. It is optional and stays optional: four of the
-   * six venues have no live page, and a link that 404s at a real business is
-   * worse than no link. Absence renders nothing — the same §6 move as the Plus
-   * badge, where a thing a venue does not have is a row that is not there.
+   * worse than no link. Absence renders nothing — the same §6 move as the
+   * Plus badge, where a thing a venue does not have is a row that is not
+   * there.
    *
-   * It is also the one place this product leaves itself. Everything else in the
-   * preview completes on its own page; this is a real address, opened in a new
-   * tab, and it is the reason the preview can claim any authority at all.
+   * ⚠ A PAGE THAT LOADS IS NOT A PAGE THAT TAKES MONEY. All six ids resolve
+   * to a TapIn page with that merchant's menu on it, and on 20 Sep 2026 that
+   * was briefly mistaken for six live ordering venues. It is not: Sam, the
+   * same day, gave Coffeeholics and The Burg, then added The Milk Parlor a
+   * few hours later. The other three render a menu but cannot take a payment
+   * and have no physical assets in the store. This field means "you can order
+   * and pay here today", which is why it is filled one venue at a time on
+   * Sam's word, never by inference from a page that renders.
+   *
+   * It is also the one place this product leaves itself, and since the app
+   * preview came out it is the merchant pop-up's only action — so filling it
+   * wrongly puts a false claim about a real business on the hero's proof line
+   * as well, which reads from exactly this filter.
    */
   liveUrl?: string;
+  /** That venue's own standing benefits, from its record — the three at a
+   *  Plus place, none at Italiano's, which carries a one-time offer instead. */
+  policies: Policy[];
   /** Merchant property, not a token. May only collar the merchant's own mark
    *  (TRUTH.md §6) — never skin a TapIn surface. */
   brandColor: string;
@@ -136,10 +149,106 @@ export const covers = [
   { id: "food", label: "Food" },
   { id: "drinks", label: "Drinks" },
   { id: "cover", label: "Cover" },
-  { id: "tickets", label: "Tickets" },
+  /* "Events", not "Tickets". Sam, 20 Sep 2026, listing what the membership
+     reaches at each venue: "for the burg, olaika, and the milk parlor it'd be
+     events." One word for one thing, on every surface that prints it. */
+  { id: "tickets", label: "Events" },
   { id: "lineskip", label: "Line skips" },
   { id: "merch", label: "Merch" },
 ];
+
+/**
+ * What the membership reaches AT ONE VENUE — the `covers` ids that venue
+ * actually has, in the order `covers` declares them.
+ *
+ * Sam, 20 Sep 2026: "for these pop ups I need to be able to see what it can be
+ * used on, for all of them food and drinks are included — for the burg,
+ * olaika, and the milk parlor it'd be events, and for the milk parlor it's
+ * also cover and lineskips."
+ *
+ * ══ IT IS A SUBSET, AND THE SUBSET IS THE POINT ════════════════════════════
+ * `covers` above is the NETWORK's reach: everything the membership touches
+ * anywhere. A reader standing in front of one merchant is asking a narrower
+ * question, and answering it with the network's six marks would put "Line
+ * skips" on a coffee shop. §6's rule is that a thing a venue does not have is
+ * a row that is not there, so each venue names its own.
+ *
+ * Merch is deliberately absent from every venue. It is real at the network
+ * level and Sam did not give it per venue, and a scope row is a claim about a
+ * named business — so it is listed where it was granted and nowhere else.
+ *
+ * Keyed by venue id, so a venue with no entry shows no scope rather than a
+ * guessed one.
+ */
+export const venueCovers: Record<string, string[]> = {
+  /* Events too. Sam, 20 Sep 2026: "for coffeeholics this also applies for
+     events too" — it was food and drinks only, from his first pass, which
+     named the other three venues for events and not this one. */
+  coffeeholicsva: ["food", "drinks", "tickets"],
+  theburg: ["food", "drinks", "tickets"],
+  themilkparlor: ["food", "drinks", "cover", "tickets", "lineskip"],
+  olaika: ["food", "drinks", "tickets"],
+  sweetopia: ["food", "drinks"],
+  italianospizza: ["food", "drinks"],
+};
+
+/**
+ * What a venue's own benefit rows SAY, at that venue.
+ *
+ * The frozen extraction gives every venue policy the same two detail strings,
+ * and the block above BENEFIT_DETAIL already records that both are wrong:
+ * "Food and non-alcoholic drinks" is far too narrow for the 15% and wrong in
+ * the other direction for points, which earn on everything. Those strings were
+ * latent until the merchant pop-up started printing them, and on 20 Sep 2026
+ * Sam read them on a phone and asked for the pop-up to be less confusing.
+ *
+ * ══ WHY NOT JUST REUSE BENEFIT_DETAIL ══════════════════════════════════════
+ * Because these are read standing in front of ONE merchant. The network
+ * string says "once a week at each place", which is the fact that makes the
+ * monthly figure work and is exactly the wrong emphasis on a card about one
+ * address; here it is "once a week here". Same fact, same constant, the
+ * sentence the reader is actually in.
+ *
+ * ══ AND WHY THESE ARE CONDITIONS, NOT SCOPES ═══════════════════════════════
+ * Scope moved out. `venueCovers` answers "what can I use this on" once, for
+ * the whole card, which is what stopped two of these three rows repeating the
+ * same four words at each other.
+ */
+const VENUE_POLICY_DETAIL: Record<string, string> = {
+  percent: "Everything except alcohol",
+  /* ══ "ON ANYTHING" EARNS ITS WORDS ══════════════════════════════════════
+     Sam, 20 Sep 2026: "mention here, that credit can be used towards
+     anything, implying alcohol without actually saying it."
+
+     It is the second half of the network string (BENEFIT_DETAIL, his own
+     wording from 15 Sep), and it was cut here with the rest of the density
+     pass. It is not a flourish: the row directly above this one says
+     "Everything except alcohol", and without the contrast a reader carries
+     that exclusion down to the credit as well. The credit reaches alcohol and
+     the 15% does not, which is the distinction TRUTH is built on — and this
+     is how it gets stated without the surface ever advertising a discount on
+     a drink, which §10 forbids outright. */
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spends like cash, on anything`,
+  /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
+     The density pass took this line out on the reasoning that it only
+     restated scope, which the `venueCovers` row below now says once for all
+     three. Sam, 20 Sep 2026, looking at the result: "not sure why you cut the
+     text here for the page preview pop ups."
+
+     He is right, and the reasoning was wrong about what the line is. "Earned
+     on every order" is a CADENCE, not a scope — the parallel of the credit's
+     "once a week here", and the answer to the question a reader actually has
+     about points, which is whether they have to qualify for them. It is also
+     his own wording, from the advert's third card, so the pop-up and the
+     campaign page say it identically. */
+  points: "Earned on every order",
+};
+
+/** A venue policy's detail line, corrected. An empty string means the benefit
+ *  carries no condition and the row prints none. Falls back to the record, so
+ *  a kind that gains a policy later still prints something true. */
+export const venuePolicyDetail = (kind: string, fallback: string): string =>
+  VENUE_POLICY_DETAIL[kind] ?? fallback;
 
 export interface ComingVenue {
   id: string;
@@ -563,19 +672,42 @@ export const founderSaving = {
  * making a reader find it: an unconditional "locked for good" beside a control
  * that takes money is the kind of promise §10 exists to stop.
  */
+/**
+ * ══ IT NEVER GOES UP, AND THE YEAR IS GONE ═════════════════════════════════
+ * Sam, 20 Sep 2026: "let's just say it never goes up on both."
+ *
+ * "Both" is his Meta carousel and this build. The advert's fifth card already
+ * read "Your rate never goes up — $4.99 for as long as you stay a member —
+ * even after it rises to $14.99", while every surface here said the rate was
+ * locked for a FULL YEAR. Two different promises about the same money, one of
+ * them about to run as paid advertising. He has settled it on the stronger
+ * one, which is also the one his own first instinct made — "for good" was his
+ * phrase before the year ever appeared (14 Sep, "it stays at $6.99 for an
+ * entire year", which narrowed it).
+ *
+ * THE CONDITION STAYS IN THE SENTENCE. "Never goes up" without it is exactly
+ * the unconditional promise beside a control that takes money that §10 exists
+ * to stop. The rate survives as long as the membership does, and a refund or
+ * a cancellation gives it up — term 7 has said so since the first build ("A
+ * refund gives up your seat and your locked rate"), and this sentence carries
+ * it inline rather than making a reader go and find it.
+ *
+ * That is also what makes the promise keepable: it binds the price of a seat
+ * that is continuously held, not a price anyone can leave and come back to.
+ */
 /** The founding lock, said with the plan's own figure — "$9.99 a month" under
  *  a year plan was the wrong number in the right sentence. */
 export const lockedRateFor = (price: string, per: string): string =>
   FOUNDING_OPEN
-    ? `Your Early Bird rate is locked for a full year — ${price} ${per} from the day we open.`
+    ? `Your Early Bird rate never goes up: ${price} ${per} from the day we open, for as long as you stay a member.`
     : lockedRateLines.standard;
 
 export const lockedRateLines = {
-  founding:
-    /* Sam, 14 Sep 2026 (night): "it stays at $6.99 for an entire year." */
-    `Your Early Bird rate is locked for a full year — ${usd(FOUNDING_MONTHLY)} a month from the day we open.`,
+  founding: `Your Early Bird rate never goes up: ${usd(FOUNDING_MONTHLY)} a month from the day we open, for as long as you stay a member.`,
   /* No founding rate left to lock, but the promise the product actually makes
-     about price stability is still true and is still worth saying. */
+     about price stability is still true and is still worth saying. It already
+     said it this way, which is what made the year on the line above read as
+     the odd one out. */
   standard: "Your rate is locked for as long as you keep the membership.",
 } as const;
 /** Today's line. /in reads the one she bought under instead, from her record. */
@@ -615,8 +747,8 @@ export const passPlan = {
     {
       id: "today",
       term:
-        `You pay ${usd(PASS_TODAY)} today for your first ${PASS_MONTHS} months — ` +
-        `${PASS_PER_MONTH} a month. After that it renews at ${usd(PASS_TODAY)} every ` +
+        `You pay ${usd(PASS_TODAY)} today for your first ${PASS_MONTHS} months, ` +
+        `which is ${PASS_PER_MONTH} a month. After that it renews at ${usd(PASS_TODAY)} every ` +
         `${PASS_MONTHS} months, at the same price.`,
     },
     {
@@ -725,7 +857,7 @@ export const yearPlan = {
     {
       id: "today",
       term:
-        `You pay ${usd(YEAR_TODAY)} today for your first year — ${YEAR_PER_MONTH} a month. ` +
+        `You pay ${usd(YEAR_TODAY)} today for your first year, which is ${YEAR_PER_MONTH} a month. ` +
         `After that it renews at ${usd(YEAR_TODAY)} a year, at the same price.`,
     },
     {
@@ -830,7 +962,7 @@ function subscribise(
       {
         id: "today",
         label: `${paidToday} today`,
-        detail: `Your first ${period} — it holds your ${seat} too`,
+        detail: `Your first ${period}. It holds your ${seat} too`,
       },
       {
         id: "then",
@@ -1000,6 +1132,18 @@ export const PLANS = {
  * and would have gone on saying $4.99 beside a checkout charging $14.99.
  */
 export const monthlyToday: number = MONTHLY_NOW;
+/** The standard rate, formatted, for a surface that names what the Early Bird
+ *  price is cheaper THAN. Same constant the seat line and the plan ladder
+ *  print, so a campaign page cannot quote a figure this build does not hold. */
+export const standardAfter: string = usd(AFTER_MONTHLY);
+
+/* `depositEarnsCredit` lived here: "Your first $10+ order earns $5 credit,
+   more than the deposit", with a guard that dropped the comparative clause if
+   a future price ever met the credit. Sam, 20 Sep 2026: "let's remove the
+   'first $10 order' thing it's too complicated." It had three consumers and
+   now has none, so it is deleted rather than left for a reader to wonder
+   about. The $10 floor is still stated where it is a condition, on the
+   credit's own benefit row, from BENEFIT.creditMinUsd. */
 export const standardMonthly: number = moneyJson.pricing.standardMonthly;
 
 /** live = the app does this today. soon/example = it does not. */

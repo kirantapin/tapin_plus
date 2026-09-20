@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigate, type Location } from "react-router-dom";
-import { LayerContext } from "./AppLayer";
 import { seatNoun } from "../model/content";
 
 /**
@@ -89,11 +88,11 @@ export default function ReserveLayer({
   }, [close]);
 
   return (
-    <LayerContext.Provider value={{ close }}>
       <div className={`reserve-layer${still ? " is-still" : ""}${closing ? " is-closing" : ""}`}>
         <div className="reserve-scrim" aria-hidden="true" />
         <div
           className="reserve-sheet"
+          data-lit=""
           role="dialog"
           aria-modal="true"
           aria-label={`Get the ${seatNoun}`}
@@ -117,6 +116,5 @@ export default function ReserveLayer({
           </div>
         </div>
       </div>
-    </LayerContext.Provider>
   );
 }

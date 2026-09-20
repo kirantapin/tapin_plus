@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Panel } from "../shell/Panel";
 import {
   INVITES,
@@ -8,7 +8,6 @@ import {
   type InviteId,
 } from "../model/invite";
 import TapInLogo from "../shell/TapInLogo";
-import { NavIcon } from "../shell/Icons";
 import AppliesTo from "../shell/AppliesTo";
 import SavingsSlider from "../shell/SavingsSlider";
 import { Drill } from "../shell/Drill";
@@ -26,9 +25,6 @@ import {
   GUARANTEE_CONTACT,
   launchWindow,
 } from "../model/content";
-
-/** The app's four destinations, in tab order. */
-const APP_TABS = ["home", "deals", "spot", "points"];
 
 /**
  * The pitch. Mode: Persuade. It STATES NO CHARGE — the charge rows, renewal
@@ -52,7 +48,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
   }, [invite]);
   const via: InviteId | null = invite ?? recallInvite();
   /* Where the app window opens over, on a desktop (AppLayer). */
-  const location = useLocation();
   /* ONE VISIBLE "Reserve a founding seat" AT A TIME. The hero carries the real
      action now, and the docked bar carries it again once a reader has scrolled
      past — but both on screen together is two identical maroon controls
@@ -184,19 +179,31 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               as cashback. The word "membership" now leads, and the credit is
               called what TRUTH calls it. */}
           <h1 className="t-display">
-            $5 credit every week, at every place you already go.
+            $5 credit every week, at every place you already go
           </h1>
 
           {/* The other two, and where. ONE line: 37signals' own reporting on
               their winning hero is that adding further explanation beneath it
-              performed 22% WORSE, so the fix is the first line, never a stack. */}
-          <p className="t-lead">
-            Restaurants and bars around Blacksburg. Plus 15% off and points
+              performed 22% WORSE, so the fix is the first line, never a stack.
+
+              IT IS NOW THE SAME LINE. Sam, 20 Sep 2026: "this copy should flow
+              as if it's a single sentence, while keeping the large header text
+              we have now." So the headline lost its full stop and this became
+              its continuation rather than a second statement: one sentence,
+              set at two sizes. The headline's own words are untouched.
+
+              NO LEADING MARK. This opened with an em dash for one commit, and
+              Sam, 20 Sep 2026: "no emdash please they're overused by ai." The
+              size change and the line break already say "same sentence,
+              continued", so the dash was carrying nothing the layout wasn't. */}
+          <p className="t-lead hero-lead">
+            restaurants and bars around Blacksburg, plus 15% off and points
             toward rewards.
           </p>
-          {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
-                of these places today, and a reader can check that in ten
-                seconds. The two addresses are the only two that exist. */}
+          {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at
+                some of these places today, and a reader can check that in ten
+                seconds. The list is `liveUrl`, never a typed count, so the
+                sentence cannot outrun the truth in the records. */}
           <p className="t-compact hero-proof">
             TapIn already runs ordering at{" "}
             {venues
@@ -206,10 +213,14 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                   <a href={v.liveUrl} target="_blank" rel="noopener noreferrer">
                     {v.name}
                   </a>
-                  {k < arr.length - 1 ? " and " : ""}
+                  {/* A SERIAL LIST, NOT A CHAIN OF "and"s. It was two
+                      venues for a week, where "and" between every pair is
+                      the same thing as a serial list; The Milk Parlor (20 Sep
+                      2026) made it three, where it is not. */}
+                  {k === arr.length - 1 ? "" : k === arr.length - 2 ? " and " : ", "}
                 </Fragment>
-              ))}{" "}
-            — see it live.
+              ))}
+            . See it live.
           </p>
 
           {/* ══ THE PLACES, UNDER THE COPY ═══════════════════════════════
@@ -246,6 +257,12 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               <b className="tnum">${monthlyToday.toFixed(2)}</b>
               <span>deposit</span>
             </p>
+            {/* NO SENTENCE UNDER THE FIGURE. It carried "Your first $10+ order
+                earns $5 credit, more than the deposit" — Sam, 20 Sep 2026:
+                "let's remove the 'first $10 order' thing it's too
+                complicated." The $10 floor is still stated where it is a
+                condition, on the credit's own benefit row; it was a second
+                number in the one block that already has three. */}
             {/* §2: the only seat sentence any surface may print, from the
                 constant, never typed — rendered by the one component that
                 strikes the after-price (Sam, 14 Sep 2026). */}
@@ -368,9 +385,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             <Drill summary="What points are worth">
               <p className="t-compact">
                 A point is worth about a cent at the place you earned it, and
-                worth most spent there. Moving a balance into one TapIn balance
-                — good anywhere on the network, or out to gift cards and airline
-                miles — is coming.
+                worth most spent there. Moving a balance into one TapIn
+                balance, good anywhere on the network or out to gift cards and
+                airline miles, is coming.
               </p>
             </Drill>
           </div>
@@ -393,19 +410,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           card. So the rail comes out onto the field with a label above it,
           which is also how the storefront ships every horizontal rail it has.
           It buys the ticker the full width as a side effect. */}
-      <section className="places">
-        <p className="t-caption places-label">Where it works</p>
-        <VenueTicker />
-        {/* §6: absence of the badge is the signal — but a prospect who has never
-            used TapIn cannot infer what the absence means, so the badge gets its
-            meaning at the point of use rather than two panels later. */}
-        {/* Sam, 14 Sep 2026: "places that are added are added to the membership
-            and those who purchase don't incur an additional fee." Under the row
-            of places, which is where that fact belongs. */}
-        <p className="t-compact places-note">
-          New places are added to your membership at no extra cost.
-        </p>
-      </section>
 
       {/* ══ MEMBERS-ONLY NIGHTS IS OUT ═══════════════════════════════════════
           Sam, 13 Sep 2026: "let's get rid of this for now too."
@@ -492,14 +496,30 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             the guarantee is stronger standing alone than it was carrying a price
             underneath it. */}
         <Panel className="closing">
-          <p className="guarantee">{guarantee}</p>
-          {/* A person to write to, which the walkthrough named as one of its two
-              sharpest objections: a guarantee with no addressee is a promise with
-              nobody behind it, and the reader most likely to care is the one
-              working out what happens if this goes wrong. Sam's, this session. */}
-          <p className="t-compact guarantee-contact">
-            <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-          </p>
+          {/* THE SHIELD, BACK ON THE LEFT. Sam, 20 Sep 2026: "for the primary
+              tapin spot though we can have the guarantee icon next to this on
+              the left like we had." /reserve's refund card has carried it all
+              along, and layout.css already flexes `.closing:has(
+              .guarantee-tile)` into the two-part shape — so this is the same
+              markup, not a second version of it, and the two surfaces state
+              the promise the same way. */}
+          <span className="guarantee-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
+              strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
+              <path d="m9.2 12.2 1.9 1.9 3.8-4" />
+            </svg>
+          </span>
+          <div className="guarantee-body">
+            <p className="guarantee">{guarantee}</p>
+            {/* A person to write to, which the walkthrough named as one of its two
+                sharpest objections: a guarantee with no addressee is a promise with
+                nobody behind it, and the reader most likely to care is the one
+                working out what happens if this goes wrong. Sam's, this session. */}
+            <p className="t-compact guarantee-contact">
+              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+            </p>
+          </div>
         </Panel>
 
         {/* THE PAIR INVERTED, 13 Sep 2026. It used to be Reserve (straight to the
@@ -512,27 +532,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             ~140px of bar over the page and layout.css's clearance below is tuned
             to one button's height. */}
 
-        {/* The app is the product; this page is only the argument for it. One
-            link, and the four glyphs ARE the contents — the row illustrates and
-            previews at once, which is cheaper than a paragraph describing it. */}
-        <Link className="applink" to="/app" state={{ background: location }}>
-          <span className="applink-glyphs" aria-hidden="true">
-            {APP_TABS.map((t) => (
-              <NavIcon key={t} id={t} />
-            ))}
-          </span>
-          <b>See inside the app</b>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="applink-go">
-            <path
-              d="m10 7 5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
         <SiteFoot />
       </div>
 

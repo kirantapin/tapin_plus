@@ -97,16 +97,6 @@
      there is nothing here anyone would want to copy. */
   user-select:none;-webkit-user-select:none;
 }
-/* The DROP is the one thing that does belong to the page rather than to the
-   card, because it is cast onto it. 52% black under 60px of blur is what it
-   takes to lift a dark card off a dark field; the same value on a near-white
-   one reads as a bruise. Lighter, tighter, and tinted with the field's own hue
-   so it reads as shade rather than as grey paint. */
-html[data-surface="app"] .tcard,
-.app-window[data-surface="app"] .tcard{
-  box-shadow:0 16px 38px rgba(27,16,20,.20), 0 2px 6px rgba(27,16,20,.08),
-    inset 0 1px 0 rgba(255,255,255,.11);
-}
 
 /* Following a pointer needs to feel attached, not chased. */
 .tcard.is-tilting{transition-duration:90ms}

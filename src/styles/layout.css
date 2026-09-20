@@ -7,7 +7,8 @@
   position:relative;z-index:1;
   max-width:480px;margin:0 auto;
   padding:var(--s-2xl) var(--gutter) 48px;
-  display:flex;flex-direction:column;gap:var(--s-xl);
+  /* A SECTION STEP, not the label interval. See --s-3xl in tokens.css. */
+  display:flex;flex-direction:column;gap:var(--s-3xl);
 }
 /* Rhythm, not metronome: the argument panels sit at one interval, then a wider
    one opens before the close, so the guarantee and the action read as a
@@ -244,7 +245,7 @@
        layout already reads at, arrived at deliberately rather than inherited.
    ============================================================================ */
 @media (min-width:1024px){
-  .column{max-width:none;margin:0;padding:0 0 64px;gap:var(--s-2xl)}
+  .column{max-width:none;margin:0;padding:0 0 64px;gap:var(--s-4xl)}
   /* Not the two FIXED, FULL-BLEED bars: both are positioned with left:0/right:0
      against the viewport, and a max-width here pulls them off the window's
      edges — the sticky CTA loses its fade into two bright margins, and the
@@ -459,3 +460,14 @@
 @media (hover:hover){.site-foot a:hover{color:var(--ink-2)}}
 .site-foot a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
+
+/* ── the hero reads as one sentence ────────────────────────────────────────
+   The lead continues the headline rather than following it, so it sits at a
+   continuation's distance — one step, not the paragraph interval a separate
+   statement would take — and shares the headline's measure on desktop so the
+   two halves stack as one block of text rather than two columns of different
+   widths. */
+.hero .hero-lead{margin-top:var(--s-md)}
+@media (min-width:1024px){
+  .hero-band:not(.is-compact) .hero .hero-lead{max-width:30ch}
+}

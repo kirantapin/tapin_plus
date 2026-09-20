@@ -4,6 +4,7 @@ import TapInCard from "../shell/TapInCard";
 import { useCardFlight } from "../shell/cardFlight";
 import { BenefitIcon, NavIcon } from "../shell/Icons";
 import CheckoutSheet from "../shell/CheckoutSheet";
+import VenueTicker from "../shell/VenueTicker";
 import type { PhoneIdentity } from "../shell/PhoneStep";
 import { useName } from "../model/nameStore";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -61,6 +62,34 @@ export default function Reserve() {
      This closes it, with the same IntersectionObserver the pitch uses on its
      hero CTA — one mechanism, not a second invention. */
   const paySlot = useRef<HTMLDivElement>(null);
+
+  /* ══ STANDARD REFUSES IN PLACE ════════════════════════════════════════
+     Sam, 20 Sep 2026: "I don't like this toast, let's get rid of it. Instead
+     the 'standard' option should flash red softly."
+
+     The toast was a second surface arriving over the sheet to say something
+     about a tile the reader was already looking at — and it covered the top
+     of that sheet to do it. The tile answers for itself now: a soft red pulse
+     on the thing that was tapped, which is where the question was asked.
+
+     THE WORDS DO NOT GO WITH IT. A colour is the whole signal for a sighted
+     reader and none of it for anyone else, so the same sentence stays in a
+     visually hidden live region. The tile's own second line — "once the Early
+     Bird spots are gone" — is on screen permanently either way, which is what
+     keeps the flash from being the only explanation. */
+  const [refused, setRefused] = useState(false);
+  const calm = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(calm.current), []);
+  const sayLater = () => {
+    setRefused(false);
+    /* Restart the animation even on a second tap: the class has to leave the
+       element for a frame or the keyframe does not re-run. */
+    window.clearTimeout(calm.current);
+    window.requestAnimationFrame(() => {
+      setRefused(true);
+      calm.current = window.setTimeout(() => setRefused(false), 900);
+    });
+  };
   /* THE DOCKED CHECKOUT, for the phone sheet (Sam, 15 Sep 2026: "still need a
      sticky checkout button for this modal, which scrolls down to the buy
      box"). Shown while the real button is out of view, gone the moment it is
@@ -159,14 +188,8 @@ export default function Reserve() {
           {FOUNDING_OPEN ? <p className="rs-seat-close">Closes {foundingCloses}</p> : null}
         </div>
 
-        <div className="rs-card">
-          <TapInCard
-            name={cardName.trim() || undefined}
-            innerRef={cardRef}
-            className="reserve-card"
-          />
-        </div>
-
+        {/* THE CARD USED TO STAND HERE, between the count and the plans.
+            It is at the foot now — see the panel below the places. */}
 
       <Panel className="checkout" id="plans">
         {/* The seat count used to open this panel. It is under the card now —
@@ -203,7 +226,11 @@ export default function Reserve() {
             which is the truth. Tapping it re-selects what is already selected, so there is
             no handler; a control that cannot change state must not pretend it
             can. */}
-        <div className="plan-pick is-solo" role="radiogroup" aria-label="Your plan">
+        <div
+          className={`plan-pick${FOUNDING_OPEN && plan.saving ? " is-ladder" : " is-solo"}`}
+          role="radiogroup"
+          aria-label="Your plan"
+        >
           <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
             {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
                 Kiran, 15 Sep 2026. What is taken today is one charge that holds
@@ -219,18 +246,96 @@ export default function Reserve() {
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
-                {plan.saving ? (
-                  <span className="plan-else">
-                    <span className="tnum">{plan.saving.after}</span> for everyone else
-                  </span>
-                ) : null}
+                {/* WHAT THE DEPOSIT IS, said beside the figure. Sam, 20 Sep
+                    2026: "we'd want to say for early bird price at checkout
+                    that the $4.99 counts towards the first month." It is the
+                    answer to the only question the word "deposit" raises, and
+                    it sits where the Standard tile's own second line sits, so
+                    the two tiles read as a pair rather than as a price and a
+                    price-with-a-note.
+
+                    The "$14.99 for everyone else" footnote that used to be
+                    here became the tile below; printing it in both places put
+                    the same figure twice, adjacent. */}
+                <span className="plan-else">Counts toward your first month</span>
               </span>
             </span>
           </div>
+
+          {/* ══ THE STANDARD TIER, SHOWN AND NOT SELECTABLE ═══════════════
+              Sam, 20 Sep 2026: "I think we should have a second tier right
+              beneath and it'd be the $14.99 membership. This creates a really
+              strong price anchor. Of course no one would be able to select it
+              because it's not live yet."
+
+              WHAT KEEPS THIS THE RIGHT SIDE OF §10. An anchor is a dark
+              pattern when the reference price is invented, or when the option
+              looks available and is not. Neither holds: $14.99 is the real
+              standard rate this build already prints in the seat line and in
+              the founding lock, read from the same `plan.saving.after` the
+              tile above used to carry — and this tile says in its own words
+              that it is not open yet, rather than leaving a reader to discover
+              that by tapping.
+
+              `aria-disabled` AND reachable, which is the pair that makes an
+              unavailable option honest: a screen reader meets "Standard, not
+              selected, dimmed, 2 of 2", the tile is in the tab order so the
+              same reader can reach it, and activating it produces the same
+              sentence a tap does rather than nothing at all. */}
+          {FOUNDING_OPEN && plan.saving ? (
+            <div
+              className={`plan-opt is-later${refused ? " is-refused" : ""}`}
+              role="radio"
+              aria-checked="false"
+              aria-disabled="true"
+              tabIndex={0}
+              onClick={sayLater}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  sayLater();
+                }
+              }}
+            >
+              {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
+                  soon'." The tile's second line already said WHEN it opens;
+                  this says THAT it is not open, which is the faster read and
+                  the one a reader needs before they tap.
+
+                  A CORNER FLAG, not a pill beside the label. This build
+                  already marks "signed, not open" on the venue cards with a
+                  flag in the tile's top corner (.vflag.is-soon), and reusing
+                  it does two things a pill could not: the status leaves the
+                  reading line entirely, so "Standard" sits alone above its
+                  own price the way "Early Bird Deposit" does, and the two
+                  places this product says "not yet" now say it the same way.
+                  As a pill it was also wider than the word it qualified. */}
+              <span className="plan-chip">Coming soon</span>
+              <b>Standard</b>
+              <span className="plan-figs">
+                <span className="plan-now">
+                  <b className="tnum">{plan.saving.after}</b>
+                  <span className="plan-else">a month, once the Early Bird spots are gone</span>
+                </span>
+              </span>
+            </div>
+          ) : null}
         </div>
+
+        {/* The sentence the toast used to carry, for a reader who cannot see
+            a tile change colour. `status`, not `alert`: nothing failed. */}
+        <p className="sr-only" role="status">
+          {refused ? "Standard opens after launch. Early Bird is the only plan open now." : ""}
+        </p>
 
         {/* The founding rate survives — said here because it is the whole value
             of taking a seat now rather than later. */}
+        {/* THE DEPOSIT-EARNS-CREDIT SENTENCE IS GONE from here too (Sam,
+            20 Sep 2026, "too complicated"). It was the same string the hero
+            carried, so leaving it on the one page where the reader is closest
+            to paying would have made the checkout the wordiest statement of a
+            line he had just cut. The charge rows, the consent sentence and
+            the refund are untouched — those are terms, not this. */}
         <p className="t-compact plan-locked">{lockedRateFor(plan.price, plan.per)}</p>
 
         {/* THE REFUND, WHERE THE PLAN IS CHOSEN. 14 Sep funnel audit: "Full
@@ -316,6 +421,62 @@ export default function Reserve() {
           </div>
         </Panel>
 
+        {/* ══ WHERE IT WORKS, AT THE FOOT ══════════════════════════════════
+            Sam, 20 Sep 2026: "too much space at the bottom here too, for this
+            modal. And we should have a small section with the logos of the
+            spots on tapin too at the very bottom."
+
+            One ask, two problems, one answer. The sheet is full height and
+            its content ran out several hundred pixels early, and the last
+            thing a reader saw before deciding was a refund promise with
+            nothing under it. The places are the answer to the question the
+            price raises — "worth $4.99 where?" — so they go here, where it is
+            asked, and the space closes because something true fills it.
+
+            `rail`, the same prop /in uses: this sits in a column, not across
+            a page, and the grid state it would otherwise reach at 1280 is a
+            seven-across row inside a 670px track. Sam asked for "the carousel
+            of places" on this surface once before, 15 Sep 2026; it is the
+            same component, back where it was. */}
+        <section className="places rs-places">
+          <p className="t-caption places-label">Where it works</p>
+          <VenueTicker rail />
+        </section>
+
+        {/* ══ THE CARD, AT THE FOOT, IN ITS OWN PANEL ══════════════════════
+            Sam, 20 Sep 2026: "can we move the membership card down to the
+            bottom? Make sure that it doesn't just fit there awkwardly. Maybe
+            it lives in a parent container itself. I'm just thinking having it
+            here on both checkout modals might lead to some bounce for
+            customers."
+
+            He is right about what it was doing. The card is the most
+            arresting object in this build and it stood directly above the
+            plans, so the first screenful of the surface that takes money was
+            a picture of a thing you do not own yet, with the decision pushed
+            under it. Aspiration belongs after the argument, not in front of
+            it.
+
+            "Not awkwardly" is the panel. On its own the card is a floating
+            object with nothing to sit on, which is exactly how it looked in
+            the one earlier attempt at moving it; in a labelled panel it is
+            the build's own inversion — a flat container with one raised
+            thing inside — which is the shape the benefit cards, the plan
+            tiles and the venue rail all already use.
+
+            It keeps its name field. That field is optional and the checkout
+            sheet asks for the name again, so nothing is lost by it sitting
+            after the button rather than before it. */}
+        <Panel label="Your card" className="rs-card-panel">
+          <div className="rs-card">
+            <TapInCard
+              name={cardName.trim() || undefined}
+              innerRef={cardRef}
+              className="reserve-card"
+            />
+          </div>
+        </Panel>
+
         <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>
           <button
             type="button"
@@ -323,7 +484,12 @@ export default function Reserve() {
             tabIndex={ctaVisible ? -1 : 0}
             onClick={() => paySlot.current?.scrollIntoView({ block: "center", behavior: "smooth" })}
           >
-            Checkout · {plan.price} {plan.per}
+            {/* NOT `plan.per` ("a month"). What this button opens takes a
+                DEPOSIT, and the tile it docks under says so — a bar reading
+                "$4.99 a month" beside a tile reading "$4.99 deposit" is the
+                same figure carrying two different promises. Sam settled the
+                word today: "need to make sure it says $4.99 deposit." */}
+            Checkout · {plan.price} deposit
           </button>
         </div>
       </div>
@@ -386,6 +552,7 @@ export default function Reserve() {
           identity.current = id;
         }}
       />
+
     </>
   );
 }

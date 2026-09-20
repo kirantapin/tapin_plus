@@ -132,6 +132,7 @@ export default function CheckoutSheet({
     >
       <div
         className="cs-sheet"
+        data-lit=""
         role="dialog"
         aria-modal="true"
         /* `seatNoun`, never the literal: after the flip the rows and consent
@@ -178,7 +179,7 @@ export default function CheckoutSheet({
           <div className="receipt" role="status">
             <p className="receipt-head">{`Your ${seatNoun} is held.`}</p>
             <p className="t-compact">
-              {`${plan.price} paid today — your first ${plan.period}. It starts when we open, expected ${launchWindow}, then ${plan.price} a ${plan.period} automatically until you cancel.`}
+              {`${plan.price} paid today, for your first ${plan.period}. It starts when we open, expected ${launchWindow}, then ${plan.price} a ${plan.period} automatically until you cancel.`}
             </p>
             {/* The subscription id. It is no longer "the only record that
                 exists" — the subscription hangs off the Supabase user and

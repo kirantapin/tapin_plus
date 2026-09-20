@@ -219,7 +219,7 @@ export default function TapInCard({
             data-1p-ignore=""
             data-lpignore="true"
             data-bwignore=""
-            aria-label="Your name, as you'd like it on the card — optional"
+            aria-label="Your name, as you'd like it on the card. Optional"
           />
         ) : (
           <p className="tcard-name">{shown}</p>

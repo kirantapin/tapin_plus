@@ -82,6 +82,7 @@
     "category": "Drinks",
     "street": "Draper Road",
     "open": false,
+    "liveUrl": "https://www.tapin.app/themilkparlor",
     "policies": [
       {
         "id": "percent",

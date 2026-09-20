@@ -528,8 +528,26 @@ html[data-flight="in"] .column > .sticky-cta{
   to{opacity:1;transform:none}}
 
 /* Above a phone the sheet stops being a sheet: centred, fully rounded, and off
-   the bottom edge, because there is no thumb to reach from down there. */
-@media (min-height:700px) and (min-width:560px){
+   the bottom edge, because there is no thumb to reach from down there.
+
+   ══ 640, NOT 560 ═══════════════════════════════════════════════════════════
+   Sam, 20 Sep 2026: "is there not still some weird margin beneath", then
+   "sign in would be a pop up for desktop and a modal on mobile."
+
+   It already did both — at the wrong width. 560 catches a large phone held
+   sideways and a small window, where the centred state's 24px of breathing
+   room becomes a band under a sheet that still fills nearly the whole screen,
+   which is the margin he saw. Nothing was stray: it was a dialog's framing
+   applied at a size that is still a sheet.
+
+   The merchant pop-up and the trial modal both turn at 640. This is the third
+   modal in the product and it was the only one with its own idea of where the
+   desktop starts, so it joins them: one number, three surfaces, and a window
+   that is a sheet in one of them is a sheet in all three.
+
+   The `min-height:700px` guard stays. A short window has no room to centre
+   anything however wide it is. */
+@media (min-height:700px) and (min-width:640px){
   .cs-scrim{align-items:center;padding:var(--s-2xl)}
   .cs-sheet{border-radius:var(--r-panel);
     box-shadow:0 24px 64px rgba(0,0,0,.5);
@@ -1013,7 +1031,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-where .ticker{margin-top:calc(-1 * var(--s-xs))}
 /* The rail's own gutter is the panel's gutter, so the first tile starts where
    the label does and the fade runs off the panel's edge. */
-.rs-where .ticker-rail{padding:0 var(--s-xl)}
+.rs-where .ticker-rail{--rail-pad:var(--s-xl)}
 .rs-where .ticker-tile{width:132px}
 /* What you get: four bullets with their glyphs, then the six marks. */
 .rs-what{margin:var(--s-xl) var(--s-xl) var(--s-md);color:var(--ink-3)}
@@ -1141,11 +1159,18 @@ html[data-flight="in"] .column > .sticky-cta{
      inside the dialog the grid needs the whole 1000px. */
   .sheet-column.column{max-width:none;width:100%}
   .sheet-column.column > .rs-modal{max-width:none;width:100%}
+  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026) and the
+     places row gained an area of its own — without one it was landing in an
+     implicit row and breaking the two columns it sat under. Reading order
+     down the left is now count, what you get, guarantee, where, card; the
+     decision holds the right the whole way down. */
   .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
-    grid-template-areas:"seats plans" "card plans" "includes plans" "closing plans";
-    grid-template-rows:auto auto 1fr auto;
+    grid-template-areas:"seats plans" "includes plans" "closing plans"
+      "places plans" "card plans";
+    grid-template-rows:repeat(5,auto);
     column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
-  .rs-card{grid-area:card}
+  .rs-card-panel{grid-area:card}
+  .rs-places{grid-area:places}
   /* The card at the size you would hold one, centred over its count;
      the panels beneath take the column. */
   .rs-card > *{max-width:380px;margin:0 auto}
@@ -1155,10 +1180,22 @@ html[data-flight="in"] .column > .sticky-cta{
      finish together. The panel now stretches to the row and is a flex
      column: the plans at its head, the two lines under them, and the button
      seated at its foot — on the same baseline as the refund card. */
-  .rs-modal > .checkout{grid-area:plans;align-self:stretch;display:flex;flex-direction:column;
+  /* ══ IT NO LONGER STRETCHES ═══════════════════════════════════════════
+     The 15 Sep fix seated the button at the foot of a stretched column so
+     the two movements finished together — the right column was ending 50px
+     short of the left and the gap read as a mistake.
+
+     Moving the card to the foot (20 Sep) put two more rows in the left
+     column, so "as tall as the other" became a 600px hole between the terms
+     and the button. Fifty pixels of difference is a misalignment; six
+     hundred is an empty column with a control stranded at the bottom of it.
+     So the panel sizes to its content again and the button follows the
+     sentence it belongs to. The columns now differ in height, which is what
+     two columns of different content do. */
+  .rs-modal > .checkout{grid-area:plans;align-self:start;display:flex;flex-direction:column;
     position:static}
   .rs-modal > .checkout > .plan-refund{margin-top:0}
-  .rs-modal > .checkout > .pay-slot{margin-top:auto;padding-top:var(--s-lg)}
+  .rs-modal > .checkout > .pay-slot{margin-top:var(--s-xl)}
   /* The left column, one rhythm: the count sits close under the card, the
      checklist one interval below it, the guarantee at the foot. */
   .rs-modal > .rs-includes-panel{grid-area:includes;margin:0}
@@ -1180,7 +1217,9 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-dock{position:sticky;bottom:0;z-index:5;
   margin:var(--s-md) calc(-1 * var(--gutter)) 0;
   padding:var(--s-lg) var(--gutter) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
-  background:linear-gradient(180deg,rgba(42,15,28,0) 0%,var(--page) 45%);
+  /* --page-0, not a literal: this faded from a hard-coded dark page, so on a
+     light sheet it would have fanned out of a colour that is no longer there. */
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%);
   transition:transform 200ms var(--ease),opacity 200ms var(--ease)}
 .rs-dock .action{margin:0}
 .rs-dock.is-away{transform:translateY(110%);opacity:0;pointer-events:none}
@@ -1346,8 +1385,197 @@ html[data-flight="in"] .column > .sticky-cta{
 
    The element stays, because it is doing the layout: `.cs-scrim` is the fixed
    flex box that positions the sheet at the bottom of the viewport and catches
-   the backdrop click that dismisses it. Only its paint is dropped. */
+   the backdrop click that dismisses it.
+
+   ══ AND IT PAINTS AGAIN, QUIETLY ═══════════════════════════════════════════
+   Sam, 20 Sep 2026: "when this pops up, the background should fade out a bit.
+   It's too bright."
+
+   The reasoning above was written when the reserve sheet was dark. What the
+   outer scrim dims is the PITCH, two layers down; the thing directly behind
+   the phone step is the reserve sheet itself, and that sheet went white when
+   the modals went light. So the step was sitting on an undimmed white page —
+   nothing compounding, nothing at 86%, just no separation at all.
+
+   .22, not the .62 that caused the original problem. It is dimming one light
+   sheet rather than a dark page, so a quarter of the way down is the whole
+   distance needed; the ink behind stays legible as context and stops
+   competing. Ink rather than black, on the house hue, because everything it
+   covers is now a light surface and pure black on cream reads as grey film.
+
+   The blur stays off. Two backdrop-filters nested is the expensive half of
+   what the first version got wrong, and separation is the job here. */
 .reserve-layer .cs-scrim{
-  background:none;
+  background:rgba(26,16,22,.22);
   -webkit-backdrop-filter:none;backdrop-filter:none;
 }
+
+/* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
+   carries a negative top margin to pull itself against the plan picker, so it
+   has to be cancelled when this sits between the two. */
+
+/* ── THE PRICE LADDER ──────────────────────────────────────────────────────
+   Two tiles stacked, not side by side: an anchor is read top-to-bottom, and
+   at 1fr 1fr the two prices sit at the same height where neither leads.
+   `.is-solo` stays for the case where there is no standard tier to show.
+
+   THE SECOND TILE IS NOT A CONTROL. No pointer, no press transform, no hover
+   — the three things that make the first one feel tappable are exactly what
+   would make this one a promise it cannot keep. It is dimmed by ink rather
+   than by `opacity`, so the figure stays legible while reading as inactive:
+   --ink-3 on --inner is 7.37:1 here. */
+.plan-pick.is-ladder{grid-template-columns:1fr}
+/* Dashed, because the tier exists and its edge does not: the one border style
+   in this build that says "outlined, not filled in yet". */
+.plan-opt.is-later{background:var(--inner);border-style:dashed}
+.plan-opt.is-later b{color:var(--ink-3)}
+.plan-opt.is-later .plan-figs b{color:var(--ink-2)}
+
+/* ── THE HOLD ──────────────────────────────────────────────────────────────
+   Tapping Standard takes the selection for 1.1s and hands it back. While it
+   is held the tile is filled like any chosen tile — it has to LOOK chosen or
+   the refusal has nothing to refuse — and the Checkout button goes flat and
+   unpressable under it. The reason sits between them in a slot that holds its
+   height whether or not there is a sentence in it, so nothing jumps. */
+.plan-opt.is-later.is-trying{background:var(--maroon);border-style:solid;
+  border-color:var(--maroon)}
+.plan-opt.is-later.is-trying b,
+.plan-opt.is-later.is-trying .plan-figs b{color:var(--on-maroon)}
+.plan-opt.is-later.is-trying .plan-else{color:var(--on-maroon);opacity:.72}
+.pay-slot .action:disabled{background:var(--inner);color:var(--ink-4);
+  box-shadow:none;cursor:default;transform:none}
+@media (prefers-reduced-motion:reduce){
+  /* The hold is a state, not a motion — it stays. Only the press scale goes. */
+  .plan-opt.is-later:active{transform:none}
+}
+
+/* ── THE PRESS, ON BOTH TILES ──────────────────────────────────────────────
+   Sam, 20 Sep 2026: "both buttons should have a scale press animation to make
+   it clear that they're clickable." Including the one that refuses: a tile
+   that does not respond to a finger reads as broken, and the refusal is the
+   toast's job, not the tile's. Same 0.98 the house `.action` uses, so a plan
+   tile and the Checkout button answer a press identically. */
+.plan-opt{cursor:pointer}
+.plan-opt:active{transform:scale(.98)}
+.plan-opt.is-later:active{transform:scale(.98)}
+
+/* ── THE REFUSAL ───────────────────────────────────────────────────────────
+   Sam, 20 Sep 2026: "the 'standard' option should flash red softly."
+
+   A soft pulse on the tile that was tapped, and nothing else on screen moves.
+   #D14245 is TapIn's badge red — the one hue outside the maroon ramp this
+   build spends, and it is spent here as STATE rather than as palette: it
+   arrives, says no, and leaves inside a second.
+
+   Soft means alpha, not a red tile. The fill peaks at 14% and the border at
+   55%, so the figure and the label stay exactly as legible through the pulse
+   as they are at rest; nothing here is the only carrier of the message, which
+   is the rule a colour signal has to satisfy. The words live in the live
+   region beside it and in the tile's own second line. */
+.plan-opt.is-later.is-refused{animation:planNo 900ms var(--ease) both}
+@keyframes planNo{
+  0%{background:var(--inner);border-color:var(--hair)}
+  18%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+  52%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+  100%{background:var(--inner);border-color:var(--hair)}
+}
+@media (prefers-reduced-motion:reduce){
+  /* No pulse, but the answer still has to arrive: it holds the same tint for
+     the same 900ms and steps back, which is a state change rather than
+     motion. */
+  .plan-opt.is-later.is-refused{animation:planNoStill 900ms steps(1,end) both}
+  @keyframes planNoStill{
+    0%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+    100%{background:var(--inner);border-color:var(--hair)}
+  }
+  .plan-opt:active,.plan-opt.is-later:active{transform:none}
+}
+
+}
+
+/* ── WHERE IT WORKS, AT THE FOOT OF THE SHEET ──────────────────────────────
+   The rail, not the grid, and no "View all places": the grid it would open is
+   a page-width object and this is a column. /in hides the same control on the
+   same reasoning (.ms-places, above). */
+.rs-places{margin-top:var(--s-2xl)}
+.rs-places .places-label{margin:0 0 var(--s-md);color:var(--ink-3)}
+.rs-places .ticker-all{display:none}
+
+
+/* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
+   Sam, 20 Sep 2026: "the edges of this modal aren't curved properly."
+
+   `.reserve-sheet` is rounded 22px at the top and `overflow:visible` — it has
+   to be, because the scroller and the dock inside it position against its
+   box. `.sheet-head` is opaque, sits flush at that top edge and had no radius
+   of its own, so it painted two square corners directly over the two round
+   ones. Nothing was wrong with the sheet; the header was covering it.
+
+   Only the START corners, and by `inherit` rather than a second 22: the
+   sheet is a bottom sheet on a phone and a fully rounded dialog from 1024,
+   and inheriting all four would round the header's BOTTOM edge too — a pair
+   of notches in the middle of the dialog. These two logical properties take
+   the top pair in both states and follow the sheet if the radius ever
+   changes. */
+.sheet-head{
+  border-start-start-radius:inherit;
+  border-start-end-radius:inherit;
+}
+
+
+/* ── THE CARD'S PANEL ──────────────────────────────────────────────────────
+   A flat container with one raised object inside it — the inversion this
+   build uses everywhere else, and what stops the card reading as a loose
+   thing dropped at the end of the sheet. The card keeps its own width cap
+   and centres on the panel's measure. */
+.rs-card-panel{margin-top:var(--s-2xl)}
+.rs-card-panel .rs-card{margin-top:var(--s-md)}
+
+/* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
+   On the tier that is not open, in the tile's top corner.
+
+   It was a pill beside the label and it was wider than the word it qualified,
+   which made the label line two competing objects and pushed the price down a
+   step in the reading order. As a corner flag the status leaves the reading
+   line entirely: "Standard" sits alone above its own figure exactly as "Early
+   Bird Deposit" does, and the tile is read as a price with a mark on it
+   rather than as a label with a badge stuck to it.
+
+   THE GEOMETRY IS THE VENUE CARD'S. `.vflag` marks "signed, not open" in the
+   corner of a place tile with one rounded corner facing the content and the
+   card's own overflow clipping the other two — so the two places this product
+   says "not yet" say it in the same shape. `.plan-opt` gains the overflow
+   that trick needs.
+
+   Quiet by construction: the press step of the ground and ink three, which is
+   6.7:1 on it. A solid brand fill is reserved for a thing that is chosen or
+   acting, and this is the opposite of both. */
+.plan-opt{position:relative;overflow:hidden}
+/* `.plan-opt .plan-chip`, not `.plan-chip`. `.plan-opt span` above sets every
+   span in a tile to 12px and --ink-4, and at one class it was beating this
+   rule on both — the flag rendered a fifth larger than drawn and in the
+   quietest ink on the ramp, 5.0:1 where the design says 6.7. */
+.plan-opt .plan-chip{
+  position:absolute;top:0;right:0;z-index:1;
+  padding:5px 9px 6px 10px;
+  border-radius:0 0 0 var(--r-card);
+  background:var(--press);color:var(--ink-3);
+  /* SEMIBOLD, NOT BOLD. Sam, 20 Sep 2026: "I don't like the font weight it
+     feels a bit off — maybe we do medium bold gilroy." Gilroy's 700 at 10px
+     under .08em of tracking sets the letterforms nearly as heavy as the price
+     below them, which is the wrong order for a status marker; 600 is the
+     weight the family's caption sizes are drawn for and it lets the figure
+     lead again. */
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1;
+}
+/* The label keeps clear of it, so a longer tier name wraps before it collides
+   rather than running under it. */
+.plan-opt:has(.plan-chip) > b{padding-right:104px}
+
+
+/* The places heading inside the sheet is a section caption like the panels
+   around it, not the page-width heading pitch.css gives it on the pitch —
+   three labels in one column have to be one thing. */
+.rs-places .places-label{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;line-height:1.3}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import PhoneStep from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 
@@ -49,10 +50,30 @@ export default function SignInBar() {
         </button>
       </div>
 
-      {open ? (
+      {/* ══ ON <body>, OR IT HANGS OFF THE HERO ═══════════════════════════
+          Sam, 20 Sep 2026: "the position of the sign in modal is completely
+          off I think." It was: the sheet sat mid-page with the pitch showing
+          below it.
+
+          `.cs-scrim` is `position:fixed; inset:0`, and this button lives
+          inside `.panel.hero`, which carries `backdrop-filter: blur(22px)`.
+          A filter makes its element the containing block for every fixed
+          descendant, so "fixed to the viewport" silently became "fixed to
+          the hero panel" — measured at top:-658, bottom:138 in an 812px
+          window. Nothing about the sheet was wrong; it was anchored to the
+          wrong box.
+
+          The portal is the same answer the merchant pop-up and the checkout
+          toast already use, and for the same reason. It is the third time
+          this trap has been hit in this build, which is what a filtered
+          ancestor costs: it is invisible until something inside it tries to
+          be fixed. */}
+      {open
+        ? createPortal(
         <div className="cs-scrim" onClick={() => setOpen(false)}>
           <div
             className="cs-sheet"
+            data-lit=""
             role="dialog"
             aria-modal="true"
             aria-label="Sign in"
@@ -83,8 +104,10 @@ export default function SignInBar() {
                 and everything reading `useAuth` re-renders itself. */}
             <PhoneStep onDone={() => setOpen(false)} />
           </div>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

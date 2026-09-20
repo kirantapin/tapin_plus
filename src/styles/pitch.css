@@ -411,16 +411,34 @@
   padding: 0 var(--s-xl);
   margin: 0;
 }
+/* ══ EACH MARK ON ITS OWN PLATE ════════════════════════════════════════════
+   Sam, 20 Sep 2026: "I liked the styling of the 'works on:' for the
+   individual merchant pages, I think for the main splash page we should use
+   the same styling."
+
+   The merchant pop-up drew this row on plates and the pitch drew it bare, so
+   one product had two ways of saying what the benefits reach. The plate is
+   the better of the two and it is now the only one: it gives each mark a box
+   to sit in, which is what stops six glyphs at three across reading as a
+   loose scatter, and it is the same inner step the benefit glyphs and the
+   trial rows already use.
+
+   The rule moves here, to `.cover` itself, rather than being copied onto the
+   pitch — the pop-up's `.vp-covers` block that introduced it is now only a
+   layout override, because there is nothing left in it to override. */
 .cover {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s-sm);
+  padding: var(--s-md) var(--s-xs);
+  border-radius: var(--r-control);
+  background: var(--inner);
   text-align: center;
 }
 .cover svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: var(--ink-3);
   display: block;
 }
@@ -748,19 +766,36 @@
   display: block;
   min-width: 0;
 }
-/* Six of the eight tiles are links now. They already looked tappable, so the
-   job here is only to make them behave like it — a press response, a focus
-   ring, and inherited colour so the anchor changes nothing about the type. */
-a.vcard {
-  text-decoration: none;
+/* ══ SIX OF THE EIGHT TILES ARE BUTTONS ════════════════════════════════════
+   They open that merchant's pop-up (shell/VenuePopup.tsx) rather than
+   navigating, so they stopped being anchors on 20 Sep 2026 — and a <button>
+   arrives with chrome an <a> never had: a 2px outset border, a grey
+   `buttonface` ground, 6px of padding, centre alignment, and 13.333px Arial
+   that does NOT inherit from the page. Every one of those has to come off
+   before the card inside can lay itself out; without the reset the rail
+   renders as pale boxes of mismatched height.
+
+   The press, focus and tap-highlight rules below were written for `a.vcard`
+   and silently stopped matching at the same moment. They are part of the same
+   fix, not a separate polish. */
+button.vcard {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
   color: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform 150ms var(--ease);
 }
-a.vcard:active {
+button.vcard:active {
   transform: scale(0.985);
 }
-a.vcard:focus-visible {
+button.vcard:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 4px;
   border-radius: var(--r-card);
@@ -867,14 +902,52 @@ a.vcard:focus-visible {
   letter-spacing: -0.02em;
   color: var(--ink-3);
 }
-/* Dashed only for the network tile — it is the one that is not a place at all. */
+/* ══ THE NETWORK TILE WEARS THE BRAND ══════════════════════════════════════
+   Sam, 20 Sep 2026: "can we make this white text on purple gradient
+   background."
+
+   It was the dashed empty plate the signed-but-unopened venues use, which was
+   right while it read as "a place with no photograph yet" and wrong once the
+   rail moved onto light surfaces: on the checkout's white sheet a dashed grey
+   box with grey type is the one tile that looks unfinished rather than the one
+   tile that is not a place.
+
+   ── IT IS THE BRAND TOKEN, NOT A PURPLE ────────────────────────────────────
+   `--maroon`, which on the campaign surface IS Coffeeholics' purple because
+   that page redefines it, and on the pitch is Chicago Maroon. So the tile
+   wears whichever brand owns the page it is on and there is no second colour
+   to keep in sync. Sam is looking at the campaign checkout, where it is the
+   purple he asked for.
+
+   ── AND IT SPENDS THAT FILL ON SOMETHING THAT IS NOT A CONTROL ─────────────
+   tokens.css reserves a solid brand fill for a thing that is chosen or
+   acting, and this tile is neither. Two things keep it inside the rule's
+   intent rather than beside it: it is a GRADIENT, not the flat fill that
+   marks the acting things, and it is the one tile in the rail that is not a
+   venue — the fill is what says so, which is the job the dash was doing. It
+   is idle, it has no hover and no press, and nothing else in the rail carries
+   any fill at all.
+
+   White type throughout, at 9.19:1 on the mid stop. */
 .vcard.is-more .vshot.is-empty {
-  border: 1px dashed var(--hair-lit);
+  border: 0;
+  background: linear-gradient(
+    158deg,
+    color-mix(in srgb, var(--maroon) 82%, #FFFFFF) 0%,
+    var(--maroon) 48%,
+    color-mix(in srgb, var(--maroon) 74%, #000000) 100%
+  );
+  color: var(--on-maroon);
+}
+.vcard.is-more .vname b,
+.vcard.is-more .vmeta {
+  color: var(--on-maroon);
 }
 .vcard.is-more .vmeta {
   white-space: normal;
   overflow: visible;
   line-height: 1.35;
+  opacity: 0.82;
 }
 .tag-sm {
   font-size: 10px;
@@ -1056,12 +1129,30 @@ a.vcard:focus-visible {
   display: flex;
   gap: var(--s-md);
   margin: 0;
-  padding: 0 var(--s-xl);
+  /* ══ ONE VALUE FOR THE PAD AND THE SNAP ═════════════════════════════════
+     The rail's inline padding is overridden in five places — the desktop
+     step, `.places`, its 1024-1279 full-bleed, the 1280 grid and the hero —
+     and `scroll-snap-align: start` measures from the SNAPPORT, which is this
+     box inset by `scroll-padding`. Set as two literals they drift, and the
+     drift is not subtle: inside the checkout the rail pads by `--gutter` (24)
+     while the snap padding said `--s-xl` (16), so the browser scrolled the
+     rail 8px on load to satisfy the snap and the first tile sat 8px left of
+     the label above it (Sam, 20 Sep 2026: "this carousel at checkout is
+     slightly off here"). One variable, and an override that forgets the snap
+     is no longer possible. */
+  --rail-pad: var(--s-xl);
+  padding-block: 0;
+  padding-inline: var(--rail-pad);
+  scroll-padding-inline: var(--rail-pad);
   list-style: none;
   overflow-x: auto;
-  /* NO scroll-snap. Snap arrests a scroll at a boundary, which is the one thing
-     a continuous ticker must never do — it was correct for the stepped version
-     this replaced and is a bug in this one. */
+  /* SNAP, AGAIN. It was removed when this became a continuous ticker: snap
+     arrests a scroll at a boundary, which is the one thing a ticker must
+     never do. The motion is gone (Sam, 20 Sep 2026: "let's not make this an
+     infinity scroll thing"), so nothing is being arrested and the rail can
+     land on a tile instead of between two. `proximity`, not `mandatory` — a
+     swipe that means to travel should not be caught by every tile it passes. */
+  scroll-snap-type: x proximity;
   overscroll-behavior-x: contain;
   /* BOTH AXES. `pan-x` alone made a finger that landed on a tile unable to
      scroll the page at all (Sam, 15 Sep 2026: "I should be able to scroll
@@ -1094,6 +1185,7 @@ a.vcard:focus-visible {
   );
 }
 .ticker-tile {
+  scroll-snap-align: start;
   /* Small enough that three and a bit are in view. Two-at-a-time is the exact
      complaint that got the last rail removed from this page: at that size the
      reader is looking at a pair of big cards, not at a list going past. */
@@ -1211,7 +1303,7 @@ a.vcard:focus-visible {
     width: 176px;
   }
   .ticker-rail {
-    padding-inline: var(--s-2xl);
+    --rail-pad: var(--s-2xl);
   }
   /* ══ THE GRID IS THE DESKTOP STATE, NOT AN EXPANDED ONE ═══════════════════
      `.is-open` is set by width from 1280px rather than by a tap (see
@@ -1347,34 +1439,21 @@ a.vcard:focus-visible {
 .column > .panel:has(.bcards) > .bcards {
   padding: 0 var(--s-xl);
 }
-/* THE SCOPE AS A 3x2 GRID (Sam: "more like a 2 row grid"). Three auto-sized
-   columns put Food/Tickets, Drinks/Line skips, Cover/Merch in aligned columns,
-   glyph beside word, inset to the panel. */
+/* THE SCOPE AS A 3x2 GRID OF PLATES (Sam, 20 Sep 2026: the merchant pop-up's
+   treatment, here too). It was three AUTO columns with the glyph beside the
+   word, left-aligned — which read fine while the marks were bare, because
+   uneven columns are invisible when there is no box around them. Put each
+   mark on a plate and the unevenness is the first thing you see: measured at
+   375px the three came out 73, 91 and 71 wide. Equal columns, and the glyph
+   goes back above the word so the row matches the one Sam asked it to
+   match. */
 .column > .panel:has(.bcards) > .covers {
   display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: start;
-  column-gap: var(--s-2xl);
-  row-gap: var(--s-lg);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--s-sm);
+  row-gap: var(--s-sm);
   padding: 0 var(--s-xl);
   margin: 0;
-}
-.column > .panel:has(.bcards) .cover {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--s-sm);
-  text-align: left;
-}
-.column > .panel:has(.bcards) .cover svg {
-  width: 20px;
-  height: 20px;
-}
-.column > .panel:has(.bcards) .cover span {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.005em;
-  color: var(--ink-2);
-  white-space: nowrap;
 }
 
 /* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
@@ -1433,15 +1512,15 @@ a.vcard:focus-visible {
      which seats the card without describing it. */
   box-shadow: var(--rest);
 }
-a.vcard {
+button.vcard {
   transition: transform 160ms var(--ease);
 }
 /* .99 for a card — the storefront's press ladder by object size. No hover fill:
    the card is a photograph, and tinting one is not a hover state. */
-a.vcard:active {
+button.vcard:active {
   transform: scale(0.99);
 }
-a.vcard:focus-visible {
+button.vcard:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 3px;
 }
@@ -1607,7 +1686,7 @@ a.vcard:focus-visible {
    edge; the label and the note keep the reading inset. */
 .places .ticker-rail {
   margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
+  --rail-pad: var(--gutter);
 }
 .places .ticker-all {
   margin-left: var(--s-xs);
@@ -2420,23 +2499,19 @@ a.vcard:focus-visible {
   .column > .panel:has(.bcards) > .covers-head::after {
     content: none;
   }
+  /* One row of six at this width, each plate taking an equal share — the same
+     object the phone stacks 3x2, not a different one. */
   .column > .panel:has(.bcards) > .covers {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     display: flex;
     flex-wrap: nowrap;
-    gap: var(--s-2xl);
+    gap: var(--s-sm);
     padding: 0;
     margin: 0;
   }
   .column > .panel:has(.bcards) .cover {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--s-sm);
-    text-align: left;
-  }
-  .column > .panel:has(.bcards) .cover svg {
-    width: 20px;
-    height: 20px;
+    flex: 1 1 0;
+    min-width: 0;
   }
   /* 13px: these are words a reader scans, not tracked micro-labels. */
   .column > .panel:has(.bcards) .cover span {
@@ -2484,7 +2559,7 @@ a.vcard:focus-visible {
   }
   .places .ticker-rail {
     margin-inline: 0;
-    padding-inline: 0;
+    --rail-pad: 0px;
   }
   .places .ticker-all {
     margin-left: 0;
@@ -2658,20 +2733,25 @@ a.vcard:focus-visible {
 @media (min-width: 1024px) and (max-width: 1279px) {
   .places .ticker-rail {
     margin-inline: calc(50% - 50vw);
-    padding-inline: calc(50vw - 50%);
+    --rail-pad: calc(50vw - 50%);
   }
 }
 
-/* ══ ALL SEVEN IN ONE ROW ═════════════════════════════════════════════════
-   VenueTicker switches to its static grid at 1280, not 1024: below that a
-   seven-across row puts the tiles under the 132px the phone rail proves, so
-   the laptop keeps the moving rail. Here the row is the lineup — six live
-   places and the one that is signed — at 3:4, so the photographs stay the
-   portraits the phone rail shows rather than the squares that made the 4+3
-   grid an 840px block with a hole in it. */
+/* ══ ALL EIGHT IN ONE ROW ═════════════════════════════════════════════════
+   VenueTicker switches to its static grid at 1280, not 1024: below that an
+   eight-across row puts the tiles under the 132px the phone rail proves, so
+   the laptop keeps the moving rail. Here the row is the lineup: six live
+   places, the one that is signed, and the network card that says more are
+   coming, at 3:4, so the photographs stay the portraits the phone rail shows
+   rather than the squares that made the 4+3 grid an 840px block with a hole
+   in it.
+
+   IT WAS SEVEN. The network card (VenueTicker, 20 Sep 2026) made the lineup
+   eight, and a seven-column row leaves the eighth alone on a second row,
+   which is the one arrangement this rule exists to prevent. */
 @media (min-width: 1280px) {
   .ticker.is-open .ticker-rail {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: var(--s-md);
     padding-inline: 0;
   }
@@ -2877,7 +2957,7 @@ a.vcard:focus-visible {
 }
 .hero-rail .ticker-rail {
   margin-inline: 0;
-  padding-inline: 0;
+  --rail-pad: 0px;
   max-width: 100%;
   -webkit-mask-image: linear-gradient(
     90deg,
@@ -2903,3 +2983,5 @@ a.vcard:focus-visible {
 .hero-rail .ticker-all {
   display: none;
 }
+
+/* What the deposit earns back, under the price on the hero. */

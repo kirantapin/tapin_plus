@@ -139,6 +139,18 @@
      on this scale and are not used, however often the old mockup reaches for
      them. */
   --s-xs:4px; --s-sm:6px; --s-md:8px; --s-lg:12px; --s-xl:16px; --s-2xl:24px;
+  /* ── THE SECTION STEPS ──────────────────────────────────────────────────
+     The scale stopped at 24px, so the widest interval this build could draw
+     between two whole page sections was the same one it draws between a
+     label and the list under it — and the pitch shipped with 16px between
+     the hero and the panel after it. Every page read as one unbroken slab
+     no matter how its own insides were spaced (Sam, 20 Sep 2026: "the page
+     is too dense").
+
+     These two are for separating MOVEMENTS, never for anything inside one.
+     If a gap is between two things a reader would call parts of the same
+     thing, it belongs on the ramp above. */
+  --s-3xl:40px; --s-4xl:64px;
   --gutter:24px;
 
   --font:"Gilroy",Arial,system-ui,sans-serif;
@@ -160,78 +172,10 @@
   --collar-ring:rgba(255,255,255,.20);
 }
 
-/* ============================================================================
-   THE LIGHT SURFACE — the app, and only the app.
-
-   Sam, 12 Sep 2026: "build a light version of the app (including the preview)
-   while keeping the dark theme for the landing pages and carousels."
-
-   THIS IS A SURFACE SPLIT, NOT A USER PREFERENCE, so it is keyed on the route
-   rather than on prefers-color-scheme: `<html data-surface="app">`, set by the
-   shell. The landing pages keep §9's authored dark ground — the mosaic, the
-   night scene and the glass hero are all built on it and all live there.
-
-   WHY THE SPLIT IS DEFENSIBLE AND NOT JUST TWO LOOKS. The dark field is doing
-   a Persuade job: it is a stage, and the six photographs are the subject. The
-   app is Operate — it is read, scanned and totted up, and TapIn's real
-   merchant storefront (~/desktop-ui) is light for exactly that reason. The
-   product this page is selling IS light. So a prospect walking the preview is
-   now seeing the thing rather than a dark mock of it.
-
-   THE RAMP IS MEASURED AGAINST THE DARK ONE, not picked by eye. The dark ink
-   steps measure 17.74 / 9.83 / 7.75 / 5.74 on --card; these measure 18.57 /
-   10.11 / 7.74 / 5.78 — the same perceptual ladder with the field inverted.
-   The floor across ALL FIVE surfaces is 4.52:1, so every step clears AA body
-   text on every ground it can land on, which the dark ramp also does.
-
-   TWO §9 RULES SURVIVE INTACT, and both were checked rather than assumed:
-     - Hokie Stone Gray stays NON-TEXT. It measures 4.44:1 on --card here —
-       still short of 4.5, so the ban survives its own contrast argument in the
-       light world too and scripts/guards.py needs no exemption.
-     - Maroon stays a FILL carrying white: 9.19:1, the same number, because the
-       ratio is between the two of them and not between maroon and the page.
-       Maroon on white is also 9.19:1, which makes maroon-as-ink newly legal
-       here — a capability this file's header already anticipated. It is NOT
-       spent yet. Nothing below sets `color:var(--maroon)`; when something
-       does, it answers the same "chosen or acting thing" test as the fill.
-   ============================================================================ */
-/* ON <html> FOR THE FULL-PAGE APP, ON `.app-window` FOR THE DESKTOP WINDOW —
-   the same ramp either way, so the app is light inside its window while the
-   page beneath keeps the dark ground (AppLayer). */
-html[data-surface="app"],
-.app-window[data-surface="app"],
-.isheet-root[data-surface="app"]{
-  color-scheme:light;
-
-  /* The same five-step ramp, inverted. --card is the white the panels sit at,
-     --page the field they sit on, and --inner the tint a nested thing takes
-     INSIDE a panel — which is darker here where it was lighter on the dark
-     field, because "recessed" and "raised" swap sides when the ground does. */
-  --page:#F7F3F4;
-  --subtle:#F0E9EC;
-  --card:#FFFFFF;
-  --inner:#F6F0F2;
-  --press:#EBE1E5;
-
-  --ink-1:#1B1014;
-  --ink-2:#513C43;
-  --ink-3:#624D55;
-  --ink-4:#756069;
-
-  /* Hairlines invert too. A light surface shows an edge far more readily than
-     a dark one, so these are LOWER than the dark values, not higher: .10 black
-     on white is a visible rule where .10 white on --card is 1.33:1 and gone. */
-  --hair:rgba(27,16,20,.10);
-  --hair-lit:rgba(27,16,20,.16);
-
-  --page-0:rgba(247,243,244,0);
-  --collar-ring:rgba(27,16,20,.16);
-
-  /* The elevation tokens need no light variant — they were already TapIn's own
-     light-mode shadow values (rgba(20,22,24,.06/.10/.13)), carried over into
-     the dark build where they read as almost nothing. Here they do the job
-     they were authored for. */
-}
+/* The LIGHT SURFACE ramp stood here until 20 Sep 2026. It existed for the app
+   preview and for nothing else, and the preview is gone — nothing sets
+   `data-surface` any more, so every selector in it was unreachable. The dark
+   ramp above is now the only one this build has. */
 
 /* ---------------------------------------------------------------------------
    Type. The enumerated ramp is 11 12 13 14 15 16 17 18 20 22 24 26 30 32 —
