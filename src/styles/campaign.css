@@ -618,3 +618,25 @@
 .ct-also{margin:var(--s-lg) 0 0}
 .ct-also .collar{box-shadow:0 0 0 2px var(--inner)}
 .ct-more-p{margin-top:var(--s-lg)}
+
+/* ── NO EDGE FADE ON A LIGHT SURFACE ───────────────────────────────────────
+   Sam, 20 Sep 2026: "for the places carousel on light mode, I don't like the
+   white gradient fade on the left and right of the carousel."
+
+   The rail's mask fades its ends to transparent so a half-visible tile reads
+   as a list continuing past the frame rather than as something clipped. That
+   works on the dark field, where what shows through is the same near-black
+   the tile is sitting on. On a light sheet the tiles are dark photographs and
+   what shows through is white, so the fade stops reading as depth and starts
+   reading as a white wash painted over the ends of the row.
+
+   The reason the mask existed goes with it and has to be answered another
+   way: the rail keeps its inline padding, so at rest the first and last tiles
+   sit inside the panel rather than against its edge, and the panel's own
+   rounded corners do the clipping. Both places the light ramp is in force —
+   the campaign page and any modal carrying `data-lit`. */
+:root[data-surface="cg"] .ticker-rail,
+[data-lit] .ticker-rail {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
