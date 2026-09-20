@@ -1,0 +1,454 @@
+/* ============================================================================
+   THE CAMPAIGN SPLASH — routes/Coffeeholics.tsx, at /blacksburg/coffeeholics.
+
+   One venue, for one Meta advert. It borrows the site's whole vocabulary on
+   purpose: the ground, the glass panel, the lockup, `.action`, the benefit
+   glyphs, the seat line, the footer. The only things declared here are the
+   three shapes the pitch does not already have — the merchant plate, the
+   trial buttons and the closing price block.
+
+   A campaign page that invents a look is a campaign page that reads as a
+   scam, which is the exact suspicion "free $5" invites.
+   ============================================================================ */
+
+/* -- the lockup, over the headline ------------------------------------------ */
+.cg-lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  margin: 0 0 var(--s-xl);
+}
+.cg-lockup svg {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
+.cg-lead {
+  margin: var(--s-lg) 0 0;
+  text-wrap: pretty;
+}
+
+/* -- the merchant, as evidence ---------------------------------------------
+   A plate, not a card inside a card: the panel is already the container, so
+   this is one surface with a photograph across the top of it and the mark
+   breaking the seam, which is the venue-card shape the rail and the pop-up
+   both use. */
+.cg-venue {
+  position: relative;
+  margin: var(--s-2xl) 0 0;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--inner);
+}
+.cg-shot {
+  display: block;
+  width: 100%;
+  height: 128px;
+  object-fit: cover;
+}
+.cg-shot[data-bright="true"] {
+  filter: saturate(0.9) brightness(0.72);
+}
+.cg-collar {
+  position: absolute;
+  left: var(--s-lg);
+  top: calc(128px - 26px);
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-control);
+}
+.cg-venue-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: calc(26px + var(--s-md)) var(--s-lg) var(--s-lg);
+}
+.cg-venue-text b {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-1);
+}
+.cg-venue-text > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-4);
+}
+
+/* -- what a member gets here ------------------------------------------------ */
+.cg-benefits {
+  list-style: none;
+  margin: var(--s-2xl) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-lg);
+}
+.cg-benefits > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-lg);
+}
+.cg-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-control);
+  display: grid;
+  place-items: center;
+  background: var(--inner);
+  border: 1px solid var(--hair);
+  color: var(--ink-2);
+}
+.cg-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cg-benefits > li > span:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cg-benefits b {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink-1);
+}
+.cg-benefits b + span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-4);
+  text-wrap: pretty;
+}
+
+/* -- the two live trials ---------------------------------------------------
+   Ghost buttons, not maroon ones. §9 spends the solid maroon on the control
+   that takes money, and on this page that is "Get early access" at the foot.
+   These open a merchant's menu, which is a real action and not that one — and
+   two maroon fills above the actual ask would leave the ask as the third
+   equal-looking button on the page. */
+.cg-trials {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+}
+.cg-trial {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  padding: var(--s-lg) var(--s-xl);
+  text-align: left;
+}
+.cg-trial > span:first-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cg-trial b {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+}
+.cg-trial b + span {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink-4);
+  text-wrap: pretty;
+}
+.cg-trial svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--ink-3);
+}
+.cg-once {
+  margin: var(--s-lg) 0 0;
+  text-wrap: pretty;
+}
+
+/* -- the membership, after the proof ---------------------------------------- */
+.cg-member-line {
+  margin: 0;
+  text-wrap: pretty;
+}
+.cg-buy {
+  margin: var(--s-2xl) 0 0;
+}
+/* THE PITCH'S OWN PRICE RULE, not a second one. `.hero-price` in layout.css
+   already sets the figure, the qualifier beside it and the baseline they share,
+   and the checkout charges the figure this prints — so a campaign page that
+   redeclared the size would be a second place for that type to drift. The two
+   lines added here are the only difference: this qualifier is a sentence
+   rather than one word, so it wraps and is given a measure. */
+.cg-price {
+  flex-wrap: wrap;
+}
+.cg-price > span {
+  max-width: 24ch;
+}
+.cg-seat {
+  margin: var(--s-md) 0 0;
+  text-wrap: pretty;
+}
+.cg-cta {
+  margin-top: var(--s-xl);
+}
+
+/* ── FROM 1024px IT IS TWO COLUMNS ─────────────────────────────────────────
+   The argument is "here is the shop, here is what you get". On a phone that is
+   a stack; on a laptop the merchant plate sits beside the benefits it belongs
+   to instead of pushing them a screen down.
+
+   1024, NOT THE 720 THIS FIRST USED. `.column` is capped at 480px until
+   layout.css's 1024 breakpoint releases it, so a split any earlier divides 448
+   usable pixels into two 212px columns — measured at 900px, where it put the
+   benefit rows under half the width their two lines need. The site has one
+   desktop line and this is it. */
+@media (min-width: 1024px) {
+  .cg-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--s-2xl);
+    align-items: start;
+    margin-top: var(--s-2xl);
+  }
+  .cg-pair > .cg-venue,
+  .cg-pair > .cg-benefits {
+    margin-top: 0;
+  }
+  .cg-shot {
+    height: 168px;
+  }
+  .cg-collar {
+    top: calc(168px - 26px);
+  }
+  .cg-trials {
+    flex-direction: row;
+  }
+  /* THE LIST ITEM, NOT THE ANCHOR. The <li> is the flex item; `.cg-trial` is
+     the <a> inside it, and `.action` already sets that to width:100%. Sizing
+     the anchor left the two items at their content widths — 220px beside
+     170px, measured — for two buttons that are a pair. */
+  .cg-trials > li {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* ============================================================================
+   ══ THE LIGHT SURFACE ══════════════════════════════════════════════════════
+
+   Sam, 20 Sep 2026: "I realized the whole thing is too dark. Maybe we use
+   coffeeholics colors for this?"
+
+   ── WHAT THIS CROSSES, AND WHY IT IS ALLOWED HERE ──────────────────────────
+   PRODUCT.md: "Merchant identity appears as logos and photography, never as a
+   page skin. Venue brand colours are merchant property, not tokens." Sam
+   himself set that rule a week ago about the app's venue pages — "there's too
+   much context switching going on there."
+
+   This is a different surface and the reasoning does not carry. The app is
+   many merchants in one session, where a skin per venue is a page changing
+   identity under the reader. A campaign page is ONE merchant, reached from an
+   advert about that merchant, and never seen beside another. Co-branding is
+   what the reader already expects from it. Asked for explicitly, on this page
+   only, and scoped so it cannot leak: `data-surface="cg"` is set on <html> by
+   routes/Coffeeholics.tsx and removed when that route unmounts.
+
+   ── THE PALETTE ────────────────────────────────────────────────────────────
+   The purple is #6b319e, Coffeeholics' `brandColor`, straight from their
+   record rather than sampled.
+
+   THE GROUND IS OFF-WHITE, NOT CREAM. It was #F6F1EA for an hour, taken from
+   the alternating light card in Sam's own carousel; Sam, 20 Sep 2026: "I
+   don't like the cream color, can we just make that like an off white or
+   gray." So it is a near-neutral carrying a few points of the purple rather
+   than a warm one — a flat grey beside a saturated accent reads as unchosen,
+   and a ground tinted toward the accent reads as decided. The ink ramp moved
+   with it, from the warm browns the cream wanted to a neutral on the same
+   violet axis, because warm ink on a cool ground is what makes a page look
+   muddy rather than quiet.
+
+   Maroon is untouched and still spends itself once, on "Get early access".
+   The merchant's colour marks the merchant's offers; TapIn's colour marks the
+   thing that takes money. That separation is what keeps the co-brand from
+   reading as a different company's page.
+
+   ── MEASURED ON THIS GROUND ────────────────────────────────────────────────
+   Against the page #F3F2F5, the white card and the #ECEAF0 inner plate:
+     ink-1 #17141B   16.34 / 18.22 / 15.27
+     ink-2 #3A3540   10.68 / 11.91 /  9.98
+     ink-3 #514B58    7.54 /  8.41 /  7.05
+     ink-4 #676070    5.41 /  6.03 /  5.05
+     purple           7.36 /  8.21 /  6.88
+   Every step clears AA for body text on every surface it can land on. The
+   wordmark's dot (#D14245) sits at 3.84 on the darkest of them, which is a
+   graphic mark rather than type and clears the 3:1 that applies to one.
+   ============================================================================ */
+/* ── NOT WHILE THE CHECKOUT IS OPEN ────────────────────────────────────────
+   `:not(.is-layered)`. App.tsx puts `.is-layered` on <html> whenever /reserve
+   is open over a page, and the checkout sheet is built for the dark world: run
+   under these tokens it kept its dark plates and took dark ink with them, and
+   the seat line, the deposit rows and the sheet's own heading all dropped to
+   a few points of contrast — measured on the one surface in this product that
+   takes money.
+
+   So the campaign's light theme switches off for exactly as long as the sheet
+   is up, and the page behind the scrim goes back to the house dark with it.
+   The reader is still on /blacksburg/coffeeholics and still returns to it: the
+   silo is the navigation, not the palette. */
+:root[data-surface="cg"]:not(.is-layered) {
+  --page: #F3F2F5;
+  --subtle: #FFFFFF;
+  --card: #FFFFFF;
+  --inner: #ECEAF0;
+  --press: #E0DDE6;
+
+  --ink-1: #17141B;
+  --ink-2: #3A3540;
+  --ink-3: #514B58;
+  --ink-4: #676070;
+
+  /* hexToRgba(ink-1, .10) and .18 — the house construction, in the other
+     direction. On a light ground a white hairline is invisible. */
+  --hair: rgba(23, 20, 27, 0.1);
+  --hair-lit: rgba(23, 20, 27, 0.18);
+
+  /* Deeper than the dark surface's, because a shadow on a light ground has to
+     carry the separation a dark field gets from its own ink. */
+  --rest: 0 1px 2px rgba(23, 20, 27, 0.06);
+  --raised: 0 2px 10px rgba(23, 20, 27, 0.1);
+  --float: 0 6px 20px rgba(23, 20, 27, 0.14);
+
+  /* ══ THE BRAND FILL IS THE MERCHANT'S, ON THIS SURFACE ONLY ═════════════
+     Sam, 20 Sep 2026: "the colors still aren't really coffeeholics colors
+     like for tapin plus and the header bar."
+
+     Both of those spend `--maroon`, and so does `.action`, `.vflag` and every
+     other chosen-or-acting thing. Re-tinting them one selector at a time
+     would have left the token meaning two different things on one page, so
+     the token itself is redefined and every one of them follows. tokens.css's
+     rule is unchanged and still holds: a solid brand fill is spent only on a
+     thing that is chosen or acting. It is simply Coffeeholics' fill here.
+
+     White on #6b319e measures 8.21:1, so `--on-maroon` needs no change. */
+  --maroon: #6b319e;
+  --cg-brand: #6b319e;
+}
+
+/* The field, lit the same way the dark one is: a step off at the top, the
+   page's own colour through the middle, a shade deeper at the foot. */
+:root[data-surface="cg"]:not(.is-layered) body {
+  background: linear-gradient(180deg, #FAFAFC 0%, var(--page) 46%, #E9E7ED 100%);
+  background-attachment: fixed;
+}
+/* The authored ground is three maroon radials. On cream they read as smoke,
+   so this surface gets one wash in the merchant's purple at the same low
+   alphas — present, never a colour the type has to survive. */
+:root[data-surface="cg"]:not(.is-layered) .ground {
+  background:
+    radial-gradient(58% 42% at 18% 4%,
+      rgba(107, 49, 158, 0.13) 0%, rgba(107, 49, 158, 0.07) 34%,
+      rgba(107, 49, 158, 0) 72%),
+    radial-gradient(52% 38% at 86% 24%,
+      rgba(107, 49, 158, 0.07) 0%, rgba(107, 49, 158, 0) 70%);
+}
+
+/* -- where the merchant's colour does its work ------------------------------
+   Three places, all of them marks rather than surfaces: the glyph plates
+   beside the benefits, the hairline and arrow on the trial buttons, and the
+   label over them. */
+:root[data-surface="cg"]:not(.is-layered) .cg-icon {
+  background: color-mix(in srgb, var(--cg-brand) 9%, #FFFFFF);
+  border-color: color-mix(in srgb, var(--cg-brand) 26%, transparent);
+  color: var(--cg-brand);
+}
+:root[data-surface="cg"]:not(.is-layered) .cg-trial {
+  border: 1px solid color-mix(in srgb, var(--cg-brand) 30%, transparent);
+  background: #FFFFFF;
+}
+:root[data-surface="cg"]:not(.is-layered) .cg-trial svg {
+  color: var(--cg-brand);
+}
+:root[data-surface="cg"]:not(.is-layered) .cg-today .panel-label {
+  color: var(--cg-brand);
+}
+
+/* ── THE DOCKED PAIR ───────────────────────────────────────────────────────
+   The site's own `.sticky-cta.is-pair`: one filled action, one outlined, with
+   the column clearance layout.css already tunes for exactly this shape.
+
+   THE FILLED SLOT IS THE FREE ONE. The page's last in-flow control is already
+   a filled "Get early access"; putting a second identical one in the bar is
+   the decoy shape layout.css warns about four rules down from here. So the
+   bar carries the thing the page does not end with, and the outlined slot
+   keeps the other reachable from anywhere. */
+.cg-sticky .sticky-alt {
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--cg-brand, var(--maroon)) 34%, transparent);
+  color: var(--cg-brand, var(--maroon));
+}
+.cg-sticky .sticky-alt:active {
+  background: color-mix(in srgb, var(--cg-brand, var(--maroon)) 8%, var(--card));
+}
+
+/* -- the other places, under the membership --------------------------------
+   Sam, 20 Sep 2026: "we still want to mention somewhere, even if it's lower
+   down or at checkout that someone can use this at other spots too not just
+   coffeeholics." His own advert closes the same way — "Also at The Burg,
+   Olaika, The Milk Parlor and Sweetopia" over a row of their marks — so this
+   is that card, built from the venue records rather than typed. */
+.cg-also {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  flex-wrap: wrap;
+  margin: var(--s-xl) 0 0;
+}
+.cg-also-marks {
+  display: flex;
+  flex: 0 0 auto;
+}
+/* Overlapped, like a stack of cards rather than a row of tiles: it reads as
+   "a set" at a glance and costs a third of the width. The ring is the page's
+   own ground, so each mark cuts cleanly out of the one behind it. */
+.cg-also-marks .collar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--card);
+}
+.cg-also-marks .collar + .collar {
+  margin-left: -10px;
+}
+.cg-also p {
+  flex: 1 1 12ch;
+  min-width: 0;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* The deposit's meaning, tight to the figure it qualifies. */
+.cg-deposit {
+  margin: var(--s-sm) 0 0;
+  color: var(--ink-2);
+  max-width: 34ch;
+  text-wrap: pretty;
+}
