@@ -209,18 +209,10 @@
   grid-auto-columns: minmax(0, 1fr);
   gap: var(--s-sm);
 }
-/* The marks sit on the sheet's own inner plate, which is what separates the
-   scope row from the benefit rows above it without drawing a border between
-   them. */
-.vp-covers .cover {
-  padding: var(--s-md) var(--s-xs);
-  border-radius: var(--r-control);
-  background: var(--inner);
-}
-.vp-covers .cover svg {
-  width: 20px;
-  height: 20px;
-}
+/* The plate and the glyph size that used to be declared here are `.cover`'s
+   own now (pitch.css) — Sam asked for the pitch to wear what this row wears,
+   so the treatment moved to the shared rule and this block kept only the
+   thing that is genuinely local: the single row. */
 .vp-benefits {
   list-style: none;
   margin: 0;
