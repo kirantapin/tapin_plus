@@ -438,3 +438,94 @@
   margin: 0;
   text-wrap: pretty;
 }
+
+
+/* ============================================================================
+   THE TRIAL MODAL — shell/TrialModal.tsx.
+
+   The page's one modal, opened by the docked "Try it once for free". It holds
+   what the removed "Try it today, free" panel held, plus the two things that
+   panel never said: what happens after you tap, and why you would want this
+   more than once.
+
+   Sheet from the bottom edge on a phone, centred dialog from 640px — the same
+   two shapes and the same house curve the merchant pop-up uses, so the site
+   has one modal behaviour rather than two.
+   ============================================================================ */
+.ct-root{position:fixed;inset:0;z-index:70;display:flex;
+  align-items:flex-end;justify-content:center}
+.ct-scrim{position:absolute;inset:0;background:rgba(26,16,22,.52);
+  animation:ctFade 200ms var(--ease) both}
+.ct{position:relative;width:100%;max-height:88vh;display:flex;
+  flex-direction:column;overflow:hidden;background:var(--card);
+  border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(26,16,22,.28);
+  animation:ctUp 340ms var(--ease) both}
+.ct:focus{outline:none}
+
+.ct-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s-lg);padding:var(--s-xl) var(--s-xl) var(--s-md)}
+.ct-head h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.025em;
+  line-height:1.15;color:var(--ink-1)}
+.ct-close{flex:0 0 auto;width:34px;height:34px;padding:0;border:0;border-radius:50%;
+  display:grid;place-items:center;background:var(--inner);color:var(--ink-2);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease)}
+.ct-close svg{width:17px;height:17px}
+.ct-close:active{transform:scale(.94)}
+.ct-close:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+
+.ct-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  padding:0 var(--s-xl) calc(var(--s-xl) + env(safe-area-inset-bottom,0px))}
+
+/* ── THE STEPS ─────────────────────────────────────────────────────────────
+   Numbered because they are a sequence and the order carries information:
+   you open their page, you order, you collect — and the third is the one
+   nobody expects, which is why it is not folded into the second. */
+.ct-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
+  gap:var(--s-lg);counter-reset:none}
+.ct-steps > li{display:flex;align-items:flex-start;gap:var(--s-lg)}
+.ct-num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;
+  place-items:center;background:var(--inner);
+  color:var(--cg-brand,var(--maroon));
+  font-size:12px;font-weight:700;letter-spacing:0}
+.ct-steps > li > span:last-child{min-width:0;display:flex;flex-direction:column;gap:2px}
+.ct-steps b{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+.ct-steps b + span{font-size:13px;line-height:1.4;color:var(--ink-4);text-wrap:pretty}
+
+.ct-trials{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
+  flex-direction:column;gap:var(--s-md)}
+.ct-once{margin:var(--s-md) 0 0;text-wrap:pretty}
+
+/* ── THE CALL-OUT ──────────────────────────────────────────────────────────
+   A plate, not a card: it sits inside a sheet that is already a container,
+   and a card inside a card is the nesting this build does not draw. One rung
+   of ground separates it, which is the same device every other grouping here
+   uses. */
+.ct-more{margin:var(--s-2xl) 0 0;padding:var(--s-xl);border-radius:var(--r-card);
+  background:var(--inner)}
+.ct-more-h{margin:0;font-size:17px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink-1)}
+.ct-more-p{margin:var(--s-sm) 0 0;text-wrap:pretty}
+.ct-go{margin-top:var(--s-lg)}
+
+.ct-root.is-closing{pointer-events:none}
+.ct-root.is-closing .ct{animation:ctDown 200ms cubic-bezier(.4,0,1,1) both}
+.ct-root.is-closing .ct-scrim{animation:ctFadeOut 200ms linear both}
+@keyframes ctUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes ctDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes ctFade{from{opacity:0}to{opacity:1}}
+@keyframes ctFadeOut{from{opacity:1}to{opacity:0}}
+
+@media (min-width:640px){
+  .ct-root{align-items:center}
+  .ct{width:min(460px,calc(100vw - 48px));max-height:min(760px,calc(100vh - 48px));
+    border-radius:var(--r-panel);border:1px solid var(--hair);
+    box-shadow:0 40px 120px -20px rgba(26,16,22,.34);
+    animation:ctIn 240ms var(--ease) both}
+  .ct-root.is-closing .ct{animation:ctOut 180ms cubic-bezier(.4,0,1,1) both}
+}
+@keyframes ctIn{from{opacity:0;transform:scale(.965)}to{opacity:1;transform:none}}
+@keyframes ctOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.975)}}
+@media (prefers-reduced-motion:reduce){
+  .ct,.ct-scrim,.ct-root.is-closing .ct,.ct-root.is-closing .ct-scrim{animation:none}
+}
