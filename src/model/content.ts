@@ -672,19 +672,42 @@ export const founderSaving = {
  * making a reader find it: an unconditional "locked for good" beside a control
  * that takes money is the kind of promise §10 exists to stop.
  */
+/**
+ * ══ IT NEVER GOES UP, AND THE YEAR IS GONE ═════════════════════════════════
+ * Sam, 20 Sep 2026: "let's just say it never goes up on both."
+ *
+ * "Both" is his Meta carousel and this build. The advert's fifth card already
+ * read "Your rate never goes up — $4.99 for as long as you stay a member —
+ * even after it rises to $14.99", while every surface here said the rate was
+ * locked for a FULL YEAR. Two different promises about the same money, one of
+ * them about to run as paid advertising. He has settled it on the stronger
+ * one, which is also the one his own first instinct made — "for good" was his
+ * phrase before the year ever appeared (14 Sep, "it stays at $6.99 for an
+ * entire year", which narrowed it).
+ *
+ * THE CONDITION STAYS IN THE SENTENCE. "Never goes up" without it is exactly
+ * the unconditional promise beside a control that takes money that §10 exists
+ * to stop. The rate survives as long as the membership does, and a refund or
+ * a cancellation gives it up — term 7 has said so since the first build ("A
+ * refund gives up your seat and your locked rate"), and this sentence carries
+ * it inline rather than making a reader go and find it.
+ *
+ * That is also what makes the promise keepable: it binds the price of a seat
+ * that is continuously held, not a price anyone can leave and come back to.
+ */
 /** The founding lock, said with the plan's own figure — "$9.99 a month" under
  *  a year plan was the wrong number in the right sentence. */
 export const lockedRateFor = (price: string, per: string): string =>
   FOUNDING_OPEN
-    ? `Your Early Bird rate is locked for a full year, at ${price} ${per} from the day we open.`
+    ? `Your Early Bird rate never goes up: ${price} ${per} from the day we open, for as long as you stay a member.`
     : lockedRateLines.standard;
 
 export const lockedRateLines = {
-  founding:
-    /* Sam, 14 Sep 2026 (night): "it stays at $6.99 for an entire year." */
-    `Your Early Bird rate is locked for a full year, at ${usd(FOUNDING_MONTHLY)} a month from the day we open.`,
+  founding: `Your Early Bird rate never goes up: ${usd(FOUNDING_MONTHLY)} a month from the day we open, for as long as you stay a member.`,
   /* No founding rate left to lock, but the promise the product actually makes
-     about price stability is still true and is still worth saying. */
+     about price stability is still true and is still worth saying. It already
+     said it this way, which is what made the year on the line above read as
+     the odd one out. */
   standard: "Your rate is locked for as long as you keep the membership.",
 } as const;
 /** Today's line. /in reads the one she bought under instead, from her record. */
