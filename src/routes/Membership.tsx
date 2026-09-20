@@ -445,27 +445,6 @@ export default function Membership() {
               </p>
             </Panel>
 
-            <Link
-              className="applink ms-see"
-              to="/app"
-              state={{ background: location }}
-            >
-              <b>See inside the app</b>
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="applink-go"
-              >
-                <path
-                  d="m10 7 5 5-5 5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
           </>
         ) : subscribed ? (
           /* ══ PAID, BUT NOT ON THIS DEVICE ══════════════════════════════════

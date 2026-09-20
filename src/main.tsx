@@ -11,7 +11,7 @@ import "./styles/pitch.css";
 import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";
-import "./styles/app.css";
+import "./styles/venue.css";
 import "./styles/arrival.css";
 
 createRoot(document.getElementById("root")!).render(

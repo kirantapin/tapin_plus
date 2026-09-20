@@ -33,10 +33,6 @@ export default function Shell({ layered = false }: { layered?: boolean }) {
   /* Prefix match, so every screen under the preview is included — Sam asked
      for this "across all pages within the app preview". `/app` exactly and
      `/app/...` both count; a future `/apply` would not. */
-  /* NOT WHILE THE APP IS A WINDOW. On a desktop the app renders in a layer
-     that carries its own `data-surface="app"` (AppLayer); the page under it
-     must keep the dark ground, so the html-level flag stays off. */
-  const isApp = !layered && (pathname === "/app" || pathname.startsWith("/app/"));
 
   /* ══ EVERY NEW PAGE STARTS AT ITS TOP ═════════════════════════════════════
      Sam, 13 Sep 2026: tapping through to a merchant page landed already
@@ -66,15 +62,6 @@ export default function Shell({ layered = false }: { layered?: boolean }) {
     window.scrollTo(0, 0);
   }, [pathname, navType, layered, state]);
 
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (isApp) root.dataset.surface = "app";
-    else delete root.dataset.surface;
-    /* No cleanup that clears the attribute: this effect IS the cleanup, and it
-       runs on every route change. Removing it on unmount instead would blank
-       the surface for a frame during a route swap, which is the flash the
-       layout effect exists to prevent. */
-  }, [isApp]);
 
   return (
     <>
