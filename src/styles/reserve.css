@@ -528,8 +528,26 @@ html[data-flight="in"] .column > .sticky-cta{
   to{opacity:1;transform:none}}
 
 /* Above a phone the sheet stops being a sheet: centred, fully rounded, and off
-   the bottom edge, because there is no thumb to reach from down there. */
-@media (min-height:700px) and (min-width:560px){
+   the bottom edge, because there is no thumb to reach from down there.
+
+   ══ 640, NOT 560 ═══════════════════════════════════════════════════════════
+   Sam, 20 Sep 2026: "is there not still some weird margin beneath", then
+   "sign in would be a pop up for desktop and a modal on mobile."
+
+   It already did both — at the wrong width. 560 catches a large phone held
+   sideways and a small window, where the centred state's 24px of breathing
+   room becomes a band under a sheet that still fills nearly the whole screen,
+   which is the margin he saw. Nothing was stray: it was a dialog's framing
+   applied at a size that is still a sheet.
+
+   The merchant pop-up and the trial modal both turn at 640. This is the third
+   modal in the product and it was the only one with its own idea of where the
+   desktop starts, so it joins them: one number, three surfaces, and a window
+   that is a sheet in one of them is a sheet in all three.
+
+   The `min-height:700px` guard stays. A short window has no room to centre
+   anything however wide it is. */
+@media (min-height:700px) and (min-width:640px){
   .cs-scrim{align-items:center;padding:var(--s-2xl)}
   .cs-sheet{border-radius:var(--r-panel);
     box-shadow:0 24px 64px rgba(0,0,0,.5);
