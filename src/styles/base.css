@@ -46,15 +46,6 @@ body{
    bottom a step off the field, so an object still has something to stand
    against — but in the other direction: light at the top, settling into the
    field, and a shade deeper at the foot. */
-/* ONE COLOUR. The light surface used to run a white-to-plum gradient down
-   the body with the maroon glow of .ground over it, so a venue page read as
-   two tones where the hero and the ticket met (Sam, 15 Sep 2026: "the
-   background for these pages isn't uniform … a single color"). Flat --page,
-   and the glow stays off the app entirely (below). */
-html[data-surface="app"] body{
-  background:var(--page);
-}
-
 /* ---------------------------------------------------------------------------
    The one authored animated ground.
 
@@ -93,8 +84,6 @@ html[data-surface="app"] body{
    nameable as colour and does exactly the one job §9 asks of the ground, which
    is to stop the field being a flat sheet. The orbit is untouched, so both
    surfaces breathe on the same 96s clock. */
-html[data-surface="app"] .ground{display:none}
-
 @keyframes groundOrbit{
   0%  {transform:translate3d(0,0,0)         scale(1)}
   25% {transform:translate3d( 2.2%,-1.4%,0) scale(1.04)}
@@ -220,16 +209,4 @@ html[data-surface="app"] .ground{display:none}
   :root{--hair:rgba(255,255,255,.22);--hair-lit:rgba(255,255,255,.42);--ink-3:#CFC7CB;--ink-4:#BDB3B8}
   .ground{opacity:.35}
 
-  /* THE LIGHT SURFACE NEEDS ITS OWN, and not as a nicety: the block above
-     targets `:root`, which is one class's worth of specificity, while the
-     light ramp sits on `html[data-surface="app"]`, which is one class plus an
-     element. So on the app the boost above silently did nothing — a reader who
-     has asked the OS for more contrast would have got exactly the default.
-     Same direction as the dark block, mirrored: the two quiet inks step
-     towards the ink, and the hairlines roughly double. */
-  html[data-surface="app"],
-  .app-window[data-surface="app"]{
-    --hair:rgba(27,16,20,.22);--hair-lit:rgba(27,16,20,.34);
-    --ink-3:#46343A;--ink-4:#57434A;
-  }
 }

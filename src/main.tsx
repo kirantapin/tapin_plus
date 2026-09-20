@@ -11,7 +11,11 @@ import "./styles/pitch.css";
 import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";
-import "./styles/app.css";
+import "./styles/venue.css";
+import "./styles/campaign.css";
+/* Last: `data-lit` inverts the ramp on a modal subtree and has to beat the
+   per-surface token blocks in reserve.css that it is overriding. */
+import "./styles/light.css";
 import "./styles/arrival.css";
 
 createRoot(document.getElementById("root")!).render(

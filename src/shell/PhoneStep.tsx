@@ -257,10 +257,17 @@ export default function PhoneStep({
               See the header. Consent to marketing texts cannot be a condition
               of the purchase, so this is a real choice and the Continue button
               below does not read it. One line now, and only about the thing
-              that actually needs consent. Who (TapIn places), what (offers and
-              news), STOP, and that it is optional — the TCPA's express-consent
-              elements are all still here; the rates line above covers this
-              number for both kinds of message. */}
+              that actually needs consent. Who, what, STOP, and that it is
+              optional — the TCPA's express-consent elements are all still
+              here; the rates line above covers this number for both kinds of
+              message.
+
+              THE SENDER IS NAMED, AND IT IS THE COMPANY. Sam, 20 Sep 2026:
+              "this would be texts from Tapin App, Inc." It read "from TapIn
+              places", which names what the messages are ABOUT and leaves the
+              party the reader is consenting to unnamed — and the identity of
+              the sender is the one element express written consent turns on.
+              The merchants do not send these; TapIn does, about them. */}
           <label className="ph-opt">
             <input
               type="checkbox"
@@ -268,8 +275,8 @@ export default function PhoneStep({
               onChange={(e) => setOptIn(e.target.checked)}
             />
             <span id="ph-consent">
-              Also text me offers and news from TapIn places. Optional
-              &mdash; reply STOP anytime.
+              Also text me offers and news from TapIn App, Inc. Optional.
+              Reply STOP anytime.
             </span>
           </label>
 
@@ -284,7 +291,7 @@ export default function PhoneStep({
 
           {!phoneAuth.live ? (
             <p className="t-compact not-live">
-              Codes are not switched on yet — your number is saved with the
+              Codes are not switched on yet. Your number is saved with the
               reservation but not verified.
             </p>
           ) : null}

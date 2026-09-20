@@ -1,7 +1,7 @@
 import PlusFlag from "./PlusFlag";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { venues, comingVenues, heroIsBright, logoField } from "../model/content";
+import { useEffect, useRef, useState } from "react";
+import VenuePopup from "./VenuePopup";
+import { venues, comingVenues, heroIsBright, logoField, type Venue } from "../model/content";
 
 /**
  * The places: a ticker that opens into a grid.
@@ -93,85 +93,39 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
   const wide = useDesktop();
   const desktop = wide && !railOnly;
   /* The tiles open the app over this page on a desktop (AppLayer). */
-  const location = useLocation();
+  /* WHICH MERCHANT IS OPEN, if any. Local to the ticker: only one tile can be
+     tapped at a time, so the two instances the pitch renders cannot disagree,
+     and no route or router state is involved (Sam, 20 Sep 2026 — a pop-up,
+     not a page). */
+  const [popup, setPopup] = useState<Venue | null>(null);
   const [open, setOpen] = useState(false);
   /** The grid is shown when the reader asked for it, or when there is room. */
   const grid = desktop || open;
   const rail = useRef<HTMLUListElement>(null);
-  /** True while the reader is hovering, focused inside, or driving the rail. */
-  const paused = useRef(false);
-  const idle = useRef<number | undefined>(undefined);
+  /* ══ NO AUTO-SCROLL ═══════════════════════════════════════════════════
+     Sam, 20 Sep 2026: "let's not make this an infinity scroll thing."
 
-  /* Keyed on INPUT, never on `scroll`: a scroll listener cannot tell the
-     reader's scroll from the ticker's own, and keying the pause on it made the
-     first version suppress itself permanently after one advance. */
-  const nudge = useCallback(() => {
-    paused.current = true;
-    window.clearTimeout(idle.current);
-    idle.current = window.setTimeout(() => {
-      paused.current = false;
-    }, 2200);
-  }, []);
+     What stood here was a genuine ticker: a requestAnimationFrame loop
+     driving `scrollLeft` at 26px/s, a duplicate track so the wrap had no
+     visible edge, a period measured from the DOM because half the scroll
+     width was off by half a gap, and a pause keyed on pointer, wheel, focus
+     and touch. All of it existed to make a row move by itself, and a row
+     that moves by itself is now the thing not wanted.
 
-  useEffect(() => () => window.clearTimeout(idle.current), []);
+     It leaves an ordinary horizontal scroller, which is what the rail was
+     underneath: a real scrolling element, so swipe, trackpad and shift-wheel
+     keep working, and every tile is in the tab order exactly once now that
+     there is no clone to hide from it.
 
-  useEffect(() => {
-    if (grid) return;
-    const box = rail.current;
-    if (!box) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    let last = 0;
-    /* Slow enough to read a venue name as it passes. Per SECOND and multiplied
-       by the real frame delta, so it travels at one speed on a 120Hz display
-       and a 60Hz one alike. */
-    const PX_PER_SEC = 26;
-
-    const step = (t: number) => {
-      if (!last) last = t;
-      /* Clamped: after a background tab wakes, the first delta can be seconds
-         and would teleport the rail. */
-      const dt = Math.min((t - last) / 1000, 0.05);
-      last = t;
-      if (!paused.current) {
-        /* ══ THE PERIOD IS MEASURED, NOT DIVIDED ═══════════════════════════
-           This was `box.scrollWidth / 2`, on the reasoning that the list is
-           rendered twice so half the scroll width is one copy. It is not, and
-           the difference is what put a hole in the rail.
-
-           The rail is a flex row with a `gap`. Two copies of eight tiles are
-           sixteen tiles and FIFTEEN gaps, plus the rail's own inline padding;
-           one period is eight tiles and EIGHT gaps. Half the scroll width is
-           therefore short by half a gap (and off by half the padding), so every
-           wrap slipped a few pixels in the same direction. The error
-           accumulated until empty space opened at the leading edge — which is
-           precisely the artefact the duplicate track exists to prevent.
-
-           The first clone sits exactly one period from the first tile, so its
-           offset IS the period. Read from the DOM, it stays correct whatever
-           the gap, the padding or the tile width turn out to be — including in
-           the 520px column on /in, where they all differ from the pitch. */
-        const kids = box.children;
-        const half = kids.length >> 1;
-        const period =
-          half > 0 && kids[half]
-            ? (kids[half] as HTMLElement).offsetLeft -
-              (kids[0] as HTMLElement).offsetLeft
-            : box.scrollWidth / 2;
-        const next = box.scrollLeft + PX_PER_SEC * dt;
-        box.scrollLeft = period > 0 && next >= period ? next - period : next;
-      }
-      frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [grid]);
+     SNAP COMES BACK WITH IT. Snap was removed as incompatible with
+     continuous motion — it exists to arrest a scroll at a boundary, which is
+     the one thing a ticker must never do. Nothing is arresting any more, so
+     the rail can land on a tile instead of between two. See pitch.css. */
 
   const tiles = [
     ...venues.map((v) => ({
       key: v.id,
-      to: `/app/place/${v.id}` as string | undefined,
+      venue: v as Venue | undefined,
       name: v.name,
       /* Category only (audit, 14 Sep 2026): the street was the wordiest line on
          seven tiles, and the venue page carries the address. */
@@ -183,10 +137,11 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       bright: heroIsBright(v.id),
       plus: v.plus,
       tag: undefined as string | undefined,
+      more: false,
     })),
     ...comingVenues.map((v) => ({
       key: v.id,
-      to: undefined,
+      venue: undefined as Venue | undefined,
       name: v.name,
       meta: v.category,
       /* Real assets when the record carries them (Slake does, 14 Sep 2026);
@@ -198,10 +153,34 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       bright: false,
       plus: false,
       tag: "Coming" as string | undefined,
+      more: false,
     })),
+    /* ══ THE NETWORK ITSELF, AS A CARD ═══════════════════════════════════════
+       Sam, 20 Sep 2026: "the 'new places are added to your membership at no
+       extra cost' can be a card in the carousel." It was a two-line caption
+       under the rail; as a tile it sits where the fact applies and takes a
+       slot the rail already had room for, instead of another line of small
+       type under it.
+       It is the one tile that is not a place, so it is the one tile with no
+       photograph and a dashed plate (.vcard.is-more) — and it is idle, because
+       there is nothing behind it to open. */
+    {
+      key: "more",
+      venue: undefined as Venue | undefined,
+      name: "More places",
+      meta: "Added to your membership at no extra cost",
+      hero: undefined as string | undefined,
+      logo: undefined as string | undefined,
+      brand: undefined as string | undefined,
+      field: undefined as string | undefined,
+      bright: false,
+      plus: false,
+      tag: undefined as string | undefined,
+      more: true,
+    },
   ];
 
-  const body = (t: (typeof tiles)[number], clone: boolean) => {
+  const body = (t: (typeof tiles)[number]) => {
     const inner = (
       <>
         {/* THE PHOTOGRAPH IS THE CARD (Sam, 12 Sep 2026: "make the entire card
@@ -220,7 +199,14 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
                the same way on every card whether or not there is an image
                under it — which is what stops this one looking broken beside
                six that have one. */
-            <span className="monogram">{t.name.charAt(0)}</span>
+            t.more ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            ) : (
+              <span className="monogram">{t.name.charAt(0)}</span>
+            )
           )}
         </span>
 
@@ -259,19 +245,33 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
             Plus. We should have a little bit of a flag so that people know that
             they're a Tap In Plus partner." */}
         {t.plus && !t.tag ? <PlusFlag className="vflag" /> : null}
-        {!t.plus && !t.tag ? <span className="vflag is-soon">Offers only</span> : null}
+        {/* Not on the network card: "Offers only" describes a venue's tier, and
+            that tile is not a venue. */}
+        {!t.plus && !t.tag && !t.more ? (
+          <span className="vflag is-soon">Offers only</span>
+        ) : null}
         {t.tag ? <span className="vflag is-soon">{t.tag}</span> : null}
       </>
     );
-    if (!t.to) {
+    if (!t.venue) {
       /* Signed, not open. There is no page behind Slake and there must not
-         appear to be, so it takes none of the anchor's behaviour. */
-      return <span className="vcard is-idle">{inner}</span>;
+         appear to be, so it takes none of the button's behaviour. */
+      return <span className={`vcard is-idle${t.more ? " is-more" : ""}`}>{inner}</span>;
     }
+    /* A BUTTON, NOT A LINK. It opens the merchant's benefits over this page
+       rather than navigating anywhere — the app preview it used to point at
+       is gone (Sam, 20 Sep 2026). The clone track stays out of the tab order,
+       as it did when these were anchors. */
+    const v = t.venue;
     return (
-      <Link className="vcard" to={t.to} state={{ background: location }} tabIndex={clone ? -1 : undefined}>
+      <button
+        type="button"
+        className="vcard"
+        onClick={() => setPopup(v)}
+        aria-haspopup="dialog"
+      >
         {inner}
-      </Link>
+      </button>
     );
   };
 
@@ -280,22 +280,6 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
       <ul
         className="ticker-rail no-scrollbar"
         ref={rail}
-        onPointerDown={nudge}
-        onTouchStart={nudge}
-        onWheel={nudge}
-        onKeyDown={nudge}
-        onPointerEnter={() => {
-          paused.current = true;
-        }}
-        onPointerLeave={() => {
-          paused.current = false;
-        }}
-        onFocusCapture={() => {
-          paused.current = true;
-        }}
-        onBlurCapture={() => {
-          paused.current = false;
-        }}
       >
         {tiles.map((t, i) => (
           <li
@@ -306,20 +290,13 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
                wait for every row above it. */
             style={grid ? { animationDelay: `${Math.min(i, 5) * 40}ms` } : undefined}
           >
-            {body(t, false)}
+            {body(t)}
           </li>
         ))}
 
-        {/* The second track, present only while the ticker runs. Hidden from
-            assistive technology and from the Tab order, so the page still offers
-            each venue exactly once. */}
-        {!grid
-          ? tiles.map((t) => (
-              <li key={`clone-${t.key}`} className="ticker-tile" aria-hidden="true">
-                {body(t, true)}
-              </li>
-            ))
-          : null}
+        {/* NO SECOND TRACK. It existed only to hide the wrap of a moving
+            rail, and cost every tile a duplicate that had to be kept out of
+            the tab order and away from assistive technology. */}
       </ul>
 
       {/* Gone on desktop: everything it would reveal is already on screen. */}
@@ -343,6 +320,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
         </svg>
       </button>
       )}
+      {popup ? <VenuePopup venue={popup} onClose={() => setPopup(null)} /> : null}
     </div>
   );
 }

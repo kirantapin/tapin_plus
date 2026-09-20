@@ -1,21 +1,14 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Route, Routes, useLocation, useParams, type Location } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, type Location } from "react-router-dom";
 import Shell from "./shell/Shell";
-import AppLayer from "./shell/AppLayer";
 import ReserveLayer from "./shell/ReserveLayer";
 import Arrival from "./shell/Arrival";
-import { useMedia } from "./shell/useMedia";
 import { useEventTracking } from "./context/event_tracking_context";
 import Pitch from "./routes/Pitch";
 import How from "./routes/How";
+import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
 import Membership from "./routes/Membership";
-import AppShell from "./routes/app/AppShell";
-import AppHome from "./routes/app/AppHome";
-import AppDeals from "./routes/app/AppDeals";
-import AppSpot from "./routes/app/AppSpot";
-import AppPoints from "./routes/app/AppPoints";
-import AppPlace from "./routes/app/AppPlace";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -26,29 +19,6 @@ import AppPlace from "./routes/app/AppPlace";
  * don't animate page changes." This build does not animate them.
  */
 /** See the note on the place route: the key is the whole point of this. */
-function KeyedPlace() {
-  const { venueId } = useParams();
-  return <AppPlace key={venueId} />;
-}
-
-/** The locked app preview — what she gets, walkable before she pays anything,
- *  and still locked after, because it is not live until Spring 2027. Declared
- *  once and mounted in two places: in the page tree on a phone, and inside the
- *  desktop window (see AppLayer). */
-const appRoutes = (
-  <Route path="/app" element={<AppShell />}>
-    <Route index element={<AppHome />} />
-    <Route path="deals" element={<AppDeals />} />
-    <Route path="spot" element={<AppSpot />} />
-    <Route path="points" element={<AppPoints />} />
-    {/* One merchant. KEYED ON THE VENUE so React remounts it when the id
-        changes: the seeded basket is computed in a useState initializer, and
-        React Router reuses the component instance across /app/place/a →
-        /app/place/b, so the basket would still hold venue A's item ids. */}
-    <Route path="place/:venueId" element={<KeyedPlace />} />
-  </Route>
-);
-
 export default function App() {
   const location = useLocation();
 
@@ -65,17 +35,11 @@ export default function App() {
   useEffect(() => {
     track("$pageview", { $current_url: window.location.href, path: location.pathname });
   }, [location.pathname, track]);
-  const desktop = useMedia("(min-width: 1024px)");
-  const isApp = location.pathname === "/app" || location.pathname.startsWith("/app/");
-
-  /* ══ THE APP IS A WINDOW ON A DESKTOP ═══════════════════════════════════════
-     Sam, 14 Sep 2026. On a desktop /app renders as a layer over the page it
-     was opened from; the page keeps rendering underneath at the location the
-     link carried in `state.background`. On a phone nothing here applies and
-     the app is the page. See AppLayer for the whole mechanism. */
-  /* ══ THE CHECKOUT IS A SHEET, AT EVERY WIDTH ══════════════════════════════
-     Sam, 14 Sep 2026: /reserve "should be a modal that slides up from the
-     bottom of the page". Same mechanism as the app window; see ReserveLayer. */
+  /* THE APP PREVIEW IS GONE (Sam, 20 Sep 2026). Tapping a merchant opens that
+     merchant's benefits over the page and points at their LIVE TapIn ordering
+     page instead — shell/VenuePopup.tsx. The preview mocked a product that does
+     not open until Spring 2027; the six merchant pages are real today, which is
+     the stronger thing to show. */
   const isReserve = location.pathname === "/reserve";
 
   /* ══ THE ARRIVAL, ON THE DOOR ONLY ════════════════════════════════════════
@@ -86,8 +50,7 @@ export default function App() {
   const [arrive] = useState(
     () => location.pathname === "/" || location.pathname === "/welcome",
   );
-  const appLayered = desktop && isApp;
-  const layered = appLayered || isReserve;
+  const layered = isReserve;
   const background = (location.state as { background?: Location } | null)?.background;
   const under: Location | string = layered ? (background ?? "/") : location;
 
@@ -108,18 +71,24 @@ export default function App() {
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
           <Route path="/welcome" element={<Pitch invite="welcomeweek" />} />
           <Route path="/how" element={<How />} />
+          {/* ══ THE CAMPAIGN SPLASH ══════════════════════════════════════
+              One venue, for one Meta advert. Sam, 20 Sep 2026: "Should be a
+              separate URL, like plus.tapin.app/blacksburg/coffeeholics." The
+              app is served under BASE_URL "/blacksburg/", so this route IS
+              that path, and vercel.json's "/blacksburg/:path*" rewrite
+              already hands it to index.html. The host is a DNS matter. */}
+          <Route path="/coffeeholics" element={<Coffeeholics />} />
           <Route path="/reserve" element={<Reserve />} />
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}
           <Route path="/in" element={<Membership />} />
-          {appRoutes}
+          {/* THE PREVIEW'S OLD ADDRESSES. /app and everything under it were
+              real routes until 20 Sep 2026, so they are in browser histories,
+              in shared links and in anyone's muscle memory. Left unhandled
+              they render a blank page; they send you home instead. */}
+          <Route path="/app/*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
-      {appLayered ? (
-        <AppLayer background={background}>
-          <Routes>{appRoutes}</Routes>
-        </AppLayer>
-      ) : null}
       {isReserve ? (
         <ReserveLayer background={background}>
           <Reserve />
