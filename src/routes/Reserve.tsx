@@ -12,6 +12,7 @@ import {
   PLANS,
   lockedRateLine,
   lockedRateFor,
+  depositEarnsCredit,
   benefits,
   FOUNDING_OPEN,
   foundingCloses,
@@ -231,6 +232,11 @@ export default function Reserve() {
 
         {/* The founding rate survives — said here because it is the whole value
             of taking a seat now rather than later. */}
+        {/* The same sentence the hero carries, from the same constant. It sits
+            ABOVE the locked-rate line and well clear of the charge rows, which
+            stay exactly as they are: this is what the deposit earns back, not
+            a term of the charge. */}
+        <p className="t-compact plan-deposit">{depositEarnsCredit}</p>
         <p className="t-compact plan-locked">{lockedRateFor(plan.price, plan.per)}</p>
 
         {/* THE REFUND, WHERE THE PLAN IS CHOSEN. 14 Sep funnel audit: "Full

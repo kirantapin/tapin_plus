@@ -1012,6 +1012,37 @@ export const PLANS = {
  * and would have gone on saying $4.99 beside a checkout charging $14.99.
  */
 export const monthlyToday: number = MONTHLY_NOW;
+
+/**
+ * What the deposit turns into.
+ *
+ * Sam, 20 Sep 2026: "frame it as a deposit that counts towards credit that
+ * they can use (even though that credit is gated by a min $10 spend at
+ * participating merchant locations)."
+ *
+ * ══ THIS PROMISES NOTHING NEW, AND THAT IS THE POINT ═══════════════════════
+ * It would have been easy to write "your $4.99 becomes $4.99 of credit" —
+ * and nothing in this build or behind `create_simple_intent` grants such a
+ * credit, so that sentence would be a promise with no mechanism under it, on
+ * the surface that takes money.
+ *
+ * The membership already carries a $5 weekly credit on a $10+ order. That is
+ * a benefit that exists, is disclosed in the charge block, and is worth more
+ * than the deposit from the first qualifying order. So the frame Sam asked
+ * for is true as written, using the mechanic already shipped — and the $10
+ * gate is stated rather than buried, which is what he asked for too.
+ *
+ * THE COMPARISON IS CONDITIONAL ON THE ARITHMETIC. Both figures move: the
+ * deposit has been repriced five times this month and the credit is a
+ * constant in savings.ts. If a future price ever meets or passes the credit,
+ * the clause claiming it is worth more drops out by itself rather than
+ * quietly becoming false — the drift that has bitten FOUNDING_MONTHLY_USD
+ * twice already.
+ */
+export const depositEarnsCredit: string =
+  BENEFIT.creditUsd > MONTHLY_NOW
+    ? `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order earns $${BENEFIT.creditUsd} credit — more than the deposit.`
+    : `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order earns $${BENEFIT.creditUsd} credit.`;
 export const standardMonthly: number = moneyJson.pricing.standardMonthly;
 
 /** live = the app does this today. soon/example = it does not. */
