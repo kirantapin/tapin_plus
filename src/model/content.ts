@@ -181,7 +181,10 @@ export const covers = [
  * guessed one.
  */
 export const venueCovers: Record<string, string[]> = {
-  coffeeholicsva: ["food", "drinks"],
+  /* Events too. Sam, 20 Sep 2026: "for coffeeholics this also applies for
+     events too" — it was food and drinks only, from his first pass, which
+     named the other three venues for events and not this one. */
+  coffeeholicsva: ["food", "drinks", "tickets"],
   theburg: ["food", "drinks", "tickets"],
   themilkparlor: ["food", "drinks", "cover", "tickets", "lineskip"],
   olaika: ["food", "drinks", "tickets"],
@@ -214,17 +217,19 @@ export const venueCovers: Record<string, string[]> = {
 const VENUE_POLICY_DETAIL: Record<string, string> = {
   percent: "Everything except alcohol",
   credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here`,
-  /* ══ EMPTY, ON PURPOSE ═══════════════════════════════════════════════════
-     Sam, 20 Sep 2026: "we'd want to remove a lot of these little supporting
-     text things it's just way too crowded and dense."
+  /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
+     The density pass took this line out on the reasoning that it only
+     restated scope, which the `venueCovers` row below now says once for all
+     three. Sam, 20 Sep 2026, looking at the result: "not sure why you cut the
+     text here for the page preview pop ups."
 
-     The other two lines survive that cut because they are CONDITIONS: the 15%
-     has one exclusion and the credit has a floor and a frequency, and a
-     benefit printed without its condition is the §10 claim this build does
-     not make. Points have neither. Their line only ever restated scope, and
-     scope is now the `venueCovers` row a few pixels below — said once, for
-     all three. So the row is the label and the glyph, and nothing else. */
-  points: "",
+     He is right, and the reasoning was wrong about what the line is. "Earned
+     on every order" is a CADENCE, not a scope — the parallel of the credit's
+     "once a week here", and the answer to the question a reader actually has
+     about points, which is whether they have to qualify for them. It is also
+     his own wording, from the advert's third card, so the pop-up and the
+     campaign page say it identically. */
+  points: "Earned on every order",
 };
 
 /** A venue policy's detail line, corrected. An empty string means the benefit
