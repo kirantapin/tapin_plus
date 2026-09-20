@@ -149,10 +149,89 @@ export const covers = [
   { id: "food", label: "Food" },
   { id: "drinks", label: "Drinks" },
   { id: "cover", label: "Cover" },
-  { id: "tickets", label: "Tickets" },
+  /* "Events", not "Tickets". Sam, 20 Sep 2026, listing what the membership
+     reaches at each venue: "for the burg, olaika, and the milk parlor it'd be
+     events." One word for one thing, on every surface that prints it. */
+  { id: "tickets", label: "Events" },
   { id: "lineskip", label: "Line skips" },
   { id: "merch", label: "Merch" },
 ];
+
+/**
+ * What the membership reaches AT ONE VENUE — the `covers` ids that venue
+ * actually has, in the order `covers` declares them.
+ *
+ * Sam, 20 Sep 2026: "for these pop ups I need to be able to see what it can be
+ * used on, for all of them food and drinks are included — for the burg,
+ * olaika, and the milk parlor it'd be events, and for the milk parlor it's
+ * also cover and lineskips."
+ *
+ * ══ IT IS A SUBSET, AND THE SUBSET IS THE POINT ════════════════════════════
+ * `covers` above is the NETWORK's reach: everything the membership touches
+ * anywhere. A reader standing in front of one merchant is asking a narrower
+ * question, and answering it with the network's six marks would put "Line
+ * skips" on a coffee shop. §6's rule is that a thing a venue does not have is
+ * a row that is not there, so each venue names its own.
+ *
+ * Merch is deliberately absent from every venue. It is real at the network
+ * level and Sam did not give it per venue, and a scope row is a claim about a
+ * named business — so it is listed where it was granted and nowhere else.
+ *
+ * Keyed by venue id, so a venue with no entry shows no scope rather than a
+ * guessed one.
+ */
+export const venueCovers: Record<string, string[]> = {
+  coffeeholicsva: ["food", "drinks"],
+  theburg: ["food", "drinks", "tickets"],
+  themilkparlor: ["food", "drinks", "cover", "tickets", "lineskip"],
+  olaika: ["food", "drinks", "tickets"],
+  sweetopia: ["food", "drinks"],
+  italianospizza: ["food", "drinks"],
+};
+
+/**
+ * What a venue's own benefit rows SAY, at that venue.
+ *
+ * The frozen extraction gives every venue policy the same two detail strings,
+ * and the block above BENEFIT_DETAIL already records that both are wrong:
+ * "Food and non-alcoholic drinks" is far too narrow for the 15% and wrong in
+ * the other direction for points, which earn on everything. Those strings were
+ * latent until the merchant pop-up started printing them, and on 20 Sep 2026
+ * Sam read them on a phone and asked for the pop-up to be less confusing.
+ *
+ * ══ WHY NOT JUST REUSE BENEFIT_DETAIL ══════════════════════════════════════
+ * Because these are read standing in front of ONE merchant. The network
+ * string says "once a week at each place", which is the fact that makes the
+ * monthly figure work and is exactly the wrong emphasis on a card about one
+ * address; here it is "once a week here". Same fact, same constant, the
+ * sentence the reader is actually in.
+ *
+ * ══ AND WHY THESE ARE CONDITIONS, NOT SCOPES ═══════════════════════════════
+ * Scope moved out. `venueCovers` answers "what can I use this on" once, for
+ * the whole card, which is what stopped two of these three rows repeating the
+ * same four words at each other.
+ */
+const VENUE_POLICY_DETAIL: Record<string, string> = {
+  percent: "Everything except alcohol",
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here`,
+  /* ══ EMPTY, ON PURPOSE ═══════════════════════════════════════════════════
+     Sam, 20 Sep 2026: "we'd want to remove a lot of these little supporting
+     text things it's just way too crowded and dense."
+
+     The other two lines survive that cut because they are CONDITIONS: the 15%
+     has one exclusion and the credit has a floor and a frequency, and a
+     benefit printed without its condition is the §10 claim this build does
+     not make. Points have neither. Their line only ever restated scope, and
+     scope is now the `venueCovers` row a few pixels below — said once, for
+     all three. So the row is the label and the glyph, and nothing else. */
+  points: "",
+};
+
+/** A venue policy's detail line, corrected. An empty string means the benefit
+ *  carries no condition and the row prints none. Falls back to the record, so
+ *  a kind that gains a policy later still prints something true. */
+export const venuePolicyDetail = (kind: string, fallback: string): string =>
+  VENUE_POLICY_DETAIL[kind] ?? fallback;
 
 export interface ComingVenue {
   id: string;
