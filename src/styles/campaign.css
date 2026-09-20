@@ -531,3 +531,40 @@
 @media (prefers-reduced-motion:reduce){
   .ct,.ct-scrim,.ct-root.is-closing .ct,.ct-root.is-closing .ct-scrim{animation:none}
 }
+
+/* ── POWERED BY TAPIN ──────────────────────────────────────────────────────
+   The foot of a co-branded page has to say whose product it is. Quiet: the
+   lockup at reading size beside two words, centred, on the page's own ground
+   rather than in a plate — it is an attribution, not a section. */
+.cg-powered{
+  display:flex;align-items:center;justify-content:center;gap:var(--s-md);
+  margin:var(--s-2xl) 0 0;color:var(--ink-4);
+}
+.cg-powered span{font-size:12px;font-weight:600;letter-spacing:.02em}
+.cg-powered svg{height:17px;width:auto;display:block;color:var(--ink-2)}
+
+/* ── THE DOCKED PAIR'S CLEARANCE, ONLY WHILE IT IS DOCKED ──────────────────
+   Sam, 20 Sep 2026, on the foot of the page: "notice how there's so much
+   space here."
+
+   layout.css reserves 184px for `.sticky-cta.is-pair` unconditionally,
+   because the pitch's bar is up for most of that page. This page's bar is
+   up for almost none of it: it hides whenever the buy block is on screen,
+   and the buy block sits directly above the powered-by line and the footer —
+   so by the time a reader can see the bottom of the page, the bar has gone
+   and 160px of reserved floor is all that is left down there.
+
+   `:not(.is-away)` ties the reserve to the thing being reserved for. The
+   padding is added at the END of the document, so switching it on never
+   moves content the reader is looking at; switching it off can only shorten
+   a page they have already scrolled past the bar on.
+
+   152 rather than 184: the bar measures 144 here, and the reserve is the bar
+   plus a step. */
+.column:has(.cg-sticky.is-pair:not(.is-away)){padding-bottom:152px}
+/* AND THE GENERIC RULE HAS TO BE TURNED OFF, not merely out-specified.
+   layout.css's `.column:has(.sticky-cta.is-pair)` is unconditional, so while
+   the bar is away it kept reserving its 184px on its own — which is the
+   state the whole page ends in, and so the only state a reader ever sees the
+   floor in. Same weight as the rule above, later in the cascade. */
+.column:has(.cg-sticky.is-pair.is-away){padding-bottom:48px}

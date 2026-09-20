@@ -287,6 +287,19 @@ export default function Coffeeholics() {
         ) : null}
       </section>
 
+      {/* ══ POWERED BY TAPIN ════════════════════════════════════════════════
+          Sam, 20 Sep 2026: "it needs the powered by tapin as well."
+
+          This page wears Coffeeholics' colour from the announcement bar to
+          the button, which is the point of it — and the cost of that is that
+          the only thing naming whose product this is sits 1,100px up in the
+          lockup. A co-brand says whose it is at the foot, where a reader who
+          scrolled the whole thing is deciding whether to trust it. */}
+      <p className="cg-powered">
+        <span>Powered by</span>
+        <TapInLogo />
+      </p>
+
       <SiteFoot />
 
       {trial ? <TrialModal onClose={() => setTrial(false)} /> : null}
