@@ -11,7 +11,6 @@ import {
   logoField,
   launchWindow,
   monthlyToday,
-  depositEarnsCredit,
   venues,
 } from "../model/content";
 import { campaignVenue, campaignBenefits, campaignTrials } from "../model/campaign";
@@ -283,9 +282,6 @@ export default function Coffeeholics() {
             <b className="tnum">${monthlyToday.toFixed(2)}</b>
             <span>deposit</span>
           </p>
-          {/* What the word means, immediately under it: the credit it earns
-              back and the order that earns it. The pitch's own string. */}
-          <p className="t-compact cg-deposit">{depositEarnsCredit}</p>
           <p className="t-compact cg-seat">
             <SeatCapLine />
           </p>

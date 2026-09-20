@@ -438,11 +438,3 @@
   margin: 0;
   text-wrap: pretty;
 }
-
-/* The deposit's meaning, tight to the figure it qualifies. */
-.cg-deposit {
-  margin: var(--s-sm) 0 0;
-  color: var(--ink-2);
-  max-width: 34ch;
-  text-wrap: pretty;
-}
