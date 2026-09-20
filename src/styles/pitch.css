@@ -884,14 +884,52 @@ button.vcard:focus-visible {
   letter-spacing: -0.02em;
   color: var(--ink-3);
 }
-/* Dashed only for the network tile — it is the one that is not a place at all. */
+/* ══ THE NETWORK TILE WEARS THE BRAND ══════════════════════════════════════
+   Sam, 20 Sep 2026: "can we make this white text on purple gradient
+   background."
+
+   It was the dashed empty plate the signed-but-unopened venues use, which was
+   right while it read as "a place with no photograph yet" and wrong once the
+   rail moved onto light surfaces: on the checkout's white sheet a dashed grey
+   box with grey type is the one tile that looks unfinished rather than the one
+   tile that is not a place.
+
+   ── IT IS THE BRAND TOKEN, NOT A PURPLE ────────────────────────────────────
+   `--maroon`, which on the campaign surface IS Coffeeholics' purple because
+   that page redefines it, and on the pitch is Chicago Maroon. So the tile
+   wears whichever brand owns the page it is on and there is no second colour
+   to keep in sync. Sam is looking at the campaign checkout, where it is the
+   purple he asked for.
+
+   ── AND IT SPENDS THAT FILL ON SOMETHING THAT IS NOT A CONTROL ─────────────
+   tokens.css reserves a solid brand fill for a thing that is chosen or
+   acting, and this tile is neither. Two things keep it inside the rule's
+   intent rather than beside it: it is a GRADIENT, not the flat fill that
+   marks the acting things, and it is the one tile in the rail that is not a
+   venue — the fill is what says so, which is the job the dash was doing. It
+   is idle, it has no hover and no press, and nothing else in the rail carries
+   any fill at all.
+
+   White type throughout, at 9.19:1 on the mid stop. */
 .vcard.is-more .vshot.is-empty {
-  border: 1px dashed var(--hair-lit);
+  border: 0;
+  background: linear-gradient(
+    158deg,
+    color-mix(in srgb, var(--maroon) 82%, #FFFFFF) 0%,
+    var(--maroon) 48%,
+    color-mix(in srgb, var(--maroon) 74%, #000000) 100%
+  );
+  color: var(--on-maroon);
+}
+.vcard.is-more .vname b,
+.vcard.is-more .vmeta {
+  color: var(--on-maroon);
 }
 .vcard.is-more .vmeta {
   white-space: normal;
   overflow: visible;
   line-height: 1.35;
+  opacity: 0.82;
 }
 .tag-sm {
   font-size: 10px;
