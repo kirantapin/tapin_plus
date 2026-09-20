@@ -1180,7 +1180,9 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-dock{position:sticky;bottom:0;z-index:5;
   margin:var(--s-md) calc(-1 * var(--gutter)) 0;
   padding:var(--s-lg) var(--gutter) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
-  background:linear-gradient(180deg,rgba(42,15,28,0) 0%,var(--page) 45%);
+  /* --page-0, not a literal: this faded from a hard-coded dark page, so on a
+     light sheet it would have fanned out of a colour that is no longer there. */
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%);
   transition:transform 200ms var(--ease),opacity 200ms var(--ease)}
 .rs-dock .action{margin:0}
 .rs-dock.is-away{transform:translateY(110%);opacity:0;pointer-events:none}

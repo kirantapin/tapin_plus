@@ -92,6 +92,7 @@ export default function ReserveLayer({
         <div className="reserve-scrim" aria-hidden="true" />
         <div
           className="reserve-sheet"
+          data-lit=""
           role="dialog"
           aria-modal="true"
           aria-label={`Get the ${seatNoun}`}

@@ -99,8 +99,14 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
   return createPortal(
     <div className={`vp-root${closing ? " is-closing" : ""}`} onClick={close}>
       <div className="vp-scrim" aria-hidden="true" />
+      {/* `data-lit` inverts the nine ground-and-ink tokens on this subtree
+          (styles/light.css). Sam, 20 Sep 2026: "can we make these pop ups,
+          along with the checkout modal pop up also be light theme." The
+          scrim, the sheet's shadow and the veil over the photograph stay
+          dark, because none of them is a surface. */}
       <div
         className="vp"
+        data-lit=""
         role="dialog"
         aria-modal="true"
         aria-label={venue.name}

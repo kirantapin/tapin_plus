@@ -302,19 +302,13 @@
    wordmark's dot (#D14245) sits at 3.84 on the darkest of them, which is a
    graphic mark rather than type and clears the 3:1 that applies to one.
    ============================================================================ */
-/* ── NOT WHILE THE CHECKOUT IS OPEN ────────────────────────────────────────
-   `:not(.is-layered)`. App.tsx puts `.is-layered` on <html> whenever /reserve
-   is open over a page, and the checkout sheet is built for the dark world: run
-   under these tokens it kept its dark plates and took dark ink with them, and
-   the seat line, the deposit rows and the sheet's own heading all dropped to
-   a few points of contrast — measured on the one surface in this product that
-   takes money.
-
-   So the campaign's light theme switches off for exactly as long as the sheet
-   is up, and the page behind the scrim goes back to the house dark with it.
-   The reader is still on /blacksburg/coffeeholics and still returns to it: the
-   silo is the navigation, not the palette. */
-:root[data-surface="cg"]:not(.is-layered) {
+/* THE `:not(.is-layered)` GATE IS GONE. It existed because the checkout sheet
+   was built for the dark world and, run under these tokens, kept its dark
+   plates while taking dark ink with them — a few points of contrast on the one
+   surface that takes money. The sheet now carries its own light ramp on
+   `data-lit` (styles/light.css), so it no longer inherits anything from the
+   page beneath it and this page has no reason to switch itself off. */
+:root[data-surface="cg"] {
   --page: #F3F2F5;
   --subtle: #FFFFFF;
   --card: #FFFFFF;
@@ -355,14 +349,14 @@
 
 /* The field, lit the same way the dark one is: a step off at the top, the
    page's own colour through the middle, a shade deeper at the foot. */
-:root[data-surface="cg"]:not(.is-layered) body {
+:root[data-surface="cg"] body {
   background: linear-gradient(180deg, #FAFAFC 0%, var(--page) 46%, #E9E7ED 100%);
   background-attachment: fixed;
 }
 /* The authored ground is three maroon radials. On cream they read as smoke,
    so this surface gets one wash in the merchant's purple at the same low
    alphas — present, never a colour the type has to survive. */
-:root[data-surface="cg"]:not(.is-layered) .ground {
+:root[data-surface="cg"] .ground {
   background:
     radial-gradient(58% 42% at 18% 4%,
       rgba(107, 49, 158, 0.13) 0%, rgba(107, 49, 158, 0.07) 34%,
@@ -375,19 +369,19 @@
    Three places, all of them marks rather than surfaces: the glyph plates
    beside the benefits, the hairline and arrow on the trial buttons, and the
    label over them. */
-:root[data-surface="cg"]:not(.is-layered) .cg-icon {
+:root[data-surface="cg"] .cg-icon {
   background: color-mix(in srgb, var(--cg-brand) 9%, #FFFFFF);
   border-color: color-mix(in srgb, var(--cg-brand) 26%, transparent);
   color: var(--cg-brand);
 }
-:root[data-surface="cg"]:not(.is-layered) .cg-trial {
+:root[data-surface="cg"] .cg-trial {
   border: 1px solid color-mix(in srgb, var(--cg-brand) 30%, transparent);
   background: #FFFFFF;
 }
-:root[data-surface="cg"]:not(.is-layered) .cg-trial svg {
+:root[data-surface="cg"] .cg-trial svg {
   color: var(--cg-brand);
 }
-:root[data-surface="cg"]:not(.is-layered) .cg-today .panel-label {
+:root[data-surface="cg"] .cg-today .panel-label {
   color: var(--cg-brand);
 }
 
