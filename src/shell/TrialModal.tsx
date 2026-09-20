@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { campaignTrials, campaignVenue } from "../model/campaign";
+import { useReserveCta } from "./useReserveCta";
 import { monthlyToday, standardAfter } from "../model/content";
 
 /**
@@ -40,6 +41,16 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
   const [closing, setClosing] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const venue = campaignVenue;
+  /* ══ THE SILO HELD ON THE PAGE AND BROKE IN HERE ═══════════════════════
+     Sam, 20 Sep 2026: "when I clicked on get early access again it took me
+     to the main tapin page checkout not the one for coffeeholics."
+
+     `/reserve` is a layer over `state.background ?? "/"`, and this Link was
+     written as a bare `to="/reserve"` — so it took the fallback and put the
+     pitch under the sheet. The page's own two buttons have carried the
+     background since the silo was asked for; this one was added later and
+     did not. It uses the same hook now, which is the point of the hook. */
+  const cta = useReserveCta();
 
   const close = () => {
     if (closing) return;
@@ -66,22 +77,22 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* ══ HEADINGS ONLY ═══════════════════════════════════════════════════════
+     Sam, 20 Sep 2026: "this is too confusing, but I like the steps involved
+     here — can you just use /impeccable polish to make it a bit less wordy."
+
+     Each step carried a sentence under it and two of the three were saying
+     what the buttons below already say in their own words: step one described
+     what tapping an offer does, step two restated both offers' terms, and the
+     offers then restated them again. Ninety-five words to say three things.
+
+     So the sentences are gone and the third heading absorbs the one fact that
+     was only ever in them — the ticket — because that is the part nobody
+     expects and the only reason this list is longer than one line. */
   const steps = [
-    {
-      k: "open",
-      h: `Open ${venue?.name ?? "the shop"} on TapIn`,
-      p: "Either offer below takes you straight there, already attached to your order.",
-    },
-    {
-      k: "order",
-      h: "Order what you want",
-      p: "The 15% comes off the top, or the $5 credit lands in My Spot for whenever you want it.",
-    },
-    {
-      k: "collect",
-      h: "Collect it",
-      p: "Your order goes straight to the counter as a ticket when you place it.",
-    },
+    { k: "open", h: `Open ${venue?.name ?? "the shop"} on TapIn` },
+    { k: "order", h: "Order what you want" },
+    { k: "collect", h: "It goes straight to the counter as a ticket" },
   ];
 
   /* On <body>: the campaign page's panels are transformed surfaces, and a
@@ -120,10 +131,7 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
                 <span className="ct-num" aria-hidden="true">
                   {i + 1}
                 </span>
-                <span>
-                  <b>{s.h}</b>
-                  <span>{s.p}</span>
-                </span>
+                <b>{s.h}</b>
               </li>
             ))}
           </ol>
@@ -137,10 +145,9 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span>
-                    <b>{t.label}</b>
-                    <span>{t.note}</span>
-                  </span>
+                  {/* The label alone. "Spend $10, get $5 credit" is a whole
+                      claim, and the line under it repeated the step above. */}
+                  <b>{t.label}</b>
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
@@ -155,8 +162,10 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
               </li>
             ))}
           </ul>
+          {/* The two facts worth keeping from the four lines that went: it is
+              one use each, and the credit keeps. */}
           <p className="t-compact ct-once">
-            One time each, on your next order at {venue?.name ?? "the shop"}.
+            One time each. Your credit waits in My Spot.
           </p>
 
           {/* ══ THE CALL-OUT ═══════════════════════════════════════════════
@@ -172,11 +181,15 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
           <div className="ct-more">
             <p className="ct-more-h">Want this every week?</p>
             <p className="t-compact ct-more-p">
-              Early access is ${monthlyToday.toFixed(2)} before the price goes up to{" "}
-              {standardAfter}.
+              ${monthlyToday.toFixed(2)} now, {standardAfter} once the spots are gone.
             </p>
-            <Link className="action ct-go" to="/reserve" onClick={onClose}>
-              Get early access
+            <Link
+              className="action ct-go"
+              to={cta.to}
+              state={cta.state}
+              onClick={onClose}
+            >
+              {cta.label}
             </Link>
           </div>
         </div>
