@@ -1351,3 +1351,9 @@ html[data-flight="in"] .column > .sticky-cta{
   background:none;
   -webkit-backdrop-filter:none;backdrop-filter:none;
 }
+
+/* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
+   carries a negative top margin to pull itself against the plan picker, so it
+   has to be cancelled when this sits between the two. */
+.plan-deposit{margin:var(--s-lg) 0 0;color:var(--ink-2);text-wrap:pretty}
+.plan-deposit + .plan-locked{margin-top:var(--s-md)}
