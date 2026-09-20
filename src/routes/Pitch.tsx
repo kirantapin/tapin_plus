@@ -180,15 +180,21 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               as cashback. The word "membership" now leads, and the credit is
               called what TRUTH calls it. */}
           <h1 className="t-display">
-            $5 credit every week, at every place you already go.
+            $5 credit every week, at every place you already go
           </h1>
 
           {/* The other two, and where. ONE line: 37signals' own reporting on
               their winning hero is that adding further explanation beneath it
-              performed 22% WORSE, so the fix is the first line, never a stack. */}
-          <p className="t-lead">
-            Restaurants and bars around Blacksburg. Plus 15% off and points
-            toward rewards.
+              performed 22% WORSE, so the fix is the first line, never a stack.
+
+              IT IS NOW THE SAME LINE. Sam, 20 Sep 2026: "this copy should flow
+              as if it's a single sentence, while keeping the large header text
+              we have now." So the headline lost its full stop and this became
+              its continuation rather than a second statement — one sentence,
+              set at two sizes. The headline's own words are untouched. */}
+          <p className="t-lead hero-lead">
+            &mdash; restaurants and bars around Blacksburg, plus 15% off and
+            points toward rewards.
           </p>
           {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
                 of these places today, and a reader can check that in ten
