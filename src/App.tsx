@@ -6,6 +6,7 @@ import Arrival from "./shell/Arrival";
 import { useEventTracking } from "./context/event_tracking_context";
 import Pitch from "./routes/Pitch";
 import How from "./routes/How";
+import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
 import Membership from "./routes/Membership";
 
@@ -70,6 +71,13 @@ export default function App() {
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
           <Route path="/welcome" element={<Pitch invite="welcomeweek" />} />
           <Route path="/how" element={<How />} />
+          {/* ══ THE CAMPAIGN SPLASH ══════════════════════════════════════
+              One venue, for one Meta advert. Sam, 20 Sep 2026: "Should be a
+              separate URL, like plus.tapin.app/blacksburg/coffeeholics." The
+              app is served under BASE_URL "/blacksburg/", so this route IS
+              that path, and vercel.json's "/blacksburg/:path*" rewrite
+              already hands it to index.html. The host is a DNS matter. */}
+          <Route path="/coffeeholics" element={<Coffeeholics />} />
           <Route path="/reserve" element={<Reserve />} />
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}

@@ -12,6 +12,7 @@ import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";
 import "./styles/venue.css";
+import "./styles/campaign.css";
 import "./styles/arrival.css";
 
 createRoot(document.getElementById("root")!).render(
