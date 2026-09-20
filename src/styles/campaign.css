@@ -610,3 +610,11 @@
 .cg-try:active{transform:scale(.98)}
 .cg-try:focus-visible{outline:2px solid var(--cg-brand,var(--maroon));outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.cg-try:active{transform:none}}
+
+/* The closing row, inside the call-out's plate. Two overrides only: the ring
+   that cuts each mark out of the one behind it has to be the plate's colour
+   rather than the card's, and the row needs the interval the heading above it
+   expects. */
+.ct-also{margin:var(--s-lg) 0 0}
+.ct-also .collar{box-shadow:0 0 0 2px var(--inner)}
+.ct-more-p{margin-top:var(--s-lg)}
