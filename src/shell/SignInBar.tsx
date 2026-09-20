@@ -53,6 +53,7 @@ export default function SignInBar() {
         <div className="cs-scrim" onClick={() => setOpen(false)}>
           <div
             className="cs-sheet"
+            data-lit=""
             role="dialog"
             aria-modal="true"
             aria-label="Sign in"
