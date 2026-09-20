@@ -188,14 +188,8 @@ export default function Reserve() {
           {FOUNDING_OPEN ? <p className="rs-seat-close">Closes {foundingCloses}</p> : null}
         </div>
 
-        <div className="rs-card">
-          <TapInCard
-            name={cardName.trim() || undefined}
-            innerRef={cardRef}
-            className="reserve-card"
-          />
-        </div>
-
+        {/* THE CARD USED TO STAND HERE, between the count and the plans.
+            It is at the foot now — see the panel below the places. */}
 
       <Panel className="checkout" id="plans">
         {/* The seat count used to open this panel. It is under the card now —
@@ -303,7 +297,16 @@ export default function Reserve() {
                 }
               }}
             >
-              <b>Standard</b>
+              {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
+                  soon'." The tile's second line already said when it opens;
+                  the chip says THAT it is not open, which is the faster read
+                  and the one a reader needs before they tap. Not maroon —
+                  tokens.css spends a solid brand fill on a chosen or acting
+                  thing, and this is neither. */}
+              <span className="plan-head">
+                <b>Standard</b>
+                <span className="plan-chip">Coming soon</span>
+              </span>
               <span className="plan-figs">
                 <span className="plan-now">
                   <b className="tnum">{plan.saving.after}</b>
@@ -434,6 +437,40 @@ export default function Reserve() {
           <p className="t-caption places-label">Where it works</p>
           <VenueTicker rail />
         </section>
+
+        {/* ══ THE CARD, AT THE FOOT, IN ITS OWN PANEL ══════════════════════
+            Sam, 20 Sep 2026: "can we move the membership card down to the
+            bottom? Make sure that it doesn't just fit there awkwardly. Maybe
+            it lives in a parent container itself. I'm just thinking having it
+            here on both checkout modals might lead to some bounce for
+            customers."
+
+            He is right about what it was doing. The card is the most
+            arresting object in this build and it stood directly above the
+            plans, so the first screenful of the surface that takes money was
+            a picture of a thing you do not own yet, with the decision pushed
+            under it. Aspiration belongs after the argument, not in front of
+            it.
+
+            "Not awkwardly" is the panel. On its own the card is a floating
+            object with nothing to sit on, which is exactly how it looked in
+            the one earlier attempt at moving it; in a labelled panel it is
+            the build's own inversion — a flat container with one raised
+            thing inside — which is the shape the benefit cards, the plan
+            tiles and the venue rail all already use.
+
+            It keeps its name field. That field is optional and the checkout
+            sheet asks for the name again, so nothing is lost by it sitting
+            after the button rather than before it. */}
+        <Panel label="Your card" className="rs-card-panel">
+          <div className="rs-card">
+            <TapInCard
+              name={cardName.trim() || undefined}
+              innerRef={cardRef}
+              className="reserve-card"
+            />
+          </div>
+        </Panel>
 
         <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>
           <button

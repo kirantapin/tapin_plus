@@ -1141,11 +1141,18 @@ html[data-flight="in"] .column > .sticky-cta{
      inside the dialog the grid needs the whole 1000px. */
   .sheet-column.column{max-width:none;width:100%}
   .sheet-column.column > .rs-modal{max-width:none;width:100%}
+  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026) and the
+     places row gained an area of its own — without one it was landing in an
+     implicit row and breaking the two columns it sat under. Reading order
+     down the left is now count, what you get, guarantee, where, card; the
+     decision holds the right the whole way down. */
   .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
-    grid-template-areas:"seats plans" "card plans" "includes plans" "closing plans";
-    grid-template-rows:auto auto 1fr auto;
+    grid-template-areas:"seats plans" "includes plans" "closing plans"
+      "places plans" "card plans";
+    grid-template-rows:repeat(5,auto);
     column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
-  .rs-card{grid-area:card}
+  .rs-card-panel{grid-area:card}
+  .rs-places{grid-area:places}
   /* The card at the size you would hold one, centred over its count;
      the panels beneath take the column. */
   .rs-card > *{max-width:380px;margin:0 auto}
@@ -1155,10 +1162,22 @@ html[data-flight="in"] .column > .sticky-cta{
      finish together. The panel now stretches to the row and is a flex
      column: the plans at its head, the two lines under them, and the button
      seated at its foot — on the same baseline as the refund card. */
-  .rs-modal > .checkout{grid-area:plans;align-self:stretch;display:flex;flex-direction:column;
+  /* ══ IT NO LONGER STRETCHES ═══════════════════════════════════════════
+     The 15 Sep fix seated the button at the foot of a stretched column so
+     the two movements finished together — the right column was ending 50px
+     short of the left and the gap read as a mistake.
+
+     Moving the card to the foot (20 Sep) put two more rows in the left
+     column, so "as tall as the other" became a 600px hole between the terms
+     and the button. Fifty pixels of difference is a misalignment; six
+     hundred is an empty column with a control stranded at the bottom of it.
+     So the panel sizes to its content again and the button follows the
+     sentence it belongs to. The columns now differ in height, which is what
+     two columns of different content do. */
+  .rs-modal > .checkout{grid-area:plans;align-self:start;display:flex;flex-direction:column;
     position:static}
   .rs-modal > .checkout > .plan-refund{margin-top:0}
-  .rs-modal > .checkout > .pay-slot{margin-top:auto;padding-top:var(--s-lg)}
+  .rs-modal > .checkout > .pay-slot{margin-top:var(--s-xl)}
   /* The left column, one rhythm: the count sits close under the card, the
      checklist one interval below it, the guarantee at the foot. */
   .rs-modal > .rs-includes-panel{grid-area:includes;margin:0}
@@ -1465,3 +1484,33 @@ html[data-flight="in"] .column > .sticky-cta{
   border-start-start-radius:inherit;
   border-start-end-radius:inherit;
 }
+
+
+/* ── THE CARD'S PANEL ──────────────────────────────────────────────────────
+   A flat container with one raised object inside it — the inversion this
+   build uses everywhere else, and what stops the card reading as a loose
+   thing dropped at the end of the sheet. The card keeps its own width cap
+   and centres on the panel's measure. */
+.rs-card-panel{margin-top:var(--s-2xl)}
+.rs-card-panel .rs-card{margin-top:var(--s-md)}
+
+/* ── THE COMING-SOON CHIP ──────────────────────────────────────────────────
+   On the tier that is not open. Quiet by construction: the press step of the
+   ground, ink three, and the caption's tracking — it is a state, and the one
+   solid fill in this palette is reserved for a thing that is chosen or
+   acting. It sits on the label's own line so the tile keeps its two rows. */
+.plan-head{display:flex;align-items:center;gap:var(--s-md);flex-wrap:wrap}
+.plan-chip{
+  flex:0 0 auto;padding:2px 7px;border-radius:var(--r-pill);
+  background:var(--press);color:var(--ink-3);
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  line-height:1.5;
+}
+.plan-opt.is-on .plan-chip{background:rgba(255,255,255,.18);color:var(--on-maroon)}
+
+
+/* The places heading inside the sheet is a section caption like the panels
+   around it, not the page-width heading pitch.css gives it on the pitch —
+   three labels in one column have to be one thing. */
+.rs-places .places-label{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;line-height:1.3}
