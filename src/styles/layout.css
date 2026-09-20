@@ -459,3 +459,14 @@
 @media (hover:hover){.site-foot a:hover{color:var(--ink-2)}}
 .site-foot a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
+
+/* ── the hero reads as one sentence ────────────────────────────────────────
+   The lead continues the headline rather than following it, so it sits at a
+   continuation's distance — one step, not the paragraph interval a separate
+   statement would take — and shares the headline's measure on desktop so the
+   two halves stack as one block of text rather than two columns of different
+   widths. */
+.hero .hero-lead{margin-top:var(--s-md)}
+@media (min-width:1024px){
+  .hero-band:not(.is-compact) .hero .hero-lead{max-width:30ch}
+}
