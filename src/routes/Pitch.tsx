@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Panel } from "../shell/Panel";
 import {
   INVITES,
@@ -8,7 +8,6 @@ import {
   type InviteId,
 } from "../model/invite";
 import TapInLogo from "../shell/TapInLogo";
-import { NavIcon } from "../shell/Icons";
 import AppliesTo from "../shell/AppliesTo";
 import SavingsSlider from "../shell/SavingsSlider";
 import { Drill } from "../shell/Drill";
@@ -26,9 +25,6 @@ import {
   GUARANTEE_CONTACT,
   launchWindow,
 } from "../model/content";
-
-/** The app's four destinations, in tab order. */
-const APP_TABS = ["home", "deals", "spot", "points"];
 
 /**
  * The pitch. Mode: Persuade. It STATES NO CHARGE — the charge rows, renewal
@@ -52,7 +48,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
   }, [invite]);
   const via: InviteId | null = invite ?? recallInvite();
   /* Where the app window opens over, on a desktop (AppLayer). */
-  const location = useLocation();
   /* ONE VISIBLE "Reserve a founding seat" AT A TIME. The hero carries the real
      action now, and the docked bar carries it again once a reader has scrolled
      past — but both on screen together is two identical maroon controls
@@ -512,27 +507,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             ~140px of bar over the page and layout.css's clearance below is tuned
             to one button's height. */}
 
-        {/* The app is the product; this page is only the argument for it. One
-            link, and the four glyphs ARE the contents — the row illustrates and
-            previews at once, which is cheaper than a paragraph describing it. */}
-        <Link className="applink" to="/app" state={{ background: location }}>
-          <span className="applink-glyphs" aria-hidden="true">
-            {APP_TABS.map((t) => (
-              <NavIcon key={t} id={t} />
-            ))}
-          </span>
-          <b>See inside the app</b>
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="applink-go">
-            <path
-              d="m10 7 5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Link>
         <SiteFoot />
       </div>
 

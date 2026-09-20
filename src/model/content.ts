@@ -39,15 +39,19 @@ export interface Venue {
    *
    * Sam, 13 Sep 2026, giving the two: tapin.app/theburg and
    * tapin.app/coffeeholicsva. It is optional and stays optional: four of the
-   * six venues have no live page, and a link that 404s at a real business is
-   * worse than no link. Absence renders nothing — the same §6 move as the Plus
-   * badge, where a thing a venue does not have is a row that is not there.
+   * worse than no link. It stays optional for that reason, though as of
+   * 20 Sep 2026 all six resolve — see LIVE_PAGE below, which fills the four
+   * the extraction left blank after each was opened and checked.
    *
-   * It is also the one place this product leaves itself. Everything else in the
-   * preview completes on its own page; this is a real address, opened in a new
-   * tab, and it is the reason the preview can claim any authority at all.
+   * It is also the one place this product leaves itself, and since the app
+   * preview came out (20 Sep 2026) it is the merchant pop-up's only action:
+   * a real address, in a new tab, which is the whole proof that these six
+   * businesses are running TapIn today.
    */
   liveUrl?: string;
+  /** That venue's own standing benefits, from its record — the three at a
+   *  Plus place, none at Italiano's, which carries a one-time offer instead. */
+  policies: Policy[];
   /** Merchant property, not a token. May only collar the merchant's own mark
    *  (TRUTH.md §6) — never skin a TapIn surface. */
   brandColor: string;
@@ -68,6 +72,27 @@ interface VenueRecord extends Omit<Venue, "plus"> {
   policies: Policy[];
 }
 
+/**
+ * The live TapIn page for venues the extraction did not record one for.
+ *
+ * venues.json carries `liveUrl` for two of the six — Sam gave those two on
+ * 13 Sep 2026 and the field has been optional ever since, on the rule that a
+ * link which 404s at a real business is worse than no link.
+ *
+ * ALL SIX ARE LIVE. Opened in a browser on 20 Sep 2026: every id resolves to
+ * that merchant's own TapIn page with their own menu on it, and The Milk
+ * Parlor's even reads CLOSED, which is what its record here already says. So
+ * the rule is satisfied rather than bent — these are verified, not assumed.
+ * The frozen extraction is not edited; the override lives here, the way the
+ * benefit labels above do.
+ */
+const LIVE_PAGE: Record<string, string> = {
+  themilkparlor: "https://www.tapin.app/themilkparlor",
+  olaika: "https://www.tapin.app/olaika",
+  sweetopia: "https://www.tapin.app/sweetopia",
+  italianospizza: "https://www.tapin.app/italianospizza",
+};
+
 export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map(
   (v) => ({
     id: v.id,
@@ -77,7 +102,7 @@ export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map(
     category: v.category,
     street: v.street,
     open: v.open,
-    liveUrl: v.liveUrl,
+    liveUrl: v.liveUrl ?? LIVE_PAGE[v.id],
     brandColor: v.brandColor,
     plus: v.policies.length > 0,
     /* The extraction's points policy reads "2× points" with a multiplier of 2.

@@ -1,7 +1,7 @@
 import PlusFlag from "./PlusFlag";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { venues, comingVenues, heroIsBright, logoField } from "../model/content";
+import VenuePopup from "./VenuePopup";
+import { venues, comingVenues, heroIsBright, logoField, type Venue } from "../model/content";
 
 /**
  * The places: a ticker that opens into a grid.
@@ -93,7 +93,11 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
   const wide = useDesktop();
   const desktop = wide && !railOnly;
   /* The tiles open the app over this page on a desktop (AppLayer). */
-  const location = useLocation();
+  /* WHICH MERCHANT IS OPEN, if any. Local to the ticker: only one tile can be
+     tapped at a time, so the two instances the pitch renders cannot disagree,
+     and no route or router state is involved (Sam, 20 Sep 2026 — a pop-up,
+     not a page). */
+  const [popup, setPopup] = useState<Venue | null>(null);
   const [open, setOpen] = useState(false);
   /** The grid is shown when the reader asked for it, or when there is room. */
   const grid = desktop || open;
@@ -171,7 +175,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
   const tiles = [
     ...venues.map((v) => ({
       key: v.id,
-      to: `/app/place/${v.id}` as string | undefined,
+      venue: v as Venue | undefined,
       name: v.name,
       /* Category only (audit, 14 Sep 2026): the street was the wordiest line on
          seven tiles, and the venue page carries the address. */
@@ -186,7 +190,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
     })),
     ...comingVenues.map((v) => ({
       key: v.id,
-      to: undefined,
+      venue: undefined as Venue | undefined,
       name: v.name,
       meta: v.category,
       /* Real assets when the record carries them (Slake does, 14 Sep 2026);
@@ -263,15 +267,26 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
         {t.tag ? <span className="vflag is-soon">{t.tag}</span> : null}
       </>
     );
-    if (!t.to) {
+    if (!t.venue) {
       /* Signed, not open. There is no page behind Slake and there must not
-         appear to be, so it takes none of the anchor's behaviour. */
+         appear to be, so it takes none of the button's behaviour. */
       return <span className="vcard is-idle">{inner}</span>;
     }
+    /* A BUTTON, NOT A LINK. It opens the merchant's benefits over this page
+       rather than navigating anywhere — the app preview it used to point at
+       is gone (Sam, 20 Sep 2026). The clone track stays out of the tab order,
+       as it did when these were anchors. */
+    const v = t.venue;
     return (
-      <Link className="vcard" to={t.to} state={{ background: location }} tabIndex={clone ? -1 : undefined}>
+      <button
+        type="button"
+        className="vcard"
+        onClick={() => setPopup(v)}
+        tabIndex={clone ? -1 : undefined}
+        aria-haspopup="dialog"
+      >
         {inner}
-      </Link>
+      </button>
     );
   };
 
@@ -343,6 +358,7 @@ export default function VenueTicker({ rail: railOnly = false }: { rail?: boolean
         </svg>
       </button>
       )}
+      {popup ? <VenuePopup venue={popup} onClose={() => setPopup(null)} /> : null}
     </div>
   );
 }
