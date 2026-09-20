@@ -1367,9 +1367,28 @@ html[data-flight="in"] .column > .sticky-cta{
 
    The element stays, because it is doing the layout: `.cs-scrim` is the fixed
    flex box that positions the sheet at the bottom of the viewport and catches
-   the backdrop click that dismisses it. Only its paint is dropped. */
+   the backdrop click that dismisses it.
+
+   ══ AND IT PAINTS AGAIN, QUIETLY ═══════════════════════════════════════════
+   Sam, 20 Sep 2026: "when this pops up, the background should fade out a bit.
+   It's too bright."
+
+   The reasoning above was written when the reserve sheet was dark. What the
+   outer scrim dims is the PITCH, two layers down; the thing directly behind
+   the phone step is the reserve sheet itself, and that sheet went white when
+   the modals went light. So the step was sitting on an undimmed white page —
+   nothing compounding, nothing at 86%, just no separation at all.
+
+   .22, not the .62 that caused the original problem. It is dimming one light
+   sheet rather than a dark page, so a quarter of the way down is the whole
+   distance needed; the ink behind stays legible as context and stops
+   competing. Ink rather than black, on the house hue, because everything it
+   covers is now a light surface and pure black on cream reads as grey film.
+
+   The blur stays off. Two backdrop-filters nested is the expensive half of
+   what the first version got wrong, and separation is the job here. */
 .reserve-layer .cs-scrim{
-  background:none;
+  background:rgba(26,16,22,.22);
   -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 
