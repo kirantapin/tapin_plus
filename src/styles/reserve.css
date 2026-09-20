@@ -1357,3 +1357,19 @@ html[data-flight="in"] .column > .sticky-cta{
 /* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
    carries a negative top margin to pull itself against the plan picker, so it
    has to be cancelled when this sits between the two. */
+
+/* ── THE PRICE LADDER ──────────────────────────────────────────────────────
+   Two tiles stacked, not side by side: an anchor is read top-to-bottom, and
+   at 1fr 1fr the two prices sit at the same height where neither leads.
+   `.is-solo` stays for the case where there is no standard tier to show.
+
+   THE SECOND TILE IS NOT A CONTROL. No pointer, no press transform, no hover
+   — the three things that make the first one feel tappable are exactly what
+   would make this one a promise it cannot keep. It is dimmed by ink rather
+   than by `opacity`, so the figure stays legible while reading as inactive:
+   --ink-3 on --inner is 7.37:1 here. */
+.plan-pick.is-ladder{grid-template-columns:1fr}
+.plan-opt.is-later{cursor:default;background:var(--inner);border-style:dashed}
+.plan-opt.is-later b{color:var(--ink-3)}
+.plan-opt.is-later .plan-figs b{color:var(--ink-2)}
+.plan-opt.is-later:active{transform:none}

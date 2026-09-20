@@ -203,7 +203,11 @@ export default function Reserve() {
             which is the truth. Tapping it re-selects what is already selected, so there is
             no handler; a control that cannot change state must not pretend it
             can. */}
-        <div className="plan-pick is-solo" role="radiogroup" aria-label="Your plan">
+        <div
+          className={`plan-pick${FOUNDING_OPEN && plan.saving ? " is-ladder" : " is-solo"}`}
+          role="radiogroup"
+          aria-label="Your plan"
+        >
           <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
             {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
                 Kiran, 15 Sep 2026. What is taken today is one charge that holds
@@ -219,14 +223,50 @@ export default function Reserve() {
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
-                {plan.saving ? (
-                  <span className="plan-else">
-                    <span className="tnum">{plan.saving.after}</span> for everyone else
-                  </span>
-                ) : null}
+                {/* THE "FOR EVERYONE ELSE" LINE HAS MOVED OUT of this tile and
+                    become the tile below, where it is a price on an object
+                    rather than a footnote inside another price. Printing it in
+                    both places put the same figure twice, adjacent. */}
               </span>
             </span>
           </div>
+
+          {/* ══ THE STANDARD TIER, SHOWN AND NOT SELECTABLE ═══════════════
+              Sam, 20 Sep 2026: "I think we should have a second tier right
+              beneath and it'd be the $14.99 membership. This creates a really
+              strong price anchor. Of course no one would be able to select it
+              because it's not live yet."
+
+              WHAT KEEPS THIS THE RIGHT SIDE OF §10. An anchor is a dark
+              pattern when the reference price is invented, or when the option
+              looks available and is not. Neither holds: $14.99 is the real
+              standard rate this build already prints in the seat line and in
+              the founding lock, read from the same `plan.saving.after` the
+              tile above used to carry — and this tile says in its own words
+              that it is not open yet, rather than leaving a reader to discover
+              that by tapping.
+
+              Still a radio, and an honest one: `aria-checked="false"` with
+              `aria-disabled="true"`, out of the tab order, no handler. A
+              screen reader meets "Standard, not selected, dimmed, 2 of 2",
+              which is exactly what a sighted reader meets. */}
+          {FOUNDING_OPEN && plan.saving ? (
+            <div
+              className="plan-opt is-later"
+              role="radio"
+              aria-checked="false"
+              aria-disabled="true"
+              tabIndex={-1}
+            >
+              <b>Standard</b>
+              <span className="plan-figs">
+                <span className="plan-now">
+                  <b className="tnum">{plan.saving.after}</b>
+                  <span className="plan-else">a month, once the Early Bird spots are gone</span>
+                </span>
+              </span>
+            </div>
+          ) : null}
         </div>
 
         {/* The founding rate survives — said here because it is the whole value
