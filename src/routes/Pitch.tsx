@@ -190,11 +190,16 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               IT IS NOW THE SAME LINE. Sam, 20 Sep 2026: "this copy should flow
               as if it's a single sentence, while keeping the large header text
               we have now." So the headline lost its full stop and this became
-              its continuation rather than a second statement — one sentence,
-              set at two sizes. The headline's own words are untouched. */}
+              its continuation rather than a second statement: one sentence,
+              set at two sizes. The headline's own words are untouched.
+
+              NO LEADING MARK. This opened with an em dash for one commit, and
+              Sam, 20 Sep 2026: "no emdash please they're overused by ai." The
+              size change and the line break already say "same sentence,
+              continued", so the dash was carrying nothing the layout wasn't. */}
           <p className="t-lead hero-lead">
-            &mdash; restaurants and bars around Blacksburg, plus 15% off and
-            points toward rewards.
+            restaurants and bars around Blacksburg, plus 15% off and points
+            toward rewards.
           </p>
           {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
                 of these places today, and a reader can check that in ten
@@ -210,8 +215,8 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                   </a>
                   {k < arr.length - 1 ? " and " : ""}
                 </Fragment>
-              ))}{" "}
-            — see it live.
+              ))}
+            . See it live.
           </p>
 
           {/* ══ THE PLACES, UNDER THE COPY ═══════════════════════════════
@@ -373,9 +378,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             <Drill summary="What points are worth">
               <p className="t-compact">
                 A point is worth about a cent at the place you earned it, and
-                worth most spent there. Moving a balance into one TapIn balance
-                — good anywhere on the network, or out to gift cards and airline
-                miles — is coming.
+                worth most spent there. Moving a balance into one TapIn
+                balance, good anywhere on the network or out to gift cards and
+                airline miles, is coming.
               </p>
             </Drill>
           </div>

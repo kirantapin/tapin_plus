@@ -92,7 +92,7 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
           <span className="bcard-text">
             <b>Special offers</b>
             <span>
-              Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"} — on top of the three
+              Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
             </span>
           </span>
         </div>

@@ -61,7 +61,7 @@ function buildSlides(spend: number) {
     {
       id: "spend",
       headline: "What do you spend in a month in Blacksburg?",
-      line: "Coffee, lunch, dinner — the everyday stuff.",
+      line: "Coffee, lunch, dinner. The everyday stuff.",
       tag: null as string | null,
       /** Never auto-advances: this one waits for her. */
       hold: true,
@@ -602,7 +602,7 @@ export default function How() {
                         type="button"
                         className="how-spend tnum"
                         onClick={toSpend}
-                        aria-label={`${p.spend} a month — change what you spend`}
+                        aria-label={`${p.spend} a month, change what you spend`}
                       >
                         {p.spend}
                       </button>

@@ -268,8 +268,8 @@ export default function PhoneStep({
               onChange={(e) => setOptIn(e.target.checked)}
             />
             <span id="ph-consent">
-              Also text me offers and news from TapIn places. Optional
-              &mdash; reply STOP anytime.
+              Also text me offers and news from TapIn places. Optional.
+              Reply STOP anytime.
             </span>
           </label>
 
@@ -284,7 +284,7 @@ export default function PhoneStep({
 
           {!phoneAuth.live ? (
             <p className="t-compact not-live">
-              Codes are not switched on yet — your number is saved with the
+              Codes are not switched on yet. Your number is saved with the
               reservation but not verified.
             </p>
           ) : null}
