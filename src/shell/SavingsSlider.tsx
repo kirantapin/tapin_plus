@@ -45,7 +45,7 @@ export default function SavingsSlider() {
     { key: "pct", label: "15% off the bill", value: s.percentSavingUsd },
     {
       key: "credit",
-      label: `Credit, to spend there — ${s.creditsEarned} × $${BENEFIT.creditUsd}`,
+      label: `Credit, to spend there: ${s.creditsEarned} × $${BENEFIT.creditUsd}`,
       value: s.creditSavingUsd,
     },
     { key: "points", label: "Points, worth most there", value: s.pointsSavingUsd },
@@ -140,7 +140,7 @@ export default function SavingsSlider() {
           ))}
         </ul>
         <p className="t-compact">
-          <b className="tnum">{money(s.firstMonthUsd)}</b> in month one — credit needs a visit first.
+          <b className="tnum">{money(s.firstMonthUsd)}</b> in month one. Credit needs a visit first.
         </p>
         <p className="t-compact">{s.basis}</p>
 

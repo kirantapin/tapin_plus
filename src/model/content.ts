@@ -579,13 +579,13 @@ export const founderSaving = {
  *  a year plan was the wrong number in the right sentence. */
 export const lockedRateFor = (price: string, per: string): string =>
   FOUNDING_OPEN
-    ? `Your Early Bird rate is locked for a full year — ${price} ${per} from the day we open.`
+    ? `Your Early Bird rate is locked for a full year, at ${price} ${per} from the day we open.`
     : lockedRateLines.standard;
 
 export const lockedRateLines = {
   founding:
     /* Sam, 14 Sep 2026 (night): "it stays at $6.99 for an entire year." */
-    `Your Early Bird rate is locked for a full year — ${usd(FOUNDING_MONTHLY)} a month from the day we open.`,
+    `Your Early Bird rate is locked for a full year, at ${usd(FOUNDING_MONTHLY)} a month from the day we open.`,
   /* No founding rate left to lock, but the promise the product actually makes
      about price stability is still true and is still worth saying. */
   standard: "Your rate is locked for as long as you keep the membership.",
@@ -627,8 +627,8 @@ export const passPlan = {
     {
       id: "today",
       term:
-        `You pay ${usd(PASS_TODAY)} today for your first ${PASS_MONTHS} months — ` +
-        `${PASS_PER_MONTH} a month. After that it renews at ${usd(PASS_TODAY)} every ` +
+        `You pay ${usd(PASS_TODAY)} today for your first ${PASS_MONTHS} months, ` +
+        `which is ${PASS_PER_MONTH} a month. After that it renews at ${usd(PASS_TODAY)} every ` +
         `${PASS_MONTHS} months, at the same price.`,
     },
     {
@@ -737,7 +737,7 @@ export const yearPlan = {
     {
       id: "today",
       term:
-        `You pay ${usd(YEAR_TODAY)} today for your first year — ${YEAR_PER_MONTH} a month. ` +
+        `You pay ${usd(YEAR_TODAY)} today for your first year, which is ${YEAR_PER_MONTH} a month. ` +
         `After that it renews at ${usd(YEAR_TODAY)} a year, at the same price.`,
     },
     {
@@ -842,7 +842,7 @@ function subscribise(
       {
         id: "today",
         label: `${paidToday} today`,
-        detail: `Your first ${period} — it holds your ${seat} too`,
+        detail: `Your first ${period}. It holds your ${seat} too`,
       },
       {
         id: "then",
@@ -1041,7 +1041,7 @@ export const monthlyToday: number = MONTHLY_NOW;
  */
 export const depositEarnsCredit: string =
   BENEFIT.creditUsd > MONTHLY_NOW
-    ? `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order earns $${BENEFIT.creditUsd} credit — more than the deposit.`
+    ? `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order earns $${BENEFIT.creditUsd} credit, more than the deposit.`
     : `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order earns $${BENEFIT.creditUsd} credit.`;
 export const standardMonthly: number = moneyJson.pricing.standardMonthly;
 
