@@ -46,10 +46,11 @@ export interface Venue {
    * ⚠ A PAGE THAT LOADS IS NOT A PAGE THAT TAKES MONEY. All six ids resolve
    * to a TapIn page with that merchant's menu on it, and on 20 Sep 2026 that
    * was briefly mistaken for six live ordering venues. It is not: Sam, the
-   * same day — payments are hooked up at Coffeeholics and The Burg only, and
-   * the other four have no physical assets in the store either. This field
-   * means "you can order and pay here today", which is why it stays at two,
-   * and why nothing may fill it by inference from a page that renders.
+   * same day, gave Coffeeholics and The Burg, then added The Milk Parlor a
+   * few hours later. The other three render a menu but cannot take a payment
+   * and have no physical assets in the store. This field means "you can order
+   * and pay here today", which is why it is filled one venue at a time on
+   * Sam's word, never by inference from a page that renders.
    *
    * It is also the one place this product leaves itself, and since the app
    * preview came out it is the merchant pop-up's only action — so filling it

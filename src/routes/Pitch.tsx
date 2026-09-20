@@ -201,9 +201,10 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             restaurants and bars around Blacksburg, plus 15% off and points
             toward rewards.
           </p>
-          {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at two
-                of these places today, and a reader can check that in ten
-                seconds. The two addresses are the only two that exist. */}
+          {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at
+                some of these places today, and a reader can check that in ten
+                seconds. The list is `liveUrl`, never a typed count, so the
+                sentence cannot outrun the truth in the records. */}
           <p className="t-compact hero-proof">
             TapIn already runs ordering at{" "}
             {venues
@@ -213,7 +214,11 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                   <a href={v.liveUrl} target="_blank" rel="noopener noreferrer">
                     {v.name}
                   </a>
-                  {k < arr.length - 1 ? " and " : ""}
+                  {/* A SERIAL LIST, NOT A CHAIN OF "and"s. It was two
+                      venues for a week, where "and" between every pair is
+                      the same thing as a serial list; The Milk Parlor (20 Sep
+                      2026) made it three, where it is not. */}
+                  {k === arr.length - 1 ? "" : k === arr.length - 2 ? " and " : ", "}
                 </Fragment>
               ))}
             . See it live.
