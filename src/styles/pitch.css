@@ -748,19 +748,36 @@
   display: block;
   min-width: 0;
 }
-/* Six of the eight tiles are links now. They already looked tappable, so the
-   job here is only to make them behave like it — a press response, a focus
-   ring, and inherited colour so the anchor changes nothing about the type. */
-a.vcard {
-  text-decoration: none;
+/* ══ SIX OF THE EIGHT TILES ARE BUTTONS ════════════════════════════════════
+   They open that merchant's pop-up (shell/VenuePopup.tsx) rather than
+   navigating, so they stopped being anchors on 20 Sep 2026 — and a <button>
+   arrives with chrome an <a> never had: a 2px outset border, a grey
+   `buttonface` ground, 6px of padding, centre alignment, and 13.333px Arial
+   that does NOT inherit from the page. Every one of those has to come off
+   before the card inside can lay itself out; without the reset the rail
+   renders as pale boxes of mismatched height.
+
+   The press, focus and tap-highlight rules below were written for `a.vcard`
+   and silently stopped matching at the same moment. They are part of the same
+   fix, not a separate polish. */
+button.vcard {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
   color: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: transform 150ms var(--ease);
 }
-a.vcard:active {
+button.vcard:active {
   transform: scale(0.985);
 }
-a.vcard:focus-visible {
+button.vcard:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 4px;
   border-radius: var(--r-card);
@@ -1433,15 +1450,15 @@ a.vcard:focus-visible {
      which seats the card without describing it. */
   box-shadow: var(--rest);
 }
-a.vcard {
+button.vcard {
   transition: transform 160ms var(--ease);
 }
 /* .99 for a card — the storefront's press ladder by object size. No hover fill:
    the card is a photograph, and tinting one is not a hover state. */
-a.vcard:active {
+button.vcard:active {
   transform: scale(0.99);
 }
-a.vcard:focus-visible {
+button.vcard:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 3px;
 }
