@@ -139,6 +139,18 @@
      on this scale and are not used, however often the old mockup reaches for
      them. */
   --s-xs:4px; --s-sm:6px; --s-md:8px; --s-lg:12px; --s-xl:16px; --s-2xl:24px;
+  /* ── THE SECTION STEPS ──────────────────────────────────────────────────
+     The scale stopped at 24px, so the widest interval this build could draw
+     between two whole page sections was the same one it draws between a
+     label and the list under it — and the pitch shipped with 16px between
+     the hero and the panel after it. Every page read as one unbroken slab
+     no matter how its own insides were spaced (Sam, 20 Sep 2026: "the page
+     is too dense").
+
+     These two are for separating MOVEMENTS, never for anything inside one.
+     If a gap is between two things a reader would call parts of the same
+     thing, it belongs on the ramp above. */
+  --s-3xl:40px; --s-4xl:64px;
   --gutter:24px;
 
   --font:"Gilroy",Arial,system-ui,sans-serif;

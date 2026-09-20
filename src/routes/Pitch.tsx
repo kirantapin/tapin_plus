@@ -227,6 +227,14 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               makes the scroll seamless. */}
           <div className="hero-rail">
             <VenueTicker rail />
+            {/* Sam, 14 Sep 2026: "places that are added are added to the
+                membership and those who purchase don't incur an additional
+                fee." It used to sit under the SECOND copy of this rail, a
+                thousand pixels down; that copy is gone (20 Sep) and the fact
+                belongs with the places either way. */}
+            <p className="t-compact hero-rail-note">
+              New places are added to your membership at no extra cost.
+            </p>
           </div>
 
           {/* ══ PRICE, ACTION AND REFUND, IN ONE BLOCK ═══════════════════════
@@ -398,19 +406,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           card. So the rail comes out onto the field with a label above it,
           which is also how the storefront ships every horizontal rail it has.
           It buys the ticker the full width as a side effect. */}
-      <section className="places">
-        <p className="t-caption places-label">Where it works</p>
-        <VenueTicker />
-        {/* §6: absence of the badge is the signal — but a prospect who has never
-            used TapIn cannot infer what the absence means, so the badge gets its
-            meaning at the point of use rather than two panels later. */}
-        {/* Sam, 14 Sep 2026: "places that are added are added to the membership
-            and those who purchase don't incur an additional fee." Under the row
-            of places, which is where that fact belongs. */}
-        <p className="t-compact places-note">
-          New places are added to your membership at no extra cost.
-        </p>
-      </section>
 
       {/* ══ MEMBERS-ONLY NIGHTS IS OUT ═══════════════════════════════════════
           Sam, 13 Sep 2026: "let's get rid of this for now too."

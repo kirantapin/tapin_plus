@@ -2923,3 +2923,11 @@ button.vcard:focus-visible {
 
 /* What the deposit earns back, under the price on the hero. */
 .hero-deposit{margin:var(--s-sm) 0 0;color:var(--ink-2);max-width:34ch;text-wrap:pretty}
+
+/* The one fact about the places, under the rail it describes. It arrived here
+   when the second copy of that rail came off the page (20 Sep 2026). */
+.hero-rail-note {
+  margin: var(--s-lg) 0 0;
+  color: var(--ink-4);
+  text-wrap: pretty;
+}

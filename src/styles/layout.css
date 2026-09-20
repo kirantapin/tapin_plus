@@ -7,7 +7,8 @@
   position:relative;z-index:1;
   max-width:480px;margin:0 auto;
   padding:var(--s-2xl) var(--gutter) 48px;
-  display:flex;flex-direction:column;gap:var(--s-xl);
+  /* A SECTION STEP, not the label interval. See --s-3xl in tokens.css. */
+  display:flex;flex-direction:column;gap:var(--s-3xl);
 }
 /* Rhythm, not metronome: the argument panels sit at one interval, then a wider
    one opens before the close, so the guarantee and the action read as a
@@ -244,7 +245,7 @@
        layout already reads at, arrived at deliberately rather than inherited.
    ============================================================================ */
 @media (min-width:1024px){
-  .column{max-width:none;margin:0;padding:0 0 64px;gap:var(--s-2xl)}
+  .column{max-width:none;margin:0;padding:0 0 64px;gap:var(--s-4xl)}
   /* Not the two FIXED, FULL-BLEED bars: both are positioned with left:0/right:0
      against the viewport, and a max-width here pulls them off the window's
      edges — the sticky CTA loses its fade into two bright margins, and the
