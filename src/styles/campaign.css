@@ -531,3 +531,22 @@
 @media (prefers-reduced-motion:reduce){
   .ct,.ct-scrim,.ct-root.is-closing .ct,.ct-root.is-closing .ct-scrim{animation:none}
 }
+
+/* ── POWERED BY TAPIN ──────────────────────────────────────────────────────
+   The foot of a co-branded page has to say whose product it is. Quiet: the
+   lockup at reading size beside two words, centred, on the page's own ground
+   rather than in a plate — it is an attribution, not a section. */
+.cg-powered{
+  display:flex;align-items:center;justify-content:center;gap:var(--s-md);
+  margin:var(--s-2xl) 0 0;color:var(--ink-4);
+}
+.cg-powered span{font-size:12px;font-weight:600;letter-spacing:.02em}
+.cg-powered svg{height:17px;width:auto;display:block;color:var(--ink-2)}
+
+/* ── THE DOCKED PAIR'S CLEARANCE ───────────────────────────────────────────
+   layout.css reserves 184px for `.sticky-cta.is-pair`, measured on the
+   pitch's bar. This page's pair is 144px, so the generic figure left 40px of
+   visible floor under the footer once the bar had covered the rest (Sam,
+   20 Sep 2026: "too much space at the bottom"). 160 is the bar plus one
+   step, which is what the reserve was for. */
+.column:has(.cg-sticky.is-pair){padding-bottom:160px}
