@@ -298,15 +298,20 @@ export default function Reserve() {
               }}
             >
               {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
-                  soon'." The tile's second line already said when it opens;
-                  the chip says THAT it is not open, which is the faster read
-                  and the one a reader needs before they tap. Not maroon —
-                  tokens.css spends a solid brand fill on a chosen or acting
-                  thing, and this is neither. */}
-              <span className="plan-head">
-                <b>Standard</b>
-                <span className="plan-chip">Coming soon</span>
-              </span>
+                  soon'." The tile's second line already said WHEN it opens;
+                  this says THAT it is not open, which is the faster read and
+                  the one a reader needs before they tap.
+
+                  A CORNER FLAG, not a pill beside the label. This build
+                  already marks "signed, not open" on the venue cards with a
+                  flag in the tile's top corner (.vflag.is-soon), and reusing
+                  it does two things a pill could not: the status leaves the
+                  reading line entirely, so "Standard" sits alone above its
+                  own price the way "Early Bird Deposit" does, and the two
+                  places this product says "not yet" now say it the same way.
+                  As a pill it was also wider than the word it qualified. */}
+              <span className="plan-chip">Coming soon</span>
+              <b>Standard</b>
               <span className="plan-figs">
                 <span className="plan-now">
                   <b className="tnum">{plan.saving.after}</b>

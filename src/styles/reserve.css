@@ -1513,19 +1513,47 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-card-panel{margin-top:var(--s-2xl)}
 .rs-card-panel .rs-card{margin-top:var(--s-md)}
 
-/* ── THE COMING-SOON CHIP ──────────────────────────────────────────────────
-   On the tier that is not open. Quiet by construction: the press step of the
-   ground, ink three, and the caption's tracking — it is a state, and the one
-   solid fill in this palette is reserved for a thing that is chosen or
-   acting. It sits on the label's own line so the tile keeps its two rows. */
-.plan-head{display:flex;align-items:center;gap:var(--s-md);flex-wrap:wrap}
-.plan-chip{
-  flex:0 0 auto;padding:2px 7px;border-radius:var(--r-pill);
+/* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
+   On the tier that is not open, in the tile's top corner.
+
+   It was a pill beside the label and it was wider than the word it qualified,
+   which made the label line two competing objects and pushed the price down a
+   step in the reading order. As a corner flag the status leaves the reading
+   line entirely: "Standard" sits alone above its own figure exactly as "Early
+   Bird Deposit" does, and the tile is read as a price with a mark on it
+   rather than as a label with a badge stuck to it.
+
+   THE GEOMETRY IS THE VENUE CARD'S. `.vflag` marks "signed, not open" in the
+   corner of a place tile with one rounded corner facing the content and the
+   card's own overflow clipping the other two — so the two places this product
+   says "not yet" say it in the same shape. `.plan-opt` gains the overflow
+   that trick needs.
+
+   Quiet by construction: the press step of the ground and ink three, which is
+   6.7:1 on it. A solid brand fill is reserved for a thing that is chosen or
+   acting, and this is the opposite of both. */
+.plan-opt{position:relative;overflow:hidden}
+/* `.plan-opt .plan-chip`, not `.plan-chip`. `.plan-opt span` above sets every
+   span in a tile to 12px and --ink-4, and at one class it was beating this
+   rule on both — the flag rendered a fifth larger than drawn and in the
+   quietest ink on the ramp, 5.0:1 where the design says 6.7. */
+.plan-opt .plan-chip{
+  position:absolute;top:0;right:0;z-index:1;
+  padding:5px 9px 6px 10px;
+  border-radius:0 0 0 var(--r-card);
   background:var(--press);color:var(--ink-3);
-  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  line-height:1.5;
+  /* SEMIBOLD, NOT BOLD. Sam, 20 Sep 2026: "I don't like the font weight it
+     feels a bit off — maybe we do medium bold gilroy." Gilroy's 700 at 10px
+     under .08em of tracking sets the letterforms nearly as heavy as the price
+     below them, which is the wrong order for a status marker; 600 is the
+     weight the family's caption sizes are drawn for and it lets the figure
+     lead again. */
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1;
 }
-.plan-opt.is-on .plan-chip{background:rgba(255,255,255,.18);color:var(--on-maroon)}
+/* The label keeps clear of it, so a longer tier name wraps before it collides
+   rather than running under it. */
+.plan-opt:has(.plan-chip) > b{padding-right:104px}
 
 
 /* The places heading inside the sheet is a section caption like the panels
