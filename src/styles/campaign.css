@@ -317,8 +317,8 @@
      ink-4 #676070    5.41 /  6.03 /  5.05
      purple           7.36 /  8.21 /  6.88
    Every step clears AA for body text on every surface it can land on. The
-   wordmark's dot (#D14245) sits at 3.84 on the darkest of them, which is a
-   graphic mark rather than type and clears the 3:1 that applies to one.
+   wordmark's dot is the purple here too (see `--dot` below), so it lands at
+   6.88 on the darkest of them — well past the 3:1 a graphic mark owes.
    ============================================================================ */
 /* THE `:not(.is-layered)` GATE IS GONE. It existed because the checkout sheet
    was built for the dark world and, run under these tokens, kept its dark
@@ -363,6 +363,14 @@
      White on #6b319e measures 8.21:1, so `--on-maroon` needs no change. */
   --maroon: #6b319e;
   --cg-brand: #6b319e;
+
+  /* The wordmark's dot follows. It is TapIn's one spot of colour and it sat
+     at badge red on a page that is purple from the announcement bar to the
+     button — the one red thing on the surface, in the lockup at the top and
+     again in "Powered by TapIn" at the foot. It is a token for exactly this
+     reason (shell/TapInLogo.tsx fills it with `var(--dot)`), so the whole
+     lockup reads as Coffeeholics' here and nothing else changes. */
+  --dot: #6b319e;
 }
 
 /* The field, lit the same way the dark one is: a step off at the top, the
