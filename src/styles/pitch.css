@@ -2927,4 +2927,3 @@ button.vcard:focus-visible {
 }
 
 /* What the deposit earns back, under the price on the hero. */
-.hero-deposit{margin:var(--s-sm) 0 0;color:var(--ink-2);max-width:34ch;text-wrap:pretty}

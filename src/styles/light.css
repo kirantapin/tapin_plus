@@ -96,3 +96,22 @@
   --press: #E8E2E4;
   --page-0: rgba(240, 237, 238, 0);
 }
+
+/* ── THE MEMBERSHIP CARD'S SHADOW ──────────────────────────────────────────
+   Sam, 20 Sep 2026: "the shadow under the membership card is far too
+   intense."
+
+   card.css casts it at `0 26px 60px rgba(0,0,0,.52)`. On the dark field that
+   is a deep object sitting in a dark room and you read it as depth; on a
+   near-white sheet the same 52% black at 60px of blur is a grey smear the
+   width of the card, and the eye takes it for a second object rather than for
+   the shadow of the first.
+
+   Shorter drop, tighter blur, and the house ink rather than pure black —
+   about a third of the alpha, which is the same relationship `--float` keeps
+   to its dark counterpart. The inset top highlight is kept verbatim: that is
+   the card's material, a lit edge under a lamp, and it reads the same on
+   either ground. */
+[data-lit] .tcard {
+  box-shadow: 0 10px 24px rgba(26, 16, 22, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.11);
+}

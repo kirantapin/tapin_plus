@@ -21,7 +21,6 @@ import SignInBar from "../shell/SignInBar";
 import { venues, logoField } from "../model/content";
 import {
   monthlyToday,
-  depositEarnsCredit,
   guarantee,
   GUARANTEE_CONTACT,
   launchWindow,
@@ -258,9 +257,12 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               <b className="tnum">${monthlyToday.toFixed(2)}</b>
               <span>deposit</span>
             </p>
-            {/* What the word "deposit" means here, immediately under it — the
-                credit it earns back and the $10 order that earns it. */}
-            <p className="t-compact hero-deposit">{depositEarnsCredit}</p>
+            {/* NO SENTENCE UNDER THE FIGURE. It carried "Your first $10+ order
+                earns $5 credit, more than the deposit" — Sam, 20 Sep 2026:
+                "let's remove the 'first $10 order' thing it's too
+                complicated." The $10 floor is still stated where it is a
+                condition, on the credit's own benefit row; it was a second
+                number in the one block that already has three. */}
             {/* §2: the only seat sentence any surface may print, from the
                 constant, never typed — rendered by the one component that
                 strikes the after-price (Sam, 14 Sep 2026). */}
