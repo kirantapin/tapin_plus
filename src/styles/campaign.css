@@ -159,6 +159,24 @@
   flex-direction: column;
   gap: 2px;
 }
+/* The row's verb, in the brand hue beside its arrow. It is an instruction
+   rather than a detail, so it reads as the same thing the glyph is saying
+   instead of as one more fact about the offer. */
+.ct-do {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: var(--cg-brand, var(--maroon));
+}
+.ct-do svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
 .cg-trial b {
   font-size: 15px;
   font-weight: 700;
@@ -568,3 +586,27 @@
    state the whole page ends in, and so the only state a reader ever sees the
    floor in. Same weight as the rule above, later in the cascade. */
 .column:has(.cg-sticky.is-pair.is-away){padding-bottom:48px}
+
+/* ── THE INVITATION UNDER THE BENEFITS ─────────────────────────────────────
+   A row, not a third filled button: the page already spends its fill on
+   "Get early access" and the docked bar, and a third one here would leave
+   the reader choosing between three equal-looking controls. This reads as
+   the last line of the list it closes, with a chevron doing the work.
+
+   Full width and 48px tall, so it is a real target on a phone rather than a
+   text link pretending to be one. */
+.cg-try{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);
+  width:100%;min-height:48px;margin:var(--s-lg) 0 0;
+  padding:var(--s-md) var(--s-lg);
+  border:1px solid var(--hair);border-radius:var(--r-control);
+  background:var(--inner);
+  font:inherit;font-size:14px;font-weight:700;letter-spacing:-.01em;
+  color:var(--cg-brand,var(--maroon));text-align:left;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease),background-color 150ms var(--ease);
+}
+.cg-try svg{width:18px;height:18px;flex:0 0 auto}
+.cg-try:active{transform:scale(.98)}
+.cg-try:focus-visible{outline:2px solid var(--cg-brand,var(--maroon));outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.cg-try:active{transform:none}}

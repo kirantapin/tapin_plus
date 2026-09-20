@@ -145,19 +145,37 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {/* The label alone. "Spend $10, get $5 credit" is a whole
-                      claim, and the line under it repeated the step above. */}
+                  {/* ══ THE LABEL, AND THE ACTION ═════════════════════════
+                      Sam, 20 Sep 2026, converging on it in four messages:
+                      "click here to use", then "too wordy", then "or just
+                      'redeem'", then "Or 'try now'".
+
+                      "Try now" over "Redeem" because it is already this
+                      page's word — the docked bar says "Try it once for
+                      free", the list says "Try the first two free today" and
+                      this modal is titled "Try it once, free". Redeem is what
+                      the merchant's own page calls it one tap later, which is
+                      the right place for a second vocabulary, not here.
+
+                      Two words, and beside the arrow rather than under the
+                      label — a second line would have been another fact about
+                      the offer, which is what the sublines cut from here were.
+                      On the right it reads as the row's verb, which is what
+                      the external-link glyph alone was having to carry. */}
                   <b>{t.label}</b>
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <span className="ct-do">
+                    Try now
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.9"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
                 </a>
               </li>
             ))}

@@ -215,6 +215,31 @@ export default function Coffeeholics() {
             </li>
           ))}
         </ul>
+
+        {/* ══ THE TRIAL, MENTIONED WHERE THE BENEFITS ARE ═══════════════════
+            Sam, 20 Sep 2026: "maybe we still mention that you can try it now,
+            and when I click on the deals to try it triggers the modal first
+            before I actually go to the coffeeholics page to use the deals."
+
+            The docked bar says it too, but the bar is chrome — it arrives
+            over the page rather than in it, and a reader who has just read
+            the three benefits is exactly the reader the offer is for. So the
+            invitation sits at the end of that list, and it opens the same
+            modal: the how-it-works comes first and Coffeeholics comes from
+            there, which is the order he asked for. */}
+        <button type="button" className="cg-try" onClick={() => setTrial(true)}>
+          Try the first two free today
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="m10 7 5 5-5 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
         </div>
       </section>
 
@@ -226,9 +251,14 @@ export default function Coffeeholics() {
           figure this build does not hold. */}
       <section className="panel cg-member">
         <p className="t-caption panel-label">Every week, not once</p>
+        {/* NO BACK-REFERENCE. This opened "Those two are a trial", which
+            pointed at a panel that stood directly above it — and that panel
+            became a modal (Sam, 20 Sep 2026), so the sentence was pointing at
+            nothing. He caught it: "not sure it does right now since we
+            removed the try it now from the page." It stands on its own. */}
         <p className="t-lead cg-member-line">
-          Those two are a trial. From {launchWindow}, members get them at Coffeeholics
-          every week, and at every other place on the membership around Blacksburg.
+          From {launchWindow}, members get all three at Coffeeholics every week, and
+          at every other place on the membership around Blacksburg.
         </p>
         <div className="cg-buy" ref={buy}>
           {/* DEPOSIT, THE WORD THE REST OF THE BUILD USES. Sam, 20 Sep 2026:
