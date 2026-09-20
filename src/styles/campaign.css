@@ -556,7 +556,13 @@
    rather than in a plate — it is an attribution, not a section. */
 .cg-powered{
   display:flex;align-items:center;justify-content:center;gap:var(--s-md);
-  margin:var(--s-2xl) 0 0;color:var(--ink-4);
+  /* `auto` on the inline sides, not 0. layout.css centres every child of the
+     column with `margin-inline:auto` under its width cap, and a `margin`
+     SHORTHAND here was resetting both sides to zero — so from 1024px up this
+     line sat 720px wide against the left edge of a 1440px window while the
+     panels above it were centred. Measured: its box ran 0 to 720 where the
+     footer's ran 360 to 1080. */
+  margin:var(--s-2xl) auto 0;color:var(--ink-4);
 }
 .cg-powered span{font-size:12px;font-weight:600;letter-spacing:.02em}
 .cg-powered svg{height:17px;width:auto;display:block;color:var(--ink-2)}
