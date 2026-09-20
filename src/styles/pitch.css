@@ -411,16 +411,34 @@
   padding: 0 var(--s-xl);
   margin: 0;
 }
+/* ══ EACH MARK ON ITS OWN PLATE ════════════════════════════════════════════
+   Sam, 20 Sep 2026: "I liked the styling of the 'works on:' for the
+   individual merchant pages, I think for the main splash page we should use
+   the same styling."
+
+   The merchant pop-up drew this row on plates and the pitch drew it bare, so
+   one product had two ways of saying what the benefits reach. The plate is
+   the better of the two and it is now the only one: it gives each mark a box
+   to sit in, which is what stops six glyphs at three across reading as a
+   loose scatter, and it is the same inner step the benefit glyphs and the
+   trial rows already use.
+
+   The rule moves here, to `.cover` itself, rather than being copied onto the
+   pitch — the pop-up's `.vp-covers` block that introduced it is now only a
+   layout override, because there is nothing left in it to override. */
 .cover {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s-sm);
+  padding: var(--s-md) var(--s-xs);
+  border-radius: var(--r-control);
+  background: var(--inner);
   text-align: center;
 }
 .cover svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: var(--ink-3);
   display: block;
 }
@@ -1421,34 +1439,21 @@ button.vcard:focus-visible {
 .column > .panel:has(.bcards) > .bcards {
   padding: 0 var(--s-xl);
 }
-/* THE SCOPE AS A 3x2 GRID (Sam: "more like a 2 row grid"). Three auto-sized
-   columns put Food/Tickets, Drinks/Line skips, Cover/Merch in aligned columns,
-   glyph beside word, inset to the panel. */
+/* THE SCOPE AS A 3x2 GRID OF PLATES (Sam, 20 Sep 2026: the merchant pop-up's
+   treatment, here too). It was three AUTO columns with the glyph beside the
+   word, left-aligned — which read fine while the marks were bare, because
+   uneven columns are invisible when there is no box around them. Put each
+   mark on a plate and the unevenness is the first thing you see: measured at
+   375px the three came out 73, 91 and 71 wide. Equal columns, and the glyph
+   goes back above the word so the row matches the one Sam asked it to
+   match. */
 .column > .panel:has(.bcards) > .covers {
   display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: start;
-  column-gap: var(--s-2xl);
-  row-gap: var(--s-lg);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--s-sm);
+  row-gap: var(--s-sm);
   padding: 0 var(--s-xl);
   margin: 0;
-}
-.column > .panel:has(.bcards) .cover {
-  flex-direction: row;
-  align-items: center;
-  gap: var(--s-sm);
-  text-align: left;
-}
-.column > .panel:has(.bcards) .cover svg {
-  width: 20px;
-  height: 20px;
-}
-.column > .panel:has(.bcards) .cover span {
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.005em;
-  color: var(--ink-2);
-  white-space: nowrap;
 }
 
 /* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
@@ -2494,23 +2499,19 @@ button.vcard:focus-visible {
   .column > .panel:has(.bcards) > .covers-head::after {
     content: none;
   }
+  /* One row of six at this width, each plate taking an equal share — the same
+     object the phone stacks 3x2, not a different one. */
   .column > .panel:has(.bcards) > .covers {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     display: flex;
     flex-wrap: nowrap;
-    gap: var(--s-2xl);
+    gap: var(--s-sm);
     padding: 0;
     margin: 0;
   }
   .column > .panel:has(.bcards) .cover {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--s-sm);
-    text-align: left;
-  }
-  .column > .panel:has(.bcards) .cover svg {
-    width: 20px;
-    height: 20px;
+    flex: 1 1 0;
+    min-width: 0;
   }
   /* 13px: these are words a reader scans, not tracked micro-labels. */
   .column > .panel:has(.bcards) .cover span {
