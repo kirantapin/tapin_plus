@@ -273,11 +273,18 @@
    routes/Coffeeholics.tsx and removed when that route unmounts.
 
    ── THE PALETTE ────────────────────────────────────────────────────────────
-   The cream is Sam's own: his Meta carousel alternates dark cards with cream
-   ones, so the page a reader lands on is one of the cards they tapped. The
-   purple is #6b319e, Coffeeholics' `brandColor`, straight from their record
-   rather than sampled — it is used as ACCENT (the glyph plates, the trial
-   hairlines, the label), never as a fill behind type.
+   The purple is #6b319e, Coffeeholics' `brandColor`, straight from their
+   record rather than sampled.
+
+   THE GROUND IS OFF-WHITE, NOT CREAM. It was #F6F1EA for an hour, taken from
+   the alternating light card in Sam's own carousel; Sam, 20 Sep 2026: "I
+   don't like the cream color, can we just make that like an off white or
+   gray." So it is a near-neutral carrying a few points of the purple rather
+   than a warm one — a flat grey beside a saturated accent reads as unchosen,
+   and a ground tinted toward the accent reads as decided. The ink ramp moved
+   with it, from the warm browns the cream wanted to a neutral on the same
+   violet axis, because warm ink on a cool ground is what makes a page look
+   muddy rather than quiet.
 
    Maroon is untouched and still spends itself once, on "Get early access".
    The merchant's colour marks the merchant's offers; TapIn's colour marks the
@@ -285,37 +292,50 @@
    reading as a different company's page.
 
    ── MEASURED ON THIS GROUND ────────────────────────────────────────────────
-   Against the cream #F6F1EA, the white card and the #F0E8DD inner plate:
-     ink-1 #1A1016   16.54 / 18.59 / 15.31
-     ink-2 #3D2F37   11.26 / 12.65 / 10.42
-     ink-3 #55454E    7.96 /  8.95 /  7.37
-     ink-4 #6B5A63    5.72 /  6.43 /  5.29
-     purple           7.31 /  8.21 /  6.76
-     maroon           8.18 /  9.19 /  7.56
-   Every step clears AA for body text on every surface it can land on.
+   Against the page #F3F2F5, the white card and the #ECEAF0 inner plate:
+     ink-1 #17141B   16.34 / 18.22 / 15.27
+     ink-2 #3A3540   10.68 / 11.91 /  9.98
+     ink-3 #514B58    7.54 /  8.41 /  7.05
+     ink-4 #676070    5.41 /  6.03 /  5.05
+     purple           7.36 /  8.21 /  6.88
+   Every step clears AA for body text on every surface it can land on. The
+   wordmark's dot (#D14245) sits at 3.84 on the darkest of them, which is a
+   graphic mark rather than type and clears the 3:1 that applies to one.
    ============================================================================ */
-:root[data-surface="cg"] {
-  --page: #F6F1EA;
+/* ── NOT WHILE THE CHECKOUT IS OPEN ────────────────────────────────────────
+   `:not(.is-layered)`. App.tsx puts `.is-layered` on <html> whenever /reserve
+   is open over a page, and the checkout sheet is built for the dark world: run
+   under these tokens it kept its dark plates and took dark ink with them, and
+   the seat line, the deposit rows and the sheet's own heading all dropped to
+   a few points of contrast — measured on the one surface in this product that
+   takes money.
+
+   So the campaign's light theme switches off for exactly as long as the sheet
+   is up, and the page behind the scrim goes back to the house dark with it.
+   The reader is still on /blacksburg/coffeeholics and still returns to it: the
+   silo is the navigation, not the palette. */
+:root[data-surface="cg"]:not(.is-layered) {
+  --page: #F3F2F5;
   --subtle: #FFFFFF;
   --card: #FFFFFF;
-  --inner: #F0E8DD;
-  --press: #E6DBCD;
+  --inner: #ECEAF0;
+  --press: #E0DDE6;
 
-  --ink-1: #1A1016;
-  --ink-2: #3D2F37;
-  --ink-3: #55454E;
-  --ink-4: #6B5A63;
+  --ink-1: #17141B;
+  --ink-2: #3A3540;
+  --ink-3: #514B58;
+  --ink-4: #676070;
 
   /* hexToRgba(ink-1, .10) and .18 — the house construction, in the other
      direction. On a light ground a white hairline is invisible. */
-  --hair: rgba(26, 16, 22, 0.1);
-  --hair-lit: rgba(26, 16, 22, 0.18);
+  --hair: rgba(23, 20, 27, 0.1);
+  --hair-lit: rgba(23, 20, 27, 0.18);
 
-  /* Deeper than the dark surface's, because a shadow on cream has to carry
-     the separation a dark field gets from its own ink. */
-  --rest: 0 1px 2px rgba(26, 16, 22, 0.06);
-  --raised: 0 2px 10px rgba(26, 16, 22, 0.1);
-  --float: 0 6px 20px rgba(26, 16, 22, 0.14);
+  /* Deeper than the dark surface's, because a shadow on a light ground has to
+     carry the separation a dark field gets from its own ink. */
+  --rest: 0 1px 2px rgba(23, 20, 27, 0.06);
+  --raised: 0 2px 10px rgba(23, 20, 27, 0.1);
+  --float: 0 6px 20px rgba(23, 20, 27, 0.14);
 
   /* ══ THE BRAND FILL IS THE MERCHANT'S, ON THIS SURFACE ONLY ═════════════
      Sam, 20 Sep 2026: "the colors still aren't really coffeeholics colors
@@ -335,39 +355,39 @@
 
 /* The field, lit the same way the dark one is: a step off at the top, the
    page's own colour through the middle, a shade deeper at the foot. */
-:root[data-surface="cg"] body {
-  background: linear-gradient(180deg, #FFFCF7 0%, var(--page) 46%, #EFE7DC 100%);
+:root[data-surface="cg"]:not(.is-layered) body {
+  background: linear-gradient(180deg, #FAFAFC 0%, var(--page) 46%, #E9E7ED 100%);
   background-attachment: fixed;
 }
 /* The authored ground is three maroon radials. On cream they read as smoke,
    so this surface gets one wash in the merchant's purple at the same low
    alphas — present, never a colour the type has to survive. */
-:root[data-surface="cg"] .ground {
+:root[data-surface="cg"]:not(.is-layered) .ground {
   background:
     radial-gradient(58% 42% at 18% 4%,
       rgba(107, 49, 158, 0.13) 0%, rgba(107, 49, 158, 0.07) 34%,
       rgba(107, 49, 158, 0) 72%),
     radial-gradient(52% 38% at 86% 24%,
-      rgba(134, 31, 65, 0.08) 0%, rgba(134, 31, 65, 0) 70%);
+      rgba(107, 49, 158, 0.07) 0%, rgba(107, 49, 158, 0) 70%);
 }
 
 /* -- where the merchant's colour does its work ------------------------------
    Three places, all of them marks rather than surfaces: the glyph plates
    beside the benefits, the hairline and arrow on the trial buttons, and the
    label over them. */
-:root[data-surface="cg"] .cg-icon {
-  background: color-mix(in srgb, var(--cg-brand) 10%, #FFFFFF);
+:root[data-surface="cg"]:not(.is-layered) .cg-icon {
+  background: color-mix(in srgb, var(--cg-brand) 9%, #FFFFFF);
   border-color: color-mix(in srgb, var(--cg-brand) 26%, transparent);
   color: var(--cg-brand);
 }
-:root[data-surface="cg"] .cg-trial {
+:root[data-surface="cg"]:not(.is-layered) .cg-trial {
   border: 1px solid color-mix(in srgb, var(--cg-brand) 30%, transparent);
   background: #FFFFFF;
 }
-:root[data-surface="cg"] .cg-trial svg {
+:root[data-surface="cg"]:not(.is-layered) .cg-trial svg {
   color: var(--cg-brand);
 }
-:root[data-surface="cg"] .cg-today .panel-label {
+:root[data-surface="cg"]:not(.is-layered) .cg-today .panel-label {
   color: var(--cg-brand);
 }
 
@@ -381,12 +401,12 @@
    bar carries the thing the page does not end with, and the outlined slot
    keeps the other reachable from anywhere. */
 .cg-sticky .sticky-alt {
-  background: #FFFFFF;
-  border-color: color-mix(in srgb, var(--cg-brand) 34%, transparent);
-  color: var(--cg-brand);
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--cg-brand, var(--maroon)) 34%, transparent);
+  color: var(--cg-brand, var(--maroon));
 }
 .cg-sticky .sticky-alt:active {
-  background: color-mix(in srgb, var(--cg-brand) 8%, #FFFFFF);
+  background: color-mix(in srgb, var(--cg-brand, var(--maroon)) 8%, var(--card));
 }
 
 /* -- the other places, under the membership --------------------------------
@@ -422,5 +442,13 @@
   flex: 1 1 12ch;
   min-width: 0;
   margin: 0;
+  text-wrap: pretty;
+}
+
+/* The deposit's meaning, tight to the figure it qualifies. */
+.cg-deposit {
+  margin: var(--s-sm) 0 0;
+  color: var(--ink-2);
+  max-width: 34ch;
   text-wrap: pretty;
 }

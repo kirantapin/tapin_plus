@@ -5,11 +5,13 @@ import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import SeatCapLine from "../shell/SeatCapLine";
 import { BenefitIcon } from "../shell/Icons";
+import { useReserveCta } from "../shell/useReserveCta";
 import {
   heroIsBright,
   logoField,
   launchWindow,
   monthlyToday,
+  depositEarnsCredit,
   venues,
 } from "../model/content";
 import { campaignVenue, campaignBenefits, campaignTrials } from "../model/campaign";
@@ -71,6 +73,18 @@ export default function Coffeeholics() {
      a docked control competing with the one the reader is already looking at
      is the decoy shape, not redundancy. An observer rather than a scroll
      handler, so nothing runs on the frames between. */
+  /* ══ THE CHECKOUT OPENS OVER THIS PAGE ═════════════════════════════════
+     Sam, 20 Sep 2026: "when I click on get early access it shouldn't take me
+     to the Tapin checkout on the other page, everything should be siloed."
+
+     `/reserve` is a LAYER, not a destination: App.tsx renders it over
+     `state.background ?? "/"`, and the fallback is why it used to land the
+     reader on the pitch. This hook already carries the current location as
+     that background — the pitch has always used it — so the sheet opens over
+     the Coffeeholics page, closing it returns here, and the main landing page
+     is never seen. It also sends a member who already holds a membership to
+     /in rather than inviting them to buy it twice. */
+  const cta = useReserveCta();
   const buy = useRef<HTMLDivElement>(null);
   const [past, setPast] = useState(true);
   useEffect(() => {
@@ -254,19 +268,29 @@ export default function Coffeeholics() {
       <section className="panel cg-member">
         <p className="t-caption panel-label">Every week, not once</p>
         <p className="t-lead cg-member-line">
-          Those two are a trial. Members get them at Coffeeholics every week, and at
-          every other place on the membership around Blacksburg.
+          Those two are a trial. From {launchWindow}, members get them at Coffeeholics
+          every week, and at every other place on the membership around Blacksburg.
         </p>
         <div className="cg-buy" ref={buy}>
+          {/* DEPOSIT, THE WORD THE REST OF THE BUILD USES. Sam, 20 Sep 2026:
+              "need to make sure it says $4.99 deposit." This read "a month,
+              from when we open", which is the framing his advert's fifth card
+              uses and the one the pitch and the checkout do not — and the
+              checkout this button opens charges a deposit. The date it was
+              carrying moved up into the sentence above, where it qualifies
+              the membership rather than the figure. */}
           <p className="hero-price cg-price">
             <b className="tnum">${monthlyToday.toFixed(2)}</b>
-            <span>a month, from when we open on {launchWindow}</span>
+            <span>deposit</span>
           </p>
+          {/* What the word means, immediately under it: the credit it earns
+              back and the order that earns it. The pitch's own string. */}
+          <p className="t-compact cg-deposit">{depositEarnsCredit}</p>
           <p className="t-compact cg-seat">
             <SeatCapLine />
           </p>
-          <Link className="action cg-cta" to="/reserve">
-            Get early access
+          <Link className="action cg-cta" to={cta.to} state={cta.state}>
+            {cta.label}
           </Link>
         </div>
 
@@ -316,8 +340,8 @@ export default function Coffeeholics() {
         <button type="button" className="action" onClick={toTrials}>
           Try it once for free
         </button>
-        <Link className="sticky-alt" to="/reserve">
-          Get early access
+        <Link className="sticky-alt" to={cta.to} state={cta.state}>
+          {cta.label}
         </Link>
       </div>
     </>
