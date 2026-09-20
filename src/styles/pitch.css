@@ -1073,7 +1073,21 @@ button.vcard:focus-visible {
   display: flex;
   gap: var(--s-md);
   margin: 0;
-  padding: 0 var(--s-xl);
+  /* ══ ONE VALUE FOR THE PAD AND THE SNAP ═════════════════════════════════
+     The rail's inline padding is overridden in five places — the desktop
+     step, `.places`, its 1024-1279 full-bleed, the 1280 grid and the hero —
+     and `scroll-snap-align: start` measures from the SNAPPORT, which is this
+     box inset by `scroll-padding`. Set as two literals they drift, and the
+     drift is not subtle: inside the checkout the rail pads by `--gutter` (24)
+     while the snap padding said `--s-xl` (16), so the browser scrolled the
+     rail 8px on load to satisfy the snap and the first tile sat 8px left of
+     the label above it (Sam, 20 Sep 2026: "this carousel at checkout is
+     slightly off here"). One variable, and an override that forgets the snap
+     is no longer possible. */
+  --rail-pad: var(--s-xl);
+  padding-block: 0;
+  padding-inline: var(--rail-pad);
+  scroll-padding-inline: var(--rail-pad);
   list-style: none;
   overflow-x: auto;
   /* SNAP, AGAIN. It was removed when this became a continuous ticker: snap
@@ -1083,7 +1097,6 @@ button.vcard:focus-visible {
      land on a tile instead of between two. `proximity`, not `mandatory` — a
      swipe that means to travel should not be caught by every tile it passes. */
   scroll-snap-type: x proximity;
-  scroll-padding-inline: var(--s-xl);
   overscroll-behavior-x: contain;
   /* BOTH AXES. `pan-x` alone made a finger that landed on a tile unable to
      scroll the page at all (Sam, 15 Sep 2026: "I should be able to scroll
@@ -1234,7 +1247,7 @@ button.vcard:focus-visible {
     width: 176px;
   }
   .ticker-rail {
-    padding-inline: var(--s-2xl);
+    --rail-pad: var(--s-2xl);
   }
   /* ══ THE GRID IS THE DESKTOP STATE, NOT AN EXPANDED ONE ═══════════════════
      `.is-open` is set by width from 1280px rather than by a tap (see
@@ -1630,7 +1643,7 @@ button.vcard:focus-visible {
    edge; the label and the note keep the reading inset. */
 .places .ticker-rail {
   margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
+  --rail-pad: var(--gutter);
 }
 .places .ticker-all {
   margin-left: var(--s-xs);
@@ -2507,7 +2520,7 @@ button.vcard:focus-visible {
   }
   .places .ticker-rail {
     margin-inline: 0;
-    padding-inline: 0;
+    --rail-pad: 0px;
   }
   .places .ticker-all {
     margin-left: 0;
@@ -2681,7 +2694,7 @@ button.vcard:focus-visible {
 @media (min-width: 1024px) and (max-width: 1279px) {
   .places .ticker-rail {
     margin-inline: calc(50% - 50vw);
-    padding-inline: calc(50vw - 50%);
+    --rail-pad: calc(50vw - 50%);
   }
 }
 
@@ -2905,7 +2918,7 @@ button.vcard:focus-visible {
 }
 .hero-rail .ticker-rail {
   margin-inline: 0;
-  padding-inline: 0;
+  --rail-pad: 0px;
   max-width: 100%;
   -webkit-mask-image: linear-gradient(
     90deg,

@@ -1013,7 +1013,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-where .ticker{margin-top:calc(-1 * var(--s-xs))}
 /* The rail's own gutter is the panel's gutter, so the first tile starts where
    the label does and the fade runs off the panel's edge. */
-.rs-where .ticker-rail{padding:0 var(--s-xl)}
+.rs-where .ticker-rail{--rail-pad:var(--s-xl)}
 .rs-where .ticker-tile{width:132px}
 /* What you get: four bullets with their glyphs, then the six marks. */
 .rs-what{margin:var(--s-xl) var(--s-xl) var(--s-md);color:var(--ink-3)}

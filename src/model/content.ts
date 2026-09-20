@@ -1097,6 +1097,10 @@ export const PLANS = {
  * and would have gone on saying $4.99 beside a checkout charging $14.99.
  */
 export const monthlyToday: number = MONTHLY_NOW;
+/** The standard rate, formatted, for a surface that names what the Early Bird
+ *  price is cheaper THAN. Same constant the seat line and the plan ladder
+ *  print, so a campaign page cannot quote a figure this build does not hold. */
+export const standardAfter: string = usd(AFTER_MONTHLY);
 
 /* `depositEarnsCredit` lived here: "Your first $10+ order earns $5 credit,
    more than the deposit", with a guard that dropped the comparative clause if

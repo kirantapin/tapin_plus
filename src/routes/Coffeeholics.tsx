@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import TapInLogo from "../shell/TapInLogo";
 import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
+import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
 import { BenefitIcon } from "../shell/Icons";
 import { useReserveCta } from "../shell/useReserveCta";
@@ -13,7 +14,7 @@ import {
   monthlyToday,
   venues,
 } from "../model/content";
-import { campaignVenue, campaignBenefits, campaignTrials } from "../model/campaign";
+import { campaignVenue, campaignBenefits } from "../model/campaign";
 
 /**
  * THE COFFEEHOLICS SPLASH — the page a Meta ad points at.
@@ -111,14 +112,16 @@ export default function Coffeeholics() {
     return () => io.disconnect();
   }, []);
 
-  /* The trials live in their own panel because there are two of them and one
-     button cannot carry both tokens. The docked button goes there rather than
-     picking one and quietly dropping the other. */
-  const toTrials = () => {
-    document
-      .getElementById("cg-try")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
+  /* ══ THE DOCKED BUTTON OPENS A MODAL ═══════════════════════════════════
+     Sam, 20 Sep 2026: "instead of scrolling to a section on the page (which
+     we can remove), we can instead have a modal pop up that shows me how I
+     can try this for free… and then there should be a call out."
+
+     It used to scroll to a panel holding the two links. A button that moves
+     the page rather than doing something is the weakest thing this page can
+     put in its most valuable slot, and the panel it arrived at answered
+     "which offer" without answering "and then what happens". */
+  const [trial, setTrial] = useState(false);
 
   /* The record, not a typed name: this venue's photograph, mark, category and
      street change here when they change anywhere. */
@@ -215,49 +218,6 @@ export default function Coffeeholics() {
         </div>
       </section>
 
-      {/* ══ WHAT YOU CAN HAVE TODAY ══════════════════════════════════════════
-          Two real policies on Coffeeholics' real page, each behind its own
-          link. This is the only part of the offer a reader can verify without
-          paying anything, so it gets its own panel rather than a line in the
-          one above.
-
-          TWO BUTTONS, NOT ONE. They are separate policies on separate tokens —
-          one link cannot carry both, and collapsing them into a single "order
-          now" would quietly drop whichever one it did not point at. */}
-      <section className="panel cg-today" id="cg-try">
-        <p className="t-caption panel-label">Try it today, free</p>
-        <ul className="cg-trials">
-          {campaignTrials.map((t) => (
-            <li key={t.id}>
-              <a
-                className="action action-ghost cg-trial"
-                href={t.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>
-                  <b>{t.label}</b>
-                  <span>{t.note}</span>
-                </span>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.9"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </a>
-            </li>
-          ))}
-        </ul>
-        {/* THE LIMIT, BESIDE THE OFFER IT LIMITS. Sam: "It's a one time
-            offer." A trial read as the standing weekly benefit is a reader
-            misled by omission. */}
-        <p className="t-compact cg-once">One time each, on your next order at Coffeeholics.</p>
-      </section>
 
       {/* ══ THE MEMBERSHIP, AFTER THE PROOF ══════════════════════════════════
           The advert closes on "Get early access" and so does the page. The
@@ -329,11 +289,13 @@ export default function Coffeeholics() {
 
       <SiteFoot />
 
+      {trial ? <TrialModal onClose={() => setTrial(false)} /> : null}
+
       <div className={`sticky-cta is-pair cg-sticky${past ? "" : " is-away"}`}>
         {/* A button, not a link: it moves the reader to the two offers on this
             page rather than navigating, because there are two tokens and one
             href can only carry one of them. */}
-        <button type="button" className="action" onClick={toTrials}>
+        <button type="button" className="action" onClick={() => setTrial(true)}>
           Try it once for free
         </button>
         <Link className="sticky-alt" to={cta.to} state={cta.state}>
