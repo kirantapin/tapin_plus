@@ -482,15 +482,17 @@
    you open their page, you order, you collect — and the third is the one
    nobody expects, which is why it is not folded into the second. */
 .ct-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
-  gap:var(--s-lg);counter-reset:none}
+  gap:var(--s-lg)}
 .ct-steps > li{display:flex;align-items:flex-start;gap:var(--s-lg)}
 .ct-num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;
   place-items:center;background:var(--inner);
   color:var(--cg-brand,var(--maroon));
   font-size:12px;font-weight:700;letter-spacing:0}
-.ct-steps > li > span:last-child{min-width:0;display:flex;flex-direction:column;gap:2px}
-.ct-steps b{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
-.ct-steps b + span{font-size:13px;line-height:1.4;color:var(--ink-4);text-wrap:pretty}
+/* The heading IS the step now, so it takes the row's vertical centre against
+   the numeral rather than sitting on the first line of a paragraph. */
+.ct-steps > li{align-items:center}
+.ct-steps b{min-width:0;font-size:15px;font-weight:700;letter-spacing:-.01em;
+  line-height:1.35;color:var(--ink-1);text-wrap:pretty}
 
 .ct-trials{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
   flex-direction:column;gap:var(--s-md)}
