@@ -216,7 +216,19 @@ export const venueCovers: Record<string, string[]> = {
  */
 const VENUE_POLICY_DETAIL: Record<string, string> = {
   percent: "Everything except alcohol",
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here`,
+  /* ══ "ON ANYTHING" EARNS ITS WORDS ══════════════════════════════════════
+     Sam, 20 Sep 2026: "mention here, that credit can be used towards
+     anything, implying alcohol without actually saying it."
+
+     It is the second half of the network string (BENEFIT_DETAIL, his own
+     wording from 15 Sep), and it was cut here with the rest of the density
+     pass. It is not a flourish: the row directly above this one says
+     "Everything except alcohol", and without the contrast a reader carries
+     that exclusion down to the credit as well. The credit reaches alcohol and
+     the 15% does not, which is the distinction TRUTH is built on — and this
+     is how it gets stated without the surface ever advertising a discount on
+     a drink, which §10 forbids outright. */
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spends like cash, on anything`,
   /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
      The density pass took this line out on the reasoning that it only
      restated scope, which the `venueCovers` row below now says once for all
