@@ -333,3 +333,10 @@
     animation: none;
   }
 }
+
+/* The venues that are on the membership but cannot take a TapIn order yet. */
+.vp-soon {
+  margin: var(--s-2xl) 0 0;
+  text-align: center;
+  text-wrap: pretty;
+}

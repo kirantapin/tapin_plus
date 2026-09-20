@@ -168,7 +168,17 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
                 your membership.
               </p>
             </>
-          ) : null}
+          ) : (
+            /* ══ NO ORDERING HERE YET, AND IT SAYS SO ════════════════════════
+               Four of the six have a TapIn page that renders but cannot take
+               a payment, and carry none of the in-store assets either (Sam,
+               20 Sep 2026). So they get no "Order at" button and no claim
+               about earning today — just the one forward-looking sentence the
+               rest of the site is already written in. */
+            <p className="t-compact vp-soon">
+              Ordering through TapIn opens here when we do.
+            </p>
+          )}
         </div>
       </div>
     </div>,
