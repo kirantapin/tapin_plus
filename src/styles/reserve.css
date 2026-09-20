@@ -1403,30 +1403,38 @@ html[data-flight="in"] .column > .sticky-cta{
 .plan-opt:active{transform:scale(.98)}
 .plan-opt.is-later:active{transform:scale(.98)}
 
-/* ── THE TOAST ─────────────────────────────────────────────────────────────
-   Down from the top edge, centred on the column's own measure rather than on
-   the viewport, so it arrives over the sheet it belongs to. Dark on every
-   surface: it is a message laid over the room, not a panel inside it, and the
-   light checkout is exactly where a light toast would disappear. */
-.rs-toast{
-  position:fixed;left:0;right:0;top:0;z-index:80;
-  display:flex;justify-content:center;pointer-events:none;
-  padding:calc(env(safe-area-inset-top,0px) + var(--s-lg)) var(--gutter) 0;
-  animation:toastIn 260ms var(--ease) both;
+/* ── THE REFUSAL ───────────────────────────────────────────────────────────
+   Sam, 20 Sep 2026: "the 'standard' option should flash red softly."
+
+   A soft pulse on the tile that was tapped, and nothing else on screen moves.
+   #D14245 is TapIn's badge red — the one hue outside the maroon ramp this
+   build spends, and it is spent here as STATE rather than as palette: it
+   arrives, says no, and leaves inside a second.
+
+   Soft means alpha, not a red tile. The fill peaks at 14% and the border at
+   55%, so the figure and the label stay exactly as legible through the pulse
+   as they are at rest; nothing here is the only carrier of the message, which
+   is the rule a colour signal has to satisfy. The words live in the live
+   region beside it and in the tile's own second line. */
+.plan-opt.is-later.is-refused{animation:planNo 900ms var(--ease) both}
+@keyframes planNo{
+  0%{background:var(--inner);border-color:var(--hair)}
+  18%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+  52%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+  100%{background:var(--inner);border-color:var(--hair)}
 }
-.rs-toast p{
-  margin:0;max-width:min(420px,100%);
-  padding:var(--s-lg) var(--s-xl);
-  border-radius:var(--r-card);
-  background:#241019;border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 12px 32px rgba(0,0,0,.38);
-  font-size:13px;font-weight:600;line-height:1.4;letter-spacing:.005em;
-  color:#FFFFFF;text-wrap:pretty;text-align:center;
-}
-@keyframes toastIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){
-  .rs-toast{animation:none}
+  /* No pulse, but the answer still has to arrive: it holds the same tint for
+     the same 900ms and steps back, which is a state change rather than
+     motion. */
+  .plan-opt.is-later.is-refused{animation:planNoStill 900ms steps(1,end) both}
+  @keyframes planNoStill{
+    0%{background:rgba(209,66,69,.14);border-color:rgba(209,66,69,.55)}
+    100%{background:var(--inner);border-color:var(--hair)}
+  }
   .plan-opt:active,.plan-opt.is-later:active{transform:none}
+}
+
 }
 
 /* ── WHERE IT WORKS, AT THE FOOT OF THE SHEET ──────────────────────────────

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Panel } from "../shell/Panel";
 import TapInCard from "../shell/TapInCard";
 import { useCardFlight } from "../shell/cardFlight";
@@ -64,26 +63,32 @@ export default function Reserve() {
      hero CTA — one mechanism, not a second invention. */
   const paySlot = useRef<HTMLDivElement>(null);
 
-  /* ══ STANDARD IS NOT SELECTABLE, AND SAYS SO WHEN TAPPED ═══════════════
-     Sam, 20 Sep 2026: "I don't like the standard click effect with checkout.
-     Instead both buttons should have a scale press animation to make it clear
-     that they're clickable and when I click on the standard one it doesn't
-     let me select it and a toast comes down from the top letting me know that
-     standard opens after launch."
+  /* ══ STANDARD REFUSES IN PLACE ════════════════════════════════════════
+     Sam, 20 Sep 2026: "I don't like this toast, let's get rid of it. Instead
+     the 'standard' option should flash red softly."
 
-     This replaces a version that let the tile take the selection for a second
-     and handed it back, greying the Checkout button while it did. That put a
-     money control into a disabled state to make a point about pricing, which
-     is a lot of machinery — and a second of "did I just break it" — for a
-     sentence. The tile simply does not select now, and the sentence arrives
-     where a sentence belongs. */
-  const [toast, setToast] = useState<string | null>(null);
-  const toastOut = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(toastOut.current), []);
+     The toast was a second surface arriving over the sheet to say something
+     about a tile the reader was already looking at — and it covered the top
+     of that sheet to do it. The tile answers for itself now: a soft red pulse
+     on the thing that was tapped, which is where the question was asked.
+
+     THE WORDS DO NOT GO WITH IT. A colour is the whole signal for a sighted
+     reader and none of it for anyone else, so the same sentence stays in a
+     visually hidden live region. The tile's own second line — "once the Early
+     Bird spots are gone" — is on screen permanently either way, which is what
+     keeps the flash from being the only explanation. */
+  const [refused, setRefused] = useState(false);
+  const calm = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(calm.current), []);
   const sayLater = () => {
-    setToast("Standard opens after launch. Early Bird is the only plan open now.");
-    window.clearTimeout(toastOut.current);
-    toastOut.current = window.setTimeout(() => setToast(null), 3200);
+    setRefused(false);
+    /* Restart the animation even on a second tap: the class has to leave the
+       element for a frame or the keyframe does not re-run. */
+    window.clearTimeout(calm.current);
+    window.requestAnimationFrame(() => {
+      setRefused(true);
+      calm.current = window.setTimeout(() => setRefused(false), 900);
+    });
   };
   /* THE DOCKED CHECKOUT, for the phone sheet (Sam, 15 Sep 2026: "still need a
      sticky checkout button for this modal, which scrolls down to the buy
@@ -247,10 +252,18 @@ export default function Reserve() {
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
-                {/* THE "FOR EVERYONE ELSE" LINE HAS MOVED OUT of this tile and
-                    become the tile below, where it is a price on an object
-                    rather than a footnote inside another price. Printing it in
-                    both places put the same figure twice, adjacent. */}
+                {/* WHAT THE DEPOSIT IS, said beside the figure. Sam, 20 Sep
+                    2026: "we'd want to say for early bird price at checkout
+                    that the $4.99 counts towards the first month." It is the
+                    answer to the only question the word "deposit" raises, and
+                    it sits where the Standard tile's own second line sits, so
+                    the two tiles read as a pair rather than as a price and a
+                    price-with-a-note.
+
+                    The "$14.99 for everyone else" footnote that used to be
+                    here became the tile below; printing it in both places put
+                    the same figure twice, adjacent. */}
+                <span className="plan-else">Counts toward your first month</span>
               </span>
             </span>
           </div>
@@ -277,7 +290,7 @@ export default function Reserve() {
               sentence a tap does rather than nothing at all. */}
           {FOUNDING_OPEN && plan.saving ? (
             <div
-              className="plan-opt is-later"
+              className={`plan-opt is-later${refused ? " is-refused" : ""}`}
               role="radio"
               aria-checked="false"
               aria-disabled="true"
@@ -300,6 +313,12 @@ export default function Reserve() {
             </div>
           ) : null}
         </div>
+
+        {/* The sentence the toast used to carry, for a reader who cannot see
+            a tile change colour. `status`, not `alert`: nothing failed. */}
+        <p className="sr-only" role="status">
+          {refused ? "Standard opens after launch. Early Bird is the only plan open now." : ""}
+        </p>
 
         {/* The founding rate survives — said here because it is the whole value
             of taking a seat now rather than later. */}
@@ -492,25 +511,6 @@ export default function Reserve() {
         }}
       />
 
-      {/* ══ THE TOAST ═══════════════════════════════════════════════════════
-          Down from the top, over the sheet. Portalled to <body> because the
-          sheet animates with a transform and a `position:fixed` child of a
-          transformed ancestor is clipped to that ancestor rather than to the
-          viewport — the same trap the merchant pop-up's scrim hit.
-
-          `role="status"`, not `alert`: nothing failed and nothing is waiting
-          on the reader, so it must not interrupt what a screen reader is
-          already saying. It is not a control and holds no focus; it says one
-          sentence and leaves after 3.2s, which is long enough to read
-          nineteen words without being long enough to sit in the way. */}
-      {toast
-        ? createPortal(
-            <div className="rs-toast" role="status">
-              <p>{toast}</p>
-            </div>,
-            document.body,
-          )
-        : null}
     </>
   );
 }
