@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Panel } from "../shell/Panel";
 import TapInCard from "../shell/TapInCard";
 import { useCardFlight } from "../shell/cardFlight";
 import { BenefitIcon, NavIcon } from "../shell/Icons";
 import CheckoutSheet from "../shell/CheckoutSheet";
+import VenueTicker from "../shell/VenueTicker";
 import type { PhoneIdentity } from "../shell/PhoneStep";
 import { useName } from "../model/nameStore";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -61,6 +63,28 @@ export default function Reserve() {
      This closes it, with the same IntersectionObserver the pitch uses on its
      hero CTA — one mechanism, not a second invention. */
   const paySlot = useRef<HTMLDivElement>(null);
+
+  /* ══ STANDARD IS NOT SELECTABLE, AND SAYS SO WHEN TAPPED ═══════════════
+     Sam, 20 Sep 2026: "I don't like the standard click effect with checkout.
+     Instead both buttons should have a scale press animation to make it clear
+     that they're clickable and when I click on the standard one it doesn't
+     let me select it and a toast comes down from the top letting me know that
+     standard opens after launch."
+
+     This replaces a version that let the tile take the selection for a second
+     and handed it back, greying the Checkout button while it did. That put a
+     money control into a disabled state to make a point about pricing, which
+     is a lot of machinery — and a second of "did I just break it" — for a
+     sentence. The tile simply does not select now, and the sentence arrives
+     where a sentence belongs. */
+  const [toast, setToast] = useState<string | null>(null);
+  const toastOut = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(toastOut.current), []);
+  const sayLater = () => {
+    setToast("Standard opens after launch. Early Bird is the only plan open now.");
+    window.clearTimeout(toastOut.current);
+    toastOut.current = window.setTimeout(() => setToast(null), 3200);
+  };
   /* THE DOCKED CHECKOUT, for the phone sheet (Sam, 15 Sep 2026: "still need a
      sticky checkout button for this modal, which scrolls down to the buy
      box"). Shown while the real button is out of view, gone the moment it is
@@ -246,17 +270,25 @@ export default function Reserve() {
               that it is not open yet, rather than leaving a reader to discover
               that by tapping.
 
-              Still a radio, and an honest one: `aria-checked="false"` with
-              `aria-disabled="true"`, out of the tab order, no handler. A
-              screen reader meets "Standard, not selected, dimmed, 2 of 2",
-              which is exactly what a sighted reader meets. */}
+              `aria-disabled` AND reachable, which is the pair that makes an
+              unavailable option honest: a screen reader meets "Standard, not
+              selected, dimmed, 2 of 2", the tile is in the tab order so the
+              same reader can reach it, and activating it produces the same
+              sentence a tap does rather than nothing at all. */}
           {FOUNDING_OPEN && plan.saving ? (
             <div
               className="plan-opt is-later"
               role="radio"
               aria-checked="false"
               aria-disabled="true"
-              tabIndex={-1}
+              tabIndex={0}
+              onClick={sayLater}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  sayLater();
+                }
+              }}
             >
               <b>Standard</b>
               <span className="plan-figs">
@@ -362,6 +394,28 @@ export default function Reserve() {
           </div>
         </Panel>
 
+        {/* ══ WHERE IT WORKS, AT THE FOOT ══════════════════════════════════
+            Sam, 20 Sep 2026: "too much space at the bottom here too, for this
+            modal. And we should have a small section with the logos of the
+            spots on tapin too at the very bottom."
+
+            One ask, two problems, one answer. The sheet is full height and
+            its content ran out several hundred pixels early, and the last
+            thing a reader saw before deciding was a refund promise with
+            nothing under it. The places are the answer to the question the
+            price raises — "worth $4.99 where?" — so they go here, where it is
+            asked, and the space closes because something true fills it.
+
+            `rail`, the same prop /in uses: this sits in a column, not across
+            a page, and the grid state it would otherwise reach at 1280 is a
+            seven-across row inside a 670px track. Sam asked for "the carousel
+            of places" on this surface once before, 15 Sep 2026; it is the
+            same component, back where it was. */}
+        <section className="places rs-places">
+          <p className="t-caption places-label">Where it works</p>
+          <VenueTicker rail />
+        </section>
+
         <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>
           <button
             type="button"
@@ -369,7 +423,12 @@ export default function Reserve() {
             tabIndex={ctaVisible ? -1 : 0}
             onClick={() => paySlot.current?.scrollIntoView({ block: "center", behavior: "smooth" })}
           >
-            Checkout · {plan.price} {plan.per}
+            {/* NOT `plan.per` ("a month"). What this button opens takes a
+                DEPOSIT, and the tile it docks under says so — a bar reading
+                "$4.99 a month" beside a tile reading "$4.99 deposit" is the
+                same figure carrying two different promises. Sam settled the
+                word today: "need to make sure it says $4.99 deposit." */}
+            Checkout · {plan.price} deposit
           </button>
         </div>
       </div>
@@ -432,6 +491,26 @@ export default function Reserve() {
           identity.current = id;
         }}
       />
+
+      {/* ══ THE TOAST ═══════════════════════════════════════════════════════
+          Down from the top, over the sheet. Portalled to <body> because the
+          sheet animates with a transform and a `position:fixed` child of a
+          transformed ancestor is clipped to that ancestor rather than to the
+          viewport — the same trap the merchant pop-up's scrim hit.
+
+          `role="status"`, not `alert`: nothing failed and nothing is waiting
+          on the reader, so it must not interrupt what a screen reader is
+          already saying. It is not a control and holds no focus; it says one
+          sentence and leaves after 3.2s, which is long enough to read
+          nineteen words without being long enough to sit in the way. */}
+      {toast
+        ? createPortal(
+            <div className="rs-toast" role="status">
+              <p>{toast}</p>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
