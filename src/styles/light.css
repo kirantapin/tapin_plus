@@ -1,0 +1,98 @@
+/* ============================================================================
+   THE LIGHT SURFACE — `data-lit` on a modal's own panel.
+
+   Sam, 20 Sep 2026: "can we make these pop ups, along with the checkout modal
+   pop up also be light theme."
+
+   ── WHY AN ATTRIBUTE ON A SUBTREE, NOT A SECOND STYLESHEET ─────────────────
+   Every surface in this build is drawn from the same nine tokens: five rungs
+   of ground and four steps of ink. A modal that is light is not a different
+   component, it is the same component with the ramp inverted — so this file
+   redefines those tokens on a subtree and nothing else changes. The pop-up
+   and the sheet keep one implementation each.
+
+   It also means the rule the tokens carry survives the inversion. Hierarchy
+   is steps plus hairlines, never elevation; maroon is still spent only on a
+   thing that is chosen or acting, and it still carries white (9.19:1 on the
+   card here, the same figure the dark surface measures).
+
+   ── WHAT STAYS DARK, ON PURPOSE ────────────────────────────────────────────
+   Three things, and each for the same reason: they are not surfaces.
+     · the scrims (`.vp-scrim`, `.cs-scrim`) — a light sheet needs a dark room
+       behind it, and dimming is what a scrim is for
+     · the sheet shadows — a light object still casts a dark shadow
+     · the veils over photography (`.vp-shot::after`, the mosaic's) and the
+       controls that sit on them (`.vp-close`) — those are over a merchant's
+       photograph, whose brightness owes nothing to the theme
+   None of them are declared here, which is why they are listed: their absence
+   is a decision, not an oversight.
+
+   ── MEASURED ────────────────────────────────────────────────────────────────
+   Against page #F5F2F3, card #FFFFFF, inner #EFEAEC, the sheet's own #F0EDEE
+   and press #E4DDE0:
+     ink-1  16.71 / 18.59 / 15.63 / 15.98 / 13.91
+     ink-2  11.37 / 12.65 / 10.63 / 10.87 /  9.47
+     ink-3   8.04 /  8.95 /  7.52 /  7.69 /  6.70
+     ink-4   5.78 /  6.43 /  5.40 /  5.52 /  4.81
+     maroon  8.26 /  9.19 /  7.72 /  7.90 /  6.88
+   Every step clears AA for body text on every rung it can land on, including
+   the quietest ink on the deepest one.
+   ============================================================================ */
+[data-lit] {
+  /* ── THE UA HAS TO BE TOLD TOO ──────────────────────────────────────────
+     tokens.css declares `color-scheme: dark` at the root, so the browser
+     draws native controls dark: on the checkout's light sheet the consent
+     checkbox rendered as a filled dark square with nothing to read it
+     against, which is the one control on that sheet a reader has to see the
+     state of. This also brings scrollbars, the caret, autofill's own fill
+     and the date and select widgets over with the surface. */
+  color-scheme: light;
+
+  /* The ground, in five rungs. Neutral carrying a few points of the house
+     hue (h~347) rather than a flat grey — a grey beside a saturated accent
+     reads as unchosen, one tinted toward it reads as decided. */
+  --page: #F5F2F3;
+  --subtle: #FFFFFF;
+  --card: #FFFFFF;
+  --inner: #EFEAEC;
+  --press: #E4DDE0;
+  /* The page at zero alpha, for the gradients that fade a docked bar into
+     the surface under it. Transparent black would fade through grey. */
+  --page-0: rgba(245, 242, 243, 0);
+
+  /* Ink, on the same hue axis the dark ramp uses, walking the other way. */
+  --ink-1: #1A1016;
+  --ink-2: #3D2F37;
+  --ink-3: #55454E;
+  --ink-4: #6B5A63;
+
+  /* hexToRgba(ink-1, .10) and .18 — the house construction inverted. A white
+     hairline on a light ground is not a hairline. */
+  --hair: rgba(26, 16, 22, 0.1);
+  --hair-lit: rgba(26, 16, 22, 0.18);
+
+  /* Deeper than the dark surface's: a shadow on a light ground has to carry
+     the separation a dark field gets for free from its own ink. */
+  --rest: 0 1px 2px rgba(26, 16, 22, 0.06);
+  --raised: 0 2px 10px rgba(26, 16, 22, 0.1);
+  --float: 0 6px 20px rgba(26, 16, 22, 0.14);
+}
+
+/* ── THE CHECKOUT SHEET KEEPS ITS OWN RAMP, INVERTED ───────────────────────
+   reserve.css remaps the five rungs inside the dialog rather than lifting its
+   ground alone, so the panels and the plan cards keep the steps they had:
+   ground → panel → card (Sam, 15 Sep 2026: "make the modal background
+   lighter too"). On a light surface that step runs the other way — the sheet's
+   ground sits a rung BELOW white so the panels on it read as raised — and the
+   relationship it was protecting is preserved either way.
+
+   Two class-weight selectors, so this beats `.reserve-sheet`'s own block
+   whatever order the stylesheets land in. */
+.reserve-sheet[data-lit] {
+  --page: #F0EDEE;
+  --subtle: #FFFFFF;
+  --card: #FFFFFF;
+  --inner: #F5F2F3;
+  --press: #E8E2E4;
+  --page-0: rgba(240, 237, 238, 0);
+}

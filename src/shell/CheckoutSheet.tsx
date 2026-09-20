@@ -132,6 +132,7 @@ export default function CheckoutSheet({
     >
       <div
         className="cs-sheet"
+        data-lit=""
         role="dialog"
         aria-modal="true"
         /* `seatNoun`, never the literal: after the flip the rows and consent
