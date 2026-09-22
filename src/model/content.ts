@@ -246,9 +246,53 @@ const VENUE_POLICY_DETAIL: Record<string, string> = {
 
 /** A venue policy's detail line, corrected. An empty string means the benefit
  *  carries no condition and the row prints none. Falls back to the record, so
- *  a kind that gains a policy later still prints something true. */
+ *  a kind that gains a policy later still prints something true.
+ *
+ *  ⚠ NO CALLER as of 21 Sep 2026. The merchant pop-up's benefit ROWS became
+ *  figure columns (docs/POLISH-2026-09-21.md §10) and a 30px figure takes a
+ *  four-word qualifier, not a sentence — so the pop-up reads
+ *  `venuePolicyFigure` below instead. This is left standing, not orphaned by
+ *  accident: it is the only place the long form of a venue's own conditions is
+ *  written down, and the credit's "spends like cash, on anything" (Sam's
+ *  wording, and the one line that implies alcohol without saying it) exists
+ *  nowhere else on this surface now. Delete it when that clause has a home. */
 export const venuePolicyDetail = (kind: string, fallback: string): string =>
   VENUE_POLICY_DETAIL[kind] ?? fallback;
+
+/**
+ * A venue policy AS A FIGURE — what the pop-up sets at 30px, and the short
+ * qualifier under it (docs/POLISH-2026-09-21.md §10.2).
+ *
+ * Split at the same seam `campaignBenefits` is: `figure` is the thing set
+ * large, `qualifier` is the CONDITION or CADENCE that makes it true and never
+ * a restatement of the figure. Three columns of "15% — fifteen percent off"
+ * would be the same claim twice.
+ *
+ * NOTHING HERE IS TYPED. The 5, the 15 and the 10 are BENEFIT's, so the sheet
+ * cannot print a rate or a floor the product does not hold — which is the
+ * whole reason the figures are derived rather than written beside the venue
+ * they are claimed at.
+ */
+const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }> = {
+  credit: {
+    figure: `$${BENEFIT.creditUsd}`,
+    qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
+  },
+  percent: {
+    figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
+    qualifier: "off, except alcohol",
+  },
+  /* Not a number, and still the figure: a column headed by its qualifier
+     would be a fourth kind of thing in a row of three. */
+  points: { figure: "Points", qualifier: "on every order" },
+};
+
+/** The figure and qualifier for one venue policy kind, or undefined for a kind
+ *  this build has no figure form of — which prints no column rather than a
+ *  guessed one. */
+export const venuePolicyFigure = (
+  kind: string,
+): { figure: string; qualifier: string } | undefined => VENUE_POLICY_FIGURE[kind];
 
 export interface ComingVenue {
   id: string;

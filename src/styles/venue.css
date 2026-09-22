@@ -5,10 +5,30 @@
    photograph and mark, what the membership gives you at that address, and the
    door to their live TapIn page.
 
-   It lives in the site's own dark world — there is no light app surface any
-   more (the preview it replaced carried one). A sheet from the bottom edge on
-   a phone, a centred dialog from 640px, the same two shapes and the same
-   house curve the checkout uses.
+   A light sheet (`data-lit`) from the bottom edge on a phone, a centred 460px
+   dialog from 640px, the same two shapes and the same house curve the checkout
+   uses.
+
+   ══ REDESIGNED, 21 SEP 2026 (docs/POLISH-2026-09-21.md §10) ════════════════
+   Sam: "when done can we /impeccable redesign these merchant page pop ups."
+   The old sheet was nine objects at one weight — band, collar, heading, two
+   uppercase eyebrows with rules, three icon-tile rows, three tall plates, a
+   button — and it named The Burg three times in its first 300px.
+
+   Four objects now, and one of them is clearly the largest:
+     THE PHOTOGRAPH   200px on a phone, 220 in the dialog. The name, the PLUS
+                      chip and `category · street` ride it under a veil; the
+                      collar sits top-left and the close top-right.
+     THE FIGURES      $5 / 15% / Points in three hairlined columns — the
+                      splash's `.cg-figures` at sheet scale.
+     WORKS ON         compact plates, glyph and word on a line, one row.
+     THE ACTION       untouched.
+   No uppercase eyebrow, no icon tile, no rule under a heading, one button.
+
+   NOTHING HERE REACHES THE PITCH. The plates were `.covers`/`.cover` shared
+   with pitch.css, and the pitch now wears that tall plate on its own page
+   (Sam, 20 Sep) — so the compact one is `.vp-cover`, its own element, and the
+   two sizes of one idea cannot move each other.
    ============================================================================ */
 
 .vp-root {
@@ -41,58 +61,122 @@
   outline: none;
 }
 
-/* -- the merchant's own photograph ------------------------------------------ */
-/* A BAND. It was 168px here and 190px on a dialog, which on a 812px phone put
-   the only action under the fold — and several of these heroes are the
-   merchant's own wordmark, so at that height the card opened by saying the
-   venue's name three times (image, collar, heading) before saying anything
-   about the membership. The photograph's job is to prove this is a real
-   place, and a band does that as well as a block does. */
+/* ── THE PHOTOGRAPH ────────────────────────────────────────────────────────
+   The object the sheet opens with, and the only place the venue is named.
+   `isolation` plus declared z-indexes because `::after` is generated as the
+   LAST child: a positioned veil with auto z-index paints over the name, which
+   is the lesson the pitch's photo cards wrote down in pitch.css. */
 .vp-shot {
   position: relative;
+  isolation: isolate;
   flex: 0 0 auto;
-  height: 132px;
+  height: 200px;
   background: var(--card);
 }
 .vp-shot > img {
+  position: relative;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.vp-shot > img[data-bright="true"] {
+/* ══ THE ONE HERO THAT IS NOT A PHOTOGRAPH ═════════════════════════════════
+   The Burg's is a brand card on white (0.891 mean luminance) — its own
+   wordmark, large, on a white field. Everything below is built for a picture
+   of a room, and on this file the composition inverts: the white field reads
+   as a slab against the sheet's own white, and the mark sets the venue's name
+   at 90px directly behind the 22px one. §10 refuses "a wordmark hero without
+   the veil", and the veil a photograph needs is not the one this needs.
+
+   So `heroIsBright` earns a second job. The filter brings the field down to
+   184, and the ramp below is deepened across its whole length rather than
+   only at the foot: the card becomes a dark plate with the merchant's mark on
+   it, the way the collar beside it is, and the name in front of it is the
+   thing that is read first. */
+.vp-shot[data-bright] > img {
   filter: saturate(0.9) brightness(0.72);
 }
-/* The veil the venue cards already use, so the mark and the close control sit
-   on a measured ground rather than on whatever the photograph happens to be. */
+.vp-shot[data-bright]::after {
+  background: linear-gradient(
+    180deg,
+    rgba(18, 10, 14, 0.52) 0%,
+    rgba(18, 10, 14, 0.46) 30%,
+    rgba(18, 10, 14, 0.64) 64%,
+    rgba(18, 10, 14, 0.82) 100%
+  );
+}
+/* ══ THE VEIL, AND WHY IT HOLDS BEFORE IT RAMPS ═════════════════════════════
+   The venue card's veil, from the foot: barely there across the top so the
+   photograph is seen and the collar sits on the merchant's own artwork, deep
+   at the bottom so the name and the street have a measured ground rather than
+   whatever the picture happens to be there.
+
+   THE STOPS ARE MEASURED, NOT PICKED, and the inherited ones do not hold. The
+   band wore .24 → .06 at 42% → .72 at 100% — three stops, a fast ramp, and
+   nothing laid on it. Put the name on the photograph and that ramp reaches only
+   about .37 where the name's cap-line sets. Sampled at 375 with the two nodes
+   hidden, the brightest ground pixel under each and the contrast white gets on
+   it (the `.bshot` method in pitch.css):
+
+                      INHERITED BAND RAMP     THIS RAMP
+                      name    street          name    street
+     Coffeeholics     4.84    6.34            7.99    8.05
+     The Burg         4.25    5.23            7.22    7.12
+     The Milk Parlor  3.96    6.04            6.78    7.71
+     Olaika           3.48    3.66            6.12    5.36
+     Sweetopia        2.87    4.21            5.33    6.03
+     Italiano's       2.97    4.07            5.44    5.89
+
+   Five of the six failed AA on the name — Sweetopia's white counter at 2.87:1,
+   Olaika's plates at 3.48 — because the ramp is already two thirds open where
+   the type starts. So this one opens LATE: the top wash clears by 30% so the
+   photograph and the collar's own artwork are seen, and the dark side does not
+   begin until 64%, which is above every text node on every venue.
+
+   AND IT IS NO DEEPER THAN IT HAS TO BE. The first pass ran .68/.88 at those
+   two stops and measured 8.17:1 at its worst — a correct number over a
+   photograph nobody could see. .54/.76 holds the floor at 5.33:1, which is the
+   same margin the pitch cards settled on, and gives the picture back. The rgba
+   is the field's own #120A0E at four alphas, written out rather than tokenised
+   because a token cannot carry four stops. */
 .vp-shot::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(18, 10, 14, 0.24) 0%,
-    rgba(18, 10, 14, 0.06) 42%,
-    rgba(31, 9, 22, 0.72) 100%
+    rgba(18, 10, 14, 0.3) 0%,
+    rgba(18, 10, 14, 0.08) 30%,
+    rgba(18, 10, 14, 0.54) 64%,
+    rgba(18, 10, 14, 0.76) 100%
   );
 }
+/* Top-left, ON the photograph rather than straddling its edge: the sheet below
+   starts with the state line now, and a collar hanging into it would push that
+   line down by its own overhang. */
 .vp-collar {
   position: absolute;
-  left: var(--s-xl);
-  bottom: -22px;
   z-index: 2;
-  width: 60px;
-  height: 60px;
-  border-radius: var(--r-card);
+  left: var(--s-2xl);
+  top: var(--s-xl);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-control);
 }
+/* 44, not the 36 it wore before: §6's floor for a tappable at 375, and this is
+   the only control on the sheet besides the action. Its top edge aligns with the
+   collar's across the photograph; the extra 4px falls downward, where there is
+   nothing to line up with. */
 .vp-close {
   position: absolute;
-  top: var(--s-lg);
-  right: var(--s-lg);
+  top: var(--s-xl);
+  right: var(--s-2xl);
   z-index: 2;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -116,13 +200,19 @@
   outline-offset: 2px;
 }
 
-/* -- identity and benefits --------------------------------------------------- */
-.vp-body {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: calc(22px + var(--s-lg)) var(--s-xl) calc(var(--s-xl) + env(safe-area-inset-bottom, 0px));
+/* ── THE NAME, ON THE PHOTOGRAPH, ONCE ─────────────────────────────────────
+   `--on-maroon` and not `--ink-1`. This subtree is inside `[data-lit]`, where
+   the ink ramp inverts and `--ink-1` resolves to near-black — over a dark veil
+   that is a name nobody can read. `--on-maroon` is the token light.css
+   deliberately does not touch, because it means "the white a dark fill
+   carries", which is exactly the job here. Not `opacity` either: the street is
+   a colour value mixed from that token, so live text is never dimmed. */
+.vp-id {
+  position: absolute;
+  z-index: 2;
+  left: var(--s-2xl);
+  right: var(--s-2xl);
+  bottom: var(--s-xl);
 }
 .vp-name {
   display: flex;
@@ -130,140 +220,203 @@
   gap: var(--s-md);
   flex-wrap: wrap;
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  color: var(--ink-1);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--on-maroon);
 }
 .vp-plus {
   align-self: center;
 }
-.vp-meta {
+.vp-where {
+  margin: var(--s-xs) 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--on-maroon) 84%, transparent);
+}
+
+/* ── THE SHEET ─────────────────────────────────────────────────────────────
+   Its gutter is the page's `--gutter`, not the tighter one the band-era sheet
+   used, so the figures row and the plate lineup start where every other
+   statement in this product starts. */
+.vp-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--s-xl) var(--s-2xl) calc(var(--s-2xl) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Open or closed, under the photograph. NO STATUS HUE — §9 keeps this palette
+   to maroon and nothing in this build carries a green or a red, so the state
+   separates on the ink ramp and on the shape of the mark: the dot is filled
+   when the door is open and a ring when it is not. */
+.vp-state {
   display: flex;
   align-items: center;
   gap: var(--s-md);
-  flex-wrap: wrap;
-  margin: var(--s-sm) 0 0;
+  margin: 0;
   font-size: 14px;
   font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.45;
   color: var(--ink-3);
 }
-.vp-open,
-.vp-shut {
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.vp-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--ink-4);
 }
-/* NO STATUS HUE. §9 keeps this palette to maroon, and nothing else in the
-   dark world carries a green or a red — so the two states separate on the ink
-   ramp and on weight, which is how every other state in this build reads. */
-.vp-open {
-  color: var(--ink-2);
-}
-.vp-shut {
-  color: var(--ink-4);
-  font-weight: 500;
+.vp-state[data-open] .vp-dot {
+  background: var(--ink-2);
+  box-shadow: none;
 }
 
-/* ── THE TWO SECTION LABELS ────────────────────────────────────────────────
-   "What you get here" and "Works on" are siblings: one names the benefits,
-   the other names their reach. They are set identically, with the rule
-   running out of the label rather than a box around the section — the same
-   device the pitch uses to tie its scope row to the benefits above it. A
-   second container inside a sheet that is already a container is the nested
-   card this build does not draw. */
-.vp-label,
-.vp-covers-head {
-  display: flex;
-  align-items: center;
-  gap: var(--s-lg);
-  margin: var(--s-2xl) 0 var(--s-md);
-  color: var(--ink-3);
-}
-.vp-label::after,
-.vp-covers-head::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--hair);
-}
+/* ══ THE BENEFITS ARE FIGURES ══════════════════════════════════════════════
+   The splash's `.cg-figures` construction, scaled to the sheet: three open
+   columns parted by a hairline, the figure large and tabular, the qualifier at
+   the reading floor under it. Not a copy of that class — it is written here at
+   this sheet's own sizes, because the two surfaces are 375 and 460 wide and a
+   shared rule would have to be overridden on both.
 
-/* ── WHAT IT WORKS ON ──────────────────────────────────────────────────────
-   The pitch's own `covers` row, narrowed to one address. It inherits the
-   glyph, label and colour from pitch.css and overrides only the two things
-   that are page-shaped there: the outer gutter (this sheet already has one)
-   and the fixed three columns.
-
-   ONE ROW AT ANY COUNT. The pitch draws six marks in a 3×2 grid; a venue
-   carries two, three or five, and `repeat(3, 1fr)` turns five into three plus
-   an orphaned two. `grid-auto-flow: column` gives every venue a single row of
-   equal columns instead, so the row reads as one statement and no venue gets
-   a ragged second line. */
-.vp-covers {
-  padding: 0;
-  grid-template-columns: none;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: var(--s-sm);
-}
-/* The plate and the glyph size that used to be declared here are `.cover`'s
-   own now (pitch.css) — Sam asked for the pitch to wear what this row wears,
-   so the treatment moved to the shared rule and this block kept only the
-   thing that is genuinely local: the single row. */
-.vp-benefits {
+   THE STEP BEFORE THE DIVIDER IS --s-sm, which is the splash's own hard-won
+   number: at 375 these cells are 109 wide and the widest figure ("Points",
+   84px at 30px/700) has to clear its own content box with the qualifier
+   wrapping under it. Six leaves room and still parts the column from the line. */
+.vp-figures {
   list-style: none;
-  margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-lg);
+  margin: var(--s-2xl) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
 }
-.vp-benefits > li {
+.vp-figures > li {
+  min-width: 0;
+  padding-right: var(--s-sm);
+}
+/* `--hair-lit`, not `--hair`. tokens.css says why in one line: --hair is the
+   house value for an edge against the page, and --hair-lit is "for dividers
+   INSIDE a panel, where .10 measures 1.33:1 and simply vanishes". Three
+   columns inside a sheet is that case exactly — the splash draws this same
+   construction with --hair because it is on the dark field, where the same
+   alpha is white and reads. */
+.vp-figures > li + li {
+  border-left: 1px solid var(--hair-lit);
+  padding-left: var(--s-lg);
+}
+.vp-figures > li:last-child {
+  padding-right: 0;
+}
+/* 30px is on tokens.css's enumerated ramp and is deliberately NOT `.t-figure`
+   (48/64): that size is the one display moment on a PAGE, and a sheet inside a
+   page does not get to spend it. Tabular so $5 and 15% sit on the same
+   rhythm. */
+.vp-fig {
+  display: block;
+  font-family: var(--font);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.vp-figures > li > span {
+  display: block;
+  margin-top: var(--s-md);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+  text-wrap: balance;
+}
+
+/* The offer-only venue's one line, under the offers glyph — the same mark the
+   pitch gives an offer, so a reader recognizes it as the merchant's own
+   promotion rather than one of the standing three. Bare glyph, no tile: a tile
+   here would be the row this redesign removed, reintroduced for one venue. */
+.vp-offer {
   display: flex;
   align-items: flex-start;
-  gap: var(--s-lg);
+  gap: var(--s-md);
+  margin: var(--s-2xl) 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-3);
+  text-wrap: pretty;
 }
-.vp-icon {
+.vp-offer-glyph {
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-control);
-  display: grid;
-  place-items: center;
-  background: var(--inner);
-  border: 1px solid var(--hair);
-  color: var(--ink-2);
+  display: block;
+  padding-top: 1px;
+  color: var(--ink-3);
 }
-.vp-icon svg {
+.vp-offer-glyph svg {
   width: 20px;
   height: 20px;
   display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
-.vp-benefits > li > span:last-child {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.vp-benefits b {
-  font-size: 15px;
+.vp-offer b {
   font-weight: 700;
-  letter-spacing: -0.01em;
   color: var(--ink-1);
 }
-.vp-benefits b + span {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--ink-4);
-  text-wrap: pretty;
+
+/* ══ WHAT IT WORKS ON ══════════════════════════════════════════════════════
+   A REAL HEADING, NOT A CAPTION. It was `.t-caption` — 11px tracked uppercase
+   with a hairline running out of it — twice on one sheet, which is the tell
+   §1.2 named. Sentence case at the reading floor, in the ink one step above
+   the plates it heads, and nothing under it.
+
+   THE PLATES ARE CONTENT-SIZED, LEFT-ALIGNED. Stretched to equal columns they
+   became wide slabs with the word lost in the middle of each — the pitch
+   measured that at 1280 and landed on `justify-content: start` for the same
+   reason. A lineup is a lineup. */
+.vp-covers-head {
+  margin: var(--s-3xl) 0 var(--s-lg);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.vp-covers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-sm);
+  margin: 0;
+}
+.vp-cover {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  height: 40px;
+  padding: 0 var(--s-lg);
+  border-radius: var(--r-control);
+  background: var(--inner);
+}
+.vp-cover svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: block;
+  color: var(--ink-3);
+}
+.vp-cover > span {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--ink-2);
+  white-space: nowrap;
 }
 
 /* -- the door to the live page ----------------------------------------------- */
@@ -280,6 +433,13 @@
   height: 17px;
   flex: 0 0 auto;
   opacity: 0.86;
+}
+
+/* The venues that are on the membership but cannot take a TapIn order yet. */
+.vp-soon {
+  margin: var(--s-2xl) 0 0;
+  text-align: center;
+  text-wrap: pretty;
 }
 
 /* -- motion ------------------------------------------------------------------ */
@@ -342,8 +502,11 @@
   .vp-root.is-closing .vp {
     animation: vpOut 180ms cubic-bezier(0.4, 0, 1, 1) both;
   }
+  /* §10's one size change between the two shapes. Everything else — the
+     figures, the plates, the gutter — is identical, because the sheet is 375
+     wide and the dialog 460, and the composition already fits the narrower. */
   .vp-shot {
-    height: 148px;
+    height: 220px;
   }
 }
 @keyframes vpIn {
@@ -374,11 +537,4 @@
   .vp-root.is-closing .vp-scrim {
     animation: none;
   }
-}
-
-/* The venues that are on the membership but cannot take a TapIn order yet. */
-.vp-soon {
-  margin: var(--s-2xl) 0 0;
-  text-align: center;
-  text-wrap: pretty;
 }
