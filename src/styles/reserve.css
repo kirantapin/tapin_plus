@@ -141,7 +141,7 @@
 .charges li:first-child{padding-top:0}
 .charges li + li{border-top:1px solid var(--hair-lit)}
 .charges b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
-.charges span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.charges span{font-size:14px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
 
 /* What a refund costs, directly under the row that offers it. Not fine print
    and not an alarm: the same treatment any other qualifying line gets, sitting
@@ -167,7 +167,7 @@
    sentence above stay visible. That is the condition §4 sets, not a preference. */
 .terms{margin:0;padding:0 0 0 var(--s-xl);display:flex;flex-direction:column;
   gap:var(--s-lg)}
-.terms li{font-size:13px;font-weight:500;line-height:1.5;letter-spacing:.005em;
+.terms li{font-size:14px;font-weight:500;line-height:1.5;letter-spacing:.005em;
   color:var(--ink-3)}
 .terms li::marker{color:var(--ink-4)}
 
@@ -273,10 +273,10 @@
 .reach-collar img{border-radius:8px}
 .reach-collar::after{border-radius:8px}
 .reach-place{display:flex;flex-direction:column;gap:2px;min-width:0}
-.reach-place b{font-size:13px;font-weight:600;color:var(--ink-1);
+.reach-place b{font-size:14px;font-weight:600;color:var(--ink-1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 13px, not 12: a category is a word, not a tracked micro-label. */
-.reach-place span{font-size:13px;font-weight:500;color:var(--ink-4)}
+.reach-place span{font-size:14px;font-weight:500;color:var(--ink-4)}
 
 .rs-split,.rs-read,.rs-decide,.rs-stick{display:contents}
 
@@ -633,7 +633,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-facts li:first-child{padding-top:0}
 .ms-facts li + li{border-top:1px solid var(--hair-lit)}
 .ms-facts b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
-.ms-facts span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.ms-facts span{font-size:14px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
 .ms-locked{margin:var(--s-lg) 0 0;padding-top:var(--s-lg);
   border-top:1px solid var(--hair-lit)}
 
@@ -653,7 +653,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ph{display:flex;flex-direction:column}
 .ph-lede{margin:0 0 var(--s-xl);font-size:15px;font-weight:500;line-height:1.5;
   color:var(--ink-2)}
-.ph-label{display:block;margin:0 0 var(--s-md);font-size:13px;font-weight:600;
+.ph-label{display:block;margin:0 0 var(--s-md);font-size:14px;font-weight:600;
   letter-spacing:.005em;color:var(--ink-3)}
 /* The second label opens a new field group under the first. */
 .ph-label-2{margin-top:var(--s-xl)}
@@ -686,12 +686,12 @@ html[data-flight="in"] .column > .sticky-cta{
   margin:var(--s-lg) 0 0;cursor:pointer}
 .ph-opt input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;
   accent-color:var(--maroon);cursor:pointer}
-.ph-opt span{font-size:13px;font-weight:500;line-height:1.45;color:var(--ink-3)}
+.ph-opt span{font-size:14px;font-weight:500;line-height:1.45;color:var(--ink-3)}
 .ph-opt input:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 
 .ph .action{margin-top:var(--s-xl)}
 .ph-back{margin:var(--s-lg) 0 0;padding:0;border:0;background:none;font:inherit;
-  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--ink-3);cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
 .ph-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
@@ -705,13 +705,13 @@ html[data-flight="in"] .column > .sticky-cta{
 .cs-who{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--s-md);
   margin:0 0 var(--s-xl);padding-bottom:var(--s-lg);
   border-bottom:1px solid var(--hair-lit);
-  font-size:13px;font-weight:500;color:var(--ink-3)}
+  font-size:14px;font-weight:500;color:var(--ink-3)}
 .cs-who b{font-size:15px;font-weight:700;color:var(--ink-1)}
 /* The number beside the name: same size, a step quieter, so the line reads
    person-then-account rather than two competing facts. */
 .cs-phone{font-size:15px;font-weight:500;color:var(--ink-3)}
 .cs-change{margin-left:auto;padding:0;border:0;background:none;font:inherit;
-  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--ink-3);cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
 .cs-change:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
@@ -1032,7 +1032,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .seat-count{margin:0;display:flex;align-items:baseline;gap:var(--s-sm);flex-wrap:wrap;
   font-size:14px;line-height:1.3;color:var(--ink-2)}
 .seat-count b{font-size:17px;line-height:1;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
-.seat-closes{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3);white-space:nowrap}
+.seat-closes{margin-left:auto;font-size:14px;font-weight:500;color:var(--ink-3);white-space:nowrap}
 .seat-meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hair-lit)}
 .seat-meter i{position:absolute;inset:0;background:var(--ink-1);
   transform-origin:left;transform:scaleX(var(--p,0))}
@@ -1175,7 +1175,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-refer-copy:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 .ms-refer-share{margin-top:var(--s-lg)}
 .ms-refer-track{display:flex;align-items:center;gap:var(--s-lg);margin:var(--s-lg) 0 0;
-  font-size:13px;font-weight:500;color:var(--ink-3)}
+  font-size:14px;font-weight:500;color:var(--ink-3)}
 .ms-refer-track .tnum{font-weight:700;color:var(--ink-1)}
 .ms-refer-meter{position:relative;flex:1 1 auto;max-width:160px;height:3px;border-radius:2px;
   background:var(--hair-lit);overflow:hidden}
@@ -1757,7 +1757,14 @@ html[data-flight="in"] .column > .sticky-cta{
    fading) and parked (not painted, and `inert`/`aria-hidden` from the
    component) both sit at the top of the stack and contribute no height. */
 .rs-page.is-out,.rs-page.is-off{position:absolute;inset-block-start:0;inset-inline:0}
-.rs-page.is-off{visibility:hidden}
+/* HEIGHT 0, NOT JUST HIDDEN. An absolutely positioned page still extends the
+   scroller's scrollable overflow by its own height, and page 0 is ~1,640px
+   tall on a phone — so on "Your details" the sheet scrolled through a
+   thousand pixels of empty ground under a 460px form (Fable, 22 Sep 2026,
+   measured scrollHeight 1694 against a 691px scroller). Zero height with
+   its own overflow hidden keeps the page in the DOM, with its state, and
+   out of the measurement. */
+.rs-page.is-off{visibility:hidden;height:0;overflow:hidden}
 .rs-page.is-out{pointer-events:none;animation:rsPageOut 280ms var(--ease) both}
 .rs-page.is-in{animation:rsPageIn 280ms var(--ease) both}
 /* Back plays it mirrored — the direction is on the stack, so a page never has
