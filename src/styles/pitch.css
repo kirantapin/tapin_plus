@@ -2283,22 +2283,37 @@ button.vcard:focus-visible {
      in any measurement, because the box WAS at x=0. */
   .hero .logo {
     align-self: flex-start;
-    margin-bottom: var(--s-2xl);
+    margin-bottom: var(--s-xl);
   }
-  /* ══ THE H1 TAKES THE RAMP'S OWN DESKTOP STEP ════════════════════════════
-     layout.css sets `.hero h1{font-size:44px}` up here — (0,1,1), written
-     when 32px was the largest size this build had — and `.t-hero` is (0,1,0),
-     so the token's 56 lost on weight alone and the headline would have stayed
-     at the old step while everything around it grew. Named with the class so
-     the ramp wins, and named HERE because pitch.css loads after layout.css. */
+  /* ══ THE H1 FITS THE COLUMN, AND THE COLUMN FITS A LAPTOP ═══════════════
+     layout.css sets `.hero h1{font-size:44px}` up here — (0,1,1) — and
+     `.t-hero` is (0,1,0), so the ramp's step has to be named with the class
+     to win, and named HERE because pitch.css loads after layout.css.
+
+     It was a flat 56. Sam, 21 Sep, in the app's own browser pane (a hair
+     under 1440 wide, ~900 tall): "don't love the way this looks on desktop"
+     — the headline had gone to four lines with "go" alone on the last, the
+     rail's tiles were 235px tall under it, and the price and the button sat
+     below the fold, so the docked bar was already showing on load, over the
+     wordmark. The column was taller than the screen.
+
+     Fluid between 40 and 52 on the viewport, so the three-line break holds
+     from 1024 up instead of depending on whether the column lands a few
+     pixels either side of 18ch. With the tiles square (below), the logo's
+     gap a step shorter and the price block's rule tighter, the button's foot
+     sits at ~720px at 1440 — inside a 13-inch laptop's viewport. */
   .hero h1.t-hero {
-    font-size: 56px;
+    font-size: clamp(40px, 3.5vw, 52px);
     line-height: 1.02;
   }
-  /* The copy's measure inside the panel: two lines of headline, a paragraph's
-     width for the lead, and the price block no wider than either. */
+  /* The copy's measure inside the panel: three lines of headline, a
+     paragraph's width for the lead, and the price block no wider than either. */
   .hero-band:not(.is-compact) .hero h1 {
-    max-width: 18ch;
+    max-width: 20ch;
+  }
+  .hero-band:not(.is-compact) .hero-buy {
+    margin-top: var(--s-lg);
+    padding-top: var(--s-lg);
   }
   /* 18px, not the phone's 17: the lead has a 56px headline over it here and a
      column of its own to run in. */
@@ -3183,8 +3198,21 @@ button.vcard:focus-visible {
    up, because both are (0,2,0) and an equal-weight rule earlier in the file
    loses on source order — which is exactly what happened on the first pass. */
 @media (min-width: 1024px) {
+  /* 160 square, not 176 at 3:4: the portrait tile was 235px tall, the
+     tallest thing in a column that has to fit a laptop's viewport (see the
+     H1 rule), and 160 is the width at which three whole tiles sit in the
+     column at 1280 as well as at 1440 (3×160 + 2×12 = 504 in a 505 column).
+     The ratio lives on the `.vcard` button inside the `li`, which is where
+     the base 3:4 is declared — a ratio on the `li` measures nothing. 160
+     square still holds the collar, the name and the category. */
   .hero-rail .ticker-tile {
-    width: 176px;
+    width: 160px;
+  }
+  .hero-rail .ticker-tile .vcard {
+    aspect-ratio: 1;
+  }
+  .hero-rail {
+    margin-top: var(--s-lg);
   }
 }
 /* "View all places" opens the grid this mount refuses; it would do nothing
@@ -3197,19 +3225,21 @@ button.vcard:focus-visible {
    layout.css sets `.hero-price b{font-size:32px}` and `.hero-price span
    {font-size:15px}` — both (0,1,1), both outranking `.t-figure` at (0,1,0),
    so the token has to be named with the element or it silently does nothing.
-   48 on a phone is the ramp's own figure step; 56 up here rather than the
-   token's 64, because the H1 beside it is 56 and the headline stays the
-   largest thing on the page. The label drops to the raised compact floor so
-   it reads as the figure's unit and not as a second line. */
+   It went to the token's 48 on 21 Sep and Sam, reading it on a phone: "only
+   issue is how large this looks which is a bit weird" — a price outsizing
+   the 36px headline above it. Back to 32 on a phone, 44 from 1024 under the
+   56px H1: the figure's face and tabular numerals, at a size under the
+   headline's. The label drops to the raised compact floor so it reads as the
+   figure's unit and not as a second line. */
 .hero-price b.t-figure {
-  font-size: 48px;
+  font-size: 32px;
 }
 .hero-price span {
   font-size: 14px;
 }
 @media (min-width: 1024px) {
   .hero-price b.t-figure {
-    font-size: 56px;
+    font-size: 44px;
   }
 }
 
