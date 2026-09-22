@@ -1,5 +1,11 @@
 import { BenefitIcon, NavIcon } from "./Icons";
-import { benefits, offers, venues } from "../model/content";
+import {
+  benefitFragments,
+  benefitShots,
+  benefits,
+  offers,
+  venues,
+} from "../model/content";
 
 /**
  * The three standing benefits, as cards.
@@ -35,21 +41,27 @@ import { benefits, offers, venues } from "../model/content";
  * smaller there, it is the pre-checkout now); the pitch keeps the rows.
  */
 /**
- * ══ THE PITCH'S ROWS BECOME FIGURES AND COLUMNS — 21 Sep 2026 ══════════════
- * Sam: "it still feels a bit AI generated." The four rows were the textbook
- * tell — icon tile, bold label, grey subline, four times, same size — and on
- * the pitch's desktop they were four equal CARDS of exactly that. So the
- * non-compact path drops the tiles entirely (docs/POLISH-2026-09-21.md §4.3):
- * the credit's dollar becomes the panel's display figure with its word beside
- * it, the other two stand as open columns divided by a hairline, and the
- * offers line closes under one more. Hairlines, not boxes.
+ * ══ THE PITCH'S BENEFITS BECOME PHOTOGRAPHS — 21 Sep 2026 ══════════════════
+ * The 21 Sep morning pass (§4.3) made these an open statement: a giant `$5`
+ * beside a small "credit", then two hairlined columns, then a line. Sam, on a
+ * phone: "I really don't like this" — naming the split figure, the hairline
+ * columns and the bare glyph row under them. Then: "can you take a look at the
+ * meandu website? I like their styling for this kind of thing. I think it'd be
+ * cool if we had photos from the coffeeholics instagram too."
  *
- * THE FIGURE IS LIFTED OUT OF THE LABEL, NOT TYPED. `credit.label` is
- * "$5 credit" in money-and-terms.json; the money token leads and the rest of
- * the label sits beside it at reading size, so the row still prints exactly
- * the string the data holds — set at two sizes, the same device the hero uses
- * for its headline and lead. Nothing here invents a cadence: "once a week at
- * each place" is the condition's own words, underneath.
+ * So each benefit is a PHOTOGRAPH CARD (docs/POLISH-2026-09-21.md §7): a venue
+ * hero full-bleed under a veil, the benefit's own label and condition in the
+ * top-left, and a frosted fragment floating in the lower half showing what the
+ * benefit does to one order. The photo is the evidence and the chip is the
+ * proof — no icon tiles, no hairlines, no display figure, which is what the
+ * three rejected devices had in common.
+ *
+ * NOTHING HERE IS TYPED. The title is the record's `label` WHOLE — the figure
+ * is no longer lifted out of it, which is the split Sam rejected — the line is
+ * its `detail`, the fragment is `benefitFragments` (whose discounts are derived
+ * from BENEFIT, not written), and the photograph is `benefitShots` resolved
+ * through the venue's own `hero`. The credit leads by SIZE alone, as it always
+ * has: full grid width and a larger title (Sam, 12 Sep: "this is the big one").
  *
  * `compact` is untouched. The checkout's chip list is drawn by reserve.css off
  * `.bcards.is-chips` and still needs the tile and the same tree.
@@ -62,9 +74,6 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
      sits in front of it. Falls back to the first offer if Olaika's ever goes. */
   const offer = offers.find((o) => o.venueId === "olaika") ?? offers[0];
   const offerVenue = offer ? venues.find((v) => v.id === offer.venueId) : undefined;
-  /* The leading money token of the credit's label, and what is left of it. */
-  const leadFigure = credit ? (/^\$[\d.,]+/.exec(credit.label)?.[0] ?? "") : "";
-  const leadWord = credit ? credit.label.slice(leadFigure.length).trim() : "";
 
   if (compact) {
     return (
@@ -113,52 +122,82 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
     );
   }
 
+  /* The four, in §7's order: the credit, the two standing benefits behind it,
+     then offers. Each carries its own photograph, its own words and its own
+     fragment; the offers card reads all three off the offer record.
+
+     ══ THE FOURTH THING: OFFERS, ON TOP ═══════════════════════════════════
+     Sam, 14 Sep 2026: "include a section for special offers, like the one at
+     olaika, that are on TOP of the benefits they already have." The example is
+     the real Olaika offer from money-and-terms.json — the same record the
+     deck's offers slide and the app's Deals screen read — so a venue's name
+     and terms are never typed here.
+
+     IT IS A CARD LIKE THE OTHER THREE NOW, not the single line §4.3 made of
+     it. The line was right when the three above it were an open statement and
+     a fourth row would have read as a fourth equal; against three photographs
+     a bare line reads as a footnote to them, which is the opposite of "on
+     top". Size still separates it from the credit, which is the only thing
+     that ever needed separating. */
+  const cards = [
+    ...(credit ? [{ policy: credit, line: credit.detail }] : []),
+    ...rest.map((b) => ({ policy: b, line: b.detail })),
+    ...(offer
+      ? [
+          {
+            policy: { id: "offers", label: "Special offers" },
+            line: `Like ${offer.label.toLowerCase()} at ${offerVenue?.name ?? "a TapIn Plus place"}, on top of the three`,
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="bcards">
-      {credit ? (
-        <div className="bcard is-lead">
-          <b className="t-figure tnum bcard-fig">{leadFigure}</b>
-          <span className="bcard-text">
-            <b>{leadWord}</b>
-            {/* The condition, at the reading floor and never as fine print. It
-                is the half that makes the figure true. */}
-            <span>{credit.detail}</span>
-          </span>
-          {/* The scope used to be repeated here as "at each of N places". Cut:
-              the hero lead already says "at every Plus place in town" and the
-              panel note below says it again, so a third statement bought
-              nothing and cost the condition its line. */}
-        </div>
-      ) : null}
-
-      <div className="bcard-pair">
-        {rest.map((b) => (
-          <div className="bcard" key={b.id}>
-            <span className="bcard-text">
-              <b>{b.label}</b>
-              <span>{b.detail}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-      {/* ══ THE FOURTH THING: OFFERS, ON TOP ═══════════════════════════════════
-          Sam, 14 Sep 2026: "include a section for special offers, like the one
-          at olaika, that are on TOP of the benefits they already have." The
-          example is the real Olaika offer from money-and-terms.json — the same
-          record the deck's offers slide and the app's Deals screen read — so a
-          venue's name and terms are never typed here.
-
-          ONE LINE, under one hairline: it is the fourth thing and the smallest
-          of the four, and giving it the three's treatment was what made the
-          block read as a grid of equals. */}
-      {offer ? (
-        <p className="bcard is-offers">
-          <b>Special offers</b>{" "}
-          <span>
-            Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
-          </span>
-        </p>
-      ) : null}
+    <div className="bshots">
+      {cards.map(({ policy, line }) => {
+        const shot = venues.find((v) => v.id === benefitShots[policy.id])?.hero;
+        /* The offers fragment is the offer itself — the venue and the terms as
+           the record holds them, so a real business's deal is never retyped. */
+        const chip =
+          policy.id === "offers"
+            ? offer
+              ? { line: offerVenue?.name ?? "A TapIn Plus place", figure: offer.label }
+              : undefined
+            : benefitFragments[policy.id];
+        return (
+          <article
+            className={`bshot${policy.id === "credit" ? " is-lead" : ""}`}
+            key={policy.id}
+          >
+            {/* alt="" — the photograph is the card's mood, and every word it
+                carries is already in the heading beside it. */}
+            {shot ? (
+              <img className="bshot-img" src={shot} alt="" decoding="async" loading="lazy" />
+            ) : null}
+            <div className="bshot-say">
+              {/* THE LABEL WHOLE. "$5 credit" is one string in
+                  money-and-terms.json and it is set as one. */}
+              <h3 className="bshot-title">{policy.label}</h3>
+              <p className="bshot-line">{line}</p>
+            </div>
+            {chip ? (
+              <p className="bshot-chip">
+                <span className="bshot-chip-a">
+                  <span className="bshot-glyph" aria-hidden="true">
+                    {policy.id === "offers" ? (
+                      <NavIcon id="deals" />
+                    ) : (
+                      <BenefitIcon id={policy.id} />
+                    )}
+                  </span>
+                  {chip.line}
+                </span>
+                <b className="bshot-chip-b">{chip.figure}</b>
+              </p>
+            ) : null}
+          </article>
+        );
+      })}
     </div>
   );
 }

@@ -330,6 +330,59 @@ export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
 );
 
 /**
+ * THE PHOTOGRAPH BEHIND EACH BENEFIT, as a benefit id → venue id map.
+ *
+ * Sam, 21 Sep 2026, pointing at meandu.com: "I like their styling for this kind
+ * of thing. I think it'd be cool if we had photos from the coffeeholics
+ * instagram too." The card resolves the id through that venue's own `hero`, so
+ * the Instagram shots are a one-line swap per card and nothing here holds a
+ * second copy of an image path.
+ *
+ * Four ids, four different files, and no `heroIsBright` one: The Burg's hero is
+ * a brand card on white (0.891 mean luminance, see BRIGHT_HEROES below) and the
+ * §7 veil is built for a photograph of a room, not for a wordmark.
+ */
+export const benefitShots: Record<string, string> = {
+  credit: "coffeeholicsva",
+  percent: "italianospizza",
+  points: "themilkparlor",
+  offers: "olaika",
+};
+
+/**
+ * THE ILLUSTRATIVE BASKET ON EACH CARD'S CHIP — the only invented figures in
+ * the block, declared HERE so no component types a price, and kept beside the
+ * benefits they exercise. The discount beside each is derived, never typed:
+ * that is what stops a card claiming a rate the product does not hold.
+ *
+ * Both baskets are coffee-shop and pizza-counter orders. §10 forbids any claim
+ * that alcohol is discounted, and an order line under a "15% off" title is
+ * exactly such a claim by layout, so nothing here is a drink with a proof.
+ *
+ * The credit's basket clears BENEFIT.creditMinUsd — a basket under the
+ * threshold would picture a credit that is not actually earned.
+ */
+const SHOT_BASKET_USD: Record<string, number> = { credit: 11.5, percent: 9 };
+
+/** The fragment each photo card floats over its lower half: what the benefit
+ *  looks like on one order. Two lines — the order, then what it saved. */
+export const benefitFragments: Record<string, { line: string; figure: string }> = {
+  credit: {
+    line: `Latte + croissant · $${SHOT_BASKET_USD.credit.toFixed(2)}`,
+    figure: `−$${BENEFIT.creditUsd.toFixed(2)} credit`,
+  },
+  percent: {
+    line: `Two slices · $${SHOT_BASKET_USD.percent.toFixed(2)}`,
+    figure: `−$${(SHOT_BASKET_USD.percent * BENEFIT.percentOff).toFixed(2)} (${Math.round(
+      BENEFIT.percentOff * 100,
+    )}% off)`,
+  },
+  /* No figure: the transfer programme is unbuilt and a rate published today is
+     a rate a member holds Sam to in 2027. */
+  points: { line: "Every order", figure: "Points toward a free one" },
+};
+
+/**
  * "Save at least what you pay, or we refund the difference."
  * The DIFFERENCE, not the whole fee — and it is a promise the SERVER keeps.
  * No surface may imply a client computes it (TRUTH.md §3).

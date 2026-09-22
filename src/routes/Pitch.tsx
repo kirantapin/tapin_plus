@@ -362,13 +362,19 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
       {/* The label carries "at Plus places" so the badge on the venue tiles has
           a meaning on the page it appears on — it was stamped on five tiles and
           defined nowhere except inside a disclosure. */}
-      {/* A HEADING, NOT A LABEL. `Panel`'s own `label` prop renders
+      {/* ══ A SECTION, NOT A PANEL ═══════════════════════════════════════════
+          The benefits are photograph cards now (docs/POLISH-2026-09-21.md §7),
+          and the cards ARE the boxes — a panel around them is a card inside a
+          card, which is the storefront's one hard rule. So this block comes out
+          onto the field with its heading on the ground: `.pitch-get`, an open
+          section that sets its own intervals at both widths.
+
+          A HEADING, NOT A LABEL. `Panel`'s own `label` prop renders
           `.t-caption` — 11px tracked caps — which is the list-label role, and
           four of those down one page is the eyebrow tic the 21 Sep 2026 pass
-          removed. Same string, passed as a child heading instead so
-          Panel.tsx keeps its contract for every other surface. */}
-      <Panel className="flush">
-        <h2 className="t-section panel-head">What you get</h2>
+          removed. Same string, set as the heading it always was. */}
+      <section className="pitch-get">
+        <h2 className="t-section pitch-get-head">What you get</h2>
         <BenefitCards />
 
         {/* The connective tissue the panel was missing: without the label the
@@ -397,7 +403,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             never market the credit as meant for drinks, age-gate the spend)
             are flagged there and not resolved here. Stated once, as scope, in
             body type, under the benefits it qualifies — not as a headline. */}
-        <p className="t-compact panel-note">
+        <p className="t-compact pitch-get-note">
           Only the 15% off skips alcohol. Credit can be used on anything.
         </p>
 
@@ -422,7 +428,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             </Drill>
           </div>
         ) : null}
-      </Panel>
+      </section>
 
       {/* ══ WHERE IT WORKS, AS A TICKER ═══════════════════════════════════════
           Sam asked for a carousel rather than the 2x2 grid: auto-scrolling,

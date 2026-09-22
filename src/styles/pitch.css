@@ -1483,98 +1483,191 @@ button.vcard:focus-visible {
 /* Desktop: the three cards are composed in THE PAGE BELOW THE HERO, at the end
    of this file, as the first of its four movements. */
 
-/* ══ THE PITCH'S BENEFITS: A FIGURE, TWO COLUMNS AND A LINE ═════════════════
-   Scoped to `.bcards:not(.is-chips)` so the checkout's chip list — which is
-   drawn entirely by reserve.css off `.bcards.is-chips` and still wants the
-   tile — cannot be reached by any of it.
+/* ══ THE PITCH'S BENEFITS ARE PHOTOGRAPHS ═══════════════════════════════════
+   What stood here was §4.3's open statement — `.bcards:not(.is-chips)` dressing
+   the four rows as a display figure, two hairlined columns and a closing line.
+   Sam rejected all three devices on 21 Sep (see BenefitCards.tsx), and nothing
+   renders a non-chips `.bcards` any more, so those rules are gone rather than
+   left to rot behind a selector no tree matches. The `.bcards` BASE block above
+   stays exactly as it was: the compact path and reserve.css's `.bcards.is-chips`
+   still read every line of it.
 
-   The shape (docs/POLISH-2026-09-21.md §4.3): the credit's dollar as the
-   panel's display figure with its word beside it and the condition under;
-   then 15% off and Points as two OPEN COLUMNS divided by one hairline; then
-   the offers as a single line under one more. Four rows of tile-plus-bold-
-   plus-grey were four of the same object, and the number that is the product
-   was set two points above the label beside it. */
-.bcards:not(.is-chips) .bcard.is-lead {
-  align-items: baseline;
-  gap: var(--s-lg);
-  padding-bottom: var(--s-2xl);
-}
-.bcards:not(.is-chips) .bcard-fig {
-  flex: 0 0 auto;
-  font-weight: 700;
-}
-.bcards:not(.is-chips) .bcard.is-lead .bcard-text b {
-  font-size: 18px;
-  letter-spacing: -0.015em;
-}
+   The card is me&u's, by name (docs/POLISH-2026-09-21.md §7): a venue's own
+   photograph full-bleed under a veil, the benefit's label and condition in the
+   top-left, and one frosted fragment floating in the lower half. The photo is
+   the evidence; the fragment is the proof.
 
-/* THE TWO OPEN COLUMNS. `.bcard-pair` is `display:contents` at base, which is
-   what let the four rows stack; here it is the object again — two columns
-   with a hairline between them and nothing else drawn. */
-.bcards:not(.is-chips) .bcard-pair {
+   THE VEIL IS TWO JOBS IN ONE GRADIENT. Dark at the top so a 22px white title
+   clears AA over a lit café shot, nearly open across the middle so the food is
+   actually seen, and dark again at the foot so the chip has something to sit
+   on. The rgba is the field's own #120A0E at four alphas, which is why it is
+   written out rather than tokenised — a token cannot carry four stops.
+
+   ══ THE FOURTH STOP IS MEASURED, AND IT IS §7'S ONE DEVIATION ══════════════
+   §7 names three stops: .74 at 0, .30 at 48%, .58 at 100%. Rendered against
+   these six heroes that ramp is too fast, and it fails §6's own acceptance —
+   sampled at 500 with the text hidden, the BRIGHTEST pixel under each node and
+   the alpha it would need to carry white at 4.5:1:
+
+     $5 credit      title .05-.13 → needs .55    line .15-.28 → needs .61
+     15% off        title .07-.17 → needs .53    line .20-.28 → needs .56
+     Points         title .07-.17 → needs .24    line .20-.37 → needs .53
+     Special offers title .07-.17 → needs .52    line .20-.37 → needs .61
+
+   §7's ramp delivers .62 at .13 but only .48 at .28 and .40 at .37, so three of
+   the four conditions sat between 2.0:1 and 3.5:1 against the blown highlights
+   — the pizza crust, the stage lights, Olaika's white plates. me&u's own cards
+   get away with three stops because their photographs are dark; ours are not,
+   and a plan's number is not worth a line a reader cannot read.
+
+   So the top stop HOLDS to 40% before the ramp starts. Nothing else moves: the
+   same colour, the same .74 at the top and .58 at the foot, the same open
+   middle — it opens at 62% instead of 48%, which is below every text node on
+   every card. Measured again after the change, against the brightest pixel
+   under every node: 5.67:1 at 500 and 5.59:1 at 1440, both on the offers
+   card's line over Olaika's plates.
+
+   Z-ORDER IS DECLARED, NOT INHERITED FROM DOM ORDER. `::after` is generated as
+   the LAST child, so a positioned veil with auto z-index paints over the title.
+   `isolation` makes the card its own stacking context and the three layers name
+   their own place inside it, so nothing here can reach another card. */
+.bshots {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--hair-lit);
+  gap: var(--s-lg);
 }
-.bcards:not(.is-chips) .bcard-pair .bcard {
+.bshot {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 20px;
+  height: 240px;
+  padding: var(--s-xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-lg);
+}
+/* The credit leads by size and by nothing else — Sam, 12 Sep: "this is the big
+   one". No maroon fill: tokens.css spends a solid maroon on a chosen or acting
+   thing, and a benefit on a marketing page is neither. */
+.bshot.is-lead {
+  height: 320px;
+}
+.bshot-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  border-top: 0;
-  padding: var(--s-lg) 0;
 }
-.bcards:not(.is-chips) .bcard-pair .bcard + .bcard {
-  border-left: 1px solid var(--hair-lit);
-  padding-left: var(--s-lg);
+.bshot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 10, 14, 0.74) 0%,
+    rgba(18, 10, 14, 0.66) 40%,
+    rgba(18, 10, 14, 0.3) 62%,
+    rgba(18, 10, 14, 0.58) 100%
+  );
 }
-.bcards:not(.is-chips) .bcard-pair .bcard:first-child {
-  padding-right: var(--s-lg);
-}
-.bcards:not(.is-chips) .bcard-text b {
-  font-size: 18px;
-  letter-spacing: -0.015em;
-}
-/* The condition at the reading floor, on every one of them. It was 13px,
-   under the floor this build raised on 21 Sep 2026, and it is the sentence
-   that makes each claim true. */
-.bcards:not(.is-chips) .bcard-text span {
-  font-size: 14px;
-  letter-spacing: 0.003em;
-}
-
-/* THE FOURTH THING IS A LINE, NOT A ROW. It is an example of an extra, on top
-   of the three — giving it the three's treatment is what made the block read
-   as a grid of four equals. */
-.bcards:not(.is-chips) .bcard.is-offers {
-  display: block;
+.bshot-say,
+.bshot-chip {
+  position: relative;
+  z-index: 2;
   margin: 0;
-  padding: var(--s-lg) 0 0;
-  font-size: 14px;
+}
+.bshot-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--ink-1);
+}
+/* NOT `opacity`, and not the ink ramp either: the ramp is measured on --card
+   and means nothing over a photograph. White at .84 over the veil is §7's own
+   value, derived from --ink-1 so the white itself still comes from the token. */
+.bshot-line {
+  margin: var(--s-sm) 0 0;
+  max-width: 30ch;
+  font-size: 15px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
   letter-spacing: 0.003em;
-  color: var(--ink-3);
+  color: color-mix(in srgb, var(--ink-1) 84%, transparent);
   text-wrap: pretty;
 }
-.bcards:not(.is-chips) .bcard.is-offers b {
+/* THE FRAGMENT. Frosted, not solid: it is a piece of the app lying on the
+   photograph, and a flat plate reads as a caption bar instead. The blur has a
+   fallback of nothing — the fill alone is already 4.5:1 for both its lines. */
+.bshot-chip {
+  align-self: flex-start;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(18, 10, 14, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.bshot-chip-a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--ink-1) 72%, transparent);
+}
+/* The glyph takes its stroke from the line it opens — the icon family is all
+   currentColor at 1.7 in a 24 box, so only the size is set here. */
+.bshot-glyph {
+  flex: 0 0 auto;
+  display: block;
+}
+.bshot-glyph svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.bshot-chip-b {
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   color: var(--ink-1);
 }
 
-/* ══ THE STATEMENT ON A PHONE ═══════════════════════════════════════════
-   BACK IN ITS PANEL. Sam, 14 Sep 2026, on the un-panelled version: "it's still
-   a bit too dense, I liked what we had way earlier… there was a parent
-   container similar to 'what you'd save'." So on the phone this is the same
-   object as the savings panel beside it: a `.panel.flush` with its caption,
-   the four divided rows inside it, then the scope strip and the alcohol
-   sentence under the panel's own hairline caption. Nothing here overrides the
-   panel, the caption or the note — base.css and layout.css draw those — only
-   the strip's grid and the rows' inset are set. The desktop block below
-   un-panels it into the four-card movement. */
+/* ══ THE SECTION ON A PHONE ════════════════════════════════════════════════
+   NO PANEL AT ANY WIDTH. It was a `.panel.flush` at 14 Sep's request — "there
+   was a parent container similar to 'what you'd save'" — and the photo cards
+   answer that request better than a fill did: they are containers, four of
+   them, and putting a box around four boxes is the nested-card ban this build
+   carries over from the storefront (§7).
+
+   So `.pitch-get` is an open section on the field, taking the page's own
+   gutter from `.column` rather than a panel's inset, and setting the three
+   intervals inside it: heading to cards, cards to "Applies to", plates to the
+   alcohol note. Nothing else moves — `AppliesTo` and the note are the same
+   elements they were, shared with /in and unchanged. */
+.pitch-get-head {
+  margin: 0 0 var(--s-lg);
+}
+
 /* ══ A SECTION HEADING INSIDE A PANEL ══════════════════════════════════════
    `Panel`'s `label` prop renders `.t-caption` — 11px tracked caps — and four
    of those down one page is an eyebrow on every block rather than a label on
-   a list. The pitch's two panels render their own `<h2 class="t-section">`
-   instead (Pitch.tsx); Panel.tsx is unchanged, so every other surface keeps
-   the caption it was written with.
+   a list. The savings panel renders its own `<h2 class="t-section">` instead
+   (Pitch.tsx); Panel.tsx is unchanged, so every other surface keeps the
+   caption it was written with.
 
    It takes `.panel-label`'s own placement: the label interval below it, and
    the panel's inset when the panel is `.flush` and its content runs to the
@@ -1586,71 +1679,40 @@ button.vcard:focus-visible {
   padding: 0 var(--s-xl);
 }
 
-.column > .panel:has(.bcards) > .bcards {
-  padding: 0 var(--s-xl);
+/* ══ THE SCOPE ROW GETS ITS PLATES BACK ════════════════════════════════════
+   Sam asked for the merchant pop-up's plated tiles here on 20 Sep 2026 — "I
+   liked the styling of the 'works on:' for the individual merchant pages, I
+   think for the main splash page we should use the same styling" — and §4.4
+   overrode him the next morning, stripping them back to a bare glyph row. He
+   named that row on 21 Sep as one of the three things he disliked, so the
+   override is DELETED rather than tuned: what stood here re-declared `.covers`
+   as a flex line and blanked `.cover`'s fill, radius and pad, and every one of
+   those declarations existed only to undo the base. The base plates draw it
+   now, which means this page and the pop-up are once again one rule.
+
+   What is left is placement plus the one thing the plate does not carry: the
+   label at the reading floor. `.cover span` is 11px at base because the pop-up
+   sets six words in a sheet; on the pitch these are six nouns a reader scans
+   at arm's length, and 14 is this build's floor for a word that is not a
+   tracked micro-label (§5). Measured at 375: three plates of 109px against a
+   70px widest label, so the raise costs no wrap. */
+.pitch-get .covers-head {
+  margin: var(--s-2xl) 0 var(--s-lg);
 }
-
-/* ══ THE SCOPE ROW LOSES ITS PLATES, ON THIS PAGE ONLY ══════════════════════
-   Sam asked for the merchant pop-up's plated tiles here on 20 Sep 2026, and
-   the plates are still right THERE: in a sheet about one venue, six marks in
-   boxes are a list of what that venue takes. On the pitch they made a 3×2
-   grid of identical rounded tiles sitting under a panel of identical rounded
-   rows, which is the sameness the 21 Sep pass is removing — and it cost the
-   labels their reading size, because a word at 14px does not fit a plate at
-   three across.
-
-   Bare glyph and word, one line of six on the ground, under a hairline. The
-   BASE `.cover` and `.covers` rules are untouched: the pop-up (venue.css) and
-   the checkout still draw the plated version from them, and this is an
-   override under the pitch's own `:has(.bcards)` scope — the same scoping the
-   desktop statement already uses, and for the same reason.
-
-   20px between items is what the plan asks for and 20 is not on the spacing
-   scale (tokens.css: 4/6/8/12/16/24 — "the half-steps are load-bearing"), so
-   the gap is the floor and `space-between` spends the remainder: at 430 that
-   pays out 19.6px, which is the plan's interval arrived at by the layout
-   rather than typed off the scale.
-
-   MEASURED, AND IT IS TIGHT. The six words come to 252px; the row's content
-   box is 309 at 375 and 350 at 430. At a 12px floor the 375 case is three
-   pixels over and the browser answers by shrinking "Line skips" onto two
-   lines — which is why the items are `flex: 0 0 auto` (a shrunk item here is
-   a wrapped word, never a narrower row) and why the row may wrap below that:
-   at 320 the six genuinely do not fit on one line, and two rows is the right
-   answer there, not a sideways scroll. */
-.column > .panel:has(.bcards) > .covers {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--s-md);
-  padding: var(--s-lg) var(--s-xl) 0;
-  margin: var(--s-lg) 0 0;
-  border-top: 1px solid var(--hair);
-}
-.column > .panel:has(.bcards) .cover {
-  flex: 0 0 auto;
-  min-width: 0;
-  gap: var(--s-md);
+.pitch-get .covers {
   padding: 0;
-  border-radius: 0;
-  background: none;
 }
-/* The reading floor, not the caption's 11px: these are six nouns a reader
-   scans, and a noun is not a tracked micro-label. */
-.column > .panel:has(.bcards) .cover span {
+.pitch-get .cover span {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.003em;
-  color: var(--ink-3);
 }
-/* The heading stands over the row now, so it stops carrying the rule — the
-   hairline above `.covers` is the same line, drawn where it divides. */
-.column > .panel:has(.bcards) > .covers-head {
-  margin: var(--s-2xl) var(--s-xl) 0;
+.pitch-get-note {
+  margin: var(--s-lg) 0 0;
 }
-.column > .panel:has(.bcards) > .covers-head::after {
-  content: none;
+.pitch-get .panel-drill {
+  padding: 0;
+  margin: var(--s-lg) 0 0;
 }
 
 /* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
@@ -2555,9 +2617,8 @@ button.vcard:focus-visible {
     text-transform: none;
     color: var(--ink-1);
   }
-  .column > .panel:has(.bcards) > .panel-head {
+  .pitch-get-head {
     margin: 0 0 var(--s-2xl);
-    padding: 0;
   }
   .pitch-decide .panel > .panel-head {
     margin: 0 0 var(--s-xl);
@@ -2565,147 +2626,69 @@ button.vcard:focus-visible {
   }
 
   /* ── 1 · the statement ────────────────────────────────────────────────── */
-  /* The panel un-panels: no fill, no edge, no inset. What is left is a flex
-     row that wraps — heading and cards take full lines, then the scope strip
-     runs as one line beneath them. */
-  .column > .panel:has(.bcards) {
+  /* THE SECTION TAKES THE GRID. `.column > :where(…)` caps every child at 720
+     for reading measure; this block is four photographs, not a paragraph, so it
+     names itself and wins — (0,2,0) against the cap's (0,1,0), which is exactly
+     the escape hatch that selector's own note describes.
+
+     THE CREDIT ON ITS OWN LINE, THE THREE UNDER IT. Sam, 12 Sep: "this is the
+     big one", and at this width leading by size means a full-width photograph
+     over a row of three, not a 2×1 share of a grid. 4/3 on the three keeps the
+     row honest at every window between 1024 and 1280 — a fixed height would
+     stretch the crop as the tracks grow. */
+  .column > .pitch-get {
     width: 100%;
     max-width: var(--grid);
     margin-inline: auto;
-    background: none;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    column-gap: var(--s-2xl);
-    row-gap: 0;
   }
-  /* ══ NO BOXES AT ANY WIDTH ═══════════════════════════════════════════════
-     This block used to dress the four `.bcard`s as four tall --card plates,
-     each with a 56px tile, a 24px title and a 15px condition — four equal
-     cards of icon-plus-heading-plus-text, which is the single most legible
-     "this was generated" tell on the page and the reason Sam raised it. They
-     are an open grid now, divided by hairlines and nothing else: the credit
-     takes the wide track with the figure at the ramp's desktop step, 15% off
-     and Points take one each, and the offers line runs the full width under
-     one more hairline.
-
-     THREE COLUMNS, THE FIRST DOUBLE. `2fr 1fr 1fr` is what "the credit spans
-     two columns" comes to when the other two are single — one row, three
-     cells, the lead at half the grid. `minmax(0,…)` on each, because a track
-     with an auto minimum is sized by its longest condition and the row stops
-     being three even columns (the same trap the mosaic's own note records).
-
-     STILL SCOPED TO THE PITCH. `.bcards` is shared, and a bare descendant
-     selector here is global at 1024 — that mistake shipped once and put
-     224px statement cards inside the checkout's reading column. */
-  .column > .panel:has(.bcards) > .panel-head {
-    flex: 1 0 100%;
+  .pitch-get .bshots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2xl);
   }
-  .column > .panel:has(.bcards) > .bcards {
-    flex: 1 0 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0;
-    padding: 0;
-    margin: 0;
+  .pitch-get .bshot {
+    height: auto;
+    aspect-ratio: 4 / 3;
+    padding: var(--s-2xl);
   }
-  .column > .panel:has(.bcards) .bcard-pair {
-    display: contents;
-  }
-  /* The hairlines are vertical here: one object with three divisions, the
-     first of which is wider. The base rows' top borders come off — a grid of
-     top rules would draw a line over the whole row for no division. */
-  .column > .panel:has(.bcards) .bcard,
-  .column > .panel:has(.bcards) .bcard.is-lead {
-    border-top: 0;
-    padding: 0 var(--s-2xl) 0 0;
-    background: none;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .column > .panel:has(.bcards) .bcard-pair .bcard {
-    border-left: 1px solid var(--hair-lit);
-    padding-left: var(--s-2xl);
-  }
-  /* 64px: this is the one display moment in the block, and at this width it
-     has a half-grid track to stand in. */
-  .column > .panel:has(.bcards) .bcard-fig {
-    font-size: 64px;
-  }
-  .column > .panel:has(.bcards) .bcard-text b,
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text b {
-    font-size: 20px;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-  }
-  .column > .panel:has(.bcards) .bcard-text span,
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text span {
-    margin-top: var(--s-md);
-    font-size: 15px;
-    line-height: 1.45;
-    color: var(--ink-2);
-  }
-  /* The fourth thing: one line across the grid, under the rule that divides
-     it from the three it sits on top of. */
-  .column > .panel:has(.bcards) .bcard.is-offers {
+  .pitch-get .bshot.is-lead {
     grid-column: 1 / -1;
-    margin: var(--s-2xl) 0 0;
-    padding: var(--s-xl) 0 0;
-    border-top: 1px solid var(--hair);
-    font-size: 15px;
-    color: var(--ink-2);
+    height: 380px;
+    aspect-ratio: auto;
+  }
+  /* The one size on this page that is off tokens.css's enumerated ramp, and it
+     is §7's own number: the lead card's title steps up while the other three
+     hold at 22, which is how the credit leads without a second device. */
+  .pitch-get .bshot.is-lead .bshot-title {
+    font-size: 28px;
+    letter-spacing: -0.02em;
   }
 
-  /* The scope row: the heading, then six glyph-and-word pairs on one line
-     under a rule, then the alcohol sentence as the row's caption. It shared a
-     line with the heading and the note before, which is three different kinds
-     of thing on one baseline. */
-  .column > .panel:has(.bcards) > .covers-head {
-    flex: 1 0 100%;
-    margin: var(--s-4xl) 0 0;
+  /* The scope row: the heading, then six plates on ONE LINE set to the grid's
+     left edge. Stretched across 1280 they were six wide slabs with the words
+     lost in the middle of each; capped at 132 they are the pop-up's plate at
+     the pop-up's proportions, and the lineup fills the left half under a
+     heading that runs the full width. `start`, not `space-between`: a lineup
+     is a lineup, and spreading it is what made the bare row read as scatter
+     (Fable, 21 Sep, at 1440). */
+  .pitch-get .covers-head {
+    margin: var(--s-4xl) 0 var(--s-lg);
   }
-  /* The six sit as one line from the left edge, under a rule that runs the
-     grid's full width. Spread by `space-between` across 1280px they were six
-     specks with 200px of nothing between each, and the eye read them as
-     scattered rather than as a row (Fable, 21 Sep, at 1440). A lineup that
-     fills the left two thirds under a full-width rule is the editorial
-     construction the plan named: content set to the grid's one left edge. */
-  .column > .panel:has(.bcards) > .covers {
-    flex: 1 0 100%;
-    justify-content: flex-start;
-    gap: var(--s-4xl);
-    padding: var(--s-xl) 0 0;
+  .pitch-get .covers {
+    grid-template-columns: repeat(6, minmax(0, 132px));
+    justify-content: start;
+    gap: var(--s-lg);
+  }
+  .pitch-get-note {
     margin: var(--s-lg) 0 0;
-  }
-  .column > .panel:has(.bcards) .cover {
-    flex: 0 0 auto;
-  }
-  .column > .panel:has(.bcards) .cover span {
-    color: var(--ink-2);
-  }
-  .column > .panel:has(.bcards) > .panel-note {
-    flex: 1 0 100%;
-    min-width: 0;
-    margin: var(--s-lg) 0 0;
-    padding: 0;
-  }
-  .column > .panel:has(.bcards) > .panel-drill {
-    flex: 1 0 100%;
-    padding: 0;
-    margin-top: var(--s-lg);
   }
   /* A reading measure for the answer; unbounded, the summary's chevron sat
      1,200px from its own words. */
-  .column > .panel:has(.bcards) > .panel-drill .drill {
+  .pitch-get .panel-drill .drill {
     max-width: 460px;
     margin: 0;
   }
   /* The chevron sits by the words, not at the measure's far end. */
-  .column > .panel:has(.bcards) > .panel-drill .drill > summary {
+  .pitch-get .panel-drill .drill > summary {
     justify-content: flex-start;
     gap: var(--s-md);
   }
