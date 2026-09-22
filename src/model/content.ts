@@ -365,17 +365,23 @@ export const benefitShots: Record<string, string> = {
 const SHOT_BASKET_USD: Record<string, number> = { credit: 11.5, percent: 9 };
 
 /** The fragment each photo card floats over its lower half: what the benefit
- *  looks like on one order. Two lines — the order, then what it saved. */
+ *  looks like on one order. Two lines — the order, then what you pay.
+ *
+ *  WHAT YOU PAY, NOT WHAT CAME OFF. The second line read "−$5.00 credit" and
+ *  "−$1.35 (15% off)"; Sam, 21 Sep 2026: "don't like the -$5 credit" and
+ *  "don't love the way the negative price looks here, although it's a great
+ *  visual." A minus sign in a display figure is a ledger line, and a ledger
+ *  is the bill, not the benefit. The total after is the same fact stated the
+ *  way a receipt states it — and it is still arithmetic on the model's own
+ *  figures, never a typed number. */
 export const benefitFragments: Record<string, { line: string; figure: string }> = {
   credit: {
     line: `Latte + croissant · $${SHOT_BASKET_USD.credit.toFixed(2)}`,
-    figure: `−$${BENEFIT.creditUsd.toFixed(2)} credit`,
+    figure: `You pay $${(SHOT_BASKET_USD.credit - BENEFIT.creditUsd).toFixed(2)}`,
   },
   percent: {
     line: `Two slices · $${SHOT_BASKET_USD.percent.toFixed(2)}`,
-    figure: `−$${(SHOT_BASKET_USD.percent * BENEFIT.percentOff).toFixed(2)} (${Math.round(
-      BENEFIT.percentOff * 100,
-    )}% off)`,
+    figure: `You pay $${(SHOT_BASKET_USD.percent * (1 - BENEFIT.percentOff)).toFixed(2)}`,
   },
   /* No figure: the transfer programme is unbuilt and a rate published today is
      a rate a member holds Sam to in 2027. */
