@@ -197,7 +197,7 @@
    docs/POLISH-2026-09-21.md.
 
    .t-hero     the page H1. 36 on a phone, 56 from 1024.
-   .t-figure   THE ONE DISPLAY MOMENT PER SURFACE — the dollar figure. Heavy,
+   .t-figure   THE ONE DISPLAY MOMENT PER SURFACE — the dollar figure. Bold (Sam, 21 Sep: not Heavy),
                tabular, tight. 48 on a phone, 64 from 1024. Nothing else on a
                page may be set at this size.
    .t-section  a section heading, sentence case. Replaces .t-caption wherever a
@@ -205,7 +205,7 @@
                label inside a panel, or a chip. */
 .t-hero{font-size:36px;font-weight:700;letter-spacing:-.035em;line-height:1.02;color:var(--ink-1);
   text-wrap:balance}
-.t-figure{font-family:var(--font-heavy);font-size:48px;font-weight:700;letter-spacing:-.03em;
+.t-figure{font-family:var(--font);font-size:48px;font-weight:700;letter-spacing:-.03em;
   line-height:.95;color:var(--ink-1);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .t-section{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2;color:var(--ink-1)}
 @media (min-width:1024px){
