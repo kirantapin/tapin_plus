@@ -110,6 +110,21 @@ export default function Reserve() {
   const [noWallet, setNoWallet] = useState(false);
   /** The checkout sheet. Everything that discloses or charges lives in it. */
   const [sheetOpen, setSheetOpen] = useState(false);
+  /* ══ ONE ACTION, IN TWO PLACES ════════════════════════════════════════════
+     Sam, 21 Sep 2026: "when I click this sticky checkout button it should take
+     me to the next step in the funnel instead of scrolling down or up to the
+     checkout button."
+
+     It used to `scrollIntoView` the real button, which asked the reader to
+     press twice for one intention and moved the page under them to do it. Both
+     controls now run this, so the docked bar IS the Checkout button rather
+     than a pointer at it, and any guard added here can only ever be added
+     once. (There is none today: the Standard tier's refusal is the tile's own
+     pulse and never disabled this control.)
+
+     THE OBSERVER STAYS, and so does `is-away`. Its job was never the scroll —
+     it is what keeps two identical maroon buttons off one screen. */
+  const openCheckout = () => setSheetOpen(true);
 
   /* ══ THE SHEET OPENING IS THE MID-FUNNEL EVENT ═════════════════════════════
      One `checkout_opened` per open, not per render — both buttons below set the
@@ -166,9 +181,19 @@ export default function Reserve() {
   return (
     <>
       <div className="rs-modal">
-        {/* ══ THE DEPOSIT COMES BACK, AND IT SAYS SO FIRST ══════════════════
+        {/* ══ THE SHEET'S SUBTITLE ═════════════════════════════════════════
             Sam, 21 Sep 2026: "the checkout modal should show the 'earn back
-            the cost of membership on first $10 purchase' at the top."
+            the cost of membership on first $10 purchase' at the top", then,
+            seeing the first build of it: "I don't like the way they look, make
+            sure cohesive with the rest of the page."
+
+            IT IS THE HEADER CONTINUING, NOT A ROW INSERTED ABOVE THE CONTENT.
+            The first version was a glyph tile beside two lines with a hairline
+            under it — a list row standing alone, in a sheet that speaks in
+            white panels and prose. This is a full-bleed band on the header's
+            own ground carrying one sentence and its qualifier: the reader
+            meets what the deposit does before the first panel, in the voice
+            the rest of the sheet uses (styles/reserve.css).
 
             EVERY FIGURE IS READ. The deposit is `monthlyToday`, so it follows
             the price when the Early Bird seats go; the floor and the amount are
@@ -189,49 +214,20 @@ export default function Reserve() {
             than printing a comparison that no longer holds. */}
         {FOUNDING_OPEN && monthlyToday < BENEFIT.creditUsd ? (
           <div className="rs-earnback">
-            <span className="rs-earnback-ico" aria-hidden="true">
-              <BenefitIcon id="credit" />
-            </span>
-            <p className="rs-earnback-say">
-              <b>
-                Earn the ${monthlyToday.toFixed(2)} back on your first $
-                {Math.round(BENEFIT.creditMinUsd)}+ order
-              </b>
-              <span>
-                It earns ${BENEFIT.creditUsd} credit, more than the deposit.
-              </span>
+            <p className="rs-earnback-lede">
+              Earn the ${monthlyToday.toFixed(2)} back on your first $
+              {Math.round(BENEFIT.creditMinUsd)}+ order
+            </p>
+            <p className="rs-earnback-sub">
+              It earns ${BENEFIT.creditUsd} credit, more than the deposit.
             </p>
           </div>
         ) : null}
 
-        {/* ══ THE COUNT, AS A CARD ABOVE THE CARD ═══════════════════════════
-            Sam, 15 Sep 2026: "bring back the original progress bar and put it
-            above the membership card." So: the sentence with the number
-            lifted, the close date on the same line, and beneath them the
-            ten-cell meter — one cell per five seats, a mask over one fill so
-            the fraction is exact. Still Sam's artificial count (model/seats.ts),
-            still body ink, still no clock. */}
-        <div className="rs-seat-card">
-          <p className="rs-seat-line">
-            {seatParts.n !== null ? (
-              <>
-                <b className="tnum">{seatParts.n}</b>
-                <span>{seatParts.rest}</span>
-              </>
-            ) : (
-              <span>{seatParts.rest}</span>
-            )}
-          </p>
-          <span className="rs-meter" aria-hidden="true">
-            <i style={{ ["--p" as string]: `${seatsLeft() / SEAT_CAP}` }} />
-          </span>
-          {/* The close date as a caption under the bar — the sentence is the
-              count; the date qualifies the bar, so it sits with the bar. */}
-          {FOUNDING_OPEN ? <p className="rs-seat-close">Closes {foundingCloses}</p> : null}
-        </div>
-
-        {/* THE CARD USED TO STAND HERE, between the count and the plans.
-            It is at the foot now — see the panel below the places. */}
+        {/* THE COUNT STOOD HERE, IN A CARD, and the membership card before
+            it. Both moved: the card to the foot of the page, the count to
+            under the Checkout button — see THE COUNT, AS THE BUTTON'S CAPTION
+            in the panel below. */}
 
       <Panel className="checkout" id="plans">
         {/* The seat count used to open this panel. It is under the card now —
@@ -397,23 +393,62 @@ export default function Reserve() {
             the one control on the page that starts a purchase. */}
         <div ref={paySlot} className="pay-slot">
           {paid ? (
-            <button
-              type="button"
-              className="action"
-              onClick={() => setSheetOpen(true)}
-            >
+            <button type="button" className="action" onClick={openCheckout}>
               View your seat
             </button>
           ) : (
-            <button
-              type="button"
-              className="action"
-              onClick={() => setSheetOpen(true)}
-            >
+            <button type="button" className="action" onClick={openCheckout}>
               Checkout
             </button>
           )}
         </div>
+
+        {/* ══ THE COUNT, AS THE BUTTON'S CAPTION ════════════════════════════
+            Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below
+            the actual checkout button and allow the earn $5 back to replace
+            it." So the head of the sheet is one statement instead of two
+            stacked boxes, and the order a reader meets is price → button →
+            how many are left: the scarcity qualifies the action rather than
+            standing in front of it.
+
+            AND IT IS THE BUTTON'S CAPTION, NOT A CARD. It sat in an --inner
+            box with its own border, which made it a second object arguing with
+            the panel it sits in; centred under the control, in the control's
+            own measure, it needs no container at all. Every source is
+            unchanged — `seatLine()` for the sentence, `seatsLeft()/SEAT_CAP`
+            for the fraction, the real close date under it. Still artificial
+            (model/seats.ts), still no clock.
+
+            OUTSIDE `.pay-slot`, deliberately: that box is what the
+            IntersectionObserver measures, and growing it would change when
+            the docked bar hides. */}
+        {FOUNDING_OPEN ? (
+          <div className="rs-seats-under">
+            <p className="rs-seat-line">
+              {seatParts.n !== null ? (
+                <>
+                  <b className="tnum">{seatParts.n}</b>
+                  <span>{seatParts.rest}</span>
+                </>
+              ) : (
+                <span>{seatParts.rest}</span>
+              )}
+            </p>
+            <span className="rs-meter" aria-hidden="true">
+              {/* ⚠ THE FILL IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
+                  IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 88%
+                  today where `left/cap` is 12%: a bar that is nearly full says
+                  what the sentence above it says, while a bar with a 12%
+                  sliver reads as an empty room. Same fact, drawn the way a
+                  reader already reads a progress bar. The sentence is the
+                  statement of record; this is aria-hidden and never carries a
+                  number of its own. */}
+              <i style={{ ["--p" as string]: `${1 - seatsLeft() / SEAT_CAP}` }} />
+            </span>
+            {/* The date qualifies the bar, so it sits under the bar. */}
+            <p className="rs-seat-close">Closes {foundingCloses}</p>
+          </div>
+        ) : null}
       </Panel>
 
         {/* WHAT YOU GET, IN ITS OWN CONTAINER, WITH THE HOME PAGE'S ICONS.
@@ -524,7 +559,7 @@ export default function Reserve() {
             type="button"
             className="action"
             tabIndex={ctaVisible ? -1 : 0}
-            onClick={() => paySlot.current?.scrollIntoView({ block: "center", behavior: "smooth" })}
+            onClick={openCheckout}
           >
             {/* NOT `plan.per` ("a month"). What this button opens takes a
                 DEPOSIT, and the tile it docks under says so — a bar reading
