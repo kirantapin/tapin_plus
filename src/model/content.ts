@@ -318,7 +318,9 @@ const BENEFIT_DETAIL: Record<string, string> = {
      excludes alcohol (docs/virginia-alcohol-research.md); his call to keep it —
      points redeem for what the place offers, and the exclusion is stated on
      the 15% card. */
-  points: "Redeem for free food, drinks, etc. at each place",
+  /* Sam, 21 Sep 2026, reading the points card: "we should include cover,
+     and event tickets here too." */
+  points: "Redeem for free food, drinks, cover, event tickets, etc. at each place",
 };
 
 export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
