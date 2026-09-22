@@ -187,12 +187,44 @@
    uppercase micro-label. A phrase is not a label: if it reads as a sentence it
    takes the reading floor, whatever container it is in.
    --------------------------------------------------------------------------- */
+/* ══ TWO DISPLAY STEPS AND A SECTION HEAD — 21 Sep 2026 ═══════════════════
+   Sam: "it still feels a bit AI generated." The ramp ran 11/12/13/15/16/18/24/32
+   and stopped: one H1 size, then everything within a few points of body. The
+   number that IS the product ($5, $4.99) was never larger than the headline,
+   and every section was headed by the same tracked 11px caption. Refined pages
+   step by 2×, not 1.2× — the figure at two to three times the headline, and
+   sections headed by a real heading. These three carry that. See
+   docs/POLISH-2026-09-21.md.
+
+   .t-hero     the page H1. 36 on a phone, 56 from 1024.
+   .t-figure   THE ONE DISPLAY MOMENT PER SURFACE — the dollar figure. Heavy,
+               tabular, tight. 48 on a phone, 64 from 1024. Nothing else on a
+               page may be set at this size.
+   .t-section  a section heading, sentence case. Replaces .t-caption wherever a
+               label heads a SECTION; .t-caption remains legal only on a list
+               label inside a panel, or a chip. */
+.t-hero{font-size:36px;font-weight:700;letter-spacing:-.035em;line-height:1.02;color:var(--ink-1);
+  text-wrap:balance}
+.t-figure{font-family:var(--font-heavy);font-size:48px;font-weight:700;letter-spacing:-.03em;
+  line-height:.95;color:var(--ink-1);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.t-section{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2;color:var(--ink-1)}
+@media (min-width:1024px){
+  .t-hero{font-size:56px}
+  .t-figure{font-size:64px}
+}
+
 .t-display{font-size:32px;font-weight:700;letter-spacing:-.03em;line-height:1.06;color:var(--ink-1)}
 .t-headline{font-size:24px;font-weight:700;letter-spacing:-.025em;line-height:1.2;color:var(--ink-1)}
 .t-title{font-size:18px;font-weight:700;letter-spacing:-.015em;line-height:1.3;color:var(--ink-1)}
-.t-lead{font-size:16px;font-weight:500;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
-.t-body{font-size:15px;font-weight:400;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
-.t-compact{font-size:13px;font-weight:500;letter-spacing:.005em;line-height:1.4;color:var(--ink-3)}
+/* ══ THE MOBILE FLOOR, RAISED ═══════════════════════════════════════════════
+   Body 15→16, lead 16→17, compact 13→14. Sam, 21 Sep 2026: "use best practices
+   for mobile UI as far as text sizing, spacing, and density." Thirteen was
+   carrying real sentences — the seat line, the one-time note, the alcohol note
+   — and a sentence is not a label. Sixteen is the base every mobile guideline
+   names, and the one this build's own note above already argued for. */
+.t-lead{font-size:17px;font-weight:500;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
+.t-body{font-size:16px;font-weight:400;letter-spacing:0;line-height:1.5;color:var(--ink-2)}
+.t-compact{font-size:14px;font-weight:500;letter-spacing:.003em;line-height:1.45;color:var(--ink-3)}
 .t-label{font-size:12px;font-weight:600;letter-spacing:.025em;line-height:1.3;color:var(--ink-3)}
 /* The caption role: tracked uppercase. .08em is DESIGN.md's documented value —
    the shells used .12em, 50% over, which reads as type set by feel. */

@@ -11,124 +11,209 @@
    scam, which is the exact suspicion "free $5" invites.
    ============================================================================ */
 
-/* -- the lockup, over the headline ------------------------------------------ */
-.cg-lockup {
-  display: flex;
-  align-items: center;
-  gap: var(--s-md);
-  margin: 0 0 var(--s-xl);
-}
-.cg-lockup svg {
-  height: 26px;
-  width: auto;
-  display: block;
-}
+/* ── THE SECTION THAT IS NOT A PANEL ───────────────────────────────────────
+   21 Sep 2026, docs/POLISH-2026-09-21.md §3. The headline, the lead and the
+   three figures used to sit inside the same rounded, hairlined, 16px-padded
+   box as everything else on the page — which is §1.1 of that plan's diagnosis
+   in one element. They now sit on the page's own ground, and the membership
+   below is the ONE box, because the membership is the decision.
 
-.cg-lead {
-  margin: var(--s-lg) 0 0;
-  text-wrap: pretty;
-}
-
-/* -- the merchant, as evidence ---------------------------------------------
-   A plate, not a card inside a card: the panel is already the container, so
-   this is one surface with a photograph across the top of it and the mark
-   breaking the seam, which is the venue-card shape the rail and the pop-up
-   both use. */
-.cg-venue {
+   `position:relative` is the frame the lockup is positioned against on a
+   phone; `margin-top` takes back the step `.column:has(.announce)` adds under
+   the fixed bar, so the photograph meets it. */
+.cg {
   position: relative;
-  margin: var(--s-2xl) 0 0;
-  border-radius: var(--r-card);
+  margin-top: calc(var(--s-2xl) * -1);
+}
+
+/* ── THE MERCHANT, AS EVIDENCE AND AS THE HERO ─────────────────────────────
+   Their photograph, full width, with their mark and their street on it. The
+   one thing a cold reader from a Meta scroll is deciding is whether this is a
+   real shop on a real street, and a 128px strip below a headline answered that
+   fourth. It is the first thing on the page now.
+
+   OUT TO THE COLUMN'S EDGES. The panel that used to inset this is gone, so
+   there is nothing left for the photograph to be inset from; the gutter is
+   given back as a negative margin rather than by a rule anywhere else. */
+.cg-band {
+  position: relative;
+  margin-inline: calc(var(--gutter) * -1);
   overflow: hidden;
   background: var(--inner);
 }
 .cg-shot {
   display: block;
   width: 100%;
-  height: 128px;
+  height: 260px;
   object-fit: cover;
 }
 .cg-shot[data-bright="true"] {
   filter: saturate(0.9) brightness(0.72);
 }
-.cg-collar {
+/* THE VENUE-CARD VEIL, AND A SHORT ONE AT THE HEAD OF IT.
+   The long veil is the rail's and the pop-up's: barely there at the top, near
+   opaque at the foot, so the name and the street have a ground rather than a
+   photograph under them. The short one exists because this photograph is a
+   mural — measured, the top 60px of it runs bright purple and green, and a
+   white lockup laid on the long veil's .10 was unreadable there. Same ink,
+   same file's idiom (pitch.css does exactly this over the mosaic), and it is
+   gone by 22% so it never touches the name. */
+.cg-band::after {
+  content: "";
   position: absolute;
-  left: var(--s-lg);
-  top: calc(128px - 26px);
-  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(18, 10, 14, 0.46) 0%, rgba(18, 10, 14, 0) 22%),
+    linear-gradient(180deg, rgba(18, 10, 14, 0.1) 0%, rgba(18, 10, 14, 0.72) 100%);
+}
+.cg-name {
+  position: absolute;
+  z-index: 1;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: var(--s-xl);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+}
+.cg-collar {
   width: 52px;
   height: 52px;
   border-radius: var(--r-control);
 }
-.cg-venue-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: calc(26px + var(--s-md)) var(--s-lg) var(--s-lg);
-}
-.cg-venue-text b {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--ink-1);
-}
-.cg-venue-text > span {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-4);
-}
-
-/* -- what a member gets here ------------------------------------------------ */
-.cg-benefits {
-  list-style: none;
-  margin: var(--s-2xl) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-lg);
-}
-.cg-benefits > li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-lg);
-}
-.cg-icon {
-  flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-control);
-  display: grid;
-  place-items: center;
-  background: var(--inner);
-  border: 1px solid var(--hair);
-  color: var(--ink-2);
-}
-.cg-icon svg {
-  width: 20px;
-  height: 20px;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.cg-benefits > li > span:last-child {
+.cg-name-text {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.cg-benefits b {
-  font-size: 16px;
+/* White, and white at .8 — the two inks a photograph allows. This is a colour
+   value on a dark veil, not an `opacity` dimming live text: the ink ramp has
+   no step that survives a photograph. */
+.cg-name-text b {
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--ink-1);
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
 }
-.cg-benefits b + span {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--ink-4);
+.cg-name-text > span {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* -- the lockup -------------------------------------------------------------
+   ONE ELEMENT, TWO PLACES. Over the photograph top-left on a phone; at the
+   head of the left column from 1024. Positioned rather than duplicated, so
+   there is no second lockup to keep in sync. */
+.cg-lockup {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: var(--s-xl);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  color: #FFFFFF;
+}
+.cg-lockup svg {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+/* The chip inverts while it is on the photograph: a purple plate on a purple
+   mural is a chip nobody sees. White on the merchant's purple is the same
+   8.21:1 pair the plate already measures, read the other way round. */
+.cg-lockup .plus {
+  background: #FFFFFF;
+  color: var(--cg-brand, var(--maroon));
+}
+
+/* -- what a member gets here: THREE FIGURES, NOT THREE ROWS -----------------
+   docs/POLISH-2026-09-21.md §3.3, and the single biggest move on the page.
+   This was an icon tile, a bold label and a grey subline, three times — the
+   shape the plan's §1.2 names as the textbook tell. The numbers ARE the offer,
+   so they are set as the offer: open columns on the ground, divided by one
+   hairline each, no tile and no plate. `.cg-icon` is gone with them.
+
+   THE BASELINE IS THE BLOCK'S OWN STRUT. `Points` is a word and cannot take
+   48px, but a smaller inline span inside a block whose font-size IS 48 sits on
+   that block's line box — the strut every line box carries from its own
+   element's font. So the three figures share a baseline and, because the strut
+   also fixes all three boxes to one height, the three qualifiers line up too.
+   No magic offsets, and nothing to retune when the ramp moves. */
+.cg-figures {
+  list-style: none;
+  padding: 0;
+  margin: calc(var(--s-xl) * 2) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+/* The step BEFORE the divider is --s-sm, not --s-md. At 375 the cells are 114
+   wide and "15%" sets at 95: with 8px of right padding its own content box was
+   93 and the glyphs overflowed it by two. Nothing on the page scrolled, but a
+   figure clipped by its own cell is a figure that will clip on a narrower
+   phone. Six leaves it four to spare and still parts the column from the
+   hairline. */
+.cg-figures > li {
+  min-width: 0;
+  padding-right: var(--s-sm);
+}
+.cg-figures > li + li {
+  border-left: 1px solid var(--hair);
+  padding-left: var(--s-lg);
+}
+.cg-figures > li:last-child {
+  padding-right: 0;
+}
+.cg-figures b {
+  display: block;
+  margin: 0;
+}
+.cg-fig-word {
+  font-family: var(--font);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.cg-figures > li > span {
+  display: block;
+  margin-top: var(--s-md);
+  text-wrap: balance;
+}
+
+/* -- the headline and the lead, on the ground ------------------------------ */
+.cg-say {
+  margin-top: var(--s-2xl);
+}
+.cg-h1 {
+  margin: 0;
+  max-width: 14ch;
+}
+.cg-lead {
+  margin: var(--s-lg) 0 0;
+  max-width: 34ch;
   text-wrap: pretty;
+}
+
+/* -- the actions -----------------------------------------------------------
+   ONE FILLED ACTION PER VIEW. On a phone the fill is spent at the foot, on the
+   membership, so only the ghost is here; the filled twin is `display:none`
+   until 1024, where the fold holds the whole argument and the docked bar is
+   switched off in exchange. */
+.cg-acts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+  margin-top: var(--s-xl);
+}
+.cg-hero-cta {
+  display: none;
 }
 
 /* -- the two live trials ---------------------------------------------------
@@ -201,72 +286,197 @@
   text-wrap: pretty;
 }
 
-/* -- the membership, after the proof ---------------------------------------- */
-.cg-member-line {
+/* -- the membership, after the proof ---------------------------------------
+   THE ONE BOX ON THE PAGE. Three cells: the statement, the price, the action.
+   Stacked on a phone in the order the page already had; one horizontal band
+   from 1024, which is what a single-plan row looks like when it is not a
+   1,120px-wide phone. The wrappers exist for that and change nothing below. */
+.cg-member-h {
   margin: 0;
+}
+.cg-member-line {
+  margin: var(--s-lg) 0 0;
   text-wrap: pretty;
+}
+.cg-member-head,
+.cg-buy,
+.cg-act {
+  min-width: 0;
 }
 .cg-buy {
   margin: var(--s-2xl) 0 0;
 }
-/* THE PITCH'S OWN PRICE RULE, not a second one. `.hero-price` in layout.css
-   already sets the figure, the qualifier beside it and the baseline they share,
-   and the checkout charges the figure this prints — so a campaign page that
-   redeclared the size would be a second place for that type to drift. The two
-   lines added here are the only difference: this qualifier is a sentence
-   rather than one word, so it wraps and is given a measure. */
+/* THE PAGE'S ONE DISPLAY MOMENT. `.hero-price` set this at 32px, one step off
+   the headline, which is the flat ramp §1.3 of the plan describes; the figure
+   now takes `.t-figure` and the qualifier stays a 14px label on its baseline.
+   The class carries tabular figures, so `.tnum` is not also needed here. */
 .cg-price {
+  display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
+  gap: var(--s-lg);
+  margin: 0;
+}
+.cg-price > b {
+  margin: 0;
 }
 .cg-price > span {
-  max-width: 24ch;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-3);
 }
 .cg-seat {
   margin: var(--s-md) 0 0;
   text-wrap: pretty;
 }
+.cg-act {
+  margin: var(--s-2xl) 0 0;
+}
 .cg-cta {
-  margin-top: var(--s-xl);
+  margin: 0;
+}
+/* 40px of column gap plus this makes the 48 the plan asks for between the hero
+   block and the one box. */
+.cg-member {
+  margin-top: var(--s-md);
 }
 
-/* ── FROM 1024px IT IS TWO COLUMNS ─────────────────────────────────────────
-   The argument is "here is the shop, here is what you get". On a phone that is
-   a stack; on a laptop the merchant plate sits beside the benefits it belongs
-   to instead of pushing them a screen down.
+/* ══ FROM 1024px: THE ARGUMENT BESIDE THE EVIDENCE ═════════════════════════
+   Sam, 21 Sep 2026, on this page at 1440: it was a 720px column with nothing
+   either side and the merchant's photograph reduced to a 168px strip inside
+   it — a widened phone, which is §1.4 of the polish plan.
 
-   1024, NOT THE 720 THIS FIRST USED. `.column` is capped at 480px until
-   layout.css's 1024 breakpoint releases it, so a split any earlier divides 448
-   usable pixels into two 212px columns — measured at 900px, where it put the
-   benefit rows under half the width their two lines need. The site has one
-   desktop line and this is it. */
+   So: two columns at 55/45 in 1,120px, the whole argument on the left and the
+   shop on the right at full height. The right column is the evidence and it is
+   given half the screen, because on this page the evidence is the product.
+
+   1024 AND NOT 720. `.column` is capped at 480px until layout.css's own 1024
+   line releases it, so a split any earlier divides 448 usable pixels in two.
+   The site has one desktop line and this is it. */
 @media (min-width: 1024px) {
-  .cg-pair {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--s-2xl);
-    align-items: start;
-    margin-top: var(--s-2xl);
+  /* The 1,120 measure, with 48px of gutter either side. Named children, at
+     (0,2,0): layout.css caps every column child at 720 from a `:where()` rule
+     that contributes no specificity precisely so this can be written here. */
+  .column > .cg,
+  .column > .cg-member {
+    max-width: min(1120px, calc(100% - 96px));
+    margin-inline: auto;
   }
-  .cg-pair > .cg-venue,
-  .cg-pair > .cg-benefits {
+
+  .cg {
     margin-top: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+    grid-template-rows: auto 1fr;
+    column-gap: calc(var(--s-xl) * 2);
+    align-items: start;
+  }
+  /* The photograph as a tall object beside the argument rather than a strip
+     above it. `min-height` is the floor; `align-self:stretch` lets it take the
+     left column's height when the headline runs long. The image goes absolute
+     because a stretched cell has no content of its own to give it height. */
+  .cg-band {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    margin-inline: 0;
+    min-height: 560px;
+    border-radius: calc(var(--r-panel) * 1.5);
   }
   .cg-shot {
-    height: 168px;
+    position: absolute;
+    inset: 0;
+    height: 100%;
   }
-  .cg-collar {
-    top: calc(168px - 26px);
+  /* The head scrim goes: nothing is laid over the top of the photograph here
+     — the lockup is in the column beside it — so it is a dark band and
+     nothing else. The long veil the name sits on stays. */
+  .cg-band::after {
+    background: linear-gradient(
+      180deg,
+      rgba(18, 10, 14, 0.1) 0%,
+      rgba(18, 10, 14, 0.72) 100%
+    );
   }
-  .cg-trials {
+  /* Back into the flow, at the head of the left column, in the page's own ink:
+     there is no photograph under it here. */
+  .cg-lockup {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: var(--s-2xl);
+    color: var(--ink-1);
+  }
+  .cg-lockup .plus {
+    background: var(--maroon);
+    color: var(--on-maroon);
+  }
+  .cg-say {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+  .cg-h1 {
+    max-width: 12ch;
+  }
+  .cg-lead {
+    font-size: 18px;
+    max-width: 40ch;
+  }
+  /* Side by side, equal: the fold is wide enough to hold both, so the docked
+     pair below is switched off rather than repeating them over the page. */
+  .cg-acts {
     flex-direction: row;
+    gap: var(--s-lg);
   }
-  /* THE LIST ITEM, NOT THE ANCHOR. The <li> is the flex item; `.cg-trial` is
-     the <a> inside it, and `.action` already sets that to width:100%. Sizing
-     the anchor left the two items at their content widths — 220px beside
-     170px, measured — for two buttons that are a pair. */
-  .cg-trials > li {
+  .cg-acts > * {
     flex: 1 1 0;
     min-width: 0;
+  }
+  .cg-hero-cta {
+    display: block;
+  }
+
+  /* The band: statement | price | action, with a hairline between the cells
+     and the also-at marks under the button. */
+  .cg-member {
+    margin-top: var(--s-xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+    column-gap: calc(var(--s-xl) * 2);
+    align-items: center;
+    padding: calc(var(--s-xl) * 2);
+  }
+  .cg-buy,
+  .cg-act {
+    margin-top: 0;
+    padding-left: calc(var(--s-xl) * 2);
+    border-left: 1px solid var(--hair);
+  }
+  /* The plan's `auto` third track, given a ceiling. Left open it sized to the
+     also-at sentence's max-content — "Also at The Burg, The Milk Parlor,
+     Olaika and Sweetopia." on one line — which took 470px of the band and a
+     470px-wide button with it. The sentence wraps under the button instead;
+     220 is the floor the plan sets for the control. */
+  .cg-act {
+    min-width: 220px;
+    max-width: 320px;
+  }
+  .cg-also {
+    margin-top: var(--s-lg);
+  }
+
+  /* NO DOCKED PAIR HERE. Both actions are in the first fold, and a bar
+     repeating them is the decoy shape layout.css warns about. The floor it
+     reserves goes with it, at the foot of this file — the two conditional
+     rules that set it are (0,4,0) and are written later, so an override here
+     would lose on source order however it is weighted. */
+  .cg-sticky {
+    display: none;
+  }
+  /* The column's own 64px section gap is the whole interval under the band. */
+  .cg-powered {
+    margin-top: 0;
   }
 }
 
@@ -392,22 +602,15 @@
 }
 
 /* -- where the merchant's colour does its work ------------------------------
-   Three places, all of them marks rather than surfaces: the glyph plates
-   beside the benefits, the hairline and arrow on the trial buttons, and the
-   label over them. */
-:root[data-surface="cg"] .cg-icon {
-  background: color-mix(in srgb, var(--cg-brand) 9%, #FFFFFF);
-  border-color: color-mix(in srgb, var(--cg-brand) 26%, transparent);
-  color: var(--cg-brand);
-}
+   Marks rather than surfaces: the hairline and the arrow on the trial buttons
+   inside the modal. The glyph plates that used to be the third place went with
+   `.cg-icon` on 21 Sep 2026 — the three benefits are figures now, and a figure
+   wears the page's ink, not the merchant's. */
 :root[data-surface="cg"] .cg-trial {
   border: 1px solid color-mix(in srgb, var(--cg-brand) 30%, transparent);
   background: #FFFFFF;
 }
 :root[data-surface="cg"] .cg-trial svg {
-  color: var(--cg-brand);
-}
-:root[data-surface="cg"] .cg-today .panel-label {
   color: var(--cg-brand);
 }
 
@@ -600,30 +803,48 @@
    state the whole page ends in, and so the only state a reader ever sees the
    floor in. Same weight as the rule above, later in the cascade. */
 .column:has(.cg-sticky.is-pair.is-away){padding-bottom:48px}
-
-/* ── THE INVITATION UNDER THE BENEFITS ─────────────────────────────────────
-   A row, not a third filled button: the page already spends its fill on
-   "Get early access" and the docked bar, and a third one here would leave
-   the reader choosing between three equal-looking controls. This reads as
-   the last line of the list it closes, with a chevron doing the work.
-
-   Full width and 48px tall, so it is a real target on a phone rather than a
-   text link pretending to be one. */
-.cg-try{
-  display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);
-  width:100%;min-height:48px;margin:var(--s-lg) 0 0;
-  padding:var(--s-md) var(--s-lg);
-  border:1px solid var(--hair);border-radius:var(--r-control);
-  background:var(--inner);
-  font:inherit;font-size:14px;font-weight:700;letter-spacing:-.01em;
-  color:var(--cg-brand,var(--maroon));text-align:left;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-  transition:transform 150ms var(--ease),background-color 150ms var(--ease);
+/* AND NEITHER OF THEM APPLIES FROM 1024, where the bar is `display:none` and
+   there is nothing to clear. Written here rather than in the desktop block
+   above because both rules above are (0,4,0): an override earlier in the file
+   loses on source order at equal weight, and raising the weight to beat them
+   would be arguing with the cascade rather than reading it. `past` starts true
+   and the observer only corrects it once the action block is measured, so
+   without this a 1440 page reserved 152px of empty floor under its footer. */
+@media (min-width: 1024px) {
+  .column:has(.cg-sticky.is-pair:not(.is-away)),
+  .column:has(.cg-sticky.is-pair.is-away) {
+    padding-bottom: var(--s-4xl);
+  }
 }
-.cg-try svg{width:18px;height:18px;flex:0 0 auto}
-.cg-try:active{transform:scale(.98)}
-.cg-try:focus-visible{outline:2px solid var(--cg-brand,var(--maroon));outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.cg-try:active{transform:none}}
+
+/* ── THE INVITATION UNDER THE FIGURES ──────────────────────────────────────
+   A row, not a third filled button: the page spends its fill on "Get early
+   access", and a second one here would leave the reader choosing between two
+   equal-looking controls for different destinations.
+
+   IT IS THE HOUSE GHOST NOW (`.action.action-ghost`), not a shape of its own.
+   It was a 14px purple strip at 48px tall — a control invented for one page,
+   half a step under the button it sits beside. The only thing declared here is
+   the chevron and the row that carries it; the size, the plate, the hairline
+   and the press all come from the two classes every other secondary action on
+   the site already wears. */
+.cg-try {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-md);
+  min-height: 48px;
+}
+.cg-try svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--ink-3);
+}
+.cg-try:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
 
 /* The closing row, inside the call-out's plate. Two overrides only: the ring
    that cuts each mark out of the one behind it has to be the plate's colour
@@ -653,4 +874,39 @@
 [data-lit] .ticker-rail {
   -webkit-mask-image: none;
   mask-image: none;
+}
+
+/* ── ON A PHONE THE MENTION IS A LINK, NOT A THIRD PILL ────────────────────
+   Measured at 375 after the polish: "Try the first two free today" rendered
+   as a ghost button directly above the docked pair, which already carries
+   "Try it once for free" as its filled action. Three pills in one view, two
+   of them the same verb — the exact tell the plan set out to remove.
+
+   Below 1024 the docked pair IS this page's action row, so the in-page
+   mention only has to be a mention: a text link at reading size with the
+   chevron, on the argument's own left edge, 44px tall so it stays a target.
+   From 1024 the pair is hidden and this goes back to being the ghost button
+   beside the filled one, where it is the only place the action lives. */
+@media (max-width: 1023px) {
+  .cg-acts .cg-try {
+    justify-content: flex-start;
+    width: auto;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--cg-brand, var(--maroon));
+  }
+  .cg-acts .cg-try svg {
+    color: currentColor;
+  }
+  .cg-acts .cg-try:active {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
 }

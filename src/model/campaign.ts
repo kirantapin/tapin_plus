@@ -77,21 +77,36 @@ export const campaignTrials = [
  * and lands on a page that opens differently has to re-decide they are in the
  * right place. So these are the carousel's own lines.
  *
+ * ══ A FIGURE AND ITS QUALIFIER, NOT A LABEL AND A NOTE ═════════════════════
+ * 21 Sep 2026 (docs/POLISH-2026-09-21.md §3): the splash sets these three as
+ * DISPLAY FIGURES on the page rather than as rows beside icon tiles, so the
+ * record is split at the same seam the type is — `figure` is the thing that is
+ * set large, `qualifier` is the ≤3-word line under it. The claims are the
+ * advert's, unchanged; only where the line breaks has moved.
+ *
+ * "Points" is the one that is not a number. It is still the figure, because a
+ * column headed by its qualifier would be a fourth kind of thing in a row of
+ * three; the splash sets it smaller, on the same baseline.
+ *
  * ⚠ "ONCE A DAY" IS THE ADVERT'S, NOT THE DATA'S. docs/data/money-and-terms.json
  * gives the 15% no cadence at all, and no other surface prints one. Sam wrote
  * it on the card himself and it is the tighter of the two claims, so it is the
  * one printed here — but the JSON and this file now disagree, and the JSON is
  * what the checkout's terms are built from. It is his to reconcile.
  *
- * `note` is a CONDITION or a CADENCE, never a restatement of the label. The
- * merchant pop-up learned that on the same afternoon.
+ * `qualifier` is a CONDITION or a CADENCE, never a restatement of the figure.
+ * The merchant pop-up learned that on the same afternoon.
  */
-export const campaignBenefits: { id: string; label: string; note: string }[] = [
+export const campaignBenefits: {
+  id: string;
+  figure: string;
+  qualifier: string;
+}[] = [
   {
     id: "credit",
-    label: `$${BENEFIT.creditUsd} credit`,
-    note: `Every week, on any order over $${Math.round(BENEFIT.creditMinUsd)}`,
+    figure: `$${BENEFIT.creditUsd}`,
+    qualifier: "credit every week",
   },
-  { id: "percent", label: "15% off", note: "Once a day" },
-  { id: "points", label: "Points toward rewards", note: "Earned on every order" },
+  { id: "percent", figure: "15%", qualifier: "off, once a day" },
+  { id: "points", figure: "Points", qualifier: "on every order" },
 ];
