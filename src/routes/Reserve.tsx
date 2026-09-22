@@ -18,7 +18,11 @@ import {
   foundingCloses,
   guarantee,
   GUARANTEE_CONTACT,
+  monthlyToday,
 } from "../model/content";
+/* The credit's own constants, from the model that computes the saving — the
+   floor and the amount are read, never retyped beside a price. */
+import { BENEFIT } from "../model/savings";
 
 /**
  * /reserve — the checkout. Mode: Operate. The decision and nothing else.
@@ -162,6 +166,44 @@ export default function Reserve() {
   return (
     <>
       <div className="rs-modal">
+        {/* ══ THE DEPOSIT COMES BACK, AND IT SAYS SO FIRST ══════════════════
+            Sam, 21 Sep 2026: "the checkout modal should show the 'earn back
+            the cost of membership on first $10 purchase' at the top."
+
+            EVERY FIGURE IS READ. The deposit is `monthlyToday`, so it follows
+            the price when the Early Bird seats go; the floor and the amount are
+            BENEFIT's own `creditMinUsd` and `creditUsd`, the same two constants
+            the credit's benefit row prints. Nothing here is typed.
+
+            ══ AND IT IS GATED TWICE ════════════════════════════════════════
+            FOUNDING_OPEN: after the flip the deposit is $14.99 and one $10
+            order does not come near it, so the sentence would be false beside
+            that price — this is the same condition `plan.saving` keys off.
+
+            The second guard is the comparative's own. `depositEarnsCredit` in
+            content.ts carried this line until 20 Sep with a check that dropped
+            "more than the deposit" if the price ever met the credit; the helper
+            was deleted that day on Sam's word ("too complicated") and asked for
+            again today, so the guard comes back with it. If a founding price is
+            ever set at or above $5 this block simply does not render, rather
+            than printing a comparison that no longer holds. */}
+        {FOUNDING_OPEN && monthlyToday < BENEFIT.creditUsd ? (
+          <div className="rs-earnback">
+            <span className="rs-earnback-ico" aria-hidden="true">
+              <BenefitIcon id="credit" />
+            </span>
+            <p className="rs-earnback-say">
+              <b>
+                Earn the ${monthlyToday.toFixed(2)} back on your first $
+                {Math.round(BENEFIT.creditMinUsd)}+ order
+              </b>
+              <span>
+                It earns ${BENEFIT.creditUsd} credit, more than the deposit.
+              </span>
+            </p>
+          </div>
+        ) : null}
+
         {/* ══ THE COUNT, AS A CARD ABOVE THE CARD ═══════════════════════════
             Sam, 15 Sep 2026: "bring back the original progress bar and put it
             above the membership card." So: the sentence with the number

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Drill } from "./Drill";
 import SubscriptionPayButton from "./SubscriptionPayButton";
@@ -92,6 +92,49 @@ export default function CheckoutSheet({
   const { subscribed } = useAuth();
   const forfeitTerm = plan.terms.find((t) => t.id === "forfeit")?.term;
 
+  /* ══ THE SHEET LEAVES UNDER ITS OWN MOTION ═════════════════════════════════
+     Sam, 21 Sep 2026: "can these modals transition in from the bottom of the
+     screen like the checkout modal?" — said of the Sign in sheet, which is this
+     same `.cs-sheet`. It now slides the whole way up (reserve.css `csUp`), and
+     a sheet that travels in has to travel out: `onClose` unmounts this subtree
+     at once, so without a beat of state the exit is a cut.
+
+     So every way out routes through here, and `onClose` is called when the
+     motion has finished rather than when the tap lands. VenuePopup's pattern —
+     a `closing` flag, one close at a time, and reduced motion leaving
+     immediately — with ReserveLayer's 280ms handoff, because the exit this
+     draws is the 260ms `csDown` rather than the pop-up's 200ms.
+
+     WHAT IT DOES NOT CHANGE: which taps are allowed to close at all. `paid`
+     still refuses Escape and the backdrop below; §4's order inside the sheet is
+     untouched. This is the animation of a dismissal, not a new one. */
+  const [closing, setClosing] = useState(false);
+  const timer = useRef<number | null>(null);
+  const close = useCallback(() => {
+    if (closing) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      onClose();
+      return;
+    }
+    setClosing(true);
+    timer.current = window.setTimeout(() => {
+      timer.current = null;
+      setClosing(false);
+      onClose();
+    }, 280);
+  }, [closing, onClose]);
+
+  /* Closed from outside (or re-opened later) leaves nothing half-played behind:
+     a pending unmount would otherwise close the next opening for it. */
+  useEffect(() => {
+    if (open) return;
+    if (timer.current !== null) {
+      window.clearTimeout(timer.current);
+      timer.current = null;
+    }
+    setClosing(false);
+  }, [open]);
+
   /**
    * Escape closes, and the body underneath stops scrolling.
    *
@@ -104,7 +147,7 @@ export default function CheckoutSheet({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !paid) onClose();
+      if (e.key === "Escape" && !paid) close();
     };
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -113,7 +156,7 @@ export default function CheckoutSheet({
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, onClose, paid]);
+  }, [open, close, paid]);
 
   /** Focus lands inside the sheet, not on whatever was behind it. */
   useEffect(() => {
@@ -124,10 +167,10 @@ export default function CheckoutSheet({
 
   return (
     <div
-      className="cs-scrim"
+      className={`cs-scrim${closing ? " is-closing" : ""}`}
       /* The backdrop dismisses — except once paid, for the reason above. */
       onClick={() => {
-        if (!paid) onClose();
+        if (!paid) close();
       }}
     >
       <div
@@ -159,7 +202,7 @@ export default function CheckoutSheet({
           <button
             type="button"
             className="cs-close"
-            onClick={onClose}
+            onClick={close}
             aria-label={paid ? "Done" : "Close"}
           >
             <svg

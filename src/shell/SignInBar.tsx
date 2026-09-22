@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PhoneStep from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
@@ -30,6 +30,44 @@ export default function SignInBar() {
   const { userSession, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
+  /* ══ IT LEAVES THE WAY IT ARRIVED ══════════════════════════════════════════
+     Sam, 21 Sep 2026: "can these modals transition in from the bottom of the
+     screen like the checkout modal?" The arrival is reserve.css's (`csUp`); the
+     departure needs a beat of state, because an unmount is instant and a sheet
+     that slides in and then vanishes is worse than one that never moved.
+
+     VenuePopup's pattern exactly: a `closing` flag for the length of the exit,
+     a reduced-motion short-circuit that unmounts at once, and one close at a
+     time. The timeout is 280ms, not VenuePopup's 200 — its sheet leaves in
+     200ms and this one leaves in 260 (`csDown`, the checkout's own duration),
+     and ReserveLayer already pairs that 260 with a 280ms handoff. A 200ms
+     timeout here would cut the slide short. */
+  const [closing, setClosing] = useState(false);
+  const timer = useRef<number | null>(null);
+  const close = () => {
+    if (closing) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setOpen(false);
+      return;
+    }
+    setClosing(true);
+    timer.current = window.setTimeout(() => {
+      timer.current = null;
+      setClosing(false);
+      setOpen(false);
+    }, 280);
+  };
+  /* Re-opening inside those 280ms has to cancel the pending unmount, or the
+     sheet opens and is closed again by the previous close's own timer. */
+  const openSheet = () => {
+    if (timer.current !== null) {
+      window.clearTimeout(timer.current);
+      timer.current = null;
+    }
+    setClosing(false);
+    setOpen(true);
+  };
+
   /* `undefined` is "not known yet" — render nothing rather than flashing
      "Sign in" at someone who is already signed in, every reload. */
   if (userSession === undefined) return null;
@@ -51,7 +89,7 @@ export default function SignInBar() {
         <button
           type="button"
           className="signin-go"
-          onClick={() => (userSession ? logout() : setOpen(true))}
+          onClick={() => (userSession ? logout() : openSheet())}
         >
           {userSession ? "Sign out" : "Sign in"}
         </button>
@@ -77,7 +115,10 @@ export default function SignInBar() {
           be fixed. */}
       {open
         ? createPortal(
-        <div className="cs-scrim" onClick={() => setOpen(false)}>
+        <div
+          className={`cs-scrim${closing ? " is-closing" : ""}`}
+          onClick={close}
+        >
           <div
             className="cs-sheet"
             data-lit=""
@@ -91,7 +132,7 @@ export default function SignInBar() {
               <button
                 type="button"
                 className="cs-close"
-                onClick={() => setOpen(false)}
+                onClick={close}
                 aria-label="Close"
               >
                 <svg
@@ -109,7 +150,7 @@ export default function SignInBar() {
             {/* The session is what matters here, and `verifyCode` leaves it
                 behind through `onAuthStateChange` — so the sheet just closes
                 and everything reading `useAuth` re-renders itself. */}
-            <PhoneStep onDone={() => setOpen(false)} />
+            <PhoneStep onDone={close} />
           </div>
         </div>,
             document.body,

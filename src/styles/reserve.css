@@ -502,7 +502,7 @@ html[data-flight="in"] .column > .sticky-cta{
   box-shadow:0 -18px 48px rgba(0,0,0,.46);
   padding:var(--s-xl);
   padding-bottom:calc(var(--s-xl) + env(safe-area-inset-bottom,0px));
-  animation:csRise 260ms var(--ease) both;
+  animation:csUp 420ms var(--ease) both;
 }
 .cs-sheet:focus{outline:none}
 .cs-sheet:focus-visible{outline:2px solid var(--ink-1);outline-offset:-3px}
@@ -524,8 +524,39 @@ html[data-flight="in"] .column > .sticky-cta{
 .receipt .receipt-go{margin-top:var(--s-2xl)}
 
 @keyframes csFade{from{opacity:0}to{opacity:1}}
-@keyframes csRise{from{opacity:0;transform:translateY(14px)}
-  to{opacity:1;transform:none}}
+
+/* ══ IT ARRIVES FROM THE EDGE, LIKE THE SHEET IT SITS IN ════════════════════
+   Sam, 21 Sep 2026, on a phone, pointing at Sign in: "can these modals
+   transition in from the bottom of the screen like the checkout modal?"
+
+   It did not. `csRise` was a 14px lift and a fade over 260ms — a popover's
+   motion, on an element that is docked to the bottom edge and rounded only at
+   the top. The reserve layer directly behind it travels the whole way
+   (`sheetUp`, translateY(100%) → none, 420ms on the house curve), so two
+   sheets on one screen disagreed about what a sheet is.
+
+   Same keyframe, same duration, same curve as `sheetUp`, and TRANSFORM ONLY:
+   the scrim's own 180ms fade is what dims the page, so the sheet has no reason
+   to fade in as well. From 640px this is a centred dialog and `csPop`
+   overrides it — see the block below. csRise is gone rather than left unused. */
+@keyframes csUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes csDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes csFadeOut{from{opacity:1}to{opacity:0}}
+
+/* ══ AND IT LEAVES THE SAME WAY ═════════════════════════════════════════════
+   `is-closing` on the scrim, held by the component for the length of the exit
+   and then unmounted (SignInBar, CheckoutSheet — the pattern is VenuePopup's).
+   Quicker than the entrance and on an ease-IN, because an object leaving
+   through an edge accelerates into it rather than settling: the same 260ms
+   `sheetDown` uses one layer down.
+
+   THE FADE IS ON THE SCRIM ELEMENT, WHICH IS ALSO THE SHEET'S PARENT. Unlike
+   `.vp-scrim` and `.reserve-scrim`, which are children of their own root, this
+   scrim IS the fixed flex box that positions the sheet — so the sheet slides
+   down carrying its parent's fading opacity. That reads as the sheet leaving,
+   and the alternative is restructuring an element three surfaces depend on. */
+.cs-scrim.is-closing{pointer-events:none;animation:csFadeOut 260ms linear both}
+.cs-scrim.is-closing .cs-sheet{animation:csDown 260ms cubic-bezier(.4,0,1,1) both}
 
 /* Above a phone the sheet stops being a sheet: centred, fully rounded, and off
    the bottom edge, because there is no thumb to reach from down there.
@@ -549,17 +580,30 @@ html[data-flight="in"] .column > .sticky-cta{
    anything however wide it is. */
 @media (min-height:700px) and (min-width:640px){
   .cs-scrim{align-items:center;padding:var(--s-2xl)}
+  /* The duration comes with the name: the sheet state is 420ms now, and a
+     centred dialog that took that long to fade in would feel slack. */
   .cs-sheet{border-radius:var(--r-panel);
     box-shadow:0 24px 64px rgba(0,0,0,.5);
-    animation-name:csPop}
+    animation-name:csPop;animation-duration:260ms}
   @keyframes csPop{from{opacity:0;transform:translateY(10px) scale(.985)}
     to{opacity:1;transform:none}}
+  /* THE MATCHING WAY OUT. A dialog does not slide off an edge it is not
+     attached to — it settles back exactly the way it came, in 180ms, which is
+     the pair the merchant pop-up already draws at this width (`vpOut`). After
+     the phone rule above, so it wins on source order at equal specificity. */
+  .cs-scrim.is-closing .cs-sheet{animation:csPopOut 180ms cubic-bezier(.4,0,1,1) both}
+  @keyframes csPopOut{from{opacity:1;transform:none}
+    to{opacity:0;transform:translateY(10px) scale(.985)}}
 }
 
 /* The sheet's motion is decoration on a surface that takes money — first thing
    to go when the reader has asked for less of it. */
 @media (prefers-reduced-motion:reduce){
-  .cs-scrim,.cs-sheet{animation:none}
+  /* The components short-circuit the exit under `reduce` and never set the
+     class — this is the same belt-and-braces venue.css keeps, so a future
+     caller that forgets the check cannot animate anything here. */
+  .cs-scrim,.cs-sheet,
+  .cs-scrim.is-closing,.cs-scrim.is-closing .cs-sheet{animation:none}
 }
 
 /* ============================================================================
@@ -1164,11 +1208,18 @@ html[data-flight="in"] .column > .sticky-cta{
      implicit row and breaking the two columns it sat under. Reading order
      down the left is now count, what you get, guarantee, where, card; the
      decision holds the right the whole way down. */
+  /* The earn-back statement takes a row of its own at the head of the left
+     column — the same place it holds on a phone. An unplaced child would land
+     in an implicit row and break the two columns under it, which is what
+     happened to the places row on 20 Sep. */
   .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
-    grid-template-areas:"seats plans" "includes plans" "closing plans"
-      "places plans" "card plans";
-    grid-template-rows:repeat(5,auto);
+    grid-template-areas:"earn plans" "seats plans" "includes plans"
+      "closing plans" "places plans" "card plans";
+    grid-template-rows:repeat(6,auto);
     column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
+  /* Held to the count card's own measure and centred with it, so the statement
+     and the meter under it share one left edge. */
+  .rs-earnback{grid-area:earn;max-width:380px;width:100%;margin:0 auto}
   .rs-card-panel{grid-area:card}
   .rs-places{grid-area:places}
   /* The card at the size you would hold one, centred over its count;
@@ -1231,6 +1282,38 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-includes-panel > .panel-label{margin-bottom:var(--s-md)}
 .rs-includes-panel .rs-list{margin:0 var(--s-xl);gap:var(--s-md)}
 .rs-includes-panel .rs-list li{font-size:14px;line-height:1.35}
+
+/* ══ THE DEPOSIT COMES BACK, AND IT SAYS SO FIRST ═══════════════════════════
+   Sam, 21 Sep 2026: "the checkout modal should show the 'earn back the cost of
+   membership on first $10 purchase' at the top." Routes/Reserve.tsx holds the
+   figures and the gate; this is the shape.
+
+   OPEN ON THE SHEET'S GROUND, NOT A CARD. The first two things in this modal
+   would otherwise be two boxes of nearly the same size stacked on each other —
+   the craft floor's first refusal (POLISH §5: no same-size cards as page
+   structure, no nested cards). It is a statement, so it is set like one: the
+   glyph in its own tile, the two lines beside it, and a hairline to mark where
+   it ends. The tile is the only box, and it is the house one — `.rs-li-icon`'s
+   construction at 32px, --inner inside --hair, the glyph on --ink-2.
+
+   NO MAROON. Nothing here is chosen or acting (tokens.css): it is a fact about
+   what the deposit does. Maroon on this sheet is the plan tile and the control
+   that takes money, and a third maroon thing above both would outrank them.
+
+   Measured on the sheet's own lit ramp (`.reserve-sheet[data-lit]`, --page
+   #F0EDEE): --ink-1 15.98:1, --ink-3 7.69:1, and the tile's --ink-2 on --inner
+   #F5F2F3 10.63:1. */
+.rs-earnback{display:flex;align-items:center;gap:var(--s-lg);
+  padding-bottom:var(--s-lg);border-bottom:1px solid var(--hair)}
+.rs-earnback-ico{flex:0 0 auto;width:32px;height:32px;border-radius:var(--r-sm);
+  display:grid;place-items:center;background:var(--inner);border:1px solid var(--hair);
+  color:var(--ink-2)}
+.rs-earnback-ico svg{width:18px;height:18px;display:block}
+/* The reading floor, not a caption: the second line is a sentence. */
+.rs-earnback-say{margin:0;min-width:0;display:flex;flex-direction:column;gap:var(--s-xs)}
+.rs-earnback-say b{font-size:16px;font-weight:700;line-height:1.3;letter-spacing:-.01em;
+  color:var(--ink-1)}
+.rs-earnback-say span{font-size:14px;line-height:1.35;color:var(--ink-3)}
 
 /* ── the count card ───────────────────────────────────────────────────────── */
 .rs-seat-card{padding:var(--s-md) var(--s-lg) var(--s-lg);
