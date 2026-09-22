@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState, type Ref } from "react";
 import { Link } from "react-router-dom";
+import { Page } from "./Pager";
 import { Drill } from "./Drill";
 import SubscriptionPayButton from "./SubscriptionPayButton";
-import PhoneStep, { readablePhone, type PhoneIdentity } from "./PhoneStep";
+import PhoneStep, {
+  readablePhone,
+  type PhoneIdentity,
+  type PhoneStage,
+  type PhoneStepHandle,
+} from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 import {
   launchWindow,
@@ -12,10 +18,24 @@ import {
 } from "../model/content";
 
 /**
- * The charge, in a sheet of its own.
+ * The charge — pages 1, 2 and 3 of the checkout.
  *
  * Sam, 13 Sep 2026: "instead of all these disclosures here, they'd exist in a
  * checkout modal flow… we only need the disclosure and terms right at checkout."
+ *
+ * ══ IT STOPPED BEING A SHEET OF ITS OWN ON 21 Sep 2026 ═════════════════════
+ * Sam, on this arriving over the checkout: "the way this pops up is strange, I
+ * think it'd be a part of the checkout modal, almost like it swipes to the next
+ * screen as if this flow is a part of the same modal. We'd need a back button
+ * as well probably."
+ *
+ * So the second scrim, the second `.cs-sheet` and its own header and X are
+ * gone. What is left is what was always the point: three states, rendered as
+ * three pages inside the one sheet ReserveLayer draws (shell/Pager.tsx moves
+ * between them, the layer's header carries the title and the Back chevron, and
+ * its X closes the whole layer from any page). The state machine below —
+ * `identity`, `subscribed`, `paid` — is untouched, and every string in the
+ * three states is the string it was. See docs/POLISH-2026-09-21.md §9.
  *
  * ══ §4 DID NOT MOVE. IT CAME WITH THEM, AND IT STILL GOVERNS THIS FILE ══════
  * TRUTH.md §4 is the one rule that outranks design here: the three charge rows,
@@ -57,32 +77,39 @@ export interface CheckoutPlan {
 
 export default function CheckoutSheet({
   plan,
-  open,
-  onClose,
+  step,
+  onStep,
   paid,
   onPaid,
   noWallet,
   onNoWallet,
   onIdentity,
+  onStage,
+  phoneRef,
 }: {
   plan: CheckoutPlan;
-  open: boolean;
-  onClose: () => void;
-  /** The PaymentIntent id once the charge settled, or null. */
+  /** Which page of the layer is up. 1, 2 and 3 are this file's. */
+  step: number;
+  /** Move the layer's track — the flow advances itself, the chrome follows. */
+  onStep: (step: number) => void;
+  /** The subscription id once the charge settled, or null. */
   paid: string | null;
   onPaid: (id: string) => void;
   noWallet: boolean;
   onNoWallet: () => void;
   /** Where the signed-in number goes — stored with the reservation. */
   onIdentity: (id: PhoneIdentity) => void;
+  /** The phone step's stage, so the layer can title its header from it. */
+  onStage?: (stage: PhoneStage) => void;
+  /** The layer's Back chevron reaches the phone step's own way back. */
+  phoneRef?: Ref<PhoneStepHandle>;
 }) {
-  const panel = useRef<HTMLDivElement>(null);
   /**
    * WHO IS BUYING, BEFORE WHAT THEY ARE BUYING.
    *
    * Sam, 13 Sep 2026: they sign in with a phone number before they can
-   * purchase. Held in the sheet rather than in the page, because it is part of
-   * this transaction: closing without finishing should not leave a half-signed
+   * purchase. Held here rather than in the page, because it is part of this
+   * transaction: closing without finishing should not leave a half-signed
    * state behind for the next attempt to inherit.
    */
   const [identity, setIdentity] = useState<PhoneIdentity | null>(null);
@@ -92,271 +119,175 @@ export default function CheckoutSheet({
   const { subscribed } = useAuth();
   const forfeitTerm = plan.terms.find((t) => t.id === "forfeit")?.term;
 
-  /* ══ THE SHEET LEAVES UNDER ITS OWN MOTION ═════════════════════════════════
-     Sam, 21 Sep 2026: "can these modals transition in from the bottom of the
-     screen like the checkout modal?" — said of the Sign in sheet, which is this
-     same `.cs-sheet`. It now slides the whole way up (reserve.css `csUp`), and
-     a sheet that travels in has to travel out: `onClose` unmounts this subtree
-     at once, so without a beat of state the exit is a cut.
-
-     So every way out routes through here, and `onClose` is called when the
-     motion has finished rather than when the tap lands. VenuePopup's pattern —
-     a `closing` flag, one close at a time, and reduced motion leaving
-     immediately — with ReserveLayer's 280ms handoff, because the exit this
-     draws is the 260ms `csDown` rather than the pop-up's 200ms.
-
-     WHAT IT DOES NOT CHANGE: which taps are allowed to close at all. `paid`
-     still refuses Escape and the backdrop below; §4's order inside the sheet is
-     untouched. This is the animation of a dismissal, not a new one. */
-  const [closing, setClosing] = useState(false);
-  const timer = useRef<number | null>(null);
-  const close = useCallback(() => {
-    if (closing) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      onClose();
-      return;
-    }
-    setClosing(true);
-    timer.current = window.setTimeout(() => {
-      timer.current = null;
-      setClosing(false);
-      onClose();
-    }, 280);
-  }, [closing, onClose]);
-
-  /* Closed from outside (or re-opened later) leaves nothing half-played behind:
-     a pending unmount would otherwise close the next opening for it. */
-  useEffect(() => {
-    if (open) return;
-    if (timer.current !== null) {
-      window.clearTimeout(timer.current);
-      timer.current = null;
-    }
-    setClosing(false);
-  }, [open]);
-
-  /**
-   * Escape closes, and the body underneath stops scrolling.
-   *
-   * NOT WHILE PAID. Once the charge has settled this sheet holds the only copy
-   * of the reference that exists — nothing server-side writes the reservation
-   * down — so an accidental Escape would throw away the one thing the member
-   * needs to claim a refund. The receipt state is dismissed deliberately or not
-   * at all.
-   */
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !paid) close();
-    };
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = previous;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, close, paid]);
-
-  /** Focus lands inside the sheet, not on whatever was behind it. */
-  useEffect(() => {
-    if (open) panel.current?.focus();
-  }, [open]);
-
-  if (!open) return null;
+  /* "Change", and the wallet's own "you are not signed in": both are the same
+     correction, and both are one page back. Clearing the identity without
+     moving would leave page 2 with nobody to hold the seat for. */
+  const changeIdentity = () => {
+    setIdentity(null);
+    onStep(1);
+  };
 
   return (
-    <div
-      className={`cs-scrim${closing ? " is-closing" : ""}`}
-      /* The backdrop dismisses — except once paid, for the reason above. */
-      onClick={() => {
-        if (!paid) close();
-      }}
-    >
-      <div
-        className="cs-sheet"
-        data-lit=""
-        role="dialog"
-        aria-modal="true"
-        /* `seatNoun`, never the literal: after the flip the rows and consent
-           beneath say "seat", and the sheet's own name must agree with them. */
-        aria-label={
-          paid
-            ? `Your ${seatNoun}`
-            : identity
-              ? `Confirm your ${seatNoun}`
-              : `Your details, to hold your ${seatNoun}`
-        }
-        tabIndex={-1}
-        ref={panel}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="cs-top">
-          <p className="cs-title">
-            {paid
-              ? `Your ${seatNoun}`
-              : identity
-                ? "Confirm your seat"
-                : "Your details"}
-          </p>
-          <button
-            type="button"
-            className="cs-close"
-            onClick={close}
-            aria-label={paid ? "Done" : "Close"}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-            >
-              <path d="m7 7 10 10M17 7 7 17" />
-            </svg>
-          </button>
-        </div>
+    <>
+      {/* ══ PAGE 1 · WHO, BEFORE WHAT ═══════════════════════════════════════
+          The number is collected BEFORE the charge rows, not after, and that
+          ordering is the point: a reservation whose owner is unknown cannot be
+          handed to anyone in Spring 2027.
 
-        {paid ? (
-          <div className="receipt" role="status">
-            <p className="receipt-head">{`Your ${seatNoun} is held.`}</p>
-            <p className="t-compact">
-              {`${plan.price} paid today, for your first ${plan.period}. It starts when we open, expected ${launchWindow}, then ${plan.price} a ${plan.period} automatically until you cancel.`}
-            </p>
-            {/* The subscription id. It is no longer "the only record that
-                exists" — the subscription hangs off the Supabase user and
-                `subscription_status` answers for it on any device — so it is
-                shown as a handle for support, not as something to keep safe. */}
-            <p className="t-compact receipt-ref">
-              Reference <span>{paid}</span>
-            </p>
-            <p className="t-compact">
-              Email {GUARANTEE_CONTACT} to cancel, or for a full refund any time
-              before we open.
-            </p>
-            {/* ══ THE DOOR TO THE PAGE AFTER THE PURCHASE ══════════════════
-                Sam, 14 Sep 2026: "the actual post-purchase page." /in is that
-                page — the card with her name, what she holds, the reference,
-                the terms she agreed to — and the receipt hands her to it
-                rather than leaving her under a modal with a close button. */}
-            <Link className="action receipt-go" to="/in">
-              See your membership
-            </Link>
-          </div>
-        ) : subscribed ? (
-          /* ══ ALREADY BOUGHT ═════════════════════════════════════════════
-             Asked of Stripe through `subscription_status`, not of this
-             browser: the localStorage record is gone on a second device and
-             a real member would otherwise be walked back through a checkout
-             whose wallet answers 409. No rows, no consent and no control —
-             §4 governs a decision, and there is no decision left to take. */
-          <div className="receipt" role="status">
-            <p className="receipt-head">You already have a {seatNoun}.</p>
-            <p className="t-compact">
-              This number is already on an Early Bird {seatNoun}, so there is
-              nothing to pay now. Opening in Blacksburg, {launchWindow}.
-            </p>
-            <Link className="action receipt-go" to="/in">
-              See your membership
-            </Link>
-          </div>
-        ) : !identity ? (
-          /* ══ WHO, BEFORE WHAT ═══════════════════════════════════════════
-             The number is collected BEFORE the charge rows, not after, and
-             that ordering is the point: a reservation whose owner is unknown
-             cannot be handed to anyone in Spring 2027.
-
-             §4 IS NOT WEAKENED BY THIS. Its rule is about what must be visible
-             at the moment billing details are taken — and billing details are
-             taken by the wallet, one step further on. A reader cannot reach a
-             payment sheet from here; they reach the rows, the consent and the
-             wallet together, exactly as before. A step in front of the
-             disclosure block is not a thing between the rows and the button. */
+          §4 IS NOT WEAKENED BY THIS. Its rule is about what must be visible at
+          the moment billing details are taken — and billing details are taken
+          by the wallet, one page further on. A reader cannot reach a payment
+          sheet from here; they reach the rows, the consent and the wallet
+          together, exactly as before. A step in front of the disclosure block
+          is not a thing between the rows and the button. */}
+      <Page current={step === 1}>
+        <div className="rs-step">
           <PhoneStep
+            ref={phoneRef}
+            onStage={onStage}
             onDone={(id) => {
               setIdentity(id);
               onIdentity(id);
+              onStep(2);
             }}
           />
-        ) : (
-          <>
-            {/* WHO IS BUYING, RESTATED. The number is the account and the
-                reader typed it one screen ago — printing it here is how they
-                catch a typo before money moves, not decoration. */}
-            <p className="cs-who">
-              <span>Holding for</span>
-              <b>{identity.name}</b>
-              <span className="tnum cs-phone">
-                {readablePhone(identity.phone)}
-              </span>
-              <button
-                type="button"
-                className="cs-change"
-                onClick={() => setIdentity(null)}
-              >
-                Change
-              </button>
-            </p>
+        </div>
+      </Page>
 
-            {/* ROWS → FORFEIT → CONSENT → CONTROL. §4's order, unbroken. */}
-            <ul className="charges">
-              {plan.chargeRows.map((r) => (
-                <li key={r.id}>
-                  <b>{r.label}</b>
-                  <span>{r.detail}</span>
-                </li>
-              ))}
-            </ul>
+      {/* ══ PAGE 2 · THE CHARGE ═════════════════════════════════════════════
+          ROWS → FORFEIT → CONSENT → CONTROL, together and in that order. Read
+          this file's header before moving anything in here. */}
+      <Page current={step === 2}>
+        <div className="rs-step">
+          {identity ? (
+            <>
+              {/* WHO IS BUYING, RESTATED. The number is the account and the
+                  reader typed it one screen ago — printing it here is how they
+                  catch a typo before money moves, not decoration. */}
+              <p className="cs-who">
+                <span>Holding for</span>
+                <b>{identity.name}</b>
+                <span className="tnum cs-phone">
+                  {readablePhone(identity.phone)}
+                </span>
+                <button
+                  type="button"
+                  className="cs-change"
+                  onClick={changeIdentity}
+                >
+                  Change
+                </button>
+              </p>
 
-            {/* The qualifier on the refund, out where the refund is: what it
-                costs is the seat and the locked rate. Rendered verbatim from the
-                terms list, never retyped. */}
-            {forfeitTerm ? (
-              <p className="t-compact forfeit">{forfeitTerm}</p>
-            ) : null}
+              {/* ROWS → FORFEIT → CONSENT → CONTROL. §4's order, unbroken. */}
+              <ul className="charges">
+                {plan.chargeRows.map((r) => (
+                  <li key={r.id}>
+                    <b>{r.label}</b>
+                    <span>{r.detail}</span>
+                  </li>
+                ))}
+              </ul>
 
-            {/* Deliberately the least decorated text here. It is consent, not
-                marketing — reading size, reading contrast, no emphasis. */}
-            <p className="consent">{plan.consent}</p>
-
-            {/* ══ THE REAL SUBSCRIPTION, ALWAYS ═══════════════════════════
-                15 Sep 2026. The fake-purchase ghost button and every "test
-                mode" line are gone: this slot renders the live wallet on every
-                build, wired to `create_simple_intent` in subscription mode.
-                The customer comes from the access token the phone step above
-                leaves behind, so there is nothing anonymous left to fake. */}
-            <div className="pay-slot">
-              <SubscriptionPayButton
-                onSubscribed={({ subscriptionId }) => onPaid(subscriptionId)}
-                onUnavailable={onNoWallet}
-                /* The phone step is one screen back and it is what mints the
-                   session, so a missing token here means it did not take —
-                   send them back to it rather than into a 401. */
-                onNeedsSignIn={() => setIdentity(null)}
-              />
-              {/* WALLETS ONLY — no card field. On a browser with neither
-                  Apple Pay nor Google Pay the element renders nothing at all,
-                  so the sheet has to say why rather than showing a gap where
-                  the control should be. */}
-              {noWallet ? (
-                <p className="t-compact not-live">
-                  Reserving needs Apple Pay or Google Pay. Open this page on
-                  your phone to hold a seat.
-                </p>
+              {/* The qualifier on the refund, out where the refund is: what it
+                  costs is the seat and the locked rate. Rendered verbatim from the
+                  terms list, never retyped. */}
+              {forfeitTerm ? (
+                <p className="t-compact forfeit">{forfeitTerm}</p>
               ) : null}
+
+              {/* Deliberately the least decorated text here. It is consent, not
+                  marketing — reading size, reading contrast, no emphasis. */}
+              <p className="consent">{plan.consent}</p>
+
+              {/* ══ THE REAL SUBSCRIPTION, ALWAYS ═══════════════════════════
+                  15 Sep 2026. The fake-purchase ghost button and every "test
+                  mode" line are gone: this slot renders the live wallet on every
+                  build, wired to `create_simple_intent` in subscription mode.
+                  The customer comes from the access token the phone step above
+                  leaves behind, so there is nothing anonymous left to fake. */}
+              <div className="pay-slot">
+                <SubscriptionPayButton
+                  onSubscribed={({ subscriptionId }) => onPaid(subscriptionId)}
+                  onUnavailable={onNoWallet}
+                  /* The phone step is one screen back and it is what mints the
+                     session, so a missing token here means it did not take —
+                     send them back to it rather than into a 401. */
+                  onNeedsSignIn={changeIdentity}
+                />
+                {/* WALLETS ONLY — no card field. On a browser with neither
+                    Apple Pay nor Google Pay the element renders nothing at all,
+                    so the sheet has to say why rather than showing a gap where
+                    the control should be. */}
+                {noWallet ? (
+                  <p className="t-compact not-live">
+                    Reserving needs Apple Pay or Google Pay. Open this page on
+                    your phone to hold a seat.
+                  </p>
+                ) : null}
+              </div>
+
+              <Drill summary="The full terms">
+                <ol className="terms">
+                  {plan.terms.map((t) => (
+                    <li key={t.id}>{t.term}</li>
+                  ))}
+                </ol>
+              </Drill>
+            </>
+          ) : null}
+        </div>
+      </Page>
+
+      {/* ══ PAGE 3 · THE RECEIPT, OR THE SEAT ALREADY HELD ══════════════════
+          Both end states land here: the charge that just settled, and the
+          member who was already on an Early Bird seat when they opened the
+          checkout. Neither has a way back — there is no decision left to take
+          — so the layer draws no Back chevron on this page. */}
+      <Page current={step === 3}>
+        <div className="rs-step">
+          {paid ? (
+            <div className="receipt" role="status">
+              <p className="receipt-head">{`Your ${seatNoun} is held.`}</p>
+              <p className="t-compact">
+                {`${plan.price} paid today, for your first ${plan.period}. It starts when we open, expected ${launchWindow}, then ${plan.price} a ${plan.period} automatically until you cancel.`}
+              </p>
+              {/* The subscription id. It is no longer "the only record that
+                  exists" — the subscription hangs off the Supabase user and
+                  `subscription_status` answers for it on any device — so it is
+                  shown as a handle for support, not as something to keep safe. */}
+              <p className="t-compact receipt-ref">
+                Reference <span>{paid}</span>
+              </p>
+              <p className="t-compact">
+                Email {GUARANTEE_CONTACT} to cancel, or for a full refund any time
+                before we open.
+              </p>
+              {/* ══ THE DOOR TO THE PAGE AFTER THE PURCHASE ══════════════════
+                  Sam, 14 Sep 2026: "the actual post-purchase page." /in is that
+                  page — the card with her name, what she holds, the reference,
+                  the terms she agreed to — and the receipt hands her to it
+                  rather than leaving her under a modal with a close button. */}
+              <Link className="action receipt-go" to="/in">
+                See your membership
+              </Link>
             </div>
 
-            <Drill summary="The full terms">
-              <ol className="terms">
-                {plan.terms.map((t) => (
-                  <li key={t.id}>{t.term}</li>
-                ))}
-              </ol>
-            </Drill>
-          </>
-        )}
-      </div>
-    </div>
+          ) : subscribed ? (
+            <div className="receipt" role="status">
+              <p className="receipt-head">You already have a {seatNoun}.</p>
+              <p className="t-compact">
+                This number is already on an Early Bird {seatNoun}, so there is
+                nothing to pay now. Opening in Blacksburg, {launchWindow}.
+              </p>
+              <Link className="action receipt-go" to="/in">
+                See your membership
+              </Link>
+            </div>
+
+          ) : null}
+        </div>
+      </Page>
+    </>
   );
 }

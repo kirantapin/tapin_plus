@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import PhoneStep from "./PhoneStep";
+import PhoneStep, { type PhoneStage, type PhoneStepHandle } from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 
 /**
@@ -25,10 +25,24 @@ import { useAuth } from "../context/auth_context";
  * ══ IT CLAIMS NOTHING ABOUT A PURCHASE ═════════════════════════════════════
  * Signing in is not buying. This says who you are and no more; whether a seat
  * is held is `subscribed`, which the CTA beside it already reads.
+ *
+ * ══ AND IT PAGES LIKE THE CHECKOUT (21 Sep 2026) ═══════════════════════════
+ * Sam: "also the same paged flow for the sign in sheet." The number and the
+ * code are two pages of PhoneStep's own track now, so this sheet grew the
+ * chrome that paging needs: a title that follows the stage and a Back chevron
+ * on the code page. The chevron calls the step's `back()` — the existing "Use a
+ * different number" path — rather than a second way back that could drift from
+ * it. Everything else about the sheet is unchanged: it is still a slide-up
+ * `.cs-sheet` on a scrim of its own, portalled to <body>, because this is not
+ * part of the checkout flow. See docs/POLISH-2026-09-21.md §9.1.
  */
 export default function SignInBar() {
   const { userSession, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  /* Which of the step's two pages is up — the title reads from it, and the
+     chevron only exists on the second one. */
+  const [stage, setStage] = useState<PhoneStage>("phone");
+  const phone = useRef<PhoneStepHandle>(null);
 
   /* ══ IT LEAVES THE WAY IT ARRIVED ══════════════════════════════════════════
      Sam, 21 Sep 2026: "can these modals transition in from the bottom of the
@@ -65,6 +79,7 @@ export default function SignInBar() {
       timer.current = null;
     }
     setClosing(false);
+    setStage("phone");
     setOpen(true);
   };
 
@@ -128,7 +143,29 @@ export default function SignInBar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="cs-top">
-              <p className="cs-title">Sign in</p>
+              {stage === "code" ? (
+                <button
+                  type="button"
+                  className="rs-back cs-back"
+                  onClick={() => phone.current?.back()}
+                  aria-label="Back"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M14.5 6.5 9 12l5.5 5.5" />
+                  </svg>
+                </button>
+              ) : null}
+              <p className="cs-title">
+                {stage === "code" ? "Enter your code" : "Sign in"}
+              </p>
               <button
                 type="button"
                 className="cs-close"
@@ -150,7 +187,7 @@ export default function SignInBar() {
             {/* The session is what matters here, and `verifyCode` leaves it
                 behind through `onAuthStateChange` — so the sheet just closes
                 and everything reading `useAuth` re-renders itself. */}
-            <PhoneStep onDone={close} />
+            <PhoneStep ref={phone} onStage={setStage} onDone={close} />
           </div>
         </div>,
             document.body,

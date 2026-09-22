@@ -1,4 +1,11 @@
-import { useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import Pager, { Page, PAGE_MOVE_MS } from "./Pager";
 import { phoneAuth, sendCode, verifyCode } from "./authEnv";
 import { useName } from "../model/nameStore";
 
@@ -36,6 +43,17 @@ import { useName } from "../model/nameStore";
  * and is disclosed in a plain sentence under the field. The box is left with
  * only what genuinely needs consent: offers and news. Sam's ask, verbatim:
  * "make transactional texts required, but marketing texts can be an opt in."
+ *
+ * ══ THE TWO STAGES ARE TWO PAGES, AND THE HOST DRAWS THE CHROME ════════════
+ * 21 Sep 2026. The number and the code used to be a ternary in one column, and
+ * the way back was an underlined "Use a different number" at the foot. Both
+ * hosts — the checkout's page 1 and the sign-in sheet — now carry a header with
+ * a title and a Back chevron, so the stages are a two-page `Pager` track (the
+ * same primitive the checkout's own four pages use, shell/Pager.tsx), this step
+ * reports which stage is up through `onStage`, and `back()` is exposed so the
+ * chevron in the host's header runs the step's OWN way back rather than a
+ * second copy of it. Nothing about the OTP logic, the fields or the strings
+ * changed — they moved into the pages. See docs/POLISH-2026-09-21.md §9.1.
  *
  * ══ VERIFICATION IS GATED, COLLECTION IS NOT ═══════════════════════════════
  * With `phoneAuth.live` false there is no SMS provider configured, so no code
@@ -92,11 +110,23 @@ export interface PhoneIdentity {
   marketingOptIn: boolean;
 }
 
-export default function PhoneStep({
-  onDone,
-}: {
-  onDone: (id: PhoneIdentity) => void;
-}) {
+/** Which of the two pages is up. The host titles its header from this. */
+export type PhoneStage = "phone" | "code";
+
+/** What a host may do to this step from its own chrome. */
+export interface PhoneStepHandle {
+  /** Back to the number, from the code page. The "different number" path. */
+  back: () => void;
+}
+
+const PhoneStep = forwardRef<
+  PhoneStepHandle,
+  {
+    onDone: (id: PhoneIdentity) => void;
+    /** Fires on every stage change, so the host's title can follow it. */
+    onStage?: (stage: PhoneStage) => void;
+  }
+>(function PhoneStep({ onDone, onStage }, ref) {
   /* The session's one name — typed here, or onto the card on the deck's close
      (Sam, 14 Sep 2026). Either way it is the same value, so the field opens
      already filled if she named the card, and the /reserve card fills in as
@@ -105,7 +135,10 @@ export default function PhoneStep({
   const [digits, setDigits] = useState("");
   const [optIn, setOptIn] = useState(false);
   const phoneRef = useRef<HTMLInputElement>(null);
-  const [stage, setStage] = useState<"phone" | "code">("phone");
+  const [stage, setStage] = useState<PhoneStage>("phone");
+  /* Which way the track is moving. Forward to the code, mirrored on the way
+     back — Pager reads it off the stack and the host never sets it. */
+  const [dir, setDir] = useState<"fwd" | "back">("fwd");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +151,24 @@ export default function PhoneStep({
      a card with a placeholder on it. Trimmed, non-empty; nothing stricter,
      because a name is whatever she says it is. */
   const valid = digits.length === 10 && name.trim().length > 0;
+
+  /* ══ THE WAY BACK, AND THERE IS ONLY ONE ═══════════════════════════════════
+     The foot's "Use a different number" and the host header's Back chevron are
+     the same three lines: drop the code, drop the error, show the number again.
+     Exposed on the ref so the chevron cannot become a second, drifting copy. */
+  const back = useCallback(() => {
+    setCode("");
+    setError(null);
+    setDir("back");
+    setStage("phone");
+    onStage?.("phone");
+    /* Focus follows the move back, as it follows the move forward. Without it
+       the code field is parked with the page it was on and focus falls to the
+       body, which is a keyboard reader losing their place mid-sign-in. The
+       number is what they came back to change, so it is what takes it. */
+    window.setTimeout(() => phoneRef.current?.focus(), PAGE_MOVE_MS);
+  }, [onStage]);
+  useImperativeHandle(ref, () => ({ back }), [back]);
 
   const submitPhone = async () => {
     if (!valid || busy) return;
@@ -137,10 +188,14 @@ export default function PhoneStep({
       setError(err);
       return;
     }
+    setDir("fwd");
     setStage("code");
+    onStage?.("code");
     /* Focus follows the step. Without this the code field is a control the
-       reader has to go and find after the screen changed under them. */
-    window.setTimeout(() => codeRef.current?.focus(), 60);
+       reader has to go and find after the screen changed under them. The wait
+       is the move's own length: focusing a field that is still sliding scrolls
+       the sheet to catch it. */
+    window.setTimeout(() => codeRef.current?.focus(), PAGE_MOVE_MS);
   };
 
   const submitCode = async () => {
@@ -165,8 +220,13 @@ export default function PhoneStep({
         when we open.
       </p>
 
-      {stage === "phone" ? (
-        <>
+      {/* ══ TWO PAGES, ONE MOVE ═══════════════════════════════════════════
+          The number and the code are the same track the checkout's own pages
+          run on, so every step in both sheets moves identically. Both pages
+          stay mounted: a number typed here is still typed when the reader
+          comes back to it from the code page. */}
+      <Pager dir={dir}>
+        <Page current={stage === "phone"}>
           {/* The name first, then the number — the order every checkout a
               student has used puts them in. Same field chrome as the number,
               without the country-code affordance. `words` capitalisation and
@@ -295,9 +355,9 @@ export default function PhoneStep({
               reservation but not verified.
             </p>
           ) : null}
-        </>
-      ) : (
-        <>
+        </Page>
+
+        <Page current={stage === "code"}>
           <label className="ph-label" htmlFor="ph-code">
             The 6-digit code we sent to {pretty(digits)}
           </label>
@@ -332,19 +392,12 @@ export default function PhoneStep({
           >
             {busy ? "Checking…" : "Confirm"}
           </button>
-          <button
-            type="button"
-            className="ph-back"
-            onClick={() => {
-              setStage("phone");
-              setCode("");
-              setError(null);
-            }}
-          >
+          {/* The same `back` the host's chevron calls — one path, two doors. */}
+          <button type="button" className="ph-back" onClick={back}>
             Use a different number
           </button>
-        </>
-      )}
+        </Page>
+      </Pager>
 
       {/* Announced, not just shown. An error that only changes colour is an
           error a screen-reader user never learns about. */}
@@ -353,4 +406,6 @@ export default function PhoneStep({
       </p>
     </div>
   );
-}
+});
+
+export default PhoneStep;

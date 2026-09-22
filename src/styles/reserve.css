@@ -474,21 +474,29 @@ html[data-flight="in"] .column > .sticky-cta{
 @keyframes arriveIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ============================================================================
-   THE CHECKOUT SHEET — where the disclosures and the charge live.
+   THE SHEET — now the SIGN-IN sheet, and only that.
 
-   Sam, 13 Sep 2026: "we only need the disclosure and terms right at checkout."
+   It was built as the checkout's second surface ("we only need the disclosure
+   and terms right at checkout", Sam, 13 Sep 2026) and the sign-in sheet reused
+   its chrome. On 21 Sep the checkout stopped having a second surface — the
+   charge is pages 1–3 of the reserve layer's own sheet — so every rule here is
+   now worn by `SignInBar` alone. The class names are kept because that IS the
+   component's chrome and renaming them would rewrite a file this pass did not
+   otherwise touch; `.cs-sheet .charges` below is the one rule left over from
+   the charge, harmless and one line.
 
    A SHEET ON A PHONE, A PANEL ON A DESKTOP, and both are the same element: it
    docks to the bottom edge below 700px, which is where a thumb is, and centres
-   above it. Scrolls internally rather than growing — the full terms are eight
-   numbered paragraphs and the wallet must never be pushed off a short screen.
+   above it. Scrolls internally rather than growing.
    ============================================================================ */
 .cs-scrim{
   position:fixed;inset:0;z-index:60;
   display:flex;align-items:flex-end;justify-content:center;
   padding:0;
   background:rgba(10,5,8,.62);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  /* 6px, the house value on every scrim in the build (Sam, 21 Sep 2026 — see
+     `.reserve-scrim`). This one was the 3px the others were matched against. */
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:csFade 180ms var(--ease) both;
 }
 .cs-sheet{
@@ -925,7 +933,15 @@ html[data-flight="in"] .column > .sticky-cta{
    the X, the seat count's new place, and the benefits as chips.
    ============================================================================ */
 .reserve-layer{position:fixed;inset:0;z-index:40}
+/* ══ IT BLURS WHAT IT DIMS ═════════════════════════════════════════════════
+   Sam, 21 Sep 2026: "whenever a pop-up or a modal is triggered, blur the
+   background … the sign-in modal right now blurs the background, but every
+   other modal doesn't." The sign-in sheet's scrim carried a blur and this one
+   did not, so two modals in one build disagreed about what a scrim is. 6px is
+   the value all four now use (`.cs-scrim` below, `.vp-scrim`, `.ct-scrim`), and
+   it rides this element, so the fade below is untouched. */
 .reserve-scrim{position:absolute;inset:0;background:rgba(10,5,8,.62);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:layerFade 180ms var(--ease) both}
 /* ══ IN AND OUT, ONE MATERIAL ══════════════════════════════════════════════
    Sam, 15 Sep 2026: "/impeccable animate for the slide in and out." A sheet
@@ -1180,7 +1196,13 @@ html[data-flight="in"] .column > .sticky-cta{
 .sheet-column.column{padding-top:var(--s-xl);padding-bottom:var(--s-2xl)}
 .sheet-column.column > .rs-modal{width:100%}
 @media (max-width:1023px){
-  .reserve-sheet{inset:auto 0 0 0;height:auto;max-height:92vh;
+  /* 92vh FLAT, NOT `auto` UP TO 92vh (21 Sep 2026). The sheet has four pages
+     now and they are nothing like the same height, so a frame sized to its
+     content would collapse from full height to a two-field form the instant
+     the reader taps Checkout — and a modal that changes size cannot read as
+     the same modal moving to its next page. Page 0 has always filled this
+     anyway, so nothing about the surface a reader knows has changed. */
+  .reserve-sheet{inset:auto 0 0 0;height:92vh;
     border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
   .reserve-scrim{background:rgba(6,3,5,.6)}
 }
@@ -1194,7 +1216,12 @@ html[data-flight="in"] .column > .sticky-cta{
   .sheet-column.column{padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
 }
 .rs-modal{display:flex;flex-direction:column;gap:var(--s-lg)}
-.rs-card > *{max-width:320px;margin:0 auto}
+/* THE CARD'S OWN WIDTH, AND WHY THIS IS THREE CLASSES DEEP. card.css is
+   imported after this file and caps `.card-stage` at 420 — at one class the cap
+   below lost on source order, silently, which is why the foot has been showing a
+   420px card under a rule that said 320. 340 is §8's figure: the size you would
+   hold one at, on a sheet that is 375 wide at its narrowest. */
+.rs-card-close .rs-card > *{max-width:340px;margin:0 auto}
 /* `.rs-seats` / `.rs-seats-close` stood here: the count's centred first form,
    unreferenced since it became a card on 15 Sep and now doubly so. */
 .rs-modal > .checkout{margin:0}
@@ -1240,11 +1267,14 @@ html[data-flight="in"] .column > .sticky-cta{
      in a 506px column, 16px above the row it is in. */
   .rs-modal > .rs-earnback{grid-area:earn;margin:0;padding:var(--s-lg) var(--s-xl);
     border-radius:var(--r-panel)}
-  .rs-card-panel{grid-area:card}
+  /* The grid's own row gap is the interval here; the phone's margin above the
+     hairline would double it. */
+  .rs-card-close{grid-area:card;margin-top:0}
   .rs-places{grid-area:places}
-  /* The card at the size you would hold one, centred over its count;
-     the panels beneath take the column. */
-  .rs-card > *{max-width:380px;margin:0 auto}
+  /* ONE WIDTH IN BOTH LAYOUTS. A 380 cap stood here and never applied — see
+     the note on the phone rule — so the desktop card was rendering at
+     `.card-stage`'s own 420. The close is the same object on both surfaces, so
+     it is 340 on both; the column it centres in is ~500px wide. */
   /* POLISH, 15 Sep 2026 ("layout still seems a bit off on desktop"). The
      right column ended 50px short of the left, so the two movements did not
      finish together. The panel now stretches to the row and is a flex
@@ -1507,40 +1537,14 @@ html[data-flight="in"] .column > .sticky-cta{
     align-items:center;justify-content:center}
 }
 
-/* ══ NO SECOND SCRIM INSIDE THE RESERVE LAYER ════════════════════════════════
-   `/reserve` is itself a layer: `.reserve-scrim` already dims the pitch behind
-   it at rgba(10,5,8,.62). The checkout sheet then laid its OWN `.cs-scrim` at
-   the same value with a 3px blur on top, so the phone step sat under two of
-   them — about 86% black, which is the "weird black overlay" and not a
-   deliberate depth cue. Compounding dim is what you get for free by nesting two
-   things that were each designed to be the only modal on screen.
-
-   The element stays, because it is doing the layout: `.cs-scrim` is the fixed
-   flex box that positions the sheet at the bottom of the viewport and catches
-   the backdrop click that dismisses it.
-
-   ══ AND IT PAINTS AGAIN, QUIETLY ═══════════════════════════════════════════
-   Sam, 20 Sep 2026: "when this pops up, the background should fade out a bit.
-   It's too bright."
-
-   The reasoning above was written when the reserve sheet was dark. What the
-   outer scrim dims is the PITCH, two layers down; the thing directly behind
-   the phone step is the reserve sheet itself, and that sheet went white when
-   the modals went light. So the step was sitting on an undimmed white page —
-   nothing compounding, nothing at 86%, just no separation at all.
-
-   .22, not the .62 that caused the original problem. It is dimming one light
-   sheet rather than a dark page, so a quarter of the way down is the whole
-   distance needed; the ink behind stays legible as context and stops
-   competing. Ink rather than black, on the house hue, because everything it
-   covers is now a light surface and pure black on cream reads as grey film.
-
-   The blur stays off. Two backdrop-filters nested is the expensive half of
-   what the first version got wrong, and separation is the job here. */
-.reserve-layer .cs-scrim{
-  background:rgba(26,16,22,.22);
-  -webkit-backdrop-filter:none;backdrop-filter:none;
-}
+/* ── THE CHECKOUT'S SECOND SCRIM IS GONE (21 Sep 2026) ─────────────────────
+   A block stood here dimming `.cs-scrim` when it appeared INSIDE the reserve
+   layer, and before that undoing the double dim of two scrims stacked: the
+   phone step used to arrive as a second sheet over the checkout. It does not
+   any more — it is page 1 of this one (shell/ReserveLayer.tsx, and §9 of
+   docs/POLISH-2026-09-21.md) — so the only `.cs-scrim` left in the build is the
+   sign-in sheet's, which is portalled to <body> over the pitch and needs the
+   full dim it already has. Removed rather than left unreachable. */
 
 /* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
    carries a negative top margin to pull itself against the plan picker, so it
@@ -1655,13 +1659,23 @@ html[data-flight="in"] .column > .sticky-cta{
 }
 
 
-/* ── THE CARD'S PANEL ──────────────────────────────────────────────────────
-   A flat container with one raised object inside it — the inversion this
-   build uses everywhere else, and what stops the card reading as a loose
-   thing dropped at the end of the sheet. The card keeps its own width cap
-   and centres on the panel's measure. */
-.rs-card-panel{margin-top:var(--s-2xl)}
-.rs-card-panel .rs-card{margin-top:var(--s-md)}
+/* ── THE CARD, AS THE SHEET'S CLOSE ────────────────────────────────────────
+   Sam, 21 Sep 2026: "the membership card feels out of place." It was a dark
+   maroon object on a white panel labelled YOUR CARD on a light sheet — three
+   nested surfaces, which is a framed picture of the thing rather than the
+   thing (docs/POLISH-2026-09-21.md §8).
+
+   No plate and no label. A hairline closes the rail above it, the card sits on
+   the sheet's own ground at the size you would hold one, and one line under it
+   says when it is hers. The interval above the hairline and below it is the
+   same section step, so the card reads as the end of the sheet rather than as
+   one more panel in the stack. */
+.rs-card-close{margin-top:var(--s-2xl);padding-top:var(--s-2xl);
+  border-top:1px solid var(--hair)}
+/* 14px and ink three, centred on the object it names — the reading floor, not
+   a caption size: it is a sentence about what the reader is buying. */
+.rs-card-cap{margin:var(--s-lg) 0 0;font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--ink-3);text-align:center}
 
 /* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
    On the tier that is not open, in the tile's top corner.
@@ -1711,3 +1725,103 @@ html[data-flight="in"] .column > .sticky-cta{
    three labels in one column have to be one thing. */
 .rs-places .places-label{font-size:11px;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;line-height:1.3}
+
+
+/* ============================================================================
+   THE PAGED SHEET — one modal, four pages, and the move between them.
+
+   Sam, 21 Sep 2026: "the way this pops up is strange, I think it'd be a part of
+   the checkout modal, almost like it swipes to the next screen as if this flow
+   is a part of the same modal. We'd need a back button as well probably." And,
+   describing it again while it was being built: "there's this slight fade/slide-
+   to-the-left animation that takes me to the page where I enter my details. Once
+   I hit send me a code … it does that same left slide/fade animation."
+
+   SLIGHT IS THE WHOLE SPEC. Not a carousel: 32px of travel and an opacity, so
+   the page arrives from the direction it came from and nothing is ever parked
+   off to the side. That is also why there is no horizontal scroll to trap — the
+   pages are a STACK, and only the current one is in flow, which is what keeps
+   the sheet the height of the page you are on rather than of the tallest page
+   in the sequence. shell/Pager.tsx is the one implementation; the checkout's
+   four pages and PhoneStep's two stages both run on it.
+   ============================================================================ */
+.rs-pages{position:relative;
+  /* The 32px of entrance travel is clipped at the sheet's edge, so nothing is
+     ever scrollable sideways. CLIP, not hidden: `hidden` would make this a
+     scroll container and the docked Checkout bar inside page 0 would stick to
+     the bottom of the content instead of to the sheet. Vertical stays visible —
+     the subtitle band pulls up through the header and the dock sticks. */
+  overflow-x:clip;overflow-y:visible}
+.rs-page{min-width:0}
+/* Out of flow the moment it is not the page you are on: leaving (still painted,
+   fading) and parked (not painted, and `inert`/`aria-hidden` from the
+   component) both sit at the top of the stack and contribute no height. */
+.rs-page.is-out,.rs-page.is-off{position:absolute;inset-block-start:0;inset-inline:0}
+.rs-page.is-off{visibility:hidden}
+.rs-page.is-out{pointer-events:none;animation:rsPageOut 280ms var(--ease) both}
+.rs-page.is-in{animation:rsPageIn 280ms var(--ease) both}
+/* Back plays it mirrored — the direction is on the stack, so a page never has
+   to know where it sits in the sequence. */
+.rs-pages[data-dir="back"] > .rs-page.is-in{animation-name:rsPageInBack}
+.rs-pages[data-dir="back"] > .rs-page.is-out{animation-name:rsPageOutBack}
+@keyframes rsPageIn{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+@keyframes rsPageOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-16px)}}
+@keyframes rsPageInBack{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
+@keyframes rsPageOutBack{from{opacity:1;transform:none}to{opacity:0;transform:translateX(16px)}}
+/* The move is how a reader is told the step changed, and the header's title
+   says the same thing without it: under `reduce` the pages simply swap. */
+@media (prefers-reduced-motion:reduce){
+  .rs-page.is-in,.rs-page.is-out{animation:none}
+}
+
+/* ── PAGES 1–3: THE STEPS' OWN MEASURE ─────────────────────────────────────
+   The steps are not panels. They sit on the sheet's own ground with the
+   column's gutter on a phone, and from 1024 they hold a reading measure in the
+   middle of the 1000px dialog rather than stretching a two-field form across
+   it (docs/POLISH-2026-09-21.md §9). */
+.rs-step{padding:var(--s-xl) var(--gutter) var(--s-2xl)}
+@media (min-width:1024px){
+  .rs-step{max-width:560px;margin-inline:auto;
+    padding:var(--s-2xl) var(--gutter) var(--s-3xl)}
+}
+/* The step's two pages were flex children of `.ph`; inside a page they still
+   are, so the full-width controls stay full width. */
+.ph .rs-page{display:flex;flex-direction:column}
+/* THE FIELD HAS TO READ AGAINST WHAT IT SITS ON. `--inner` is a step above the
+   sheet's ground on the dark ramp and a step BELOW white on the light one — on
+   the reserve sheet's own `--page` (#F0EDEE) the two are within a point of each
+   other and the field disappeared into the surface. The relationship the field
+   had on the old sheet (a plate against its ground) is white here; same token
+   vocabulary, one rung along. */
+.rs-step .ph-field{background:var(--card)}
+
+/* ── THE WAY BACK, IN BOTH SHEETS' HEADERS ─────────────────────────────────
+   44px of control, because it is the one new tappable this pass adds and 44 is
+   the floor. NOT the X's 36px pill: the X is the way out of the whole layer and
+   has worn that pill since 14 Sep, and a second, larger pill beside it would
+   read as the more important of the two. A bare chevron at the leading edge is
+   the affordance every phone already uses for "one step back", and it leaves
+   the filled shape to mean one thing. */
+.rs-back{flex:0 0 auto;width:44px;height:44px;display:flex;align-items:center;
+  justify-content:center;padding:0;border:0;background:none;color:var(--ink-2);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease)}
+.rs-back svg{width:22px;height:22px;display:block}
+.rs-back:active{transform:scale(.94)}
+.rs-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-pill)}
+/* In the checkout's header the title is centred on the viewport and the X is
+   pinned to the right edge, so this pins to the left one the same way. The
+   chevron's own 11px of inset puts its stem on the gutter line. */
+.sheet-back{position:absolute;left:var(--s-lg);top:50%;transform:translateY(-50%)}
+.sheet-back:active{transform:translateY(-50%) scale(.94)}
+/* The sign-in sheet's header is a flex row on the sheet's 16px padding: the
+   pull-back seats the chevron's stem on that padding line instead of 11px
+   inside it, and the row holds 44px whether the chevron is there or not, so the
+   title does not move when the code page arrives. */
+.cs-top{min-height:44px}
+.cs-back{margin-inline-start:calc(-1 * var(--s-lg))}
+/* The title takes focus on every page change so the move is announced. It is a
+   heading, not a control, so it must not also wear a focus ring — the ring is
+   how this build says "you can press this". */
+.sheet-title:focus{outline:none}
