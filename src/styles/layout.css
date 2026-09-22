@@ -162,7 +162,7 @@
 .drill{margin:var(--s-lg) 0 0}
 .drill > summary{display:flex;align-items:center;justify-content:space-between;
   gap:var(--s-md);list-style:none;cursor:pointer;padding:var(--s-md) 0;
-  font-size:13px;font-weight:600;letter-spacing:.005em;color:var(--ink-3);
+  font-size:14px;font-weight:600;letter-spacing:.005em;color:var(--ink-3);
   -webkit-tap-highlight-color:transparent;transition:color 150ms var(--ease)}
 .drill > summary::-webkit-details-marker{display:none}
 .drill > summary::marker{content:""}

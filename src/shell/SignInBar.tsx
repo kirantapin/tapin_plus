@@ -36,14 +36,21 @@ export default function SignInBar() {
 
   return (
     <>
-      {/* The CTA's own shape and size, in the ghost variant. NOT the maroon
-          one: the money CTA is directly above this, and two full-maroon
-          buttons on one screen is the decoy problem /reserve solved once
-          already — the nearer one wins and it is not the one that sells. */}
+      {/* ══ A TEXT CONTROL IN THE ANNOUNCEMENT BAR ══════════════════════════
+          It wore the CTA's own shape (`.action.action-ghost`, full width) at
+          the foot of the hero, which made it the THIRD stacked pill in the
+          first screenful — one filled action per view is the rule, and two
+          ghosts under it is the decoy shape in a quieter colour.
+
+          It is page chrome now, not an offer: 12px on the bar's own ink, at
+          the right edge, sized by pitch.css. The classes go with it — an
+          `.action` here would have to have every one of its button
+          properties undone, and a control that is styled by negation is the
+          next person's puzzle. Nothing about the sheet changes. */}
       <div className="signin-bar">
         <button
           type="button"
-          className="action action-ghost signin-go"
+          className="signin-go"
           onClick={() => (userSession ? logout() : setOpen(true))}
         >
           {userSession ? "Sign out" : "Sign in"}

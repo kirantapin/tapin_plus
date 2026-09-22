@@ -34,6 +34,26 @@ import { benefits, offers, venues } from "../model/content";
  * modal uses it (Sam, 14 Sep 2026: make "what the membership gives you" WAY
  * smaller there, it is the pre-checkout now); the pitch keeps the rows.
  */
+/**
+ * ══ THE PITCH'S ROWS BECOME FIGURES AND COLUMNS — 21 Sep 2026 ══════════════
+ * Sam: "it still feels a bit AI generated." The four rows were the textbook
+ * tell — icon tile, bold label, grey subline, four times, same size — and on
+ * the pitch's desktop they were four equal CARDS of exactly that. So the
+ * non-compact path drops the tiles entirely (docs/POLISH-2026-09-21.md §4.3):
+ * the credit's dollar becomes the panel's display figure with its word beside
+ * it, the other two stand as open columns divided by a hairline, and the
+ * offers line closes under one more. Hairlines, not boxes.
+ *
+ * THE FIGURE IS LIFTED OUT OF THE LABEL, NOT TYPED. `credit.label` is
+ * "$5 credit" in money-and-terms.json; the money token leads and the rest of
+ * the label sits beside it at reading size, so the row still prints exactly
+ * the string the data holds — set at two sizes, the same device the hero uses
+ * for its headline and lead. Nothing here invents a cadence: "once a week at
+ * each place" is the condition's own words, underneath.
+ *
+ * `compact` is untouched. The checkout's chip list is drawn by reserve.css off
+ * `.bcards.is-chips` and still needs the tile and the same tree.
+ */
 export default function BenefitCards({ compact = false }: { compact?: boolean } = {}) {
   const by = (id: string) => benefits.find((b) => b.id === id);
   const credit = by("credit");
@@ -42,16 +62,64 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
      sits in front of it. Falls back to the first offer if Olaika's ever goes. */
   const offer = offers.find((o) => o.venueId === "olaika") ?? offers[0];
   const offerVenue = offer ? venues.find((v) => v.id === offer.venueId) : undefined;
+  /* The leading money token of the credit's label, and what is left of it. */
+  const leadFigure = credit ? (/^\$[\d.,]+/.exec(credit.label)?.[0] ?? "") : "";
+  const leadWord = credit ? credit.label.slice(leadFigure.length).trim() : "";
+
+  if (compact) {
+    return (
+      <div className="bcards is-chips">
+        {credit ? (
+          <div className="bcard is-lead">
+            <span className="bcard-tile" aria-hidden="true">
+              <BenefitIcon id={credit.id} />
+            </span>
+            <span className="bcard-text">
+              <b>{credit.label}</b>
+              {/* The condition, at the reading floor and never as fine print.
+                  It is the half that makes the figure true. */}
+              <span>{credit.detail}</span>
+            </span>
+          </div>
+        ) : null}
+
+        <div className="bcard-pair">
+          {rest.map((b) => (
+            <div className="bcard" key={b.id}>
+              <span className="bcard-tile" aria-hidden="true">
+                <BenefitIcon id={b.id} />
+              </span>
+              <span className="bcard-text">
+                <b>{b.label}</b>
+                <span>{b.detail}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+        {offer ? (
+          <div className="bcard is-offers">
+            <span className="bcard-tile" aria-hidden="true">
+              <NavIcon id="deals" />
+            </span>
+            <span className="bcard-text">
+              <b>Special offers</b>
+              <span>
+                Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
+              </span>
+            </span>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
-    <div className={compact ? "bcards is-chips" : "bcards"}>
+    <div className="bcards">
       {credit ? (
         <div className="bcard is-lead">
-          <span className="bcard-tile" aria-hidden="true">
-            <BenefitIcon id={credit.id} />
-          </span>
+          <b className="t-figure tnum bcard-fig">{leadFigure}</b>
           <span className="bcard-text">
-            <b>{credit.label}</b>
+            <b>{leadWord}</b>
             {/* The condition, at the reading floor and never as fine print. It
                 is the half that makes the figure true. */}
             <span>{credit.detail}</span>
@@ -59,17 +127,13 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
           {/* The scope used to be repeated here as "at each of N places". Cut:
               the hero lead already says "at every Plus place in town" and the
               panel note below says it again, so a third statement bought
-              nothing and cost the condition its line — it squeezed "On a $10+
-              order, once a week at each place" onto three lines at 420px. */}
+              nothing and cost the condition its line. */}
         </div>
       ) : null}
 
       <div className="bcard-pair">
         {rest.map((b) => (
           <div className="bcard" key={b.id}>
-            <span className="bcard-tile" aria-hidden="true">
-              <BenefitIcon id={b.id} />
-            </span>
             <span className="bcard-text">
               <b>{b.label}</b>
               <span>{b.detail}</span>
@@ -82,20 +146,18 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
           at olaika, that are on TOP of the benefits they already have." The
           example is the real Olaika offer from money-and-terms.json — the same
           record the deck's offers slide and the app's Deals screen read — so a
-          venue's name and terms are never typed here. Shared component, so the
-          pitch and the checkout gain the card together. */}
+          venue's name and terms are never typed here.
+
+          ONE LINE, under one hairline: it is the fourth thing and the smallest
+          of the four, and giving it the three's treatment was what made the
+          block read as a grid of equals. */}
       {offer ? (
-        <div className="bcard is-offers">
-          <span className="bcard-tile" aria-hidden="true">
-            <NavIcon id="deals" />
+        <p className="bcard is-offers">
+          <b>Special offers</b>{" "}
+          <span>
+            Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
           </span>
-          <span className="bcard-text">
-            <b>Special offers</b>
-            <span>
-              Like {offer.label.toLowerCase()} at {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
-            </span>
-          </span>
-        </div>
+        </p>
       ) : null}
     </div>
   );
