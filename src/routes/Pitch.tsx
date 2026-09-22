@@ -18,6 +18,7 @@ import BenefitCards from "../shell/BenefitCards";
 import SeatCapLine from "../shell/SeatCapLine";
 import { useReserveCta } from "../shell/useReserveCta";
 import SignInBar from "../shell/SignInBar";
+import TrialModal from "../shell/TrialModal";
 import { venues } from "../model/content";
 import {
   monthlyToday,
@@ -55,6 +56,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
      removed from /reserve's desktop. The bar waits until the hero's has left. */
   const heroCta = useRef<HTMLAnchorElement>(null);
   const [past, setPast] = useState(false);
+  /* The "try it once" sheet, opened from the hero and from the docked pair.
+     Same modal the campaign splash uses; `lit` because this page is dark. */
+  const [trial, setTrial] = useState(false);
   useEffect(() => {
     const el = heroCta.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -310,13 +314,12 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 "Skip to the price" as the escape); the deck itself is
                 unchanged and its own close still lands on /reserve.
 
-                ══ THE DECK'S DOOR IS A LINK AGAIN, 21 Sep 2026 ═════════════
-                It was `.action.action-ghost` — a second full-width pill under
-                the filled one, with Sign in making a third. Rob asked for the
-                walkthrough to be "secondary, but more prominent", and it is:
-                it sits on the same line as the money control at 16px with a
-                chevron, which is prominent without being a second button.
-                The route, the words and the target size are unchanged. */}
+                ══ AND THEN OUT OF THE HERO ENTIRELY, 21 Sep 2026 ═══════════
+                The deck's door was `.action.action-ghost` here, then a 16px
+                link with a chevron, and it is now neither: `How it works`
+                lives in the savings panel, which is the place a reader asking
+                how it works has already stopped at. The slot it leaves is the
+                trial's — see the note on the control below. */}
             <div className="hero-actions">
               <Link
                 className="action hero-cta"
@@ -326,8 +329,29 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               >
                 {cta.label}
               </Link>
-              <Link className="hero-how" to="/how">
-                How it works
+              {/* ══ AND IT OPENS THE TRIAL, NOT THE DECK, 21 Sep 2026 ═══════
+                  Sam: "can we have 'get early access' on this main splash, and
+                  a similar 'try it once' modal like what we had on the
+                  coffeeholics specific page."
+
+                  The walkthrough is not lost — `How it works` still sits in
+                  the savings panel (`.save-how`), which is where a reader who
+                  wants the mechanism is already looking. What the hero's
+                  second slot gains instead is the only thing on this page a
+                  stranger can do today: one free order at a real counter,
+                  before the membership exists. A door beats a description in
+                  the slot beside the money control.
+
+                  Same element shape as the link it replaces (16px, chevron,
+                  44px target) — a <button> because it opens a dialog rather
+                  than navigating, and a pill beside the filled action from
+                  1024 where the row has the width for two. */}
+              <button
+                type="button"
+                className="hero-try"
+                onClick={() => setTrial(true)}
+              >
+                Try it once for free
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     d="m9 5 7 7-7 7"
@@ -338,7 +362,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                     strokeLinejoin="round"
                   />
                 </svg>
-              </Link>
+              </button>
             </div>
             {/* No refund line in the hero (audit, 14 Sep 2026): it is stated in
                 the checkout sheet before any charge, where it decides something. */}
@@ -628,15 +652,24 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
         </div>
       </div>
 
+      {/* `lit` inverts the nine tokens on the panel (styles/light.css): this
+          page is the dark field, and every pop-up on it is light. */}
+      {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
+
       <div className={`sticky-cta is-pair${past ? "" : " is-away"}`}>
         <Link className="action" to={cta.to} state={cta.state}>
           {cta.label}
         </Link>
-        {/* A button, not a text link: Rob asked for the deck to be "secondary,
-            but more prominent". */}
-        <Link className="sticky-alt" to="/how">
-          How it works
-        </Link>
+        {/* The bar carries the same pair the hero does, in the same order —
+            a docked control that offers a different second action than the one
+            the reader has already seen is two pages of chrome, not one. */}
+        <button
+          type="button"
+          className="sticky-alt"
+          onClick={() => setTrial(true)}
+        >
+          Try it once for free
+        </button>
       </div>
     </>
   );

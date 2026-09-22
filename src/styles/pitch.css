@@ -1540,7 +1540,7 @@ button.vcard:focus-visible {
   isolation: isolate;
   overflow: hidden;
   border-radius: 20px;
-  height: 240px;
+  height: 220px;
   padding: var(--s-xl);
   display: flex;
   flex-direction: column;
@@ -1551,7 +1551,7 @@ button.vcard:focus-visible {
    one". No maroon fill: tokens.css spends a solid maroon on a chosen or acting
    thing, and a benefit on a marketing page is neither. */
 .bshot.is-lead {
-  height: 320px;
+  height: 260px;
 }
 .bshot-img {
   position: absolute;
@@ -2327,19 +2327,71 @@ button.vcard:focus-visible {
      (`display:block;width:100%`); in a 565px panel that is a slab, and the
      page then carried the same control at three widths. 300 keeps it a
      generous target and lets it read as a button beside the price. */
+  /* ══ TWO PILLS, SHARING THE COLUMN'S OWN MEASURE ════════════════════════
+     `.action` is a phone bar (`display:block;width:100%`); in this panel that
+     was a slab, so the filled button was sized to its words at a 300px floor
+     while the second control was a text link beside it.
+
+     From 21 Sep 2026 the second control is a pill too — the trial — and the
+     two split the row the way `.cg-acts` splits Coffeeholics', so their outer
+     edges land on the same measure the rail and the H1 above them use.
+
+     MEASURED, because the arithmetic is tight. The hero's content box is 549
+     at 1440 and 387 at 1024, and 300 + 260 + a gap fits neither: keeping the
+     300 floor would have left the ghost at 237 and, floored at 260, pushed the
+     pair past the column's edge into its padding. Two equal halves are 268 at
+     1440 — past the 260 the pill was speced at — and hold both labels on one
+     line down to 1024, where each half is 187.
+
+     THE BASIS IS 50%, NOT 0. With `box-sizing:border-box` a zero basis hands
+     each item its own padding on top of an equal share of what is left, and
+     these two wear different padding: measured at 279 against 257, which the
+     eye catches on two controls side by side. From 50% they shrink out of
+     equal boxes and stay equal. The ghost's inset is the tighter of the two
+     deliberately — its label is the longer one, and 1024 is where that bites.
+
+     The gap comes down to `--s-lg` with them: 24px was the interval between a
+     button and a bare text link, not between two pills. */
   .hero-band:not(.is-compact) .hero-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: auto;
-    min-width: 300px;
-    align-self: flex-start;
+    flex: 1 1 50%;
+    min-width: 0;
   }
   .hero-band:not(.is-compact) .hero-actions {
     flex-direction: row;
     align-items: center;
-    gap: var(--s-2xl);
-    align-self: flex-start;
+    gap: var(--s-lg);
+    align-self: stretch;
+  }
+  /* The house ghost's own values (`.action.action-ghost` in reserve.css), on
+     the pitch's own class: a step of ground, a lit hairline, the card radius,
+     and the filled button's height so the pair reads as one row. Its phone
+     treatment above is undone declaration by declaration rather than by a
+     second element. */
+  .hero-band:not(.is-compact) .hero-try {
+    flex: 1 1 50%;
+    min-width: 0;
+    min-height: 52px;
+    justify-content: center;
+    gap: var(--s-md);
+    padding: var(--s-md) var(--s-lg);
+    border-radius: var(--r-card);
+    background: var(--inner);
+    border: 1px solid var(--hair-lit);
+    color: var(--ink-1);
+    transition: transform 200ms var(--ease), background-color 200ms var(--ease);
+  }
+  .hero-band:not(.is-compact) .hero-try:active {
+    transform: scale(0.98);
+    background: var(--press);
+    transition-duration: 100ms;
+  }
+  .hero-band:not(.is-compact) .hero-try:focus-visible {
+    outline-offset: 2px;
+    border-radius: var(--r-card);
   }
   .hero-buy {
     border-top-color: var(--hair-lit);
@@ -2992,14 +3044,35 @@ button.vcard:focus-visible {
   }
 }
 
-/* ══ "HOW IT WORKS", AS A LINK, IN BOTH PLACES ══════════════════════════════
-   The hero's and the savings panel's are the same door and are now the same
-   object: 16px, the page's brightest ink, a chevron, and a 44px target that
-   is met by the line box rather than by a slab of fill. They were full-width
-   `.action.action-ghost` pills, which made the first screen three stacked
-   buttons and the savings panel a second place where a secondary control
-   looked like a primary one. The route and the words are unchanged. */
-.hero-how,
+/* ══ THE HERO'S SECOND CONTROL, AND THE SAVINGS PANEL'S ═════════════════════
+   One object, two places: 16px, the page's brightest ink, a chevron, and a
+   44px target that is met by the line box rather than by a slab of fill. They
+   were full-width `.action.action-ghost` pills, which made the first screen
+   three stacked buttons and the savings panel a second place where a secondary
+   control looked like a primary one.
+
+   `.hero-how` is gone with the link it styled (21 Sep 2026): the hero's slot
+   now opens the trial modal, and `How it works` is only in the savings panel.
+   The treatment is unchanged, which is the point of sharing the rule — the
+   hero's control is the same object it was, pointed somewhere else.
+
+   A <button> needs four things an <a> gets for free. They are declared before
+   the shared block so the shared block still owns the metrics: `font:inherit`
+   is a shorthand and would otherwise reset the size and weight set below. */
+.hero-try {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+.hero-try,
 .save-how {
   display: inline-flex;
   align-items: center;
@@ -3013,7 +3086,7 @@ button.vcard:focus-visible {
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
-.hero-how svg,
+.hero-try svg,
 .save-how svg {
   width: 18px;
   height: 18px;
@@ -3022,12 +3095,12 @@ button.vcard:focus-visible {
   transition: transform 150ms var(--ease);
 }
 @media (hover: hover) {
-  .hero-how:hover svg,
+  .hero-try:hover svg,
   .save-how:hover svg {
     transform: translateX(2px);
   }
 }
-.hero-how:focus-visible,
+.hero-try:focus-visible,
 .save-how:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 3px;
@@ -3037,6 +3110,21 @@ button.vcard:focus-visible {
    interval; the drill above it already carries a divider's worth of space. */
 .save-how {
   margin: var(--s-md) 0 0;
+}
+
+/* ══ THE DOCKED PAIR'S SECOND CONTROL IS A BUTTON NOW ═══════════════════════
+   It was a <Link to="/how">; it opens the trial modal. layout.css owns the
+   whole look of `.sticky-alt` and is not touched — this is only the four
+   things a <button> does not inherit from it. `font-family` rather than
+   `font:inherit`, because the shorthand would reset the 15px/700 that rule
+   sets and this would then be a second place the bar's metrics are written. */
+.sticky-cta .sticky-alt {
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 
 /* The wordmark with the PLUS chip beside it, on the hero. */

@@ -36,13 +36,25 @@ import {
  * counter as a ticket"), which is exactly why it has to be last rather than
  * folded into the second.
  *
- * ══ NO `data-lit` ══════════════════════════════════════════════════════════
- * The page under this is already light and carries Coffeeholics' own tinted
- * ramp. Inheriting it keeps the modal in the same room as the page; adding
- * `data-lit` would drop the house neutral on top of the merchant's tint and
- * the two whites would disagree by a few points of hue.
+ * ══ `data-lit` IS THE CALLER'S, BECAUSE IT DEPENDS ON THE PAGE ═════════════
+ * On Coffeeholics: off. That page is already light and carries the merchant's
+ * own tinted ramp — inheriting it keeps the modal in the same room as the page,
+ * where `data-lit` would drop the house neutral on top of the tint and the two
+ * whites would disagree by a few points of hue.
+ *
+ * On the pitch (21 Sep 2026): on. That page is the committed dark field, and
+ * every pop-up on it is light — the merchant pop-up and the checkout sheet
+ * both invert (shell/VenuePopup.tsx, styles/light.css), so a modal that stayed
+ * dark here would be the only one of the three that did.
  */
-export default function TrialModal({ onClose }: { onClose: () => void }) {
+export default function TrialModal({
+  lit,
+  onClose,
+}: {
+  /** Invert the nine ground-and-ink tokens on the panel — set on a dark page. */
+  lit?: boolean;
+  onClose: () => void;
+}) {
   const [closing, setClosing] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const venue = campaignVenue;
@@ -110,6 +122,7 @@ export default function TrialModal({ onClose }: { onClose: () => void }) {
       <div className="ct-scrim" aria-hidden="true" />
       <div
         className="ct"
+        data-lit={lit ? "" : undefined}
         role="dialog"
         aria-modal="true"
         aria-labelledby="ct-title"

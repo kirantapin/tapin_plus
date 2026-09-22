@@ -761,6 +761,22 @@
   .ct,.ct-scrim,.ct-root.is-closing .ct,.ct-root.is-closing .ct-scrim{animation:none}
 }
 
+/* ── THE SAME MODAL ON A DARK PAGE (`lit`) ─────────────────────────────────
+   The pitch mounts this with `data-lit`, so light.css inverts the nine tokens
+   on the panel and every rule above resolves against the light ramp instead —
+   `--card` is white, `--inner` the step under it, and `--cg-brand` is simply
+   not declared off the campaign surface, so the two rules that reach for it
+   take their `var(--maroon)` fallback. Measured on the panel: 18.59:1 for the
+   headings, 9.19:1 for the button, 7.72:1 for the numerals.
+
+   ONE RULE NEEDS SAYING TWICE. `.cg-trial b + span` is (0,1,2) and was written
+   for a subline this modal does not render; it was beating `.ct-do`'s own
+   13px maroon with 12px `--ink-4`. Here the verb takes the mobile floor and
+   the fill it was specified with, and its arrow follows the label rather than
+   dropping to the ink the row's chevron uses on the splash. */
+[data-lit] .ct-do{font-size:14px;color:var(--maroon)}
+[data-lit] .ct-do svg{color:currentColor}
+
 /* ── POWERED BY TAPIN ──────────────────────────────────────────────────────
    The foot of a co-branded page has to say whose product it is. Quiet: the
    lockup at reading size beside two words, centred, on the page's own ground
