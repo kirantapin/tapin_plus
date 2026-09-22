@@ -684,6 +684,8 @@
 .ct-root{position:fixed;inset:0;z-index:70;display:flex;
   align-items:flex-end;justify-content:center}
 .ct-scrim{position:absolute;inset:0;background:rgba(26,16,22,.52);
+  /* Blurred like every other scrim in the build (Sam, 22 Sep 2026). */
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:ctFade 200ms var(--ease) both}
 .ct{position:relative;width:100%;max-height:88vh;display:flex;
   flex-direction:column;overflow:hidden;background:var(--card);

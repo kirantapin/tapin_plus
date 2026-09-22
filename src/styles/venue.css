@@ -43,6 +43,12 @@
   position: absolute;
   inset: 0;
   background: rgba(6, 3, 5, 0.66);
+  /* Sam, 22 Sep 2026: "whenever a pop-up or a modal is triggered, blur the
+     background" — the sign-in sheet's scrim already did, and every other
+     scrim in the build now carries the same 6px so one room dims the same
+     way whichever sheet is over it. */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   animation: vpFade 200ms var(--ease) both;
 }
 .vp {
