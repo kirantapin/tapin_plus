@@ -1567,12 +1567,19 @@ button.vcard:focus-visible {
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* DEEPER UNDER THE COPY. Sam, 22 Sep 2026, on the credit card: "I like
+     this, but the only issue is it's hard to see the text." The ratio was
+     passing (5.3:1 at worst against the brightest pixel) and the eye still
+     lost the subline in the mural — a busy ground costs legibility that a
+     contrast ratio does not measure. The top stop goes to .88 and holds
+     through the copy's band before falling away to show the photograph,
+     and the foot deepens for the chip. */
   background: linear-gradient(
     180deg,
-    rgba(18, 10, 14, 0.74) 0%,
-    rgba(18, 10, 14, 0.66) 40%,
-    rgba(18, 10, 14, 0.3) 62%,
-    rgba(18, 10, 14, 0.58) 100%
+    rgba(18, 10, 14, 0.88) 0%,
+    rgba(18, 10, 14, 0.84) 42%,
+    rgba(18, 10, 14, 0.34) 66%,
+    rgba(18, 10, 14, 0.64) 100%
   );
 }
 .bshot-say,
@@ -1588,10 +1595,17 @@ button.vcard:focus-visible {
   letter-spacing: -0.015em;
   line-height: 1.15;
   color: var(--ink-1);
+  /* A legibility shadow, not a decorative one: over a photograph the veil
+     sets the ratio and the shadow separates the letterforms from texture
+     — the mural's owl and the pizza crust were both running through the
+     counters (Sam, 22 Sep: "hard to see the text"). The same construction
+     the campaign band and the venue pop-up use over their photographs. */
+  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
 }
 /* NOT `opacity`, and not the ink ramp either: the ramp is measured on --card
-   and means nothing over a photograph. White at .84 over the veil is §7's own
-   value, derived from --ink-1 so the white itself still comes from the token. */
+   and means nothing over a photograph. White at .94 over the veil (was §7's
+   .84 until the 22 Sep legibility note), derived from --ink-1 so the white
+   itself still comes from the token. */
 .bshot-line {
   margin: var(--s-sm) 0 0;
   max-width: 30ch;
@@ -1599,7 +1613,8 @@ button.vcard:focus-visible {
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0.003em;
-  color: color-mix(in srgb, var(--ink-1) 84%, transparent);
+  color: color-mix(in srgb, var(--ink-1) 94%, transparent);
+  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
   text-wrap: pretty;
 }
 /* THE FRAGMENT. Frosted, not solid: it is a piece of the app lying on the
