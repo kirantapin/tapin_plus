@@ -867,6 +867,9 @@
             cardFloat 6.4s 640ms ease-in-out infinite;
 }
 .sc-close .card-stage{
+  /* card.css caps a stage at 420; the checkout's card lifts that cap and this
+     one must match it (§25, §32), so the one width is `--tcard-w` on .sc-close. */
+  max-width:none;
   position:relative;transform-style:preserve-3d;
   animation:cardDrift 9.7s 640ms ease-in-out infinite;
 }

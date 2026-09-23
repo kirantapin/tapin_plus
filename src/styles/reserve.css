@@ -1230,24 +1230,17 @@ html.is-layered{overflow:hidden}
 .ms-refer-head .ms-refer-lede{flex:1;min-width:0}
 .ms-refer-tee{--tee-h:88px;flex:0 0 auto}
 
-/* ── the docked Checkout, phone only ──────────────────────────────────────── */
-/* Sticky to the sheet's foot while the real button is below the fold; slides
-   away when it is on screen. Bleeds to the sheet's edges over its own fade. */
-/* PINNED TO THE SCROLLER'S OWN BOTTOM. A negative offset here pushed the
-   button's lower half past the sheet's clipped edge on a phone (Sam, 15 Sep
-   2026: "the checkout sticky button doesn't seem to be showing correctly").
-   bottom:0 keeps the whole control inside the visible sheet. */
+/* ── THE DOCK: PAGE 0'S CHECKOUT BELOW 1024, ALWAYS ON (§31) ────────────────
+   Sticky to the scroller's own bottom (a negative offset once pushed half the
+   button past the sheet's clipped edge). Below 1024 it bleeds to the sheet's
+   edges over its own `--page-0 → --page` fade. */
 .rs-dock{position:sticky;bottom:0;z-index:5;
   margin:var(--s-md) calc(-1 * var(--gutter)) 0;
   padding:var(--s-lg) var(--gutter) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
-  /* --page-0, not a literal: this faded from a hard-coded dark page, so on a
-     light sheet it would have fanned out of a colour that is no longer there. */
-  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%);
-  transition:transform 200ms var(--ease),opacity 200ms var(--ease)}
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%)}
 .rs-dock .action{margin:0}
-.rs-dock.is-away{transform:translateY(110%);opacity:0;pointer-events:none}
+/* From 1024 the order card carries its own button (§31.1), so the dock goes. */
 @media (min-width:1024px){.rs-dock{display:none}}
-@media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
 
 
 /* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
@@ -1536,18 +1529,31 @@ html.is-layered{overflow:hidden}
 /* The hairline is the refund's own top edge, so it goes when the line does. */
 .rs-refund{padding-top:var(--s-xl);border-top:1px solid var(--hair)}
 
-/* The button at the card's width and, 10px under it, the count centred: the
-   number in `--ink-1` at 700, the rest a rung quieter. `.pay-slot` drops the
-   16px it carries for page 2's consent sentence. */
-.rs-buy{display:flex;flex-direction:column;gap:10px}
-.rs-buy > .pay-slot{margin-top:0}
-.rs-seat-line{margin:0;text-align:center;font-size:14px;font-weight:500;
-  line-height:1.4;color:var(--ink-3)}
-.rs-seat-line b{font-weight:700;color:var(--ink-1)}
-@media (max-width:479px){
-  .rs-seat-dot{display:none}
-  .rs-seat-close{display:block}
-}
+/* ── THE ORDER CARD'S OWN BUTTON, FROM 1024 (§31.1) ───────────────────────
+   Below 1024 the dock is the Checkout and this box does not exist. */
+.rs-buy{display:none}
+@media (min-width:1024px){.rs-buy{display:block}}
+
+/* ── THE SEATS LEAD THE CARD (§31) ─────────────────────────────────────────
+   One line with two ends — the count on the left, the close on the right,
+   its own line below 480 — over a 6px bar whose fill is the seats TAKEN (see
+   Reserve.tsx for which fraction, and why). A hairline closes the block;
+   the heading follows at the card's own gap. The fill grows once on first
+   paint; the house reduced-motion block leaves it complete and still. */
+.rs-seats{display:flex;flex-direction:column;gap:var(--s-md);
+  padding-bottom:var(--s-xl);border-bottom:1px solid var(--hair)}
+.rs-seats-line{display:flex;flex-wrap:wrap;justify-content:space-between;
+  gap:var(--s-xs) var(--s-lg);margin:0;font-size:14px;font-weight:500;
+  line-height:1.4;color:var(--ink-2)}
+.rs-seats-line b{font-size:16px;font-weight:700;color:var(--ink-1)}
+.rs-seats-close{color:var(--ink-3);white-space:nowrap}
+@media (max-width:479px){.rs-seats-close{flex-basis:100%}}
+.rs-seats-bar{display:block;height:6px;border-radius:var(--r-pill);
+  background:var(--press);overflow:hidden}
+.rs-seats-bar i{display:block;height:100%;border-radius:var(--r-pill);
+  background:var(--ink-1);transform-origin:left;transform:scaleX(var(--p,0));
+  animation:rsBarGrow 600ms var(--ease) both}
+@keyframes rsBarGrow{from{transform:scaleX(0)}}
 
 /* ── 3. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe
@@ -1595,8 +1601,13 @@ html.is-layered{overflow:hidden}
 .rs-promise{display:flex;align-items:flex-start;gap:var(--s-md);margin:0;
   padding-top:var(--s-lg);border-top:1px solid var(--hair-lit);
   font-size:15px;line-height:1.4;color:var(--ink-1);text-wrap:pretty}
-.rs-promise > svg{flex:0 0 auto;display:block;width:20px;height:20px;
-  margin-top:calc((1.4em - 20px) / 2);color:var(--ink-2)}
+/* The shield in a 32px tile of `--press`, the card radius's small step (Sam,
+   23 Sep 2026: "a parent container with rounded edges, it'd be a subtle gray"). */
+.rs-promise-mark{flex:0 0 auto;display:grid;place-items:center;width:32px;height:32px;
+  border-radius:var(--r-sm);background:var(--press);color:var(--ink-1)}
+.rs-promise-mark svg{display:block;width:18px;height:18px}
+/* On the details page it closes the form under a hairline, at the step's gap. */
+.rs-promise-step{margin-top:var(--s-2xl)}
 .rs-promise b{font-weight:700}
 .rs-promise a{font-size:14px;font-weight:500;color:var(--ink-2);
   text-underline-offset:3px;white-space:nowrap}
@@ -1823,7 +1834,7 @@ html.is-layered{overflow:hidden}
      modal at the same weight. */
   .sheet-column.column > .rs-modal{max-width:none;
     display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    column-gap:calc(var(--s-xl) * 2);align-items:start}
+    column-gap:calc(var(--s-xl) * 2);align-items:stretch}
   /* NOTHING INSIDE A COLUMN CAN WIDEN IT (§23). The columns were already
      `minmax(0,1fr)` tracks with `min-width:0`, but each column's own grid
      had one `auto` track, whose floor is its widest child's min-content — a
@@ -1839,8 +1850,10 @@ html.is-layered{overflow:hidden}
      on — also let's use a white background for both"). What you get reads
      first, on the left; the money and its button sit on the right, where a
      checkout keeps them. The DOM order stays money-first (the phone's single
-     column and the tab order), so this is a visual order only. The panel no
-     longer stretches to the row: two white cards of their own heights, top
-     aligned, instead of one card padding a void above the membership card. */
-  .rs-get-col{order:-1;align-self:start}
+     column and the tab order), so this is a visual order only. ONE BOTTOM
+     EDGE (§32, Sam: "I don't think we should have the open space on the
+     bottom left"): the panel fills its track and seats the card on its
+     floor, so the air sits inside the white card, never on the ground. */
+  .rs-get-col{order:-1;align-self:stretch;grid-template-rows:minmax(0,1fr)}
+  .rs-inc-card{margin-top:auto}
 }

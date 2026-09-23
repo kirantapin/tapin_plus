@@ -13,6 +13,15 @@
    panel both draw it at this width. 340 wherever it fits; on a narrow phone,
    the window less the sheet's gutter and the panel's inset on each side. */
 :root{--tcard-w:min(340px,calc(100vw - 80px))}
+/* FROM 1024 THE CARD FILLS THE CHECKOUT'S PANEL (§32, Sam: "the membership
+   card should be wider here to fill the awkward space on the right and left
+   of it"): the sheet (min(1040, 100vw − 64)) less the modal's gutters, less the
+   column gap, halved, less the panel's padding and its 1px border each side.
+   The deck's slide 9 reads the same number, so the §25 flight stays a pure
+   translate; the card keeps its aspect ratio, its type does not scale. */
+@media (min-width:1024px){
+  :root{--tcard-w:calc((min(1040px,100vw - 64px) - 2 * var(--gutter) - 2 * var(--s-xl)) / 2 - 2 * var(--s-xl) - 2px)}
+}
 
 /* ══ THE CARD IS A DARK OBJECT IN BOTH WORLDS ══════════════════════════════
    It is a maroon card. That is true on a dark page and on a light one, and it

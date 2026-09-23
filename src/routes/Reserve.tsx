@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
+import GuaranteeLine from "../shell/GuaranteeLine";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
@@ -13,7 +14,6 @@ import {
   foundingCloses,
   foundingTierName,
   guarantee,
-  GUARANTEE_CONTACT,
   logoField,
   monthlyToday,
   offers,
@@ -58,19 +58,19 @@ import { BENEFIT } from "../model/savings";
    guarantee block (docs/POLISH-2026-09-21.md §16).
 
    The pitch and the splash persuade; this sheet CONFIRMS. So page 0 is the
-   plan tiles, the schedule, the button and its count, and the included panel
-   with the card at its foot.
+   plan tiles, the order card (the seats, the schedule), the included panel
+   with the card at its foot, and the docked button (§31).
 
    ══ THE INCLUDED PANEL, AND DESKTOP WITHOUT A SCROLL (23 Sep 2026, §18) ════
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe we
    use the same on the checkout flow." So what you get, where it works and the
    guarantee — three open blocks — are one `--inner` panel in that call-out's
-   construction (no button and no price inside it: the ledger carries both).
+   construction (no button and no price inside it).
    And "checkout on desktop should be wider so I don't need to scroll": from
-   1024 the sheet is two columns — the money on the left (tiles, schedule,
-   button, count), what it buys on the right (the panel, the card inside it).
-   Below 1024 the column wrappers generate no boxes, so the phone reads the
-   same order. */
+   1024 the sheet is two columns — what it buys on the left (the panel, the
+   card inside it), the money on the right (tiles, order card; §30), the dock
+   under both. Below 1024 the column wrappers generate no boxes, so the phone
+   reads the DOM order. */
 const plan = PLANS.monthly;
 
 /* ══ THE SCHEDULE — WHAT YOU PAY, AND WHEN ══════════════════════════════════
@@ -163,9 +163,8 @@ const included: { id: string; line: string }[] = [
    break inside "The Burg" reads as two places). */
 const joinAfter = (k: number, n: number) => (k === n - 1 ? "" : k === n - 2 ? " and " : ", ");
 
-/* The docked bar's own words, on the button too: the control on the page and
-   the bar that stands in for it say the same thing. NOT `plan.per` — what this
-   opens takes a DEPOSIT (Sam: "need to make sure it says $4.99 deposit"). */
+/* The dock's words. NOT `plan.per` — what this opens takes a DEPOSIT (Sam:
+   "need to make sure it says $4.99 deposit"). */
 const checkoutLabel = `Checkout · ${plan.price} deposit`;
 
 export default function Reserve() {
@@ -176,20 +175,6 @@ export default function Reserve() {
      things the page's own controls need: whether a seat has been paid for, and
      the one call that moves the sheet on to "Your details". */
   const { paid, openCheckout } = useReserveFlow();
-
-  /* ══ ONE VISIBLE "Reserve a founding seat" AT A TIME ═══════════════════════
-     Sam, 13 Sep 2026: "while the 'reserve a founding seat' is in view there's
-     no need for the sticky button."
-
-     Right, and it is worse than redundant. The docked bar is a full-maroon
-     control with the real button's exact words that CANNOT TAKE MONEY — it is
-     an anchor to #checkout — so with both on screen the page shows two
-     identical maroon buttons and the nearer one is the decoy. This build
-     already removed that shape from /reserve's DESKTOP layout (layout.css's
-     `.column:has(#checkout)` rule) and the mobile bar was logged as still open.
-     This closes it, with the same IntersectionObserver the pitch uses on its
-     hero CTA — one mechanism, not a second invention. */
-  const paySlot = useRef<HTMLDivElement>(null);
 
   /* ══ STANDARD REFUSES IN PLACE ════════════════════════════════════════
      Sam, 20 Sep 2026: "I don't like this toast, let's get rid of it. Instead
@@ -222,40 +207,19 @@ export default function Reserve() {
   };
   const sayLater = () => refuse("later");
   const saySoldOut = () => refuse("sold");
-  /* THE DOCKED CHECKOUT, for the phone sheet (Sam, 15 Sep 2026: "still need a
-     sticky checkout button for this modal, which scrolls down to the buy
-     box"). Shown while the real button is out of view, gone the moment it is
-     not — two identical maroon buttons on one screen is the decoy problem
-     this page solved once already. It scrolls; it never takes money. */
-  const [ctaVisible, setCtaVisible] = useState(true);
-  useEffect(() => {
-    const el = paySlot.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => setCtaVisible(e.isIntersecting), { threshold: 0.6 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  /* ══ ONE ACTION, IN TWO PLACES ════════════════════════════════════════════
-     Sam, 21 Sep 2026: "when I click this sticky checkout button it should take
-     me to the next step in the funnel instead of scrolling down or up to the
-     checkout button."
-
-     It used to `scrollIntoView` the real button, which asked the reader to
-     press twice for one intention and moved the page under them to do it. Both
-     controls now run this, so the docked bar IS the Checkout button rather
-     than a pointer at it, and any guard added here can only ever be added
-     once. (There is none today: the Standard tier's refusal is the tile's own
-     pulse and never disabled this control.)
-
-     THE OBSERVER STAYS, and so does `is-away`. Its job was never the scroll —
-     it is what keeps two identical maroon buttons off one screen. `openCheckout`
-     is the layer's: it moves the sheet to page 1 (shell/ReserveLayer.tsx). */
+  /* ══ ONE BUTTON A WIDTH (23 Sep 2026, POLISH §31, §31.1) ═════════════════
+     Sam: "just have the checkout button always be sticky to the bottom instead
+     of a dedicated button here" — then, at desktop: "we still need a checkout
+     button on desktop, unlike the sticky one we have on the mobile version."
+     Below 1024 the dock is page 0's Checkout, always on; from 1024 the order
+     card's own button is. `openCheckout` moves the sheet to page 1. */
   const cardRef = useRef<HTMLDivElement | null>(null);
   /* The name she gave the card on the deck's close, or typed into the sheet —
      the card here shows it as it is typed. Placeholder until there is one. */
   const [cardName] = useName();
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
+  const left = seatsLeft();
 
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it
@@ -267,7 +231,7 @@ export default function Reserve() {
   return (
     <div className="rs-modal">
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
-          The left column from 1024 (the tiles, then the order card); below
+          The right column from 1024 (the tiles, then the order card); below
           1024 this wrapper is `display:contents` and draws nothing. */}
       <div className="rs-pay-col">
         {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
@@ -438,11 +402,30 @@ export default function Reserve() {
               : ""}
         </p>
 
-        {/* ══ THE ORDER CARD (23 Sep 2026, POLISH §29) ══════════════════════
-            Sam: "they should be in a parent container, otherwise feels too
-            chaotic." One card, text only: the schedule on its rail, the refund
-            under a hairline, the button and its count. Nothing sits under it. */}
+        {/* ══ THE ORDER CARD (23 Sep 2026, POLISH §29, §31) ═════════════════
+            One card, text only: the seats, the schedule on its rail, the refund
+            under a hairline, and from 1024 its own button (§31.1); below 1024
+            the dock is the one Checkout. */}
         <section className="rs-order" aria-labelledby="rs-order-head">
+          {/* The seats lead: `seatsLeft()` of `SEAT_CAP` (model/seats.ts, still
+              artificial) and `foundingCloses`, only while FOUNDING_OPEN. The
+              deadline shares the line from 480 and takes its own below. */}
+          {FOUNDING_OPEN ? (
+            <div className="rs-seats">
+              <p className="rs-seats-line">
+                <span>
+                  <b className="tnum">{left}</b> of {SEAT_CAP} {foundingTierName} spots left
+                </span>
+                <span className="rs-seats-close">closes at {foundingCloses}</span>
+              </p>
+              {/* ⚠ THE FILL IS THE SEATS TAKEN, `1 − left / cap`, NOT THE SEATS
+                  LEFT — DO NOT "FIX" IT. A bar nearly full says what the line
+                  says; the line is the statement of record, this is aria-hidden. */}
+              <span className="rs-seats-bar" aria-hidden="true">
+                <i style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
+              </span>
+            </div>
+          ) : null}
           <h2 className="t-title rs-order-head" id="rs-order-head">
             What you pay, and when
           </h2>
@@ -458,36 +441,21 @@ export default function Reserve() {
             ))}
           </ol>
           {refundLine ? <p className="rs-refund">{refundLine}</p> : null}
-
-          {/* The button moves the sheet to page 1. `.pay-slot` is the box the
-              observer measures to hide the docked twin, so the count stays a
-              sibling of it, never inside it. */}
+          {/* DESKTOP KEEPS ITS OWN BUTTON (Sam, 23 Sep 2026: "we still need a
+              checkout button on desktop, unlike the sticky one we have on the
+              mobile version"): shown from 1024; below it the dock is the one
+              Checkout. Same handler, same words. */}
           <div className="rs-buy">
-            <div ref={paySlot} className="pay-slot">
-              <button type="button" className="action" onClick={openCheckout}>
-                {paid ? "View your seat" : checkoutLabel}
-              </button>
-            </div>
-
-            {/* The count: `seatsLeft()` of `SEAT_CAP` (model/seats.ts, still
-                artificial) and `foundingCloses`, only while FOUNDING_OPEN. Below
-                480 the dot drops and the deadline takes its own line. */}
-            {FOUNDING_OPEN ? (
-              <p className="rs-seat-line">
-                <span className="rs-seat-count">
-                  <b className="tnum">{seatsLeft()}</b> of {SEAT_CAP} spots left
-                </span>
-                <span className="rs-seat-dot">{" · "}</span>
-                <span className="rs-seat-close">closes at {foundingCloses}</span>
-              </p>
-            ) : null}
+            <button type="button" className="action" onClick={openCheckout}>
+              {paid ? "View your seat" : checkoutLabel}
+            </button>
           </div>
         </section>
       </div>
 
       {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════
-          The right column from 1024; `display:contents` below it, where the
-          panel follows the count and closes the one column. */}
+          The left column from 1024; `display:contents` below it, where the
+          panel follows the order card. */}
       <div className="rs-get-col">
         {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
             Sam, on the trial modal's call-out: "I like how you formatted
@@ -500,8 +468,8 @@ export default function Reserve() {
             this every week? And at every location?"; by checkout the reader
             has said yes, so the plate states it. Words, never a figure.
 
-            NO BUTTON AND NO PRICE INSIDE IT. The action stays with the
-            ledger and the money is the tiles' and the ledger's; a second
+            NO BUTTON AND NO PRICE INSIDE IT. The action is the dock's and
+            the money is the tiles' and the order card's; a second
             price here would be the same figure stated twice on one sheet. */}
         <section className="rs-inc" aria-labelledby="rs-inc-head">
           <h2 className="t-title rs-inc-head" id="rs-inc-head">
@@ -548,21 +516,8 @@ export default function Reserve() {
               .
             </p>
           </div>
-          {/* The guarantee, under a hairline: the promise and the address to
-              claim it at, after the shield. The words are the model's
-              (`guarantee`, `GUARANTEE_CONTACT`), and the claim is the
-              server's to keep (TRUTH.md §3). */}
-          <p className="rs-promise">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
-              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
-              <path d="m9.2 12.2 1.9 1.9 3.8-4" />
-            </svg>
-            <span>
-              <b>{guarantee}</b>{" "}
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-            </span>
-          </p>
+          {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
+          <GuaranteeLine />
           {/* ══ THE CARD LIVES IN THE PANEL (23 Sep 2026, POLISH §26) ══════
               It was the sheet's close under its own hairline (§8), a second
               object after the panel. The heading's list adds up to it, so the
@@ -582,19 +537,11 @@ export default function Reserve() {
 
       </div>
 
-      <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>
-        <button
-          type="button"
-          className="action"
-          tabIndex={ctaVisible ? -1 : 0}
-          onClick={openCheckout}
-        >
-          {/* NOT `plan.per` ("a month"). What this button opens takes a
-              DEPOSIT, and the tile it docks under says so — a bar reading
-              "$4.99 a month" beside a tile reading "$4.99 deposit" is the
-              same figure carrying two different promises. Sam settled the
-              word today: "need to make sure it says $4.99 deposit." */}
-          {checkoutLabel}
+      {/* The phone's foot: sticky to the scroller's bottom, always on, page 0's
+          Checkout below 1024 (reserve.css hides it from there). */}
+      <div className="rs-dock">
+        <button type="button" className="action" onClick={openCheckout}>
+          {paid ? "View your seat" : checkoutLabel}
         </button>
       </div>
     </div>
