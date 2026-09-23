@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Panel } from "../shell/Panel";
 import TapInCard from "../shell/TapInCard";
 import { useCardFlight } from "../shell/cardFlight";
-import { BenefitIcon, NavIcon } from "../shell/Icons";
+import { NavIcon } from "../shell/Icons";
 import VenueTicker from "../shell/VenueTicker";
+import BenefitFigures from "../shell/BenefitFigures";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
 import { seatLine, seatsLeft, SEAT_CAP } from "../model/seats";
@@ -17,6 +18,10 @@ import {
   guarantee,
   GUARANTEE_CONTACT,
   monthlyToday,
+  offers,
+  plusVenues,
+  venuePolicyFigure,
+  venues,
 } from "../model/content";
 /* The credit's own constants, from the model that computes the saving — the
    floor and the amount are read, never retyped beside a price. */
@@ -43,6 +48,30 @@ import { BENEFIT } from "../model/savings";
  * retires the device by name. It counts nothing; see `model/seats.ts`. Still no
  * countdown clock, and the October close beside it is real.
  */
+
+/* ══ WHAT YOU GET, AS FIGURES (23 Sep 2026, docs/POLISH-2026-09-21.md §15) ══
+   The pop-up's three figures and its qualifiers, because this is the
+   network-wide sheet and not one shop's page: `$5` / `15%` / `1×` over
+   "a week, on $10+ orders" / "off, except alcohol" / "points, on every order".
+
+   `benefits` says WHICH three stand; the venue records say what each is. Not
+   the other way round: the extraction's points record still carries its
+   frozen 2×, and content.ts corrects it to 1× on the venue policies only — so
+   a figure read off `benefits` would print a rate the product retired on
+   15 Sep. `venuePolicyFigure` builds the $5 and the 15 from BENEFIT, as it
+   does for the pop-up, so nothing on this sheet is typed beside a price. */
+const FIGURE_ORDER = ["credit", "percent", "points"];
+const networkFigures = FIGURE_ORDER.flatMap((kind) => {
+  if (!benefits.some((b) => b.kind === kind)) return [];
+  const held = plusVenues.flatMap((v) => v.policies).find((p) => p.kind === kind);
+  const fig = held ? venuePolicyFigure(held) : undefined;
+  return fig ? [{ id: kind, ...fig }] : [];
+});
+/* The one offer line, read off the offer record the way the pitch's offers
+   card reads it (shell/BenefitCards.tsx) — Olaika's by venue, not by index,
+   so a real business's deal and name are never retyped here. */
+const offer = offers.find((o) => o.venueId === "olaika") ?? offers[0];
+const offerVenue = offer ? venues.find((v) => v.id === offer.venueId) : undefined;
 
 export default function Reserve() {
   /* ══ THE CHECKOUT IS THIS SHEET'S OTHER PAGES NOW (21 Sep 2026) ═══════════
@@ -430,39 +459,54 @@ export default function Reserve() {
       ) : null}
     </Panel>
 
-      {/* WHAT YOU GET, IN ITS OWN CONTAINER, WITH THE HOME PAGE'S ICONS.
-          Sam, 15 Sep 2026: "put all of the bulleted points in a parent
-          container, and use the same icons they had on the main page." The
-          same four glyph tiles the pitch's cards carry, one row each, the
-          detail from the same list. */}
-      <Panel label="What you get" className="flush rs-includes-panel">
-        <ul className="rs-list" aria-label="What you get">
-          {benefits.map((b) => (
-            <li key={b.id}>
-              <span className="rs-li-icon" aria-hidden="true">
-                <BenefitIcon id={b.id} />
-              </span>
-              <span>
-                <b>{b.label}</b> {b.detail.charAt(0).toLowerCase() + b.detail.slice(1)}
-              </span>
-            </li>
-          ))}
-          <li>
-            <span className="rs-li-icon" aria-hidden="true">
+      {/* ══ THE LEFT COLUMN, IN THE NEW LANGUAGE (23 Sep 2026) ═══════════
+          Sam, on the desktop checkout: "/impeccable redesign this." The plans
+          column was current; this one was the build before the polish —
+          WHAT YOU GET and WHERE IT WORKS as uppercase tracked eyebrows, four
+          icon-tile + bold + grey rows (the §1.2 tell every other surface has
+          replaced), a shield in a tile in a panel, 3:4 posters cut at the
+          column's edge: three panels of one weight on the one surface that
+          takes money (docs/POLISH-2026-09-21.md §15).
+
+          THREE OPEN BLOCKS NOW, on the sheet's own ground, parted by one
+          section step: what you get as figures, the guarantee as a
+          statement, where it works as the hero's square rail. Each is headed
+          by a sentence-case title, never a caption, and none has a box. */}
+
+      {/* WHAT YOU GET: the pop-up's strip and its one offer line. The list
+          keeps its accessible name, so a screen reader still meets "What you
+          get, list, 3 items" where it met the four rows. */}
+      <section className="rs-get">
+        <h2 className="t-title rs-head">What you get</h2>
+        <BenefitFigures
+          items={networkFigures}
+          size="sheet"
+          className="rs-figures"
+          label="What you get"
+        />
+        {/* The offers glyph bare, as in the pop-up: an offer is a place's own
+            promotion on top of the standing three, so it is a line under
+            them and never a fourth column. */}
+        {offer ? (
+          <p className="rs-offer">
+            <span className="rs-offer-glyph" aria-hidden="true">
               <NavIcon id="deals" />
             </span>
             <span>
-              <b>Special offers</b> from the places, on top
+              <b>Special offers</b> · Like {offer.label.toLowerCase()} at{" "}
+              {offerVenue?.name ?? "a TapIn Plus place"}, on top of the three
             </span>
-          </li>
-        </ul>
-      </Panel>
+          </p>
+        ) : null}
+      </section>
 
-      {/* The refund card, as it was — Sam, 15 Sep 2026: "i liked the original
-          refund card we had." The shield tile, the sentence, the address on
-          its own line; the same panel the page carried before the modal. */}
-      <Panel className="closing rs-closing">
-        <span className="guarantee-tile" aria-hidden="true">
+      {/* THE GUARANTEE, OUT OF ITS PANEL — as the pitch states it: a hairline
+          above, the shield bare at the left, the promise as a sentence and
+          the address to write to under it. It was "the original refund card"
+          Sam asked back on 15 Sep; the words, the shield and the address are
+          that card's, and only the plate under them is gone. */}
+      <section className="rs-guarantee">
+        <span className="rs-guarantee-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
             strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
@@ -475,27 +519,20 @@ export default function Reserve() {
             <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
           </p>
         </div>
-      </Panel>
+      </section>
 
       {/* ══ WHERE IT WORKS, AT THE FOOT ══════════════════════════════════
           Sam, 20 Sep 2026: "too much space at the bottom here too, for this
           modal. And we should have a small section with the logos of the
-          spots on tapin too at the very bottom."
+          spots on tapin too at the very bottom." The places answer the
+          question the price raises — "worth $4.99 where?" — so they sit
+          where it is asked.
 
-          One ask, two problems, one answer. The sheet is full height and
-          its content ran out several hundred pixels early, and the last
-          thing a reader saw before deciding was a refund promise with
-          nothing under it. The places are the answer to the question the
-          price raises — "worth $4.99 where?" — so they go here, where it is
-          asked, and the space closes because something true fills it.
-
-          `rail`, the same prop /in uses: this sits in a column, not across
-          a page, and the grid state it would otherwise reach at 1280 is a
-          seven-across row inside a 670px track. Sam asked for "the carousel
-          of places" on this surface once before, 15 Sep 2026; it is the
-          same component, back where it was. */}
+          `rail`, the same prop /in uses: this is a column, not a page. Since
+          23 Sep the tiles are the pitch hero's SQUARE ones (styles/
+          reserve.css), contained to the column as §13 made it. */}
       <section className="places rs-places">
-        <p className="t-caption places-label">Where it works</p>
+        <h2 className="t-title rs-head">Where it works</h2>
         <VenueTicker rail />
       </section>
 

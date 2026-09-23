@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CoverIcon, NavIcon } from "./Icons";
 import PlusFlag from "./PlusFlag";
+import BenefitFigures from "./BenefitFigures";
 import {
   covers,
   offers,
@@ -176,22 +177,14 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
               §10.2, and the biggest move on the sheet: the numbers that ARE
               the membership are set as the membership, in open columns parted
               by a hairline, with no tile beside them. Same construction as
-              the splash's `.cg-figures`, scaled to 460px. Points is "1×",
-              read from the policy's multiplier, so the three are one size
-              (Sam, 22 Sep 2026: "it's a bit weird right now"). */}
-          {figures.length ? (
-            <ul className="vp-figures">
-              {figures.map((f) => (
-                <li key={f.id}>
-                  <b className="vp-fig">{f.figure}</b>
-                  {/* A CONDITION or a CADENCE, never a restatement of the
-                      figure: a figure printed without the thing that
-                      qualifies it is the §10 claim this build does not make. */}
-                  <span>{f.qualifier}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+              the splash's, at the sheet's 30px — one component since 23 Sep
+              (shell/BenefitFigures.tsx, §15), so the pop-up, the splash and
+              the checkout cannot drift apart. Points is "1×", read from the
+              policy's multiplier, so the three are one size (Sam, 22 Sep
+              2026: "it's a bit weird right now"). Each qualifier is a
+              CONDITION or a CADENCE, never the figure restated. A venue with
+              none of the three draws nothing here. */}
+          <BenefitFigures items={figures} size="sheet" className="vp-figures" />
 
           {/* An offer is the merchant's own promotion rather than one of the
               standing three, so it is one line under the offers glyph — the

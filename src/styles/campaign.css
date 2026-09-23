@@ -143,49 +143,12 @@
    48px `$5`: "it's a bit weird right now." All three are `.t-figure` now —
    `$5`, `15%`, `1×` — so one line box sets all three on one baseline.
 
-   STRETCH, NOT START. The hairline is each cell's own border, so a cell whose
-   qualifier wraps once more drew a longer line than its neighbour. Stretched,
-   the three cells are the row's height and the two hairlines are equal. */
+   THE CONSTRUCTION MOVED TO styles/figures.css on 23 Sep 2026 (§15) — the
+   stretch, the hairline, the step before the divider and the two-line
+   qualifier cap are all `.figs.is-display` now, shared with the pop-up and
+   the checkout. What stays here is where this page puts it. */
 .cg-figures {
-  list-style: none;
-  padding: 0;
   margin: calc(var(--s-xl) * 2) 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-}
-/* The step BEFORE the divider is --s-sm, not --s-md. At 375 the cells are 114
-   wide and "15%" sets at 95: with 8px of right padding its own content box was
-   93 and the glyphs overflowed it by two. Nothing on the page scrolled, but a
-   figure clipped by its own cell is a figure that will clip on a narrower
-   phone. Six leaves it four to spare and still parts the column from the
-   hairline. */
-.cg-figures > li {
-  min-width: 0;
-  padding-right: var(--s-sm);
-}
-.cg-figures > li + li {
-  border-left: 1px solid var(--hair);
-  padding-left: var(--s-lg);
-}
-.cg-figures > li:last-child {
-  padding-right: 0;
-}
-.cg-figures b {
-  display: block;
-  margin: 0;
-}
-/* TWO LINES EACH, AT EVERY WIDTH. Left to the cell, the three wrapped 2/2/2
-   at 375, 1/1/2 from ~420 and again at 1024, and 1/1/1 at 1440 — one column
-   always a line longer somewhere. The cap is bracketed by the copy (Gilroy
-   500 at 14px): "points, toward" is 92.6px and must fit, "off, once a day"
-   is 97px and must not, so each qualifier is its figure's word over its
-   condition. Re-measure both if a qualifier changes. */
-.cg-figures > li > span {
-  display: block;
-  max-width: 6.75em;
-  margin-top: var(--s-md);
-  text-wrap: balance;
 }
 
 /* -- the headline and the lead, on the ground ------------------------------ */

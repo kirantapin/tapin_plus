@@ -1,0 +1,103 @@
+/* ============================================================================
+   THE FIGURE STRIP — shell/BenefitFigures.tsx (docs/POLISH-2026-09-21.md §15)
+
+   One construction for the three places that set the benefits as figures: the
+   Coffeeholics splash (`display`), the merchant pop-up and the checkout
+   (`sheet`). These rules moved here from campaign.css (`.cg-figures`) and
+   venue.css (`.vp-figures`) unchanged in value; the two hosts keep only their
+   own margin, and the extraction was measured to render the same geometry at
+   375 and 1440 before and after.
+
+   Imported after pitch.css and before the per-surface files, so a host's
+   placement rule (one class, later file) wins on source order without having
+   to out-rank anything here.
+   ========================================================================== */
+
+/* STRETCH, NOT START. The hairline is each cell's own border, so a cell whose
+   qualifier wrapped once more drew a longer line than its neighbour. Stretched,
+   the three cells are the row's height and the two hairlines are equal. */
+.figs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+/* The step BEFORE the divider is --s-sm, not --s-md: at 375 the splash's cells
+   are 114 wide and "15%" sets at 95, so with 8px of right padding its own
+   content box was 93 and the glyphs overflowed it by two. Six leaves four to
+   spare and still parts the column from the hairline. */
+.figs > li {
+  min-width: 0;
+  padding-right: var(--s-sm);
+}
+.figs > li + li {
+  border-left: 1px solid var(--figs-rule);
+  padding-left: var(--s-lg);
+}
+.figs > li:last-child {
+  padding-right: 0;
+}
+.figs-fig {
+  display: block;
+  margin: 0;
+}
+.figs-q {
+  display: block;
+  margin-top: var(--s-md);
+  text-wrap: balance;
+}
+
+/* ── display: the page's one display moment ──────────────────────────────────
+   The figure is `.t-figure` itself (48 on a phone, 64 from 1024) and the
+   qualifier `.t-compact`, both from tokens.css — so this block sets only what
+   the tokens do not: the rule, and the qualifier's measure.
+
+   `--hair`: this strip sits on a page's own ground, where the house edge value
+   is the one that reads.
+
+   TWO LINES EACH, AT EVERY WIDTH. Left to the cell, the three wrapped 2/2/2 at
+   375, 1/1/2 from ~420 and 1/1/1 at 1440 — one column always a line longer
+   somewhere. The cap is bracketed by the splash's copy (Gilroy 500 at 14px):
+   "points, toward" is 92.6px and must fit, "off, once a day" is 97px and must
+   not. Re-measure both if a qualifier changes. */
+.figs.is-display {
+  --figs-rule: var(--hair);
+}
+.figs.is-display .figs-q {
+  max-width: 6.75em;
+}
+
+/* ── sheet: the 30px step a sheet inside a page may spend ────────────────────
+   30 is on tokens.css's enumerated ramp and deliberately NOT `.t-figure`: that
+   size is the one display moment on a PAGE, and a sheet over a page does not
+   get to spend it. Tabular, so $5 and 15% sit on one rhythm.
+
+   `--hair-lit`: tokens.css reserves it for dividers inside a surface, where
+   .10 measures 1.33:1 and vanishes — both sheets that carry this size are lit
+   surfaces over a page.
+
+   Two lines each: 7.5em (105px) sits inside the pop-up's bracket — its widest
+   needed line is ~77px, its shortest qualifier 119px. */
+.figs.is-sheet {
+  --figs-rule: var(--hair-lit);
+}
+.figs.is-sheet .figs-fig {
+  font-family: var(--font);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.figs.is-sheet .figs-q {
+  max-width: 7.5em;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}

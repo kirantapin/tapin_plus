@@ -8,6 +8,7 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
 import "./styles/pitch.css";
+import "./styles/figures.css";
 import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";

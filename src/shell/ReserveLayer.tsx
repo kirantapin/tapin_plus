@@ -263,7 +263,29 @@ export default function ReserveLayer({
 
   return (
     <div className={`reserve-layer${still ? " is-still" : ""}${closing ? " is-closing" : ""}`}>
-      <div className="reserve-scrim" aria-hidden="true" />
+      {/* ══ A CLICK OUTSIDE CLOSES IT (23 Sep 2026) ══════════════════════
+          Sam, on the desktop checkout: "when I click outside of this pop up
+          can you have it close." The scrim is the sibling UNDER the sheet,
+          not its parent, so a click inside the sheet never reaches it and
+          nothing has to stop propagation. It runs the X's own `close`, with
+          its exit, from any page.
+
+          NOT ONCE PAID — the guard the old second sheet's backdrop had, and
+          the Escape key's above: the receipt holds the reference a member
+          quotes to claim a refund, and a stray tap must not throw it away.
+          The X, reading "Done" there, still closes. aria-hidden, because
+          this is a pointer shortcut; the X and Escape are the named ways out.
+
+          On a phone the sheet is 92vh, so the scrim shows as a band above it
+          and a tap there closes too — a bottom sheet's usual behaviour, and
+          the pop-up's (`.vp-root`). */}
+      <div
+        className="reserve-scrim"
+        aria-hidden="true"
+        onClick={() => {
+          if (!paid) close();
+        }}
+      />
       <div
         className="reserve-sheet"
         data-lit=""

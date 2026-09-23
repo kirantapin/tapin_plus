@@ -284,73 +284,15 @@
 }
 
 /* ══ THE BENEFITS ARE FIGURES ══════════════════════════════════════════════
-   The splash's `.cg-figures` construction, scaled to the sheet: three open
-   columns parted by a hairline, the figure large and tabular, the qualifier at
-   the reading floor under it. Not a copy of that class — it is written here at
-   this sheet's own sizes, because the two surfaces are 375 and 460 wide and a
-   shared rule would have to be overridden on both.
-
-   THE STEP BEFORE THE DIVIDER IS --s-sm, which is the splash's own hard-won
-   number: at 375 these cells are 109 wide and the widest figure (`15%` since
-   22 Sep, when "Points" became `1×`) has to clear its own content box with
-   the qualifier wrapping under it. Six leaves room and still parts the column.
-
-   STRETCH, as on the splash: the hairline is each cell's border, so cells of
-   one height draw two hairlines of one height. */
+   The splash's construction at the sheet's own size: three open columns parted
+   by a hairline, the figure 30px and tabular, the qualifier at the reading
+   floor under it. Since 23 Sep 2026 it is ONE construction — shell/
+   BenefitFigures.tsx `size="sheet"`, rules in styles/figures.css — shared with
+   the splash and the checkout (docs/POLISH-2026-09-21.md §15). The 30px, the
+   `--hair-lit` rule and the 7.5em qualifier cap all moved there unchanged;
+   what stays here is this sheet's placement. */
 .vp-figures {
-  list-style: none;
-  padding: 0;
   margin: var(--s-2xl) 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-}
-.vp-figures > li {
-  min-width: 0;
-  padding-right: var(--s-sm);
-}
-/* `--hair-lit`, not `--hair`. tokens.css says why in one line: --hair is the
-   house value for an edge against the page, and --hair-lit is "for dividers
-   INSIDE a panel, where .10 measures 1.33:1 and simply vanishes". Three
-   columns inside a sheet is that case exactly — the splash draws this same
-   construction with --hair because it is on the dark field, where the same
-   alpha is white and reads. */
-.vp-figures > li + li {
-  border-left: 1px solid var(--hair-lit);
-  padding-left: var(--s-lg);
-}
-.vp-figures > li:last-child {
-  padding-right: 0;
-}
-/* 30px is on tokens.css's enumerated ramp and is deliberately NOT `.t-figure`
-   (48/64): that size is the one display moment on a PAGE, and a sheet inside a
-   page does not get to spend it. Tabular so $5 and 15% sit on the same
-   rhythm. */
-.vp-fig {
-  display: block;
-  font-family: var(--font);
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: var(--ink-1);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-/* Two lines each at every width, as on the splash: uncapped, the sheet at
-   500 set all three on one line with the credit 3px from wrapping, and the
-   dialog split them. 7.5em (105px) sits inside the copy's bracket — the
-   widest needed line is ~77px, the shortest qualifier 119px. */
-.vp-figures > li > span {
-  display: block;
-  max-width: 7.5em;
-  margin-top: var(--s-md);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.003em;
-  line-height: 1.35;
-  color: var(--ink-3);
-  text-wrap: balance;
 }
 
 /* The offer-only venue's one line, under the offers glyph — the same mark the

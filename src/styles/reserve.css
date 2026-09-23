@@ -1102,14 +1102,9 @@ html[data-flight="in"] .column > .sticky-cta{
    the label does and the fade runs off the panel's edge. */
 .rs-where .ticker-rail{--rail-pad:var(--s-xl)}
 .rs-where .ticker-tile{width:132px}
-/* What you get: four bullets with their glyphs, then the six marks. */
+/* What you get: the six marks. (`.rs-list` / `.rs-li-icon`, the icon-tile
+   rows, went on 23 Sep 2026 — the benefits are figures now, §15.) */
 .rs-what{margin:var(--s-xl) var(--s-xl) var(--s-md);color:var(--ink-3)}
-.rs-list{list-style:none;margin:0 var(--s-xl);padding:0;display:flex;flex-direction:column;gap:var(--s-md)}
-.rs-list li{display:flex;align-items:center;gap:var(--s-lg);font-size:15px;line-height:1.35;color:var(--ink-2)}
-.rs-list li b{font-weight:700;color:var(--ink-1)}
-.rs-li-icon{flex:0 0 auto;width:34px;height:34px;border-radius:var(--r-sm);
-  display:grid;place-items:center;background:var(--inner);border:1px solid var(--hair);color:var(--ink-2)}
-.rs-li-icon svg{width:18px;height:18px;display:block}
 .rs-covers{margin:var(--s-xl) var(--s-xl) 0}
 .rs-covers .covers-head{margin:0 0 var(--s-md);color:var(--ink-3)}
 .rs-covers .covers{grid-template-columns:repeat(6,1fr);gap:var(--s-md) var(--s-sm)}
@@ -1229,7 +1224,6 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-includes li{display:flex;align-items:flex-start;gap:var(--s-md);font-size:14px;line-height:1.4;color:var(--ink-2)}
 .rs-includes svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px;color:var(--ink-1)}
 .rs-includes b{font-weight:700;color:var(--ink-1)}
-.rs-modal > .rs-closing{margin:var(--s-sm) 0 0}
 
 /* ── THE TABLET MEASURE, 640–1023 (22 Sep 2026, docs/POLISH §13) ──────────
    The sheet is the window's width here and the column was the phone's 480 cap
@@ -1283,15 +1277,14 @@ html[data-flight="in"] .column > .sticky-cta{
      `auto` rows the grid spread the difference over all three — 28, 44 and
      12px between panels that should share one interval. `1fr` on the third
      row takes all of it (an item crossing a flexible track grows only that
-     track), and `.rs-closing` sits at that row's foot: the band and the list
-     keep the row gap, the wider interval opens before the close — the rhythm
-     `.column > .closing` draws on the page — and the guarantee ends level
-     with the plans, so the places and the card start on one line. */
+     track), so the places and the card start on one line. (Until 23 Sep the
+     guarantee sat at that row's foot, level with the plans; it heads the row
+     now — see `.rs-guarantee` below.) */
   .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
     grid-template-areas:"earn plans" "includes plans"
       "closing plans" "places card";
     grid-template-rows:auto auto 1fr auto;
-    column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
+    column-gap:var(--s-2xl);row-gap:var(--s-2xl);align-items:start}
   /* The band leads the left column at the column's own width. It stops being
      full bleed here — there is no sheet edge to reach in a centred dialog — so
      it takes the panels' radius and their inset, and reads as the plate the
@@ -1344,10 +1337,19 @@ html[data-flight="in"] .column > .sticky-cta{
      separating movements, never for anything inside one) opened inside a
      single panel, and 16 more than the same pair measures on a phone. */
   .rs-modal > .checkout > .pay-slot{margin-top:0}
-  /* The left column, one rhythm: the count sits close under the card, the
-     checklist one interval below it, the guarantee at the foot. */
-  .rs-modal > .rs-includes-panel{grid-area:includes;margin:0}
-  .rs-modal > .rs-closing{grid-area:closing;align-self:end;margin:0}
+  /* The left column, one rhythm (23 Sep 2026, §15): three open blocks under
+     the band, each one row-gap — `--s-2xl`, the section step — from the
+     last. The row gap was `--s-lg` while the blocks were panels whose own
+     plates did the parting; open on the ground, the interval has to. */
+  .rs-modal > .rs-get{grid-area:includes;margin:0}
+  /* AT THE ROW'S HEAD NOW, not its foot. The plans are taller than the band,
+     the figures and the guarantee together (~480 against ~365 at 1440), so
+     the `1fr` row still takes the difference — but the blocks are open now,
+     and slack opened between two of them reads as a hole in the argument.
+     Seated at the start, the three keep one section step each and the slack
+     falls where the sheet already turns: above "Where it works", on the line
+     the card starts on. */
+  .rs-modal > .rs-guarantee{grid-area:closing;align-self:start;margin:0}
 }
 
 /* The referral head: the sentence beside the shirt it earns. */
@@ -1374,11 +1376,6 @@ html[data-flight="in"] .column > .sticky-cta{
 @media (min-width:1024px){.rs-dock{display:none}}
 @media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
 
-/* What you get, as a panel: the list's own inset, one row per benefit. */
-.rs-modal > .rs-includes-panel{margin:0;padding-bottom:var(--s-xl)}
-.rs-includes-panel > .panel-label{margin-bottom:var(--s-md)}
-.rs-includes-panel .rs-list{margin:0 var(--s-xl);gap:var(--s-md)}
-.rs-includes-panel .rs-list li{font-size:14px;line-height:1.35}
 
 /* ══ THE SHEET'S SUBTITLE BAND ══════════════════════════════════════════════
    Sam, 21 Sep 2026: "the checkout modal should show the 'earn back the cost of
@@ -1670,14 +1667,16 @@ html[data-flight="in"] .column > .sticky-cta{
   .plan-opt:active,.plan-opt.is-later:active{transform:none}
 }
 
-}
-
 /* ── WHERE IT WORKS, AT THE FOOT OF THE SHEET ──────────────────────────────
    The rail, not the grid, and no "View all places": the grid it would open is
    a page-width object and this is a column. /in hides the same control on the
-   same reasoning (.ms-places, above). */
-.rs-places{margin-top:var(--s-2xl)}
-.rs-places .places-label{margin:0 0 var(--s-md);color:var(--ink-3)}
+   same reasoning (.ms-places, above).
+
+   A STRAY `}` STOOD ABOVE THIS BLOCK until 23 Sep 2026, one more than the
+   reduced-motion block above it opens. At the top level a lone `}` becomes
+   part of the NEXT rule's selector and the browser drops that rule whole —
+   so whichever rule sat first here silently never applied (it was the old
+   `.rs-places{margin-top}`). Count the braces before adding a block above. */
 .rs-places .ticker-all{display:none}
 /* CONTAINED — the pitch hero's own construction (`.hero-rail .ticker-rail`,
    pitch.css). This section is also `.places`, so it took the pitch's bleed:
@@ -1689,6 +1688,69 @@ html[data-flight="in"] .column > .sticky-cta{
    the lit sheet the fade is refused (campaign.css, `[data-lit] .ticker-rail`). */
 .rs-places{min-width:0;overflow-x:clip}
 .rs-places .ticker-rail{width:100%;max-width:100%;margin-inline:0;--rail-pad:0px}
+
+
+/* ══ THE LEFT COLUMN, OPEN (23 Sep 2026, docs/POLISH-2026-09-21.md §15) ════
+   Sam, on the desktop checkout: "/impeccable redesign this." What you get,
+   the guarantee and where it works were three panels of one weight under
+   uppercase eyebrows, with four icon tiles and a shield tile inside them —
+   the pre-polish language on the one surface that takes money. They are
+   three open blocks on the sheet's own ground now, each headed in sentence
+   case, none boxed. The band above keeps its white; the plans beside keep
+   theirs.
+
+   ONE SECTION STEP BETWEEN THE BLOCKS. On a phone `.rs-modal` is a flex
+   column with an `--s-lg` gap that the band and the plans already count on,
+   so each block tops it up to `--s-2xl` rather than the gap changing under
+   them. From 1024 the grid's own row gap is the interval (the desktop block
+   above) and these margins stand down — hence the max-width, not a later
+   reset that would lose to it on source order. */
+@media (max-width:1023px){
+  .rs-modal > .rs-get,
+  .rs-modal > .rs-guarantee,
+  .rs-modal > .rs-places{margin-top:calc(var(--s-2xl) - var(--s-lg))}
+}
+/* The head is `.t-title` — 18px 700 `--ink-1`, the size the band's own
+   statement is set at — so the sheet has one heading size, not a third. It
+   sits closer to what it heads than to what came before it. */
+.rs-head{margin:0 0 var(--s-lg)}
+.rs-figures{margin:0}
+
+/* The one offer line, the pop-up's construction at the reading floor: the
+   offers glyph bare at the left, the label bold, the example after it. */
+.rs-offer{display:flex;align-items:flex-start;gap:var(--s-md);margin:var(--s-xl) 0 0;
+  font-size:14px;font-weight:500;line-height:1.4;color:var(--ink-3);text-wrap:pretty}
+.rs-offer b{font-weight:700;color:var(--ink-1)}
+.rs-offer-glyph{flex:0 0 auto;display:block;color:var(--ink-3)}
+.rs-offer-glyph svg{width:20px;height:20px;display:block}
+
+/* THE GUARANTEE AS A STATEMENT, as the pitch sets it: a hairline over it,
+   the shield bare in `--ink-2` beside the promise, the address under. 24px
+   is the promise's own first line (18 × 1.35), so the mark sits on that line
+   rather than floating above a paragraph. 24ch keeps the sentence to two
+   even lines at every width the column takes. `.guarantee` and
+   `.guarantee-contact` are layout.css's, shared with the pitch and /in. */
+.rs-guarantee{display:flex;align-items:flex-start;gap:var(--s-lg);
+  padding-top:var(--s-xl);border-top:1px solid var(--hair)}
+.rs-guarantee-mark{flex:0 0 auto;display:block;color:var(--ink-2)}
+.rs-guarantee-mark svg{width:24px;height:24px;display:block}
+.rs-guarantee .guarantee{max-width:24ch}
+
+/* THE HERO RAIL'S SQUARE TILES. The 3:4 poster was a phone's portrait tile
+   carried into a column it did not fit, cut off mid-card at the column's edge.
+   Square at every width: the phone keeps the rail's own tile width, and from
+   1024 it is the hero's 160 (pitch.css, `.hero-rail`), which the column holds
+   three of whole. The ratio rides the `.vcard` inside the `li`, where the base
+   3:4 is declared. */
+.rs-places .ticker-tile .vcard{aspect-ratio:1}
+@media (min-width:1024px){
+  .rs-places .ticker-tile{width:160px}
+  /* 12, not the rail's 8: at 8 three tiles are 496 in a 506 column and a 2px
+     sliver of a fourth showed at the edge — on a lit sheet there is no fade
+     to soften it. 3 × 160 + 2 × 12 = 504, and the fourth starts past the
+     column. At 1024 (482) the third is cut, which is a rail saying "more". */
+  .rs-places .ticker-rail{gap:var(--s-lg)}
+}
 
 
 /* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
@@ -1771,13 +1833,6 @@ html[data-flight="in"] .column > .sticky-cta{
 /* The label keeps clear of it, so a longer tier name wraps before it collides
    rather than running under it. */
 .plan-opt:has(.plan-chip) > b{padding-right:104px}
-
-
-/* The places heading inside the sheet is a section caption like the panels
-   around it, not the page-width heading pitch.css gives it on the pitch —
-   three labels in one column have to be one thing. */
-.rs-places .places-label{font-size:11px;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;line-height:1.3}
 
 
 /* ============================================================================

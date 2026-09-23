@@ -6,6 +6,7 @@ import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
+import BenefitFigures from "../shell/BenefitFigures";
 import { useReserveCta } from "../shell/useReserveCta";
 import {
   heroIsBright,
@@ -239,15 +240,10 @@ export default function Coffeeholics() {
               docs/POLISH-2026-09-21.md §3.3, the biggest single move on the
               page: the numbers that ARE the offer are set as the offer, in
               open columns divided by a hairline, with no tile beside them.
-              $5 / 15% / 1×, one size (Sam, 22 Sep 2026). */}
-          <ul className="cg-figures">
-            {campaignBenefits.map((b) => (
-              <li key={b.id}>
-                <b className="t-figure">{b.figure}</b>
-                <span className="t-compact">{b.qualifier}</span>
-              </li>
-            ))}
-          </ul>
+              $5 / 15% / 1×, one size (Sam, 22 Sep 2026). The construction is
+              shared with the pop-up and the checkout since 23 Sep (§15);
+              `cg-figures` is only this page's placement. */}
+          <BenefitFigures items={campaignBenefits} size="display" className="cg-figures" />
 
           {/* ══ THE ACTIONS ══════════════════════════════════════════════
               ONE FILLED ACTION PER VIEW. On a phone that is the membership
