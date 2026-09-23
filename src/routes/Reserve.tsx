@@ -487,35 +487,39 @@ export default function Reserve() {
               the panel it sits in; centred under the control, in the control's
               own measure, it needs no container at all. Every source is
               unchanged — `seatLine()` for the sentence, `seatsLeft()/SEAT_CAP`
-              for the fraction, the real close date under it. Still artificial
+              for the fraction, the real close date beside it. Still artificial
               (model/seats.ts), still no clock.
 
               OUTSIDE `.pay-slot`, deliberately: that box is what the
               IntersectionObserver measures, and growing it would change when
               the docked bar hides.
 
-              ONE LINE, THEN THE BAR (23 Sep 2026, POLISH §23): the count and
-              the close date were a sentence, a bar and a second sentence. The
-              tier is named in the tile above, so the line does not repeat it;
-              the number is `seatsLeft()` of `SEAT_CAP` from model/seats.ts, the
+              ONE LINE, AND THE SHARE AS A GLYPH (23 Sep 2026, POLISH §23, §27):
+              the count and the close date are one sentence, led by a 16px pie.
+              The bar that followed read as the button's own progress. The tier
+              is named in the tile above, so the line does not repeat it; the
+              number is `seatsLeft()` of `SEAT_CAP` from model/seats.ts, the
               date `foundingCloses`, and the whole block only renders while
-              FOUNDING_OPEN, so there is always a number here. */}
+              FOUNDING_OPEN, so there is always a number here. Below 480 the
+              dot drops and the date takes its own centred line. */}
           {FOUNDING_OPEN ? (
             <div className="rs-seats-under">
               <p className="rs-seat-line">
-                <b className="tnum">{seatsLeft()}</b> of {SEAT_CAP} spots left · closes {foundingCloses}
+                {/* ⚠ THE WEDGE IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
+                    IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 59%
+                    today where `left/cap` is 41%: a disc that is mostly filled
+                    says what the sentence beside it says, a room filling up.
+                    Same fact, drawn the way a reader already reads a pie. The
+                    sentence is the statement of record; this is aria-hidden
+                    and never carries a number of its own. */}
+                <i className="rs-pie" aria-hidden="true"
+                  style={{ ["--p" as string]: 1 - seatsLeft() / SEAT_CAP }} />
+                <span className="rs-seat-count">
+                  <b className="tnum">{seatsLeft()}</b> of {SEAT_CAP} spots left
+                </span>
+                <span className="rs-seat-dot">{" · "}</span>
+                <span className="rs-seat-close">closes at {foundingCloses}</span>
               </p>
-              <span className="rs-meter" aria-hidden="true">
-                {/* ⚠ THE FILL IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
-                    IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 88%
-                    today where `left/cap` is 12%: a bar that is nearly full says
-                    what the sentence above it says, while a bar with a 12%
-                    sliver reads as an empty room. Same fact, drawn the way a
-                    reader already reads a progress bar. The sentence is the
-                    statement of record; this is aria-hidden and never carries a
-                    number of its own. */}
-                <i style={{ ["--p" as string]: `${1 - seatsLeft() / SEAT_CAP}` }} />
-              </span>
             </div>
           ) : null}
         </div>

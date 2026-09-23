@@ -1252,31 +1252,36 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    IT WAS A CARD AND IT IS A CAPTION. As an --inner box with its own border at
    the head of the modal it was a second container arguing with the panel under
    it — two same-width boxes stacked, which is the craft floor's first refusal —
-   and it put the scarcity in front of the price. Under the button it is three
-   plain lines on the panel's own ground: no border, no fill, nothing to
+   and it put the scarcity in front of the price. Under the button it is one
+   plain line on the panel's own ground: no border, no fill, nothing to
    contain it but the space above it.
 
    THE MEASURE IS THE BUTTON'S. It is a sibling of `.pay-slot` inside the same
-   panel, so the sentence, the bar and the date all run edge to edge with the
-   control they qualify — no width of its own, nothing to keep in step by hand.
+   panel, so the line centres on the control it qualifies — no width of its
+   own, nothing to keep in step by hand.
 
-   ONE LINE AND THE BAR (23 Sep 2026, POLISH §23). It was a sentence, the bar
-   and the close date under it; the count and the date are now one 14px line
-   centred on the button's label, and the bar follows. The number keeps the
-   line's size and takes weight and `--ink-1` instead of a size step, so the
-   price in the tile above stays the one figure that leads. */
+   ONE LINE, A RUNG QUIETER (23 Sep 2026, POLISH §23, §27). The count and the
+   date are one 14px line in `--ink-3`, so the button is the only loud thing
+   under the tiles. The number keeps the line's size and takes weight and
+   `--ink-1` instead of a size step, so the price in the tile above stays the
+   one figure that leads. The pie and the sentence are one centred flex unit;
+   below 480 the dot drops and the date wraps to its own centred line. */
 .rs-seats-under{margin-top:var(--s-md);text-align:center}
-.rs-seat-line{margin:0;font-size:14px;font-weight:500;line-height:1.35;color:var(--ink-2)}
+.rs-seat-line{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+  margin:0;font-size:14px;font-weight:500;line-height:1.35;color:var(--ink-3)}
 .rs-seat-line b{font-weight:700;color:var(--ink-1)}
-/* One continuous bar (Sam, 15 Sep 2026: "a single line, not little blocks"),
-   the fill scaled from the left so the fraction is exact — and see Reserve.tsx
-   for WHICH fraction: it draws the seats taken, not the seats left. 4px and the
-   control radius, so it reads as a rule under the button rather than as a
-   second control; it takes the button's own measure from its parent. */
-.rs-meter{position:relative;display:block;height:4px;margin-top:var(--s-md);
-  border-radius:var(--r-control);background:var(--hair-lit);overflow:hidden}
-.rs-meter i{position:absolute;inset:0;border-radius:var(--r-control);background:var(--ink-1);
-  transform-origin:left;transform:scaleX(var(--p,0))}
+.rs-seat-dot{white-space:pre}
+/* A pie, not a second bar at the button's width (§27): a bar directly under a
+   control reads as that control loading, a disc reads as "how full", and it is
+   the timeline's dot family above it. The wedge is the seats taken — see
+   Reserve.tsx for WHICH fraction. Centred on the first line's box, not the block's. */
+.rs-pie{flex:0 0 auto;width:16px;height:16px;border-radius:50%;
+  margin:calc((1.35em - 16px) / 2) var(--s-md) 0 0;
+  background:conic-gradient(var(--ink-1) calc(var(--p) * 1turn),var(--hair-lit) 0)}
+@media (max-width:479px){
+  .rs-seat-dot{display:none}
+  .rs-seat-close{flex-basis:100%}
+}
 
 /* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
    The group is down to a single plan, so the grid stops being two columns and
@@ -1827,7 +1832,7 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    it on. The docked bar is already gone from 1024.
 
    THE FIT. The left column is the taller: the timeline's three two-line
-   stops and the refund line under the rail outrun the panel by ~76px at
+   stops and the refund line under the rail outrun the panel by ~68px at
    1180 and 1440. Nothing is added and no type shrinks; the panel takes up
    the difference above the card's hairline. No scroll from 1024 to 1440.
    ============================================================================ */
@@ -1852,7 +1857,6 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
   /* Kiran's third tile (the sold-out $4.99, 23 Sep) is why the money column
      steps at 16; on desktop this supersedes §16's 24 between its blocks. */
   .rs-pay-col{gap:var(--s-xl)}
-  .rs-seats-under,.rs-meter{margin-top:var(--s-sm)}
   /* ONE BOTTOM LINE (§26). The right column stretches to the row, the panel
      fills it, and the card's block sits on the panel's floor. */
   .rs-get-col{align-self:stretch;grid-template-rows:minmax(0,1fr)}
