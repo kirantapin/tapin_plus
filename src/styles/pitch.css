@@ -3162,11 +3162,42 @@ button.vcard:focus-visible {
   outline-offset: 2px;
 }
 
-/* ══ THE TEXT LINKS: THE DECK'S DOOR IN THE HERO, AND THE SAVINGS PANEL'S ═══
-   One object, two places: 16px, a chevron, and a 44px target met by the line
-   box rather than by a slab of fill. */
-.hero-how,
+/* ══ THE SAVINGS PANEL'S DOOR TO THE DECK IS A PILL (Sam, 23 Sep 2026: "how
+   it works, on this section, should be an actual button"): the hero's trial
+   pill, as a link, at the panel's full width. */
 .save-how {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid var(--hair-lit);
+  border-radius: var(--r-card);
+  background: var(--inner);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
+}
+.save-how:active {
+  transform: scale(0.98);
+  background: var(--press);
+  transition-duration: 100ms;
+}
+.save-how:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
+
+/* ══ THE TEXT LINK: THE DECK'S DOOR IN THE HERO ═══════════════════════════
+   16px, a chevron, and a 44px target met by the line box rather than by a
+   slab of fill. */
+.hero-how {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
@@ -3179,8 +3210,7 @@ button.vcard:focus-visible {
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
-.hero-how svg,
-.save-how svg {
+.hero-how svg {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
@@ -3188,13 +3218,11 @@ button.vcard:focus-visible {
   transition: transform 150ms var(--ease);
 }
 @media (hover: hover) {
-  .hero-how:hover svg,
-  .save-how:hover svg {
+  .hero-how:hover svg {
     transform: translateX(2px);
   }
 }
-.hero-how:focus-visible,
-.save-how:focus-visible {
+.hero-how:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 3px;
   border-radius: var(--r-sm);
