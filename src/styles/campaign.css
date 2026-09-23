@@ -486,7 +486,7 @@
   .cg-acts {
     flex-direction: row;
     align-items: center;
-    gap: var(--s-2xl);
+    gap: var(--s-lg);
   }
   .cg-hero-cta {
     display: inline-flex;
@@ -903,59 +903,57 @@
   }
 }
 
-/* ── THE INVITATION BESIDE THE ASK ─────────────────────────────────────────
-   A text link, not a third filled button and not a pill: the page spends its
-   fill on "Get early access", and a second slab beside it leaves the reader
-   choosing between two equal-looking controls for different destinations.
-
-   ONE OBJECT AT EVERY WIDTH. It was the house ghost (`.action.action-ghost`)
-   with a phone override undoing every part of it: measured at 375, it sat as
-   a pill directly above the docked pair, which already carries "Try it once
-   for free" — three pills in one view, two of them the same verb. The phone
-   made it a link at reading size with the chevron, on the argument's own
-   left edge, 44px tall so it stays a target. §20 (23 Sep 2026) took that
-   link to the desktop as well, beside the filled button, and the ghost
-   classes and their undoing went with it. §24 set it on the photograph at
-   every width, so it is white there, not the merchant's purple. A <button>,
-   so it declares what an <a> gets for free. */
+/* ── THE INVITATION BESIDE THE ASK, AS THE SECOND PILL ──────────────────────
+   Sam, 23 Sep 2026: "the secondary button [should] say 'try for free today'
+   and should follow the button sizing of the header": the same shape as the
+   white action beside it, outlined in white on the photograph rather than
+   filled, so the pair reads as one row of two choices with one of them lit.
+   A <button>, because it opens the trial modal rather than navigating. */
 .cg-try {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: var(--s-md);
-  min-height: 44px;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
   margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid color-mix(in srgb, var(--on-maroon) 60%, transparent);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--on-maroon) 8%, transparent);
   box-shadow: none;
   font: inherit;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  text-align: left;
+  text-align: center;
   color: var(--on-maroon);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
 }
-.cg-try svg {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-  color: currentColor;
-  transition: transform 150ms var(--ease);
-}
-@media (hover: hover) {
-  .cg-try:hover svg {
-    transform: translateX(2px);
-  }
+.cg-try:active {
+  transform: scale(0.98);
+  background: color-mix(in srgb, var(--on-maroon) 16%, transparent);
+  transition-duration: 100ms;
 }
 .cg-try:focus-visible {
   outline: 2px solid var(--on-maroon);
   outline-offset: 2px;
+}
+/* AFTER THE BASE RULE, NOT IN THE 1024 BLOCK ABOVE: at equal specificity the
+   later rule wins, and the base rule is written here, below that block. */
+@media (min-width: 1024px) {
+  .cg-try {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 220px;
+    min-height: 0;
+    height: 48px;
+    padding: 0 calc(var(--s-xl) * 2);
+  }
 }
 
 /* The closing row, inside the call-out's plate. Two overrides only: the ring

@@ -303,17 +303,7 @@ export default function Coffeeholics() {
                   how-it-works comes first and Coffeeholics comes from there,
                   which is the order he asked for. */}
               <button type="button" className="cg-try" onClick={() => setTrial(true)}>
-                Try the first two free today
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="m10 7 5 5-5 5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.9"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                Try for free today
               </button>
             </div>
           </div>
