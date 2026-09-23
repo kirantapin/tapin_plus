@@ -114,7 +114,7 @@ const schedule: { id: string; when: string; figure: string; clause: string }[] =
           id: "credit",
           when: `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order`,
           figure: `+$${BENEFIT.creditUsd} credit`,
-          clause: "more than the deposit",
+          clause: "More than the deposit",
         },
       ]
     : []),
@@ -122,9 +122,9 @@ const schedule: { id: string; when: string; figure: string; clause: string }[] =
     id: "opens",
     when: launchWindow,
     figure: `${plan.price} ${plan.per}`,
-    clause: "then automatically, your first month already paid",
+    clause: "Then automatically, your first month already paid",
   },
-  { id: "always", when: "Always", figure: plan.price, clause: "never goes up while you stay a member" },
+  { id: "always", when: "Always", figure: plan.price, clause: "Never goes up while you stay a member" },
 ];
 
 /* ══ WHAT YOU GET, AS A CHECKLIST ══════════════════════════════════════════
@@ -267,7 +267,7 @@ export default function Reserve() {
   return (
     <div className="rs-modal">
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
-          The left column from 1024 (tiles, schedule, button, count); below
+          The left column from 1024 (the tiles, then the order card); below
           1024 this wrapper is `display:contents` and draws nothing. */}
       <div className="rs-pay-col">
         {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
@@ -438,14 +438,15 @@ export default function Reserve() {
               : ""}
         </p>
 
-        {/* ══ THE SCHEDULE, ON A RAIL ═════════════════════════════════════
-            Replaces the subtitle band ("earn the $4.99 back…", Sam 21 Sep) and
-            the prose lines under the tiles: the same facts, as stops in time.
-            Every figure sits on the list's one right edge; the sentence under
-            the rail is the refund, and nothing sits under the button but its
-            count. */}
-        <div className="rs-sched">
-          <ol className="rs-time" aria-label="What you pay, and when">
+        {/* ══ THE ORDER CARD (23 Sep 2026, POLISH §29) ══════════════════════
+            Sam: "they should be in a parent container, otherwise feels too
+            chaotic." One card, text only: the schedule on its rail, the refund
+            under a hairline, the button and its count. Nothing sits under it. */}
+        <section className="rs-order" aria-labelledby="rs-order-head">
+          <h2 className="t-title rs-order-head" id="rs-order-head">
+            What you pay, and when
+          </h2>
+          <ol className="rs-time">
             {schedule.map((stop) => (
               <li className="rs-stop" key={stop.id}>
                 <p className="rs-stop-head">
@@ -457,72 +458,31 @@ export default function Reserve() {
             ))}
           </ol>
           {refundLine ? <p className="rs-refund">{refundLine}</p> : null}
-        </div>
 
-        {/* ══ THE DOOR TO THE CHARGE ═════════════════════════════════════════
-            Sam, 13 Sep 2026: "we only need the disclosure and terms right at
-            checkout." The rows, the consent, the wallet and the full terms are
-            pages 1–2 of this sheet; this button moves it on.
+          {/* The button moves the sheet to page 1. `.pay-slot` is the box the
+              observer measures to hide the docked twin, so the count stays a
+              sibling of it, never inside it. */}
+          <div className="rs-buy">
+            <div ref={paySlot} className="pay-slot">
+              <button type="button" className="action" onClick={openCheckout}>
+                {paid ? "View your seat" : checkoutLabel}
+              </button>
+            </div>
 
-            THE OBSERVER STAYS. It is what suppresses the docked bar while a real
-            control is on screen — two identical maroon buttons on one screen is
-            the decoy problem this page solved once already. */}
-        <div className="rs-buy">
-          <div ref={paySlot} className="pay-slot">
-            <button type="button" className="action" onClick={openCheckout}>
-              {paid ? "View your seat" : checkoutLabel}
-            </button>
-          </div>
-
-          {/* ══ THE COUNT, AS THE BUTTON'S CAPTION ════════════════════════════
-              Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below
-              the actual checkout button and allow the earn $5 back to replace
-              it." So the head of the sheet is one statement instead of two
-              stacked boxes, and the order a reader meets is price → button →
-              how many are left: the scarcity qualifies the action rather than
-              standing in front of it.
-
-              AND IT IS THE BUTTON'S CAPTION, NOT A CARD. It sat in an --inner
-              box with its own border, which made it a second object arguing with
-              the panel it sits in; centred under the control, in the control's
-              own measure, it needs no container at all. Every source is
-              unchanged — `seatLine()` for the sentence, `seatsLeft()/SEAT_CAP`
-              for the fraction, the real close date beside it. Still artificial
-              (model/seats.ts), still no clock.
-
-              OUTSIDE `.pay-slot`, deliberately: that box is what the
-              IntersectionObserver measures, and growing it would change when
-              the docked bar hides.
-
-              ONE LINE, AND THE SHARE AS A GLYPH (23 Sep 2026, POLISH §23, §27):
-              the count and the close date are one sentence, led by a 16px pie.
-              The bar that followed read as the button's own progress. The tier
-              is named in the tile above, so the line does not repeat it; the
-              number is `seatsLeft()` of `SEAT_CAP` from model/seats.ts, the
-              date `foundingCloses`, and the whole block only renders while
-              FOUNDING_OPEN, so there is always a number here. Below 480 the
-              dot drops and the date takes its own centred line. */}
-          {FOUNDING_OPEN ? (
-            <div className="rs-seats-under">
+            {/* The count: `seatsLeft()` of `SEAT_CAP` (model/seats.ts, still
+                artificial) and `foundingCloses`, only while FOUNDING_OPEN. Below
+                480 the dot drops and the deadline takes its own line. */}
+            {FOUNDING_OPEN ? (
               <p className="rs-seat-line">
-                {/* ⚠ THE WEDGE IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
-                    IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 59%
-                    today where `left/cap` is 41%: a disc that is mostly filled
-                    says what the sentence beside it says, a room filling up.
-                    Same fact, drawn the way a reader already reads a pie. The
-                    sentence is the statement of record; this is aria-hidden
-                    and never carries a number of its own. */}
-                <i className="rs-pie" aria-hidden="true"
-                  style={{ ["--p" as string]: 1 - seatsLeft() / SEAT_CAP }} />
                 <span className="rs-seat-count">
                   <b className="tnum">{seatsLeft()}</b> of {SEAT_CAP} spots left
                 </span>
                 <span className="rs-seat-dot">{" · "}</span>
                 <span className="rs-seat-close">closes at {foundingCloses}</span>
               </p>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+          </div>
+        </section>
       </div>
 
       {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════

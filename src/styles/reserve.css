@@ -1245,44 +1245,6 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
 @media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
 
 
-/* ══ THE COUNT, UNDER THE BUTTON ════════════════════════════════════════════
-   Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below the actual
-   checkout button and allow the earn $5 back to replace it."
-
-   IT WAS A CARD AND IT IS A CAPTION. As an --inner box with its own border at
-   the head of the modal it was a second container arguing with the panel under
-   it — two same-width boxes stacked, which is the craft floor's first refusal —
-   and it put the scarcity in front of the price. Under the button it is one
-   plain line on the panel's own ground: no border, no fill, nothing to
-   contain it but the space above it.
-
-   THE MEASURE IS THE BUTTON'S. It is a sibling of `.pay-slot` inside the same
-   panel, so the line centres on the control it qualifies — no width of its
-   own, nothing to keep in step by hand.
-
-   ONE LINE, A RUNG QUIETER (23 Sep 2026, POLISH §23, §27). The count and the
-   date are one 14px line in `--ink-3`, so the button is the only loud thing
-   under the tiles. The number keeps the line's size and takes weight and
-   `--ink-1` instead of a size step, so the price in the tile above stays the
-   one figure that leads. The pie and the sentence are one centred flex unit;
-   below 480 the dot drops and the date wraps to its own centred line. */
-.rs-seats-under{margin-top:var(--s-md);text-align:center}
-.rs-seat-line{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
-  margin:0;font-size:14px;font-weight:500;line-height:1.35;color:var(--ink-3)}
-.rs-seat-line b{font-weight:700;color:var(--ink-1)}
-.rs-seat-dot{white-space:pre}
-/* A pie, not a second bar at the button's width (§27): a bar directly under a
-   control reads as that control loading, a disc reads as "how full", and it is
-   the timeline's dot family above it. The wedge is the seats taken — see
-   Reserve.tsx for WHICH fraction. Centred on the first line's box, not the block's. */
-.rs-pie{flex:0 0 auto;width:16px;height:16px;border-radius:50%;
-  margin:calc((1.35em - 16px) / 2) var(--s-md) 0 0;
-  background:conic-gradient(var(--ink-1) calc(var(--p) * 1turn),var(--hair-lit) 0)}
-@media (max-width:479px){
-  .rs-seat-dot{display:none}
-  .rs-seat-close{flex-basis:100%}
-}
-
 /* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
    The group is down to a single plan, so the grid stops being two columns and
    the tile takes the width it used to share. Everything else — the chosen
@@ -1514,11 +1476,10 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
      · the figure strip (§15) — a marketing device; the checklist replaces it
      · the rail — it stays on the pitch; the places are one row here
      · the guarantee block — it is one line now
-   Every block sits on the sheet's own ground; since §18 (23 Sep) the one
-   exception is the included panel, which gathered what you get, where it
-   works and the guarantee into the trial modal's call-out. The flex gap on
-   `.rs-modal` is the one section step between blocks (`--s-2xl`), and
-   `--s-lg` is the interval inside a block. */
+   Every block sits on the sheet's own ground but two plates: the included
+   panel (§18) and the order card (§29). The flex gap on `.rs-modal` is the
+   one section step between blocks (`--s-2xl`), and `--s-lg` is the interval
+   inside a block. */
 
 /* ── 1. THE TILES, ON THE SHEET'S GROUND ───────────────────────────────────
    They sat on a white panel, and the Standard tile's `--inner` fill was a
@@ -1538,41 +1499,52 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    `.plan-figs` already did; only the line's own .72 remains (5.3:1). */
 .plan-opt.is-on .plan-now{opacity:1}
 
-/* ── 2. THE SCHEDULE, AS A TIMELINE (POLISH §26) ──────────────────────────
-   Three moments on one rail: a 2px `--hair-lit` line through 10px dots —
-   Today filled in `--ink-1`, the stops to come ringed in `--ink-2` on
-   `--card` — and the text 24px clear of the dots. A stop is the moment and
-   its figure on one 22px line (every figure on the list's right edge), then
-   the clause under it. The rail is drawn per stop, from its dot to the next
-   stop's, so it starts and ends on a dot whatever a clause wraps to. The
-   refund sentence sits under the rail, at the clause's size and ink. */
-.rs-sched{display:flex;flex-direction:column;gap:var(--s-xl)}
-.rs-time{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
-.rs-stop{position:relative;padding-left:calc(10px + var(--s-2xl))}
-.rs-stop::before{content:"";position:absolute;left:4px;top:11px;width:2px;
-  height:calc(100% + 20px);background:var(--hair-lit)}
-.rs-stop:last-child::before{content:none}
-.rs-stop::after{content:"";position:absolute;left:0;top:6px;box-sizing:border-box;
-  width:10px;height:10px;border-radius:50%;
-  background:var(--card);border:2px solid var(--ink-2)}
-.rs-stop:first-child::after{background:var(--ink-1);border-color:var(--ink-1)}
+/* ── 2. THE ORDER CARD (POLISH §29) ────────────────────────────────────────
+   Everything about the money in one object, the pair to the included panel:
+   `--card` on the sheet's ground, a `--hair` edge and the resting shadow,
+   children stacked at `--s-xl`. Text only; no second container inside it. */
+.rs-order{display:flex;flex-direction:column;gap:var(--s-xl);margin:0;
+  padding:var(--s-xl);border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--card);box-shadow:var(--rest)}
+.rs-order-head{margin:0}
+
+/* The timeline: solid 8px dots, Today in `--ink-1` and the stops to come in
+   `--ink-4`, the text 24px from the dot's left edge. The rail is drawn per
+   stop from its dot's centre to the next one's, under the dots, so it ends on
+   the last dot whatever a clause wraps to. */
+.rs-time{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.rs-stop{position:relative;padding-left:var(--s-2xl)}
+.rs-stop:not(:last-child)::before{content:"";position:absolute;left:3px;top:10px;
+  bottom:-24px;width:2px;background:var(--hair-lit)}
+.rs-stop::after{content:"";position:absolute;left:0;top:6px;width:8px;height:8px;
+  border-radius:50%;background:var(--ink-4)}
+.rs-stop:first-child::after{background:var(--ink-1)}
+/* The moment and its figure on one 20px line, every figure on the list's one
+   right edge; the clause under it at the refund's size and ink. */
 .rs-stop-head{display:flex;align-items:baseline;justify-content:space-between;
-  gap:var(--s-xl);margin:0;line-height:22px}
-.rs-when{min-width:0;font-size:14px;font-weight:600;letter-spacing:.005em;color:var(--ink-2)}
-.rs-fig{flex:0 0 auto;white-space:nowrap;font-size:16px;font-weight:700;
-  letter-spacing:-.01em;color:var(--ink-1)}
+  gap:var(--s-xl);margin:0;line-height:20px}
+.rs-when{min-width:0;font-size:15px;font-weight:700;color:var(--ink-1)}
+.rs-fig{flex:0 0 auto;white-space:nowrap;font-size:15px;font-weight:700;color:var(--ink-1)}
 .rs-clause,.rs-refund{margin:0;font-size:14px;font-weight:500;line-height:1.4;
   color:var(--ink-3);text-wrap:pretty}
-.rs-clause{margin-top:var(--s-xs)}
+.rs-clause{margin-top:2px}
+/* The hairline is the refund's own top edge, so it goes when the line does. */
+.rs-refund{padding-top:var(--s-xl);border-top:1px solid var(--hair)}
 
-/* ── 3. THE BUTTON AND ITS COUNT ───────────────────────────────────────────
-   The block's own interval, not the §4 slot's: `.pay-slot` carries a 16px
-   top margin for page 2, where it sits under the consent sentence. Here the
-   section step above it is the whole interval. The count under it is
-   unchanged (`.rs-seats-under`). */
+/* The button at the card's width and, 10px under it, the count centred: the
+   number in `--ink-1` at 700, the rest a rung quieter. `.pay-slot` drops the
+   16px it carries for page 2's consent sentence. */
+.rs-buy{display:flex;flex-direction:column;gap:10px}
 .rs-buy > .pay-slot{margin-top:0}
+.rs-seat-line{margin:0;text-align:center;font-size:14px;font-weight:500;
+  line-height:1.4;color:var(--ink-3)}
+.rs-seat-line b{font-weight:700;color:var(--ink-1)}
+@media (max-width:479px){
+  .rs-seat-dot{display:none}
+  .rs-seat-close{display:block}
+}
 
-/* ── 4. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
+/* ── 3. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe
    we use the same on the checkout flow." What you get, where it works and the
    guarantee were three open blocks after the count; they are one plate in
@@ -1822,8 +1794,8 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    through anything." The reader's screen has the width, so the review sheet
    takes it: `min(1040px, 100vw - 64px)`, height still its content's and
    still capped at the window, and page 0 in two equal columns — the money
-   on the left (the tiles, the schedule, the button and its count), what it
-   buys on the right (the included panel, the card at its foot). The money
+   on the left (the tiles, then the order card), what it buys on the right
+   (the included panel, the card at its foot). The money
    column packs to its top; the panel takes the row's height and seats the
    card on its floor, so the two columns end on one line (§26).
 
@@ -1831,10 +1803,10 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    so the sheet does not change width under the reader when Checkout moves
    it on. The docked bar is already gone from 1024.
 
-   THE FIT. The left column is the taller: the timeline's three two-line
-   stops and the refund line under the rail outrun the panel by ~68px at
-   1180 and 1440. Nothing is added and no type shrinks; the panel takes up
-   the difference above the card's hairline. No scroll from 1024 to 1440.
+   THE FIT (§29). The tiles and the order card outrun the panel by ~153px
+   at 1180 and 1440; the panel takes it up above the card's hairline. The
+   sheet is 782px tall: no scroll at 1180×820 or 1440×900, but a window
+   under ~814px tall (1280×800, any 768) scrolls page 0 by the difference.
    ============================================================================ */
 @media (min-width:1024px){
   .reserve-sheet{width:min(1040px,calc(100vw - 64px));
