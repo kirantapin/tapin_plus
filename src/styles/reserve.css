@@ -1231,6 +1231,26 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-includes b{font-weight:700;color:var(--ink-1)}
 .rs-modal > .rs-closing{margin:var(--s-sm) 0 0}
 
+/* ── THE TABLET MEASURE, 640–1023 (22 Sep 2026, docs/POLISH §13) ──────────
+   The sheet is the window's width here and the column was the phone's 480 cap
+   stretched: 432px of content in an 834px sheet. It takes 560 — the measure
+   the paged steps hold from 1024 — centred, and the column's own gutters stay
+   the floor under it. */
+@media (min-width:640px) and (max-width:1023px){
+  .sheet-column.column{max-width:none}
+  .sheet-column.column > .rs-modal{max-width:560px;margin-inline:auto}
+}
+/* THE TWO BLEEDS FOLLOW THE SHEET, NOT THE GUTTER. The band and the docked bar
+   reach the sheet's edges; a `-gutter` margin only did that while the column
+   was the sheet minus its gutters. Below 1024 the sheet is the window and the
+   page hides its scrollbar, so `50% - 50vw` is exactly the distance to its edge
+   at any column width — on a phone it is the old -gutter to the pixel — and the inline
+   padding puts the contents back on the column's edge. */
+@media (max-width:1023px){
+  .rs-modal > .rs-earnback,
+  .rs-modal > .rs-dock{margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%)}
+}
+
 /* The two-column modal, AFTER the base rules above so source order lets it win
    (the first cut sat above them and lost, 15 Sep 2026). */
 @media (min-width:1024px){
@@ -1238,11 +1258,10 @@ html[data-flight="in"] .column > .sticky-cta{
      inside the dialog the grid needs the whole 1000px. */
   .sheet-column.column{max-width:none;width:100%}
   .sheet-column.column > .rs-modal{max-width:none;width:100%}
-  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026) and the
-     places row gained an area of its own — without one it was landing in an
-     implicit row and breaking the two columns it sat under. Reading order
-     down the left is now count, what you get, guarantee, where, card; the
-     decision holds the right the whole way down. */
+  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026; superseded
+     22 Sep, below) and the places row gained an area of its own — without one
+     it was landing in an implicit row and breaking the two columns it sat
+     under. */
   /* The earn-back statement takes a row of its own at the head of the left
      column — the same place it holds on a phone. An unplaced child would land
      in an implicit row and break the two columns under it, which is what
@@ -1251,10 +1270,27 @@ html[data-flight="in"] .column > .sticky-cta{
      THE `seats` ROW WENT WITH THE COUNT (21 Sep): it is inside the plans panel
      now, in the right-hand column, so the left column opens on the statement
      and the two movements are shorter by a row each. */
+  /* ══ THE CARD CROSSES TO THE RIGHT (22 Sep 2026, docs/POLISH §13) ══════
+     With the card at the foot of the left column the left ran to 1009px and
+     the right, the plans alone, stopped at 478: half the decision column was
+     empty ground. The card now closes the RIGHT column, under the plans, on
+     the row the places open on the left — so each column is two movements
+     (band, what you get, guarantee, places / plans, card) and they finish
+     within a line of each other. Every interval is the grid's own gap.
+
+     THE CLOSING ROW IS THE ONE THAT GIVES. The plans panel spanning three
+     rows is taller than the band, the list and the guarantee, and with four
+     `auto` rows the grid spread the difference over all three — 28, 44 and
+     12px between panels that should share one interval. `1fr` on the third
+     row takes all of it (an item crossing a flexible track grows only that
+     track), and `.rs-closing` sits at that row's foot: the band and the list
+     keep the row gap, the wider interval opens before the close — the rhythm
+     `.column > .closing` draws on the page — and the guarantee ends level
+     with the plans, so the places and the card start on one line. */
   .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
     grid-template-areas:"earn plans" "includes plans"
-      "closing plans" "places plans" "card plans";
-    grid-template-rows:repeat(5,auto);
+      "closing plans" "places card";
+    grid-template-rows:auto auto 1fr auto;
     column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
   /* The band leads the left column at the column's own width. It stops being
      full bleed here — there is no sheet edge to reach in a centred dialog — so
@@ -1267,10 +1303,17 @@ html[data-flight="in"] .column > .sticky-cta{
      in a 506px column, 16px above the row it is in. */
   .rs-modal > .rs-earnback{grid-area:earn;margin:0;padding:var(--s-lg) var(--s-xl);
     border-radius:var(--r-panel)}
-  /* The grid's own row gap is the interval here; the phone's margin above the
-     hairline would double it. */
-  .rs-card-close{grid-area:card;margin-top:0}
-  .rs-places{grid-area:places}
+  /* The grid's own row gap is the interval here; the phone's margins would
+     double it. `.rs-modal >`, at two classes: both phone rules sit LATER in
+     this file, and at one class they won on source order — which is why the
+     `margin-top:0` that stood here never applied (24px above each, measured).
+
+     NO HAIRLINE ON THE CARD HERE. On a phone it closes the rail above the
+     card; in this column the plans are above it and the rail is beside it, so
+     the rule would be a stray line level with the places caption. The card's
+     top and the caption's top share the row line instead. */
+  .rs-modal > .rs-card-close{grid-area:card;margin-top:0;padding-top:0;border-top:0}
+  .rs-modal > .rs-places{grid-area:places;margin-top:0}
   /* ONE WIDTH IN BOTH LAYOUTS. A 380 cap stood here and never applied — see
      the note on the phone rule — so the desktop card was rendering at
      `.card-stage`'s own 420. The close is the same object on both surfaces, so
@@ -1636,6 +1679,16 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-places{margin-top:var(--s-2xl)}
 .rs-places .places-label{margin:0 0 var(--s-md);color:var(--ink-3)}
 .rs-places .ticker-all{display:none}
+/* CONTAINED — the pitch hero's own construction (`.hero-rail .ticker-rail`,
+   pitch.css). This section is also `.places`, so it took the pitch's bleed:
+   a -gutter margin on a phone and `50% - 50vw` from 1024, which at 1180 drew a
+   1180px rail from x=−222 under the plans column (22 Sep 2026, POLISH §13).
+   Here the rail is the column's width at every width: no margin, no inset, the
+   first tile on the caption's edge, and the section clips as the backstop.
+   CLIP, not hidden, so this is not a scroll container. No mask is added: on
+   the lit sheet the fade is refused (campaign.css, `[data-lit] .ticker-rail`). */
+.rs-places{min-width:0;overflow-x:clip}
+.rs-places .ticker-rail{width:100%;max-width:100%;margin-inline:0;--rail-pad:0px}
 
 
 /* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
