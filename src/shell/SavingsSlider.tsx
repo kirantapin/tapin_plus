@@ -64,8 +64,12 @@ export default function SavingsSlider() {
           in 11px caps. The "assuming vs you said" distinction survives in the
           band itself — the chosen one is maroon whether we chose it or she did,
           and the question above it is what makes changing it obvious. */}
+      {/* THE ONE DISPLAY MOMENT IN THIS PANEL. `.t-figure` — the ramp's
+          dollar step (tokens.css) — rather than the 32px this carried, which
+          was within a few points of the headings around it and so read as one
+          more line rather than as the answer the panel exists to give. */}
       <p className="save-figure">
-        <span className="amount tnum">{money(s.steadyUsd)}</span>
+        <span className="amount tnum t-figure">{money(s.steadyUsd)}</span>
         <span className="unit">a month</span>
       </p>
 

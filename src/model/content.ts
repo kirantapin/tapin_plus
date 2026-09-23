@@ -21,6 +21,8 @@ export interface Policy {
   kind: "percent" | "credit" | "points";
   label: string;
   detail: string;
+  /** Points only: the rate a surface prints as "1×". Set below, never typed. */
+  multiplier?: number;
 }
 
 export interface Venue {
@@ -95,7 +97,7 @@ export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map(
     plus: v.policies.length > 0,
     /* The extraction's points policy reads "2× points" with a multiplier of 2.
      Sam, 15 Sep 2026: points are 1× now. The JSON is frozen; the override
-     lives here, so no surface can print a multiplier. */
+     lives here, and the "1×" the figure strips print (22 Sep) is read from it. */
     policies: v.policies.map((pol) =>
       pol.kind === "points" ? { ...pol, label: "Points", multiplier: 1 } : pol,
     ),
@@ -246,9 +248,56 @@ const VENUE_POLICY_DETAIL: Record<string, string> = {
 
 /** A venue policy's detail line, corrected. An empty string means the benefit
  *  carries no condition and the row prints none. Falls back to the record, so
- *  a kind that gains a policy later still prints something true. */
+ *  a kind that gains a policy later still prints something true.
+ *
+ *  ⚠ NO CALLER as of 21 Sep 2026. The merchant pop-up's benefit ROWS became
+ *  figure columns (docs/POLISH-2026-09-21.md §10) and a 30px figure takes a
+ *  four-word qualifier, not a sentence — so the pop-up reads
+ *  `venuePolicyFigure` below instead. This is left standing, not orphaned by
+ *  accident: it is the only place the long form of a venue's own conditions is
+ *  written down, and the credit's "spends like cash, on anything" (Sam's
+ *  wording, and the one line that implies alcohol without saying it) exists
+ *  nowhere else on this surface now. Delete it when that clause has a home. */
 export const venuePolicyDetail = (kind: string, fallback: string): string =>
   VENUE_POLICY_DETAIL[kind] ?? fallback;
+
+/**
+ * A venue policy AS A FIGURE — what the pop-up sets at 30px, and the short
+ * qualifier under it (docs/POLISH-2026-09-21.md §10.2).
+ *
+ * Split at the same seam `campaignBenefits` is: `figure` is the thing set
+ * large, `qualifier` is the CONDITION or CADENCE that makes it true and never
+ * a restatement of the figure. Three columns of "15% — fifteen percent off"
+ * would be the same claim twice.
+ *
+ * NOTHING HERE IS TYPED. The 5, the 15 and the 10 are BENEFIT's, so the sheet
+ * cannot print a rate or a floor the product does not hold — which is the
+ * whole reason the figures are derived rather than written beside the venue
+ * they are claimed at.
+ */
+const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }> = {
+  credit: {
+    figure: `$${BENEFIT.creditUsd}`,
+    qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
+  },
+  percent: {
+    figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
+    qualifier: "off, except alcohol",
+  },
+};
+
+/** The figure and qualifier for one venue policy, or undefined for a kind this
+ *  build has no figure form of — which prints no column rather than a guessed
+ *  one. Points is "1×" from the policy's own `multiplier` (Sam, 22 Sep 2026:
+ *  the three at one size), so a points policy without one prints no column. */
+export const venuePolicyFigure = (
+  policy: Pick<Policy, "kind" | "multiplier">,
+): { figure: string; qualifier: string } | undefined =>
+  policy.kind === "points"
+    ? policy.multiplier
+      ? { figure: `${policy.multiplier}\u00D7`, qualifier: "points, on every order" }
+      : undefined
+    : VENUE_POLICY_FIGURE[policy.kind];
 
 export interface ComingVenue {
   id: string;
@@ -318,7 +367,9 @@ const BENEFIT_DETAIL: Record<string, string> = {
      excludes alcohol (docs/virginia-alcohol-research.md); his call to keep it —
      points redeem for what the place offers, and the exclusion is stated on
      the 15% card. */
-  points: "Redeem for free food, drinks, etc. at each place",
+  /* Sam, 21 Sep 2026, reading the points card: "we should include cover,
+     and event tickets here too." */
+  points: "Redeem for free food, drinks, cover, event tickets, etc. at each place",
 };
 
 export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
@@ -328,6 +379,66 @@ export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
     detail: BENEFIT_DETAIL[b.id] ?? b.detail,
   }),
 );
+
+/**
+ * THE PHOTOGRAPH BEHIND EACH BENEFIT, as a benefit id → venue id map.
+ *
+ * Sam, 21 Sep 2026, pointing at meandu.com: "I like their styling for this kind
+ * of thing. I think it'd be cool if we had photos from the coffeeholics
+ * instagram too." The card resolves the id through that venue's own `hero`, so
+ * the Instagram shots are a one-line swap per card and nothing here holds a
+ * second copy of an image path.
+ *
+ * Four ids, four different files, and no `heroIsBright` one: The Burg's hero is
+ * a brand card on white (0.891 mean luminance, see BRIGHT_HEROES below) and the
+ * §7 veil is built for a photograph of a room, not for a wordmark.
+ */
+export const benefitShots: Record<string, string> = {
+  credit: "coffeeholicsva",
+  percent: "italianospizza",
+  points: "themilkparlor",
+  offers: "olaika",
+};
+
+/**
+ * THE ILLUSTRATIVE BASKET ON EACH CARD'S CHIP — the only invented figures in
+ * the block, declared HERE so no component types a price, and kept beside the
+ * benefits they exercise. The discount beside each is derived, never typed:
+ * that is what stops a card claiming a rate the product does not hold.
+ *
+ * Both baskets are coffee-shop and pizza-counter orders. §10 forbids any claim
+ * that alcohol is discounted, and an order line under a "15% off" title is
+ * exactly such a claim by layout, so nothing here is a drink with a proof.
+ *
+ * The credit's basket clears BENEFIT.creditMinUsd — a basket under the
+ * threshold would picture a credit that is not actually earned.
+ */
+const SHOT_BASKET_USD: Record<string, number> = { credit: 11.5, percent: 9 };
+
+/** The fragment each photo card floats over its lower half: what the benefit
+ *  looks like on one order. Two lines — the order, then what you pay.
+ *
+ *  WHAT YOU PAY, NOT WHAT CAME OFF. The second line read "−$5.00 credit" and
+ *  "−$1.35 (15% off)"; Sam, 21 Sep 2026: "don't like the -$5 credit" and
+ *  "don't love the way the negative price looks here, although it's a great
+ *  visual." A minus sign in a display figure is a ledger line, and a ledger
+ *  is the bill, not the benefit. "You pay $6.50" was the first replacement;
+ *  Sam, minutes later: "we should say 'you save X' instead of you pay X" —
+ *  the saving is the benefit, the total is the bill again. Still arithmetic
+ *  on the model's own figures, never a typed number. */
+export const benefitFragments: Record<string, { line: string; figure: string }> = {
+  credit: {
+    line: `Latte + croissant · $${SHOT_BASKET_USD.credit.toFixed(2)}`,
+    figure: `You save $${BENEFIT.creditUsd.toFixed(2)}`,
+  },
+  percent: {
+    line: `Two slices · $${SHOT_BASKET_USD.percent.toFixed(2)}`,
+    figure: `You save $${(SHOT_BASKET_USD.percent * BENEFIT.percentOff).toFixed(2)}`,
+  },
+  /* No figure: the transfer programme is unbuilt and a rate published today is
+     a rate a member holds Sam to in 2027. */
+  points: { line: "Every order", figure: "Points toward a free one" },
+};
 
 /**
  * "Save at least what you pay, or we refund the difference."

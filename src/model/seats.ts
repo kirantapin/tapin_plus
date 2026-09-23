@@ -50,7 +50,8 @@ import moneyJson from "../../docs/data/money-and-terms.json";
 /* 50, NOT THE EXTRACTION'S 100. Sam, 15 Sep 2026 (late): "I think we'll do 50
    early bird seats at $6.99 a month. Say that 35 of the 50 are left." The
    JSON is frozen; the override lives here, and content.ts reads this. */
-export const SEAT_CAP = 50;
+/* Sam, 22 Sep 2026: "Can we say 100 spots, with 41 left now." */
+export const SEAT_CAP = 100;
 void moneyJson;
 
 /**
@@ -67,8 +68,9 @@ void moneyJson;
    SEATS_PER_DAY. Still an invented figure, and this file's header says so. */
 /* Kiran, 18 Sep 2026: 11 → 6. Fixed, not drifting, for the same reason 11 was:
    SEATS_PER_DAY is 0, so this is what the line reads every day until someone
-   edits it again. Of 50, so the page now asserts 44 seats have gone. */
-const SEATS_AT_OPEN = 6;
+   edits it again. Of 100, so the page now asserts 59 seats have gone (Sam,
+   22 Sep 2026: "100 spots, with 41 left now"). */
+const SEATS_AT_OPEN = 41;
 
 /**
  * ══ THE COUNTER NO LONGER MOVES ════════════════════════════════════════════

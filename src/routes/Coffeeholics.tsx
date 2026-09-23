@@ -5,8 +5,11 @@ import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
-import { BenefitIcon } from "../shell/Icons";
+import PhotoCard from "../shell/PhotoCard";
+import BenefitFigures from "../shell/BenefitFigures";
+import SavingsLedger from "../shell/SavingsLedger";
 import { useReserveCta } from "../shell/useReserveCta";
+import { useMedia } from "../shell/useMedia";
 import {
   heroIsBright,
   logoField,
@@ -14,7 +17,12 @@ import {
   monthlyToday,
   venues,
 } from "../model/content";
-import { campaignVenue, campaignBenefits } from "../model/campaign";
+import {
+  campaignVenue,
+  campaignBenefits,
+  campaignShots,
+  campaignLedger,
+} from "../model/campaign";
 
 /**
  * THE COFFEEHOLICS SPLASH — the page a Meta ad points at.
@@ -28,9 +36,9 @@ import { campaignVenue, campaignBenefits } from "../model/campaign";
  * thing in the middle of it that a carousel cannot do — the two live trials at
  * that shop, free, today.
  *
- *   what a member gets here     the advert's three cards, its own words
- *   what you can have today     two gated one-time offers, verified live
- *   the membership              the price, the seats, the action
+ *   the shop, photographed        evidence before argument
+ *   what a member gets here       the advert's three claims, as figures
+ *   the membership                the price, the seats, the action
  *
  * Proof before the ask. A cold reader from a scroll has spent no intent to get
  * here; opening with $4.99 toward a service that starts at {launchWindow} asks
@@ -38,16 +46,47 @@ import { campaignVenue, campaignBenefits } from "../model/campaign";
  * past is one they can answer now — and answering it is what earns the ask.
  *
  * ══ IT IS THE SAME WORLD, NOT A NEW ONE ════════════════════════════════════
- * Same ground, same glass, same lockup, same maroon, same `.action`, same
- * benefit glyphs, same seat line, same footer. A campaign page that looks like
- * a different company reads as a scam, which is the exact suspicion "free $5"
- * invites, so nothing here is invented that the site already owns.
+ * Same ground, same glass, same lockup, same maroon, same `.action`, same seat
+ * line, same footer. A campaign page that looks like a different company reads
+ * as a scam, which is the exact suspicion "free $5" invites, so nothing here is
+ * invented that the site already owns.
  *
  * ══ AND IT IS SHORT ════════════════════════════════════════════════════════
  * Sam, the same afternoon, twice: "there's just a bunch of little text that i
  * think is unnecessary and redundant", and "way too crowded and dense. We
  * gotta dial back significantly." Every second line on this page is a
  * condition, a cadence or a price. Nothing restates a label.
+ *
+ * ══ 21 SEP 2026 — ONE BOX, ONE DISPLAY MOMENT ══════════════════════════════
+ * docs/POLISH-2026-09-21.md §3. Sam: "it still feels a bit AI generated." It
+ * did, and the diagnosis was composition rather than colour: three benefits as
+ * icon-tile-plus-heading rows, a headline and a lead inside the same rounded
+ * panel as everything else, and the merchant's photograph reduced to a 128px
+ * strip. So:
+ *
+ *   the photograph is the hero      full-bleed, the shop before the sentence
+ *   the headline sits on the ground the panel around it is gone
+ *   the three claims are FIGURES    $5 / 15% / 1×, in open columns
+ *   the membership keeps its box    it is the decision; it is the only box
+ *
+ * ══ 22 SEP 2026 — THE PROOF UNDER THE CLAIM ═══════════════════════════════
+ * §11: "showing items from their page, and when ordering what they save."
+ * Three of Coffeeholics' own items as the pitch's photo cards (PhotoCard),
+ * between the hero and the membership. The strip is the advert's claim; the
+ * cards are what it comes to on a real order.
+ *
+ * ══ 23 SEP 2026 — THE HERO EARNS ITS MOTION ═══════════════════════════════
+ * §17. Nothing on the page showed what the membership actually is: the same
+ * $5 arriving every week against one $4.99. That is a sequence, so it is the
+ * one thing here that moves — the month ledger (SavingsLedger), a receipt
+ * that fills itself over the photograph from 1024. On a phone the same
+ * receipt sits under the try link, complete and still: the photograph is a
+ * 260px band there and the card would cover it.
+ *
+ * §20, the same evening: the ledger redrawn as a receipt from the app (each
+ * week its basket's own photograph, the foot the one large figure), and the
+ * two equal hero slabs replaced by one button sized to its words with the try
+ * link beside it — the membership band's construction.
  */
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -90,11 +129,17 @@ export default function Coffeeholics() {
   useEffect(() => {
     const el = buy.current;
     if (!el) return;
-    /* ══ ONE ANCHOR: THE BUY BLOCK ════════════════════════════════════════
+    /* ══ ONE ANCHOR: THE FILLED ACTION ════════════════════════════════════
        The bar is out only while the page's own filled "Get early access" is
        on screen. Two controls for one destination at the same moment is the
        decoy shape layout.css warns about, and that is the only moment it can
        happen here.
+
+       THE REF MOVED WITH THE BUTTON. The price and the button used to share
+       one `.cg-buy` block; the desktop band (§3) splits them into two cells
+       of a row, so the observed element is now the cell the button is in.
+       Observing the price instead would hide the bar a beat early on a phone,
+       where the two are 60px apart.
 
        IT IS NOT ALSO KEYED TO THE HERO, which is what this tried first. The
        pitch hides its bar until the reader passes a buy block near the top;
@@ -129,6 +174,10 @@ export default function Coffeeholics() {
   /* Everywhere else it works, from the records — never a typed list of names,
      which is how a sixth venue signs and a page keeps saying five. */
   const others = venues.filter((o) => o.id !== "coffeeholicsva" && o.plus);
+  /* One ledger, placed by the stylesheet's own line: over the photograph and
+     looping from 1024, under the try link and still below it. Rendered once
+     rather than twice-and-hidden, so a phone never runs a loop it cannot see. */
+  const desk = useMedia("(min-width: 1024px)");
   if (!v) return null;
 
   return (
@@ -157,29 +206,19 @@ export default function Coffeeholics() {
         </p>
       </div>
 
-      <section className="panel cg">
-        <p className="cg-lockup">
-          <TapInLogo />
-          <PlusFlag className="plus" />
-        </p>
-
-        {/* THE ADVERT'S FIRST CARD, VERBATIM. The reader tapped those words a
-            second ago; re-earning their attention with a different sentence is
-            the cost message match exists to avoid. */}
-        <h1 className="t-display">$5 credit every week at Coffeeholics</h1>
-        <p className="t-lead cg-lead">
-          On any order over $10. Plus 15% off and points toward rewards.
-        </p>
-
-        {/* A plain div on a phone and a two-column grid from 720px, where the
-            shop can sit beside the benefits it belongs to instead of pushing
-            them a screen down. */}
-        <div className="cg-pair">
-        {/* ══ THE MERCHANT, AS EVIDENCE ════════════════════════════════════
+      {/* NOT A `.panel`. The headline, the lead and the three figures sit on
+          the page's own ground; the only box on this page is the membership,
+          because the membership is the decision. */}
+      <section className="cg">
+        {/* ══ THE MERCHANT, AS EVIDENCE AND AS THE HERO ════════════════════
             Their photograph and their own mark. The single thing a cold reader
-            is deciding is whether this is a real shop on a real street, and
-            the buttons below settle it by opening their actual page. */}
-        <div className="cg-venue">
+            is deciding is whether this is a real shop on a real street, and a
+            128px strip below the fold was answering that last. Full-bleed
+            under the announcement bar on a phone; a tall object beside the
+            argument from 1024. The name and street ride the photograph rather
+            than a plate under it — the venue-card shape the rail and the
+            pop-up both use. */}
+        <div className="cg-band">
           <img
             className="cg-shot"
             src={v.hero}
@@ -187,134 +226,220 @@ export default function Coffeeholics() {
             decoding="async"
             data-bright={heroIsBright(v.id) ? "true" : undefined}
           />
-          <span
-            className="collar cg-collar"
-            data-field={logoField(v.id)}
-            style={{ ["--brand" as string]: v.brandColor }}
-          >
-            <img src={v.logo} alt="" decoding="async" />
-          </span>
-          <span className="cg-venue-text">
-            <b>{v.name}</b>
-            <span>
-              {v.category} · {v.street}
+          <p className="cg-name">
+            <span
+              className="collar cg-collar"
+              data-field={logoField(v.id)}
+              style={{ ["--brand" as string]: v.brandColor }}
+            >
+              <img src={v.logo} alt="" decoding="async" />
             </span>
-          </span>
+            <span className="cg-name-text">
+              <b>{v.name}</b>
+              <span>
+                {v.category} · {v.street}
+              </span>
+            </span>
+          </p>
+          {desk && campaignLedger ? <SavingsLedger ledger={campaignLedger} /> : null}
         </div>
 
-        <ul className="cg-benefits">
-          {campaignBenefits.map((b) => (
-            <li key={b.id}>
-              <span className="cg-icon" aria-hidden="true">
-                <BenefitIcon id={b.id} />
-              </span>
-              <span>
-                <b>{b.label}</b>
-                <span>{b.note}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
+        {/* On the photograph on a phone, at the head of the left column from
+            1024 — one element either way, moved by CSS, so there is no second
+            lockup to keep in sync. */}
+        <p className="cg-lockup">
+          <TapInLogo />
+          <PlusFlag className="plus" mark={false} />
+        </p>
 
-        {/* ══ THE TRIAL, MENTIONED WHERE THE BENEFITS ARE ═══════════════════
-            Sam, 20 Sep 2026: "maybe we still mention that you can try it now,
-            and when I click on the deals to try it triggers the modal first
-            before I actually go to the coffeeholics page to use the deals."
+        <div className="cg-say">
+          {/* THE ADVERT'S FIRST CARD, VERBATIM. The reader tapped those words
+              a second ago; re-earning their attention with a different
+              sentence is the cost message match exists to avoid. */}
+          <h1 className="t-hero cg-h1">$5 credit every week at Coffeeholics</h1>
+          <p className="t-lead cg-lead">
+            On any order over $10. Plus 15% off and points toward rewards.
+          </p>
 
-            The docked bar says it too, but the bar is chrome — it arrives
-            over the page rather than in it, and a reader who has just read
-            the three benefits is exactly the reader the offer is for. So the
-            invitation sits at the end of that list, and it opens the same
-            modal: the how-it-works comes first and Coffeeholics comes from
-            there, which is the order he asked for. */}
-        <button type="button" className="cg-try" onClick={() => setTrial(true)}>
-          Try the first two free today
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="m10 7 5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+          {/* ══ THREE FIGURES, NOT THREE ROWS ════════════════════════════
+              docs/POLISH-2026-09-21.md §3.3, the biggest single move on the
+              page: the numbers that ARE the offer are set as the offer, in
+              open columns divided by a hairline, with no tile beside them.
+              $5 / 15% / 1×, one size (Sam, 22 Sep 2026). The construction is
+              shared with the pop-up and the checkout since 23 Sep (§15);
+              `cg-figures` is only this page's placement. */}
+          <BenefitFigures items={campaignBenefits} size="display" className="cg-figures" />
+
+          {/* ══ THE ACTIONS ══════════════════════════════════════════════
+              ONE FILLED ACTION PER VIEW. On a phone that is the membership
+              button at the foot, so the only control up here is the try
+              link — the filled twin below is `display:none` until 1024, where
+              the fold is wide enough to hold the argument and both actions at
+              once and the docked bar is switched off in exchange.
+
+              ONE BUTTON AND A LINK, NOT TWO SLABS (§20, 23 Sep 2026). Sam, on
+              the desktop hero: "don't like the CTA buttons here", beside the
+              membership band he did like — one button sized to its words and
+              the second thing beside it as text. So that is the construction:
+              the filled button at its words' width, the try link beside it. */}
+          <div className="cg-acts">
+            <Link
+              className="action cg-hero-cta"
+              to={cta.to}
+              state={cta.state}
+            >
+              {cta.label}
+            </Link>
+            {/* ══ THE TRIAL, MENTIONED WHERE THE BENEFITS ARE ═══════════
+                Sam, 20 Sep 2026: "maybe we still mention that you can try it
+                now, and when I click on the deals to try it triggers the
+                modal first before I actually go to the coffeeholics page to
+                use the deals."
+
+                The docked bar says it too, but the bar is chrome — it arrives
+                over the page rather than in it, and a reader who has just
+                read the three figures is exactly the reader the offer is for.
+                So the invitation sits at the end of that list, and it opens
+                the same modal: the how-it-works comes first and Coffeeholics
+                comes from there, which is the order he asked for. */}
+            <button type="button" className="cg-try" onClick={() => setTrial(true)}>
+              Try the first two free today
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m10 7 5 5-5 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+          {!desk && campaignLedger ? <SavingsLedger ledger={campaignLedger} still /> : null}
         </div>
       </section>
 
+      {/* ══ WHAT YOU'D SAVE HERE ═════════════════════════════════════════════
+          §11. Three of their own items, their own photographs, and what the
+          benefit takes off each — the pitch's photo card, not a lookalike.
+          On the page's ground, not in a panel: the cards are the boxes. */}
+      {campaignShots.length ? (
+        <section className="cg-save" aria-labelledby="cg-save-h">
+          <h2 className="t-section cg-save-h" id="cg-save-h">
+            What you'd save here
+          </h2>
+          <div className="bshots cg-shots">
+            {campaignShots.map((c) => (
+              <PhotoCard
+                key={c.id}
+                img={c.img}
+                title={c.title}
+                line={c.line}
+                lead={c.id === "credit"}
+                chip={c.chip}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* ══ THE MEMBERSHIP, AFTER THE PROOF ══════════════════════════════════
           The advert closes on "Get early access" and so does the page. The
           price, the date and the seat sentence are the site's own constants —
           the checkout charges from the same ones, so an advert cannot quote a
-          figure this build does not hold. */}
+          figure this build does not hold.
+
+          THREE CELLS, STACKED ON A PHONE AND A ROW FROM 1024. The wrappers
+          exist so the desktop band can be one movement — statement, price,
+          action — rather than a 1,120px-wide phone. Their stacked order is
+          the order the phone already had. */}
       <section className="panel cg-member">
-        <p className="t-caption panel-label">Every week, not once</p>
-        {/* NO BACK-REFERENCE. This opened "Those two are a trial", which
-            pointed at a panel that stood directly above it — and that panel
-            became a modal (Sam, 20 Sep 2026), so the sentence was pointing at
-            nothing. He caught it: "not sure it does right now since we
-            removed the try it now from the page." It stands on its own. */}
-        <p className="t-lead cg-member-line">
-          From {launchWindow}, members get all three at Coffeeholics every week, and
-          at every other place on the membership around Blacksburg.
-        </p>
-        <div className="cg-buy" ref={buy}>
+        <div className="cg-member-head">
+          {/* A HEADING, NOT A CAPTION. This was `.t-caption` — 11px tracked
+              uppercase over a sentence — which is the tic §1.5 of the polish
+              plan names: one such label on a page is a label, four is a
+              style. `.t-section` is the replacement the ramp gained for it. */}
+          <h2 className="t-section cg-member-h">Every week, not once</h2>
+          {/* NO BACK-REFERENCE. This opened "Those two are a trial", which
+              pointed at a panel that stood directly above it — and that panel
+              became a modal (Sam, 20 Sep 2026), so the sentence was pointing
+              at nothing. He caught it: "not sure it does right now since we
+              removed the try it now from the page." It stands on its own. */}
+          <p className="t-body cg-member-line">
+            From {launchWindow}, members get all three at Coffeeholics every
+            week, and at every other place on the membership around Blacksburg.
+          </p>
+        </div>
+
+        <div className="cg-buy">
           {/* DEPOSIT, THE WORD THE REST OF THE BUILD USES. Sam, 20 Sep 2026:
               "need to make sure it says $4.99 deposit." This read "a month,
               from when we open", which is the framing his advert's fifth card
               uses and the one the pitch and the checkout do not — and the
               checkout this button opens charges a deposit. The date it was
               carrying moved up into the sentence above, where it qualifies
-              the membership rather than the figure. */}
-          <p className="hero-price cg-price">
-            <b className="tnum">${monthlyToday.toFixed(2)}</b>
+              the membership rather than the figure.
+
+              `.t-figure` RATHER THAN `.hero-price`: the price is this page's
+              one display moment, and the ramp gained the step for it. The
+              class carries tabular figures, so `.tnum` is not also needed. */}
+          <p className="cg-price">
+            <b className="t-figure">${monthlyToday.toFixed(2)}</b>
             <span>deposit</span>
           </p>
           <p className="t-compact cg-seat">
             <SeatCapLine />
           </p>
+        </div>
+
+        <div className="cg-act" ref={buy}>
           <Link className="action cg-cta" to={cta.to} state={cta.state}>
             {cta.label}
           </Link>
+
+          {/* ══ THE OTHER PLACES ════════════════════════════════════════
+              Sam, 20 Sep 2026: "we still want to mention somewhere, even if
+              it's lower down or at checkout that someone can use this at
+              other spots too not just coffeeholics." His advert closes the
+              same way.
+
+              Down here rather than up there on purpose: the advert was about
+              one shop and the reader came for it, so widening the offer
+              before they have taken it in trades a concrete thing for a vague
+              one. After the price it is the reason the price is worth
+              paying. */}
+          {others.length ? (
+            <div className="cg-also">
+              <span className="cg-also-marks" aria-hidden="true">
+                {others.map((o) => (
+                  <span
+                    key={o.id}
+                    className="collar"
+                    data-field={logoField(o.id)}
+                    style={{ ["--brand" as string]: o.brandColor }}
+                  >
+                    <img src={o.logo} alt="" decoding="async" />
+                  </span>
+                ))}
+              </span>
+              <p className="t-compact">
+                Also at{" "}
+                {others.map((o, k, arr) => (
+                  <Fragment key={o.id}>
+                    {o.name}
+                    {k === arr.length - 1
+                      ? ""
+                      : k === arr.length - 2
+                        ? " and "
+                        : ", "}
+                  </Fragment>
+                ))}
+                .
+              </p>
+            </div>
+          ) : null}
         </div>
-
-        {/* ══ THE OTHER PLACES ════════════════════════════════════════════
-            Sam, 20 Sep 2026: "we still want to mention somewhere, even if
-            it's lower down or at checkout that someone can use this at other
-            spots too not just coffeeholics." His advert closes the same way.
-
-            Down here rather than up there on purpose: the advert was about
-            one shop and the reader came for it, so widening the offer before
-            they have taken it in trades a concrete thing for a vague one.
-            After the price it is the reason the price is worth paying. */}
-        {others.length ? (
-          <div className="cg-also">
-            <span className="cg-also-marks" aria-hidden="true">
-              {others.map((o) => (
-                <span
-                  key={o.id}
-                  className="collar"
-                  data-field={logoField(o.id)}
-                  style={{ ["--brand" as string]: o.brandColor }}
-                >
-                  <img src={o.logo} alt="" decoding="async" />
-                </span>
-              ))}
-            </span>
-            <p className="t-compact">
-              Also at{" "}
-              {others.map((o, k, arr) => (
-                <Fragment key={o.id}>
-                  {o.name}
-                  {k === arr.length - 1 ? "" : k === arr.length - 2 ? " and " : ", "}
-                </Fragment>
-              ))}
-              .
-            </p>
-          </div>
-        ) : null}
       </section>
 
       {/* ══ POWERED BY TAPIN ════════════════════════════════════════════════
