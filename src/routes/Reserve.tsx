@@ -13,7 +13,6 @@ import {
   firstEarlyBirdPrice,
   foundingCloses,
   foundingTierName,
-  guarantee,
   logoField,
   monthlyToday,
   offers,

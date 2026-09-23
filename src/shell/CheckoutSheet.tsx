@@ -1,4 +1,5 @@
 import { useState, type Ref } from "react";
+import GuaranteeLine from "./GuaranteeLine";
 import { Link } from "react-router-dom";
 import { Page } from "./Pager";
 import { Drill } from "./Drill";
@@ -154,6 +155,10 @@ export default function CheckoutSheet({
               onStep(2);
             }}
           />
+          {/* The guarantee, under the form (Sam, 23 Sep 2026: "this should show
+              up on the your details page"): the same line the included panel
+              carries, so the promise is in view where the number is given. */}
+          <GuaranteeLine className="rs-promise-step" />
         </div>
       </Page>
 
