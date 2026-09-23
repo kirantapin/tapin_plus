@@ -118,10 +118,6 @@
   color:var(--ink-2)}
 .rs-worth b{font-weight:700;color:var(--ink-1)}
 .plan-opt.is-on .plan-save{opacity:1}
-/* The grandfathering, once, between the choice and the charge rows. It must not
-   read as one of the rows — those are what happens to her money — so it keeps
-   body ink and sits on the panel rather than in the list. */
-.plan-locked{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl)}
 .plan-opt:active{transform:scale(.98)}
 .plan-opt:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 /* Two channels, never colour alone: the fill AND the border move. */
@@ -1072,10 +1068,6 @@ html[data-flight="in"] .column > .sticky-cta{
 
 }
 
-/* The refund under the plan tiles (14 Sep audit). A term, in the quiet ink,
-   one interval under the lock line. */
-.plan-refund{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl);color:var(--ink-3)}
-
 /* ── the footer's brand row (checkout only) ───────────────────────────────── */
 .site-foot.has-brand{display:flex;flex-direction:column;align-items:center;gap:var(--s-lg);
   padding-top:var(--s-2xl)}
@@ -1114,22 +1106,26 @@ html[data-flight="in"] .column > .sticky-cta{
    is the container; the pitch's card-row rules keyed on .bcards no longer
    match anything here. */
 
-/* ── the desktop pop-up ─────────────────────────────────────────────────────
+/* ── the pop-up, from 640 ──────────────────────────────────────────────────
    Sam, 15 Sep 2026: "this should be a pop up on desktop not a modal that
    slides up from the bottom … /impeccable animate for the fade in and out …
-   have the background be darker when the pop up is displaying." Below 1024
-   the sheet is unchanged. From 1024 the same surface is a window: centred,
-   inset from the viewport, rounded, and it ARRIVES rather than slides — a
-   fade with a 3.5% settle on the house curve, 240ms, over a scrim that goes
-   to 78% so the page beneath reads as scenery. Leaving is the reverse at
-   180ms with an ease-in. The header and the scroller are unchanged: they are
-   absolute inside the surface and follow it. */
-@media (min-width:1024px){
+   have the background be darker when the pop up is displaying." The same
+   surface is a window: centred, inset from the viewport, rounded, and it
+   ARRIVES rather than slides — a fade with a 3.5% settle on the house curve,
+   240ms. Leaving is the reverse at 180ms with an ease-in.
+
+   ══ ONE COLUMN, SO ONE WIDTH, FROM 640 (23 Sep 2026, POLISH §16) ═════════
+   It was a 1000px two-column dialog from 1024 and the whole window from 640
+   to 1023. A review sheet is one column at every width, so the dialog is
+   that column's width wherever there is room to centre it: 640, or the
+   window less 32px a side. Its height is its content's, capped at the
+   window, and it scrolls inside. Below 640 it is the phone's sheet. */
+@media (min-width:640px){
   .reserve-scrim{background:rgba(6,3,5,.64)}
   .reserve-sheet{
     inset:auto;top:50%;left:50%;
-    width:min(1180px,calc(100vw - 64px));
-    height:min(calc(100vh - 56px),980px);
+    width:min(640px,calc(100vw - 64px));
+    height:auto;max-height:calc(100vh - 48px);
     transform:translate(-50%,-50%);
     border-radius:var(--r-panel);overflow:hidden;
     border:1px solid var(--hair-lit);
@@ -1190,7 +1186,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .sheet-scroll{position:relative;inset:auto;flex:1 1 auto;min-height:0}
 .sheet-column.column{padding-top:var(--s-xl);padding-bottom:var(--s-2xl)}
 .sheet-column.column > .rs-modal{width:100%}
-@media (max-width:1023px){
+@media (max-width:639px){
   /* 92vh FLAT, NOT `auto` UP TO 92vh (21 Sep 2026). The sheet has four pages
      now and they are nothing like the same height, so a frame sized to its
      content would collapse from full height to a two-field form the instant
@@ -1201,155 +1197,36 @@ html[data-flight="in"] .column > .sticky-cta{
     border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
   .reserve-scrim{background:rgba(6,3,5,.6)}
 }
-@media (min-width:1024px){
-  /* Sam, 15 Sep 2026: "more of a horizontal layout for this on desktop."
-     Two movements side by side: the argument (the card, the count, what you
-     get, the guarantee) down the left, the decision (the plans and the one
-     button) on the right, each column as tall as the other. The dialog
-     widens to carry both; nothing scrolls until the window is short. */
-  .reserve-sheet{width:min(1000px,calc(100vw - 48px));height:auto;max-height:calc(100vh - 48px)}
-  .sheet-column.column{padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
-}
-.rs-modal{display:flex;flex-direction:column;gap:var(--s-lg)}
+/* ══ ONE COLUMN, AT EVERY WIDTH (23 Sep 2026, POLISH §16) ══════════════════
+   The seven blocks of page 0 stack with one section step between them and
+   the block's own interval inside; nothing is placed in a grid area, because
+   there is no second column for anything to be placed beside. */
+.rs-modal{display:flex;flex-direction:column;gap:var(--s-2xl)}
 /* THE CARD'S OWN WIDTH, AND WHY THIS IS THREE CLASSES DEEP. card.css is
    imported after this file and caps `.card-stage` at 420 — at one class the cap
    below lost on source order, silently, which is why the foot has been showing a
    420px card under a rule that said 320. 340 is §8's figure: the size you would
    hold one at, on a sheet that is 375 wide at its narrowest. */
 .rs-card-close .rs-card > *{max-width:340px;margin:0 auto}
-/* `.rs-seats` / `.rs-seats-close` stood here: the count's centred first form,
-   unreferenced since it became a card on 15 Sep and now doubly so. */
-.rs-modal > .checkout{margin:0}
-.rs-includes{list-style:none;margin:var(--s-sm) 0 0;padding:0 var(--s-sm);display:flex;flex-direction:column;gap:var(--s-md)}
-.rs-includes li{display:flex;align-items:flex-start;gap:var(--s-md);font-size:14px;line-height:1.4;color:var(--ink-2)}
-.rs-includes svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px;color:var(--ink-1)}
-.rs-includes b{font-weight:700;color:var(--ink-1)}
 
-/* ── THE TABLET MEASURE, 640–1023 (22 Sep 2026, docs/POLISH §13) ──────────
-   The sheet is the window's width here and the column was the phone's 480 cap
-   stretched: 432px of content in an 834px sheet. It takes 560 — the measure
-   the paged steps hold from 1024 — centred, and the column's own gutters stay
-   the floor under it. */
-@media (min-width:640px) and (max-width:1023px){
-  .sheet-column.column{max-width:none}
-  .sheet-column.column > .rs-modal{max-width:560px;margin-inline:auto}
+/* ── THE MEASURE, FROM 640 ─────────────────────────────────────────────────
+   Inside the 640 dialog the column gives up the phone's 480 cap and its
+   children's 720 one, and page 0 holds a 560px measure, centred — the same
+   measure the paged steps hold (`.rs-step` below), so the sheet does not
+   change width under the reader when Checkout moves it on. */
+@media (min-width:640px){
+  .sheet-column.column{max-width:none;width:100%;
+    padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
+  .sheet-column.column > .rs-modal{max-width:560px;width:100%;margin-inline:auto}
 }
-/* THE TWO BLEEDS FOLLOW THE SHEET, NOT THE GUTTER. The band and the docked bar
-   reach the sheet's edges; a `-gutter` margin only did that while the column
-   was the sheet minus its gutters. Below 1024 the sheet is the window and the
-   page hides its scrollbar, so `50% - 50vw` is exactly the distance to its edge
-   at any column width — on a phone it is the old -gutter to the pixel — and the inline
-   padding puts the contents back on the column's edge. */
-@media (max-width:1023px){
-  .rs-modal > .rs-earnback,
+/* THE DOCKED BAR BLEEDS TO THE SHEET'S EDGES ON A PHONE. Below 640 the sheet
+   is the window and the page hides its scrollbar, so `50% - 50vw` is exactly
+   the distance to its edge at any column width, and the inline padding puts
+   the button back on the column's edge. In the dialog the sheet is not the
+   window; the bar's own `-gutter` margin reaches the column's padding, and its
+   fade is the sheet's ground, so its edges do not show. */
+@media (max-width:639px){
   .rs-modal > .rs-dock{margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%)}
-}
-
-/* The two-column modal, AFTER the base rules above so source order lets it win
-   (the first cut sat above them and lost, 15 Sep 2026). */
-@media (min-width:1024px){
-  /* The column primitive caps its width and its children's for the phone;
-     inside the dialog the grid needs the whole 1000px. */
-  .sheet-column.column{max-width:none;width:100%}
-  .sheet-column.column > .rs-modal{max-width:none;width:100%}
-  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026; superseded
-     22 Sep, below) and the places row gained an area of its own — without one
-     it was landing in an implicit row and breaking the two columns it sat
-     under. */
-  /* The earn-back statement takes a row of its own at the head of the left
-     column — the same place it holds on a phone. An unplaced child would land
-     in an implicit row and break the two columns under it, which is what
-     happened to the places row on 20 Sep.
-
-     THE `seats` ROW WENT WITH THE COUNT (21 Sep): it is inside the plans panel
-     now, in the right-hand column, so the left column opens on the statement
-     and the two movements are shorter by a row each. */
-  /* ══ THE CARD CROSSES TO THE RIGHT (22 Sep 2026, docs/POLISH §13) ══════
-     With the card at the foot of the left column the left ran to 1009px and
-     the right, the plans alone, stopped at 478: half the decision column was
-     empty ground. The card now closes the RIGHT column, under the plans, on
-     the row the places open on the left — so each column is two movements
-     (band, what you get, guarantee, places / plans, card) and they finish
-     within a line of each other. Every interval is the grid's own gap.
-
-     THE CLOSING ROW IS THE ONE THAT GIVES. The plans panel spanning three
-     rows is taller than the band, the list and the guarantee, and with four
-     `auto` rows the grid spread the difference over all three — 28, 44 and
-     12px between panels that should share one interval. `1fr` on the third
-     row takes all of it (an item crossing a flexible track grows only that
-     track), so the places and the card start on one line. (Until 23 Sep the
-     guarantee sat at that row's foot, level with the plans; it heads the row
-     now — see `.rs-guarantee` below.) */
-  .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
-    grid-template-areas:"earn plans" "includes plans"
-      "closing plans" "places card";
-    grid-template-rows:auto auto 1fr auto;
-    column-gap:var(--s-2xl);row-gap:var(--s-2xl);align-items:start}
-  /* The band leads the left column at the column's own width. It stops being
-     full bleed here — there is no sheet edge to reach in a centred dialog — so
-     it takes the panels' radius and their inset, and reads as the plate the
-     column opens on.
-
-     `.rs-modal >`, at two classes: the phone rule that bleeds it sits LATER in
-     this file (grouped with the count it belongs to), so a single class here
-     loses on source order and the band kept its negative margins — 554px wide
-     in a 506px column, 16px above the row it is in. */
-  .rs-modal > .rs-earnback{grid-area:earn;margin:0;padding:var(--s-lg) var(--s-xl);
-    border-radius:var(--r-panel)}
-  /* The grid's own row gap is the interval here; the phone's margins would
-     double it. `.rs-modal >`, at two classes: both phone rules sit LATER in
-     this file, and at one class they won on source order — which is why the
-     `margin-top:0` that stood here never applied (24px above each, measured).
-
-     NO HAIRLINE ON THE CARD HERE. On a phone it closes the rail above the
-     card; in this column the plans are above it and the rail is beside it, so
-     the rule would be a stray line level with the places caption. The card's
-     top and the caption's top share the row line instead. */
-  .rs-modal > .rs-card-close{grid-area:card;margin-top:0;padding-top:0;border-top:0}
-  .rs-modal > .rs-places{grid-area:places;margin-top:0}
-  /* ONE WIDTH IN BOTH LAYOUTS. A 380 cap stood here and never applied — see
-     the note on the phone rule — so the desktop card was rendering at
-     `.card-stage`'s own 420. The close is the same object on both surfaces, so
-     it is 340 on both; the column it centres in is ~500px wide. */
-  /* POLISH, 15 Sep 2026 ("layout still seems a bit off on desktop"). The
-     right column ended 50px short of the left, so the two movements did not
-     finish together. The panel now stretches to the row and is a flex
-     column: the plans at its head, the two lines under them, and the button
-     seated at its foot — on the same baseline as the refund card. */
-  /* ══ IT NO LONGER STRETCHES ═══════════════════════════════════════════
-     The 15 Sep fix seated the button at the foot of a stretched column so
-     the two movements finished together — the right column was ending 50px
-     short of the left and the gap read as a mistake.
-
-     Moving the card to the foot (20 Sep) put two more rows in the left
-     column, so "as tall as the other" became a 600px hole between the terms
-     and the button. Fifty pixels of difference is a misalignment; six
-     hundred is an empty column with a control stranded at the bottom of it.
-     So the panel sizes to its content again and the button follows the
-     sentence it belongs to. The columns now differ in height, which is what
-     two columns of different content do. */
-  .rs-modal > .checkout{grid-area:plans;align-self:start;display:flex;flex-direction:column;
-    position:static}
-  .rs-modal > .checkout > .plan-refund{margin-top:0}
-  /* ZERO, and the refund line's own 24px bottom carries the interval. This
-     said 16px, which does not collapse in a flex column: the terms and the
-     button they belong to were 40px apart — a SECTION step (tokens.css: for
-     separating movements, never for anything inside one) opened inside a
-     single panel, and 16 more than the same pair measures on a phone. */
-  .rs-modal > .checkout > .pay-slot{margin-top:0}
-  /* The left column, one rhythm (23 Sep 2026, §15): three open blocks under
-     the band, each one row-gap — `--s-2xl`, the section step — from the
-     last. The row gap was `--s-lg` while the blocks were panels whose own
-     plates did the parting; open on the ground, the interval has to. */
-  .rs-modal > .rs-get{grid-area:includes;margin:0}
-  /* AT THE ROW'S HEAD NOW, not its foot. The plans are taller than the band,
-     the figures and the guarantee together (~480 against ~365 at 1440), so
-     the `1fr` row still takes the difference — but the blocks are open now,
-     and slack opened between two of them reads as a hole in the argument.
-     Seated at the start, the three keep one section step each and the slack
-     falls where the sheet already turns: above "Where it works", on the line
-     the card starts on. */
-  .rs-modal > .rs-guarantee{grid-area:closing;align-self:start;margin:0}
 }
 
 /* The referral head: the sentence beside the shirt it earns. */
@@ -1376,42 +1253,6 @@ html[data-flight="in"] .column > .sticky-cta{
 @media (min-width:1024px){.rs-dock{display:none}}
 @media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
 
-
-/* ══ THE SHEET'S SUBTITLE BAND ══════════════════════════════════════════════
-   Sam, 21 Sep 2026: "the checkout modal should show the 'earn back the cost of
-   membership on first $10 purchase' at the top" — then, on the first build of
-   it: "/impeccable redesign these two, I don't like the way they look, make
-   sure cohesive with the rest of the page."
-
-   WHAT IT WAS, AS ANTI-REFERENCE. A 32px glyph tile beside a bold line and a
-   grey one, closed by a hairline. Every part of that is this build's LIST-ROW
-   vocabulary — `.rs-li-icon`, `.vp-icon` — used for a thing that is not in a
-   list and has nothing beside it to be a row among. It read as a notification
-   bar dropped on top of the sheet.
-
-   WHAT IT IS. The header, continuing. `.sheet-head` is 56px of near-opaque
-   page with a hairline under it; this is the next band down, in white, full
-   bleed to the sheet's edges, carrying the sentence at the size the sheet's
-   own title is set (18 against the header's 15) and its qualifier under it.
-   No glyph, no tile, no rule: the white band's bottom edge against the ground
-   IS the separator, which is the same move the panels below make.
-
-   It pulls up through `.sheet-column`'s 16px of top padding so nothing shows
-   between it and the header — a gap there would make it a card that happens to
-   be first, which is exactly the thing it replaced. */
-.rs-earnback{
-  /* Flush to the header, bled to the sheet's edges, and 16px to the first
-     panel — the flex gap on `.rs-modal` carries 12 of those. */
-  margin:calc(-1 * var(--s-xl)) calc(-1 * var(--gutter)) calc(var(--s-xl) - var(--s-lg));
-  padding:var(--s-lg) var(--gutter);
-  background:var(--card);
-}
-/* 18px, the one step up from the sheet title (15) and down from a panel's
-   figures — and `balance`, so the two lines this makes at 375 break evenly
-   instead of leaving one word alone on the second. */
-.rs-earnback-lede{margin:0;font-size:18px;font-weight:700;line-height:1.3;
-  letter-spacing:-.015em;color:var(--ink-1);text-wrap:balance}
-.rs-earnback-sub{margin:var(--s-xs) 0 0;font-size:14px;line-height:1.35;color:var(--ink-3)}
 
 /* ══ THE COUNT, UNDER THE BUTTON ════════════════════════════════════════════
    Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below the actual
@@ -1586,10 +1427,6 @@ html[data-flight="in"] .column > .sticky-cta{
    sign-in sheet's, which is portalled to <body> over the pitch and needs the
    full dim it already has. Removed rather than left unreachable. */
 
-/* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
-   carries a negative top margin to pull itself against the plan picker, so it
-   has to be cancelled when this sits between the two. */
-
 /* ── THE PRICE LADDER ──────────────────────────────────────────────────────
    Two tiles stacked, not side by side: an anchor is read top-to-bottom, and
    at 1fr 1fr the two prices sit at the same height where neither leads.
@@ -1667,90 +1504,111 @@ html[data-flight="in"] .column > .sticky-cta{
   .plan-opt:active,.plan-opt.is-later:active{transform:none}
 }
 
-/* ── WHERE IT WORKS, AT THE FOOT OF THE SHEET ──────────────────────────────
-   The rail, not the grid, and no "View all places": the grid it would open is
-   a page-width object and this is a column. /in hides the same control on the
-   same reasoning (.ms-places, above).
+/* ══ PAGE 0 AS A REVIEW SHEET (23 Sep 2026, docs/POLISH-2026-09-21.md §16) ══
+   Sam: "the checkout page needs some more work, can you look at mobbin to take
+   inspiration and use /impeccable to design." The references (Cash App,
+   CLEAR+, Panera Sip Club, Shopify, Fresha) are all one column: a ledger of
+   what you pay and when, a short checklist, a guarantee line, one button that
+   names the amount. What went, and why, so none of it is rebuilt by accident:
+     · the two-column grid and its areas — there is one column now
+     · the subtitle band — its facts are the ledger's first two rows
+     · the figure strip (§15) — a marketing device; the checklist replaces it
+     · the rail — it stays on the pitch; the places are one row here
+     · the guarantee block — it is one line now
+   Every block sits on the sheet's own ground; none has a panel. The flex gap
+   on `.rs-modal` is the one section step between them (`--s-2xl`), and
+   `--s-lg` is the interval inside a block. */
 
-   A STRAY `}` STOOD ABOVE THIS BLOCK until 23 Sep 2026, one more than the
-   reduced-motion block above it opens. At the top level a lone `}` becomes
-   part of the NEXT rule's selector and the browser drops that rule whole —
-   so whichever rule sat first here silently never applied (it was the old
-   `.rs-places{margin-top}`). Count the braces before adding a block above. */
-.rs-places .ticker-all{display:none}
-/* CONTAINED — the pitch hero's own construction (`.hero-rail .ticker-rail`,
-   pitch.css). This section is also `.places`, so it took the pitch's bleed:
-   a -gutter margin on a phone and `50% - 50vw` from 1024, which at 1180 drew a
-   1180px rail from x=−222 under the plans column (22 Sep 2026, POLISH §13).
-   Here the rail is the column's width at every width: no margin, no inset, the
-   first tile on the caption's edge, and the section clips as the backstop.
-   CLIP, not hidden, so this is not a scroll container. No mask is added: on
-   the lit sheet the fade is refused (campaign.css, `[data-lit] .ticker-rail`). */
-.rs-places{min-width:0;overflow-x:clip}
-.rs-places .ticker-rail{width:100%;max-width:100%;margin-inline:0;--rail-pad:0px}
+/* ── 1. THE TILES, ON THE SHEET'S GROUND ───────────────────────────────────
+   They sat on a white panel, and the Standard tile's `--inner` fill was a
+   recess in it. On the sheet's own ground (`--page`, a rung BELOW white on
+   this ramp) `--inner` is within a point of the surface and the tile's plate
+   disappears, leaving a dashed outline. So `--inner` is re-pointed at white
+   on this tile alone: the plate keeps the step it had, one rung along — the
+   move `.rs-step .ph-field` makes below — and the refusal's keyframes, which
+   read `--inner` at both ends, start and settle on that same white. */
+.rs-modal > .plan-pick{margin:0}
+.rs-modal .plan-opt.is-later{--inner:var(--card)}
+/* THE CHOSEN TILE'S SECOND LINE, AT READING CONTRAST. `.plan-opt.is-on span`
+   dims every span in the tile to .82, and `.plan-now` is a span: so the price
+   rendered at 82% (the 14 Sep note above says it must not) and "Counts toward
+   your first month" at .72 inside that, 59% white on maroon — 4.16:1,
+   measured on this pass. The wrapper goes back to full strength, as
+   `.plan-figs` already did; only the line's own .72 remains (5.3:1). */
+.plan-opt.is-on .plan-now{opacity:1}
 
+/* ── 2. THE SCHEDULE ───────────────────────────────────────────────────────
+   One grid for the whole ledger, and each row a SUBGRID of it, so the figures
+   column is one width for every row — the widest figure's — and every amount
+   ends on one right edge. The label and the figure share a baseline; the note
+   runs under the label only, so the figure column stays clear.
 
-/* ══ THE LEFT COLUMN, OPEN (23 Sep 2026, docs/POLISH-2026-09-21.md §15) ════
-   Sam, on the desktop checkout: "/impeccable redesign this." What you get,
-   the guarantee and where it works were three panels of one weight under
-   uppercase eyebrows, with four icon tiles and a shield tile inside them —
-   the pre-polish language on the one surface that takes money. They are
-   three open blocks on the sheet's own ground now, each headed in sentence
-   case, none boxed. The band above keeps its white; the plans beside keep
-   theirs.
+   The label is the house field label (14/600 `--ink-3`, `.ph-label`); the
+   note is a step darker because it is the sentence that explains the figure;
+   the figure is 16/700 tabular `--ink-1`, the loudest thing in its row and
+   never louder than the row beside it. Dividers are `--hair-lit`, the same
+   line page 2's charge rows draw — `--hair` measures ~1.3:1 on this ground
+   and a ledger with invisible rules is a list that has lost its columns. */
+.rs-ledger{display:grid;grid-template-columns:minmax(0,1fr) max-content;
+  column-gap:var(--s-xl);margin:0}
+.rs-row{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;
+  align-items:baseline;row-gap:var(--s-xs);padding:var(--s-lg) 0}
+.rs-row:first-child{padding-top:0}
+.rs-row:last-child{padding-bottom:0}
+.rs-row + .rs-row{border-top:1px solid var(--hair-lit)}
+.rs-when{grid-column:1;grid-row:1;margin:0;font-size:14px;font-weight:600;
+  line-height:1.35;letter-spacing:.005em;color:var(--ink-3)}
+.rs-fig{grid-column:2;grid-row:1;justify-self:end;margin:0;text-align:right;
+  white-space:nowrap;font-size:16px;font-weight:700;line-height:1.35;
+  letter-spacing:-.01em;color:var(--ink-1)}
+.rs-note{grid-column:1;grid-row:2;margin:0;font-size:14px;font-weight:500;
+  line-height:1.4;color:var(--ink-2);text-wrap:pretty}
 
-   ONE SECTION STEP BETWEEN THE BLOCKS. On a phone `.rs-modal` is a flex
-   column with an `--s-lg` gap that the band and the plans already count on,
-   so each block tops it up to `--s-2xl` rather than the gap changing under
-   them. From 1024 the grid's own row gap is the interval (the desktop block
-   above) and these margins stand down — hence the max-width, not a later
-   reset that would lose to it on source order. */
-@media (max-width:1023px){
-  .rs-modal > .rs-get,
-  .rs-modal > .rs-guarantee,
-  .rs-modal > .rs-places{margin-top:calc(var(--s-2xl) - var(--s-lg))}
-}
-/* The head is `.t-title` — 18px 700 `--ink-1`, the size the band's own
-   statement is set at — so the sheet has one heading size, not a third. It
-   sits closer to what it heads than to what came before it. */
-.rs-head{margin:0 0 var(--s-lg)}
-.rs-figures{margin:0}
+/* ── 3. THE BUTTON AND ITS COUNT ───────────────────────────────────────────
+   The block's own interval, not the §4 slot's: `.pay-slot` carries a 16px
+   top margin for page 2, where it sits under the consent sentence. Here the
+   section step above it is the whole interval. The count under it is
+   unchanged (`.rs-seats-under`). */
+.rs-buy > .pay-slot{margin-top:0}
 
-/* The one offer line, the pop-up's construction at the reading floor: the
-   offers glyph bare at the left, the label bold, the example after it. */
-.rs-offer{display:flex;align-items:flex-start;gap:var(--s-md);margin:var(--s-xl) 0 0;
-  font-size:14px;font-weight:500;line-height:1.4;color:var(--ink-3);text-wrap:pretty}
-.rs-offer b{font-weight:700;color:var(--ink-1)}
-.rs-offer-glyph{flex:0 0 auto;display:block;color:var(--ink-3)}
-.rs-offer-glyph svg{width:20px;height:20px;display:block}
+/* ── 4. WHAT YOU GET ───────────────────────────────────────────────────────
+   The heading is `.t-title` (18/700 `--ink-1`); a check glyph in ink, not a
+   tile, beside each line. The glyph is centred on the FIRST line box
+   (1.4em at 15px), so a line that wraps keeps its check at its head. */
+.rs-get-head{margin:0 0 var(--s-lg)}
+.rs-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
+  gap:var(--s-md)}
+.rs-checks li{display:flex;align-items:flex-start;gap:var(--s-md);
+  font-size:15px;font-weight:500;line-height:1.4;color:var(--ink-2)}
+.rs-checks svg{flex:0 0 auto;display:block;width:16px;height:16px;
+  margin-top:calc((1.4em - 16px) / 2);color:var(--ink-2)}
 
-/* THE GUARANTEE AS A STATEMENT, as the pitch sets it: a hairline over it,
-   the shield bare in `--ink-2` beside the promise, the address under. 24px
-   is the promise's own first line (18 × 1.35), so the mark sits on that line
-   rather than floating above a paragraph. 24ch keeps the sentence to two
-   even lines at every width the column takes. `.guarantee` and
-   `.guarantee-contact` are layout.css's, shared with the pitch and /in. */
-.rs-guarantee{display:flex;align-items:flex-start;gap:var(--s-lg);
-  padding-top:var(--s-xl);border-top:1px solid var(--hair)}
-.rs-guarantee-mark{flex:0 0 auto;display:block;color:var(--ink-2)}
-.rs-guarantee-mark svg{width:24px;height:24px;display:block}
-.rs-guarantee .guarantee{max-width:24ch}
+/* ── 5. WHERE IT WORKS ─────────────────────────────────────────────────────
+   The splash's `.cg-also`, as it is (campaign.css), with two things this
+   sheet needs: no margin of its own (the section step is the interval), and
+   the ring that cuts each mark out of the one behind it drawn in THIS
+   surface's ground rather than white — on the splash it sits on white, and a
+   white ring on `--page` is a halo. The marks stay one row beside the names
+   at every width; the names wrap under themselves, never under the marks. */
+.rs-venues .cg-also{margin:0;flex-wrap:nowrap}
+.rs-venues .cg-also-marks .collar{box-shadow:0 0 0 2px var(--page)}
+.rs-venues-line{margin:0}
+.rs-venue-name{white-space:nowrap}
 
-/* THE HERO RAIL'S SQUARE TILES. The 3:4 poster was a phone's portrait tile
-   carried into a column it did not fit, cut off mid-card at the column's edge.
-   Square at every width: the phone keeps the rail's own tile width, and from
-   1024 it is the hero's 160 (pitch.css, `.hero-rail`), which the column holds
-   three of whole. The ratio rides the `.vcard` inside the `li`, where the base
-   3:4 is declared. */
-.rs-places .ticker-tile .vcard{aspect-ratio:1}
-@media (min-width:1024px){
-  .rs-places .ticker-tile{width:160px}
-  /* 12, not the rail's 8: at 8 three tiles are 496 in a 506 column and a 2px
-     sliver of a fourth showed at the edge — on a lit sheet there is no fade
-     to soften it. 3 × 160 + 2 × 12 = 504, and the fourth starts past the
-     column. At 1024 (482) the third is cut, which is a rail saying "more". */
-  .rs-places .ticker-rail{gap:var(--s-lg)}
-}
+/* ── 6. THE GUARANTEE ──────────────────────────────────────────────────────
+   One statement: the shield at 20px beside the promise (15/700) and the
+   address after it (14px), as one run of text so a narrow sheet wraps it as
+   a sentence. The address does not break inside itself. The shield is centred
+   on the first line box, as the checklist's glyphs are. */
+.rs-promise{display:flex;align-items:flex-start;gap:var(--s-md);margin:0;
+  font-size:15px;line-height:1.4;color:var(--ink-1);text-wrap:pretty}
+.rs-promise > svg{flex:0 0 auto;display:block;width:20px;height:20px;
+  margin-top:calc((1.4em - 20px) / 2);color:var(--ink-2)}
+.rs-promise b{font-weight:700}
+.rs-promise a{font-size:14px;font-weight:500;color:var(--ink-2);
+  text-underline-offset:3px;white-space:nowrap}
+.rs-promise a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
 
 
 /* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
@@ -1783,10 +1641,9 @@ html[data-flight="in"] .column > .sticky-cta{
    No plate and no label. A hairline closes the rail above it, the card sits on
    the sheet's own ground at the size you would hold one, and one line under it
    says when it is hers. The interval above the hairline and below it is the
-   same section step, so the card reads as the end of the sheet rather than as
-   one more panel in the stack. */
-.rs-card-close{margin-top:var(--s-2xl);padding-top:var(--s-2xl);
-  border-top:1px solid var(--hair)}
+   same section step — above it, the column's own gap — so the card reads as
+   the end of the sheet rather than as one more panel in the stack. */
+.rs-card-close{padding-top:var(--s-2xl);border-top:1px solid var(--hair)}
 /* 14px and ink three, centred on the object it names — the reading floor, not
    a caption size: it is a sentence about what the reader is buying. */
 .rs-card-cap{margin:var(--s-lg) 0 0;font-size:14px;font-weight:500;line-height:1.4;
@@ -1891,11 +1748,11 @@ html[data-flight="in"] .column > .sticky-cta{
 
 /* ── PAGES 1–3: THE STEPS' OWN MEASURE ─────────────────────────────────────
    The steps are not panels. They sit on the sheet's own ground with the
-   column's gutter on a phone, and from 1024 they hold a reading measure in the
-   middle of the 1000px dialog rather than stretching a two-field form across
-   it (docs/POLISH-2026-09-21.md §9). */
+   column's gutter on a phone, and in the dialog they hold the reading measure
+   page 0 holds (docs/POLISH-2026-09-21.md §9). From 640, since 23 Sep: that
+   is where the sheet becomes the dialog now (§16). */
 .rs-step{padding:var(--s-xl) var(--gutter) var(--s-2xl)}
-@media (min-width:1024px){
+@media (min-width:640px){
   .rs-step{max-width:560px;margin-inline:auto;
     padding:var(--s-2xl) var(--gutter) var(--s-3xl)}
 }
