@@ -14,10 +14,22 @@ import TapInIcon from "./TapInIcon";
  * (TapInIcon) so it takes the plate's ink. One component for the pitch's
  * corner flag (.vflag) and the venue page's chip (.plus).
  */
-export default function PlusFlag({ className = "" }: { className?: string }) {
+/**
+ * `mark` — the TapIn glyph before the word. On by default: on a venue tile or
+ * a merchant's card the glyph is what says whose flag this is. Off beside the
+ * wordmark (Sam, 22 Sep 2026: "can we remove the tapin logo from the plus
+ * chip here"), where the mark is already the word to its left.
+ */
+export default function PlusFlag({
+  className = "",
+  mark = true,
+}: {
+  className?: string;
+  mark?: boolean;
+}) {
   return (
     <span className={className}>
-      <TapInIcon className="plus-mark" />
+      {mark ? <TapInIcon className="plus-mark" /> : null}
       <span className="plus-word">PLUS</span>
     </span>
   );

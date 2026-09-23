@@ -224,7 +224,7 @@ export default function Coffeeholics() {
             lockup to keep in sync. */}
         <p className="cg-lockup">
           <TapInLogo />
-          <PlusFlag className="plus" />
+          <PlusFlag className="plus" mark={false} />
         </p>
 
         <div className="cg-say">
