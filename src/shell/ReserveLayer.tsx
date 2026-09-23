@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -12,6 +13,7 @@ import { useLocation, useNavigate, type Location } from "react-router-dom";
 import Pager, { Page } from "./Pager";
 import CheckoutSheet from "./CheckoutSheet";
 import { flightPending } from "./cardFlight";
+import { useSheetFrame } from "./useSheetFrame";
 import type { PhoneIdentity, PhoneStage, PhoneStepHandle } from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -128,15 +130,34 @@ export default function ReserveLayer({
     dir: "fwd",
   });
   const step = page.step;
-  const go = useCallback((next: number) => {
-    setPage((p) =>
-      p.step === next ? p : { step: next, dir: next > p.step ? "fwd" : "back" },
-    );
-  }, []);
+  /* From 1024 the frame follows the page it holds (§33): its size is read
+     here, before the step changes, and run to the new page's once it lands. */
+  const holdFrame = useSheetFrame(sheet);
+  const shown = useRef(0);
+  useLayoutEffect(() => {
+    shown.current = step;
+  }, [step]);
+  const go = useCallback(
+    (next: number) => {
+      if (next !== shown.current) holdFrame();
+      setPage((p) =>
+        p.step === next ? p : { step: next, dir: next > p.step ? "fwd" : "back" },
+      );
+    },
+    [holdFrame],
+  );
 
   /* Which of PhoneStep's two stages is up on page 1 — the header titles itself
-     from it, and the chevron uses it to decide what "back" means there. */
+     from it, and the chevron uses it to decide what "back" means there. The
+     code page is a page too, so the frame follows it the same way. */
   const [stage, setStage] = useState<PhoneStage>("phone");
+  const onStage = useCallback(
+    (next: PhoneStage) => {
+      holdFrame();
+      setStage(next);
+    },
+    [holdFrame],
+  );
 
   /* ══ THE CHARGE'S OWN STATE, NOW THAT THE CHARGE IS DRAWN HERE ════════════
      Moved from routes/Reserve.tsx with the pages. `paid` is never seeded from
@@ -392,7 +413,7 @@ export default function ReserveLayer({
               onIdentity={(id) => {
                 identity.current = id;
               }}
-              onStage={setStage}
+              onStage={onStage}
               phoneRef={phone}
             />
           </Pager>

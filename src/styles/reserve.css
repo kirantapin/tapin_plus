@@ -1816,9 +1816,9 @@ html.is-layered{overflow:hidden}
    column packs to its top; the panel takes the row's height and seats the
    card on its floor, so the two columns end on one line (§26).
 
-   Pages 1–3 keep their 560 measure centred in the wider sheet (`.rs-step`),
-   so the sheet does not change width under the reader when Checkout moves
-   it on. The docked bar is already gone from 1024.
+   Pages 1–3 keep their 560 measure (`.rs-step`); since §33 the sheet
+   narrows to it when Checkout moves it on (the foot of this file). The
+   docked bar is already gone from 1024.
 
    THE FIT (§29). The tiles and the order card outrun the panel by ~153px
    at 1180 and 1440; the panel takes it up above the card's hairline. The
@@ -1856,4 +1856,16 @@ html.is-layered{overflow:hidden}
      floor, so the air sits inside the white card, never on the ground. */
   .rs-get-col{order:-1;align-self:stretch;grid-template-rows:minmax(0,1fr)}
   .rs-inc-card{margin-top:auto}
+}
+
+/* ── THE FRAME FOLLOWS ITS PAGE, FROM 1024 (POLISH §33) ─────────────────────
+   Page 0 is two columns; pages 1–3 are one, so once page 0 is out of flow the
+   sheet takes the one-column dialog's measure (the 560 step plus its gutters)
+   and its content's height. Keyed to page 0's own state, so the width changes
+   in the same commit as the pages. shell/useSheetFrame.ts runs the change;
+   while it does, the scroller holds its overflow so no scrollbar flashes. */
+@media (min-width:1024px){
+  .reserve-sheet:has(> .sheet-scroll > .rs-pages > .rs-page:first-child:is(.is-out,.is-off)){
+    width:min(640px,calc(100vw - 64px))}
+  .reserve-sheet[data-frame] > .sheet-scroll{overflow-y:hidden}
 }
