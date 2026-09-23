@@ -55,9 +55,19 @@ import { BENEFIT } from "../model/savings";
    this sheet had grown them — a subtitle band, a figure strip, a rail, a
    guarantee block (docs/POLISH-2026-09-21.md §16).
 
-   The pitch and the splash persuade; this sheet CONFIRMS. So page 0 is seven
-   blocks in one column: the plan tiles, the schedule, the button and its
-   count, what you get, where it works, the guarantee, the card. */
+   The pitch and the splash persuade; this sheet CONFIRMS. So page 0 is the
+   plan tiles, the schedule, the button and its count, the included panel, and
+   the card.
+
+   ══ THE INCLUDED PANEL, AND DESKTOP WITHOUT A SCROLL (23 Sep 2026, §18) ════
+   Sam, on the trial modal's call-out: "I like how you formatted this, maybe we
+   use the same on the checkout flow." So what you get, where it works and the
+   guarantee — three open blocks — are one `--inner` panel in that call-out's
+   construction (no button and no price inside it: the ledger carries both).
+   And "checkout on desktop should be wider so I don't need to scroll": from
+   1024 the sheet is two columns — the money on the left (tiles, schedule,
+   button, count), what it buys on the right (the panel, the card). Below 1024
+   the column wrappers generate no boxes, so the phone reads the same order. */
 const plan = PLANS.monthly;
 
 /* ══ THE SCHEDULE — WHAT YOU PAY, AND WHEN ══════════════════════════════════
@@ -149,8 +159,9 @@ const included: { id: string; line: string }[] = [
 ];
 
 /* ══ WHERE IT WORKS, AS ONE ROW ═══════════════════════════════════════════
-   The splash's `.cg-also` construction — the marks overlapped, the names in a
-   sentence — for all six. Names as the records hold them, so a real
+   The trial modal's call-out row — the marks overlapped on the left, the names
+   in a sentence beside them — for all six, rebuilt under `.rs-*` so the sheet
+   and the modal never share a rule. Names as the records hold them, so a real
    business's name is never shortened or retyped here. The rail stays on the
    pitch; on a sheet that confirms, it was a second carousel to scroll. */
 /* The joins between the names, in the splash's own grammar: commas, then
@@ -257,327 +268,342 @@ export default function Reserve() {
 
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it
-     reads as a review sheet (see the note above `plan`): one column, the
-     money as a schedule, one button, a checklist, a row of places, a line of
-     guarantee, the card. §4 is untouched — the rows, the consent and the
-     control still travel together on page 2, one tap on. */
+     reads as a review sheet (see the note above `plan`): the money as a
+     schedule, one button, one panel of what it includes, the card. §4 is
+     untouched — the rows, the consent and the control still travel together
+     on page 2, one tap on. */
   return (
     <div className="rs-modal">
-      {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
-         It offered monthly, the 3-month pass and the year-with-a-shirt as a
-         radiogroup. Two reasons it had to go, and the second is the serious
-         one.
+      {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
+          The left column from 1024 (tiles, schedule, button, count); below
+          1024 this wrapper is `display:contents` and draws nothing. */}
+      <div className="rs-pay-col">
+        {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
+           It offered monthly, the 3-month pass and the year-with-a-shirt as a
+           radiogroup. Two reasons it had to go, and the second is the serious
+           one.
 
-         SAM ASKED FOR IT: "get rid of those and just have the standard $6.99
-         one."
+           SAM ASKED FOR IT: "get rid of those and just have the standard $6.99
+           one."
 
-         AND IT WAS NEVER REAL. `create_simple_intent` hardcodes ONE price in
-         subscription mode — every tile created the same subscription for the
-         same amount. Choosing "3 months" charged the monthly figure and
-         produced a monthly subscription, while the rows, the consent sentence
-         and the terms beside it all described a 3-month pass. That is a
-         control that looks like it did something and did not, on the one
-         surface where §4 says the stated terms must match what is charged.
-         Do not restore a tile without a price id behind it.
+           AND IT WAS NEVER REAL. `create_simple_intent` hardcodes ONE price in
+           subscription mode — every tile created the same subscription for the
+           same amount. Choosing "3 months" charged the monthly figure and
+           produced a monthly subscription, while the rows, the consent sentence
+           and the terms beside it all described a 3-month pass. That is a
+           control that looks like it did something and did not, on the one
+           surface where §4 says the stated terms must match what is charged.
+           Do not restore a tile without a price id behind it.
 
-         `PLANS.pass` and `PLANS.year` stay in content.ts: /in reads the plan
-         off a stored reservation, and a record written before today still has
-         to render the words its owner agreed to. */}
-      {/* THE TILE STAYS, AND IT IS ALREADY CHOSEN. One plan, so the group
-          holds one option and that option is selected — the reader sees what
-          they are buying in the same object that used to offer the choice,
-          rather than a panel of prose with no figure on it.
+           `PLANS.pass` and `PLANS.year` stay in content.ts: /in reads the plan
+           off a stored reservation, and a record written before today still has
+           to render the words its owner agreed to. */}
+        {/* THE TILE STAYS, AND IT IS ALREADY CHOSEN. One plan, so the group
+            holds one option and that option is selected — the reader sees what
+            they are buying in the same object that used to offer the choice,
+            rather than a panel of prose with no figure on it.
 
-          STILL A RADIO, not a div dressed as one: it is the single member of
-          a radiogroup, `aria-checked` is true, and it is focusable — a
-          screen reader should meet "Early Bird Deposit, selected, 1 of 1",
-          which is the truth. Tapping it re-selects what is already selected, so there is
-          no handler; a control that cannot change state must not pretend it
-          can. */}
-      <div
-        className={`plan-pick${FOUNDING_OPEN && plan.saving ? " is-ladder" : " is-solo"}`}
-        role="radiogroup"
-        aria-label="Your plan"
-      >
-        <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
-          {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
-              Kiran, 15 Sep 2026. What is taken today is one charge that holds
-              the seat; the recurring rate and its cadence are the consent
-              sentence's job, two lines below, where they are disclosed
-              together with the control. A tile reading "Monthly · $4.99 a
-              month" put the schedule on the object and said it twice.
+            STILL A RADIO, not a div dressed as one: it is the single member of
+            a radiogroup, `aria-checked` is true, and it is focusable — a
+            screen reader should meet "Early Bird Deposit, selected, 1 of 1",
+            which is the truth. Tapping it re-selects what is already selected, so there is
+            no handler; a control that cannot change state must not pretend it
+            can. */}
+        <div
+          className={`plan-pick${FOUNDING_OPEN && plan.saving ? " is-ladder" : " is-solo"}`}
+          role="radiogroup"
+          aria-label="Your plan"
+        >
+          <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
+            {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
+                Kiran, 15 Sep 2026. What is taken today is one charge that holds
+                the seat; the recurring rate and its cadence are the consent
+                sentence's job, two lines below, where they are disclosed
+                together with the control. A tile reading "Monthly · $4.99 a
+                month" put the schedule on the object and said it twice.
 
-              Follows the flip: after the Early Bird spots are gone there is
-              nothing early about it, and `plan.label` is not a substitute
-              because it names the cadence this tile no longer states. */}
-          <b>{FOUNDING_OPEN ? "Early Bird Deposit" : "Deposit"}</b>
-          <span className="plan-figs">
-            <span className="plan-now">
-              <b className="tnum">{plan.price}</b>
-              {/* WHAT THE DEPOSIT IS, said beside the figure. Sam, 20 Sep
-                  2026: "we'd want to say for early bird price at checkout
-                  that the $4.99 counts towards the first month." It is the
-                  answer to the only question the word "deposit" raises, and
-                  it sits where the Standard tile's own second line sits, so
-                  the two tiles read as a pair rather than as a price and a
-                  price-with-a-note.
-
-                  The "$14.99 for everyone else" footnote that used to be
-                  here became the tile below; printing it in both places put
-                  the same figure twice, adjacent. */}
-              <span className="plan-else">Counts toward your first month</span>
-            </span>
-          </span>
-        </div>
-
-        {/* ══ THE STANDARD TIER, SHOWN AND NOT SELECTABLE ═══════════════
-            Sam, 20 Sep 2026: "I think we should have a second tier right
-            beneath and it'd be the $14.99 membership. This creates a really
-            strong price anchor. Of course no one would be able to select it
-            because it's not live yet."
-
-            WHAT KEEPS THIS THE RIGHT SIDE OF §10. An anchor is a dark
-            pattern when the reference price is invented, or when the option
-            looks available and is not. Neither holds: $14.99 is the real
-            standard rate this build already prints in the seat line and in
-            the founding lock, read from the same `plan.saving.after` the
-            tile above used to carry — and this tile says in its own words
-            that it is not open yet, rather than leaving a reader to discover
-            that by tapping.
-
-            `aria-disabled` AND reachable, which is the pair that makes an
-            unavailable option honest: a screen reader meets "Standard, not
-            selected, dimmed, 2 of 2", the tile is in the tab order so the
-            same reader can reach it, and activating it produces the same
-            sentence a tap does rather than nothing at all. */}
-        {FOUNDING_OPEN && plan.saving ? (
-          <div
-            className={`plan-opt is-later${refused ? " is-refused" : ""}`}
-            role="radio"
-            aria-checked="false"
-            aria-disabled="true"
-            tabIndex={0}
-            onClick={sayLater}
-            onKeyDown={(e) => {
-              if (e.key === " " || e.key === "Enter") {
-                e.preventDefault();
-                sayLater();
-              }
-            }}
-          >
-            {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
-                soon'." The tile's second line already said WHEN it opens;
-                this says THAT it is not open, which is the faster read and
-                the one a reader needs before they tap.
-
-                A CORNER FLAG, not a pill beside the label. This build
-                already marks "signed, not open" on the venue cards with a
-                flag in the tile's top corner (.vflag.is-soon), and reusing
-                it does two things a pill could not: the status leaves the
-                reading line entirely, so "Standard" sits alone above its
-                own price the way "Early Bird Deposit" does, and the two
-                places this product says "not yet" now say it the same way.
-                As a pill it was also wider than the word it qualified. */}
-            <span className="plan-chip">Coming soon</span>
-            <b>Standard</b>
+                Follows the flip: after the Early Bird spots are gone there is
+                nothing early about it, and `plan.label` is not a substitute
+                because it names the cadence this tile no longer states. */}
+            <b>{FOUNDING_OPEN ? "Early Bird Deposit" : "Deposit"}</b>
             <span className="plan-figs">
               <span className="plan-now">
-                <b className="tnum">{plan.saving.after}</b>
-                <span className="plan-else">a month, once the Early Bird spots are gone</span>
+                <b className="tnum">{plan.price}</b>
+                {/* WHAT THE DEPOSIT IS, said beside the figure. Sam, 20 Sep
+                    2026: "we'd want to say for early bird price at checkout
+                    that the $4.99 counts towards the first month." It is the
+                    answer to the only question the word "deposit" raises, and
+                    it sits where the Standard tile's own second line sits, so
+                    the two tiles read as a pair rather than as a price and a
+                    price-with-a-note.
+
+                    The "$14.99 for everyone else" footnote that used to be
+                    here became the tile below; printing it in both places put
+                    the same figure twice, adjacent. */}
+                <span className="plan-else">Counts toward your first month</span>
               </span>
             </span>
           </div>
-        ) : null}
-      </div>
 
-      {/* The sentence the toast used to carry, for a reader who cannot see
-          a tile change colour. `status`, not `alert`: nothing failed. */}
-      <p className="sr-only" role="status">
-        {refused ? "Standard opens after launch. Early Bird is the only plan open now." : ""}
-      </p>
+          {/* ══ THE STANDARD TIER, SHOWN AND NOT SELECTABLE ═══════════════
+              Sam, 20 Sep 2026: "I think we should have a second tier right
+              beneath and it'd be the $14.99 membership. This creates a really
+              strong price anchor. Of course no one would be able to select it
+              because it's not live yet."
 
-      {/* ══ THE SCHEDULE ══════════════════════════════════════════════════
-          Replaces the subtitle band ("earn the $4.99 back…", Sam 21 Sep) and
-          the two prose lines under the tiles (the locked rate, the refund):
-          the same facts, each a row with its figure on one right edge. An
-          open ledger — hairlines between rows, no plate — because a panel
-          around a list of charges is a bill, and this is the terms of one. */}
-      <dl className="rs-ledger" aria-label="What you pay, and when">
-        {schedule.map((row) => (
-          <div className="rs-row" key={row.id}>
-            <dt className="rs-when">{row.when}</dt>
-            <dd className="rs-fig tnum">{row.figure}</dd>
-            {row.note ? <dd className="rs-note">{row.note}</dd> : null}
-          </div>
-        ))}
-      </dl>
+              WHAT KEEPS THIS THE RIGHT SIDE OF §10. An anchor is a dark
+              pattern when the reference price is invented, or when the option
+              looks available and is not. Neither holds: $14.99 is the real
+              standard rate this build already prints in the seat line and in
+              the founding lock, read from the same `plan.saving.after` the
+              tile above used to carry — and this tile says in its own words
+              that it is not open yet, rather than leaving a reader to discover
+              that by tapping.
 
-      {/* ══ THE DOOR TO THE CHARGE ═════════════════════════════════════════
-          Sam, 13 Sep 2026: "we only need the disclosure and terms right at
-          checkout." The rows, the consent, the wallet and the full terms are
-          pages 1–2 of this sheet; this button moves it on.
+              `aria-disabled` AND reachable, which is the pair that makes an
+              unavailable option honest: a screen reader meets "Standard, not
+              selected, dimmed, 2 of 2", the tile is in the tab order so the
+              same reader can reach it, and activating it produces the same
+              sentence a tap does rather than nothing at all. */}
+          {FOUNDING_OPEN && plan.saving ? (
+            <div
+              className={`plan-opt is-later${refused ? " is-refused" : ""}`}
+              role="radio"
+              aria-checked="false"
+              aria-disabled="true"
+              tabIndex={0}
+              onClick={sayLater}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  sayLater();
+                }
+              }}
+            >
+              {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
+                  soon'." The tile's second line already said WHEN it opens;
+                  this says THAT it is not open, which is the faster read and
+                  the one a reader needs before they tap.
 
-          THE OBSERVER STAYS. It is what suppresses the docked bar while a real
-          control is on screen — two identical maroon buttons on one screen is
-          the decoy problem this page solved once already. */}
-      <div className="rs-buy">
-        <div ref={paySlot} className="pay-slot">
-          <button type="button" className="action" onClick={openCheckout}>
-            {paid ? "View your seat" : checkoutLabel}
-          </button>
+                  A CORNER FLAG, not a pill beside the label. This build
+                  already marks "signed, not open" on the venue cards with a
+                  flag in the tile's top corner (.vflag.is-soon), and reusing
+                  it does two things a pill could not: the status leaves the
+                  reading line entirely, so "Standard" sits alone above its
+                  own price the way "Early Bird Deposit" does, and the two
+                  places this product says "not yet" now say it the same way.
+                  As a pill it was also wider than the word it qualified. */}
+              <span className="plan-chip">Coming soon</span>
+              <b>Standard</b>
+              <span className="plan-figs">
+                <span className="plan-now">
+                  <b className="tnum">{plan.saving.after}</b>
+                  <span className="plan-else">a month, once the Early Bird spots are gone</span>
+                </span>
+              </span>
+            </div>
+          ) : null}
         </div>
 
-        {/* ══ THE COUNT, AS THE BUTTON'S CAPTION ════════════════════════════
-            Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below
-            the actual checkout button and allow the earn $5 back to replace
-            it." So the head of the sheet is one statement instead of two
-            stacked boxes, and the order a reader meets is price → button →
-            how many are left: the scarcity qualifies the action rather than
-            standing in front of it.
+        {/* The sentence the toast used to carry, for a reader who cannot see
+            a tile change colour. `status`, not `alert`: nothing failed. */}
+        <p className="sr-only" role="status">
+          {refused ? "Standard opens after launch. Early Bird is the only plan open now." : ""}
+        </p>
 
-            AND IT IS THE BUTTON'S CAPTION, NOT A CARD. It sat in an --inner
-            box with its own border, which made it a second object arguing with
-            the panel it sits in; centred under the control, in the control's
-            own measure, it needs no container at all. Every source is
-            unchanged — `seatLine()` for the sentence, `seatsLeft()/SEAT_CAP`
-            for the fraction, the real close date under it. Still artificial
-            (model/seats.ts), still no clock.
+        {/* ══ THE SCHEDULE ══════════════════════════════════════════════════
+            Replaces the subtitle band ("earn the $4.99 back…", Sam 21 Sep) and
+            the two prose lines under the tiles (the locked rate, the refund):
+            the same facts, each a row with its figure on one right edge. An
+            open ledger — hairlines between rows, no plate — because a panel
+            around a list of charges is a bill, and this is the terms of one. */}
+        <dl className="rs-ledger" aria-label="What you pay, and when">
+          {schedule.map((row) => (
+            <div className="rs-row" key={row.id}>
+              <dt className="rs-when">{row.when}</dt>
+              <dd className="rs-fig tnum">{row.figure}</dd>
+              {row.note ? <dd className="rs-note">{row.note}</dd> : null}
+            </div>
+          ))}
+        </dl>
 
-            OUTSIDE `.pay-slot`, deliberately: that box is what the
-            IntersectionObserver measures, and growing it would change when
-            the docked bar hides. */}
-        {FOUNDING_OPEN ? (
-          <div className="rs-seats-under">
-            <p className="rs-seat-line">
-              {seatParts.n !== null ? (
-                <>
-                  <b className="tnum">{seatParts.n}</b>
+        {/* ══ THE DOOR TO THE CHARGE ═════════════════════════════════════════
+            Sam, 13 Sep 2026: "we only need the disclosure and terms right at
+            checkout." The rows, the consent, the wallet and the full terms are
+            pages 1–2 of this sheet; this button moves it on.
+
+            THE OBSERVER STAYS. It is what suppresses the docked bar while a real
+            control is on screen — two identical maroon buttons on one screen is
+            the decoy problem this page solved once already. */}
+        <div className="rs-buy">
+          <div ref={paySlot} className="pay-slot">
+            <button type="button" className="action" onClick={openCheckout}>
+              {paid ? "View your seat" : checkoutLabel}
+            </button>
+          </div>
+
+          {/* ══ THE COUNT, AS THE BUTTON'S CAPTION ════════════════════════════
+              Sam, 21 Sep 2026: "maybe we move the 6 of 50 counter right below
+              the actual checkout button and allow the earn $5 back to replace
+              it." So the head of the sheet is one statement instead of two
+              stacked boxes, and the order a reader meets is price → button →
+              how many are left: the scarcity qualifies the action rather than
+              standing in front of it.
+
+              AND IT IS THE BUTTON'S CAPTION, NOT A CARD. It sat in an --inner
+              box with its own border, which made it a second object arguing with
+              the panel it sits in; centred under the control, in the control's
+              own measure, it needs no container at all. Every source is
+              unchanged — `seatLine()` for the sentence, `seatsLeft()/SEAT_CAP`
+              for the fraction, the real close date under it. Still artificial
+              (model/seats.ts), still no clock.
+
+              OUTSIDE `.pay-slot`, deliberately: that box is what the
+              IntersectionObserver measures, and growing it would change when
+              the docked bar hides. */}
+          {FOUNDING_OPEN ? (
+            <div className="rs-seats-under">
+              <p className="rs-seat-line">
+                {seatParts.n !== null ? (
+                  <>
+                    <b className="tnum">{seatParts.n}</b>
+                    <span>{seatParts.rest}</span>
+                  </>
+                ) : (
                   <span>{seatParts.rest}</span>
-                </>
-              ) : (
-                <span>{seatParts.rest}</span>
-              )}
-            </p>
-            <span className="rs-meter" aria-hidden="true">
-              {/* ⚠ THE FILL IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
-                  IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 88%
-                  today where `left/cap` is 12%: a bar that is nearly full says
-                  what the sentence above it says, while a bar with a 12%
-                  sliver reads as an empty room. Same fact, drawn the way a
-                  reader already reads a progress bar. The sentence is the
-                  statement of record; this is aria-hidden and never carries a
-                  number of its own. */}
-              <i style={{ ["--p" as string]: `${1 - seatsLeft() / SEAT_CAP}` }} />
-            </span>
-            {/* The date qualifies the bar, so it sits under the bar. */}
-            <p className="rs-seat-close">Closes {foundingCloses}</p>
-          </div>
-        ) : null}
+                )}
+              </p>
+              <span className="rs-meter" aria-hidden="true">
+                {/* ⚠ THE FILL IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
+                    IS DELIBERATE — DO NOT "FIX" IT BACK. `1 - left/cap` is 88%
+                    today where `left/cap` is 12%: a bar that is nearly full says
+                    what the sentence above it says, while a bar with a 12%
+                    sliver reads as an empty room. Same fact, drawn the way a
+                    reader already reads a progress bar. The sentence is the
+                    statement of record; this is aria-hidden and never carries a
+                    number of its own. */}
+                <i style={{ ["--p" as string]: `${1 - seatsLeft() / SEAT_CAP}` }} />
+              </span>
+              {/* The date qualifies the bar, so it sits under the bar. */}
+              <p className="rs-seat-close">Closes {foundingCloses}</p>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      {/* ══ WHAT YOU GET ════════════════════════════════════════════════════
-          Four lines, a check each — the checklist every reference plan sheet
-          carries. The glyph is ink, not a tile: a tile per line is the §1.2
-          row this sheet already retired. */}
-      {included.length ? (
-        <section className="rs-get" aria-labelledby="rs-get-head">
-          <h2 className="t-title rs-get-head" id="rs-get-head">
-            What you get
+      {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THEN THE CARD ═════════════════
+          The right column from 1024; `display:contents` below it, where the
+          panel and the card follow the count in the one column. */}
+      <div className="rs-get-col">
+        {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
+            Sam, on the trial modal's call-out: "I like how you formatted
+            this, maybe we use the same on the checkout flow." Its
+            construction, rebuilt under `.rs-*`: one `--inner` plate, a
+            heading, then what you get, where it works and the guarantee —
+            the three open blocks that followed the count — as its rows.
+
+            THE HEADING ANSWERS THE MODAL'S QUESTION. The call-out asks "Want
+            this every week? And at every location?"; by checkout the reader
+            has said yes, so the plate states it. Words, never a figure.
+
+            NO BUTTON AND NO PRICE INSIDE IT. The action stays with the
+            ledger and the money is the tiles' and the ledger's; a second
+            price here would be the same figure stated twice on one sheet. */}
+        <section className="rs-inc" aria-labelledby="rs-inc-head">
+          <h2 className="t-title rs-inc-head" id="rs-inc-head">
+            Every week, at every location
           </h2>
-          <ul className="rs-checks">
-            {included.map((item) => (
-              <li key={item.id}>
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
-                  strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="m3.2 8.4 3 3 6.6-6.8" />
-                </svg>
-                <span>{item.line}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {/* ══ WHERE IT WORKS ══════════════════════════════════════════════════
-          One row: the six marks overlapped and their names in a sentence —
-          the splash's close (`.cg-also`, styles/campaign.css), reused rather
-          than redrawn. The list under "Special offers from the places" is the
-          answer to "which places", so it needs no heading of its own; the
-          section keeps an accessible name for a reader who jumps by region. */}
-      <section className="rs-venues" aria-label="Where it works">
-        <div className="cg-also">
-          <span className="cg-also-marks" aria-hidden="true">
-            {venues.map((v) => (
-              <span
-                key={v.id}
-                className="collar"
-                data-field={logoField(v.id)}
-                style={{ ["--brand" as string]: v.brandColor }}
-              >
-                <img src={v.logo} alt="" decoding="async" />
-              </span>
-            ))}
-          </span>
-          <p className="t-compact rs-venues-line">
-            {venues.map((v, k, all) => (
-              <Fragment key={v.id}>
-                <span className="rs-venue-name">{v.name}</span>
-                {joinAfter(k, all.length)}
-              </Fragment>
-            ))}
+          {/* Four lines, a check each — the checklist every reference plan
+              sheet carries. The glyph is ink, not a tile. */}
+          {included.length ? (
+            <ul className="rs-checks">
+              {included.map((item) => (
+                <li key={item.id}>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m3.2 8.4 3 3 6.6-6.8" />
+                  </svg>
+                  <span>{item.line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {/* Where it works: the six marks stacked on the left, their names
+              in a sentence beside them — the call-out's two-column row. */}
+          <div className="rs-inc-also">
+            <span className="rs-inc-marks" aria-hidden="true">
+              {venues.map((v) => (
+                <span
+                  key={v.id}
+                  className="collar"
+                  data-field={logoField(v.id)}
+                  style={{ ["--brand" as string]: v.brandColor }}
+                >
+                  <img src={v.logo} alt="" decoding="async" />
+                </span>
+              ))}
+            </span>
+            <p className="rs-inc-line">
+              At{" "}
+              {venues.map((v, k, all) => (
+                <Fragment key={v.id}>
+                  <span className="rs-venue-name">{v.name}</span>
+                  {joinAfter(k, all.length)}
+                </Fragment>
+              ))}
+              .
+            </p>
+          </div>
+          {/* The guarantee, under a hairline: the promise and the address to
+              claim it at, after the shield. The words are the model's
+              (`guarantee`, `GUARANTEE_CONTACT`), and the claim is the
+              server's to keep (TRUTH.md §3). */}
+          <p className="rs-promise">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
+              <path d="m9.2 12.2 1.9 1.9 3.8-4" />
+            </svg>
+            <span>
+              <b>{guarantee}</b>{" "}
+              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+            </span>
           </p>
+        </section>
+
+        {/* ══ THE CARD IS THE SHEET'S CLOSE ═══════════════════════════════
+            Sam, 21 Sep 2026, at the foot of this sheet: "we should /impeccable
+            redesign this section of the checkout it's a bit weird. The membership
+            card feels out of place."
+
+            WHAT MADE IT WEIRD WAS THE PLATE. Three surfaces nested — the light
+            sheet, a white panel labelled YOUR CARD, and the dark maroon card
+            inside it — and a dark object on a white plate on a light sheet is a
+            framed picture of a thing, not the thing. The uppercase label was the
+            eyebrow tic §2 removed everywhere else, and it announced that the last
+            object before the button is something the reader does not own yet.
+
+            The panel was the answer to "not awkwardly" on 20 Sep, and the plate
+            is what is awkward now. So the card stops being CONTENT and becomes
+            the sheet's CLOSE: one hairline, the card on the sheet's own ground at
+            the size you would hold one, and a single line under it saying when it
+            is hers. Nothing above the rail moves; the docked button still clears
+            it; `TapInCard`'s name contract is untouched, so the field in the
+            checkout still fills this card as she types.
+
+            THE DATE IS READ, NEVER TYPED — `launchWindow` is the model's own
+            opening constant, the same one the receipt and the seat line print.
+            See docs/POLISH-2026-09-21.md §8. */}
+        <div className="rs-card-close">
+          <div className="rs-card">
+            <TapInCard
+              name={cardName.trim() || undefined}
+              innerRef={cardRef}
+              className="reserve-card"
+            />
+          </div>
+          <p className="rs-card-cap">Yours from {launchWindow}</p>
         </div>
-      </section>
-
-      {/* ══ THE GUARANTEE, AS ONE LINE ══════════════════════════════════════
-          The promise and the address to claim it at, after the shield, with
-          no panel and no tile — the words are the model's (`guarantee`,
-          `GUARANTEE_CONTACT`), and the claim is the server's to keep
-          (TRUTH.md §3). */}
-      <p className="rs-promise">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
-          strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
-          <path d="m9.2 12.2 1.9 1.9 3.8-4" />
-        </svg>
-        <span>
-          <b>{guarantee}</b>{" "}
-          <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-        </span>
-      </p>
-
-      {/* ══ THE CARD IS THE SHEET'S CLOSE ═══════════════════════════════
-          Sam, 21 Sep 2026, at the foot of this sheet: "we should /impeccable
-          redesign this section of the checkout it's a bit weird. The membership
-          card feels out of place."
-
-          WHAT MADE IT WEIRD WAS THE PLATE. Three surfaces nested — the light
-          sheet, a white panel labelled YOUR CARD, and the dark maroon card
-          inside it — and a dark object on a white plate on a light sheet is a
-          framed picture of a thing, not the thing. The uppercase label was the
-          eyebrow tic §2 removed everywhere else, and it announced that the last
-          object before the button is something the reader does not own yet.
-
-          The panel was the answer to "not awkwardly" on 20 Sep, and the plate
-          is what is awkward now. So the card stops being CONTENT and becomes
-          the sheet's CLOSE: one hairline, the card on the sheet's own ground at
-          the size you would hold one, and a single line under it saying when it
-          is hers. Nothing above the rail moves; the docked button still clears
-          it; `TapInCard`'s name contract is untouched, so the field in the
-          checkout still fills this card as she types.
-
-          THE DATE IS READ, NEVER TYPED — `launchWindow` is the model's own
-          opening constant, the same one the receipt and the seat line print.
-          See docs/POLISH-2026-09-21.md §8. */}
-      <div className="rs-card-close">
-        <div className="rs-card">
-          <TapInCard
-            name={cardName.trim() || undefined}
-            innerRef={cardRef}
-            className="reserve-card"
-          />
-        </div>
-        <p className="rs-card-cap">Yours from {launchWindow}</p>
       </div>
 
       <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>

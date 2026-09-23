@@ -1119,7 +1119,9 @@ html[data-flight="in"] .column > .sticky-cta{
    to 1023. A review sheet is one column at every width, so the dialog is
    that column's width wherever there is room to centre it: 640, or the
    window less 32px a side. Its height is its content's, capped at the
-   window, and it scrolls inside. Below 640 it is the phone's sheet. */
+   window, and it scrolls inside. Below 640 it is the phone's sheet.
+   From 1024 it is two columns again and 1040 wide — §18, at the foot of this
+   file. */
 @media (min-width:640px){
   .reserve-scrim{background:rgba(6,3,5,.64)}
   .reserve-sheet{
@@ -1515,8 +1517,10 @@ html[data-flight="in"] .column > .sticky-cta{
      · the figure strip (§15) — a marketing device; the checklist replaces it
      · the rail — it stays on the pitch; the places are one row here
      · the guarantee block — it is one line now
-   Every block sits on the sheet's own ground; none has a panel. The flex gap
-   on `.rs-modal` is the one section step between them (`--s-2xl`), and
+   Every block sits on the sheet's own ground; since §18 (23 Sep) the one
+   exception is the included panel, which gathered what you get, where it
+   works and the guarantee into the trial modal's call-out. The flex gap on
+   `.rs-modal` is the one section step between blocks (`--s-2xl`), and
    `--s-lg` is the interval inside a block. */
 
 /* ── 1. THE TILES, ON THE SHEET'S GROUND ───────────────────────────────────
@@ -1527,7 +1531,7 @@ html[data-flight="in"] .column > .sticky-cta{
    on this tile alone: the plate keeps the step it had, one rung along — the
    move `.rs-step .ph-field` makes below — and the refusal's keyframes, which
    read `--inner` at both ends, start and settle on that same white. */
-.rs-modal > .plan-pick{margin:0}
+.rs-modal .plan-pick{margin:0}
 .rs-modal .plan-opt.is-later{--inner:var(--card)}
 /* THE CHOSEN TILE'S SECOND LINE, AT READING CONTRAST. `.plan-opt.is-on span`
    dims every span in the tile to .82, and `.plan-now` is a span: so the price
@@ -1571,11 +1575,23 @@ html[data-flight="in"] .column > .sticky-cta{
    unchanged (`.rs-seats-under`). */
 .rs-buy > .pay-slot{margin-top:0}
 
-/* ── 4. WHAT YOU GET ───────────────────────────────────────────────────────
-   The heading is `.t-title` (18/700 `--ink-1`); a check glyph in ink, not a
-   tile, beside each line. The glyph is centred on the FIRST line box
-   (1.4em at 15px), so a line that wraps keeps its check at its head. */
-.rs-get-head{margin:0 0 var(--s-lg)}
+/* ── 4. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
+   Sam, on the trial modal's call-out: "I like how you formatted this, maybe
+   we use the same on the checkout flow." What you get, where it works and the
+   guarantee were three open blocks after the count; they are one plate in
+   the call-out's construction (campaign.css `.ct-more`: the `--inner` ground,
+   the card radius, `--s-xl` of inset, `--s-lg` between its rows), written
+   here under `.rs-*` so a change to either surface cannot move the other.
+   No button and no price inside it — the ledger carries both. */
+.rs-inc{display:flex;flex-direction:column;gap:var(--s-lg);margin:0;
+  padding:var(--s-xl);border-radius:var(--r-card);background:var(--inner)}
+/* `.t-title` is the heading's size and ink (18/700 `--ink-1`); the plate's
+   row gap is its only interval. */
+.rs-inc-head{margin:0}
+
+/* The checklist, as it was: a check glyph in ink, not a tile, beside each
+   line. The glyph is centred on the FIRST line box (1.4em at 15px), so a
+   line that wraps keeps its check at its head. */
 .rs-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
   gap:var(--s-md)}
 .rs-checks li{display:flex;align-items:flex-start;gap:var(--s-md);
@@ -1583,24 +1599,26 @@ html[data-flight="in"] .column > .sticky-cta{
 .rs-checks svg{flex:0 0 auto;display:block;width:16px;height:16px;
   margin-top:calc((1.4em - 16px) / 2);color:var(--ink-2)}
 
-/* ── 5. WHERE IT WORKS ─────────────────────────────────────────────────────
-   The splash's `.cg-also`, as it is (campaign.css), with two things this
-   sheet needs: no margin of its own (the section step is the interval), and
-   the ring that cuts each mark out of the one behind it drawn in THIS
-   surface's ground rather than white — on the splash it sits on white, and a
-   white ring on `--page` is a halo. The marks stay one row beside the names
-   at every width; the names wrap under themselves, never under the marks. */
-.rs-venues .cg-also{margin:0;flex-wrap:nowrap}
-.rs-venues .cg-also-marks .collar{box-shadow:0 0 0 2px var(--page)}
-.rs-venues-line{margin:0}
+/* Where it works, in the call-out's two-column row: the six marks stacked
+   like a hand of cards on the left, the sentence beside them. The ring that
+   cuts each mark out of the one behind it is the PLATE's ground, `--inner`,
+   so it reads as a cut and not a halo. The marks never wrap under the
+   sentence; the names wrap under themselves, and never inside a name. */
+.rs-inc-also{display:flex;align-items:center;gap:var(--s-lg)}
+.rs-inc-marks{display:flex;flex:0 0 auto}
+.rs-inc-marks .collar{width:32px;height:32px;border-radius:10px;
+  box-shadow:0 0 0 2px var(--inner)}
+.rs-inc-marks .collar + .collar{margin-left:-10px}
+.rs-inc-line{flex:1 1 12ch;min-width:0;margin:0;font-size:14px;font-weight:500;
+  line-height:1.45;color:var(--ink-2);text-wrap:pretty}
 .rs-venue-name{white-space:nowrap}
 
-/* ── 6. THE GUARANTEE ──────────────────────────────────────────────────────
-   One statement: the shield at 20px beside the promise (15/700) and the
-   address after it (14px), as one run of text so a narrow sheet wraps it as
-   a sentence. The address does not break inside itself. The shield is centred
-   on the first line box, as the checklist's glyphs are. */
+/* The guarantee closes the plate under a hairline: the shield at 20px beside
+   the promise (15/700) and the address after it (14px), one run of text so a
+   narrow plate wraps it as a sentence. `--hair-lit`, the ledger's rule — on
+   this ground `--hair` all but vanishes. */
 .rs-promise{display:flex;align-items:flex-start;gap:var(--s-md);margin:0;
+  padding-top:var(--s-lg);border-top:1px solid var(--hair-lit);
   font-size:15px;line-height:1.4;color:var(--ink-1);text-wrap:pretty}
 .rs-promise > svg{flex:0 0 auto;display:block;width:20px;height:20px;
   margin-top:calc((1.4em - 20px) / 2);color:var(--ink-2)}
@@ -1609,6 +1627,11 @@ html[data-flight="in"] .column > .sticky-cta{
   text-underline-offset:3px;white-space:nowrap}
 .rs-promise a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
+
+/* ── THE TWO COLUMNS' WRAPPERS, BELOW 1024 ────────────────────────────────
+   They draw nothing: every block lays out as a child of `.rs-modal`'s one
+   flex column, in the review-sheet order, exactly as before they existed. */
+.rs-pay-col,.rs-get-col{display:contents}
 
 
 /* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
@@ -1797,3 +1820,38 @@ html[data-flight="in"] .column > .sticky-cta{
    heading, not a control, so it must not also wear a focus ring — the ring is
    how this build says "you can press this". */
 .sheet-title:focus{outline:none}
+
+
+/* ============================================================================
+   DESKTOP WITHOUT A SCROLL — from 1024 (23 Sep 2026, POLISH §18).
+
+   Sam: "checkout on desktop should be wider so I don't need to scroll
+   through anything." The reader's screen has the width, so the review sheet
+   takes it: `min(1040px, 100vw - 64px)`, height still its content's and
+   still capped at the window, and page 0 in two equal columns — the money
+   on the left (the tiles, the schedule, the button and its count), what it
+   buys on the right (the included panel, then the card as the close). Each
+   column packs to its top, so the shorter one does not stretch to meet the
+   taller.
+
+   Pages 1–3 keep their 560 measure centred in the wider sheet (`.rs-step`),
+   so the sheet does not change width under the reader when Checkout moves
+   it on. The docked bar is already gone from 1024.
+
+   THE FIT. The left column is the taller. At 1180x820 with the ledger as
+   the phone has it, the scroller measured 741 of content in 714; the
+   ledger's row padding is the one thing tightened (`--s-lg` to `--s-sm`,
+   desktop only — 48px back, where `--s-md` would have left 5px to spare).
+   No type shrinks.
+   ============================================================================ */
+@media (min-width:1024px){
+  .reserve-sheet{width:min(1040px,calc(100vw - 64px))}
+  /* Three classes, to take back the 560 measure the 640 rule gives the
+     modal at the same weight. */
+  .sheet-column.column > .rs-modal{max-width:none;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    column-gap:calc(var(--s-xl) * 2);align-items:start}
+  .rs-pay-col,.rs-get-col{display:grid;align-content:start;gap:var(--s-2xl);
+    min-width:0}
+  .rs-row{padding-block:var(--s-sm)}
+}
