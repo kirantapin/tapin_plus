@@ -369,6 +369,24 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                   />
                 </svg>
               </button>
+              {/* The deck's door, back in the hero. It left on 21 Sep when
+                  Try it once took its slot; Sam, 23 Sep 2026: "I'd like to
+                  bring that back, it just wouldn't be one of the focuses." A
+                  text link, never a third pill: the same treatment as the
+                  savings panel's, under the pair. */}
+              <Link className="hero-how" to="/how">
+                How it works
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m9 5 7 7-7 7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
             </div>
             {/* No refund line in the hero (audit, 14 Sep 2026): it is stated in
                 the checkout sheet before any charge, where it decides something. */}

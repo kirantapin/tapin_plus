@@ -2389,9 +2389,22 @@ button.vcard:focus-visible {
   }
   .hero-band:not(.is-compact) .hero-actions {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--s-lg);
     align-self: stretch;
+  }
+  /* The pair fills the row; the deck's door takes a line of its own under
+     it, at text size, so it is reachable without competing. With the row
+     allowed to wrap, two 50% bases plus the gap would wrap the pair too, so
+     each base leaves half the gap: they still grow to fill the row. */
+  .hero-band:not(.is-compact) .hero-actions > .hero-cta,
+  .hero-band:not(.is-compact) .hero-actions > .hero-try {
+    flex-basis: calc(50% - var(--s-lg) / 2);
+  }
+  .hero-band:not(.is-compact) .hero-how {
+    flex: 0 0 100%;
+    margin-top: calc(var(--s-xs) - var(--s-lg));
   }
   /* The house ghost's own values (`.action.action-ghost` in reserve.css), on
      the pitch's own class: a step of ground, a lit hairline, the card radius,
@@ -3158,6 +3171,7 @@ button.vcard:focus-visible {
   touch-action: manipulation;
 }
 .hero-try,
+.hero-how,
 .save-how {
   display: inline-flex;
   align-items: center;
@@ -3172,6 +3186,7 @@ button.vcard:focus-visible {
   -webkit-tap-highlight-color: transparent;
 }
 .hero-try svg,
+.hero-how svg,
 .save-how svg {
   width: 18px;
   height: 18px;
@@ -3181,15 +3196,24 @@ button.vcard:focus-visible {
 }
 @media (hover: hover) {
   .hero-try:hover svg,
+  .hero-how:hover svg,
   .save-how:hover svg {
     transform: translateX(2px);
   }
 }
 .hero-try:focus-visible,
+.hero-how:focus-visible,
 .save-how:focus-visible {
   outline: 2px solid var(--ink-1);
   outline-offset: 3px;
   border-radius: var(--r-sm);
+}
+/* The deck's door is the quiet third thing in the hero (Sam, 23 Sep 2026:
+   "bring that back, it just wouldn't be one of the focuses"): the ink ramp's
+   third step rather than the first, so the try link above it stays the
+   second action and this reads as a footnote to the pair. */
+.hero-how {
+  color: var(--ink-3);
 }
 /* Inside the savings panel it sits under the drill, at the panel's own
    interval; the drill above it already carries a divider's worth of space. */
