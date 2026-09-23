@@ -175,6 +175,7 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
             line={line}
             lead={policy.id === "credit"}
             chip={chip}
+            lit
           />
         );
       })}

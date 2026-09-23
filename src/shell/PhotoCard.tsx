@@ -24,6 +24,17 @@ export interface PhotoCardProps {
   line: string;
   chip?: { line: string; figure: string };
   lead?: boolean;
+  /**
+   * `lit` — the card carries the light ramp (`data-lit`, styles/light.css):
+   * a white plate with dark ink on the dark page. Sam, 23 Sep 2026, on the
+   * pitch: "the card containers make it really hard to see what's included.
+   * Can we figure out a color scheme that makes these easier to read." The
+   * dark card rung under grey ink was a plate the eye read as more ground;
+   * white under the ink ramp is the same plate the splash, the pop-up and the
+   * checkout already use. The splash leaves it off: its page is already light
+   * and carries Coffeeholics' own tinted ramp.
+   */
+  lit?: boolean;
 }
 
 /* "California Club · $12.00" → the item and its price. The separator stays in
@@ -34,11 +45,19 @@ const ORDER = /^(.+) · (\$[\d.,]+)$/;
    an offer's terms are not savings and stay one string. */
 const SAVES = /^(You save) (.+)$/;
 
-export default function PhotoCard({ img, alt = "", title, line, chip, lead = false }: PhotoCardProps) {
+export default function PhotoCard({
+  img,
+  alt = "",
+  title,
+  line,
+  chip,
+  lead = false,
+  lit = false,
+}: PhotoCardProps) {
   const order = chip ? ORDER.exec(chip.line) : null;
   const saves = chip ? SAVES.exec(chip.figure) : null;
   return (
-    <article className={`bshot${lead ? " is-lead" : ""}`}>
+    <article className={`bshot${lead ? " is-lead" : ""}`} data-lit={lit ? "" : undefined}>
       {img ? (
         <img className="bshot-img" src={img} alt={alt} decoding="async" loading="lazy" />
       ) : null}
