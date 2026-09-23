@@ -3469,3 +3469,298 @@ button.vcard:focus-visible {
   border: 1px solid var(--hair);
   box-shadow: var(--rest);
 }
+
+/* ============================================================================
+   THE CALENDAR — shell/MonthCalendar.tsx (docs/POLISH-2026-09-21.md §21).
+
+   Sam, 23 Sep 2026, on the canvas's calendar direction: "wondering if you
+   could implement that on the main LP", with "offerings from other
+   locations". The headline shown happening: four weeks of real orders at four
+   places, each day's order its own photograph with the week's credit on it,
+   and a foot that counts the membership against what came back.
+
+   A WHITE CARD CARRYING `data-lit`, so its ink is the light ramp wherever it
+   sits — over the dark mosaic from 1024, on the light room below it. The
+   plate §12 A chose for type near a photograph; the Coffeeholics receipt is
+   the same object on its own page (campaign.css, `.ml-*`), and the two keep
+   one construction: the figure is ink, not green; the crossing is told by
+   weight of ink; the only colour is the credit's chip, maroon, the page's one
+   colour for a thing that is TapIn's. Every size is on the ramp and nothing
+   is under 14 but the chip.
+   ============================================================================ */
+.mc {
+  box-sizing: border-box;
+  padding: var(--s-2xl);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--float);
+  color: var(--ink-1);
+}
+.mc-head {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink-1);
+}
+.mc-sub {
+  margin: var(--s-xs) 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+/* Week labels down the left, Monday first across the top, square days. */
+.mc-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  gap: var(--s-md);
+  align-items: center;
+  margin: var(--s-xl) 0 0;
+}
+.mc-dow {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-4);
+}
+.mc-week {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+.mc-day {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--inner);
+  overflow: hidden;
+}
+/* The order is one element — photograph and chip — so it enters as one. It
+   carries the day's radius, so its corners stay round while it scales. */
+.mc-order {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.mc-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mc-chip {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+  color: var(--on-maroon);
+  background: var(--maroon);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+/* THE LATEST ORDER. Every line is laid in the same cell and one is shown, so
+   the card holds the height of the longest (a three-item basket that wraps)
+   and never changes size as the month fills. At rest the last is the one. */
+.mc-latest {
+  display: grid;
+  margin: var(--s-lg) 0 0;
+}
+.mc-line {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.4;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+.mc-line b {
+  font-weight: 700;
+  color: var(--ink-1);
+}
+.mc-line:not(.is-last) {
+  opacity: 0;
+}
+.mc-foot {
+  display: grid;
+  gap: var(--s-sm);
+  margin: var(--s-xl) 0 0;
+  padding-top: var(--s-lg);
+  border-top: 1px solid var(--hair);
+}
+.mc-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.mc-fig {
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.mc-net {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: var(--s-xs) 0 0;
+}
+.mc-ahead {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+/* The card's one large figure. Right-aligned and tabular, so the count never
+   moves the digits already standing. */
+.mc-net-fig {
+  margin-left: auto;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── THE LOOP ─────────────────────────────────────────────────────────────
+   Only while the script holds `data-run`. Transform and opacity, nothing
+   else, on days laid out at full size from the first frame. Each transition
+   sits on the state it arrives INTO, so the reset (dropping `is-in` and
+   `data-out` together) snaps the invisible orders back with none. The exit is
+   shorter and accelerating, the modal's own leave curve. */
+.mc[data-run] .mc-order {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.mc[data-run] .mc-order.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 280ms var(--ease),
+    transform 280ms var(--ease);
+}
+.mc[data-run] .mc-line {
+  opacity: 0;
+}
+.mc[data-run] .mc-line.is-now {
+  opacity: 1;
+  transition: opacity 200ms var(--ease);
+}
+/* THE CROSSING IS TOLD BY INK: owed, the figure is the quiet step and nothing
+   names it; past zero it takes the heading ink (a class flip, not a colour
+   transition) and "You're ahead" fades in. */
+.mc[data-run] .mc-ahead {
+  transition: opacity 200ms var(--ease);
+}
+.mc[data-run] .mc-foot:not(.is-ahead) .mc-ahead {
+  opacity: 0;
+  transition: none;
+}
+.mc[data-run] .mc-foot:not(.is-ahead) .mc-net-fig {
+  color: var(--ink-3);
+}
+.mc[data-run] .mc-net-fig,
+.mc[data-run] .mc-earned-fig {
+  transition: opacity 280ms var(--ease);
+}
+.mc[data-run][data-out] .mc-order.is-in,
+.mc[data-run][data-out] .mc-line.is-now,
+.mc[data-run][data-out] .mc-ahead,
+.mc[data-run][data-out] .mc-net-fig,
+.mc[data-run][data-out] .mc-earned-fig {
+  opacity: 0;
+  transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ── A NARROW PHONE ───────────────────────────────────────────────────────
+   At 375 the card is 327 wide, and the desktop grid (a 56px label column,
+   8px gaps, 24px inset) leaves each day 25px — the chip would cover it. The
+   label column takes its words' own width, the gaps and inset tighten a step,
+   and the days come out near 31px; their radius follows them down so a day
+   stays a square, not a pill. */
+@media (max-width: 479px) {
+  .mc {
+    padding: var(--s-xl);
+  }
+  .mc-grid {
+    grid-template-columns: auto repeat(7, minmax(0, 1fr));
+    gap: var(--s-xs);
+  }
+  .mc-week {
+    padding-right: var(--s-xs);
+  }
+  .mc-day {
+    border-radius: var(--r-sm);
+  }
+  .mc-chip {
+    right: 2px;
+    bottom: 2px;
+    height: 14px;
+    padding: 0 3px;
+    line-height: 14px;
+  }
+}
+
+/* ── OVER THE MOSAIC, FROM 1024 ───────────────────────────────────────────
+   Bottom-right of the photographs, 32 in, as the Coffeeholics receipt sits on
+   its photograph; the mosaic's veil holds behind it. Out of flow, placed in
+   the mosaic's own columns (an absolutely positioned grid child takes its
+   grid area as its containing block), so the card can never push the hero
+   row taller or reach the copy column.
+
+   (0,4,0) — the attribute is the card's own — against the band's
+   `> :not(.mosaic)` rule at (0,3,0), which dresses the copy column (the flex
+   stack, the zeroed plate, the fill pseudo-element run off the window). None
+   of that is this card's, and at this weight none of it rests on source
+   order. */
+@media (min-width: 1024px) {
+  .hero-band:not(.is-compact) > .mc[data-lit] {
+    position: absolute;
+    z-index: 1;
+    grid-column: seam / bleed-end;
+    grid-row: auto;
+    top: auto;
+    left: auto;
+    right: 32px;
+    bottom: 32px;
+    display: block;
+    width: min(460px, calc(100% - 64px));
+    max-width: none;
+    margin: 0;
+    padding: var(--s-2xl);
+    border-radius: 24px;
+    background: var(--card);
+    box-shadow: var(--float);
+  }
+  .hero-band:not(.is-compact) > .mc[data-lit]::before {
+    content: none;
+  }
+}
