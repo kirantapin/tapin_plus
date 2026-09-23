@@ -17,6 +17,9 @@ import {
   type PlanId,
 } from "../model/content";
 
+/* The noun with its article: "an Early-ish Bird Special", "a seat". */
+const aSeat = `${/^[aeiou]/i.test(seatNoun) ? "an" : "a"} ${seatNoun}`;
+
 /**
  * The charge — pages 1, 2 and 3 of the checkout.
  *
@@ -275,10 +278,9 @@ export default function CheckoutSheet({
 
           ) : subscribed ? (
             <div className="receipt" role="status">
-              <p className="receipt-head">You already have a {seatNoun}.</p>
+              <p className="receipt-head">{`You already have ${aSeat}.`}</p>
               <p className="t-compact">
-                This number is already on an Early Bird {seatNoun}, so there is
-                nothing to pay now. Opening in Blacksburg, {launchWindow}.
+                {`This number is already on ${aSeat}, so there is nothing to pay now. Opening in Blacksburg, ${launchWindow}.`}
               </p>
               <Link className="action receipt-go" to="/in">
                 See your membership

@@ -52,6 +52,9 @@ import moneyJson from "../../docs/data/money-and-terms.json";
    JSON is frozen; the override lives here, and content.ts reads this. */
 /* Sam, 22 Sep 2026: "Can we say 100 spots, with 41 left now." */
 export const SEAT_CAP = 100;
+/* The live tier's name — Kiran, 23 Sep 2026; Sam confirmed. The sold-out $4.99
+   tier above it is the "Early Bird". content.ts re-exports it (it imports this file). */
+export const foundingTierName = "Early-ish Bird";
 void moneyJson;
 
 /**
@@ -160,6 +163,6 @@ export const foundingOpen = (now: Date = new Date()): boolean =>
  */
 export const seatLine = (now: Date = new Date()): string => {
   const left = seatsLeft(now);
-  if (left === 0) return "Early Bird spots are gone";
-  return `${left} of ${SEAT_CAP} Early Bird spots left`;
+  if (left === 0) return `${foundingTierName} spots are gone`;
+  return `${left} of ${SEAT_CAP} ${foundingTierName} spots left`;
 };

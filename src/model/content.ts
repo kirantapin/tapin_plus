@@ -14,7 +14,7 @@ import venuesJson from "../../docs/data/venues.json";
 import waysJson from "../../docs/data/ways-to-use.json";
 import moneyJson from "../../docs/data/money-and-terms.json";
 import { BENEFIT } from "./savings";
-import { foundingOpen, SEAT_CAP } from "./seats";
+import { foundingOpen, foundingTierName, SEAT_CAP } from "./seats";
 
 export interface Policy {
   id: string;
@@ -462,6 +462,9 @@ const cents = (n: number) => Math.round(n * 100);
  * it, and they must not be able to disagree.
  */
 export const FOUNDING_OPEN = foundingOpen();
+/* The live tier's name, "Early-ish Bird" — Kiran, 23 Sep 2026; Sam confirmed. The
+   sold-out tier is the "Early Bird". Lives in seats.ts, which this file imports. */
+export { foundingTierName };
 
 /**
  * THE NOUN ON EVERY CONTROL THAT TAKES MONEY, and the card's plan label.
@@ -475,12 +478,12 @@ export const FOUNDING_OPEN = foundingOpen();
 /* "Early Bird Special", not "founding seat" — Sam, 14 Sep 2026, after Rob's VT
    readers found the site "too complicated". The identifiers keep the old word
    (FOUNDING_OPEN, cardPlan's branch) because they name the STATE, not the copy. */
-export const seatNoun = FOUNDING_OPEN ? "Early Bird Special" : "seat";
+export const seatNoun = FOUNDING_OPEN ? `${foundingTierName} Special` : "seat";
 /* "Get early access" — Sam, 14 Sep 2026, replacing "Get the Early Bird Special". */
 export const reserveCta = FOUNDING_OPEN ? "Get early access" : "Reserve a seat";
 /** What the card prints under PLAN: Founding while the seats last, and after
  *  that the plan a reader is actually buying, in TRUTH §2's own word. */
-export const cardPlan = FOUNDING_OPEN ? "Early Bird" : "Standard";
+export const cardPlan = FOUNDING_OPEN ? foundingTierName : "Standard";
 
 /**
  * EVENTS, SAID ONCE AND QUIETLY. Sam, 14 Sep 2026: "TapIn also includes
@@ -617,14 +620,14 @@ export const seatCapParts: SeatCapPart[] = FOUNDING_OPEN
       /* Sam, 14 Sep 2026: "remove the strike through here on the header — and
          instead say 'Price for everyone else is $14.99'". No `role`, so the
          figure renders as plain text; TRUTH §2 re-fenced to match. */
-      { text: `${SEAT_CAP} Early Bird spots · Price for everyone else is ` },
+      { text: `${SEAT_CAP} ${foundingTierName} spots · Price for everyone else is ` },
       { text: usd(AFTER_MONTHLY) },
     ]
   : /* The founding round is over. The sentence cannot go on advertising a rate
        nobody can buy — and a reader comparing $4.99 to what they are being
        charged would be reading a discount aimed at someone else. */
     [
-      { text: `The ${SEAT_CAP} Early Bird spots are gone · ` },
+      { text: `The ${SEAT_CAP} ${foundingTierName} spots are gone · ` },
       { text: usd(AFTER_MONTHLY), role: "now" },
       { text: " a month" },
     ];
@@ -816,11 +819,11 @@ export const founderSaving = {
  *  a year plan was the wrong number in the right sentence. */
 export const lockedRateFor = (price: string, per: string): string =>
   FOUNDING_OPEN
-    ? `Your Early Bird rate never goes up: ${price} ${per} from the day we open, for as long as you stay a member.`
+    ? `Your ${foundingTierName} rate never goes up: ${price} ${per} from the day we open, for as long as you stay a member.`
     : lockedRateLines.standard;
 
 export const lockedRateLines = {
-  founding: `Your Early Bird rate never goes up: ${usd(FOUNDING_MONTHLY)} a month from the day we open, for as long as you stay a member.`,
+  founding: `Your ${foundingTierName} rate never goes up: ${usd(FOUNDING_MONTHLY)} a month from the day we open, for as long as you stay a member.`,
   /* No founding rate left to lock, but the promise the product actually makes
      about price stability is still true and is still worth saying. It already
      said it this way, which is what made the year on the line above read as
@@ -1073,7 +1076,7 @@ function subscribise(
      the same way in the rows, the consent, the terms and the receipt — the
      earlier wording read as a hold fee PLUS a first charge. Nothing else is
      charged until the period after the first, and that is asked for. */
-  const seat = founding ? "Early Bird Special" : "seat";
+  const seat = founding ? `${foundingTierName} Special` : "seat";
   return {
     chargeRows: [
       {
@@ -1110,7 +1113,7 @@ function subscribise(
       !founding && t.id === "rate"
         ? {
             id: "rate",
-            term: `${paidToday} is the standard rate. The Early Bird spots are gone.`,
+            term: `${paidToday} is the standard rate. The ${foundingTierName} spots are gone.`,
           }
         : !founding && t.id === "forfeit"
           ? {

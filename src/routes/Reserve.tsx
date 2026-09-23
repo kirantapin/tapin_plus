@@ -11,6 +11,7 @@ import {
   FOUNDING_OPEN,
   firstEarlyBirdPrice,
   foundingCloses,
+  foundingTierName,
   guarantee,
   GUARANTEE_CONTACT,
   logoField,
@@ -95,7 +96,7 @@ const schedule: { id: string; when: string; figure: string; note?: string }[] = 
     id: "today",
     when: "Today",
     figure: plan.price,
-    note: `${FOUNDING_OPEN ? "Early Bird deposit" : "Deposit"}, counts toward your first ${plan.period}`,
+    note: `${FOUNDING_OPEN ? `${foundingTierName} deposit` : "Deposit"}, counts toward your first ${plan.period}`,
   },
   ...(FOUNDING_OPEN && monthlyToday < BENEFIT.creditUsd
     ? [
@@ -361,7 +362,7 @@ export default function Reserve() {
                 Follows the flip: after the Early Bird spots are gone there is
                 nothing early about it, and `plan.label` is not a substitute
                 because it names the cadence this tile no longer states. */}
-            <b>{FOUNDING_OPEN ? "Early-ish Bird Deposit" : "Deposit"}</b>
+            <b>{FOUNDING_OPEN ? `${foundingTierName} Deposit` : "Deposit"}</b>
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
@@ -434,7 +435,7 @@ export default function Reserve() {
               <span className="plan-figs">
                 <span className="plan-now">
                   <b className="tnum">{plan.saving.after}</b>
-                  <span className="plan-else">a month, once the Early Bird spots are gone</span>
+                  <span className="plan-else">{`a month, once the ${foundingTierName} spots are gone`}</span>
                 </span>
               </span>
             </div>
