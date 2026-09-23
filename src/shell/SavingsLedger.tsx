@@ -2,15 +2,23 @@ import { useId, useLayoutEffect, useRef } from "react";
 import { signedDollars, type MonthLedger } from "../model/campaign";
 
 /**
- * THE MONTH LEDGER — a receipt that fills itself (docs/POLISH-2026-09-21.md §17).
+ * THE MONTH LEDGER — a receipt that fills itself (docs/POLISH-2026-09-21.md
+ * §17, redrawn in §20).
  *
  * The one thing on the Coffeeholics page that is a SEQUENCE: the same $5
  * arriving every week against one membership. So it is the one thing that
- * moves. Rows 1–4 arrive 900ms apart (280ms, a 12px rise, the house ease);
- * as each lands the foot counts to its new total over 400ms, from −$4.99
- * through zero — that crossing is the message, and "You're ahead" arrives
- * with it. The foot holds 3.2s, the weeks fade out together over 240ms, and
- * it starts again with the membership already in place.
+ * moves. The foot rests on −$4.99 for 1.2s, then weeks 1–4 arrive 900ms apart
+ * (280ms, a 12px rise, the house ease); as each lands the foot counts to its
+ * new total over 400ms. While it is owed it is `--ink-3` and unlabelled; at
+ * the zero crossing it takes `--ink-1` and "You're ahead" fades in — the
+ * crossing is told by weight of ink, not by a colour. The foot holds 3.2s,
+ * the weeks fade out together over 240ms, and it starts again with the
+ * membership already in place (≈8s a cycle).
+ *
+ * A RECEIPT FROM THE APP, NOT A TABLE (§20). Each week is its basket's own
+ * photograph at 32px, the basket's name over the week, and `+$5.00`; the word
+ * "credit" is said once, in the line under the membership. A week whose
+ * record has no photograph keeps its row and drops the thumbnail.
  *
  * THE MARKUP IS THE FINISHED LEDGER. Every row visible, the foot at its net.
  * `data-run` is what hides the weeks for the loop, and only the script sets
@@ -18,15 +26,17 @@ import { signedDollars, type MonthLedger } from "../model/campaign";
  * `data-still` ancestor all get the complete, still receipt for free.
  *
  * CHEAP BY CONSTRUCTION. Transform and opacity only, on rows laid out at full
- * size from the start, so the card never changes size. One timeout schedule;
- * `requestAnimationFrame` runs only for the 400ms of each count and never
- * during the hold. The loop stops when the tab is hidden or the card is off
- * screen, and every timer is cleared on unmount.
+ * size from the start, so the card never changes size; the foot's ink is a
+ * class flip, not a transition. One timeout schedule; `requestAnimationFrame`
+ * runs only for the 400ms of each count and never during a hold. The loop
+ * stops when the tab is hidden or the card is off screen, and every timer is
+ * cleared on unmount.
  *
  * SCREEN READERS READ THE RECEIPT, NOT THE COUNT. Opacity does not hide a row
  * from assistive tech, so every row is always read; the moving figure is
  * `aria-hidden` and a still copy of the net stands in for it.
  */
+const OPEN = 1200;
 const RISE_GAP = 900;
 const ENTER = 280;
 const COUNT = 400;
@@ -51,8 +61,8 @@ export default function SavingsLedger({
     const el = card.current;
     const fig = net.current;
     if (still || !el || !fig) return;
-    const rows = [...el.querySelectorAll<HTMLElement>(".ml-row.is-week")];
-    const ahead = el.querySelector<HTMLElement>(".ml-ahead");
+    const rows = [...el.querySelectorAll<HTMLElement>(".ml-week")];
+    const foot = el.querySelector<HTMLElement>(".ml-foot");
     const { startCents, runningCents, netCents } = ledger;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -76,9 +86,11 @@ export default function SavingsLedger({
       raf = 0;
       running = false;
     };
+    /* Ahead means above zero: the count can land a frame on $0.00, and
+       "You're ahead" beside it would be a cent from true. */
     const write = (c: number) => {
       fig.textContent = signedDollars(c);
-      if (c >= 0) ahead?.classList.add("is-in");
+      foot?.classList.toggle("is-ahead", c > 0);
     };
     const count = (from: number, to: number) => {
       const t0 = performance.now();
@@ -94,20 +106,19 @@ export default function SavingsLedger({
     const reset = () => {
       el.removeAttribute("data-out");
       rows.forEach((r) => r.classList.remove("is-in"));
-      ahead?.classList.remove("is-in");
       write(startCents);
       dirty = false;
     };
     const cycle = () => {
       reset();
       runningCents.forEach((to, k) => {
-        later(RISE_GAP * (k + 1), () => {
+        later(OPEN + RISE_GAP * k, () => {
           dirty = true;
           rows[k]?.classList.add("is-in");
           later(ENTER, () => count(k ? runningCents[k - 1] : startCents, to));
         });
       });
-      const settled = RISE_GAP * runningCents.length + ENTER + COUNT;
+      const settled = OPEN + RISE_GAP * (runningCents.length - 1) + ENTER + COUNT;
       later(settled + HOLD, () => {
         el.setAttribute("data-out", "");
         later(LEAVE, cycle);
@@ -164,20 +175,31 @@ export default function SavingsLedger({
       <p className="ml-head" id={headId}>
         {ledger.head}
       </p>
-      <ul className="ml-rows">
-        <li className="ml-row">
-          <span className="ml-what">{ledger.plan.what}</span>
-          <b className="ml-fig">{ledger.plan.figure}</b>
-        </li>
+      <p className="ml-plan">
+        <span className="ml-plan-what">{ledger.plan.what}</span>
+        <b className="ml-fig">{ledger.plan.figure}</b>
+      </p>
+      <p className="ml-cadence">{ledger.cadence}</p>
+      <ul className="ml-weeks">
         {ledger.weeks.map((w) => (
-          <li key={w.id} className="ml-row is-week">
-            <span className="ml-what">{w.what}</span>
-            <span className="ml-basket">{w.basket}</span>
+          <li key={w.id} className="ml-week">
+            {w.img ? (
+              <img
+                className="ml-thumb"
+                src={w.img}
+                alt=""
+                width={32}
+                height={32}
+                decoding="async"
+              />
+            ) : null}
+            <span className="ml-item">{w.basket}</span>
+            <span className="ml-when">{w.what}</span>
             <b className="ml-fig">{w.figure}</b>
           </li>
         ))}
       </ul>
-      <p className="ml-foot">
+      <p className={`ml-foot${ledger.netCents > 0 ? " is-ahead" : ""}`}>
         <span className="ml-ahead">You're ahead</span>
         <b className="ml-net" ref={net} aria-hidden="true">
           {signedDollars(ledger.netCents)}

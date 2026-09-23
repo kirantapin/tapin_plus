@@ -221,6 +221,12 @@ export const campaignShots: {
  * A basket with an item missing, or under the floor, is dropped rather than
  * repriced, and the weeks renumber. If the credits ever stop covering the
  * membership, the ledger is not rendered at all: its foot says "You're ahead".
+ *
+ * §20 (23 Sep 2026): a receipt from the app, not a table. Each week carries
+ * its basket's FIRST item's own photograph (`img`, from the menu record — a
+ * basket whose first item has none keeps its row and loses the thumbnail,
+ * never borrows another), the figure is `+$5.00` alone, and the word "credit"
+ * is said once, in `cadence`, under the membership row.
  */
 const LEDGER_BASKETS: string[][] = [
   ["coffeeholicsva-160-35"],
@@ -235,7 +241,17 @@ export const signedDollars = (c: number) => `${c < 0 ? "\u2212" : ""}${dollars(M
 export interface MonthLedger {
   head: string;
   plan: { what: string; figure: string; cents: number };
-  weeks: { id: string; what: string; basket: string; figure: string; cents: number }[];
+  /** The line under the membership that says what the weeks are. */
+  cadence: string;
+  weeks: {
+    id: string;
+    what: string;
+    basket: string;
+    /** The basket's first item's own photograph, when the record has one. */
+    img?: string;
+    figure: string;
+    cents: number;
+  }[];
   /** The foot before any credit: the membership, owed. */
   startCents: number;
   /** The foot after each week lands, in order. The last is `netCents`. */
@@ -254,10 +270,17 @@ export const campaignLedger: MonthLedger | null = (() => {
     const total = found.reduce((sum, i) => sum + cents(i.price), 0);
     if (total < floor) return [];
     const credit = Math.min(cents(BENEFIT.creditUsd), total);
-    return [{ id: ids.join("+"), basket: found.map((i) => i.name).join(" + "), cents: credit }];
+    return [
+      {
+        id: ids.join("+"),
+        basket: found.map((i) => i.name).join(" + "),
+        img: found[0].img,
+        cents: credit,
+      },
+    ];
   })
     .slice(0, WEEKS_PER_MONTH)
-    .map((w, k) => ({ ...w, what: `Week ${k + 1}`, figure: `+${dollars(w.cents)} credit` }));
+    .map((w, k) => ({ ...w, what: `Week ${k + 1}`, figure: `+${dollars(w.cents)}` }));
   const plan = cents(monthlyToday);
   const runningCents = weeks.reduce<number[]>(
     (acc, w) => [...acc, (acc.length ? acc[acc.length - 1] : -plan) + w.cents],
@@ -268,6 +291,7 @@ export const campaignLedger: MonthLedger | null = (() => {
   return {
     head: `One month at ${campaignVenue.name}`,
     plan: { what: `${cardPlan} membership`, figure: dollars(plan), cents: plan },
+    cadence: `Then $${BENEFIT.creditUsd} credit, every week you order`,
     weeks,
     startCents: -plan,
     runningCents,

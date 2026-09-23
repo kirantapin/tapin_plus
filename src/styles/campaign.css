@@ -167,7 +167,7 @@
 
 /* -- the actions -----------------------------------------------------------
    ONE FILLED ACTION PER VIEW. On a phone the fill is spent at the foot, on the
-   membership, so only the ghost is here; the filled twin is `display:none`
+   membership, so only the try link is here; the filled twin is `display:none`
    until 1024, where the fold holds the whole argument and the docked bar is
    switched off in exchange. */
 .cg-acts {
@@ -434,18 +434,26 @@
     font-size: 18px;
     max-width: 40ch;
   }
-  /* Side by side, equal: the fold is wide enough to hold both, so the docked
-     pair below is switched off rather than repeating them over the page. */
+  /* THE BAND'S CONSTRUCTION, NOT TWO SLABS (§20). These were two equal
+     halves — a 269px purple bar beside a 268px grey one. Now the one filled
+     button is sized to its words and the try link sits beside it as the
+     phone's own text link, 24 apart, centred on the button's axis: the shape
+     of the membership band below, which Sam singled out. The fold holds
+     both, so the docked pair is switched off rather than repeated. */
   .cg-acts {
     flex-direction: row;
-    gap: var(--s-lg);
-  }
-  .cg-acts > * {
-    flex: 1 1 0;
-    min-width: 0;
+    align-items: center;
+    gap: var(--s-2xl);
   }
   .cg-hero-cta {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 220px;
+    height: 48px;
+    padding: 0 calc(var(--s-xl) * 2);
   }
 
   /* The band: statement | price | action, with a hairline between the cells
@@ -847,28 +855,53 @@
 }
 
 /* ── THE INVITATION UNDER THE FIGURES ──────────────────────────────────────
-   A row, not a third filled button: the page spends its fill on "Get early
-   access", and a second one here would leave the reader choosing between two
-   equal-looking controls for different destinations.
+   A text link, not a third filled button and not a pill: the page spends its
+   fill on "Get early access", and a second slab beside it leaves the reader
+   choosing between two equal-looking controls for different destinations.
 
-   IT IS THE HOUSE GHOST NOW (`.action.action-ghost`), not a shape of its own.
-   It was a 14px purple strip at 48px tall — a control invented for one page,
-   half a step under the button it sits beside. The only thing declared here is
-   the chevron and the row that carries it; the size, the plate, the hairline
-   and the press all come from the two classes every other secondary action on
-   the site already wears. */
+   ONE OBJECT AT EVERY WIDTH. It was the house ghost (`.action.action-ghost`)
+   with a phone override undoing every part of it: measured at 375, it sat as
+   a pill directly above the docked pair, which already carries "Try it once
+   for free" — three pills in one view, two of them the same verb. The phone
+   made it a link at reading size with the chevron, on the argument's own
+   left edge, 44px tall so it stays a target. §20 (23 Sep 2026) took that
+   link to the desktop as well, beside the filled button, and the ghost
+   classes and their undoing went with it. A <button>, so it declares what
+   an <a> gets for free. */
 .cg-try {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--s-md);
-  min-height: 48px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: left;
+  color: var(--cg-brand, var(--maroon));
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .cg-try svg {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
-  color: var(--ink-3);
+  color: currentColor;
+  transition: transform 150ms var(--ease);
+}
+@media (hover: hover) {
+  .cg-try:hover svg {
+    transform: translateX(2px);
+  }
 }
 .cg-try:focus-visible {
   outline: 2px solid var(--ink-1);
@@ -905,111 +938,122 @@
   mask-image: none;
 }
 
-/* ── ON A PHONE THE MENTION IS A LINK, NOT A THIRD PILL ────────────────────
-   Measured at 375 after the polish: "Try the first two free today" rendered
-   as a ghost button directly above the docked pair, which already carries
-   "Try it once for free" as its filled action. Three pills in one view, two
-   of them the same verb — the exact tell the plan set out to remove.
-
-   Below 1024 the docked pair IS this page's action row, so the in-page
-   mention only has to be a mention: a text link at reading size with the
-   chevron, on the argument's own left edge, 44px tall so it stays a target.
-   From 1024 the pair is hidden and this goes back to being the ghost button
-   beside the filled one, where it is the only place the action lives. */
-@media (max-width: 1023px) {
-  .cg-acts .cg-try {
-    justify-content: flex-start;
-    width: auto;
-    min-height: 44px;
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--cg-brand, var(--maroon));
-  }
-  .cg-acts .cg-try svg {
-    color: currentColor;
-  }
-  .cg-acts .cg-try:active {
-    transform: none;
-    filter: none;
-    opacity: 1;
-  }
-}
-
 /* ============================================================================
-   THE MONTH LEDGER — shell/SavingsLedger.tsx (docs/POLISH-2026-09-21.md §17).
+   THE MONTH LEDGER — shell/SavingsLedger.tsx (docs/POLISH-2026-09-21.md §17,
+   redrawn in §20).
 
    Sam, 23 Sep 2026: the desktop header should show "how using the deals can
    pocket savings for consumers over time — like how much they get back on the
    $4.99 they spend on the membership." A receipt: the membership, four real
    baskets each earning the week's credit, and what that leaves you.
 
-   A WHITE CARD, THE PLATE §12 A CHOSE for type near a photograph: the ink
-   ramp on `--card`, 18.2 / 11.9 / 8.4:1 for ink-1/2/3. The credits are
-   `--ink-1`, not green and not the merchant's purple — an outcome, not a
-   chosen thing. Every size is on the ramp and none is under 14.
+   §20: A RECEIPT FROM THE APP, NOT A TABLE. It was nine lines at one weight
+   with "+$5.00 credit" four times. Now each week is the basket's own
+   photograph at 32px, its name over the week, and the figure alone; the word
+   "credit" is said once, under the membership; and the foot is the one
+   large figure on the card.
 
-   Over the photograph from 1024 (bottom-right, 24 in, 360 wide — narrower
-   only when the column is, at 1024 itself); a full-width card under the try
-   link below it, complete and still.
+   A WHITE CARD, THE PLATE §12 A CHOSE for type near a photograph: the ink
+   ramp on `--card`. The credits are `--ink-1`, not green and not the
+   merchant's purple — an outcome, not a chosen thing. Every size is on the
+   ramp and none is under 14.
+
+   Over the photograph from 1024 (bottom-right, 24 in, 340 wide — narrower
+   only when the column is); a full-width card under the try link below it,
+   complete and still.
    ============================================================================ */
 .ml {
   box-sizing: border-box;
-  padding: var(--s-xl);
+  padding: 20px;
   border-radius: 20px;
   background: var(--card);
   box-shadow: var(--float);
   color: var(--ink-1);
 }
 .ml-head {
-  margin: 0 0 var(--s-xl);
+  margin: 0 0 var(--s-lg);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.005em;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+/* Row 0: what the month costs, closed by the one hairline above the weeks. */
+.ml-plan {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: 0;
+  padding-bottom: var(--s-lg);
+  border-bottom: 1px solid var(--hair);
+}
+.ml-plan-what {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   line-height: 1.3;
   color: var(--ink-2);
 }
-.ml-rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--s-lg);
-}
-/* The week and its figure on one line, the basket under both: the menu's own
-   names run long ("Butter Croissant", "Baked Cookie") and get the card's full
-   measure rather than what the figure leaves. */
-.ml-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "what fig"
-    "basket basket";
-  column-gap: var(--s-lg);
-  align-items: baseline;
-}
-.ml-what {
-  grid-area: what;
-  min-width: 0;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-  color: var(--ink-1);
-}
-.ml-basket {
-  grid-area: basket;
-  margin-top: 2px;
+/* The hairline's caption: what the weeks under it are. */
+.ml-cadence {
+  margin: var(--s-lg) 0 0;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.003em;
   line-height: 1.35;
   color: var(--ink-3);
   text-wrap: pretty;
+}
+.ml-weeks {
+  list-style: none;
+  margin: var(--s-lg) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-lg);
+}
+/* The thumbnail across both lines; the figure on the basket's own baseline,
+   so a name that wraps ("Cappuccino + Butter Croissant + Baked Cookie") keeps
+   its figure on its first line. A week with no photograph keeps the column
+   empty, so every name still starts on one edge. */
+.ml-week {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "thumb item fig"
+    "thumb when .";
+  column-gap: var(--s-lg);
+  align-items: baseline;
+}
+.ml-thumb {
+  grid-area: thumb;
+  align-self: center;
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--inner);
+}
+.ml-item {
+  grid-area: item;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--ink-1);
+  text-wrap: pretty;
+}
+.ml-when {
+  grid-area: when;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.3;
+  color: var(--ink-3);
 }
 .ml-fig {
   grid-area: fig;
@@ -1037,10 +1081,12 @@
   letter-spacing: -0.01em;
   color: var(--ink-2);
 }
-/* Right-aligned and tabular, so the count never moves the digits already
-   standing — only the leading one arrives as the total grows. */
+/* The card's one large figure. Right-aligned and tabular, so the count never
+   moves the digits already standing — only the leading one arrives as the
+   total grows. */
 .ml-net {
-  font-size: 24px;
+  margin-left: auto;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -1056,30 +1102,35 @@
    reset (dropping `is-in` and `data-out` together) snaps the invisible rows
    back 12px with no transition at all. Exit is shorter and accelerating, the
    modal's own leave curve. */
-.ml[data-run] .ml-row.is-week {
+.ml[data-run] .ml-week {
   opacity: 0;
   transform: translateY(12px);
 }
-.ml[data-run] .ml-row.is-week.is-in {
+.ml[data-run] .ml-week.is-in {
   opacity: 1;
   transform: none;
   transition:
     opacity 280ms var(--ease),
     transform 280ms var(--ease);
 }
-/* "You're ahead" is the crossing: it is not said while the foot is owed. */
+/* THE CROSSING IS TOLD BY INK. While the foot is owed it is the quiet step
+   and nothing names it; the frame it reaches zero it takes the heading ink
+   (a class flip, not a colour transition) and "You're ahead" fades in. */
 .ml[data-run] .ml-ahead {
-  opacity: 0;
+  transition: opacity 200ms var(--ease);
 }
-.ml[data-run] .ml-ahead.is-in {
-  opacity: 1;
-  transition: opacity 280ms var(--ease);
+.ml[data-run] .ml-foot:not(.is-ahead) .ml-ahead {
+  opacity: 0;
+  transition: none;
+}
+.ml[data-run] .ml-foot:not(.is-ahead) .ml-net {
+  color: var(--ink-3);
 }
 .ml[data-run] .ml-net {
   transition: opacity 280ms var(--ease);
 }
-.ml[data-run][data-out] .ml-row.is-week.is-in,
-.ml[data-run][data-out] .ml-ahead.is-in,
+.ml[data-run][data-out] .ml-week.is-in,
+.ml[data-run][data-out] .ml-ahead,
 .ml[data-run][data-out] .ml-net {
   opacity: 0;
   transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
@@ -1098,11 +1149,10 @@
     z-index: 1;
     right: var(--s-2xl);
     bottom: var(--s-2xl);
-    width: min(360px, calc(100% - var(--s-2xl) * 2));
-    padding: var(--s-2xl);
+    width: min(340px, calc(100% - var(--s-2xl) * 2));
   }
   /* THE NAME GOES TO THE HEAD OF THE PHOTOGRAPH. Bottom-left it would sit
-     under the ledger: 360 + 48 of a 490px photograph leaves 82px beside the
+     under the ledger: 340 + 48 of a 490px photograph leaves 102px beside the
      card. Up there it lands on the shop's window, the brightest thing in the
      frame — measured, white on it was 3.1:1 and the street at .8 was 2.4:1
      under the phone's .46 head scrim — so the head scrim is deeper and

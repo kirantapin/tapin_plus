@@ -82,6 +82,11 @@ import {
  * that fills itself over the photograph from 1024. On a phone the same
  * receipt sits under the try link, complete and still: the photograph is a
  * 260px band there and the card would cover it.
+ *
+ * §20, the same evening: the ledger redrawn as a receipt from the app (each
+ * week its basket's own photograph, the foot the one large figure), and the
+ * two equal hero slabs replaced by one button sized to its words with the try
+ * link beside it — the membership band's construction.
  */
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -267,10 +272,16 @@ export default function Coffeeholics() {
 
           {/* ══ THE ACTIONS ══════════════════════════════════════════════
               ONE FILLED ACTION PER VIEW. On a phone that is the membership
-              button at the foot, so the only control up here is the ghost —
-              the filled twin below is `display:none` until 1024, where the
-              fold is wide enough to hold the argument and both actions at
-              once and the docked bar is switched off in exchange. */}
+              button at the foot, so the only control up here is the try
+              link — the filled twin below is `display:none` until 1024, where
+              the fold is wide enough to hold the argument and both actions at
+              once and the docked bar is switched off in exchange.
+
+              ONE BUTTON AND A LINK, NOT TWO SLABS (§20, 23 Sep 2026). Sam, on
+              the desktop hero: "don't like the CTA buttons here", beside the
+              membership band he did like — one button sized to its words and
+              the second thing beside it as text. So that is the construction:
+              the filled button at its words' width, the try link beside it. */}
           <div className="cg-acts">
             <Link
               className="action cg-hero-cta"
@@ -291,11 +302,7 @@ export default function Coffeeholics() {
                 So the invitation sits at the end of that list, and it opens
                 the same modal: the how-it-works comes first and Coffeeholics
                 comes from there, which is the order he asked for. */}
-            <button
-              type="button"
-              className="action action-ghost cg-try"
-              onClick={() => setTrial(true)}
-            >
+            <button type="button" className="cg-try" onClick={() => setTrial(true)}>
               Try the first two free today
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
