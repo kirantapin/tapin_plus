@@ -89,7 +89,9 @@ export default function MonthCalendar({ month }: { month: Month }) {
     const count = (from: number, to: number) => {
       const t0 = performance.now();
       const tick = (now: number) => {
-        const p = Math.min(1, (now - t0) / COUNT);
+        /* A frame's timestamp can precede the t0 taken when it was asked
+           for; clamped at 0 so the first frame never dips past `from`. */
+        const p = Math.max(0, Math.min(1, (now - t0) / COUNT));
         write(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
         raf = p < 1 ? requestAnimationFrame(tick) : 0;
       };
