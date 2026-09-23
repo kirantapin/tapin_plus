@@ -961,6 +961,11 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
 .reserve-layer.is-closing .reserve-scrim{animation:layerFadeOut 260ms linear both}
 @keyframes sheetDown{from{transform:none}to{transform:translateY(100%)}}
 @keyframes layerFadeOut{from{opacity:1}to{opacity:0}}
+/* Both lived in app.css until 20 Sep and were deleted with it: the scrim's
+   own fade-in, and the scroll lock App.tsx toggles on <html> while the layer
+   is up (without it, wheel over the scrim scrolls the page beneath). */
+@keyframes layerFade{from{opacity:0}to{opacity:1}}
+html.is-layered{overflow:hidden}
 .reserve-sheet:focus{outline:none}
 /* Its own scroller, a separate box from the animated surface: see the note
    on fixed children in ReserveLayer.tsx. */
@@ -1553,7 +1558,8 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
    here under `.rs-*` so a change to either surface cannot move the other.
    No button and no price inside it — the ledger carries both. */
 .rs-inc{display:flex;flex-direction:column;gap:var(--s-lg);margin:0;
-  padding:var(--s-xl);border-radius:var(--r-card);background:var(--inner)}
+  padding:var(--s-xl);border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--card);box-shadow:var(--rest)}
 /* `.t-title` is the heading's size and ink (18/700 `--ink-1`); the plate's
    row gap is its only interval. */
 .rs-inc-head{margin:0}
@@ -1829,8 +1835,12 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
   /* Kiran's third tile (the sold-out $4.99, 23 Sep) is why the money column
      steps at 16; on desktop this supersedes §16's 24 between its blocks. */
   .rs-pay-col{gap:var(--s-xl)}
-  /* ONE BOTTOM LINE (§26). The right column stretches to the row, the panel
-     fills it, and the card's block sits on the panel's floor. */
-  .rs-get-col{align-self:stretch;grid-template-rows:minmax(0,1fr)}
-  .rs-inc-card{margin-top:auto}
+    /* SIDES SWAPPED, BOTH WHITE (Sam, 23 Sep 2026: "swap the sides these are
+     on — also let's use a white background for both"). What you get reads
+     first, on the left; the money and its button sit on the right, where a
+     checkout keeps them. The DOM order stays money-first (the phone's single
+     column and the tab order), so this is a visual order only. The panel no
+     longer stretches to the row: two white cards of their own heights, top
+     aligned, instead of one card padding a void above the membership card. */
+  .rs-get-col{order:-1;align-self:start}
 }
