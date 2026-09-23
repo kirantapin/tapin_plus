@@ -1,5 +1,6 @@
 import { BenefitIcon, NavIcon } from "./Icons";
 import PhotoCard from "./PhotoCard";
+import { cardVariant } from "../model/card";
 import {
   benefitFragments,
   benefitShots,
@@ -153,8 +154,12 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
       : []),
   ];
 
+  /* §12's direction switch (DEV only). Absent, no attribute is written and
+     this tree is the one that shipped before the switch, byte for byte. */
+  const variant = cardVariant();
+
   return (
-    <div className="bshots">
+    <div className="bshots" data-card={variant}>
       {cards.map(({ policy, line }) => {
         const shot = venues.find((v) => v.id === benefitShots[policy.id])?.hero;
         /* The offers fragment is the offer itself — the venue and the terms as
@@ -175,6 +180,7 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
             title={policy.label}
             line={line}
             lead={policy.id === "credit"}
+            variant={variant}
             chip={
               chip
                 ? {

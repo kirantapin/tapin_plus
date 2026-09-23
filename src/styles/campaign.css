@@ -302,7 +302,10 @@
 .cg-save-h {
   margin: 0 0 var(--s-lg);
 }
-.cg-save .bshot {
+/* §12's split and order-line directions (`?card=`, DEV only) set their copy
+   on a white `--card` plate rather than over the photograph, so they keep the
+   surface's own dark ink; the poster and the current card still want white. */
+.cg-save:not([data-card="split"], [data-card="line"]) .bshot {
   --ink-1: var(--on-maroon);
 }
 
@@ -403,6 +406,34 @@
     height: auto;
     aspect-ratio: 4 / 3;
     padding: var(--s-2xl);
+  }
+  /* §12's three, three across and equal here as the current card is (the
+     strip above leads with the credit). A's photograph keeps the pitch's
+     2:1 over its plate; B is as tall as its row; C is the 4:3 above. */
+  .cg-save[data-card="split"] .bshot,
+  .cg-save[data-card="split"] .bshot.is-lead {
+    aspect-ratio: auto;
+    padding: 0;
+  }
+  .cg-save[data-card="split"] .bshot-img,
+  .cg-save[data-card="split"] .bshot.is-lead .bshot-img {
+    height: auto;
+    aspect-ratio: 2 / 1;
+  }
+  .cg-save[data-card="split"] .bshot-say {
+    padding: var(--s-2xl) var(--s-2xl) 0;
+  }
+  .cg-save[data-card="split"] .bshot-chip {
+    margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
+    padding-top: var(--s-xl);
+  }
+  .cg-save[data-card="line"] .bshot,
+  .cg-save[data-card="line"] .bshot.is-lead {
+    aspect-ratio: auto;
+  }
+  .cg-save[data-card="poster"] .bshot,
+  .cg-save[data-card="poster"] .bshot.is-lead {
+    height: auto;
   }
 
   .cg {
