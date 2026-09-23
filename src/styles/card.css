@@ -193,6 +193,9 @@
 .tcard-facts{display:flex;margin:0}
 .tcard-facts > div{padding-right:var(--s-2xl)}
 .tcard-facts > div + div{padding-left:var(--s-2xl);border-left:1px solid var(--hair-lit)}
+/* The padding is the space before the next fact's rule; the last fact has no
+   next, and its 24px ran past the card's content edge (23 Sep 2026, §23). */
+.tcard-facts > div:last-child{padding-right:0}
 .tcard-facts dt{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-3)}
 .tcard-facts dd{margin:5px 0 0;font-size:18px;font-weight:700;letter-spacing:-.02em;

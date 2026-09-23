@@ -1276,13 +1276,14 @@ html[data-flight="in"] .column > .sticky-cta{
    panel, so the sentence, the bar and the date all run edge to edge with the
    control they qualify — no width of its own, nothing to keep in step by hand.
 
-   The number steps down from 20px to 16: at 20 it was competing with the price
-   in the tile above, which is the one figure on this panel that should lead. */
+   ONE LINE AND THE BAR (23 Sep 2026, POLISH §23). It was a sentence, the bar
+   and the close date under it; the count and the date are now one 14px line
+   centred on the button's label, and the bar follows. The number keeps the
+   line's size and takes weight and `--ink-1` instead of a size step, so the
+   price in the tile above stays the one figure that leads. */
 .rs-seats-under{margin-top:var(--s-md);text-align:center}
-/* Centred on the button's label, which is what it is a caption to. */
-.rs-seat-line{display:flex;justify-content:center;align-items:baseline;gap:var(--s-sm);
-  flex-wrap:wrap;margin:0;font-size:14px;line-height:1.3;color:var(--ink-2)}
-.rs-seat-line b{font-size:16px;line-height:1.3;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
+.rs-seat-line{margin:0;font-size:14px;font-weight:500;line-height:1.35;color:var(--ink-2)}
+.rs-seat-line b{font-weight:700;color:var(--ink-1)}
 /* One continuous bar (Sam, 15 Sep 2026: "a single line, not little blocks"),
    the fill scaled from the left so the fraction is exact — and see Reserve.tsx
    for WHICH fraction: it draws the seats taken, not the seats left. 4px and the
@@ -1292,10 +1293,6 @@ html[data-flight="in"] .column > .sticky-cta{
   border-radius:var(--r-control);background:var(--hair-lit);overflow:hidden}
 .rs-meter i{position:absolute;inset:0;border-radius:var(--r-control);background:var(--ink-1);
   transform-origin:left;transform:scaleX(var(--p,0))}
-/* The date, under the bar. It was 12px — a sentence under the reading floor,
-   which POLISH §6 allows only for legal links, the PLUS chip and the corner
-   flags. It is none of those. */
-.rs-seat-close{margin:var(--s-sm) 0 0;font-size:14px;font-weight:500;color:var(--ink-3)}
 
 /* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
    The group is down to a single plan, so the grid stops being two columns and
@@ -1555,29 +1552,36 @@ html[data-flight="in"] .column > .sticky-cta{
 /* ── 2. THE SCHEDULE ───────────────────────────────────────────────────────
    One grid for the whole ledger, and each row a SUBGRID of it, so the figures
    column is one width for every row — the widest figure's — and every amount
-   ends on one right edge. The label and the figure share a baseline; the note
-   runs under the label only, so the figure column stays clear.
+   ends on one right edge. The label and the figure share a baseline.
 
-   The label is the house field label (14/600 `--ink-3`, `.ph-label`); the
-   note is a step darker because it is the sentence that explains the figure;
-   the figure is 16/700 tabular `--ink-1`, the loudest thing in its row and
-   never louder than the row beside it. Dividers are `--hair-lit`, the same
-   line page 2's charge rows draw — `--hair` measures ~1.3:1 on this ground
-   and a ledger with invisible rules is a list that has lost its columns. */
+   ONE LINE A ROW (23 Sep 2026, POLISH §23). The note under each label became
+   a clause after it, at the label's size and ink: the label is the house field
+   label (14/600 `--ink-3`, `.ph-label`) and the clause the same at 500, so
+   the row reads as one quiet line with the figure — 16/700 tabular `--ink-1`
+   — the only loud thing in it. Dividers are `--hair-lit`, the same line page
+   2's charge rows draw — `--hair` measures ~1.3:1 on this ground and a ledger
+   with invisible rules is a list that has lost its columns. */
 .rs-ledger{display:grid;grid-template-columns:minmax(0,1fr) max-content;
   column-gap:var(--s-xl);margin:0}
 .rs-row{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;
-  align-items:baseline;row-gap:var(--s-xs);padding:var(--s-lg) 0}
+  align-items:baseline;padding:var(--s-lg) 0}
 .rs-row:first-child{padding-top:0}
 .rs-row:last-child{padding-bottom:0}
 .rs-row + .rs-row{border-top:1px solid var(--hair-lit)}
 .rs-when{grid-column:1;grid-row:1;margin:0;font-size:14px;font-weight:600;
   line-height:1.35;letter-spacing:.005em;color:var(--ink-3)}
+.rs-clause{font-weight:500}
 .rs-fig{grid-column:2;grid-row:1;justify-self:end;margin:0;text-align:right;
   white-space:nowrap;font-size:16px;font-weight:700;line-height:1.35;
   letter-spacing:-.01em;color:var(--ink-1)}
-.rs-note{grid-column:1;grid-row:2;margin:0;font-size:14px;font-weight:500;
-  line-height:1.4;color:var(--ink-2);text-wrap:pretty}
+/* ON THE PHONE SHEET THE CLAUSE TAKES ITS OWN LINE. Below 640 the column is
+   too narrow for the Halloween row's label, clause and figure on one line, and
+   an inline clause broke mid-phrase. So it drops under its label whole, and
+   the dot that joined them goes with it. */
+@media (max-width:639px){
+  .rs-clause{display:block;margin-top:var(--s-xs)}
+  .rs-sep{display:none}
+}
 
 /* ── 3. THE BUTTON AND ITS COUNT ───────────────────────────────────────────
    The block's own interval, not the §4 slot's: `.pay-slot` carries a 16px
@@ -1672,16 +1676,18 @@ html[data-flight="in"] .column > .sticky-cta{
    nested surfaces, which is a framed picture of the thing rather than the
    thing (docs/POLISH-2026-09-21.md §8).
 
-   No plate and no label. A hairline closes the rail above it, the card sits on
-   the sheet's own ground at the size you would hold one, and one line under it
-   says when it is hers. The interval above the hairline and below it is the
-   same section step — above it, the column's own gap — so the card reads as
-   the end of the sheet rather than as one more panel in the stack. */
+   No plate and no label. A hairline closes the rail above it and the card sits
+   on the sheet's own ground at the size you would hold one. The interval above
+   the hairline and below it is the same section step — above it, the column's
+   own gap — so the card reads as the end of the sheet rather than as one more
+   panel in the stack. Since §23 (23 Sep) there is no caption under it: "Yours
+   from Halloween 2026" repeated the card's own STARTS field. */
 .rs-card-close{padding-top:var(--s-2xl);border-top:1px solid var(--hair)}
-/* 14px and ink three, centred on the object it names — the reading floor, not
-   a caption size: it is a sentence about what the reader is buying. */
-.rs-card-cap{margin:var(--s-lg) 0 0;font-size:14px;font-weight:500;line-height:1.4;
-  color:var(--ink-3);text-align:center}
+/* THE FACTS DO NOT WRAP. At the card's 18px, "Early-ish Bird" and "Halloween
+   2026" each broke onto a second line inside a 340 card. Scoped to this card:
+   card.css's cards elsewhere are narrower, and there a no-wrap value would be
+   cut off by the card's own edge instead. */
+.rs-card-close .tcard-facts dd{white-space:nowrap}
 
 /* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
    On the tier that is not open, in the tile's top corner.
@@ -1865,14 +1871,19 @@ html[data-flight="in"] .column > .sticky-cta{
   .sheet-column.column > .rs-modal{max-width:none;
     display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     column-gap:calc(var(--s-xl) * 2);align-items:start}
-  .rs-pay-col,.rs-get-col{display:grid;align-content:start;gap:var(--s-2xl);
-    min-width:0}
+  /* NOTHING INSIDE A COLUMN CAN WIDEN IT (§23). The columns were already
+     `minmax(0,1fr)` tracks with `min-width:0`, but each column's own grid
+     had one `auto` track, whose floor is its widest child's min-content — a
+     tile's long line, a ledger clause. `minmax(0,1fr)` takes that floor
+     away, so a long string wraps inside its own block and never
+     pushes the sheet past `100vw - 64px`. */
+  .rs-pay-col,.rs-get-col{display:grid;grid-template-columns:minmax(0,1fr);
+    align-content:start;gap:var(--s-2xl);min-width:0}
   /* Kiran's third tile (the sold-out $4.99, 23 Sep) is why the money column
      steps at 16; on desktop this supersedes §16's 24 between its blocks. */
   .rs-pay-col{gap:var(--s-xl)}
-  /* The same tile: the ledger rows, the count's gaps and the card caption
-     each one step tighter, before the two moves above (23 Sep). */
-  .rs-row{padding-block:var(--s-xs)}
+  /* The ledger's rows are one line each since §23, so they get back the
+     `--s-sm` of padding the third tile had taken down to `--s-xs`. */
+  .rs-row{padding-block:var(--s-sm)}
   .rs-seats-under,.rs-meter{margin-top:var(--s-sm)}
-  .rs-card-cap{margin-top:var(--s-md)}
 }

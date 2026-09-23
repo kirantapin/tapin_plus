@@ -3,7 +3,7 @@ import TapInCard from "../shell/TapInCard";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
-import { seatLine, seatsLeft, SEAT_CAP } from "../model/seats";
+import { seatsLeft, SEAT_CAP } from "../model/seats";
 import {
   PLANS,
   launchWindow,
@@ -78,7 +78,7 @@ const plan = PLANS.monthly;
    Every price is `plan.price` / `plan.per` (so it follows the flip to the
    standard rate), the date is `launchWindow`, the credit and its floor are
    BENEFIT's, and the refund row exists only while the plan's own refund
-   charge row does. The labels and notes are words, never figures.
+   charge row does. The labels are words; a figure in a clause is the plan's.
 
    THE CREDIT ROW KEEPS THE EARN-BACK'S TWO GATES. `FOUNDING_OPEN`: after the
    flip the price is $14.99 and one $10 order does not come near it.
@@ -89,47 +89,40 @@ const plan = PLANS.monthly;
 
    The Halloween row states the RATE, not a second charge: today's deposit is
    the first month (the tile says so, and so do page 2's rows), the month
-   itself starts when we open, and the same figure recurs from there. */
+   itself starts when we open, and the same figure recurs from there.
+
+   ONE LINE A ROW (23 Sep 2026, POLISH §23). Sam: "the rest could use some
+   touching up." Each row was a label, a figure and a note under it — fifteen
+   text objects for five facts. Now the clause rides after the label at the
+   label's size, so a row is one line. Today has no clause: the tile above
+   already says the deposit counts toward the first month. */
 const refundRow = plan.chargeRows.find((r) => r.id === "refund");
-const schedule: { id: string; when: string; figure: string; note?: string }[] = [
-  {
-    id: "today",
-    when: "Today",
-    figure: plan.price,
-    note: `${FOUNDING_OPEN ? `${foundingTierName} deposit` : "Deposit"}, counts toward your first ${plan.period}`,
-  },
+const schedule: { id: string; when: string; clause?: string; figure: string }[] = [
+  { id: "today", when: "Today", figure: plan.price },
   ...(FOUNDING_OPEN && monthlyToday < BENEFIT.creditUsd
     ? [
         {
           id: "credit",
           when: `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order`,
+          clause: "more than the deposit",
           figure: `+$${BENEFIT.creditUsd} credit`,
-          note: "more than the deposit",
         },
       ]
     : []),
   {
     id: "opens",
     when: launchWindow,
+    clause: `then ${plan.price} ${plan.per}, automatic`,
     figure: `${plan.price} ${plan.per}`,
-    /* "your first month, then every month" could be read as a second
-       charge at opening (the worker who built the row flagged it). The note
-       now says whose money the first month is. */
-    note: `today's deposit covers your first ${plan.period}; then automatically`,
   },
-  {
-    id: "always",
-    when: "Always",
-    figure: plan.price,
-    note: "never goes up while you stay a member",
-  },
+  { id: "always", when: "Always", clause: "never goes up while you stay", figure: plan.price },
   ...(refundRow
     ? [
         {
           id: "refund",
           when: "Before we open",
+          clause: refundRow.detail.charAt(0).toLowerCase() + refundRow.detail.slice(1),
           figure: "Full refund",
-          note: refundRow.detail.charAt(0).toLowerCase() + refundRow.detail.slice(1),
         },
       ]
     : []),
@@ -262,13 +255,6 @@ export default function Reserve() {
   /* The name she gave the card on the deck's close, or typed into the sheet —
      the card here shows it as it is typed. Placeholder until there is one. */
   const [cardName] = useName();
-  /* `seatLine()` stays the single source of the seat sentence; the tile only
-     sets its leading number larger. Sold out, there is no number to lift. */
-  const seatParts = (() => {
-    const line = seatLine();
-    const m = line.match(/^(\d+)\s(.*)$/);
-    return m ? { n: m[1], rest: m[2] } : { n: null, rest: line };
-  })();
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
 
@@ -461,9 +447,16 @@ export default function Reserve() {
         <dl className="rs-ledger" aria-label="What you pay, and when">
           {schedule.map((row) => (
             <div className="rs-row" key={row.id}>
-              <dt className="rs-when">{row.when}</dt>
+              <dt className="rs-when">
+                {row.when}
+                {row.clause ? (
+                  <span className="rs-clause">
+                    <span className="rs-sep"> · </span>
+                    {row.clause}
+                  </span>
+                ) : null}
+              </dt>
               <dd className="rs-fig tnum">{row.figure}</dd>
-              {row.note ? <dd className="rs-note">{row.note}</dd> : null}
             </div>
           ))}
         </dl>
@@ -501,18 +494,18 @@ export default function Reserve() {
 
               OUTSIDE `.pay-slot`, deliberately: that box is what the
               IntersectionObserver measures, and growing it would change when
-              the docked bar hides. */}
+              the docked bar hides.
+
+              ONE LINE, THEN THE BAR (23 Sep 2026, POLISH §23): the count and
+              the close date were a sentence, a bar and a second sentence. The
+              tier is named in the tile above, so the line does not repeat it;
+              the number is `seatsLeft()` of `SEAT_CAP` from model/seats.ts, the
+              date `foundingCloses`, and the whole block only renders while
+              FOUNDING_OPEN, so there is always a number here. */}
           {FOUNDING_OPEN ? (
             <div className="rs-seats-under">
               <p className="rs-seat-line">
-                {seatParts.n !== null ? (
-                  <>
-                    <b className="tnum">{seatParts.n}</b>
-                    <span>{seatParts.rest}</span>
-                  </>
-                ) : (
-                  <span>{seatParts.rest}</span>
-                )}
+                <b className="tnum">{seatsLeft()}</b> of {SEAT_CAP} spots left · closes {foundingCloses}
               </p>
               <span className="rs-meter" aria-hidden="true">
                 {/* ⚠ THE FILL IS THE SEATS TAKEN, NOT THE SEATS LEFT, AND THAT
@@ -525,8 +518,6 @@ export default function Reserve() {
                     number of its own. */}
                 <i style={{ ["--p" as string]: `${1 - seatsLeft() / SEAT_CAP}` }} />
               </span>
-              {/* The date qualifies the bar, so it sits under the bar. */}
-              <p className="rs-seat-close">Closes {foundingCloses}</p>
             </div>
           ) : null}
         </div>
@@ -632,9 +623,9 @@ export default function Reserve() {
             it; `TapInCard`'s name contract is untouched, so the field in the
             checkout still fills this card as she types.
 
-            THE DATE IS READ, NEVER TYPED — `launchWindow` is the model's own
-            opening constant, the same one the receipt and the seat line print.
-            See docs/POLISH-2026-09-21.md §8. */}
+            NO CAPTION SINCE 23 Sep 2026 (POLISH §23). "Yours from Halloween
+            2026" said what the card's own STARTS field says, an inch above it.
+            The hairline stays; the card is the last thing on the sheet. */}
         <div className="rs-card-close">
           <div className="rs-card">
             <TapInCard
@@ -643,7 +634,6 @@ export default function Reserve() {
               className="reserve-card"
             />
           </div>
-          <p className="rs-card-cap">Yours from {launchWindow}</p>
         </div>
       </div>
 
