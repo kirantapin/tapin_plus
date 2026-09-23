@@ -487,8 +487,10 @@ html[data-flight="in"] .column > .sticky-cta{
   position:fixed;inset:0;z-index:60;
   display:flex;align-items:flex-end;justify-content:center;
   padding:0;
-  background:rgba(10,5,8,.62);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  /* No dim. 23 Sep 2026: the scrim under the sign-in step read as a black
+     overlay; the sheet's own shadow is the separation. The element stays for
+     layout and the backdrop click. */
+  background:transparent;
   animation:csFade 180ms var(--ease) both;
 }
 .cs-sheet{
@@ -1404,11 +1406,12 @@ html[data-flight="in"] .column > .sticky-cta{
    covers is now a light surface and pure black on cream reads as grey film.
 
    The blur stays off. Two backdrop-filters nested is the expensive half of
-   what the first version got wrong, and separation is the job here. */
-.reserve-layer .cs-scrim{
-  background:rgba(26,16,22,.22);
-  -webkit-backdrop-filter:none;backdrop-filter:none;
-}
+   what the first version got wrong, and separation is the job here.
+
+   ══ AND NOW IT DOESN'T ═════════════════════════════════════════════════════
+   23 Sep 2026: the .22 still read as a black overlay under the sign-in popup.
+   Removed — the base `.cs-scrim` is transparent everywhere now, so no
+   override is needed here. */
 
 /* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
    carries a negative top margin to pull itself against the plan picker, so it
@@ -1430,6 +1433,12 @@ html[data-flight="in"] .column > .sticky-cta{
 .plan-opt.is-later{background:var(--inner);border-style:dashed}
 .plan-opt.is-later b{color:var(--ink-3)}
 .plan-opt.is-later .plan-figs b{color:var(--ink-2)}
+/* The sold-out first Early Bird: the Standard tile's quiet ground, solid
+   rather than dashed (it existed and is finished, not yet to come), and its
+   figure struck at the same size the live price is set. */
+.plan-opt.is-sold{border-style:solid}
+.plan-opt.is-sold .plan-figs s{font-size:15px;font-weight:700;letter-spacing:-.01em;
+  color:var(--ink-3);text-decoration-thickness:1px}
 
 /* ── THE HOLD ──────────────────────────────────────────────────────────────
    Tapping Standard takes the selection for 1.1s and hands it back. While it

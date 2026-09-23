@@ -15,6 +15,7 @@ import {
   lockedRateFor,
   benefits,
   FOUNDING_OPEN,
+  firstEarlyBirdPrice,
   foundingCloses,
   guarantee,
   GUARANTEE_CONTACT,
@@ -77,19 +78,23 @@ export default function Reserve() {
      visually hidden live region. The tile's own second line — "once the Early
      Bird spots are gone" — is on screen permanently either way, which is what
      keeps the flash from being the only explanation. */
-  const [refused, setRefused] = useState(false);
+  /* Which unavailable tile was last tapped — the sold-out first round above
+     the live tile, or Standard below it. Both refuse the same way. */
+  const [refused, setRefused] = useState<"sold" | "later" | null>(null);
   const calm = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(calm.current), []);
-  const sayLater = () => {
-    setRefused(false);
+  const refuse = (which: "sold" | "later") => {
+    setRefused(null);
     /* Restart the animation even on a second tap: the class has to leave the
        element for a frame or the keyframe does not re-run. */
     window.clearTimeout(calm.current);
     window.requestAnimationFrame(() => {
-      setRefused(true);
-      calm.current = window.setTimeout(() => setRefused(false), 900);
+      setRefused(which);
+      calm.current = window.setTimeout(() => setRefused(null), 900);
     });
   };
+  const sayLater = () => refuse("later");
+  const saySoldOut = () => refuse("sold");
   /* THE DOCKED CHECKOUT, for the phone sheet (Sam, 15 Sep 2026: "still need a
      sticky checkout button for this modal, which scrolls down to the buy
      box"). Shown while the real button is out of view, gone the moment it is
@@ -231,6 +236,37 @@ export default function Reserve() {
           role="radiogroup"
           aria-label="Your plan"
         >
+          {/* ══ THE FIRST EARLY BIRD, SOLD OUT ═════════════════════════════
+              Kiran, 23 Sep 2026: the $4.99 Early Bird is over; the live tile
+              below is an "Early-ish Bird" at $5.99. Shown, struck and flagged
+              "Sold out" in the same corner flag Standard uses for "Coming
+              soon", and refused the same way when tapped. */}
+          {FOUNDING_OPEN ? (
+            <div
+              className={`plan-opt is-later is-sold${refused === "sold" ? " is-refused" : ""}`}
+              role="radio"
+              aria-checked="false"
+              aria-disabled="true"
+              tabIndex={0}
+              onClick={saySoldOut}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  saySoldOut();
+                }
+              }}
+            >
+              <span className="plan-chip">Sold out</span>
+              <b>Early Bird Deposit</b>
+              <span className="plan-figs">
+                <span className="plan-now">
+                  <s className="tnum">{firstEarlyBirdPrice}</s>
+                  <span className="plan-else">Every spot at this price has been claimed</span>
+                </span>
+              </span>
+            </div>
+          ) : null}
+
           <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
             {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
                 Kiran, 15 Sep 2026. What is taken today is one charge that holds
@@ -242,7 +278,7 @@ export default function Reserve() {
                 Follows the flip: after the Early Bird spots are gone there is
                 nothing early about it, and `plan.label` is not a substitute
                 because it names the cadence this tile no longer states. */}
-            <b>{FOUNDING_OPEN ? "Early Bird Deposit" : "Deposit"}</b>
+            <b>{FOUNDING_OPEN ? "Early-ish Bird Deposit" : "Deposit"}</b>
             <span className="plan-figs">
               <span className="plan-now">
                 <b className="tnum">{plan.price}</b>
@@ -284,7 +320,7 @@ export default function Reserve() {
               sentence a tap does rather than nothing at all. */}
           {FOUNDING_OPEN && plan.saving ? (
             <div
-              className={`plan-opt is-later${refused ? " is-refused" : ""}`}
+              className={`plan-opt is-later${refused === "later" ? " is-refused" : ""}`}
               role="radio"
               aria-checked="false"
               aria-disabled="true"
@@ -325,7 +361,11 @@ export default function Reserve() {
         {/* The sentence the toast used to carry, for a reader who cannot see
             a tile change colour. `status`, not `alert`: nothing failed. */}
         <p className="sr-only" role="status">
-          {refused ? "Standard opens after launch. Early Bird is the only plan open now." : ""}
+          {refused === "later"
+            ? "Standard opens after launch. Early-ish Bird Deposit is the only plan open now."
+            : refused === "sold"
+              ? `The ${firstEarlyBirdPrice} Early Bird is sold out. Early-ish Bird Deposit is the only plan open now.`
+              : ""}
         </p>
 
         {/* The founding rate survives — said here because it is the whole value

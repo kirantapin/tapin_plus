@@ -112,7 +112,7 @@ function readReservation(): Reservation | null {
       parsed.founding === true ||
       (parsed.founding === undefined &&
         [
-          499, 699, 999, 1199, 1699, 1799, 2299, 2499, 4796, 5499, 6796, 7999,
+          499, 599, 699, 999, 1199, 1699, 1799, 2299, 2499, 4796, 5499, 6796, 7999,
         ].includes(cents));
     const isTerm = (t: unknown): t is Term =>
       !!t &&

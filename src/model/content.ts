@@ -427,7 +427,13 @@ export const eventsNote =
    price id, not this number. Until `EARLY_ACCESS_PRICE_ID` /
    `SUBSCRIPTION_PRICE_ID` are repointed at a 499 price, the page says $4.99
    and Stripe invoices $3.99. Do not deploy this alone. */
-const FOUNDING_MONTHLY = 4.99;
+/* 23 Sep 2026: $4.99 → $5.99, with `FIRST_INVOICE_TOTAL_CENTS` and
+   `FOUNDING_MONTHLY_USD`. Same Stripe warning: the price ids must move to a
+   599 price before this deploys. */
+const FOUNDING_MONTHLY = 5.99;
+/* The first Early Bird round, shown on /reserve as sold out above the $5.99
+   "Early-ish Bird" tile. Display only — nothing charges this figure. */
+export const firstEarlyBirdPrice: string = usd(4.99);
 /* Sam, 15 Sep 2026 (later still): "for everyone else, we do $14.99 a month,
    25% discount for 3 months, and 40% discount for a full year." 3 × 14.99 =
    44.97, less 25% = 33.73 → $33.99 (24% off at the .99); 12 × 14.99 = 179.88,

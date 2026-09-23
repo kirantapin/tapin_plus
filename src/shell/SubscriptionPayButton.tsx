@@ -43,7 +43,7 @@ import { useEventTracking } from "../context/event_tracking_context";
  * EARLY_ACCESS_PRICE_ID in the edge function.
  *
  * ⚠ 15 Sep 2026: 699 → 399 with `FOUNDING_MONTHLY` in content.ts. 18 Sep 2026:
- * 399 → 499, same way. THIS NUMBER IS NOT THE PRICE — it is what Elements is
+ * 399 → 499, same way. 23 Sep 2026: 499 → 599. THIS NUMBER IS NOT THE PRICE — it is what Elements is
  * told the sheet will collect, and the real figure is the Stripe price id the
  * edge function charges. If they disagree the wallet shows one amount and the
  * invoice takes another. The Stripe prices must move too.
@@ -51,7 +51,7 @@ import { useEventTracking } from "../context/event_tracking_context";
  * The sandbox figure stays at 200: it is a test amount, not a copy of the
  * price, and nothing outside this file reads it.
  */
-const FIRST_INVOICE_TOTAL_CENTS = environment !== "production" ? 200 : 499;
+const FIRST_INVOICE_TOTAL_CENTS = environment !== "production" ? 200 : 599;
 
 type IntentType = "payment" | "setup";
 

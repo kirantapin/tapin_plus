@@ -62,7 +62,8 @@ export const WEEKS_PER_MONTH = 4;
    nobody was charged. It is a copy, not a derivation, which is why it drifted;
    the two files do not import from each other. Treat any edit to either as an
    edit to both until they are unified. */
-export const FOUNDING_MONTHLY_USD = 4.99;
+/* 23 Sep 2026: $5.99, with content.ts. */
+export const FOUNDING_MONTHLY_USD = 5.99;
 
 /**
  * Points are 10 per dollar at 1c = 10% back, but ONLY the extra 1x is the
