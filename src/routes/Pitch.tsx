@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Panel } from "../shell/Panel";
 import {
@@ -22,7 +22,6 @@ import TrialModal from "../shell/TrialModal";
 import MonthCalendar from "../shell/MonthCalendar";
 import { useMedia } from "../shell/useMedia";
 import { month } from "../model/month";
-import { venues } from "../model/content";
 import {
   monthlyToday,
   guarantee,
@@ -233,27 +232,14 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             restaurants and bars around Blacksburg, plus 15% off and points
             toward rewards.
           </p>
-          {/* VERIFIABLE TRUST (14 Sep audit): TapIn already runs ordering at
-                some of these places today, and a reader can check that in ten
-                seconds. The list is `liveUrl`, never a typed count, so the
-                sentence cannot outrun the truth in the records. */}
+          {/* THE REACH LINE. Sam, 23 Sep 2026: "tapin runs ordering and
+              experiences across 100 cities nationwide, plus finally is coming
+              to blacksburg" — his figure and his claim, replacing the 14 Sep
+              verifiable list of the three live venues. `liveUrl` still drives
+              the mosaic's Open links, so the proof moved, it did not go. */}
           <p className="t-compact hero-proof">
-            TapIn already runs ordering at{" "}
-            {venues
-              .filter((v) => v.liveUrl)
-              .map((v, k, arr) => (
-                <Fragment key={v.id}>
-                  <a href={v.liveUrl} target="_blank" rel="noopener noreferrer">
-                    {v.name}
-                  </a>
-                  {/* A SERIAL LIST, NOT A CHAIN OF "and"s. It was two
-                      venues for a week, where "and" between every pair is
-                      the same thing as a serial list; The Milk Parlor (20 Sep
-                      2026) made it three, where it is not. */}
-                  {k === arr.length - 1 ? "" : k === arr.length - 2 ? " and " : ", "}
-                </Fragment>
-              ))}
-            . See it live.
+            TapIn runs ordering and experiences across 100 cities nationwide,
+            and is finally coming to Blacksburg.
           </p>
 
           {/* ══ THE PLACES, UNDER THE COPY ═══════════════════════════════
