@@ -21,6 +21,8 @@ export interface Policy {
   kind: "percent" | "credit" | "points";
   label: string;
   detail: string;
+  /** Points only: the rate a surface prints as "1×". Set below, never typed. */
+  multiplier?: number;
 }
 
 export interface Venue {
@@ -95,7 +97,7 @@ export const venues: Venue[] = (venuesJson as unknown as VenueRecord[]).map(
     plus: v.policies.length > 0,
     /* The extraction's points policy reads "2× points" with a multiplier of 2.
      Sam, 15 Sep 2026: points are 1× now. The JSON is frozen; the override
-     lives here, so no surface can print a multiplier. */
+     lives here, and the "1×" the figure strips print (22 Sep) is read from it. */
     policies: v.policies.map((pol) =>
       pol.kind === "points" ? { ...pol, label: "Points", multiplier: 1 } : pol,
     ),
@@ -282,17 +284,20 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
     figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
     qualifier: "off, except alcohol",
   },
-  /* Not a number, and still the figure: a column headed by its qualifier
-     would be a fourth kind of thing in a row of three. */
-  points: { figure: "Points", qualifier: "on every order" },
 };
 
-/** The figure and qualifier for one venue policy kind, or undefined for a kind
- *  this build has no figure form of — which prints no column rather than a
- *  guessed one. */
+/** The figure and qualifier for one venue policy, or undefined for a kind this
+ *  build has no figure form of — which prints no column rather than a guessed
+ *  one. Points is "1×" from the policy's own `multiplier` (Sam, 22 Sep 2026:
+ *  the three at one size), so a points policy without one prints no column. */
 export const venuePolicyFigure = (
-  kind: string,
-): { figure: string; qualifier: string } | undefined => VENUE_POLICY_FIGURE[kind];
+  policy: Pick<Policy, "kind" | "multiplier">,
+): { figure: string; qualifier: string } | undefined =>
+  policy.kind === "points"
+    ? policy.multiplier
+      ? { figure: `${policy.multiplier}\u00D7`, qualifier: "points, on every order" }
+      : undefined
+    : VENUE_POLICY_FIGURE[policy.kind];
 
 export interface ComingVenue {
   id: string;

@@ -139,19 +139,20 @@
    so they are set as the offer: open columns on the ground, divided by one
    hairline each, no tile and no plate. `.cg-icon` is gone with them.
 
-   THE BASELINE IS THE BLOCK'S OWN STRUT. `Points` is a word and cannot take
-   48px, but a smaller inline span inside a block whose font-size IS 48 sits on
-   that block's line box — the strut every line box carries from its own
-   element's font. So the three figures share a baseline and, because the strut
-   also fixes all three boxes to one height, the three qualifiers line up too.
-   No magic offsets, and nothing to retune when the ramp moves. */
+   ONE SIZE, ONE BASELINE. Sam, 22 Sep 2026, on `Points` set at 28 beside a
+   48px `$5`: "it's a bit weird right now." All three are `.t-figure` now —
+   `$5`, `15%`, `1×` — so one line box sets all three on one baseline.
+
+   STRETCH, NOT START. The hairline is each cell's own border, so a cell whose
+   qualifier wraps once more drew a longer line than its neighbour. Stretched,
+   the three cells are the row's height and the two hairlines are equal. */
 .cg-figures {
   list-style: none;
   padding: 0;
   margin: calc(var(--s-xl) * 2) 0 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
 }
 /* The step BEFORE the divider is --s-sm, not --s-md. At 375 the cells are 114
    wide and "15%" sets at 95: with 8px of right padding its own content box was
@@ -174,15 +175,15 @@
   display: block;
   margin: 0;
 }
-.cg-fig-word {
-  font-family: var(--font);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
+/* TWO LINES EACH, AT EVERY WIDTH. Left to the cell, the three wrapped 2/2/2
+   at 375, 1/1/2 from ~420 and again at 1024, and 1/1/1 at 1440 — one column
+   always a line longer somewhere. The cap is bracketed by the copy (Gilroy
+   500 at 14px): "points, toward" is 92.6px and must fit, "off, once a day"
+   is 97px and must not, so each qualifier is its figure's word over its
+   condition. Re-measure both if a qualifier changes. */
 .cg-figures > li > span {
   display: block;
+  max-width: 6.75em;
   margin-top: var(--s-md);
   text-wrap: balance;
 }
@@ -286,6 +287,25 @@
   text-wrap: pretty;
 }
 
+/* -- what you'd save here: THREE OF THEIR OWN ITEMS ------------------------
+   docs/POLISH-2026-09-21.md §11. The pitch's `.bshot` photo cards (pitch.css
+   styles them globally; shell/PhotoCard.tsx renders them), each an item from
+   Coffeeholics' menu under the benefit it exercises. Phone sizes are the
+   pitch's own — 260 for the credit, 220 for the other two, 12 between.
+
+   THE PHOTOGRAPH'S WHITE. `.bshot` inks its title, line and chip from
+   `--ink-1`, which is white on the dark pitch and near-black on this light
+   surface — dark type on the veil. Inside the card the token is pointed at
+   `--on-maroon`, the white that does not invert with the surface (the
+   pop-up's rule for type over a photograph), and every `.bshot` rule
+   follows without being restated here. */
+.cg-save-h {
+  margin: 0 0 var(--s-lg);
+}
+.cg-save .bshot {
+  --ink-1: var(--on-maroon);
+}
+
 /* -- the membership, after the proof ---------------------------------------
    THE ONE BOX ON THE PAGE. Three cells: the statement, the price, the action.
    Stacked on a phone in the order the page already had; one horizontal band
@@ -358,9 +378,31 @@
      (0,2,0): layout.css caps every column child at 720 from a `:where()` rule
      that contributes no specificity precisely so this can be written here. */
   .column > .cg,
+  .column > .cg-save,
   .column > .cg-member {
     max-width: min(1120px, calc(100% - 96px));
     margin-inline: auto;
+  }
+  /* width:100% as well — the cap is a max, and a grid of photographs has no
+     intrinsic width to grow to it on its own. */
+  .column > .cg-save {
+    width: 100%;
+  }
+
+  /* Three across at 4:3, 24 between. The credit does NOT span as it does on
+     the pitch: here the strip above already leads with it. */
+  .cg-save-h {
+    margin: 0 0 var(--s-2xl);
+  }
+  .cg-save .bshots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2xl);
+  }
+  .cg-save .bshot,
+  .cg-save .bshot.is-lead {
+    height: auto;
+    aspect-ratio: 4 / 3;
+    padding: var(--s-2xl);
   }
 
   .cg {

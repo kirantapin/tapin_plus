@@ -291,16 +291,19 @@
    shared rule would have to be overridden on both.
 
    THE STEP BEFORE THE DIVIDER IS --s-sm, which is the splash's own hard-won
-   number: at 375 these cells are 109 wide and the widest figure ("Points",
-   84px at 30px/700) has to clear its own content box with the qualifier
-   wrapping under it. Six leaves room and still parts the column from the line. */
+   number: at 375 these cells are 109 wide and the widest figure (`15%` since
+   22 Sep, when "Points" became `1×`) has to clear its own content box with
+   the qualifier wrapping under it. Six leaves room and still parts the column.
+
+   STRETCH, as on the splash: the hairline is each cell's border, so cells of
+   one height draw two hairlines of one height. */
 .vp-figures {
   list-style: none;
   padding: 0;
   margin: var(--s-2xl) 0 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
 }
 .vp-figures > li {
   min-width: 0;
@@ -334,8 +337,13 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+/* Two lines each at every width, as on the splash: uncapped, the sheet at
+   500 set all three on one line with the credit 3px from wrapping, and the
+   dialog split them. 7.5em (105px) sits inside the copy's bracket — the
+   widest needed line is ~77px, the shortest qualifier 119px. */
 .vp-figures > li > span {
   display: block;
+  max-width: 7.5em;
   margin-top: var(--s-md);
   font-size: 14px;
   font-weight: 500;

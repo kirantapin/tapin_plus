@@ -1,5 +1,6 @@
 import { BENEFIT } from "./savings";
-import { venues } from "./content";
+import { benefitFragments, venues } from "./content";
+import { itemsFor } from "./menu";
 
 /**
  * A CAMPAIGN LANDING PAGE — one venue, two live offers, one decision.
@@ -84,9 +85,11 @@ export const campaignTrials = [
  * set large, `qualifier` is the ≤3-word line under it. The claims are the
  * advert's, unchanged; only where the line breaks has moved.
  *
- * "Points" is the one that is not a number. It is still the figure, because a
- * column headed by its qualifier would be a fourth kind of thing in a row of
- * three; the splash sets it smaller, on the same baseline.
+ * ALL THREE ARE NUMBERS, AT ONE SIZE. "Points" was a word set smaller on the
+ * same baseline; Sam, 22 Sep 2026: "what if we reworked the 'points' '$5' and
+ * '15%' to be the same size text… We could do 1X points, towards free items."
+ * So it is `1×`, the `1` read from Coffeeholics' own points policy (content.ts
+ * sets the multiplier), and no column is printed if that policy is gone.
  *
  * ⚠ "ONCE A DAY" IS THE ADVERT'S, NOT THE DATA'S. docs/data/money-and-terms.json
  * gives the 15% no cadence at all, and no other surface prints one. Sam wrote
@@ -97,6 +100,8 @@ export const campaignTrials = [
  * `qualifier` is a CONDITION or a CADENCE, never a restatement of the figure.
  * The merchant pop-up learned that on the same afternoon.
  */
+const pointsRate = campaignVenue?.policies.find((p) => p.kind === "points")?.multiplier;
+
 export const campaignBenefits: {
   id: string;
   figure: string;
@@ -107,6 +112,77 @@ export const campaignBenefits: {
     figure: `$${BENEFIT.creditUsd}`,
     qualifier: "credit every week",
   },
-  { id: "percent", figure: "15%", qualifier: "off, once a day" },
-  { id: "points", figure: "Points", qualifier: "on every order" },
+  {
+    id: "percent",
+    figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
+    qualifier: "off, once a day",
+  },
+  ...(pointsRate
+    ? [{ id: "points", figure: `${pointsRate}\u00D7`, qualifier: "points, toward free items" }]
+    : []),
 ];
+
+/**
+ * WHAT YOU'D SAVE HERE — three of Coffeeholics' own items, each under the
+ * benefit it exercises (docs/POLISH-2026-09-21.md §11). Sam, 22 Sep 2026:
+ * "showing items from their page, and when ordering what they save."
+ *
+ * Every figure is arithmetic on the record: the price is the menu's, the
+ * saving is BENEFIT's, in integer cents. An item missing from the data (or
+ * without its photograph) drops its card — no placeholder, no guess — and the
+ * credit card also drops if its item stops clearing the $10 threshold, since
+ * that would picture a credit nobody earns. "Once a week", not "at each
+ * place": these are this shop's items on this shop's page.
+ */
+const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+const cents = (usd: number) => Math.round(usd * 100);
+
+const SHOT_ITEMS = [
+  {
+    id: "credit",
+    item: "California Club",
+    title: `$${BENEFIT.creditUsd} credit`,
+    line: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week`,
+    saves: (price: number) =>
+      price >= BENEFIT.creditMinUsd
+        ? `You save ${dollars(Math.min(cents(BENEFIT.creditUsd), cents(price)))}`
+        : undefined,
+  },
+  {
+    id: "percent",
+    item: "French Onion Steak Melt",
+    title: `${Math.round(BENEFIT.percentOff * 100)}% off`,
+    line: "Everything except alcohol",
+    saves: (price: number) => `You save ${dollars(Math.round(cents(price) * BENEFIT.percentOff))}`,
+  },
+  {
+    id: "points",
+    item: "Cheesecake",
+    title: "Points",
+    line: "On every order",
+    /* The pitch's own words for it: no rate is published for redemption. */
+    saves: () => benefitFragments.points.figure,
+  },
+];
+
+export const campaignShots: {
+  id: string;
+  img: string;
+  title: string;
+  line: string;
+  chip: { line: string; figure: string };
+}[] = SHOT_ITEMS.flatMap((s) => {
+  const found = itemsFor("coffeeholicsva").find((i) => i.name === s.item);
+  const figure = found ? s.saves(found.price) : undefined;
+  return found?.img && figure
+    ? [
+        {
+          id: s.id,
+          img: found.img,
+          title: s.title,
+          line: s.line,
+          chip: { line: `${found.name} · ${dollars(cents(found.price))}`, figure },
+        },
+      ]
+    : [];
+});

@@ -1,4 +1,5 @@
 import { BenefitIcon, NavIcon } from "./Icons";
+import PhotoCard from "./PhotoCard";
 import {
   benefitFragments,
   benefitShots,
@@ -164,38 +165,26 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
               ? { line: offerVenue?.name ?? "A TapIn Plus place", figure: offer.label }
               : undefined
             : benefitFragments[policy.id];
+        /* THE LABEL WHOLE. "$5 credit" is one string in money-and-terms.json
+           and it is set as one. The photograph is the card's mood (alt=""),
+           and the markup is PhotoCard's, shared with the Coffeeholics splash. */
         return (
-          <article
-            className={`bshot${policy.id === "credit" ? " is-lead" : ""}`}
+          <PhotoCard
             key={policy.id}
-          >
-            {/* alt="" — the photograph is the card's mood, and every word it
-                carries is already in the heading beside it. */}
-            {shot ? (
-              <img className="bshot-img" src={shot} alt="" decoding="async" loading="lazy" />
-            ) : null}
-            <div className="bshot-say">
-              {/* THE LABEL WHOLE. "$5 credit" is one string in
-                  money-and-terms.json and it is set as one. */}
-              <h3 className="bshot-title">{policy.label}</h3>
-              <p className="bshot-line">{line}</p>
-            </div>
-            {chip ? (
-              <p className="bshot-chip">
-                <span className="bshot-chip-a">
-                  <span className="bshot-glyph" aria-hidden="true">
-                    {policy.id === "offers" ? (
-                      <NavIcon id="deals" />
-                    ) : (
-                      <BenefitIcon id={policy.id} />
-                    )}
-                  </span>
-                  {chip.line}
-                </span>
-                <b className="bshot-chip-b">{chip.figure}</b>
-              </p>
-            ) : null}
-          </article>
+            img={shot}
+            title={policy.label}
+            line={line}
+            lead={policy.id === "credit"}
+            chip={
+              chip
+                ? {
+                    ...chip,
+                    icon:
+                      policy.id === "offers" ? <NavIcon id="deals" /> : <BenefitIcon id={policy.id} />,
+                  }
+                : undefined
+            }
+          />
         );
       })}
     </div>

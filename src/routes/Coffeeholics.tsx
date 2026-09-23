@@ -5,6 +5,8 @@ import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
+import PhotoCard from "../shell/PhotoCard";
+import { BenefitIcon } from "../shell/Icons";
 import { useReserveCta } from "../shell/useReserveCta";
 import {
   heroIsBright,
@@ -13,7 +15,7 @@ import {
   monthlyToday,
   venues,
 } from "../model/content";
-import { campaignVenue, campaignBenefits } from "../model/campaign";
+import { campaignVenue, campaignBenefits, campaignShots } from "../model/campaign";
 
 /**
  * THE COFFEEHOLICS SPLASH — the page a Meta ad points at.
@@ -57,8 +59,14 @@ import { campaignVenue, campaignBenefits } from "../model/campaign";
  *
  *   the photograph is the hero      full-bleed, the shop before the sentence
  *   the headline sits on the ground the panel around it is gone
- *   the three claims are FIGURES    $5 / 15% / Points, in open columns
+ *   the three claims are FIGURES    $5 / 15% / 1×, in open columns
  *   the membership keeps its box    it is the decision; it is the only box
+ *
+ * ══ 22 SEP 2026 — THE PROOF UNDER THE CLAIM ═══════════════════════════════
+ * §11: "showing items from their page, and when ordering what they save."
+ * Three of Coffeeholics' own items as the pitch's photo cards (PhotoCard),
+ * between the hero and the membership. The strip is the advert's claim; the
+ * cards are what it comes to on a real order.
  */
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -232,21 +240,11 @@ export default function Coffeeholics() {
               docs/POLISH-2026-09-21.md §3.3, the biggest single move on the
               page: the numbers that ARE the offer are set as the offer, in
               open columns divided by a hairline, with no tile beside them.
-              "Points" is not a number and is set smaller — on the same
-              baseline, which the figure's own line-box strut supplies. */}
+              $5 / 15% / 1×, one size (Sam, 22 Sep 2026). */}
           <ul className="cg-figures">
             {campaignBenefits.map((b) => (
               <li key={b.id}>
-                <b className="t-figure">
-                  {/* A word, not a figure: it takes the row's baseline and
-                      the reading ramp's weight rather than the display size,
-                      which at 48px would set "Points" as wide as the page. */}
-                  {b.figure === "Points" ? (
-                    <span className="cg-fig-word">{b.figure}</span>
-                  ) : (
-                    b.figure
-                  )}
-                </b>
+                <b className="t-figure">{b.figure}</b>
                 <span className="t-compact">{b.qualifier}</span>
               </li>
             ))}
@@ -298,6 +296,30 @@ export default function Coffeeholics() {
           </div>
         </div>
       </section>
+
+      {/* ══ WHAT YOU'D SAVE HERE ═════════════════════════════════════════════
+          §11. Three of their own items, their own photographs, and what the
+          benefit takes off each — the pitch's photo card, not a lookalike.
+          On the page's ground, not in a panel: the cards are the boxes. */}
+      {campaignShots.length ? (
+        <section className="cg-save" aria-labelledby="cg-save-h">
+          <h2 className="t-section cg-save-h" id="cg-save-h">
+            What you'd save here
+          </h2>
+          <div className="bshots cg-shots">
+            {campaignShots.map((c) => (
+              <PhotoCard
+                key={c.id}
+                img={c.img}
+                title={c.title}
+                line={c.line}
+                lead={c.id === "credit"}
+                chip={{ ...c.chip, icon: <BenefitIcon id={c.id} /> }}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* ══ THE MEMBERSHIP, AFTER THE PROOF ══════════════════════════════════
           The advert closes on "Get early access" and so does the page. The
