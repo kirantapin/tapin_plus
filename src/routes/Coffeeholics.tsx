@@ -7,7 +7,9 @@ import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
+import SavingsLedger from "../shell/SavingsLedger";
 import { useReserveCta } from "../shell/useReserveCta";
+import { useMedia } from "../shell/useMedia";
 import {
   heroIsBright,
   logoField,
@@ -15,7 +17,12 @@ import {
   monthlyToday,
   venues,
 } from "../model/content";
-import { campaignVenue, campaignBenefits, campaignShots } from "../model/campaign";
+import {
+  campaignVenue,
+  campaignBenefits,
+  campaignShots,
+  campaignLedger,
+} from "../model/campaign";
 
 /**
  * THE COFFEEHOLICS SPLASH — the page a Meta ad points at.
@@ -67,6 +74,14 @@ import { campaignVenue, campaignBenefits, campaignShots } from "../model/campaig
  * Three of Coffeeholics' own items as the pitch's photo cards (PhotoCard),
  * between the hero and the membership. The strip is the advert's claim; the
  * cards are what it comes to on a real order.
+ *
+ * ══ 23 SEP 2026 — THE HERO EARNS ITS MOTION ═══════════════════════════════
+ * §17. Nothing on the page showed what the membership actually is: the same
+ * $5 arriving every week against one $4.99. That is a sequence, so it is the
+ * one thing here that moves — the month ledger (SavingsLedger), a receipt
+ * that fills itself over the photograph from 1024. On a phone the same
+ * receipt sits under the try link, complete and still: the photograph is a
+ * 260px band there and the card would cover it.
  */
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -154,6 +169,10 @@ export default function Coffeeholics() {
   /* Everywhere else it works, from the records — never a typed list of names,
      which is how a sixth venue signs and a page keeps saying five. */
   const others = venues.filter((o) => o.id !== "coffeeholicsva" && o.plus);
+  /* One ledger, placed by the stylesheet's own line: over the photograph and
+     looping from 1024, under the try link and still below it. Rendered once
+     rather than twice-and-hidden, so a phone never runs a loop it cannot see. */
+  const desk = useMedia("(min-width: 1024px)");
   if (!v) return null;
 
   return (
@@ -217,6 +236,7 @@ export default function Coffeeholics() {
               </span>
             </span>
           </p>
+          {desk && campaignLedger ? <SavingsLedger ledger={campaignLedger} /> : null}
         </div>
 
         {/* On the photograph on a phone, at the head of the left column from
@@ -289,6 +309,7 @@ export default function Coffeeholics() {
               </svg>
             </button>
           </div>
+          {!desk && campaignLedger ? <SavingsLedger ledger={campaignLedger} still /> : null}
         </div>
       </section>
 

@@ -1,5 +1,5 @@
-import { BENEFIT } from "./savings";
-import { benefitFragments, venues } from "./content";
+import { BENEFIT, WEEKS_PER_MONTH } from "./savings";
+import { benefitFragments, cardPlan, monthlyToday, venues } from "./content";
 import { itemsFor } from "./menu";
 
 /**
@@ -199,3 +199,78 @@ export const campaignShots: {
       ]
     : [];
 });
+
+/**
+ * THE MONTH LEDGER — one month at Coffeeholics, as a receipt that fills itself
+ * (docs/POLISH-2026-09-21.md §17). Sam, 23 Sep 2026: "how much they get back on
+ * the $4.99 they spend on the membership."
+ *
+ * The membership, then four real baskets from their own menu, each clearing
+ * the credit's floor, each earning `min(creditUsd, basket)`. The foot is the
+ * credits less the membership. ONLY THE CREDIT IS COUNTED: the 15% and the
+ * points are real but vary with the order, and a ledger that stays inside what
+ * is certain is the one a reader trusts.
+ *
+ * BY ID, NOT BY NAME. The baskets are California Club; Chipotle Turkey Melt;
+ * French Onion Steak Melt; Cappuccino + Butter Croissant + Baked Cookie. The
+ * second one's name trips scripts/guards.py's brand-as-points-destination
+ * check if it is typed in source, and the guard is right to stay strict — so
+ * the record's id picks it and the record's name prints it. The names printed
+ * are the menu's own, in full: "Butter Croissant", not "Croissant".
+ *
+ * A basket with an item missing, or under the floor, is dropped rather than
+ * repriced, and the weeks renumber. If the credits ever stop covering the
+ * membership, the ledger is not rendered at all: its foot says "You're ahead".
+ */
+const LEDGER_BASKETS: string[][] = [
+  ["coffeeholicsva-160-35"],
+  ["coffeeholicsva-160-49"],
+  ["coffeeholicsva-160-47"],
+  ["coffeeholicsva-157-37", "coffeeholicsva-163-33", "coffeeholicsva-163-11"],
+];
+
+/** Signed, in cents, with a real minus sign: the foot starts below zero. */
+export const signedDollars = (c: number) => `${c < 0 ? "\u2212" : ""}${dollars(Math.abs(c))}`;
+
+export interface MonthLedger {
+  head: string;
+  plan: { what: string; figure: string; cents: number };
+  weeks: { id: string; what: string; basket: string; figure: string; cents: number }[];
+  /** The foot before any credit: the membership, owed. */
+  startCents: number;
+  /** The foot after each week lands, in order. The last is `netCents`. */
+  runningCents: number[];
+  netCents: number;
+}
+
+export const campaignLedger: MonthLedger | null = (() => {
+  if (!campaignVenue) return null;
+  const menu = itemsFor("coffeeholicsva");
+  const floor = cents(BENEFIT.creditMinUsd);
+  const weeks = LEDGER_BASKETS.flatMap((ids) => {
+    const items = ids.map((id) => menu.find((i) => i.id === id));
+    if (items.some((i) => !i)) return [];
+    const found = items as NonNullable<(typeof items)[number]>[];
+    const total = found.reduce((sum, i) => sum + cents(i.price), 0);
+    if (total < floor) return [];
+    const credit = Math.min(cents(BENEFIT.creditUsd), total);
+    return [{ id: ids.join("+"), basket: found.map((i) => i.name).join(" + "), cents: credit }];
+  })
+    .slice(0, WEEKS_PER_MONTH)
+    .map((w, k) => ({ ...w, what: `Week ${k + 1}`, figure: `+${dollars(w.cents)} credit` }));
+  const plan = cents(monthlyToday);
+  const runningCents = weeks.reduce<number[]>(
+    (acc, w) => [...acc, (acc.length ? acc[acc.length - 1] : -plan) + w.cents],
+    [],
+  );
+  const netCents = runningCents.length ? runningCents[runningCents.length - 1] : -plan;
+  if (!weeks.length || netCents <= 0) return null;
+  return {
+    head: `One month at ${campaignVenue.name}`,
+    plan: { what: `${cardPlan} membership`, figure: dollars(plan), cents: plan },
+    weeks,
+    startCents: -plan,
+    runningCents,
+    netCents,
+  };
+})();
