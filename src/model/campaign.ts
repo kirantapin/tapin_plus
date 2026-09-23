@@ -133,6 +133,15 @@ export const campaignBenefits: {
  * credit card also drops if its item stops clearing the $10 threshold, since
  * that would picture a credit nobody earns. "Once a week", not "at each
  * place": these are this shop's items on this shop's page.
+ *
+ * THE PHOTOGRAPHS ARE COFFEEHOLICS' OWN PROMOTIONAL SHOTS, not the menu
+ * thumbnails. Sam, 23 Sep 2026: "do we have better images for coffeeholics
+ * here?" The item images in docs/data are 162px resamples of 300–550px
+ * originals, soft at a card's width. Their live TapIn page carries four
+ * 1,500px+ photographs (highlights and the Weekly Fix bundle) from the same
+ * public bucket and the same permission as the logos and heroes; three are
+ * copied to public/shots/. A card's `shot` wins over the item's thumbnail;
+ * the item line stays the record's, so the price is still the menu's.
  */
 const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const cents = (usd: number) => Math.round(usd * 100);
@@ -141,6 +150,7 @@ const SHOT_ITEMS = [
   {
     id: "credit",
     item: "California Club",
+    shot: "/shots/coffeeholicsva-bagel.jpg",
     title: `$${BENEFIT.creditUsd} credit`,
     line: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week`,
     saves: (price: number) =>
@@ -151,13 +161,16 @@ const SHOT_ITEMS = [
   {
     id: "percent",
     item: "French Onion Steak Melt",
+    shot: "/shots/coffeeholicsva-spread.jpg",
     title: `${Math.round(BENEFIT.percentOff * 100)}% off`,
     line: "Everything except alcohol",
     saves: (price: number) => `You save ${dollars(Math.round(cents(price) * BENEFIT.percentOff))}`,
   },
   {
     id: "points",
-    item: "Cheesecake",
+    /* A drink, because the photograph is the drinks and the loyalty card. */
+    item: "Cappuccino",
+    shot: "/shots/coffeeholicsva-drinks.jpg",
     title: "Points",
     line: "On every order",
     /* The pitch's own words for it: no rate is published for redemption. */
@@ -178,7 +191,7 @@ export const campaignShots: {
     ? [
         {
           id: s.id,
-          img: found.img,
+          img: s.shot ?? found.img,
           title: s.title,
           line: s.line,
           chip: { line: `${found.name} · ${dollars(cents(found.price))}`, figure },
