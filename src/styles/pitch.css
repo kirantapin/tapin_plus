@@ -454,7 +454,12 @@
   gap: var(--s-lg);
   margin: var(--s-xl) var(--s-xl) var(--s-lg);
 }
-.covers-head::after {
+/* NOT ON THE PITCH (§19, 23 Sep 2026). A head that stands over its own row
+   carries no rule; the plates are the object. `.covers-head` is still shared
+   with /in's panel (Membership.tsx), which keeps its rule, so the pitch's
+   parent is excluded here rather than undone by a second rule. The pop-up
+   (`.vp-covers-head`) and the checkout (`.rs-covers`) have their own heads. */
+:not(.pitch-scope) > .covers-head::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -1621,10 +1626,9 @@ button.vcard:focus-visible {
    carries over from the storefront (§7).
 
    So `.pitch-get` is an open section on the field, taking the page's own
-   gutter from `.column` rather than a panel's inset, and setting the three
-   intervals inside it: heading to cards, cards to "Applies to", plates to the
-   alcohol note. Nothing else moves — `AppliesTo` and the note are the same
-   elements they were, shared with /in and unchanged. */
+   gutter from `.column` rather than a panel's inset: the heading, then the
+   cards. "Applies to" and the alcohol note left it on 23 Sep 2026 (§19) for
+   `.pitch-scope`, the first block of the close, below. */
 .pitch-get-head {
   margin: 0 0 var(--s-lg);
 }
@@ -1663,18 +1667,26 @@ button.vcard:focus-visible {
    at arm's length, and 14 is this build's floor for a word that is not a
    tracked micro-label (§5). Measured at 375: three plates of 109px against a
    70px widest label, so the raise costs no wrap. */
-.pitch-get .covers-head {
-  margin: var(--s-2xl) 0 var(--s-lg);
+/* THE SCOPE IS THE CLOSE'S FIRST BLOCK (§19). On a phone `.pitch-decide` is
+   `display:contents`, so this is a child of `.pitch-lit`'s column at the
+   room's 40px step. It still reads as the cards' qualifier, so it takes back
+   the 24 it stood at inside `.pitch-get`: the phone's intervals are the ones
+   it had before the block moved. */
+.pitch-scope {
+  margin-top: calc(var(--s-2xl) - var(--s-3xl));
 }
-.pitch-get .covers {
+.pitch-scope .covers-head {
+  margin: 0 0 var(--s-lg);
+}
+.pitch-scope .covers {
   padding: 0;
 }
-.pitch-get .cover span {
+.pitch-scope .cover span {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.003em;
 }
-.pitch-get-note {
+.pitch-scope-note {
   margin: var(--s-lg) 0 0;
 }
 .pitch-get .panel-drill {
@@ -2796,24 +2808,6 @@ button.vcard:focus-visible {
     font-size: 32px;
   }
 
-  /* The scope row: the heading, then six plates on ONE LINE set to the grid's
-     left edge. Stretched across 1280 they were six wide slabs with the words
-     lost in the middle of each; capped at 132 they are the pop-up's plate at
-     the pop-up's proportions, and the lineup fills the left half under a
-     heading that runs the full width. `start`, not `space-between`: a lineup
-     is a lineup, and spreading it is what made the bare row read as scatter
-     (Fable, 21 Sep, at 1440). */
-  .pitch-get .covers-head {
-    margin: var(--s-4xl) 0 var(--s-lg);
-  }
-  .pitch-get .covers {
-    grid-template-columns: repeat(6, minmax(0, 132px));
-    justify-content: start;
-    gap: var(--s-lg);
-  }
-  .pitch-get-note {
-    margin: var(--s-lg) 0 0;
-  }
   /* A reading measure for the answer; unbounded, the summary's chevron sat
      1,200px from its own words. */
   .pitch-get .panel-drill .drill {
@@ -2850,22 +2844,29 @@ button.vcard:focus-visible {
   }
 
   /* ── 3 + 4 · the decision AND the close, one movement ─────────────────── */
-  /* ══ THE FIGURE AND THE PROMISE, SIDE BY SIDE ════════════════════════════
-     They were two stacked bands — the savings panel on the field, then the
-     guarantee alone on a --subtle one — which is the same question and its
-     answer arriving as two separate sections at the point where the page
-     should be closing. 60 / 40, aligned at the top: the control that shows
-     what you save, and the sentence that says what happens if it does not.
+  /* ══ ONE COMPOSITION, TWO COLUMNS (§19, 23 Sep 2026) ═════════════════════
+     Sam: "use /impeccable redesign for this desktop section." It was three
+     objects at three weights: six plates across the left of the grid with a
+     bare sentence under them, the savings panel below, and the guarantee
+     floating in the right column over 300px of empty ground.
 
-     `align-items:start`, NOT `stretch`. The right-hand column is an open
-     statement now rather than a panel, so there is no shared bottom edge to
-     honour — stretching it would only stretch a transparent box, and the old
-     `margin-top:auto` foot pinning went with the plan cards it was written
-     for. */
+     Now the control holds the left column, and the right column states what
+     it reaches over the promise that backs it: the scope at the top, the
+     guarantee set to the foot so the two columns end on one line. The rows
+     are `auto 1fr`, so whatever height the panel has, the space between the
+     scope and the guarantee takes it; the panel stretches only if the right
+     column is ever the taller one, so the two feet stay level either way.
+     No box around the scope or the guarantee: the savings panel is the one
+     control here, and a second panel beside it would be a panel on a page
+     of panels again. */
   .pitch-lit > .pitch-decide {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: var(--s-4xl);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "save scope"
+      "save guarantee";
+    gap: 32px 48px;
     align-items: start;
     width: 100%;
     max-width: none;
@@ -2882,6 +2883,23 @@ button.vcard:focus-visible {
   .pitch-lit > .pitch-decide > * {
     max-width: none;
     margin: 0;
+  }
+  .pitch-decide > .pitch-save {
+    grid-area: save;
+    align-self: stretch;
+  }
+  .pitch-decide > .pitch-scope {
+    grid-area: scope;
+  }
+  .pitch-decide > .pitch-guarantee {
+    grid-area: guarantee;
+    align-self: end;
+  }
+  /* Three across in the right column, the §18 plates as they are. (0,2,0)
+     against the base desktop `.covers` six-across, which /in still uses. */
+  .pitch-scope .covers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-lg);
   }
   .pitch-decide .panel {
     display: flex;

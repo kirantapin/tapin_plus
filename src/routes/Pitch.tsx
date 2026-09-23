@@ -410,36 +410,6 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           <h2 className="t-section pitch-get-head">What you get</h2>
           <BenefitCards />
 
-          {/* The connective tissue the panel was missing: without the label the
-              two icon rows read as unrelated grids. Shared with the checkout.
-              (A "social passport" panel stood above this for an hour on 15 Sep
-              2026; Sam: "I don't want to pitch the whole idea of the social
-              passport. I just want the app preview to feel like one." It lives
-              in the app now — routes/app/Tonight.tsx and the venue pages.) */}
-          <AppliesTo />
-
-          {/* NOT BEHIND A TAP ANY MORE. §10 flatly bans any claim that alcohol is
-              discounted, and "Drinks" sitting in a strip under "15% off" makes
-              exactly that claim by layout. The correction was hidden behind a
-              disclosure titled "Where and when" — which answered a question
-              nobody was asking — and students walked away from this panel
-              believing they got 15% off a Friday night. One of them said she
-              would have reserved on that belief. The sentence is unchanged; it
-              has simply stopped being optional to read. */}
-          {/* ══ WHAT ALCOHOL DOES AND DOES NOT TOUCH ═════════════════════════
-              Sam, 14 Sep 2026: "credit can be used towards alcohol, it's just
-              that 15% off can't be applied towards alcohol. Points can be earned
-              on alcohol, redeemed for generic credit, then used towards alcohol
-              purchases. So we need to include that any credit someone has can be
-              used towards alcohol." This reverses his 11 Sep decision recorded in
-              docs/virginia-alcohol-research.md, whose cautions (no 9pm–2am use,
-              never market the credit as meant for drinks, age-gate the spend)
-              are flagged there and not resolved here. Stated once, as scope, in
-              body type, under the benefits it qualifies — not as a headline. */}
-          <p className="t-compact pitch-get-note">
-            Only the 15% off skips alcohol. Credit can be used on anything.
-          </p>
-
           {/* The transfer programme. Behind a tap because it is the one benefit
               with a catch in it, and a catch in a headline is noise while a catch
               in an answer is candour. NO RATIO: the programme is not built, and a
@@ -523,7 +493,48 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             is what that grid is; the phone's DOM order, gaps and rendering are
             unchanged because `display:contents` never cared which div it was. */}
         <div className="pitch-decide">
-          <Panel>
+          {/* ══ THE SCOPE, BESIDE THE FIGURE IT QUALIFIES (§19, 23 Sep 2026) ═════
+              Sam, on the close at 1440: "use /impeccable redesign for this
+              desktop section." Six plates across the left of the grid, the
+              savings panel under them and the guarantee floating over empty
+              ground were three objects at three weights. They are one band now:
+              the savings panel on the left, and on the right what it reaches
+              over the promise that backs it. The block moved here, not the
+              grid: cards → scope → savings → guarantee was already the phone's
+              order, so the phone renders exactly as it did. */}
+          <div className="pitch-scope">
+            {/* The connective tissue the panel was missing: without the label the
+                two icon rows read as unrelated grids. Shared with the checkout.
+                (A "social passport" panel stood above this for an hour on 15 Sep
+                2026; Sam: "I don't want to pitch the whole idea of the social
+                passport. I just want the app preview to feel like one." It lives
+                in the app now — routes/app/Tonight.tsx and the venue pages.) */}
+            <AppliesTo />
+
+            {/* NOT BEHIND A TAP ANY MORE. §10 flatly bans any claim that alcohol is
+                discounted, and "Drinks" sitting in a strip under "15% off" makes
+                exactly that claim by layout. The correction was hidden behind a
+                disclosure titled "Where and when" — which answered a question
+                nobody was asking — and students walked away from this panel
+                believing they got 15% off a Friday night. One of them said she
+                would have reserved on that belief. The sentence is unchanged; it
+                has simply stopped being optional to read. */}
+            {/* ══ WHAT ALCOHOL DOES AND DOES NOT TOUCH ═════════════════════════
+                Sam, 14 Sep 2026: "credit can be used towards alcohol, it's just
+                that 15% off can't be applied towards alcohol. Points can be earned
+                on alcohol, redeemed for generic credit, then used towards alcohol
+                purchases. So we need to include that any credit someone has can be
+                used towards alcohol." This reverses his 11 Sep decision recorded in
+                docs/virginia-alcohol-research.md, whose cautions (no 9pm–2am use,
+                never market the credit as meant for drinks, age-gate the spend)
+                are flagged there and not resolved here. Stated once, as scope, in
+                body type, under the benefits it qualifies — not as a headline. */}
+            <p className="t-compact pitch-scope-note">
+              Only the 15% off skips alcohol. Credit can be used on anything.
+            </p>
+          </div>
+
+          <Panel className="pitch-save">
             <h2 className="t-section panel-head">What you&rsquo;d save</h2>
             <SavingsSlider />
             {/* The door to the deck, under the figure it explains (Sam, 15 Sep
