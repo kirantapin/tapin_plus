@@ -9,6 +9,10 @@
    ============================================================================ */
 
 .card-stage{perspective:1100px;width:100%;max-width:420px;margin:0 auto}
+/* ONE CARD, ONE SIZE (POLISH §25/§26): the deck's close and the checkout's
+   panel both draw it at this width. 340 wherever it fits; on a narrow phone,
+   the window less the sheet's gutter and the panel's inset on each side. */
+:root{--tcard-w:min(340px,calc(100vw - 80px))}
 
 /* ══ THE CARD IS A DARK OBJECT IN BOTH WORLDS ══════════════════════════════
    It is a maroon card. That is true on a dark page and on a light one, and it

@@ -1209,13 +1209,6 @@ html[data-flight="in"] .column > .sticky-cta{
    the block's own interval inside; nothing is placed in a grid area, because
    there is no second column for anything to be placed beside. */
 .rs-modal{display:flex;flex-direction:column;gap:var(--s-2xl)}
-/* THE CARD'S OWN WIDTH, AND WHY THIS IS THREE CLASSES DEEP. card.css is
-   imported after this file and caps `.card-stage` at 420 — at one class the cap
-   below lost on source order, silently, which is why the foot has been showing a
-   420px card under a rule that said 320. 340 is §8's figure: the size you would
-   hold one at, on a sheet that is 375 wide at its narrowest. */
-.rs-card-close .rs-card > *{max-width:340px;margin:0 auto}
-
 /* ── THE MEASURE, FROM 640 ─────────────────────────────────────────────────
    Inside the 640 dialog the column gives up the phone's 480 cap and its
    children's 720 one, and page 0 holds a 560px measure, centred — the same
@@ -1549,39 +1542,32 @@ html[data-flight="in"] .column > .sticky-cta{
    `.plan-figs` already did; only the line's own .72 remains (5.3:1). */
 .plan-opt.is-on .plan-now{opacity:1}
 
-/* ── 2. THE SCHEDULE ───────────────────────────────────────────────────────
-   One grid for the whole ledger, and each row a SUBGRID of it, so the figures
-   column is one width for every row — the widest figure's — and every amount
-   ends on one right edge. The label and the figure share a baseline.
-
-   ONE LINE A ROW (23 Sep 2026, POLISH §23). The note under each label became
-   a clause after it, at the label's size and ink: the label is the house field
-   label (14/600 `--ink-3`, `.ph-label`) and the clause the same at 500, so
-   the row reads as one quiet line with the figure — 16/700 tabular `--ink-1`
-   — the only loud thing in it. Dividers are `--hair-lit`, the same line page
-   2's charge rows draw — `--hair` measures ~1.3:1 on this ground and a ledger
-   with invisible rules is a list that has lost its columns. */
-.rs-ledger{display:grid;grid-template-columns:minmax(0,1fr) max-content;
-  column-gap:var(--s-xl);margin:0}
-.rs-row{grid-column:1 / -1;display:grid;grid-template-columns:subgrid;
-  align-items:baseline;padding:var(--s-lg) 0}
-.rs-row:first-child{padding-top:0}
-.rs-row:last-child{padding-bottom:0}
-.rs-row + .rs-row{border-top:1px solid var(--hair-lit)}
-.rs-when{grid-column:1;grid-row:1;margin:0;font-size:14px;font-weight:600;
-  line-height:1.35;letter-spacing:.005em;color:var(--ink-3)}
-.rs-clause{font-weight:500}
-.rs-fig{grid-column:2;grid-row:1;justify-self:end;margin:0;text-align:right;
-  white-space:nowrap;font-size:16px;font-weight:700;line-height:1.35;
+/* ── 2. THE SCHEDULE, AS A TIMELINE (POLISH §26) ──────────────────────────
+   Three moments on one rail: a 2px `--hair-lit` line through 10px dots —
+   Today filled in `--ink-1`, the stops to come ringed in `--ink-2` on
+   `--card` — and the text 24px clear of the dots. A stop is the moment and
+   its figure on one 22px line (every figure on the list's right edge), then
+   the clause under it. The rail is drawn per stop, from its dot to the next
+   stop's, so it starts and ends on a dot whatever a clause wraps to. The
+   refund sentence sits under the rail, at the clause's size and ink. */
+.rs-sched{display:flex;flex-direction:column;gap:var(--s-xl)}
+.rs-time{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
+.rs-stop{position:relative;padding-left:calc(10px + var(--s-2xl))}
+.rs-stop::before{content:"";position:absolute;left:4px;top:11px;width:2px;
+  height:calc(100% + 20px);background:var(--hair-lit)}
+.rs-stop:last-child::before{content:none}
+.rs-stop::after{content:"";position:absolute;left:0;top:6px;box-sizing:border-box;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--card);border:2px solid var(--ink-2)}
+.rs-stop:first-child::after{background:var(--ink-1);border-color:var(--ink-1)}
+.rs-stop-head{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s-xl);margin:0;line-height:22px}
+.rs-when{min-width:0;font-size:14px;font-weight:600;letter-spacing:.005em;color:var(--ink-2)}
+.rs-fig{flex:0 0 auto;white-space:nowrap;font-size:16px;font-weight:700;
   letter-spacing:-.01em;color:var(--ink-1)}
-/* ON THE PHONE SHEET THE CLAUSE TAKES ITS OWN LINE. Below 640 the column is
-   too narrow for the Halloween row's label, clause and figure on one line, and
-   an inline clause broke mid-phrase. So it drops under its label whole, and
-   the dot that joined them goes with it. */
-@media (max-width:639px){
-  .rs-clause{display:block;margin-top:var(--s-xs)}
-  .rs-sep{display:none}
-}
+.rs-clause,.rs-refund{margin:0;font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--ink-3);text-wrap:pretty}
+.rs-clause{margin-top:var(--s-xs)}
 
 /* ── 3. THE BUTTON AND ITS COUNT ───────────────────────────────────────────
    The block's own interval, not the §4 slot's: `.pay-slot` carries a 16px
@@ -1670,24 +1656,18 @@ html[data-flight="in"] .column > .sticky-cta{
 }
 
 
-/* ── THE CARD, AS THE SHEET'S CLOSE ────────────────────────────────────────
-   Sam, 21 Sep 2026: "the membership card feels out of place." It was a dark
-   maroon object on a white panel labelled YOUR CARD on a light sheet — three
-   nested surfaces, which is a framed picture of the thing rather than the
-   thing (docs/POLISH-2026-09-21.md §8).
-
-   No plate and no label. A hairline closes the rail above it and the card sits
-   on the sheet's own ground at the size you would hold one. The interval above
-   the hairline and below it is the same section step — above it, the column's
-   own gap — so the card reads as the end of the sheet rather than as one more
-   panel in the stack. Since §23 (23 Sep) there is no caption under it: "Yours
-   from Halloween 2026" repeated the card's own STARTS field. */
-.rs-card-close{padding-top:var(--s-2xl);border-top:1px solid var(--hair)}
-/* THE FACTS DO NOT WRAP. At the card's 18px, "Early-ish Bird" and "Halloween
-   2026" each broke onto a second line inside a 340 card. Scoped to this card:
-   card.css's cards elsewhere are narrower, and there a no-wrap value would be
-   cut off by the card's own edge instead. */
-.rs-card-close .tcard-facts dd{white-space:nowrap}
+/* ── THE CARD, AT THE PANEL'S FOOT (POLISH §26) ────────────────────────────
+   It was the sheet's close under its own hairline (§8); the included panel's
+   list adds up to it, so it closes the panel instead. A hairline under the
+   guarantee (`--hair-lit`, the panel's own rule), 20px, the card centred at
+   the one card width (card.css `--tcard-w`), 4px, then the panel's inset.
+   No caption: the card's STARTS field says when it is hers. */
+.rs-inc-card{padding:20px 0 var(--s-xs);border-top:1px solid var(--hair-lit)}
+.rs-inc-card .card-stage{width:var(--tcard-w);max-width:none}
+/* THE FACTS DO NOT WRAP (§23). At the card's type "Early-ish Bird" and
+   "Halloween 2026" each broke onto a second line; at the one card width both
+   hold. Scoped to the card's homes: narrower cards elsewhere would clip. */
+.rs-inc-card .tcard-facts dd{white-space:nowrap}
 
 /* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
    On the tier that is not open, in the tile's top corner.
@@ -1847,19 +1827,18 @@ html[data-flight="in"] .column > .sticky-cta{
    takes it: `min(1040px, 100vw - 64px)`, height still its content's and
    still capped at the window, and page 0 in two equal columns — the money
    on the left (the tiles, the schedule, the button and its count), what it
-   buys on the right (the included panel, then the card as the close). Each
-   column packs to its top, so the shorter one does not stretch to meet the
-   taller.
+   buys on the right (the included panel, the card at its foot). The money
+   column packs to its top; the panel takes the row's height and seats the
+   card on its floor, so the two columns end on one line (§26).
 
    Pages 1–3 keep their 560 measure centred in the wider sheet (`.rs-step`),
    so the sheet does not change width under the reader when Checkout moves
    it on. The docked bar is already gone from 1024.
 
-   THE FIT. The left column is the taller. At 1180x820 with the ledger as
-   the phone has it, the scroller measured 741 of content in 714; the
-   ledger's row padding is the one thing tightened (`--s-lg` to `--s-sm`,
-   desktop only — 48px back, where `--s-md` would have left 5px to spare).
-   No type shrinks.
+   THE FIT. The left column is the taller: the timeline's three two-line
+   stops and the refund line under the rail outrun the panel by ~76px at
+   1180 and 1440. Nothing is added and no type shrinks; the panel takes up
+   the difference above the card's hairline. No scroll from 1024 to 1440.
    ============================================================================ */
 @media (min-width:1024px){
   .reserve-sheet{width:min(1040px,calc(100vw - 64px));
@@ -1882,8 +1861,9 @@ html[data-flight="in"] .column > .sticky-cta{
   /* Kiran's third tile (the sold-out $4.99, 23 Sep) is why the money column
      steps at 16; on desktop this supersedes §16's 24 between its blocks. */
   .rs-pay-col{gap:var(--s-xl)}
-  /* The ledger's rows are one line each since §23, so they get back the
-     `--s-sm` of padding the third tile had taken down to `--s-xs`. */
-  .rs-row{padding-block:var(--s-sm)}
   .rs-seats-under,.rs-meter{margin-top:var(--s-sm)}
+  /* ONE BOTTOM LINE (§26). The right column stretches to the row, the panel
+     fills it, and the card's block sits on the panel's floor. */
+  .rs-get-col{align-self:stretch;grid-template-rows:minmax(0,1fr)}
+  .rs-inc-card{margin-top:auto}
 }

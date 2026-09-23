@@ -58,8 +58,8 @@ import { BENEFIT } from "../model/savings";
    guarantee block (docs/POLISH-2026-09-21.md §16).
 
    The pitch and the splash persuade; this sheet CONFIRMS. So page 0 is the
-   plan tiles, the schedule, the button and its count, the included panel, and
-   the card.
+   plan tiles, the schedule, the button and its count, and the included panel
+   with the card at its foot.
 
    ══ THE INCLUDED PANEL, AND DESKTOP WITHOUT A SCROLL (23 Sep 2026, §18) ════
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe we
@@ -68,8 +68,9 @@ import { BENEFIT } from "../model/savings";
    construction (no button and no price inside it: the ledger carries both).
    And "checkout on desktop should be wider so I don't need to scroll": from
    1024 the sheet is two columns — the money on the left (tiles, schedule,
-   button, count), what it buys on the right (the panel, the card). Below 1024
-   the column wrappers generate no boxes, so the phone reads the same order. */
+   button, count), what it buys on the right (the panel, the card inside it).
+   Below 1024 the column wrappers generate no boxes, so the phone reads the
+   same order. */
 const plan = PLANS.monthly;
 
 /* ══ THE SCHEDULE — WHAT YOU PAY, AND WHEN ══════════════════════════════════
@@ -77,55 +78,53 @@ const plan = PLANS.monthly;
    $1/mo`, `Always · cancel anytime`); this is that, built from the model.
    Every price is `plan.price` / `plan.per` (so it follows the flip to the
    standard rate), the date is `launchWindow`, the credit and its floor are
-   BENEFIT's, and the refund row exists only while the plan's own refund
-   charge row does. The labels are words; a figure in a clause is the plan's.
+   BENEFIT's, and the refund sentence exists only while the plan's own refund
+   charge row does. The moments are words; a figure in a clause is the plan's.
 
-   THE CREDIT ROW KEEPS THE EARN-BACK'S TWO GATES. `FOUNDING_OPEN`: after the
+   THE CREDIT STOP KEEPS THE EARN-BACK'S TWO GATES. `FOUNDING_OPEN`: after the
    flip the price is $14.99 and one $10 order does not come near it.
    `monthlyToday < creditUsd`: "more than the deposit" is a comparative, and if
-   a founding price is ever set at or above the credit the row does not
+   a founding price is ever set at or above the credit the stop does not
    render rather than print a comparison that no longer holds. A `+` on a
    credit is money arriving, not a minus on a price (§16's refusals).
 
-   The Halloween row states the RATE, not a second charge: today's deposit is
+   The Halloween stop states the RATE, not a second charge: today's deposit is
    the first month (the tile says so, and so do page 2's rows), the month
    itself starts when we open, and the same figure recurs from there.
 
-   ONE LINE A ROW (23 Sep 2026, POLISH §23). Sam: "the rest could use some
-   touching up." Each row was a label, a figure and a note under it — fifteen
-   text objects for five facts. Now the clause rides after the label at the
-   label's size, so a row is one line. Today has no clause: the tile above
-   already says the deposit counts toward the first month. */
-const refundRow = plan.chargeRows.find((r) => r.id === "refund");
-const schedule: { id: string; when: string; clause?: string; figure: string }[] = [
-  { id: "today", when: "Today", figure: plan.price },
+   A TIMELINE, NOT A TABLE (23 Sep 2026, POLISH §26). A ledger of label and
+   figure rows read as terms; what it describes is three moments and one
+   promise. So each stop is the moment with its figure on one line and a
+   clause under it, on a rail, and the refund is the one sentence under the
+   rail — the plan's own refund term, while its refund charge row stands. The
+   tier in Today's clause is `foundingTierName`, never typed. */
+const refundLine = plan.chargeRows.some((r) => r.id === "refund")
+  ? plan.terms.find((t) => t.id === "refund")?.term
+  : undefined;
+const schedule: { id: string; when: string; figure: string; clause: string }[] = [
+  {
+    id: "today",
+    when: "Today",
+    figure: plan.price,
+    clause: `${FOUNDING_OPEN ? `${foundingTierName} deposit` : "Deposit"}, counts toward your first month`,
+  },
   ...(FOUNDING_OPEN && monthlyToday < BENEFIT.creditUsd
     ? [
         {
           id: "credit",
           when: `Your first $${Math.round(BENEFIT.creditMinUsd)}+ order`,
-          clause: "more than the deposit",
           figure: `+$${BENEFIT.creditUsd} credit`,
+          clause: "more than the deposit",
         },
       ]
     : []),
   {
     id: "opens",
     when: launchWindow,
-    clause: `then ${plan.price} ${plan.per}, automatic`,
     figure: `${plan.price} ${plan.per}`,
+    clause: "then automatically, your first month already paid",
   },
-  { id: "always", when: "Always", clause: "never goes up while you stay", figure: plan.price },
-  ...(refundRow
-    ? [
-        {
-          id: "refund",
-          when: "Before we open",
-          clause: refundRow.detail.charAt(0).toLowerCase() + refundRow.detail.slice(1),
-          figure: "Full refund",
-        },
-      ]
-    : []),
+  { id: "always", when: "Always", figure: plan.price, clause: "never goes up while you stay a member" },
 ];
 
 /* ══ WHAT YOU GET, AS A CHECKLIST ══════════════════════════════════════════
@@ -261,7 +260,8 @@ export default function Reserve() {
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it
      reads as a review sheet (see the note above `plan`): the money as a
-     schedule, one button, one panel of what it includes, the card. §4 is
+     schedule, one button, one panel of what it includes with the card at its
+     foot. §4 is
      untouched — the rows, the consent and the control still travel together
      on page 2, one tap on. */
   return (
@@ -438,28 +438,26 @@ export default function Reserve() {
               : ""}
         </p>
 
-        {/* ══ THE SCHEDULE ══════════════════════════════════════════════════
+        {/* ══ THE SCHEDULE, ON A RAIL ═════════════════════════════════════
             Replaces the subtitle band ("earn the $4.99 back…", Sam 21 Sep) and
-            the two prose lines under the tiles (the locked rate, the refund):
-            the same facts, each a row with its figure on one right edge. An
-            open ledger — hairlines between rows, no plate — because a panel
-            around a list of charges is a bill, and this is the terms of one. */}
-        <dl className="rs-ledger" aria-label="What you pay, and when">
-          {schedule.map((row) => (
-            <div className="rs-row" key={row.id}>
-              <dt className="rs-when">
-                {row.when}
-                {row.clause ? (
-                  <span className="rs-clause">
-                    <span className="rs-sep"> · </span>
-                    {row.clause}
-                  </span>
-                ) : null}
-              </dt>
-              <dd className="rs-fig tnum">{row.figure}</dd>
-            </div>
-          ))}
-        </dl>
+            the prose lines under the tiles: the same facts, as stops in time.
+            Every figure sits on the list's one right edge; the sentence under
+            the rail is the refund, and nothing sits under the button but its
+            count. */}
+        <div className="rs-sched">
+          <ol className="rs-time" aria-label="What you pay, and when">
+            {schedule.map((stop) => (
+              <li className="rs-stop" key={stop.id}>
+                <p className="rs-stop-head">
+                  <span className="rs-when">{stop.when}</span>
+                  <span className="rs-fig tnum">{stop.figure}</span>
+                </p>
+                <p className="rs-clause">{stop.clause}</p>
+              </li>
+            ))}
+          </ol>
+          {refundLine ? <p className="rs-refund">{refundLine}</p> : null}
+        </div>
 
         {/* ══ THE DOOR TO THE CHARGE ═════════════════════════════════════════
             Sam, 13 Sep 2026: "we only need the disclosure and terms right at
@@ -523,9 +521,9 @@ export default function Reserve() {
         </div>
       </div>
 
-      {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THEN THE CARD ═════════════════
+      {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════
           The right column from 1024; `display:contents` below it, where the
-          panel and the card follow the count in the one column. */}
+          panel follows the count and closes the one column. */}
       <div className="rs-get-col">
         {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
             Sam, on the trial modal's call-out: "I like how you formatted
@@ -601,40 +599,23 @@ export default function Reserve() {
               <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
             </span>
           </p>
-        </section>
-
-        {/* ══ THE CARD IS THE SHEET'S CLOSE ═══════════════════════════════
-            Sam, 21 Sep 2026, at the foot of this sheet: "we should /impeccable
-            redesign this section of the checkout it's a bit weird. The membership
-            card feels out of place."
-
-            WHAT MADE IT WEIRD WAS THE PLATE. Three surfaces nested — the light
-            sheet, a white panel labelled YOUR CARD, and the dark maroon card
-            inside it — and a dark object on a white plate on a light sheet is a
-            framed picture of a thing, not the thing. The uppercase label was the
-            eyebrow tic §2 removed everywhere else, and it announced that the last
-            object before the button is something the reader does not own yet.
-
-            The panel was the answer to "not awkwardly" on 20 Sep, and the plate
-            is what is awkward now. So the card stops being CONTENT and becomes
-            the sheet's CLOSE: one hairline, the card on the sheet's own ground at
-            the size you would hold one, and a single line under it saying when it
-            is hers. Nothing above the rail moves; the docked button still clears
-            it; `TapInCard`'s name contract is untouched, so the field in the
-            checkout still fills this card as she types.
-
-            NO CAPTION SINCE 23 Sep 2026 (POLISH §23). "Yours from Halloween
-            2026" said what the card's own STARTS field says, an inch above it.
-            The hairline stays; the card is the last thing on the sheet. */}
-        <div className="rs-card-close">
-          <div className="rs-card">
+          {/* ══ THE CARD LIVES IN THE PANEL (23 Sep 2026, POLISH §26) ══════
+              It was the sheet's close under its own hairline (§8), a second
+              object after the panel. The heading's list adds up to it, so the
+              panel grows a foot: a hairline, the card centred at the one card
+              width, no caption (its STARTS field says when it is hers). On a
+              phone the panel closes page 0, so the card closes it there too.
+              `cardRef` is what the deck's card flies onto (shell/cardFlight.ts),
+              and the name field on page 1 still fills it as she types. */}
+          <div className="rs-inc-card">
             <TapInCard
               name={cardName.trim() || undefined}
               innerRef={cardRef}
               className="reserve-card"
             />
           </div>
-        </div>
+        </section>
+
       </div>
 
       <div className={`rs-dock${ctaVisible ? " is-away" : ""}`} aria-hidden={ctaVisible}>
