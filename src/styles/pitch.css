@@ -1492,173 +1492,125 @@ button.vcard:focus-visible {
    stays exactly as it was: the compact path and reserve.css's `.bcards.is-chips`
    still read every line of it.
 
-   The card is me&u's, by name (docs/POLISH-2026-09-21.md §7): a venue's own
-   photograph full-bleed under a veil, the benefit's label and condition in the
-   top-left, and one frosted fragment floating in the lower half. The photo is
-   the evidence; the fragment is the proof.
+   ══ THE CARD IS §12's A · SPLIT, SINCE 22 SEP 2026 ═══════════════════════
+   docs/POLISH-2026-09-21.md §12. Three directions were built behind a DEV-only
+   switch and Sam chose A: the photograph above with nothing over it, a solid
+   plate below carrying every word. Why, in one line: a sentence belongs on a
+   plate. §7 set the copy over the photograph, and every line of it was then a
+   negotiation with the brightest pixel under it — the veil went through three
+   ramps and a text-shadow, and Sam still lost the subline in the mural. On a
+   plate the ratio is the ink ramp's own, and the photograph is finally allowed
+   to be a photograph.
 
-   THE VEIL IS TWO JOBS IN ONE GRADIENT. Dark at the top so a 22px white title
-   clears AA over a lit café shot, nearly open across the middle so the food is
-   actually seen, and dark again at the foot so the chip has something to sit
-   on. The rgba is the field's own #120A0E at four alphas, which is why it is
-   written out rather than tokenised — a token cannot carry four stops.
+   The plate is `--card` (the dark card rung here, white on the splash) and its
+   type is the surface's own ramp: title and figure `--ink-1`, the order line
+   `--ink-2`, the condition and "You save" `--ink-3`. The saving is the card's
+   figure and is never maroon — it is an outcome, not a chosen thing.
 
-   ══ THE FOURTH STOP IS MEASURED, AND IT IS §7'S ONE DEVIATION ══════════════
-   §7 names three stops: .74 at 0, .30 at 48%, .58 at 100%. Rendered against
-   these six heroes that ramp is too fast, and it fails §6's own acceptance —
-   sampled at 500 with the text hidden, the BRIGHTEST pixel under each node and
-   the alpha it would need to carry white at 4.5:1:
-
-     $5 credit      title .05-.13 → needs .55    line .15-.28 → needs .61
-     15% off        title .07-.17 → needs .53    line .20-.28 → needs .56
-     Points         title .07-.17 → needs .24    line .20-.37 → needs .53
-     Special offers title .07-.17 → needs .52    line .20-.37 → needs .61
-
-   §7's ramp delivers .62 at .13 but only .48 at .28 and .40 at .37, so three of
-   the four conditions sat between 2.0:1 and 3.5:1 against the blown highlights
-   — the pizza crust, the stage lights, Olaika's white plates. me&u's own cards
-   get away with three stops because their photographs are dark; ours are not,
-   and a plan's number is not worth a line a reader cannot read.
-
-   So the top stop HOLDS to 40% before the ramp starts. Nothing else moves: the
-   same colour, the same .74 at the top and .58 at the foot, the same open
-   middle — it opens at 62% instead of 48%, which is below every text node on
-   every card. Measured again after the change, against the brightest pixel
-   under every node: 5.67:1 at 500 and 5.59:1 at 1440, both on the offers
-   card's line over Olaika's plates.
-
-   Z-ORDER IS DECLARED, NOT INHERITED FROM DOM ORDER. `::after` is generated as
-   the LAST child, so a positioned veil with auto z-index paints over the title.
-   `isolation` makes the card its own stacking context and the three layers name
-   their own place inside it, so nothing here can reach another card. */
+   REMOVED, WITH B (the order line) AND C (the poster): §7's veil
+   (`.bshot::after`, four stops of #120A0E), the frosted chip (its fill,
+   hairline and 14px blur), the white-over-photo ink and its text-shadows, the
+   glyph (`.bshot-glyph`), the fixed 220/260 heights, the absolute image with
+   its z-order stack, the switch itself (model/card.ts), and the splash's
+   re-point of `--ink-1` to white (campaign.css). */
 .bshots {
   display: grid;
-  gap: var(--s-lg);
-}
-.bshot {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: 20px;
-  height: 220px;
-  padding: var(--s-xl);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   gap: var(--s-lg);
 }
 /* The credit leads by size and by nothing else — Sam, 12 Sep: "this is the big
    one". No maroon fill: tokens.css spends a solid maroon on a chosen or acting
    thing, and a benefit on a marketing page is neither. */
-.bshot.is-lead {
-  height: 260px;
+.bshot {
+  overflow: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--hair);
 }
+/* ~58% of the card §12 drew (176 of 300, 152 of 260). The card is then as tall
+   as its plate needs: the plate's own type is ~150px, which 42% of 260 cannot
+   hold, and a thinner photograph is the thing this direction refuses. */
 .bshot-img {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  flex: 0 0 auto;
   display: block;
+  width: 100%;
+  height: 152px;
+  object-fit: cover;
 }
-.bshot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* DEEPER UNDER THE COPY. Sam, 22 Sep 2026, on the credit card: "I like
-     this, but the only issue is it's hard to see the text." The ratio was
-     passing (5.3:1 at worst against the brightest pixel) and the eye still
-     lost the subline in the mural — a busy ground costs legibility that a
-     contrast ratio does not measure. The top stop goes to .88 and holds
-     through the copy's band before falling away to show the photograph,
-     and the foot deepens for the chip. */
-  background: linear-gradient(
-    180deg,
-    rgba(18, 10, 14, 0.88) 0%,
-    rgba(18, 10, 14, 0.84) 42%,
-    rgba(18, 10, 14, 0.34) 66%,
-    rgba(18, 10, 14, 0.64) 100%
-  );
+.bshot.is-lead .bshot-img {
+  height: 176px;
 }
-.bshot-say,
-.bshot-chip {
-  position: relative;
-  z-index: 2;
-  margin: 0;
+.bshot-say {
+  flex: 1 1 auto;
+  padding: var(--s-xl) var(--s-xl) 0;
 }
 .bshot-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.015em;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--ink-1);
-  /* A legibility shadow, not a decorative one: over a photograph the veil
-     sets the ratio and the shadow separates the letterforms from texture
-     — the mural's owl and the pizza crust were both running through the
-     counters (Sam, 22 Sep: "hard to see the text"). The same construction
-     the campaign band and the venue pop-up use over their photographs. */
-  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
 }
-/* NOT `opacity`, and not the ink ramp either: the ramp is measured on --card
-   and means nothing over a photograph. White at .94 over the veil (was §7's
-   .84 until the 22 Sep legibility note), derived from --ink-1 so the white
-   itself still comes from the token. */
 .bshot-line {
-  margin: var(--s-sm) 0 0;
-  max-width: 30ch;
-  font-size: 15px;
+  margin: var(--s-xs) 0 0;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0.003em;
-  color: color-mix(in srgb, var(--ink-1) 94%, transparent);
-  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
+  color: var(--ink-3);
   text-wrap: pretty;
 }
-/* THE FRAGMENT. Frosted, not solid: it is a piece of the app lying on the
-   photograph, and a flat plate reads as a caption bar instead. The blur has a
-   fallback of nothing — the fill alone is already 4.5:1 for both its lines. */
+/* THE LEDGER ROW. The order line left, the saving right, on one hairline. The
+   row is held at the height of "You save" over the figure even when the figure
+   is a sentence, so the hairlines of a desktop row sit on one line. */
 .bshot-chip {
-  align-self: flex-start;
-  max-width: 100%;
+  --ledger: calc(14px * 1.3 + 24px * 1.1);
+  box-sizing: content-box;
+  min-height: var(--ledger);
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(18, 10, 14, 0.58);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: var(--s-lg) var(--s-xl) var(--s-xl);
+  padding: var(--s-lg) 0 0;
+  border-top: 1px solid var(--hair-lit);
 }
 .bshot-chip-a {
-  display: flex;
-  align-items: center;
-  gap: var(--s-sm);
-  font-size: 13px;
+  display: block;
+  min-width: 0;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.3;
-  color: color-mix(in srgb, var(--ink-1) 72%, transparent);
-}
-/* The glyph takes its stroke from the line it opens — the icon family is all
-   currentColor at 1.7 in a 24 box, so only the size is set here. */
-.bshot-glyph {
-  flex: 0 0 auto;
-  display: block;
-}
-.bshot-glyph svg {
-  width: 16px;
-  height: 16px;
-  display: block;
+  line-height: 1.4;
+  color: var(--ink-2);
 }
 .bshot-chip-b {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--ink-1);
+}
+/* 14, not §12's 13: the label clears the reading floor, and at 375 it is
+   narrower than the figure under it, so the row keeps its width. */
+.bshot-save {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+.bshot-fig {
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ══ THE SECTION ON A PHONE ════════════════════════════════════════════════
@@ -2714,10 +2666,11 @@ button.vcard:focus-visible {
      the escape hatch that selector's own note describes.
 
      THE CREDIT ON ITS OWN LINE, THE THREE UNDER IT. Sam, 12 Sep: "this is the
-     big one", and at this width leading by size means a full-width photograph
-     over a row of three, not a 2×1 share of a grid. 4/3 on the three keeps the
-     row honest at every window between 1024 and 1280 — a fixed height would
-     stretch the crop as the tracks grow. */
+     big one", and at this width leading by size means a full-width card over a
+     row of three, not a 2×1 share of a grid. The three keep §12's split — the
+     photograph at 2:1 over the plate, so the crop scales with the track at
+     every window between 1024 and 1280 and the plate takes what its type
+     needs; the grid's stretch puts their hairlines on one line. */
   .column > .pitch-get {
     width: 100%;
     max-width: var(--grid);
@@ -2727,22 +2680,57 @@ button.vcard:focus-visible {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--s-2xl);
   }
-  .pitch-get .bshot {
+  .pitch-get .bshot-img {
     height: auto;
-    aspect-ratio: 4 / 3;
-    padding: var(--s-2xl);
+    aspect-ratio: 2 / 1;
   }
+  .pitch-get .bshot-say {
+    padding: var(--s-2xl) var(--s-2xl) 0;
+  }
+  .pitch-get .bshot-chip {
+    margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
+    padding-top: var(--s-xl);
+  }
+  /* THE CREDIT SIDEWAYS. At 1,232px wide "photo above" is a 5:1 strip, so the
+     lead turns the split on its side: the photograph left at the same 58%, the
+     plate right with its copy set to the foot. */
   .pitch-get .bshot.is-lead {
     grid-column: 1 / -1;
     height: 380px;
+    display: grid;
+    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+    grid-template-rows: 1fr auto auto;
+    grid-template-areas:
+      "photo ."
+      "photo say"
+      "photo chip";
+  }
+  .pitch-get .bshot.is-lead .bshot-img {
+    grid-area: photo;
+    height: 100%;
     aspect-ratio: auto;
   }
-  /* The one size on this page that is off tokens.css's enumerated ramp, and it
-     is §7's own number: the lead card's title steps up while the other three
-     hold at 22, which is how the credit leads without a second device. */
+  .pitch-get .bshot.is-lead .bshot-say {
+    grid-area: say;
+    padding: var(--s-3xl) var(--s-3xl) 0;
+  }
+  .pitch-get .bshot.is-lead .bshot-chip {
+    grid-area: chip;
+    --ledger: calc(14px * 1.3 + 32px * 1.1);
+    margin: var(--s-2xl) var(--s-3xl) var(--s-3xl);
+  }
+  /* The one title size on this page that is off tokens.css's enumerated ramp,
+     and it is §7's own number: the lead steps up while the other three hold at
+     20, which is how the credit leads without a second device. */
   .pitch-get .bshot.is-lead .bshot-title {
     font-size: 28px;
     letter-spacing: -0.02em;
+  }
+  .pitch-get .bshot.is-lead .bshot-line {
+    font-size: 15px;
+  }
+  .pitch-get .bshot.is-lead .bshot-fig {
+    font-size: 32px;
   }
 
   /* The scope row: the heading, then six plates on ONE LINE set to the grid's
@@ -3385,391 +3373,3 @@ button.vcard:focus-visible {
 }
 
 /* What the deposit earns back, under the price on the hero. */
-
-/* ══ THE PHOTO CARD, THREE DIRECTIONS — 22 Sep 2026 (DEV SWITCH) ══════════
-   docs/POLISH-2026-09-21.md §12. `?card=split|line|poster` (model/card.ts,
-   DEV only) sets `data-card` on the pitch's `.bshots` and on the splash's
-   `.cg-save`; PhotoCard renders the same elements plus two splits (item and
-   price, "You save" and its figure) and no glyph. Absent, nothing here
-   matches and the card above is the card. One is kept, then this block
-   folds into it and the switch goes.
-
-   Same facts on all three: the benefit, its condition, the order line, the
-   saving. The saving is the card's figure on each and is never maroon — it
-   is an outcome, not a chosen thing. No struck price, no minus, no tile, no
-   text under 13px.
-
-   Phone rules here; the pitch's desktop sizes follow in the media block, the
-   splash's in campaign.css. Selectors are one attribute deeper than the
-   context rules they must beat (`.pitch-get .bshot.is-lead` is 0,3,0). */
-
-/* ── A · SPLIT: the photograph above, a solid plate below ────────────────
-   Dollar Shave Club / Superpower. No veil and no type on the image: it is
-   finally allowed to be a photograph. The plate is `--card` (the dark rung on
-   the pitch, white on the splash) and carries the copy in the surface's own
-   ink ramp, so the splash un-points `--ink-1` for this one (campaign.css). */
-[data-card="split"] .bshot {
-  height: auto;
-  padding: 0;
-  gap: 0;
-  justify-content: flex-start;
-  background: var(--card);
-  border: 1px solid var(--hair);
-}
-[data-card="split"] .bshot::after {
-  content: none;
-}
-/* ~58% of the card §12 drew (176 of 300, 152 of 260). The card is then as
-   tall as its plate needs: the plate's own type is ~150px, which 42% of 260
-   cannot hold, and a thinner photograph is the thing this direction refuses. */
-[data-card="split"] .bshot-img {
-  position: static;
-  flex: 0 0 auto;
-  height: 152px;
-}
-[data-card="split"] .bshot.is-lead .bshot-img {
-  height: 176px;
-}
-[data-card="split"] .bshot-say {
-  flex: 1 1 auto;
-  padding: var(--s-xl) var(--s-xl) 0;
-}
-[data-card="split"] .bshot-title {
-  font-size: 20px;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-  text-shadow: none;
-}
-[data-card="split"] .bshot-line {
-  margin-top: var(--s-xs);
-  max-width: none;
-  font-size: 14px;
-  color: var(--ink-3);
-  text-shadow: none;
-}
-/* The order line left, the saving right, on one hairline. The row is held at
-   the height of "You save" over the figure even when the figure is a
-   sentence, so the hairlines of a desktop row sit on one line. */
-[data-card="split"] .bshot-chip {
-  --ledger: calc(13px * 1.3 + 24px * 1.1);
-  box-sizing: content-box;
-  min-height: var(--ledger);
-  align-self: stretch;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--s-lg);
-  margin: var(--s-lg) var(--s-xl) var(--s-xl);
-  padding: var(--s-lg) 0 0;
-  border: 0;
-  border-top: 1px solid var(--hair-lit);
-  border-radius: 0;
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-[data-card="split"] .bshot-chip-a {
-  display: block;
-  min-width: 0;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--ink-2);
-}
-[data-card="split"] .bshot-chip-b {
-  flex: 0 1 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  font-size: 15px;
-  line-height: 1.3;
-  color: var(--ink-1);
-}
-[data-card="split"] .bshot-fig {
-  font-size: 24px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── B · ORDER LINE: the app's own row ─────────────────────────────────────
-   The most literal "what you'd save when ordering": a thumbnail and the item
-   as a line in My Spot reads, a hairline, the benefit, and the saving as a
-   right-set ledger at the foot. The photograph is a thumbnail, never a
-   ground, so there is no veil and no legibility cost. The chip unwraps
-   (`display: contents`) so its two halves take their own places in the grid,
-   and the veil's pseudo-element becomes the hairline. */
-[data-card="line"] .bshot {
-  height: auto;
-  padding: var(--s-xl);
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr) auto;
-  grid-template-rows: auto auto auto 1fr;
-  grid-template-areas:
-    "thumb item item"
-    "rule  rule rule"
-    "say   say  ledger"
-    "foot  foot ledger";
-  column-gap: var(--s-xl);
-  row-gap: 0;
-  background: var(--card);
-  border: 1px solid var(--hair);
-}
-[data-card="line"] .bshot::after {
-  grid-area: rule;
-  position: static;
-  height: 1px;
-  margin: var(--s-xl) 0;
-  background: var(--hair-lit);
-}
-[data-card="line"] .bshot-img {
-  grid-area: thumb;
-  position: static;
-  width: 96px;
-  height: 96px;
-  border-radius: var(--r-card);
-}
-[data-card="line"] .bshot-chip {
-  display: contents;
-}
-[data-card="line"] .bshot-chip-a {
-  grid-area: item;
-  align-self: center;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--ink-1);
-}
-[data-card="line"] .bshot-item {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-[data-card="line"] .bshot-sep {
-  display: none;
-}
-[data-card="line"] .bshot-price {
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-}
-[data-card="line"] .bshot-say {
-  grid-area: say;
-  align-self: start;
-}
-[data-card="line"] .bshot-title {
-  font-size: 18px;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
-  text-shadow: none;
-}
-[data-card="line"] .bshot-line {
-  margin-top: var(--s-xs);
-  max-width: none;
-  font-size: 14px;
-  color: var(--ink-3);
-  text-shadow: none;
-}
-[data-card="line"] .bshot-chip-b {
-  grid-area: ledger;
-  align-self: end;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  font-size: 15px;
-  line-height: 1.3;
-  color: var(--ink-1);
-}
-/* A figure that is not a saving ("Points toward a free one", an offer's
-   terms) is a sentence, and a sentence in the ledger's column would squeeze
-   the benefit to a word a line. It takes the foot's full width instead. */
-[data-card="line"] .bshot-chip-b:not(.is-save) {
-  grid-area: foot;
-  grid-column: 1 / -1;
-  margin-top: var(--s-lg);
-}
-[data-card="line"] .bshot-fig {
-  font-size: 22px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-/* The label over each saving, A and B alike. */
-[data-card="split"] .bshot-save,
-[data-card="line"] .bshot-save {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: 0.005em;
-  color: var(--ink-3);
-}
-
-/* ── C · POSTER: the current world, pushed ─────────────────────────────────
-   me&u done properly. The veil leaves the top and pools at the foot, and all
-   the copy sits bottom-left in one stack — the order as a caption, the
-   saving as the display line, then the benefit and its condition. No chip,
-   no glyph: three lines of type and a photograph. The rgba is the field's
-   own #120A0E, as the veil above. */
-[data-card="poster"] .bshot {
-  height: 260px;
-  justify-content: flex-end;
-  gap: var(--s-lg);
-}
-[data-card="poster"] .bshot.is-lead {
-  height: 300px;
-}
-/* §12 drew this as .0 at 45% → .82 at 100%. Linear, that is .08 at 50% and
-   .38 at 70%, and the stack starts at 50–57% of a phone card (the pitch's
-   two-line conditions push it up), so the 13px caption sat on an open
-   photograph. The end stops are §12's; the ramp starts higher and reaches
-   .62 by the half, where the stack begins. Measured at 375 with the text
-   hidden, against the brightest pixel under every line box: worst 7.34:1 on
-   the pitch (the caption over the pizza box), 7.17:1 on the splash (over
-   the cheesecake) — headroom enough to open the ramp further if C is kept. */
-[data-card="poster"] .bshot::after {
-  background: linear-gradient(
-    180deg,
-    rgba(18, 10, 14, 0) 24%,
-    rgba(18, 10, 14, 0.36) 38%,
-    rgba(18, 10, 14, 0.62) 50%,
-    rgba(18, 10, 14, 0.76) 64%,
-    rgba(18, 10, 14, 0.82) 100%
-  );
-}
-[data-card="poster"] .bshot-chip {
-  order: -1;
-  align-self: stretch;
-  gap: var(--s-xs);
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-/* Full white: at 13px it is the smallest line on the card and the highest in
-   the stack, so it gets the ink rather than the veil doing all the work. */
-[data-card="poster"] .bshot-chip-a {
-  display: block;
-  font-size: 13px;
-  line-height: 1.3;
-  letter-spacing: 0.005em;
-  color: var(--ink-1);
-  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
-}
-[data-card="poster"] .bshot-chip-b {
-  font-size: 28px;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 2px rgba(18, 10, 14, 0.55);
-}
-/* Not a saving, so not display-sized: at 28 "Points toward a free one" takes
-   two lines on a phone and pushes the stack up into the open photograph. */
-[data-card="poster"] .bshot-chip-b:not(.is-save) {
-  font-size: 22px;
-  line-height: 1.15;
-}
-[data-card="poster"] .bshot-title {
-  font-size: 16px;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-}
-[data-card="poster"] .bshot-line {
-  margin-top: 2px;
-  max-width: 44ch;
-  font-size: 14px;
-  color: color-mix(in srgb, var(--ink-1) 84%, transparent);
-}
-
-/* ── the pitch, from 1024 ──────────────────────────────────────────────────
-   A: the credit spans as it does today, and at 1,232px wide "photo above"
-   is a 5:1 strip — so the lead turns the split on its side, photograph left
-   at the same 58%, plate right. The three under it keep photo-over-plate.
-   B: equal cards, the credit does not span. Four cards cannot be three
-   across without an orphan, and four across is 302px a card at 1440, under
-   §6's 320 floor — so two by two.
-   C: the credit spans at 380, the three at 4/3, as today. */
-@media (min-width: 1024px) {
-  .pitch-get [data-card="split"] .bshot {
-    height: auto;
-    aspect-ratio: auto;
-    padding: 0;
-  }
-  .pitch-get [data-card="split"] .bshot-img {
-    height: auto;
-    aspect-ratio: 2 / 1;
-  }
-  .pitch-get [data-card="split"] .bshot-say {
-    padding: var(--s-2xl) var(--s-2xl) 0;
-  }
-  .pitch-get [data-card="split"] .bshot-chip {
-    margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
-    padding-top: var(--s-xl);
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead {
-    height: 380px;
-    display: grid;
-    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
-    grid-template-rows: 1fr auto auto;
-    grid-template-areas:
-      "photo ."
-      "photo say"
-      "photo chip";
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-img {
-    grid-area: photo;
-    height: 100%;
-    aspect-ratio: auto;
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-say {
-    grid-area: say;
-    padding: var(--s-3xl) var(--s-3xl) 0;
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-chip {
-    grid-area: chip;
-    --ledger: calc(13px * 1.3 + 32px * 1.1);
-    margin: var(--s-2xl) var(--s-3xl) var(--s-3xl);
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-title {
-    font-size: 28px;
-    letter-spacing: -0.02em;
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-line {
-    font-size: 15px;
-  }
-  .pitch-get [data-card="split"] .bshot.is-lead .bshot-fig {
-    font-size: 32px;
-  }
-
-  .pitch-get .bshots[data-card="line"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .pitch-get [data-card="line"] .bshot,
-  .pitch-get [data-card="line"] .bshot.is-lead {
-    grid-column: auto;
-    height: auto;
-    aspect-ratio: auto;
-    padding: var(--s-2xl);
-  }
-  .pitch-get [data-card="line"] .bshot.is-lead .bshot-title {
-    font-size: 18px;
-    letter-spacing: -0.015em;
-  }
-
-  .pitch-get [data-card="poster"] .bshot {
-    height: auto;
-  }
-  .pitch-get [data-card="poster"] .bshot.is-lead {
-    height: 380px;
-  }
-  .pitch-get [data-card="poster"] .bshot.is-lead .bshot-title {
-    font-size: 18px;
-    letter-spacing: -0.015em;
-  }
-  .pitch-get [data-card="poster"] .bshot.is-lead .bshot-chip-b {
-    font-size: 32px;
-  }
-}

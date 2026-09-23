@@ -6,8 +6,6 @@ import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
-import { cardVariant } from "../model/card";
-import { BenefitIcon } from "../shell/Icons";
 import { useReserveCta } from "../shell/useReserveCta";
 import {
   heroIsBright,
@@ -83,9 +81,6 @@ export default function Coffeeholics() {
     document.documentElement.setAttribute("data-surface", "cg");
     return () => document.documentElement.removeAttribute("data-surface");
   }, []);
-
-  /* §12's photo-card direction (`?card=`, DEV only); undefined is the current card. */
-  const card = cardVariant();
 
   /* ══ THE DOCKED PAIR ARRIVES WHEN THE HERO LEAVES ══════════════════════
      Sam, 20 Sep 2026: "need two sticky buttons, one is 'try it once for
@@ -306,7 +301,7 @@ export default function Coffeeholics() {
           benefit takes off each — the pitch's photo card, not a lookalike.
           On the page's ground, not in a panel: the cards are the boxes. */}
       {campaignShots.length ? (
-        <section className="cg-save" aria-labelledby="cg-save-h" data-card={card}>
+        <section className="cg-save" aria-labelledby="cg-save-h">
           <h2 className="t-section cg-save-h" id="cg-save-h">
             What you'd save here
           </h2>
@@ -318,8 +313,7 @@ export default function Coffeeholics() {
                 title={c.title}
                 line={c.line}
                 lead={c.id === "credit"}
-                variant={card}
-                chip={{ ...c.chip, icon: <BenefitIcon id={c.id} /> }}
+                chip={c.chip}
               />
             ))}
           </div>

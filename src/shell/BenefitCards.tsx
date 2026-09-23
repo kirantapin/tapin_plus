@@ -1,6 +1,5 @@
 import { BenefitIcon, NavIcon } from "./Icons";
 import PhotoCard from "./PhotoCard";
-import { cardVariant } from "../model/card";
 import {
   benefitFragments,
   benefitShots,
@@ -51,12 +50,11 @@ import {
  * meandu website? I like their styling for this kind of thing. I think it'd be
  * cool if we had photos from the coffeeholics instagram too."
  *
- * So each benefit is a PHOTOGRAPH CARD (docs/POLISH-2026-09-21.md §7): a venue
- * hero full-bleed under a veil, the benefit's own label and condition in the
- * top-left, and a frosted fragment floating in the lower half showing what the
- * benefit does to one order. The photo is the evidence and the chip is the
- * proof — no icon tiles, no hairlines, no display figure, which is what the
- * three rejected devices had in common.
+ * So each benefit is a PHOTOGRAPH CARD. Since 22 Sep it is §12's A (Sam's
+ * choice): the venue hero above with nothing over it, and a plate below with
+ * the benefit's own label and condition, then what the benefit does to one
+ * order as a ledger row. The photo is the evidence and the row is the proof;
+ * §7's veil and frosted fragment are gone.
  *
  * NOTHING HERE IS TYPED. The title is the record's `label` WHOLE — the figure
  * is no longer lifted out of it, which is the split Sam rejected — the line is
@@ -154,12 +152,8 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
       : []),
   ];
 
-  /* §12's direction switch (DEV only). Absent, no attribute is written and
-     this tree is the one that shipped before the switch, byte for byte. */
-  const variant = cardVariant();
-
   return (
-    <div className="bshots" data-card={variant}>
+    <div className="bshots">
       {cards.map(({ policy, line }) => {
         const shot = venues.find((v) => v.id === benefitShots[policy.id])?.hero;
         /* The offers fragment is the offer itself — the venue and the terms as
@@ -180,16 +174,7 @@ export default function BenefitCards({ compact = false }: { compact?: boolean } 
             title={policy.label}
             line={line}
             lead={policy.id === "credit"}
-            variant={variant}
-            chip={
-              chip
-                ? {
-                    ...chip,
-                    icon:
-                      policy.id === "offers" ? <NavIcon id="deals" /> : <BenefitIcon id={policy.id} />,
-                  }
-                : undefined
-            }
+            chip={chip}
           />
         );
       })}

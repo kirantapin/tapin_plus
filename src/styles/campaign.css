@@ -291,22 +291,15 @@
    docs/POLISH-2026-09-21.md §11. The pitch's `.bshot` photo cards (pitch.css
    styles them globally; shell/PhotoCard.tsx renders them), each an item from
    Coffeeholics' menu under the benefit it exercises. Phone sizes are the
-   pitch's own — 260 for the credit, 220 for the other two, 12 between.
+   pitch's own — a 176px photograph for the credit, 152 for the other two, the
+   plate under each as tall as its type, 12 between.
 
-   THE PHOTOGRAPH'S WHITE. `.bshot` inks its title, line and chip from
-   `--ink-1`, which is white on the dark pitch and near-black on this light
-   surface — dark type on the veil. Inside the card the token is pointed at
-   `--on-maroon`, the white that does not invert with the surface (the
-   pop-up's rule for type over a photograph), and every `.bshot` rule
-   follows without being restated here. */
+   THE PLATE'S INK IS THIS SURFACE'S. Since 22 Sep the card is §12's A: the
+   copy sits on a `--card` plate, white here, not over the photograph, so the
+   title, line and ledger take this surface's own ink ramp. The re-point of
+   `--ink-1` to `--on-maroon` that type over a photograph needed is gone. */
 .cg-save-h {
   margin: 0 0 var(--s-lg);
-}
-/* §12's split and order-line directions (`?card=`, DEV only) set their copy
-   on a white `--card` plate rather than over the photograph, so they keep the
-   surface's own dark ink; the poster and the current card still want white. */
-.cg-save:not([data-card="split"], [data-card="line"]) .bshot {
-  --ink-1: var(--on-maroon);
 }
 
 /* -- the membership, after the proof ---------------------------------------
@@ -392,8 +385,8 @@
     width: 100%;
   }
 
-  /* Three across at 4:3, 24 between. The credit does NOT span as it does on
-     the pitch: here the strip above already leads with it. */
+  /* Three across and equal, 24 between. The credit does NOT span as it does
+     on the pitch: here the strip above already leads with it. */
   .cg-save-h {
     margin: 0 0 var(--s-2xl);
   }
@@ -401,39 +394,21 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--s-2xl);
   }
-  .cg-save .bshot,
-  .cg-save .bshot.is-lead {
-    height: auto;
-    aspect-ratio: 4 / 3;
-    padding: var(--s-2xl);
-  }
-  /* §12's three, three across and equal here as the current card is (the
-     strip above leads with the credit). A's photograph keeps the pitch's
-     2:1 over its plate; B is as tall as its row; C is the 4:3 above. */
-  .cg-save[data-card="split"] .bshot,
-  .cg-save[data-card="split"] .bshot.is-lead {
-    aspect-ratio: auto;
-    padding: 0;
-  }
-  .cg-save[data-card="split"] .bshot-img,
-  .cg-save[data-card="split"] .bshot.is-lead .bshot-img {
+  /* The pitch's three-under-the-credit: the photograph at 2:1 over the
+     plate (the lead's taller phone photograph included), the plate's inset
+     at the desktop's 24, and the grid's stretch putting the hairlines on one
+     line. */
+  .cg-save .bshot-img,
+  .cg-save .bshot.is-lead .bshot-img {
     height: auto;
     aspect-ratio: 2 / 1;
   }
-  .cg-save[data-card="split"] .bshot-say {
+  .cg-save .bshot-say {
     padding: var(--s-2xl) var(--s-2xl) 0;
   }
-  .cg-save[data-card="split"] .bshot-chip {
+  .cg-save .bshot-chip {
     margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
     padding-top: var(--s-xl);
-  }
-  .cg-save[data-card="line"] .bshot,
-  .cg-save[data-card="line"] .bshot.is-lead {
-    aspect-ratio: auto;
-  }
-  .cg-save[data-card="poster"] .bshot,
-  .cg-save[data-card="poster"] .bshot.is-lead {
-    height: auto;
   }
 
   .cg {
