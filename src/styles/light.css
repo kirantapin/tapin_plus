@@ -97,6 +97,37 @@
   --page-0: rgba(240, 237, 238, 0);
 }
 
+/* ── THE PITCH'S DOCKED HEADER, OVER THE LIGHT ROOM ────────────────────────
+   §14, 23 Sep 2026: everything under the pitch's hero is on this ramp, and
+   `.top-cta` only ever docks once the hero's own action has gone — over the
+   light region. Its fill was `--glass`, which is not one of the nine tokens
+   and does not invert: a dark translucent plate that would carry this ramp's
+   dark ink at nothing like a reading ratio. And glass is for photography;
+   over a flat light ground it only composites to grey. So a white bar, solid,
+   with the hairline it already draws (now the light ramp's) and the ink of
+   the surface it docks to. The maroon action is unchanged: 9.19:1 on white. */
+.top-cta[data-lit] {
+  background: var(--card);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--ink-2);
+}
+
+/* ── AND THE PHONE'S DOCKED PAIR ───────────────────────────────────────────
+   Its fade reads --page-0 and --page on its own element, so `data-lit` alone
+   lands the bar on the light ground. The second control does not: it is
+   `--inner` (layout.css), which on the dark ramp is a step ABOVE the page and
+   on this one a step below it — a recessed grey slab where a button stood.
+   White keeps the step it had, the way the checkout sheet's rungs are
+   re-mapped above. The press is restated because this selector out-weighs
+   layout.css's own `:active`. */
+.sticky-cta[data-lit] .sticky-alt {
+  background: var(--card);
+}
+.sticky-cta[data-lit] .sticky-alt:active {
+  background: var(--press);
+}
+
 /* ── THE MEMBERSHIP CARD'S SHADOW ──────────────────────────────────────────
    Sam, 20 Sep 2026: "the shadow under the membership card is far too
    intense."

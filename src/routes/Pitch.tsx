@@ -397,228 +397,238 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           `.t-caption` — 11px tracked caps — which is the list-label role, and
           four of those down one page is the eyebrow tic the 21 Sep 2026 pass
           removed. Same string, set as the heading it always was. */}
-      <section className="pitch-get">
-        <h2 className="t-section pitch-get-head">What you get</h2>
-        <BenefitCards />
+      {/* ══ THE LIGHT ROOM UNDER THE DARK HEADER (23 Sep 2026) ══════════════
+          Sam: "this entire page needs to go light mode instead of dark. We can
+          have a dark mode header, but the stuff beneath needs to be more
+          legible." The hero band above stays the dark world; everything from
+          here to the foot sits on the light ramp. One attribute does it —
+          styles/light.css inverts the nine tokens on this subtree, and
+          `.pitch-lit` (pitch.css) paints the ground edge to edge and to the
+          page's foot. docs/POLISH-2026-09-21.md §14. */}
+      <div className="pitch-lit" data-lit="">
+        <section className="pitch-get">
+          <h2 className="t-section pitch-get-head">What you get</h2>
+          <BenefitCards />
 
-        {/* The connective tissue the panel was missing: without the label the
-            two icon rows read as unrelated grids. Shared with the checkout.
-            (A "social passport" panel stood above this for an hour on 15 Sep
-            2026; Sam: "I don't want to pitch the whole idea of the social
-            passport. I just want the app preview to feel like one." It lives
-            in the app now — routes/app/Tonight.tsx and the venue pages.) */}
-        <AppliesTo />
+          {/* The connective tissue the panel was missing: without the label the
+              two icon rows read as unrelated grids. Shared with the checkout.
+              (A "social passport" panel stood above this for an hour on 15 Sep
+              2026; Sam: "I don't want to pitch the whole idea of the social
+              passport. I just want the app preview to feel like one." It lives
+              in the app now — routes/app/Tonight.tsx and the venue pages.) */}
+          <AppliesTo />
 
-        {/* NOT BEHIND A TAP ANY MORE. §10 flatly bans any claim that alcohol is
-            discounted, and "Drinks" sitting in a strip under "15% off" makes
-            exactly that claim by layout. The correction was hidden behind a
-            disclosure titled "Where and when" — which answered a question
-            nobody was asking — and students walked away from this panel
-            believing they got 15% off a Friday night. One of them said she
-            would have reserved on that belief. The sentence is unchanged; it
-            has simply stopped being optional to read. */}
-        {/* ══ WHAT ALCOHOL DOES AND DOES NOT TOUCH ═════════════════════════
-            Sam, 14 Sep 2026: "credit can be used towards alcohol, it's just
-            that 15% off can't be applied towards alcohol. Points can be earned
-            on alcohol, redeemed for generic credit, then used towards alcohol
-            purchases. So we need to include that any credit someone has can be
-            used towards alcohol." This reverses his 11 Sep decision recorded in
-            docs/virginia-alcohol-research.md, whose cautions (no 9pm–2am use,
-            never market the credit as meant for drinks, age-gate the spend)
-            are flagged there and not resolved here. Stated once, as scope, in
-            body type, under the benefits it qualifies — not as a headline. */}
-        <p className="t-compact pitch-get-note">
-          Only the 15% off skips alcohol. Credit can be used on anything.
-        </p>
+          {/* NOT BEHIND A TAP ANY MORE. §10 flatly bans any claim that alcohol is
+              discounted, and "Drinks" sitting in a strip under "15% off" makes
+              exactly that claim by layout. The correction was hidden behind a
+              disclosure titled "Where and when" — which answered a question
+              nobody was asking — and students walked away from this panel
+              believing they got 15% off a Friday night. One of them said she
+              would have reserved on that belief. The sentence is unchanged; it
+              has simply stopped being optional to read. */}
+          {/* ══ WHAT ALCOHOL DOES AND DOES NOT TOUCH ═════════════════════════
+              Sam, 14 Sep 2026: "credit can be used towards alcohol, it's just
+              that 15% off can't be applied towards alcohol. Points can be earned
+              on alcohol, redeemed for generic credit, then used towards alcohol
+              purchases. So we need to include that any credit someone has can be
+              used towards alcohol." This reverses his 11 Sep decision recorded in
+              docs/virginia-alcohol-research.md, whose cautions (no 9pm–2am use,
+              never market the credit as meant for drinks, age-gate the spend)
+              are flagged there and not resolved here. Stated once, as scope, in
+              body type, under the benefits it qualifies — not as a headline. */}
+          <p className="t-compact pitch-get-note">
+            Only the 15% off skips alcohol. Credit can be used on anything.
+          </p>
 
-        {/* The transfer programme. Behind a tap because it is the one benefit
-            with a catch in it, and a catch in a headline is noise while a catch
-            in an answer is candour. NO RATIO: the programme is not built, and a
-            rate published today is a rate a member holds Sam to in 2027. §10
-            forbids naming a brand as a destination, so these stay categories. */}
-        {/* THE POINTS DRILL IS OFF THE PAGE. Rob's readers, 14 Sep 2026: "too much
-            text, too busy" — and this answered a question about an unbuilt
-            transfer programme under a panel about live benefits. Retained
-            behind a flag with the deck's transfer plate. */}
-        {SHOW_POINTS_DRILL ? (
-          <div className="panel-drill">
-            <Drill summary="What points are worth">
-              <p className="t-compact">
-                A point is worth about a cent at the place you earned it, and
-                worth most spent there. Moving a balance into one TapIn
-                balance, good anywhere on the network or out to gift cards and
-                airline miles, is coming.
+          {/* The transfer programme. Behind a tap because it is the one benefit
+              with a catch in it, and a catch in a headline is noise while a catch
+              in an answer is candour. NO RATIO: the programme is not built, and a
+              rate published today is a rate a member holds Sam to in 2027. §10
+              forbids naming a brand as a destination, so these stay categories. */}
+          {/* THE POINTS DRILL IS OFF THE PAGE. Rob's readers, 14 Sep 2026: "too much
+              text, too busy" — and this answered a question about an unbuilt
+              transfer programme under a panel about live benefits. Retained
+              behind a flag with the deck's transfer plate. */}
+          {SHOW_POINTS_DRILL ? (
+            <div className="panel-drill">
+              <Drill summary="What points are worth">
+                <p className="t-compact">
+                  A point is worth about a cent at the place you earned it, and
+                  worth most spent there. Moving a balance into one TapIn
+                  balance, good anywhere on the network or out to gift cards and
+                  airline miles, is coming.
+                </p>
+              </Drill>
+            </div>
+          ) : null}
+        </section>
+
+        {/* ══ WHERE IT WORKS, AS A TICKER ═══════════════════════════════════════
+            Sam asked for a carousel rather than the 2x2 grid: auto-scrolling,
+            swipeable, "more like a ticker", with a View all door into the app
+            preview's own list of every place.
+
+            The grid it replaces was itself a fix for a failed rail — six tiles
+            shown two at a time behind a gesture with no affordance. The ticker
+            answers that objection rather than reopening it: it moves on its own,
+            so a reader who does nothing still sees all eight go past, and the
+            headline's promise is now delivered by the door instead of by
+            rendering the whole list at once. */}
+        {/* NOT A PANEL. The tiles become cards here, and TapIn's own card rule —
+            carried over from the storefront — is that a card never sits inside a
+            card. So the rail comes out onto the field with a label above it,
+            which is also how the storefront ships every horizontal rail it has.
+            It buys the ticker the full width as a side effect. */}
+
+        {/* ══ MEMBERS-ONLY NIGHTS IS OUT ═══════════════════════════════════════
+            Sam, 13 Sep 2026: "let's get rid of this for now too."
+
+            RETAINED, NOT DELETED — the same treatment the three cut scenes get in
+            Scenes.tsx. `NightScene` and the whole `.nights` block in pitch.css
+            stay built and one JSX block from returning; "for now" is his word and
+            a feature tagged Coming is a feature that comes back. Nothing else on
+            the page referenced it.
+
+            THE TWO-COLUMN PAIR WENT WITH IT, because a 1.55:1 grid with one child
+            in it is a grid pretending to be a layout. "What it saves" takes the
+            page's own measure again and the funnel is unchanged: the wide blocks
+            run wide, and the page still narrows at the closing. */}
+
+        {/* ══ THE DECISION, AS ONE MOVEMENT ═══════════════════════════════════
+            Sam, 14 Sep 2026: "desktop still feels super incomplete, only the top
+            half seems like it was touched."
+
+            He is right, and the measurements said so plainly. Below the hero at
+            1440 every block was a wide, SHORT strip — the three benefit cards
+            were 87px tall across 1,278px, the plans 97px across 886, the app link
+            46px, the close 88px. Seven ribbons stacked down a page. Widening a
+            phone component is not designing for desktop; it is the same component
+            with more air on either side of it.
+
+            What the figure and the plans have in common is that they are the same
+            question — what do I get, and what does it cost — asked twice and
+            answered in two separate boxes 40px apart. On a phone that is the only
+            option. At 1,280px they are one composition: the argument on the left,
+            the choice and the action on the right, sharing a top edge.
+
+            `display:contents` below 1024, so the phone keeps the identical DOM
+            order, gap and rendering it had before this wrapper existed. */}
+        {/* ══ THE DECISION AND THE CLOSE, ONE WRAPPER (21 Sep 2026) ═══════════
+            They were two — `.pitch-decide` and `.pitch-close` — and on a phone
+            both are `display:contents`, so the split only ever meant anything
+            at 1024, where it put the figure in one band and the promise in
+            another. The plan pairs them: the savings panel at 60% and the
+            guarantee as an open statement at 40%, sharing a top edge, so the
+            close is one movement rather than two stacked sections. One wrapper
+            is what that grid is; the phone's DOM order, gaps and rendering are
+            unchanged because `display:contents` never cared which div it was. */}
+        <div className="pitch-decide">
+          <Panel>
+            <h2 className="t-section panel-head">What you&rsquo;d save</h2>
+            <SavingsSlider />
+            {/* The door to the deck, under the figure it explains (Sam, 15 Sep
+                2026: "can we add a how it works button to this section?"). The
+                same control the hero carries, so the page has one way of saying
+                it — and the hero's is a 16px text link now, so this one is too.
+                Left as a full-width ghost button it would have been the third
+                slab in a view that also carries the docked bar's pair. */}
+            <Link className="save-how" to="/how">
+              How it works
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m9 5 7 7-7 7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </Panel>
+
+          {/* ══ THE TWO PLANS, ON THE PAGE THAT ASKS FOR THE DECISION ════════════
+              Sam, 13 Sep 2026, from a desktop pattern review: Epidemic Sound, Oku,
+              Mailchimp and TravelPerk all put their plan cards on the landing page.
+              This pitch showed neither plan anywhere — a reader met "Monthly or 3
+              months?" for the first time on the page that takes money, having been
+              asked to decide on a single figure that was only ever the monthly one.
+
+              THESE ARE NOT CONTROLS. Nothing here is selectable: the choice is made
+              at /reserve, where switching a plan also switches the charge rows, the
+              consent sentence and the terms together. A picker here would either
+              have to carry all of that (§4) or set a state the next page does not
+              read — which is a control that looks like it did something and did
+              not. They are read-only cards, and the one action is the same action
+              the rest of the page has.
+
+              IT SURVIVES THE SOLD-OUT FLIP because it renders whatever `PLANS`
+              holds: struck price and saving while the founding round is open, plain
+              standard price after. */}
+          {/* THE PLAN CARDS LEFT THIS PAGE. Sam, 15 Sep 2026: "We can remove
+              this from the homepage. It's going to be on the landing page and on
+              the checkout page anyway, so I think we save it for the checkout
+              page." The hero states the entry price and the seat line; the three
+              plans are chosen on /reserve, where the price is paid. */}
+
+          {/* ══ THE GUARANTEE, OUT OF ITS BOX ═══════════════════════════════════
+              It was a panel: 88px of --card holding 42px of text, one more
+              rounded rectangle at the end of a page of rounded rectangles, at
+              the point where the page should be at its most substantial. It is
+              the strongest sentence here and the signature of the offer, so it
+              is now an open statement on the field — a hairline above it, the
+              shield at 28px, the promise at 22px — beside the figure it
+              guarantees rather than under it. `pitch-guarantee` is what takes
+              the panel dress off; `.closing` stays, because layout.css flexes
+              `.closing:has(.guarantee-tile)` into the shield-and-body shape and
+              /reserve states the same promise with the same markup.
+
+              No label here. Every other label heads a grid or a list; this one
+              would sit directly above a sentence set larger than it.
+
+              The seat line has moved to the hero. It is still printed exactly
+              once on this surface, still in body type, still with no clock on
+              it — and the guarantee is stronger standing alone than it was
+              carrying a price underneath it. */}
+          <Panel className="closing pitch-guarantee">
+            {/* THE SHIELD, BACK ON THE LEFT. Sam, 20 Sep 2026: "for the primary
+                tapin spot though we can have the guarantee icon next to this on
+                the left like we had." /reserve's refund card has carried it all
+                along, and layout.css already flexes `.closing:has(
+                .guarantee-tile)` into the two-part shape — so this is the same
+                markup, not a second version of it, and the two surfaces state
+                the promise the same way. */}
+            <span className="guarantee-tile" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
+                strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
+                <path d="m9.2 12.2 1.9 1.9 3.8-4" />
+              </svg>
+            </span>
+            <div className="guarantee-body">
+              <p className="guarantee">{guarantee}</p>
+              {/* A person to write to, which the walkthrough named as one of its two
+                  sharpest objections: a guarantee with no addressee is a promise with
+                  nobody behind it, and the reader most likely to care is the one
+                  working out what happens if this goes wrong. Sam's, this session. */}
+              <p className="t-compact guarantee-contact">
+                <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
               </p>
-            </Drill>
-          </div>
-        ) : null}
-      </section>
+            </div>
+          </Panel>
 
-      {/* ══ WHERE IT WORKS, AS A TICKER ═══════════════════════════════════════
-          Sam asked for a carousel rather than the 2x2 grid: auto-scrolling,
-          swipeable, "more like a ticker", with a View all door into the app
-          preview's own list of every place.
+          {/* THE PAIR INVERTED, 13 Sep 2026. It used to be Reserve (straight to the
+              charge) over "See how it works". Sam asked for the walkthrough to sit
+              IN the path rather than beside it, so the primary now goes to /how —
+              and the secondary becomes the escape hatch instead of the detour,
+              which is the half he explicitly wanted kept easy.
 
-          The grid it replaces was itself a fix for a failed rail — six tiles
-          shown two at a time behind a gesture with no affordance. The ticker
-          answers that objection rather than reopening it: it moves on its own,
-          so a reader who does nothing still sees all eight go past, and the
-          headline's promise is now delivered by the door instead of by
-          rendering the whole list at once. */}
-      {/* NOT A PANEL. The tiles become cards here, and TapIn's own card rule —
-          carried over from the storefront — is that a card never sits inside a
-          card. So the rail comes out onto the field with a label above it,
-          which is also how the storefront ships every horizontal rail it has.
-          It buys the ticker the full width as a side effect. */}
+              One .action and one slim link, unchanged: two stacked buttons put
+              ~140px of bar over the page and layout.css's clearance below is tuned
+              to one button's height. */}
 
-      {/* ══ MEMBERS-ONLY NIGHTS IS OUT ═══════════════════════════════════════
-          Sam, 13 Sep 2026: "let's get rid of this for now too."
-
-          RETAINED, NOT DELETED — the same treatment the three cut scenes get in
-          Scenes.tsx. `NightScene` and the whole `.nights` block in pitch.css
-          stay built and one JSX block from returning; "for now" is his word and
-          a feature tagged Coming is a feature that comes back. Nothing else on
-          the page referenced it.
-
-          THE TWO-COLUMN PAIR WENT WITH IT, because a 1.55:1 grid with one child
-          in it is a grid pretending to be a layout. "What it saves" takes the
-          page's own measure again and the funnel is unchanged: the wide blocks
-          run wide, and the page still narrows at the closing. */}
-
-      {/* ══ THE DECISION, AS ONE MOVEMENT ═══════════════════════════════════
-          Sam, 14 Sep 2026: "desktop still feels super incomplete, only the top
-          half seems like it was touched."
-
-          He is right, and the measurements said so plainly. Below the hero at
-          1440 every block was a wide, SHORT strip — the three benefit cards
-          were 87px tall across 1,278px, the plans 97px across 886, the app link
-          46px, the close 88px. Seven ribbons stacked down a page. Widening a
-          phone component is not designing for desktop; it is the same component
-          with more air on either side of it.
-
-          What the figure and the plans have in common is that they are the same
-          question — what do I get, and what does it cost — asked twice and
-          answered in two separate boxes 40px apart. On a phone that is the only
-          option. At 1,280px they are one composition: the argument on the left,
-          the choice and the action on the right, sharing a top edge.
-
-          `display:contents` below 1024, so the phone keeps the identical DOM
-          order, gap and rendering it had before this wrapper existed. */}
-      {/* ══ THE DECISION AND THE CLOSE, ONE WRAPPER (21 Sep 2026) ═══════════
-          They were two — `.pitch-decide` and `.pitch-close` — and on a phone
-          both are `display:contents`, so the split only ever meant anything
-          at 1024, where it put the figure in one band and the promise in
-          another. The plan pairs them: the savings panel at 60% and the
-          guarantee as an open statement at 40%, sharing a top edge, so the
-          close is one movement rather than two stacked sections. One wrapper
-          is what that grid is; the phone's DOM order, gaps and rendering are
-          unchanged because `display:contents` never cared which div it was. */}
-      <div className="pitch-decide">
-        <Panel>
-          <h2 className="t-section panel-head">What you&rsquo;d save</h2>
-          <SavingsSlider />
-          {/* The door to the deck, under the figure it explains (Sam, 15 Sep
-              2026: "can we add a how it works button to this section?"). The
-              same control the hero carries, so the page has one way of saying
-              it — and the hero's is a 16px text link now, so this one is too.
-              Left as a full-width ghost button it would have been the third
-              slab in a view that also carries the docked bar's pair. */}
-          <Link className="save-how" to="/how">
-            How it works
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="m9 5 7 7-7 7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
-        </Panel>
-
-        {/* ══ THE TWO PLANS, ON THE PAGE THAT ASKS FOR THE DECISION ════════════
-            Sam, 13 Sep 2026, from a desktop pattern review: Epidemic Sound, Oku,
-            Mailchimp and TravelPerk all put their plan cards on the landing page.
-            This pitch showed neither plan anywhere — a reader met "Monthly or 3
-            months?" for the first time on the page that takes money, having been
-            asked to decide on a single figure that was only ever the monthly one.
-
-            THESE ARE NOT CONTROLS. Nothing here is selectable: the choice is made
-            at /reserve, where switching a plan also switches the charge rows, the
-            consent sentence and the terms together. A picker here would either
-            have to carry all of that (§4) or set a state the next page does not
-            read — which is a control that looks like it did something and did
-            not. They are read-only cards, and the one action is the same action
-            the rest of the page has.
-
-            IT SURVIVES THE SOLD-OUT FLIP because it renders whatever `PLANS`
-            holds: struck price and saving while the founding round is open, plain
-            standard price after. */}
-        {/* THE PLAN CARDS LEFT THIS PAGE. Sam, 15 Sep 2026: "We can remove
-            this from the homepage. It's going to be on the landing page and on
-            the checkout page anyway, so I think we save it for the checkout
-            page." The hero states the entry price and the seat line; the three
-            plans are chosen on /reserve, where the price is paid. */}
-
-        {/* ══ THE GUARANTEE, OUT OF ITS BOX ═══════════════════════════════════
-            It was a panel: 88px of --card holding 42px of text, one more
-            rounded rectangle at the end of a page of rounded rectangles, at
-            the point where the page should be at its most substantial. It is
-            the strongest sentence here and the signature of the offer, so it
-            is now an open statement on the field — a hairline above it, the
-            shield at 28px, the promise at 22px — beside the figure it
-            guarantees rather than under it. `pitch-guarantee` is what takes
-            the panel dress off; `.closing` stays, because layout.css flexes
-            `.closing:has(.guarantee-tile)` into the shield-and-body shape and
-            /reserve states the same promise with the same markup.
-
-            No label here. Every other label heads a grid or a list; this one
-            would sit directly above a sentence set larger than it.
-
-            The seat line has moved to the hero. It is still printed exactly
-            once on this surface, still in body type, still with no clock on
-            it — and the guarantee is stronger standing alone than it was
-            carrying a price underneath it. */}
-        <Panel className="closing pitch-guarantee">
-          {/* THE SHIELD, BACK ON THE LEFT. Sam, 20 Sep 2026: "for the primary
-              tapin spot though we can have the guarantee icon next to this on
-              the left like we had." /reserve's refund card has carried it all
-              along, and layout.css already flexes `.closing:has(
-              .guarantee-tile)` into the two-part shape — so this is the same
-              markup, not a second version of it, and the two surfaces state
-              the promise the same way. */}
-          <span className="guarantee-tile" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
-              strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3.4 5.2 6v5.4c0 4.4 2.9 8.3 6.8 9.6 3.9-1.3 6.8-5.2 6.8-9.6V6L12 3.4Z" />
-              <path d="m9.2 12.2 1.9 1.9 3.8-4" />
-            </svg>
-          </span>
-          <div className="guarantee-body">
-            <p className="guarantee">{guarantee}</p>
-            {/* A person to write to, which the walkthrough named as one of its two
-                sharpest objections: a guarantee with no addressee is a promise with
-                nobody behind it, and the reader most likely to care is the one
-                working out what happens if this goes wrong. Sam's, this session. */}
-            <p className="t-compact guarantee-contact">
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-            </p>
-          </div>
-        </Panel>
-
-        {/* THE PAIR INVERTED, 13 Sep 2026. It used to be Reserve (straight to the
-            charge) over "See how it works". Sam asked for the walkthrough to sit
-            IN the path rather than beside it, so the primary now goes to /how —
-            and the secondary becomes the escape hatch instead of the detour,
-            which is the half he explicitly wanted kept easy.
-
-            One .action and one slim link, unchanged: two stacked buttons put
-            ~140px of bar over the page and layout.css's clearance below is tuned
-            to one button's height. */}
-
-        <SiteFoot />
+          <SiteFoot />
+        </div>
       </div>
 
       {/* ══ THE DESKTOP HEADER ═══════════════════════════════════════════════
@@ -639,7 +649,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           without restating what it costs; the reference bars that work all keep
           the figure next to the action. DESKTOP ONLY — below 1024 the bottom
           bar is still the right shape and this is `display:none`. */}
-      <div className={`top-cta${past ? "" : " is-away"}`}>
+      {/* `data-lit`: it only ever docks over the light region, so it takes
+          that ground — a white bar with dark ink (light.css). */}
+      <div className={`top-cta${past ? "" : " is-away"}`} data-lit="">
         <div className="top-cta-in">
           <TapInLogo className="top-cta-logo" />
           <p className="top-cta-price">
@@ -652,11 +664,13 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
         </div>
       </div>
 
-      {/* `lit` inverts the nine tokens on the panel (styles/light.css): this
-          page is the dark field, and every pop-up on it is light. */}
+      {/* `lit` inverts the nine tokens on the panel (styles/light.css): the
+          modal is light whichever ground it opens over, like every pop-up. */}
       {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
 
-      <div className={`sticky-cta is-pair${past ? "" : " is-away"}`}>
+      {/* Lit for the same reason as the header bar: it floats over the
+          light region, and fades into that ground rather than the dark one. */}
+      <div className={`sticky-cta is-pair${past ? "" : " is-away"}`} data-lit="">
         <Link className="action" to={cta.to} state={cta.state}>
           {cta.label}
         </Link>

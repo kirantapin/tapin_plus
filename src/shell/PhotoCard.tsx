@@ -32,7 +32,8 @@ export interface PhotoCardProps {
    * dark card rung under grey ink was a plate the eye read as more ground;
    * white under the ink ramp is the same plate the splash, the pop-up and the
    * checkout already use. The splash leaves it off: its page is already light
-   * and carries Coffeeholics' own tinted ramp.
+   * and carries Coffeeholics' own tinted ramp. Nothing passes it since 23 Sep
+   * 2026: the pitch's whole region under the hero is `data-lit` now (§14).
    */
   lit?: boolean;
 }

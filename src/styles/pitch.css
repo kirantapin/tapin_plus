@@ -1682,6 +1682,54 @@ button.vcard:focus-visible {
   margin: var(--s-lg) 0 0;
 }
 
+/* ══ THE LIGHT ROOM UNDER THE DARK HEADER (§14, 23 Sep 2026) ════════════════
+   Sam: "this entire page needs to go light mode instead of dark. We can have
+   a dark mode header, but the stuff beneath needs to be more legible." Two
+   grounds, one edge: the hero band stays the dark world, and `.pitch-lit`
+   (Pitch.tsx, `data-lit`) carries everything under it on light.css's ramp.
+   The tokens do the inverting; this block only paints the ground.
+
+   IT TAKES OVER THE COLUMN'S JOB. On a phone `.pitch-decide` is
+   `display:contents`, so this is now the flex parent of the four blocks the
+   column used to space, at the column's own section step.
+
+   EDGE TO EDGE. The margin runs out to the window and the padding pays the
+   same amount back, so the ground bleeds while the content box is exactly
+   the column's — the gutter at 375, and the same 432px at 500 as before.
+
+   `color` is re-declared because inheritance does not re-resolve: body sets
+   `--ink-2` in the dark world, and anything here that inherits rather than
+   naming an ink would arrive as the dark page's pale grey.
+
+   ON A PHONE THE EDGE SITS ONE STEP UNDER THE HERO CARD, not on it. The
+   band there ends at the glass card's own foot, and a light edge touching a
+   rounded card reads as a card set on a ledge; the column's step of dark
+   field under it is the header's foot. From 1024 the band has a hard foot of
+   its own and the edge moves up to meet it (the desktop block below). */
+.pitch-lit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3xl);
+  margin-inline: calc(50% - 50vw);
+  /* The foot is layout.css's clearance for the docked pair, moved inside the
+     ground so the dark field never shows under the footer (the rule below
+     takes it off the column). */
+  padding: var(--s-3xl) calc(50vw - 50%) 184px;
+  background: var(--page);
+  color: var(--ink-2);
+}
+/* (0,4,0) against layout.css's `.column:has(.sticky-cta.is-pair)` at
+   (0,3,0), so it does not rest on source order. */
+.column:has(> .pitch-lit):has(> .sticky-cta.is-pair) {
+  padding-bottom: 0;
+}
+/* A white plate on #F5F2F3 is a step of ~1.09:1, so the photo cards take the
+   ramp's seating shadow beside their hairline — the `.panel` construction. On
+   the pitch only: the splash draws the same card on its own ramp. */
+.pitch-lit .bshot {
+  box-shadow: var(--rest);
+}
+
 /* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
    Everything `.nights*` below, and `NightScene` in src/shell, is still built and
    is one JSX block from returning — Sam took the block off the pitch on 13 Sep
@@ -2442,7 +2490,7 @@ button.vcard:focus-visible {
     color: var(--ink-1);
   }
   .top-cta-price span {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--ink-3);
   }
@@ -2659,11 +2707,26 @@ button.vcard:focus-visible {
     padding: 0;
   }
 
+  /* ── the light room ──────────────────────────────────────────────────── */
+  /* THE EDGE IS THE BAND'S FOOT. The band ends hard here — the panel's fill
+     and the collage stop on one line — so the light ground climbs over the
+     column's gap to meet it, and pays the gap back inside as its own top
+     padding. One edge, straight, nothing on it. Full width: the column is
+     the window up here, and `.column > :where(…)` would otherwise cap this
+     at 720. The docked pair is `display:none` from 1024, so no clearance. */
+  .column > .pitch-lit {
+    width: 100%;
+    max-width: none;
+    margin: calc(-1 * var(--s-4xl)) 0 0;
+    padding: var(--s-4xl) 0 0;
+    gap: var(--s-4xl);
+  }
+
   /* ── 1 · the statement ────────────────────────────────────────────────── */
-  /* THE SECTION TAKES THE GRID. `.column > :where(…)` caps every child at 720
-     for reading measure; this block is four photographs, not a paragraph, so it
-     names itself and wins — (0,2,0) against the cap's (0,1,0), which is exactly
-     the escape hatch that selector's own note describes.
+  /* THE SECTION TAKES THE GRID. It is four photographs, not a paragraph, so
+     it takes the page grid rather than a reading measure. (It sat directly in
+     the column until §14 and had to out-weigh `.column > :where(…)`'s 720 cap;
+     inside `.pitch-lit` the cap no longer reaches it.)
 
      THE CREDIT ON ITS OWN LINE, THE THREE UNDER IT. Sam, 12 Sep: "this is the
      big one", and at this width leading by size means a full-width card over a
@@ -2671,7 +2734,7 @@ button.vcard:focus-visible {
      photograph at 2:1 over the plate, so the crop scales with the track at
      every window between 1024 and 1280 and the plate takes what its type
      needs; the grid's stretch puts their hairlines on one line. */
-  .column > .pitch-get {
+  .pitch-lit > .pitch-get {
     width: 100%;
     max-width: var(--grid);
     margin-inline: auto;
@@ -2799,7 +2862,7 @@ button.vcard:focus-visible {
      honour — stretching it would only stretch a transparent box, and the old
      `margin-top:auto` foot pinning went with the plan cards it was written
      for. */
-  .column > .pitch-decide {
+  .pitch-lit > .pitch-decide {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     gap: var(--s-4xl);
@@ -2807,15 +2870,16 @@ button.vcard:focus-visible {
     width: 100%;
     max-width: none;
     margin-inline: 0;
-    /* THE SECOND GROUND, AND THE PAGE ENDS ON IT. field / band / field /
-       band: the close takes the same --subtle the evidence band has, full
-       bleed, and runs to the window's foot — so the page finishes on a
-       surface rather than trailing off under a contact line. The ground
-       change is the seam; there is no hairline. */
-    background: var(--subtle);
-    padding: var(--s-4xl) calc((100% - var(--grid)) / 2) 96px;
+    /* NO BAND ANY MORE (§14). The close was a --subtle band, field / band,
+       and on the light ramp --subtle is white: the white savings panel inside
+       a white band was a panel on a panel with only a hairline between them.
+       The fill is dropped rather than moved to --inner, so the page below the
+       hero is one ground with one edge and ends on it. The band's own top
+       inset went with its fill — without a seam to pad away from it only
+       doubled the room's 64px step. */
+    padding: 0 calc((100% - var(--grid)) / 2) 96px;
   }
-  .column > .pitch-decide > * {
+  .pitch-lit > .pitch-decide > * {
     max-width: none;
     margin: 0;
   }
