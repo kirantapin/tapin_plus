@@ -19,6 +19,9 @@ import SeatCapLine from "../shell/SeatCapLine";
 import { useReserveCta } from "../shell/useReserveCta";
 import SignInBar from "../shell/SignInBar";
 import TrialModal from "../shell/TrialModal";
+import MonthCalendar from "../shell/MonthCalendar";
+import { useMedia } from "../shell/useMedia";
+import { month } from "../model/month";
 import { venues } from "../model/content";
 import {
   monthlyToday,
@@ -59,6 +62,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
   /* The "try it once" sheet, opened from the hero and from the docked pair.
      Same modal the campaign splash uses; `lit` because this page is dark. */
   const [trial, setTrial] = useState(false);
+  /* The calendar rides the mosaic from 1024 and opens the light room below
+     it; one element either way, never both (§21). */
+  const desk = useMedia("(min-width: 1024px)");
   useEffect(() => {
     const el = heroCta.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -381,6 +387,16 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
               three of them in the hero and all eight in the places section.
               Nothing else referenced `.hero-marks`; its rules go with it. */}
         </Panel>
+
+        {/* ══ THE CALENDAR, OVER THE PHOTOGRAPHS (§21, 23 Sep 2026) ══════════
+            Sam, on the canvas's calendar: "wondering if you could implement
+            that on the main LP", with "offerings from other locations". The
+            headline, shown happening: a month of real orders at four places,
+            each earning the week's credit, against one membership. Bottom-
+            right of the mosaic as the Coffeeholics receipt sits on its
+            photograph; the loop runs here and nowhere else. A sibling of the
+            hero panel, so the copy column is untouched. */}
+        {desk && month ? <MonthCalendar month={month} /> : null}
       </VenueMosaic>
 
       {/* The label carries "at Plus places" so the badge on the venue tiles has
@@ -406,6 +422,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           `.pitch-lit` (pitch.css) paints the ground edge to edge and to the
           page's foot. docs/POLISH-2026-09-21.md §14. */}
       <div className="pitch-lit" data-lit="">
+        {/* Below 1024 the mosaic is a strip under the glass card, so the
+            calendar opens the light room instead: complete and still (§21). */}
+        {!desk && month ? <MonthCalendar month={month} still /> : null}
         <section className="pitch-get">
           <h2 className="t-section pitch-get-head">What you get</h2>
           <BenefitCards />
