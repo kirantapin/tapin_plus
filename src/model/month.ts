@@ -1,5 +1,5 @@
 import { BENEFIT, WEEKS_PER_MONTH } from "./savings";
-import { cardPlan, monthlyToday, venues } from "./content";
+import { cardPlan, logoField, monthlyToday, venues } from "./content";
 import { itemsFor } from "./menu";
 
 /**
@@ -30,9 +30,12 @@ import { itemsFor } from "./menu";
  * destination check if typed in source (campaign.ts hit the same thing). The
  * record's name is what prints.
  *
- * THE PICTURE IS THE ITEM'S OWN `img` — a basket shows its first item's — and
- * where the record has none, the venue's own logo stands in, so the cell still
- * says whose night it was. Never a stock or borrowed photograph.
+ * THE PICTURE IS THE PLACE, NOT THE DISH. Sam, 23 Sep 2026, at 1440: "maybe
+ * it should be the merchant logos." Each cell is the venue's own mark
+ * (`venue.logo`) seated as the site's collars seat it — its `brandColor`
+ * around it, the seat hairline by `logoField` — so a glance down the month
+ * reads as four places coming round again. The item is still looked up and
+ * still gated on its price; it is named in the latest line, not pictured.
  *
  * Sam's cover at The Milk Parlor, weekend line skips and drinks at The Burg or
  * Olaika are the intent, and the model has no price for any of them yet; when
@@ -77,9 +80,10 @@ export interface MonthOrder {
   venue: string;
   /** The item's own name from the menu; a basket's names joined by " + ". */
   item: string;
-  /** The item's own photograph, or the venue's logo where it has none. */
+  /** The venue's own mark, `venue.logo`, and how its collar seats it. */
   img: string;
-  isLogo: boolean;
+  brand: string;
+  field: "light" | "dark";
   cents: number;
   /** `+$5` on the cell. */
   chip: string;
@@ -127,7 +131,6 @@ export const month: Month | null = (() => {
     if (seen.has(slot)) return [];
     seen.add(slot);
     const credit = Math.min(cents(BENEFIT.creditUsd), price);
-    const img = items[0].img;
     return [
       {
         id: items.map((i) => i.id).join("+"),
@@ -135,8 +138,9 @@ export const month: Month | null = (() => {
         day,
         venue: venue.name,
         item: items.map((i) => i.name).join(" + "),
-        img: img ?? venue.logo,
-        isLogo: !img,
+        img: venue.logo,
+        brand: venue.brandColor,
+        field: logoField(venue.id),
         cents: credit,
         chip: chip(credit),
         /* Glued to the venue, so a basket that wraps never strands the figure. */

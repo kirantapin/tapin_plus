@@ -3476,17 +3476,18 @@ button.vcard:focus-visible {
    Sam, 23 Sep 2026, on the canvas's calendar direction: "wondering if you
    could implement that on the main LP", with "offerings from other
    locations". The headline shown happening: four weeks of real orders at four
-   places, each day's order its own photograph with the week's credit on it,
-   and a foot that counts the membership against what came back.
+   places, each day's order the venue's own mark with the week's credit on
+   it, and a foot that counts the membership against what came back. Desktop
+   only (Sam: "I think this would be only on desktop"); below 1024 it is not
+   mounted, so nothing here needs a phone rule.
 
-   A WHITE CARD CARRYING `data-lit`, so its ink is the light ramp wherever it
-   sits — over the dark mosaic from 1024, on the light room below it. The
-   plate §12 A chose for type near a photograph; the Coffeeholics receipt is
-   the same object on its own page (campaign.css, `.ml-*`), and the two keep
-   one construction: the figure is ink, not green; the crossing is told by
-   weight of ink; the only colour is the credit's chip, maroon, the page's one
-   colour for a thing that is TapIn's. Every size is on the ramp and nothing
-   is under 14 but the chip.
+   A WHITE CARD CARRYING `data-lit`, so its ink is the light ramp over the
+   dark mosaic. The plate §12 A chose for type near a photograph; the
+   Coffeeholics receipt is the same object on its own page (campaign.css,
+   `.ml-*`), and the two keep one construction: the figure is ink, not green;
+   the crossing is told by weight of ink; the only colour is the credit's
+   chip, maroon, the page's one colour for a thing that is TapIn's. Every size
+   is on the ramp and nothing is under 14 but the chip.
    ============================================================================ */
 .mc {
   box-sizing: border-box;
@@ -3542,8 +3543,9 @@ button.vcard:focus-visible {
   background: var(--inner);
   overflow: hidden;
 }
-/* The order is one element — photograph and chip — so it enters as one. It
-   carries the day's radius, so its corners stay round while it scales. */
+/* The order is one element — the venue's mark and the chip — so it enters as
+   one. It carries the day's radius, so its corners stay round while it
+   scales. */
 .mc-order {
   position: absolute;
   inset: 0;
@@ -3556,6 +3558,24 @@ button.vcard:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* LOGOS, NOT DISHES (Sam, 23 Sep 2026: "maybe it should be the merchant
+   logos"). The order is the site's own collar (base.css) grown to fill the
+   day: the venue's brandColor in the 3px band, the mark rounded inside it at
+   the day's radius less that band, the seat hairline by the mark's measured
+   field. The collar's outer ring is dropped — the day's own --inner edge
+   already seats it, and the day clips it anyway. (0,2,0) over `.collar`. */
+.mc-order.collar {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: inherit;
+  box-shadow: none;
+}
+.mc-order.collar img,
+.mc-order.collar::after {
+  border-radius: 9px;
 }
 .mc-chip {
   position: absolute;
@@ -3700,41 +3720,22 @@ button.vcard:focus-visible {
   transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* ── A NARROW PHONE ───────────────────────────────────────────────────────
-   At 375 the card is 327 wide, and the desktop grid (a 56px label column,
-   8px gaps, 24px inset) leaves each day 25px — the chip would cover it. The
-   label column takes its words' own width, the gaps and inset tighten a step,
-   and the days come out near 31px; their radius follows them down so a day
-   stays a square, not a pill. */
-@media (max-width: 479px) {
-  .mc {
-    padding: var(--s-xl);
-  }
-  .mc-grid {
-    grid-template-columns: auto repeat(7, minmax(0, 1fr));
-    gap: var(--s-xs);
-  }
-  .mc-week {
-    padding-right: var(--s-xs);
-  }
-  .mc-day {
-    border-radius: var(--r-sm);
-  }
-  .mc-chip {
-    right: 2px;
-    bottom: 2px;
-    height: 14px;
-    padding: 0 3px;
-    line-height: 14px;
-  }
-}
-
 /* ── OVER THE MOSAIC, FROM 1024 ───────────────────────────────────────────
-   Bottom-right of the photographs, 32 in, as the Coffeeholics receipt sits on
-   its photograph; the mosaic's veil holds behind it. Out of flow, placed in
-   the mosaic's own columns (an absolutely positioned grid child takes its
-   grid area as its containing block), so the card can never push the hero
-   row taller or reach the copy column.
+   CENTRED IN THE PHOTOGRAPHS, on both axes. Sam, 23 Sep 2026, at 1440: "the
+   placement here doesn't sit with me quite right." Hugging the bottom-right
+   corner 32 in, it read as a card cropped at the band's edge; set down in the
+   middle it reads as an object resting on the venues, with photography on
+   all four sides. Out of flow, placed in the mosaic's own columns (an
+   absolutely positioned grid child takes its grid area as its containing
+   block; `grid-row: auto` spans the band's padding box, which is exactly the
+   mosaic's height, since the mosaic climbs under the bar by the same
+   `--clear`), so the card can never push the hero row taller or reach the
+   copy column. `inset: 0` + `margin: auto` centres it; `fit-content` gives
+   the auto margins a height to share.
+
+   480, NOT §21's 460: with marks in the days the grid needed it. At 460 a day
+   is 42.8px and the 29×16 chip sat over a third of a 36.8px mark; at 480 the
+   mark is 39.7px and the Coffeeholics wordmark clears the chip.
 
    (0,4,0) — the attribute is the card's own — against the band's
    `> :not(.mosaic)` rule at (0,3,0), which dresses the copy column (the flex
@@ -3747,14 +3748,12 @@ button.vcard:focus-visible {
     z-index: 1;
     grid-column: seam / bleed-end;
     grid-row: auto;
-    top: auto;
-    left: auto;
-    right: 32px;
-    bottom: 32px;
+    inset: 0;
     display: block;
-    width: min(460px, calc(100% - 64px));
+    width: min(480px, calc(100% - 64px));
+    height: fit-content;
     max-width: none;
-    margin: 0;
+    margin: auto;
     padding: var(--s-2xl);
     border-radius: 24px;
     background: var(--card);

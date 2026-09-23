@@ -5,8 +5,9 @@ import { dollars, signedDollars, type Month } from "../model/month";
  * THE CALENDAR — a month on the membership, filling itself
  * (docs/POLISH-2026-09-21.md §21). The pitch's own claim, "$5 credit every
  * week, at every place you already go", shown happening: four weeks, each
- * order the item's own photograph in its day with a `+$5` chip, a line naming
- * the latest, and a foot that counts the membership against the credit.
+ * order the venue's own mark in its day with a `+$5` chip, a line naming the
+ * item and the place, and a foot that counts the membership against the
+ * credit. Desktop only, over the mosaic: below 1024 it is not mounted.
  *
  * THE ENGINE IS THE COFFEEHOLICS LEDGER'S (§17/§20, SavingsLedger.tsx), kept
  * in step with it on purpose: the foot rests on −$4.99 for 1.2s, then the
@@ -18,8 +19,8 @@ import { dollars, signedDollars, type Month } from "../model/month";
  *
  * THE MARKUP IS THE FINISHED MONTH. Every order in its day, the last one
  * named, the foot at its net. `data-run` is what empties it for the loop and
- * only the script sets it, so a failed script, `still` (the phone), reduced
- * motion or a `data-still` ancestor all get the complete, still month.
+ * only the script sets it, so a failed script, reduced motion or a
+ * `data-still` ancestor all get the complete, still month.
  *
  * CHEAP BY CONSTRUCTION. Transform and opacity only, on cells laid out at full
  * size from the start; the latest line is every line stacked in one grid cell
@@ -28,8 +29,9 @@ import { dollars, signedDollars, type Month } from "../model/month";
  * count. Stops when the tab is hidden or the card is off screen; every timer
  * is cleared on unmount.
  *
- * SCREEN READERS READ THE MONTH, NOT THE COUNT: each order is its item's name
- * and its chip; the moving figures are `aria-hidden` beside still copies.
+ * SCREEN READERS READ THE MONTH, NOT THE COUNT: each order is its item and
+ * place, and its chip; the moving figures are `aria-hidden` beside still
+ * copies.
  */
 const OPEN = 1200;
 const GAP = 900;
@@ -38,14 +40,7 @@ const COUNT = 400;
 const HOLD = 3200;
 const LEAVE = 240;
 
-export default function MonthCalendar({
-  month,
-  still = false,
-}: {
-  month: Month;
-  /** Complete and never animated — the phone's placement. */
-  still?: boolean;
-}) {
+export default function MonthCalendar({ month }: { month: Month }) {
   const card = useRef<HTMLDivElement>(null);
   const headId = useId();
 
@@ -53,7 +48,7 @@ export default function MonthCalendar({
      the first paint, or the finished month flashes and then clears. */
   useLayoutEffect(() => {
     const el = card.current;
-    if (still || !el) return;
+    if (!el) return;
     const cells = [...el.querySelectorAll<HTMLElement>(".mc-order")];
     const lines = [...el.querySelectorAll<HTMLElement>(".mc-line")];
     const foot = el.querySelector<HTMLElement>(".mc-foot");
@@ -171,7 +166,7 @@ export default function MonthCalendar({
       reduce.removeEventListener("change", decide);
       document.removeEventListener("visibilitychange", decide);
     };
-  }, [month, still]);
+  }, [month]);
 
   const last = month.orders.length - 1;
   const at = new Map(month.orders.map((o, k) => [`${o.week}:${o.day}`, k]));
@@ -198,11 +193,17 @@ export default function MonthCalendar({
               const o = k === undefined ? undefined : month.orders[k];
               return o ? (
                 <span key={`${wk}:${day}`} className="mc-day">
-                  <span className="mc-order">
+                  {/* The venue's collar, filling the day: brand colour
+                      round the mark, the seat hairline by the mark's field. */}
+                  <span
+                    className="mc-order collar"
+                    data-field={o.field}
+                    style={{ ["--brand" as string]: o.brand }}
+                  >
                     <img
-                      className={o.isLogo ? "mc-img is-logo" : "mc-img"}
+                      className="mc-img"
                       src={o.img}
-                      alt={o.item}
+                      alt={`${o.item} at ${o.venue}`}
                       decoding="async"
                     />
                     <b className="mc-chip">{o.chip}</b>
@@ -216,27 +217,20 @@ export default function MonthCalendar({
         ))}
       </div>
 
-      {/* Still, only the last line is ever shown, so only it is laid: the
-          stack's reserve for a wrapping basket is the loop's to pay. */}
       <div className="mc-latest">
-        {still ? null : (
-          <p className="mc-line" aria-hidden="true">
-            {month.empty}
+        <p className="mc-line" aria-hidden="true">
+          {month.empty}
+        </p>
+        {month.orders.map((o, k) => (
+          <p
+            key={o.id}
+            className={k === last ? "mc-line is-last" : "mc-line"}
+            aria-hidden={k === last ? undefined : "true"}
+          >
+            <b>{o.item}</b>
+            {o.at}
           </p>
-        )}
-        {(still ? month.orders.slice(last) : month.orders).map((o, i) => {
-          const k = still ? last : i;
-          return (
-            <p
-              key={o.id}
-              className={k === last ? "mc-line is-last" : "mc-line"}
-              aria-hidden={k === last ? undefined : "true"}
-            >
-              <b>{o.item}</b>
-              {o.at}
-            </p>
-          );
-        })}
+        ))}
       </div>
 
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
