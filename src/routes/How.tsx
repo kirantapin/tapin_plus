@@ -444,14 +444,6 @@ export default function How() {
        the progress marks, and a completed swipe. */
     <div className="how" data-slide={slide.id}>
       <header className="how-top">
-        {/* The way OUT, and only that. Stepping between slides lives beside
-            Next in the foot, where Sam asked for it — so this control keeps one
-            meaning at every step instead of changing what it does at step 2. */}
-        <button type="button" className="how-back" onClick={leave} aria-label="Leave the walkthrough">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <path d="m14.5 5.5-7 6.5 7 6.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
         {/* REVERTED to the chrome row, 13 Sep 2026 — see the note in how.css.
             Flush against the sheet's top edge the tracks read as a rendering
             seam rather than as indicators. The countdown fill went with that
@@ -520,6 +512,16 @@ export default function How() {
           <i>/</i>
           {slides.length}
         </p>
+        {/* The way OUT, and only that: an X at the top right (Sam, 23 Sep
+            2026: "instead of the back arrow at the top left, we should just
+            have an X out button on the top right"). Stepping between slides
+            lives beside Next in the foot, so this control keeps one meaning
+            at every step. */}
+        <button type="button" className="how-close" onClick={leave} aria-label="Close the walkthrough">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+            <path d="m7 7 10 10M17 7 7 17" strokeLinecap="round" />
+          </svg>
+        </button>
       </header>
 
       {/* OUTSIDE the keyed stage, so it is not remounted, and carrying only the

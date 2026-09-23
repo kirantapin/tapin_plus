@@ -75,16 +75,25 @@
 
 /* -- rail ------------------------------------------------------------------ */
 .how-top{flex:0 0 auto;display:flex;align-items:center;gap:var(--s-lg);height:36px}
-/* Sometimes an <a> (step 1, leaving for the pitch) and sometimes a <button>
-   (every other step, going back one). `border:0` and `padding:0` so the two
-   render identically — a button carries UA chrome an anchor does not. */
-.how-back{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-pill);
+/* The way out is an X at the right end of the rail (Sam, 23 Sep 2026), the
+   same 36px pill the checkout's and the pop-up's close controls are. It was
+   a back chevron at the left, which read as "previous step" beside a
+   progress rail — the prev/next pair lives in the foot. `margin-left:auto`
+   sends it to the edge past the progress marks. */
+.how-back,
+.how-close{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-pill);
   display:flex;align-items:center;justify-content:center;padding:0;border:0;
   color:var(--ink-2);background:var(--inner);cursor:pointer;
   -webkit-tap-highlight-color:transparent;transition:transform 150ms var(--ease)}
-.how-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+/* `.how-back` stays as the shared circle for the two controls that borrow it
+   (the checkout layer's close, /in's back); the deck itself no longer draws one. */
+.how-close{margin-left:auto}
+.how-back:focus-visible,
+.how-close:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 .how-back svg{width:20px;height:20px}
-.how-back:active{transform:scale(.94)}
+.how-close svg{width:18px;height:18px}
+.how-back:active,
+.how-close:active{transform:scale(.94)}
 
 /* ══ THE RAIL ═════════════════════════════════════════════════════════════
    REVERTED 13 Sep 2026 to the inline form. It was moved flush to the sheet's
