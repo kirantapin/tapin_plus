@@ -3437,3 +3437,17 @@ button.vcard:focus-visible {
 }
 
 /* What the deposit earns back, under the price on the hero. */
+
+/* ══ THE PLATES ARE WHITE, LIKE THE CARDS ══════════════════════════════════
+   Sam, 23 Sep 2026, on the light pitch: "applies to cards should be the same
+   white background as the other containers." On the dark page --inner was a
+   step up from the ground; on the light ramp it is a step DOWN from the
+   photo cards' white, so the six plates read as a different, greyer kind of
+   object beside them. Same plate as the cards now: --card with the light
+   ramp's hairline and rest shadow. Scoped to the lit region, so the pop-up's
+   and the splash's plates keep their own. */
+.pitch-lit .cover {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  box-shadow: var(--rest);
+}
