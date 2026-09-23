@@ -2406,32 +2406,11 @@ button.vcard:focus-visible {
     flex: 0 0 100%;
     margin-top: calc(var(--s-xs) - var(--s-lg));
   }
-  /* The house ghost's own values (`.action.action-ghost` in reserve.css), on
-     the pitch's own class: a step of ground, a lit hairline, the card radius,
-     and the filled button's height so the pair reads as one row. Its phone
-     treatment above is undone declaration by declaration rather than by a
-     second element. */
+  /* The pill is the base rule now; the row only sets its share of it. */
   .hero-band:not(.is-compact) .hero-try {
+    width: auto;
     flex: 1 1 50%;
     min-width: 0;
-    min-height: 52px;
-    justify-content: center;
-    gap: var(--s-md);
-    padding: var(--s-md) var(--s-lg);
-    border-radius: var(--r-card);
-    background: var(--inner);
-    border: 1px solid var(--hair-lit);
-    color: var(--ink-1);
-    transition: transform 200ms var(--ease), background-color 200ms var(--ease);
-  }
-  .hero-band:not(.is-compact) .hero-try:active {
-    transform: scale(0.98);
-    background: var(--press);
-    transition-duration: 100ms;
-  }
-  .hero-band:not(.is-compact) .hero-try:focus-visible {
-    outline-offset: 2px;
-    border-radius: var(--r-card);
   }
   .hero-buy {
     border-top-color: var(--hair-lit);
@@ -3142,35 +3121,50 @@ button.vcard:focus-visible {
   }
 }
 
-/* ══ THE HERO'S SECOND CONTROL, AND THE SAVINGS PANEL'S ═════════════════════
-   One object, two places: 16px, the page's brightest ink, a chevron, and a
-   44px target that is met by the line box rather than by a slab of fill. They
-   were full-width `.action.action-ghost` pills, which made the first screen
-   three stacked buttons and the savings panel a second place where a secondary
-   control looked like a primary one.
-
-   `.hero-how` is gone with the link it styled (21 Sep 2026): the hero's slot
-   now opens the trial modal, and `How it works` is only in the savings panel.
-   The treatment is unchanged, which is the point of sharing the rule — the
-   hero's control is the same object it was, pointed somewhere else.
-
-   A <button> needs four things an <a> gets for free. They are declared before
-   the shared block so the shared block still owns the metrics: `font:inherit`
-   is a shorthand and would otherwise reset the size and weight set below. */
+/* ══ THE HERO'S SECOND CONTROL: THE HOUSE GHOST PILL, AT EVERY WIDTH ═══════
+   Sam, 23 Sep 2026: "I liked the larger try it once free button for the page
+   header." It was a 16px text link on the phone (three stacked pills was the
+   objection, when How it works was still a pill); with the deck's door now a
+   footnote link under the pair, the trial takes the docked bar's `.sticky-alt`
+   shape: a step of ground, a lit hairline, the card radius, the filled
+   button's height. A <button>, because it opens a dialog. */
 .hero-try {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
   margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid var(--hair-lit);
+  border-radius: var(--r-card);
+  background: var(--inner);
   box-shadow: none;
   font: inherit;
-  text-align: left;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
 }
-.hero-try,
+.hero-try:active {
+  transform: scale(0.98);
+  background: var(--press);
+  transition-duration: 100ms;
+}
+.hero-try:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
+
+/* ══ THE TEXT LINKS: THE DECK'S DOOR IN THE HERO, AND THE SAVINGS PANEL'S ═══
+   One object, two places: 16px, a chevron, and a 44px target met by the line
+   box rather than by a slab of fill. */
 .hero-how,
 .save-how {
   display: inline-flex;
@@ -3185,7 +3179,6 @@ button.vcard:focus-visible {
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
-.hero-try svg,
 .hero-how svg,
 .save-how svg {
   width: 18px;
@@ -3195,13 +3188,11 @@ button.vcard:focus-visible {
   transition: transform 150ms var(--ease);
 }
 @media (hover: hover) {
-  .hero-try:hover svg,
   .hero-how:hover svg,
   .save-how:hover svg {
     transform: translateX(2px);
   }
 }
-.hero-try:focus-visible,
 .hero-how:focus-visible,
 .save-how:focus-visible {
   outline: 2px solid var(--ink-1);

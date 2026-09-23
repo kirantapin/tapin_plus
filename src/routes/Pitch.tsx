@@ -334,26 +334,16 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                   before the membership exists. A door beats a description in
                   the slot beside the money control.
 
-                  Same element shape as the link it replaces (16px, chevron,
-                  44px target) — a <button> because it opens a dialog rather
-                  than navigating, and a pill beside the filled action from
-                  1024 where the row has the width for two. */}
+                  The house ghost pill at every width (Sam, 23 Sep 2026: "I
+                  liked the larger try it once free button for the page
+                  header"), the docked bar's `.sticky-alt` twin; a <button>
+                  because it opens a dialog rather than navigating. */}
               <button
                 type="button"
                 className="hero-try"
                 onClick={() => setTrial(true)}
               >
                 Try it once for free
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="m9 5 7 7-7 7"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
               </button>
               {/* The deck's door, back in the hero. It left on 21 Sep when
                   Try it once took its slot; Sam, 23 Sep 2026: "I'd like to
