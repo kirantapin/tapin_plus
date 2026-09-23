@@ -337,8 +337,6 @@
    the one slide everybody leaves, then shrink it by 64px on the next — the
    button would move under the reader's thumb at the one advance that is
    guaranteed to happen. */
-.how-prev:disabled{opacity:.34;cursor:default}
-.how-prev:disabled:active{transform:none;background:var(--inner)}
 
 .how-next{display:block;width:100%;min-height:52px;padding:0 var(--s-2xl);
   border-radius:var(--r-card);border:1px solid var(--hair-lit);
