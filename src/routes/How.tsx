@@ -407,11 +407,11 @@ export default function How() {
      Sam, 13 Sep 2026: "can I have a back arrow next to the 'next' button, on
      the left — this would take me back a slide."
 
-     DISABLED ON SLIDE 1, NOT HIDDEN. There is no previous slide there, and
-     hiding it would hand Next the whole row on step 1 and then shrink it on
-     every step after — the button would change width under the reader's thumb
-     at the one advance that is guaranteed to happen. Disabled keeps the row's
-     geometry fixed for the whole deck.
+     ON SLIDE 1 IT LEAVES. Sam, 23 Sep 2026: "this back arrow, on the first
+     slide, should exit out of the pop up — for desktop and mobile." There is
+     no previous slide there, so back means out, the same `leave` the X runs.
+     It stays in the row rather than hiding, so Next keeps its width across
+     the one advance that is guaranteed to happen.
 
      It renders on the close too, which had no visible way back at all: the
      progress marks, ArrowLeft and a right-swipe all worked there, and all
@@ -420,9 +420,12 @@ export default function How() {
     <button
       type="button"
       className="how-prev"
-      disabled={i === 0}
-      aria-label={i > 0 ? `Back to step ${i}: ${slides[i - 1].headline}` : "No previous step"}
+      aria-label={i > 0 ? `Back to step ${i}: ${slides[i - 1].headline}` : "Close the walkthrough"}
       onClick={() => {
+        if (i === 0) {
+          leave();
+          return;
+        }
         setPaused(true);
         go(i - 1);
       }}
