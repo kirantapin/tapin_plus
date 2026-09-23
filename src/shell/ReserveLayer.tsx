@@ -11,6 +11,7 @@ import {
 import { useLocation, useNavigate, type Location } from "react-router-dom";
 import Pager, { Page } from "./Pager";
 import CheckoutSheet from "./CheckoutSheet";
+import { flightPending } from "./cardFlight";
 import type { PhoneIdentity, PhoneStage, PhoneStepHandle } from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -107,7 +108,12 @@ export default function ReserveLayer({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const still = Boolean((location.state as { fromLayer?: boolean } | null)?.fromLayer);
+  /* Still — no entrance — when coming back from a window this layer opened,
+     and when the deck's card is about to fly onto this sheet: the sheet does
+     not animate under the flight (POLISH §25, shell/cardFlight.ts). */
+  const [flying] = useState(flightPending);
+  const still =
+    flying || Boolean((location.state as { fromLayer?: boolean } | null)?.fromLayer);
   const sheet = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const title = useRef<HTMLParagraphElement>(null);

@@ -819,7 +819,7 @@
    This block used to read "NO ENTRANCE ANIMATION ANYWHERE ON THIS SLIDE",
    because `getBoundingClientRect` returns the TRANSFORMED box and the card's
    rect is what the flight into /reserve takes off from — a card measured
-   mid-entrance hands the clone an origin the card never occupied.
+   mid-entrance hands the flight an origin the card never occupied.
 
    That constraint has moved to where it belongs: `stashCardOrigin` now settles
    every animation on the card and its ancestors before it measures — finishing
@@ -983,8 +983,12 @@
    see `.how-spend` beside `.scene-head.is-figure`. */
 /* Centred. Every other slide's composition runs to the sheet's full measure, so
    the card is the one thing narrower than its column — and left-aligned it read
-   as an object that had failed to fill the row rather than one placed on it. */
-.sc-close{width:100%;max-width:295px;margin-inline:auto}
+   as an object that had failed to fill the row rather than one placed on it.
+   ONE CARD (POLISH §25): the checkout's panel draws it at the same width
+   (card.css `--tcard-w`) with the same one-line facts, so the flight onto it
+   is a pure translate and the card that lands is the card that left. */
+.sc-close{width:100%;max-width:var(--tcard-w);margin-inline:auto}
+.sc-close .tcard-facts dd{white-space:nowrap}
 /* The caption under the card. Sam, 14 Sep 2026: the card takes a name now,
    optionally, and a card cannot say that about itself. Centred with the card
    on a phone; arrives a beat after it and never moves with it. */
@@ -1099,7 +1103,6 @@
      failing to fill one. */
   .how-next{width:auto;min-width:220px;align-self:flex-start}
   .vs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .sc-close{max-width:320px}
 }
 
 /* ============================================================================
@@ -1195,7 +1198,9 @@
   /* Every composition takes the plate's measure, capped where a wider version
      would stop being the object it depicts. The card keeps its own cap below. */
   .scene-art > *{width:100%;max-width:520px;margin:0}
-  .sc-close{max-width:430px;margin-inline:0}
+  /* The card and its hint, one card wide and centred on the plate; the hint
+     keeps the card's left edge. */
+  .scene-art > .sc-close-wrap{max-width:var(--tcard-w)}
   .sc-hint{text-align:left}
 
   .how-foot{grid-column:2;grid-row:3;padding-top:0;background:none;gap:var(--s-xl)}

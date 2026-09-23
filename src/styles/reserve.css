@@ -436,34 +436,24 @@
 /* ============================================================================
    THE ARRIVAL — what the card flight lands into.
 
-   The flight itself was never broken. Measured on the live page: the card
-   travels 122px and scales 0.86 → 1 under an expo-out that is ~95% done by
-   300ms of its 820 — so it nudged a tenth of a screen while the whole checkout
-   was already painted around it. Sam read that as "takes me directly to the
-   checkout flow", which is exactly what it looked like.
+   The flight was never the problem on its own: it travelled a tenth of a
+   screen while the whole checkout was already painted around it, and Sam read
+   that as "takes me directly to the checkout flow". So the sheet holds still
+   (`is-still`, set by the layer while a flight is pending) and its content
+   comes up BEHIND the landing card: one authored moment on this route, on one
+   delay tuned to the flight's perceptual finish (~340ms of its 820).
 
-   So the page now holds still and comes up BEHIND the landing card. One
-   authored moment on this route, not scattered entrances: everything except
-   the photo band and the card rises together on one delay tuned to the
-   flight's own perceptual finish (~340ms), landing before the 820ms clone
-   retires. The card is the only thing moving until then, which is the whole
-   point of flying it.
+   What rises is page 0 less the card and its home: the money column's blocks,
+   and the included panel's rows but not the panel's plate or the card's own
+   block, which is where the card lands. `.rs-pay-col` is `display:contents`
+   below 1024, so its CHILDREN are the animatable boxes at every width.
 
-   THE SELECTOR LISTS `.rs-read > *` AND `.rs-decide > *` DELIBERATELY. Those
-   two wrappers are `display:contents` below 1024, so they generate no box and
-   an animation on them does nothing at all — the animatable boxes are their
-   children. `.column > *` would only ever reach `.hero-band`, `.rs-split` (no
-   box) and `.sticky-cta`.
-
-   Gated on the attribute, which only exists while a flight is actually in
-   flight — so a reader who lands on /reserve directly, or from anywhere that
-   did not stash an origin, gets no entrance at all. base.css zeroes duration
-   and delay under `reduce`, and useCardFlight never sets the attribute there
-   in the first place.
+   Gated on the attribute, which exists only while a flight is in the air
+   (shell/cardFlight.ts), so a reader who arrives any other way gets no
+   entrance. useCardFlight never sets it under reduced motion.
    ============================================================================ */
-html[data-flight="in"] .rs-read > *,
-html[data-flight="in"] .rs-decide > *,
-html[data-flight="in"] .column > .sticky-cta{
+html[data-flight="in"] .rs-pay-col > *,
+html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
   animation:arriveIn 420ms 340ms var(--ease) both;
 }
 /* Ends at its resting state, like every other keyframe set in this build. */
@@ -975,7 +965,8 @@ html[data-flight="in"] .column > .sticky-cta{
 /* Its own scroller, a separate box from the animated surface: see the note
    on fixed children in ReserveLayer.tsx. */
 .sheet-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain}
-/* Back from the app window: the modal was already open. No re-entrance. */
+/* Back from the app window (the modal was already open), or a card flight is
+   pending (it is the one thing that moves): no entrance. */
 .reserve-layer.is-still:not(.is-closing) .reserve-scrim,
 .reserve-layer.is-still:not(.is-closing) .reserve-sheet{animation:none}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
