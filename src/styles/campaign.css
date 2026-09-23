@@ -12,75 +12,142 @@
    ============================================================================ */
 
 /* ── THE SECTION THAT IS NOT A PANEL ───────────────────────────────────────
-   21 Sep 2026, docs/POLISH-2026-09-21.md §3. The headline, the lead and the
-   three figures used to sit inside the same rounded, hairlined, 16px-padded
-   box as everything else on the page — which is §1.1 of that plan's diagnosis
-   in one element. They now sit on the page's own ground, and the membership
-   below is the ONE box, because the membership is the decision.
+   21 Sep 2026, docs/POLISH-2026-09-21.md §3: the headline, the lead and the
+   three figures left the rounded box everything else sat in, and the
+   membership below became the ONE box, because it is the decision. Since
+   §24 this section is the photographic band and the figure strip under it.
 
-   `position:relative` is the frame the lockup is positioned against on a
-   phone; `margin-top` takes back the step `.column:has(.announce)` adds under
-   the fixed bar, so the photograph meets it. */
+   `margin-top` takes back the step `.column:has(.announce)` adds under the
+   fixed bar, so the photograph meets the bar — at every width now. */
 .cg {
-  position: relative;
   margin-top: calc(var(--s-2xl) * -1);
 }
 
-/* ── THE MERCHANT, AS EVIDENCE AND AS THE HERO ─────────────────────────────
-   Their photograph, full width, with their mark and their street on it. The
-   one thing a cold reader from a Meta scroll is deciding is whether this is a
-   real shop on a real street, and a 128px strip below a headline answered that
-   fourth. It is the first thing on the page now.
+/* ══ THE BAND — THE SHOP'S PHOTOGRAPH IS THE HERO'S GROUND (§24) ═══════════
+   Sam, 23 Sep 2026: "the bottom half of this page is great, but the hero
+   section needs some work again" — at both widths. It was a 260px photograph
+   over a stack of type on a phone, and at 1440 two columns of equal weight
+   with the receipt covering the cups. It is now the pitch's own shape: a dark
+   photographic header over the light body, so the two pages read as one
+   family.
 
-   OUT TO THE COLUMN'S EDGES. The panel that used to inset this is gone, so
-   there is nothing left for the photograph to be inset from; the gutter is
-   given back as a negative margin rather than by a rule anywhere else. */
+   ONE ORDER AT EVERY WIDTH. The shop and the lockup across the head of the
+   photograph, the advert's sentence and both actions at its foot; from 1024
+   the receipt joins them bottom-right. Flex, not absolute placement, so a
+   short phone grows the band rather than overlapping the head and the foot —
+   which is why the height is a MINIMUM: 640, or 88% of a phone's small
+   viewport (`svh`, the height with the browser's bars showing, so the actions
+   are on the first screen, not under Safari's toolbar), whichever is less.
+
+   THE GROUND UNDER THE PHOTOGRAPH IS THE PAGE'S DARKEST INK, so the white
+   type is legible in the moment before the photograph decodes (and if it
+   never does) rather than white on this surface's pale `--inner`.
+
+   Z-ORDER IS DECLARED. The photograph and the veil are positioned at 0, and
+   positioned boxes paint over in-flow ones, so what sits on them names 1. */
 .cg-band {
   position: relative;
-  margin-inline: calc(var(--gutter) * -1);
+  isolation: isolate;
   overflow: hidden;
-  background: var(--inner);
+  box-sizing: border-box;
+  margin-inline: calc(var(--gutter) * -1);
+  min-height: min(88vh, 640px);
+  min-height: min(88svh, 640px);
+  padding: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-2xl);
+  background: var(--ink-1);
 }
 .cg-shot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   display: block;
   width: 100%;
-  height: 260px;
+  height: 100%;
   object-fit: cover;
+  /* PHONE: THE LABELLED CUP, CENTRED. The photograph is 1517×482, so at
+     640 tall it is set 2014 wide and a phone sees 375 of it — less than the
+     two cups span. This puts the right-hand cup (the one wearing the
+     Coffeeholics label) in the middle of the frame. */
+  object-position: 79% 50%;
 }
-.cg-shot[data-bright="true"] {
-  filter: saturate(0.9) brightness(0.72);
-}
-/* THE VENUE-CARD VEIL, AND A SHORT ONE AT THE HEAD OF IT.
-   The long veil is the rail's and the pop-up's: barely there at the top, near
-   opaque at the foot, so the name and the street have a ground rather than a
-   photograph under them. The short one exists because this photograph is a
-   mural — measured, the top 60px of it runs bright purple and green, and a
-   white lockup laid on the long veil's .10 was unreadable there. Same ink,
-   same file's idiom (pitch.css does exactly this over the mosaic), and it is
-   gone by 22% so it never touches the name. */
+/* THE VENUE-CARD VEIL, DEEP AT THE FOOT (§24) — the field's own #120A0E, and
+   measured rather than taken on trust. The plan's three stops (.14 at the
+   head, .30 at 45%, .86 at the foot) were rendered over this photograph and
+   swept with the text hidden, against the brightest pixel under each line:
+   the H1's first line sat on the lid and the sunlit wall at 3.07:1, the name
+   at 2.65:1 and the street at 2.28:1. So, two changes and no others:
+
+   THE FOOT IS SET FROM THE FOOT, IN PIXELS. The copy is a fixed stack
+   anchored to the band's foot (~300px on a phone, ~310 at 1440), and a
+   percentage stop cannot follow it as the band's height changes with the
+   phone. .86 at the foot, .56 at 340px up — the copy's floor, above its first
+   line at every width measured — then the plan's .30 and .14 above it.
+
+   A HEAD SCRIM FOR THE SHOP AND THE LOCKUP, the idiom this file already
+   used: .66 at the top edge, .50 at 80px, gone by 168px, so it never reaches
+   the cups.
+
+   Measured after, worst line at 375 / 1440: name 10.7 / 8.8, street 7.2 /
+   6.0, H1 5.9 / 5.9, lead 6.4 / 7.2, the try link 12.0 / 19.2 (:1); the
+   narrowest margin anywhere from 360 to 1440 is the street at 500, 4.97. */
 .cg-band::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(18, 10, 14, 0.46) 0%, rgba(18, 10, 14, 0) 22%),
-    linear-gradient(180deg, rgba(18, 10, 14, 0.1) 0%, rgba(18, 10, 14, 0.72) 100%);
+    linear-gradient(
+      180deg,
+      rgba(18, 10, 14, 0.66) 0,
+      rgba(18, 10, 14, 0.5) 80px,
+      rgba(18, 10, 14, 0) 168px
+    ),
+    linear-gradient(
+      0deg,
+      rgba(18, 10, 14, 0.86) 0,
+      rgba(18, 10, 14, 0.56) 340px,
+      rgba(18, 10, 14, 0.3) 440px,
+      rgba(18, 10, 14, 0.14) 100%
+    );
+}
+.cg-mast,
+.cg-say {
+  position: relative;
+  z-index: 1;
+}
+
+/* -- the head of the photograph: the shop, and whose product this is ------
+   The shop top-left as the venue-card shape (collar, name, street), the
+   lockup top-right. One row, so the two can never collide: the name gives
+   way first and the lockup never shrinks. The gap is only the floor between
+   them; `space-between` spreads them apart everywhere else.
+
+   A STEP SMALLER ON A PHONE — the collar 44, the wordmark 22 tall. At 52 and
+   26 the row needed 355px of a 343px column, and "Draper Road" broke onto a
+   second line; at 44 and 22 it is 325, so the street holds one line down to
+   a 360px phone. The desktop takes 52 and 26 back. */
+.cg-mast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-md);
 }
 .cg-name {
-  position: absolute;
-  z-index: 1;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: var(--s-xl);
+  min-width: 0;
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--s-lg);
 }
 .cg-collar {
-  width: 52px;
-  height: 52px;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-control);
 }
 .cg-name-text {
@@ -89,95 +156,84 @@
   flex-direction: column;
   gap: 2px;
 }
-/* White, and white at .8 — the two inks a photograph allows. This is a colour
-   value on a dark veil, not an `opacity` dimming live text: the ink ramp has
-   no step that survives a photograph. */
+/* White, and white at .8 — the two inks a photograph allows. A colour value on
+   a dark veil, not an `opacity` dimming live text: the ink ramp has no step
+   that survives a photograph. White is `--on-maroon`, the one white that is
+   declared once and never themed. */
 .cg-name-text b {
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #FFFFFF;
+  color: var(--on-maroon);
 }
 .cg-name-text > span {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: color-mix(in srgb, var(--on-maroon) 80%, transparent);
 }
-
-/* -- the lockup -------------------------------------------------------------
-   ONE ELEMENT, TWO PLACES. Over the photograph top-left on a phone; at the
-   head of the left column from 1024. Positioned rather than duplicated, so
-   there is no second lockup to keep in sync. */
 .cg-lockup {
-  position: absolute;
-  z-index: 1;
-  left: 0;
-  top: var(--s-xl);
+  flex: 0 0 auto;
   margin: 0;
   display: flex;
   align-items: center;
   gap: var(--s-md);
-  color: #FFFFFF;
+  color: var(--on-maroon);
 }
 .cg-lockup svg {
-  height: 26px;
+  height: 22px;
   width: auto;
   display: block;
 }
-/* The chip inverts while it is on the photograph: a purple plate on a purple
-   mural is a chip nobody sees. White on the merchant's purple is the same
-   8.21:1 pair the plate already measures, read the other way round. */
+/* The chip inverts on the photograph: a purple plate over a photograph is a
+   chip nobody sees. White with the merchant's purple is the same 8.21:1 pair
+   the plate measures, read the other way round. */
 .cg-lockup .plus {
-  background: #FFFFFF;
+  background: var(--on-maroon);
   color: var(--cg-brand, var(--maroon));
 }
 
-/* -- what a member gets here: THREE FIGURES, NOT THREE ROWS -----------------
-   docs/POLISH-2026-09-21.md §3.3, and the single biggest move on the page.
-   This was an icon tile, a bold label and a grey subline, three times — the
-   shape the plan's §1.2 names as the textbook tell. The numbers ARE the offer,
-   so they are set as the offer: open columns on the ground, divided by one
-   hairline each, no tile and no plate. `.cg-icon` is gone with them.
-
-   ONE SIZE, ONE BASELINE. Sam, 22 Sep 2026, on `Points` set at 28 beside a
-   48px `$5`: "it's a bit weird right now." All three are `.t-figure` now —
-   `$5`, `15%`, `1×` — so one line box sets all three on one baseline.
-
-   THE CONSTRUCTION MOVED TO styles/figures.css on 23 Sep 2026 (§15) — the
-   stretch, the hairline, the step before the divider and the two-line
-   qualifier cap are all `.figs.is-display` now, shared with the pop-up and
-   the checkout. What stays here is where this page puts it. */
-.cg-figures {
-  margin: calc(var(--s-xl) * 2) 0 0;
-}
-
-/* -- the headline and the lead, on the ground ------------------------------ */
-.cg-say {
-  margin-top: var(--s-2xl);
-}
+/* -- the foot of the photograph: the advert's sentence and the two actions -- */
 .cg-h1 {
   margin: 0;
   max-width: 14ch;
+  color: var(--on-maroon);
 }
 .cg-lead {
   margin: var(--s-lg) 0 0;
   max-width: 34ch;
   text-wrap: pretty;
+  color: color-mix(in srgb, var(--on-maroon) 86%, transparent);
 }
-
-/* -- the actions -----------------------------------------------------------
-   ONE FILLED ACTION PER VIEW. On a phone the fill is spent at the foot, on the
-   membership, so only the try link is here; the filled twin is `display:none`
-   until 1024, where the fold holds the whole argument and the docked bar is
-   switched off in exchange. */
 .cg-acts {
   display: flex;
   flex-direction: column;
   gap: var(--s-md);
-  margin-top: var(--s-xl);
+  margin-top: var(--s-2xl);
 }
+/* THE FILLED ACTION, WHITE ON THE PHOTOGRAPH. The house `.action` is the
+   brand fill; laid over a merchant's photograph that is two brands fighting
+   for one spot, so here it is the page's white plate carrying the page's
+   darkest ink (18.2:1). The purple fill is spent once, at the foot. */
 .cg-hero-cta {
-  display: none;
+  background: var(--card);
+  color: var(--ink-1);
+}
+.cg-hero-cta:focus-visible {
+  outline-color: var(--on-maroon);
+}
+
+/* -- what a member gets here: THREE FIGURES, NOT THREE ROWS -----------------
+   docs/POLISH-2026-09-21.md §3.3, and the single biggest move on the page: the
+   numbers ARE the offer, so they are set as the offer — open columns on the
+   ground, divided by one hairline each, no tile and no plate. One size, one
+   baseline (Sam, 22 Sep 2026). The construction lives in styles/figures.css
+   (§15); what stays here is where this page puts it.
+
+   UNDER THE BAND, ON THE LIGHT GROUND (§24): the first block after the
+   photograph, one step below it — the claim once, in figures, before the
+   cards prove it. */
+.cg-figures {
+  margin: var(--s-2xl) 0 0;
 }
 
 /* -- the two live trials ---------------------------------------------------
@@ -320,14 +376,13 @@
   margin-top: var(--s-md);
 }
 
-/* ══ FROM 1024px: THE ARGUMENT BESIDE THE EVIDENCE ═════════════════════════
+/* ══ FROM 1024px: THE PHOTOGRAPH TAKES THE WINDOW ══════════════════════════
    Sam, 21 Sep 2026, on this page at 1440: it was a 720px column with nothing
    either side and the merchant's photograph reduced to a 168px strip inside
-   it — a widened phone, which is §1.4 of the polish plan.
-
-   So: two columns at 55/45 in 1,120px, the whole argument on the left and the
-   shop on the right at full height. The right column is the evidence and it is
-   given half the screen, because on this page the evidence is the product.
+   it — a widened phone, which is §1.4 of the polish plan. §3 answered with
+   two columns, argument beside evidence; §24 (23 Sep, late) replaced that
+   with the band at the window's full width, 640 tall, and the 1,120 grid
+   under it.
 
    1024 AND NOT 720. `.column` is capped at 480px until layout.css's own 1024
    line releases it, so a split any earlier divides 448 usable pixels in two.
@@ -336,11 +391,20 @@
   /* The 1,120 measure, with 48px of gutter either side. Named children, at
      (0,2,0): layout.css caps every column child at 720 from a `:where()` rule
      that contributes no specificity precisely so this can be written here. */
-  .column > .cg,
   .column > .cg-save,
   .column > .cg-member {
     max-width: min(1120px, calc(100% - 96px));
     margin-inline: auto;
+  }
+  /* THE HERO SECTION IS THE WINDOW'S WIDTH; its type keeps the grid. The
+     band bleeds edge to edge and sets its text on the same 1,120 lines the
+     cards and the membership use, so the H1, the strip and "What you'd save
+     here" share one left edge. `--grid-in` is that inset: half of what the
+     window has beyond 1,120, never under 48. */
+  .column > .cg {
+    max-width: none;
+    margin-inline: 0;
+    --grid-in: max(calc(var(--s-2xl) * 2), calc((100% - 1120px) / 2));
   }
   /* width:100% as well — the cap is a max, and a grid of photographs has no
      intrinsic width to grow to it on its own. */
@@ -374,61 +438,40 @@
     padding-top: var(--s-xl);
   }
 
-  .cg {
-    margin-top: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
-    grid-template-rows: auto 1fr;
-    column-gap: calc(var(--s-xl) * 2);
-    align-items: start;
-  }
-  /* The photograph as a tall object beside the argument rather than a strip
-     above it. `min-height` is the floor; `align-self:stretch` lets it take the
-     left column's height when the headline runs long. The image goes absolute
-     because a stretched cell has no content of its own to give it height. */
+  /* The band at 640, its text on the grid. Top and foot at the desktop step,
+     so the head row, the copy's last line and the receipt's foot (24 in, set
+     below) sit on the same two horizontal lines. */
   .cg-band {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: stretch;
     margin-inline: 0;
-    min-height: 560px;
-    border-radius: calc(var(--r-panel) * 1.5);
+    min-height: 640px;
+    padding: var(--s-2xl) var(--grid-in);
   }
+  .cg-collar {
+    width: 52px;
+    height: 52px;
+  }
+  .cg-lockup svg {
+    height: 26px;
+  }
+  /* TWO EDGES, ONE PER SIDE. The shop, the H1, the lead and the actions share
+     the grid's left line; the lockup and the receipt share the photograph's
+     right inset, so the right side reads as one column — the lockup above
+     the receipt — instead of two near-misses 136px apart at 1440. So the
+     band's RIGHT padding is the receipt's inset; the copy is left-set and
+     capped by its own measures, so a wider box moves nothing in it. Only
+     while there is a receipt to line up with. */
+  .cg-band:has(> .ml) {
+    padding-right: var(--s-2xl);
+  }
+  /* DESKTOP: THE CUPS CENTRE-RIGHT, THE RECEIPT OFF THEM. Set 640 tall the
+     photograph is 2014 wide; anchored at its right edge, the two cups fall
+     at roughly 42–73% of a 1440 window and the receipt's 340 (24 in from the
+     right) sits over the window frame and the shrub beside them. Anchored
+     at the right because that is where the receipt is: the gap between the
+     right-hand cup and the receipt is fixed in the photograph's own pixels,
+     so it is the same at 1024 as at 1920. */
   .cg-shot {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-  }
-  /* The head scrim goes: nothing is laid over the top of the photograph here
-     — the lockup is in the column beside it — so it is a dark band and
-     nothing else. The long veil the name sits on stays. */
-  .cg-band::after {
-    background: linear-gradient(
-      180deg,
-      rgba(18, 10, 14, 0.1) 0%,
-      rgba(18, 10, 14, 0.72) 100%
-    );
-  }
-  /* Back into the flow, at the head of the left column, in the page's own ink:
-     there is no photograph under it here. */
-  .cg-lockup {
-    position: static;
-    grid-column: 1;
-    grid-row: 1;
-    margin-bottom: var(--s-2xl);
-    color: var(--ink-1);
-  }
-  .cg-lockup .plus {
-    background: var(--maroon);
-    color: var(--on-maroon);
-  }
-  .cg-say {
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: 0;
-  }
-  .cg-h1 {
-    max-width: 12ch;
+    object-position: 100% 50%;
   }
   .cg-lead {
     font-size: 18px;
@@ -454,6 +497,12 @@
     min-width: 220px;
     height: 48px;
     padding: 0 calc(var(--s-xl) * 2);
+  }
+  /* Left-set to the grid, at the width it had in the two-column hero, so
+     its three cells keep their rhythm rather than spreading across 1,120. */
+  .cg-figures {
+    max-width: 600px;
+    margin-left: var(--grid-in);
   }
 
   /* The band: statement | price | action, with a hairline between the cells
@@ -844,9 +893,9 @@
    there is nothing to clear. Written here rather than in the desktop block
    above because both rules above are (0,4,0): an override earlier in the file
    loses on source order at equal weight, and raising the weight to beat them
-   would be arguing with the cascade rather than reading it. `past` starts true
-   and the observer only corrects it once the action block is measured, so
-   without this a 1440 page reserved 152px of empty floor under its footer. */
+   would be arguing with the cascade rather than reading it. Once the reader
+   scrolls past the band's actions `past` is true at any width, so without
+   this a 1440 page reserved 152px of empty floor under its footer. */
 @media (min-width: 1024px) {
   .column:has(.cg-sticky.is-pair:not(.is-away)),
   .column:has(.cg-sticky.is-pair.is-away) {
@@ -854,7 +903,7 @@
   }
 }
 
-/* ── THE INVITATION UNDER THE FIGURES ──────────────────────────────────────
+/* ── THE INVITATION BESIDE THE ASK ─────────────────────────────────────────
    A text link, not a third filled button and not a pill: the page spends its
    fill on "Get early access", and a second slab beside it leaves the reader
    choosing between two equal-looking controls for different destinations.
@@ -866,8 +915,9 @@
    made it a link at reading size with the chevron, on the argument's own
    left edge, 44px tall so it stays a target. §20 (23 Sep 2026) took that
    link to the desktop as well, beside the filled button, and the ghost
-   classes and their undoing went with it. A <button>, so it declares what
-   an <a> gets for free. */
+   classes and their undoing went with it. §24 set it on the photograph at
+   every width, so it is white there, not the merchant's purple. A <button>,
+   so it declares what an <a> gets for free. */
 .cg-try {
   display: flex;
   align-items: center;
@@ -884,7 +934,7 @@
   font-weight: 700;
   letter-spacing: -0.01em;
   text-align: left;
-  color: var(--cg-brand, var(--maroon));
+  color: var(--on-maroon);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -904,7 +954,7 @@
   }
 }
 .cg-try:focus-visible {
-  outline: 2px solid var(--ink-1);
+  outline: 2px solid var(--on-maroon);
   outline-offset: 2px;
 }
 
@@ -958,9 +1008,9 @@
    merchant's purple — an outcome, not a chosen thing. Every size is on the
    ramp and none is under 14.
 
-   Over the photograph from 1024 (bottom-right, 24 in, 340 wide — narrower
-   only when the column is); a full-width card under the try link below it,
-   complete and still.
+   Over the photograph from 1024 only (bottom-right, 24 in, 340 wide). Below
+   1024 the page renders no receipt at all (§24): the cards are the proof on
+   a phone.
    ============================================================================ */
 .ml {
   box-sizing: border-box;
@@ -1137,42 +1187,14 @@
 }
 
 /* ── WHERE IT SITS ────────────────────────────────────────────────────────
-   Phone: under the try link, the page's own interval above it. */
-.cg-say > .ml {
-  margin-top: var(--s-2xl);
-}
-
+   Bottom-right of the band, 24 in from its right edge and its foot, over the
+   photograph's window frame rather than the cups (§24). */
 @media (min-width: 1024px) {
-  /* Over the photograph, bottom-right, inset by the desktop gutter step. */
   .cg-band > .ml {
     position: absolute;
     z-index: 1;
     right: var(--s-2xl);
     bottom: var(--s-2xl);
     width: min(340px, calc(100% - var(--s-2xl) * 2));
-  }
-  /* THE NAME GOES TO THE HEAD OF THE PHOTOGRAPH. Bottom-left it would sit
-     under the ledger: 340 + 48 of a 490px photograph leaves 102px beside the
-     card. Up there it lands on the shop's window, the brightest thing in the
-     frame — measured, white on it was 3.1:1 and the street at .8 was 2.4:1
-     under the phone's .46 head scrim — so the head scrim is deeper and
-     longer here (.72 → .56 at 14% → gone by 34%, above the card's top edge),
-     and the long veil the card sits on stays. Only when there is a ledger:
-     if the model ever drops it, the name returns to the foot. */
-  .cg-band:has(> .ml) .cg-name {
-    top: var(--s-2xl);
-    bottom: auto;
-    left: var(--s-2xl);
-    right: var(--s-2xl);
-  }
-  .cg-band:has(> .ml)::after {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(18, 10, 14, 0.72) 0%,
-        rgba(18, 10, 14, 0.56) 14%,
-        rgba(18, 10, 14, 0) 34%
-      ),
-      linear-gradient(180deg, rgba(18, 10, 14, 0.1) 0%, rgba(18, 10, 14, 0.72) 100%);
   }
 }

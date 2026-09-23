@@ -123,6 +123,17 @@ export const campaignBenefits: {
 ];
 
 /**
+ * THE HERO'S PHOTOGRAPH (docs/POLISH-2026-09-21.md §24). The fourth of the
+ * promotional shots on Coffeeholics' live TapIn page — two hands raising their
+ * iced coffees in late sun — from the same public bucket and the same
+ * permission as the three under `SHOT_ITEMS`. Not the venue record's `hero`:
+ * that is the mural every other surface already carries, and this page's band
+ * wants the product in a customer's hand. A constant here rather than a typed
+ * path in the route, so the splash's photographs live in one list.
+ */
+export const campaignHeroShot = "/shots/coffeeholicsva-cup.jpg";
+
+/**
  * WHAT YOU'D SAVE HERE — three of Coffeeholics' own items, each under the
  * benefit it exercises (docs/POLISH-2026-09-21.md §11). Sam, 22 Sep 2026:
  * "showing items from their page, and when ordering what they save."
