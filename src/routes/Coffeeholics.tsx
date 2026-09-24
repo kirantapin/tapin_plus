@@ -7,7 +7,8 @@ import TrialModal from "../shell/TrialModal";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
-import SavingsLedger from "../shell/SavingsLedger";
+import MonthCalendar from "../shell/MonthCalendar";
+import { month } from "../model/month";
 import { useReserveCta } from "../shell/useReserveCta";
 import { useMedia } from "../shell/useMedia";
 import { logoField, launchWindow, monthlyToday, venues } from "../model/content";
@@ -15,7 +16,6 @@ import {
   campaignVenue,
   campaignBenefits,
   campaignShots,
-  campaignLedger,
   campaignHeroShot,
 } from "../model/campaign";
 
@@ -309,7 +309,13 @@ export default function Coffeeholics() {
             </div>
           </div>
 
-          {desk && campaignLedger ? <SavingsLedger ledger={campaignLedger} /> : null}
+          {/* THE MONTH, NOT THE RECEIPT (Sam, 23 Sep 2026: "bring over the same
+              calendar view that was used for the main one for the coffeeholics
+              desktop page — it can be all the locations that we list"). The
+              pitch's calendar, the same component and model, at the band's
+              right from 1024: a month of orders across the listed places, each
+              earning the week's credit. */}
+          {desk && month ? <MonthCalendar month={month} /> : null}
         </div>
 
         {/* ══ THREE FIGURES, ON THE GROUND UNDER THE BAND ═══════════════════
