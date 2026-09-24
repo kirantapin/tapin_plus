@@ -179,6 +179,12 @@
   gap: var(--s-md);
   color: var(--on-maroon);
 }
+/* THE DOT, WHITE (Sam, 23 Sep 2026: "for the tapin logo, let's make the dot
+   white"): on the photograph the whole lockup is white, at the mark's own
+   size and every width. The foot's "Powered by" keeps the house red. */
+.cg-lockup .tl-dot {
+  fill: var(--on-maroon);
+}
 .cg-lockup svg {
   height: 22px;
   width: auto;
@@ -692,10 +698,9 @@
   --maroon: #6b319e;
   --cg-brand: #6b319e;
 
-  /* The wordmark keeps TapIn's own dot, badge red, at every width (Sam,
-     23 Sep 2026: "we need to just use the original tapin logo, the dot is
-     wrong here, same logo should be used for mobile too"). No `--dot`
-     override on this surface. */
+  /* The wordmark is TapIn's own mark at its own size on this surface (Sam,
+     23 Sep 2026: "just use the original tapin logo … same logo for mobile
+     too"); the header's dot is white (below, `.cg-lockup .tl-dot`). */
 }
 
 /* The field, lit the same way the dark one is: a step off at the top, the
