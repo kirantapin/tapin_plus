@@ -9,6 +9,7 @@ import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
 import MonthCalendar from "../shell/MonthCalendar";
+import MonthWeeks from "../shell/MonthWeeks";
 import { monthAt } from "../model/month";
 import { useReserveCta } from "../shell/useReserveCta";
 import { useMedia } from "../shell/useMedia";
@@ -335,16 +336,16 @@ export default function Coffeeholics() {
             OFF THE PHOTOGRAPH (§24). Over it they were a second ledger of
             figures beside the receipt's; under it they are the claim stated
             once, in figures, before the cards below prove it. */}
+        <BenefitFigures items={campaignBenefits} size="display" className="cg-figures" />
         {/* THE MONTH ON A PHONE, RIGHT UNDER THE HEADER (Sam, 23 Sep 2026:
             "include this on mobile too, right below the header on BOTH
-            pages"): the band's calendar, first under the photograph, then
-            the figure strip. */}
+            pages"), under the figure strip (Sam: "have the hero stats show up
+            above this"), as the calm week-by-week month. */}
         {!desk && month ? (
           <div className="mc-phone">
-            <MonthCalendar month={month} />
+            <MonthWeeks month={month} />
           </div>
         ) : null}
-        <BenefitFigures items={campaignBenefits} size="display" className="cg-figures" />
       </section>
 
       {/* ══ WHAT YOU'D SAVE HERE ═════════════════════════════════════════════

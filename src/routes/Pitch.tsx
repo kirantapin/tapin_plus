@@ -21,6 +21,7 @@ import SignInBar from "../shell/SignInBar";
 import TrialModal from "../shell/TrialModal";
 import LiveFeed from "../shell/LiveFeed";
 import MonthCalendar from "../shell/MonthCalendar";
+import MonthWeeks from "../shell/MonthWeeks";
 import { useMedia } from "../shell/useMedia";
 import { month } from "../model/month";
 import {
@@ -424,7 +425,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             first thing on the light ground. */}
         {!desk && month ? (
           <div className="mc-phone">
-            <MonthCalendar month={month} />
+            <MonthWeeks month={month} />
           </div>
         ) : null}
         <section className="pitch-get">
