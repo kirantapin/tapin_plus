@@ -3905,7 +3905,8 @@ button.vcard:focus-visible {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
-.mw-net span {
+/* The label only: the figure's own spans (§41) take the figure's type. */
+.mw-net > span {
   font-size: 15px;
   font-weight: 600;
   color: var(--ink-2);
@@ -3936,6 +3937,33 @@ button.vcard:focus-visible {
 }
 .mw-foot.is-ahead .mw-net b {
   color: var(--gain);
+}
+
+/* ── THE PHONE MONTH PLAYS ONCE (§41) ─────────────────────────────────────
+   shell/MonthWeeks.tsx. A counted figure stacks its final text, unseen, under
+   the live one, so the count never widens its column. While the script holds
+   `data-run` the tiles wait small and clear, and arrive into `is-in` on the
+   house ease: transform and opacity only, on tiles laid out at full size. */
+.mw-count {
+  display: inline-grid;
+  justify-items: end;
+}
+.mw-count > span {
+  grid-area: 1 / 1;
+}
+.mw-hold {
+  visibility: hidden;
+}
+.mw[data-run] .mw-tile {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.mw[data-run] .mw-tile.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 240ms var(--ease),
+    transform 240ms var(--ease);
 }
 
 /* ── ONE MONTH OR ANOTHER (§40) ───────────────────────────────────────────

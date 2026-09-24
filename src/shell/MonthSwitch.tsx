@@ -20,7 +20,8 @@ const FLIP = 240;
 /** "You saved", old figure to new. */
 export const TALLY = 400;
 
-const still = (el: Element) =>
+/** Reduced motion, or a `data-still` ancestor: no motion, the month whole. */
+export const still = (el: Element) =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches || !!el.closest("[data-still]");
 
 /** The count's curve, the house ease-out. */
