@@ -135,6 +135,16 @@ export interface Month {
   startCents: number;
   runningCents: number[];
   netCents: number;
+  /** What "You saved" is made of (§56): the $5 credits and the 15%, each a
+   *  running sum and a running count by order, and in all. */
+  runningCredit: number[];
+  runningCredits: number[];
+  runningPercent: number[];
+  runningPercents: number[];
+  creditCents: number;
+  credits: number;
+  percentCents: number;
+  percents: number;
 }
 
 /** An order in its day, off its venue's menu; nothing earned yet. */
@@ -218,6 +228,11 @@ function monthOf(orders: MonthOrder[], head: string, sub: string): Month | null 
     orders.reduce<number[]>((acc, o) => [...acc, (acc.length ? acc[acc.length - 1] : 0) + pick(o)], []);
   const runningSpent = sums((o) => o.priceCents);
   const runningCents = sums((o) => o.cents).map((c) => c - plan);
+  const runningCredit = sums((o) => o.creditCents);
+  const runningCredits = sums((o) => (o.benefit === "credit" ? 1 : 0));
+  const runningPercent = sums((o) => o.percentCents);
+  const runningPercents = sums((o) => (o.benefit === "percent" ? 1 : 0));
+  const end = (xs: number[]) => xs[xs.length - 1];
   return {
     head,
     sub,
@@ -230,6 +245,14 @@ function monthOf(orders: MonthOrder[], head: string, sub: string): Month | null 
     startCents: -plan,
     runningCents,
     netCents: runningCents[runningCents.length - 1],
+    runningCredit,
+    runningCredits,
+    runningPercent,
+    runningPercents,
+    creditCents: end(runningCredit),
+    credits: end(runningCredits),
+    percentCents: end(runningPercent),
+    percents: end(runningPercents),
   };
 }
 

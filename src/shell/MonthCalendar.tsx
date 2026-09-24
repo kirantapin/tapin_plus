@@ -1,5 +1,6 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
 import { dollars, signedDollars } from "../model/month";
+import { BENEFIT } from "../model/savings";
 import { MonthControls, TALLY, easeOut, still, useMonthSwitch, type MonthPlace } from "./MonthSwitch";
 
 /**
@@ -69,8 +70,13 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
     const foot = el.querySelector<HTMLElement>(".mc-foot");
     const net = el.querySelector<HTMLElement>(".mc-net-fig");
     const spent = el.querySelector<HTMLElement>(".mc-spent");
+    const creditFig = el.querySelector<HTMLElement>(".mc-part-credit b");
+    const creditN = el.querySelector<HTMLElement>(".mc-part-credit .mc-part-n");
+    const pctFig = el.querySelector<HTMLElement>(".mc-part-pct b");
+    const pctN = el.querySelector<HTMLElement>(".mc-part-pct .mc-part-n");
     if (!foot || !net || !spent) return;
     const { startCents, runningCents, runningSpent } = month;
+    const { runningCredit, runningCredits, runningPercent, runningPercents } = month;
     const last = runningCents.length - 1;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     /* Set when this month replaced another: what "You saved" read then. */
@@ -105,6 +111,7 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
        "You're ahead" beside it would be a cent from true. */
     const netAt = (k: number) => (k < 0 ? startCents : runningCents[k]);
     const spentAt = (k: number) => (k < 0 ? 0 : runningSpent[k]);
+    const at = (xs: number[], k: number) => (k < 0 ? 0 : xs[k]);
     /* Both moving figures, `e` of the way from step `from` to step `to`; the
        net can start from a figure of its own (a switch's old month). */
     const write = (from: number, to: number, e = 1, net0 = netAt(from)) => {
@@ -114,6 +121,12 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
       sw.net.current = c;
       spent.textContent = dollars(mix(spentAt(from), spentAt(to)));
       foot.classList.toggle("is-ahead", c > 0);
+      /* The breakdown counts with them; a count steps as its order lands. */
+      const k = e > 0 ? to : from;
+      if (creditFig) creditFig.textContent = `+${dollars(mix(at(runningCredit, from), at(runningCredit, to)))}`;
+      if (creditN) creditN.textContent = `× ${at(runningCredits, k)}`;
+      if (pctFig) pctFig.textContent = `+${dollars(mix(at(runningPercent, from), at(runningPercent, to)))}`;
+      if (pctN) pctN.textContent = `× ${at(runningPercents, k)}`;
     };
     const count = (from: number, to: number, net0?: number, ms = COUNT) => {
       if (raf) cancelAnimationFrame(raf);
@@ -305,9 +318,9 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
       {/* No order line under the grid (Sam: "not sure this is necessary"): the
           day's picture and chip already say what was bought and what it earned. */}
 
-      {/* SPEND A LITTLE, SAVE A LOT (§42, §42.2): what the month cost, what it
-          brought back after the membership, and the points, quietly. Colour
-          only on the two money figures; the chips carry the breakdown. */}
+      {/* SPEND A LITTLE, SAVE A LOT (§42, §56): what the month cost, then the
+          saved tile — what the $5 credits and the 15% brought back (Sam, 24 Sep
+          2026: "i liked that breakdown"), and "You saved" after the membership. */}
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
         <p className="mc-row">
           <span className="mc-ahead">You spent</span>
@@ -316,14 +329,42 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
           </b>
           <span className="sr-only">{dollars(month.spentCents)}</span>
         </p>
-        <p className="mc-net">
-          <span className="mc-ahead">You saved</span>
-          <b className="mc-net-fig" aria-hidden="true">
-            {signedDollars(month.netCents)}
-          </b>
-          <span className="sr-only">{signedDollars(month.netCents)}</span>
-          <span className="mc-after">after the {dollars(month.planCents)} membership</span>
-        </p>
+        <div className="mc-save">
+          <ul className="mc-parts">
+            <li className="mc-part mc-part-credit">
+              <span>
+                ${BENEFIT.creditUsd} credit{" "}
+                <i className="mc-part-n" aria-hidden="true">
+                  × {month.credits}
+                </i>
+              </span>
+              <b aria-hidden="true">+{dollars(month.creditCents)}</b>
+              <span className="sr-only">
+                , {month.credits} times: {dollars(month.creditCents)}
+              </span>
+            </li>
+            <li className="mc-part mc-part-pct">
+              <span>
+                {Math.round(BENEFIT.percentOff * 100)}% off{" "}
+                <i className="mc-part-n" aria-hidden="true">
+                  × {month.percents}
+                </i>
+              </span>
+              <b aria-hidden="true">+{dollars(month.percentCents)}</b>
+              <span className="sr-only">
+                , {month.percents} orders: {dollars(month.percentCents)}
+              </span>
+            </li>
+          </ul>
+          <p className="mc-net">
+            <span className="mc-ahead">You saved</span>
+            <b className="mc-net-fig" aria-hidden="true">
+              {signedDollars(month.netCents)}
+            </b>
+            <span className="sr-only">{signedDollars(month.netCents)}</span>
+            <span className="mc-after">after the {dollars(month.planCents)} membership</span>
+          </p>
+        </div>
       </div>
     </div>
   );

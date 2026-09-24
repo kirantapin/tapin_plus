@@ -3735,10 +3735,55 @@ button.vcard:focus-visible {
   margin: 0;
   padding: var(--s-sm) var(--s-lg);
 }
-.mc-net {
-  padding-block: var(--s-md);
+/* THE SAVED TILE (§56; Sam, 24 Sep 2026: "show the breakdown of savings from
+   the $5 credit and the savings from the 15% - i liked that breakdown"): the
+   two sources as quiet line items, a hairline, then "You saved" on the same
+   right edge as "You spent". */
+.mc-save {
+  display: grid;
+  gap: var(--s-md);
+  padding: var(--s-md) var(--s-lg);
   border-radius: var(--r-card);
   background: var(--inner);
+}
+.mc-save .mc-net {
+  padding: 0;
+}
+.mc-parts,
+.mw-parts {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0 0 var(--s-md);
+  list-style: none;
+  border-bottom: 1px solid var(--hair-lit);
+}
+.mc-part,
+.mw-part {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--s-lg);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.mc-part-n,
+.mw-part-n {
+  font-style: normal;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.mc-part b,
+.mw-part b {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--gain);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 .mc-ahead {
   grid-column: 1;
@@ -3901,9 +3946,19 @@ button.vcard:focus-visible {
   margin: 0;
   padding: var(--s-sm) var(--s-md);
 }
-.mw-net {
+/* The saved tile, as the desktop's (.mc-save, §56). */
+.mw-save {
+  display: grid;
+  gap: var(--s-sm);
+  padding: var(--s-sm) var(--s-md);
   border-radius: var(--r-card);
   background: var(--inner);
+}
+.mw-save .mw-net {
+  padding: 0;
+}
+.mw-parts {
+  padding-bottom: var(--s-sm);
 }
 .mw-lab {
   grid-column: 1;
@@ -4115,12 +4170,12 @@ button.vcard:focus-visible {
 .mw[data-swap] {
   overflow: clip;
 }
-.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
-.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row) {
+.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-parts),
+.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row, .mw-parts) {
   transition: opacity 200ms var(--ease);
 }
-.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
-.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
+.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-parts),
+.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row, .mw-parts) {
   opacity: 0;
   transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }
@@ -4128,11 +4183,11 @@ button.vcard:focus-visible {
    leave in 160ms, the lattice and the controls stay, and the card plays the
    new month in. Doubled classes outrank the loop's own `.is-in` states. */
 .mc[data-replay] .mc-heads,
-.mw[data-replay] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
+.mw[data-replay] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b, .mw-part-n) {
   transition: opacity 200ms var(--ease);
 }
-.mc.mc[data-replay="out"] :is(.mc-heads, .mc-day > .mc-order, .mc-foot b),
-.mw.mw[data-replay="out"] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
+.mc.mc[data-replay="out"] :is(.mc-heads, .mc-day > .mc-order, .mc-foot b, .mc-part-n),
+.mw.mw[data-replay="out"] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b, .mw-part-n) {
   opacity: 0;
   transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }
@@ -4166,12 +4221,14 @@ button.vcard:focus-visible {
   color: var(--gain);
 }
 .mc[data-run] .mc-net-fig,
-.mc[data-run] .mc-spent {
+.mc[data-run] .mc-spent,
+.mc[data-run] .mc-part :is(b, .mc-part-n) {
   transition: opacity 280ms var(--ease);
 }
 .mc[data-run][data-out] .mc-order.is-in,
 .mc[data-run][data-out] .mc-net-fig,
-.mc[data-run][data-out] .mc-spent {
+.mc[data-run][data-out] .mc-spent,
+.mc[data-run][data-out] .mc-part :is(b, .mc-part-n) {
   opacity: 0;
   transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
 }
