@@ -272,7 +272,7 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
             {orders.length ? (
               <span className="mw-figs" aria-hidden="true">
                 <Counted className="mw-spent" text={dollars(spent)} />
-                <Counted className="mw-saved" text={`+${dollars(saved)}`} />
+                <Counted className={saved ? "mw-saved" : "mw-saved is-zero"} text={`+${dollars(saved)}`} />
               </span>
             ) : (
               <b className="mw-figs" aria-hidden="true">

@@ -3879,6 +3879,10 @@ button.vcard:focus-visible {
 .mw-saved {
   color: var(--gain);
 }
+/* A week of points-only orders brought no money back: its +$0.00 is quiet. */
+.mw-saved.is-zero {
+  color: var(--ink-3);
+}
 /* The phone's foot is the desktop's line items (.mc-foot): "You spent", then
    "You saved" underneath in its grey tile, one figure size, one right edge. */
 .mw-foot {

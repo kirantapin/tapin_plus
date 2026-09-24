@@ -257,7 +257,10 @@ const byId = (id: string) => venues.find((v) => v.id === id && v.plus && v.polic
  * earlier weeks left, greedily, one order a day. One place: the credit order,
  * then a 15% order and a small item in turn until nothing fits. "all": each
  * place's credit order in PLACES order (a place later each week), then 15%
- * orders, then small items. Cached.
+ * orders, then small items. A week that cannot yet afford a credit order
+ * saves instead of buying small items (the last week spends what is left),
+ * so a small budget buys the credit it can reach — $25 is two $10 orders,
+ * not six coffees and a loss. Cached.
  */
 const built = new Map<string, Month | null>();
 export function monthFor(scope: string, budgetCents: number): Month | null {
@@ -285,7 +288,10 @@ export function monthFor(scope: string, budgetCents: number): Month | null {
     };
     const order = all ? ids.map((_, k) => ids[(k + wk) % ids.length]) : ids;
     const credited = order.filter((id) => shop.has(id) && add(id, "big"));
-    if (all) {
+    const last = wk === WEEKS_PER_MONTH - 1;
+    if (!credited.length && !last) {
+      /* Nothing reached the credit floor this week: carry the room forward. */
+    } else if (all) {
       round(credited, "big");
       round(order, "small");
     } else if (ids.length) {
