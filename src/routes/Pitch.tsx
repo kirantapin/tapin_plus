@@ -23,7 +23,7 @@ import LiveFeed from "../shell/LiveFeed";
 import MonthCalendar from "../shell/MonthCalendar";
 import MonthWeeks from "../shell/MonthWeeks";
 import { useMedia } from "../shell/useMedia";
-import { month } from "../model/month";
+import type { MonthPlace } from "../shell/MonthSwitch";
 import {
   monthlyToday,
   guarantee,
@@ -42,6 +42,8 @@ import {
  */
 /** Off for now — see the note at the drill. */
 const SHOW_POINTS_DRILL = false;
+/** The pitch's month is every Plus place; it asks only how much (§48). */
+const EVERY_PLACE: MonthPlace[] = [{ id: "all", label: "All of Blacksburg", scope: "all" }];
 
 export default function Pitch({ invite }: { invite?: InviteId } = {}) {
   /* Points at /in with "View your membership" once Stripe says this
@@ -393,7 +395,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             cropped at the corner (Sam, at 1440: "the placement here doesn't
             sit with me quite right"). Desktop only. A sibling of the hero
             panel, so the copy column is untouched. */}
-        {desk && month ? <MonthCalendar month={month} /> : null}
+        {desk ? <MonthCalendar places={EVERY_PLACE} /> : null}
       </VenueMosaic>
 
       {/* The label carries "at Plus places" so the badge on the venue tiles has
@@ -423,9 +425,9 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             make sense to include this on mobile too, right below the header on
             BOTH pages"). The same calendar the desktop sets over the mosaic,
             first thing on the light ground. */}
-        {!desk && month ? (
+        {!desk ? (
           <div className="mc-phone">
-            <MonthWeeks month={month} />
+            <MonthWeeks places={EVERY_PLACE} />
           </div>
         ) : null}
         <section className="pitch-get">

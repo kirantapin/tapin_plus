@@ -4031,8 +4031,64 @@ button.vcard:focus-visible {
   position: absolute;
   inset: -7px 0;
 }
-/* The sub under the control, a step away from it. */
-.mcs + .mc-sub {
+/* HOW MUCH (§48): four equal pills under the head, and under the place
+   toggle when there is one. The second question, so lighter than the first:
+   32px and no track. The chosen pill is the surface's own --maroon (purple
+   on Coffeeholics) in white; on a phone each reaches 44px to touch. */
+.mca {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-sm);
+  margin: var(--s-lg) 0 0;
+}
+.mca-opt {
+  position: relative;
+  height: 32px;
+  min-width: 0;
+  padding: 0 var(--s-md);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--inner);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background-color 160ms var(--ease),
+    color 160ms var(--ease),
+    transform 120ms var(--ease);
+}
+.mca-opt[aria-checked="true"] {
+  background: var(--maroon);
+  color: var(--on-maroon);
+}
+.mca-opt:active {
+  transform: scale(0.97);
+}
+.mca-opt:focus-visible {
+  border-radius: var(--r-pill);
+}
+@media (hover: hover) {
+  .mca-opt[aria-checked="false"]:hover {
+    color: var(--ink-1);
+  }
+}
+.mw .mca-opt::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+/* The sub under the controls, a step away from them. */
+.mcs + .mc-sub,
+.mca + .mc-sub {
   margin-top: var(--s-lg);
 }
 /* Every choice's head in one cell; the others hold the height, unseen. */
@@ -4061,6 +4117,18 @@ button.vcard:focus-visible {
 }
 .mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
 .mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+/* AN AMOUNT EMPTIES THE MONTH (§48): the head, the orders and the figures
+   leave in 160ms, the lattice and the controls stay, and the card plays the
+   new month in. Doubled classes outrank the loop's own `.is-in` states. */
+.mc[data-replay] .mc-heads,
+.mw[data-replay] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
+  transition: opacity 200ms var(--ease);
+}
+.mc.mc[data-replay="out"] :is(.mc-heads, .mc-day > .mc-order, .mc-foot b),
+.mw.mw[data-replay="out"] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
   opacity: 0;
   transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }

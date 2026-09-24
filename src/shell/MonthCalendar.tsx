@@ -1,6 +1,6 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
-import { dollars, signedDollars, type Month } from "../model/month";
-import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from "./MonthSwitch";
+import { dollars, signedDollars } from "../model/month";
+import { MonthControls, TALLY, easeOut, still, useMonthSwitch, type MonthPlace } from "./MonthSwitch";
 
 /**
  * THE CALENDAR — a month on the membership, filling itself
@@ -34,37 +34,37 @@ import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from 
  * place, and its chip; the moving figures are `aria-hidden` beside still
  * copies.
  *
- * A MONTH AT ONE PLACE (§36, `monthAt`) is the same object: an order with a
+ * A MONTH AT ONE PLACE (§36, `monthFor(venueId)`) is the same object: one with a
  * `thumb` is the item's photograph filling the day instead of a collar.
  *
- * GIVEN `choices` (§40), the card offers them under its head. A switch shows
+ * GIVEN two `places` (§40), the card offers them under its head. A switch shows
  * the new month whole, counts "You saved" across from what it read, holds,
  * and the loop begins again on the new month.
+ *
+ * AN AMOUNT (§48) replays: the loop starts over from an empty month on the
+ * new orders after a short rest. A long month lands faster, so any month
+ * fills in about the same ten seconds.
  */
 const OPEN = 1200;
+const REOPEN = 360;
 const GAP = 900;
+const FILL = 9900;
 const ENTER = 280;
 const COUNT = 400;
 const HOLD = 3200;
 const LEAVE = 240;
 
-export default function MonthCalendar({
-  month: given,
-  choices,
-}: {
-  month: Month;
-  choices?: MonthChoice[];
-}) {
+export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
   const card = useRef<HTMLDivElement>(null);
   const headId = useId();
-  const sw = useMonthSwitch(given, choices, card);
+  const sw = useMonthSwitch(places, card);
   const month = sw.shown;
 
   /* Layout, not a passive effect: the emptied state has to be in place before
      the first paint, or the finished month flashes and then clears. */
   useLayoutEffect(() => {
     const el = card.current;
-    if (!el) return;
+    if (!el || !month) return;
     const cells = [...el.querySelectorAll<HTMLElement>(".mc-order")];
     const foot = el.querySelector<HTMLElement>(".mc-foot");
     const net = el.querySelector<HTMLElement>(".mc-net-fig");
@@ -76,6 +76,9 @@ export default function MonthCalendar({
     /* Set when this month replaced another: what "You saved" read then. */
     const before = sw.from.current;
     sw.from.current = null;
+    const replaying = sw.replay.current;
+    sw.replay.current = false;
+    const gap = Math.min(GAP, Math.floor(FILL / Math.max(1, runningCents.length)));
 
     const timers = new Set<number>();
     let raf = 0;
@@ -113,6 +116,7 @@ export default function MonthCalendar({
       foot.classList.toggle("is-ahead", c > 0);
     };
     const count = (from: number, to: number, net0?: number, ms = COUNT) => {
+      if (raf) cancelAnimationFrame(raf);
       const t0 = performance.now();
       const tick = (now: number) => {
         /* A frame's timestamp can precede the t0 taken when it was asked
@@ -131,19 +135,19 @@ export default function MonthCalendar({
       write(-1, -1);
       dirty = false;
     };
-    const cycle = () => {
+    const cycle = (open = OPEN) => {
       reset();
       runningCents.forEach((_, k) => {
-        later(OPEN + GAP * k, () => {
+        later(open + gap * k, () => {
           dirty = true;
           cells[k]?.classList.add("is-in");
-          later(ENTER, () => count(k - 1, k));
+          later(ENTER, () => count(k - 1, k, undefined, Math.min(COUNT, gap)));
         });
       });
-      const settled = OPEN + GAP * (runningCents.length - 1) + ENTER + COUNT;
+      const settled = open + gap * (runningCents.length - 1) + ENTER + Math.min(COUNT, gap);
       later(settled + HOLD, () => {
         el.setAttribute("data-out", "");
-        later(LEAVE, cycle);
+        later(LEAVE, () => cycle());
       });
     };
     /* After a switch: the new month whole, "You saved" counted across from
@@ -164,7 +168,7 @@ export default function MonthCalendar({
       count(last, last, c0, TALLY);
       later(TALLY + HOLD, () => {
         el.setAttribute("data-out", "");
-        later(LEAVE, cycle);
+        later(LEAVE, () => cycle());
       });
     };
     const play = () => {
@@ -174,7 +178,7 @@ export default function MonthCalendar({
       /* Resumed mid-cycle: leave the way a cycle leaves, then begin one. */
       if (dirty) {
         el.setAttribute("data-out", "");
-        later(LEAVE, cycle);
+        later(LEAVE, () => cycle());
       } else cycle();
     };
     /* The complete month, as the markup drew it: without `data-run` nothing
@@ -187,7 +191,7 @@ export default function MonthCalendar({
       dirty = true;
     };
     const decide = () => {
-      if (reduce.matches || el.closest("[data-still]")) return settle();
+      if (still(el)) return settle();
       if (!el.hasAttribute("data-run")) {
         el.setAttribute("data-run", "");
         reset();
@@ -203,8 +207,14 @@ export default function MonthCalendar({
     io.observe(el);
     reduce.addEventListener("change", decide);
     document.addEventListener("visibilitychange", decide);
-    if (before !== null && !reduce.matches && !el.closest("[data-still]")) arrive(before);
-    else decide();
+    if (still(el)) decide();
+    else if (before !== null) arrive(before);
+    /* An amount: from empty at once, the card's own rest shortened. */
+    else if (replaying) {
+      running = true;
+      el.setAttribute("data-run", "");
+      cycle(REOPEN);
+    } else decide();
 
     return () => {
       halt();
@@ -212,33 +222,28 @@ export default function MonthCalendar({
       reduce.removeEventListener("change", decide);
       document.removeEventListener("visibilitychange", decide);
     };
-  }, [month, sw.from, sw.net]);
+  }, [month, sw.from, sw.net, sw.replay]);
 
+  if (!month) return null;
   const at = new Map(month.orders.map((o, k) => [`${o.week}:${o.day}`, k]));
 
   return (
     <div className="mc" data-lit="" ref={card} role="group" aria-labelledby={headId}>
-      {sw.on ? (
-        /* Every choice's head in one cell, the shown one visible: the card's
-           top holds the tallest, so the control never moves under a finger. */
-        <div className="mc-heads">
-          {sw.options.map((c) => (
-            <p
-              key={c.id}
-              className={c.id === sw.shownId ? "mc-head" : "mc-head mc-ghost"}
-              id={c.id === sw.shownId ? headId : undefined}
-              aria-hidden={c.id === sw.shownId ? undefined : "true"}
-            >
-              {c.month.head}
-            </p>
-          ))}
-        </div>
-      ) : (
-        <p className="mc-head" id={headId}>
-          {month.head}
-        </p>
-      )}
-      {sw.on ? <MonthSegments options={sw.options} pick={sw.pick} onPick={sw.choose} /> : null}
+      {/* Every head the card can show in one cell, the shown one visible: the
+          top holds the tallest, so the controls never move under a finger. */}
+      <div className="mc-heads">
+        {sw.heads.map((h) => (
+          <p
+            key={h}
+            className={h === month.head ? "mc-head" : "mc-head mc-ghost"}
+            id={h === month.head ? headId : undefined}
+            aria-hidden={h === month.head ? undefined : "true"}
+          >
+            {h}
+          </p>
+        ))}
+      </div>
+      <MonthControls sw={sw} />
       {/* DECLUTTERED (Sam, 23 Sep 2026: "slightly too busy … we could remove the
           text right beneath the toggle"): the toggle names the places, so the
           sub only shows where there is no toggle. */}

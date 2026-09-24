@@ -4,55 +4,20 @@ import { sectionsFor, type MenuItem } from "./menu";
 
 /**
  * A MONTH ON THE MEMBERSHIP — the calendar on the pitch and on Coffeeholics
- * (docs/POLISH-2026-09-21.md §21, §36, §40, §42).
- *
- * SPEND A LITTLE, SAVE A LOT (§42). Sam: "show how little you have to spend
- * and how much you can save with such little spend." Every order in a month
- * is the MODEST one: at each visit, the place's cheapest real order that
- * reaches the credit floor — one item, or a basket off the same menu — so the
- * foot's "You spent" is as small as the month can honestly be, and "You
- * saved" is what that spend brings back. Nothing is typed but the schedule
- * below: which place, which week, which day. The items and every figure are
- * arithmetic on the menu (`docs/data/menus.json`), in integer cents.
- *
- * THE CHEAPEST ORDER, AND WHAT COUNTS AS ONE (`cheapest`). A set of one to
- * three of the menu's own items, each with its photograph, at or over
- * `BENEFIT.creditMinUsd`, every item needed to get there (drop any and it
- * falls under), and never two drinks — one person's order, not a round. The
- * cheapest first; a place visited again takes its next cheapest, never the
- * same lead item twice, so no two visits are pictured alike. The lead is the
- * first item in menu order and is the one a dish-pictured month shows.
- *
- * THREE MONTHS FROM ONE SCHEDULE. `month` is the pitch's: every place, each
- * day the venue's own mark. `monthAt(id)` is one place's visits pictured by
- * the dish (§36). `monthAcross(id)` is every place again, on that place's
- * page (§40's "All of Blacksburg"), so the toggle and the main page tell the
- * same story. All three earn by `earn`'s rules and total by `monthOf`.
- *
- * Sam's cover at The Milk Parlor, line skips and drinks at The Burg or Olaika
- * are the intent, and the model has no price for any of them yet; when those
- * records land, each is one line in ORDERS. Italiano's carries no credit, so
- * it is not on the calendar.
+ * (docs/POLISH-2026-09-21.md §21, §36, §40, §42, §48). `monthFor(scope, budget)`
+ * spends a monthly budget on real menu items, week by week, and earns by one
+ * set of rules; every figure is arithmetic on `docs/data/menus.json`, in cents.
  */
 
 /** Monday first: the weekend closes each row, where the nights out fall. */
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-type Day = (typeof DAYS)[number];
-
-/** Where and when, and nothing else: each visit's order comes off the menu. */
-const ORDERS: { week: number; day: Day; venueId: string }[] = [
-  { week: 1, day: "Tue", venueId: "coffeeholicsva" },
-  { week: 1, day: "Sat", venueId: "themilkparlor" },
-  { week: 2, day: "Thu", venueId: "coffeeholicsva" },
-  { week: 2, day: "Fri", venueId: "olaika" },
-  { week: 2, day: "Sat", venueId: "themilkparlor" },
-  { week: 3, day: "Mon", venueId: "coffeeholicsva" },
-  { week: 3, day: "Fri", venueId: "theburg" },
-  { week: 3, day: "Sat", venueId: "sweetopia" },
-  { week: 4, day: "Wed", venueId: "coffeeholicsva" },
-  { week: 4, day: "Fri", venueId: "olaika" },
-  { week: 4, day: "Sat", venueId: "themilkparlor" },
-];
+/** The days a week's orders take, in this order of use (§48): a week of n
+ *  orders takes the first n, and its orders fill them Monday first. */
+const SPREAD = ["Tue", "Thu", "Sat", "Mon", "Wed", "Fri", "Sun"].map((d) =>
+  DAYS.indexOf(d as (typeof DAYS)[number]),
+);
+/** Across Blacksburg, the credits go round the places in this order (§48). */
+const PLACES = ["coffeeholicsva", "theburg", "themilkparlor", "olaika", "sweetopia"];
 
 const cents = (usd: number) => Math.round(usd * 100);
 export const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
@@ -64,12 +29,17 @@ const chip = (c: number) => `+$${c % 100 ? (c / 100).toFixed(2) : c / 100}`;
 /** A section of the menu that is drinks, by its own label ("Espresso Drinks"). */
 const DRINKS = /drink/i;
 
+interface Basket {
+  items: MenuItem[];
+  c: number;
+}
+
 /**
- * A venue's `n` cheapest orders at or over the floor, as `cheapest` above
- * describes: by price, then fewer items, then menu order; a lead item used
- * once is not used again. Fewer than `n` if the menu runs out.
+ * A venue's orders at or over the credit floor, cheapest first: one to three
+ * of its own photographed items, every one needed to reach the floor, never
+ * two drinks, and each led by a different item so no two are pictured alike.
  */
-function cheapest(venueId: string, n: number): MenuItem[][] {
+function baskets(venueId: string): Basket[] {
   const floor = cents(BENEFIT.creditMinUsd);
   const menu = sectionsFor(venueId).flatMap((s) =>
     s.items.filter((i) => i.img).map((i) => ({ item: i, c: cents(i.price), drink: DRINKS.test(s.label) })),
@@ -94,14 +64,19 @@ function cheapest(venueId: string, n: number): MenuItem[][] {
   };
   found.sort((x, y) => x.c - y.c || x.at.length - y.at.length || byMenu(x.at, y.at));
   const led = new Set<number>();
-  const picks: MenuItem[][] = [];
-  for (const o of found) {
-    if (picks.length >= n) break;
-    if (led.has(o.at[0])) continue;
-    led.add(o.at[0]);
-    picks.push(o.at.map((k) => menu[k].item));
-  }
-  return picks;
+  return found
+    .filter((o) => !led.has(o.at[0]) && !!led.add(o.at[0]))
+    .map((o) => ({ items: o.at.map((k) => menu[k].item), c: o.c }));
+}
+
+/** A venue's photographed items under the floor, one at a time, dearest first. */
+function smalls(venueId: string): Basket[] {
+  const floor = cents(BENEFIT.creditMinUsd);
+  return sectionsFor(venueId)
+    .flatMap((s) => s.items)
+    .filter((i) => i.img && cents(i.price) < floor)
+    .map((i) => ({ items: [i], c: cents(i.price) }))
+    .sort((x, y) => y.c - x.c);
 }
 
 /** One benefit an order earned, and the points every order earns. */
@@ -160,8 +135,6 @@ export interface Month {
   startCents: number;
   runningCents: number[];
   netCents: number;
-  /** Every order's points, whole. */
-  points: number;
 }
 
 /** An order in its day, off its venue's menu; nothing earned yet. */
@@ -171,31 +144,6 @@ interface Plan {
   venue: Venue;
   items: MenuItem[];
 }
-
-/** Every visit in ORDERS at a Plus place with a credit, each with its order:
- *  a place's k-th visit takes its k-th cheapest. One order a day. */
-const plans: Plan[] = (() => {
-  const visits = [...ORDERS]
-    .map((o) => ({ ...o, d: DAYS.indexOf(o.day) }))
-    .filter((o) => o.week >= 1 && o.week <= WEEKS_PER_MONTH && o.d >= 0)
-    .sort((a, b) => a.week - b.week || a.d - b.d);
-  const menus = new Map<string, MenuItem[][]>();
-  const taken = new Set<string>();
-  const out: Plan[] = [];
-  for (const o of visits) {
-    const venue = venues.find((v) => v.id === o.venueId);
-    if (!venue?.plus || !venue.policies.some((p) => p.kind === "credit")) continue;
-    if (!menus.has(venue.id))
-      menus.set(venue.id, cheapest(venue.id, visits.filter((v) => v.venueId === venue.id).length));
-    const at = out.filter((p) => p.venue.id === venue.id).length;
-    const items = menus.get(venue.id)?.[at];
-    const slot = `${o.week}:${o.d}`;
-    if (!items || taken.has(slot)) continue;
-    taken.add(slot);
-    out.push({ week: o.week - 1, day: o.d, venue, items });
-  }
-  return out;
-})();
 
 /** One set of rules at every place, in the order things happen: the week's
  *  first order at or over the floor AT EACH PLACE is the credit; another at
@@ -250,82 +198,116 @@ const placed = (o: EarnedPlan): Placed => ({
   cents: o.cents,
   chip: o.chip,
 });
-/** The venue's mark: the pitch's month and §40's. */
+/** The venue's mark: a month across places answers "where". */
 const collar = (o: EarnedPlan): CollarOrder => ({
   ...placed(o),
   img: o.venue.logo,
   brand: o.venue.brandColor,
   field: logoField(o.venue.id),
 });
-/** The lead item's photograph: a month at one place. */
+/** The lead item's photograph: a month at one place answers "what". */
 const dish = (o: EarnedPlan): ThumbOrder => ({ ...placed(o), thumb: o.items[0].img as string });
 
-/** The foot's figures, from earned orders; null when there is nothing to
- *  show or the money back does not cover the membership. */
-/** The head is the claim, from the month's own spend, floored to the dollar so
- *  "spend $X" is never more than the month shows (§42.1, Sam: "if you spend at
- *  least $40 … this is how far ahead you'll be"). */
-const spend = (spentCents: number) => `$${Math.floor(spentCents / 100)}`;
-
-function monthOf(
-  orders: MonthOrder[],
-  text: { head: (spent: string) => string; sub: string },
-): Month | null {
+/** The running figures and the claim; "You saved" may end below zero (§48). */
+function monthOf(orders: MonthOrder[], head: string, sub: string): Month | null {
+  if (!orders.length) return null;
   const plan = cents(monthlyToday);
   const sums = (pick: (o: MonthOrder) => number) =>
     orders.reduce<number[]>((acc, o) => [...acc, (acc.length ? acc[acc.length - 1] : 0) + pick(o)], []);
   const runningSpent = sums((o) => o.priceCents);
   const runningCents = sums((o) => o.cents).map((c) => c - plan);
-  const last = (xs: number[], none: number) => (xs.length ? xs[xs.length - 1] : none);
-  const netCents = last(runningCents, -plan);
-  if (!orders.length || netCents <= 0) return null;
   return {
-    head: text.head(spend(last(runningSpent, 0))),
-    sub: text.sub,
+    head,
+    sub,
     days: DAYS.map((d) => d[0]),
     weeks: Array.from({ length: WEEKS_PER_MONTH }, (_, k) => `Week ${k + 1}`),
     orders,
     planCents: plan,
     runningSpent,
-    spentCents: last(runningSpent, 0),
+    spentCents: runningSpent[runningSpent.length - 1],
     startCents: -plan,
     runningCents,
-    netCents,
-    points: orders.reduce((s, o) => s + o.points, 0),
+    netCents: runningCents[runningCents.length - 1],
   };
 }
 
-export const month: Month | null = monthOf(earn(plans).map(collar), {
-  head: (s) => `Spend ${s} a month across Blacksburg`,
-  sub: `$${BENEFIT.creditUsd} credit at every place, every week`,
-});
-
-/**
- * A MONTH AT ONE PLACE (§36, §42): that place's visits, each pictured by its
- * lead item's own photograph. One order a week at Coffeeholics, each the
- * next cheapest to reach the floor, each earning the week's $5.
- */
-export function monthAt(venueId: string): Month | null {
-  const venue = venues.find((v) => v.id === venueId);
-  const own = plans.filter((p) => p.venue.id === venueId);
-  if (!venue || !own.length) return null;
-  return monthOf(earn(own).map(dish), {
-    head: (s) => `Spend ${s} a month at ${venue.name}`,
-    sub: `$${BENEFIT.creditUsd} credit once a week, points on every order`,
-  });
+/** Each venue's menu lists, walked in turn: a place's next ≥$10 order is its
+ *  cheapest not yet taken this month (round again once all are), and its
+ *  next small item the dearest not yet taken that fits. */
+function larder(ids: string[]) {
+  const lists = new Map(ids.map((id) => [id, { big: baskets(id), small: smalls(id) }]));
+  const used = new Map<string, Set<Basket>>();
+  const take = (id: string, kind: "big" | "small", room: number): Basket | null => {
+    const list = lists.get(id)?.[kind] ?? [];
+    const seen = used.get(id) ?? new Set<Basket>();
+    used.set(id, seen);
+    if (list.length && list.every((b) => seen.has(b))) list.forEach((b) => seen.delete(b));
+    const fits = list.filter((b) => b.c <= room);
+    const pick = fits.find((b) => !seen.has(b)) ?? fits[0] ?? null;
+    if (pick) seen.add(pick);
+    return pick;
+  };
+  return { take, has: (id: string) => (lists.get(id)?.big.length ?? 0) > 0 };
 }
 
+const byId = (id: string) => venues.find((v) => v.id === id && v.plus && v.policies.some((p) => p.kind === "credit"));
+
 /**
- * ACROSS BLACKSBURG (§40). Sam: "a toggle for 'all tapin plus' locations in
- * blacksburg so someone can see how much they would save across all of these
- * locations." The page's own visits and every other place's, by the same
- * rules: the pitch's month, on that place's page. Each cell is the venue's
- * mark: this month answers "where", not "what".
+ * WHAT A MONTHLY BUDGET BUYS (§48). Each week spends a quarter of it plus what
+ * earlier weeks left, greedily, one order a day. One place: the credit order,
+ * then a 15% order and a small item in turn until nothing fits. "all": each
+ * place's credit order in PLACES order (a place later each week), then 15%
+ * orders, then small items. Cached.
  */
-export function monthAcross(venueId: string): Month | null {
-  if (!plans.some((p) => p.venue.id === venueId)) return null;
-  return monthOf(earn(plans).map(collar), {
-    head: (s) => `Spend ${s} a month across Blacksburg`,
-    sub: `$${BENEFIT.creditUsd} credit at every place, every week`,
-  });
+const built = new Map<string, Month | null>();
+export function monthFor(scope: string, budgetCents: number): Month | null {
+  const key = `${scope}:${budgetCents}`;
+  if (built.has(key)) return built.get(key) ?? null;
+  const all = scope === "all";
+  const ids = (all ? PLACES : [scope]).filter((id) => byId(id));
+  const shop = larder(ids);
+  const plans: Plan[] = [];
+  let room = 0;
+  for (let wk = 0; wk < WEEKS_PER_MONTH; wk++) {
+    room += Math.floor(budgetCents / WEEKS_PER_MONTH);
+    const week: { id: string; b: Basket }[] = [];
+    const add = (id: string, kind: "big" | "small") => {
+      if (week.length >= SPREAD.length) return false;
+      const b = shop.take(id, kind, room);
+      if (!b) return false;
+      week.push({ id, b });
+      room -= b.c;
+      return true;
+    };
+    /* Round the places until a whole round adds nothing. */
+    const round = (places: string[], kind: "big" | "small") => {
+      for (let k = 0, miss = 0; miss < places.length; k++) miss = add(places[k % places.length], kind) ? 0 : miss + 1;
+    };
+    const order = all ? ids.map((_, k) => ids[(k + wk) % ids.length]) : ids;
+    const credited = order.filter((id) => shop.has(id) && add(id, "big"));
+    if (all) {
+      round(credited, "big");
+      round(order, "small");
+    } else if (ids.length) {
+      const other = (k: "big" | "small") => (k === "big" ? "small" : "big");
+      for (let want: "big" | "small" = "big"; ; ) {
+        const got = add(ids[0], want) ? want : add(ids[0], other(want)) ? other(want) : null;
+        if (!got) break;
+        want = other(got);
+      }
+    }
+    const days = SPREAD.slice(0, week.length).sort((a, b) => a - b);
+    week.forEach(({ id, b }, k) => plans.push({ week: wk, day: days[k], venue: byId(id) as Venue, items: b.items }));
+  }
+  const venue = all ? null : byId(scope);
+  const amount = `$${Math.round(budgetCents / 100)}`;
+  const month = monthOf(
+    all ? earn(plans).map(collar) : earn(plans).map(dish),
+    `Spend ${amount} a month ${venue ? `at ${venue.name}` : "across Blacksburg"}`,
+    all
+      ? `$${BENEFIT.creditUsd} credit at every place, every week`
+      : `$${BENEFIT.creditUsd} credit once a week, ${Math.round(BENEFIT.percentOff * 100)}% off the rest, points on all of it`,
+  );
+  built.set(key, month);
+  return month;
 }

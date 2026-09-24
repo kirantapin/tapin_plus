@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, type Ref } from "react";
 import type { Month, MonthOrder } from "../model/month";
 import { dollars, signedDollars } from "../model/month";
-import { MonthSegments, TALLY, easeOut, still, useMonthSwitch, type MonthChoice } from "./MonthSwitch";
+import { MonthControls, TALLY, easeOut, still, useMonthSwitch, type MonthPlace } from "./MonthSwitch";
 
 /**
  * THE MONTH ON A PHONE, CALM (23 Sep 2026, /impeccable redesign — Sam: "redesign
@@ -14,7 +14,7 @@ import { MonthSegments, TALLY, easeOut, still, useMonthSwitch, type MonthChoice 
  * `--loss` and what it brought back in `--gain` (§42), then what the month
  * cost and what you saved after the membership. No empty days, no chips, no
  * running line, no loop. The same model as the desktop (`Month`), so the two
- * can never disagree. Given `choices` (§40) it offers them under the head, and
+ * can never disagree. Given two `places` (§40) it offers them under the head, and
  * a switch counts "You saved" across while the rows crossfade.
  *
  * IT PLAYS ONCE (§41). The first time the card is 40% in view the weeks land
@@ -30,7 +30,8 @@ import { MonthSegments, TALLY, easeOut, still, useMonthSwitch, type MonthChoice 
  * it whole. Each counted figure sits over its final text, held invisible, so
  * a count never widens a column; tiles move by transform and opacity only.
  * A §40 switch never replays it: the new month shows whole and "You saved"
- * counts across.
+ * counts across. A §48 amount does: the new month plays week by week at once.
+ * A month that ends below zero counts on from the membership owed instead.
  */
 const WEEK = 520;
 const STAGGER = 50;
@@ -67,31 +68,27 @@ function Counted({ className, text, live }: { className?: string; text: string; 
   );
 }
 
-export default function MonthWeeks({
-  month: given,
-  choices,
-}: {
-  month: Month;
-  choices?: MonthChoice[];
-}) {
+export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
   const card = useRef<HTMLDivElement>(null);
   const fig = useRef<HTMLSpanElement>(null);
   const spentFig = useRef<HTMLSpanElement>(null);
-  const sw = useMonthSwitch(given, choices, card);
+  const sw = useMonthSwitch(places, card);
   const month = sw.shown;
-  const ahead = month.netCents > 0;
-  const weeks = byWeek(month);
-  /** The month the sequence last saw, and whether it has had its one play. */
+  /** The month the sequence last saw, whether it has had its one play, and
+   *  whether a switch's count owns "You saved" right now. */
   const seen = useRef<Month | null>(null);
   const played = useRef(false);
+  const counting = useRef(false);
 
   /* After a switch, "You saved" counts from what it read to the new figure,
      its colour following the sign; at rest it is the markup's own. */
   useLayoutEffect(() => {
     const b = fig.current;
+    if (!month) return;
     const to = month.netCents;
     const c0 = sw.from.current;
     sw.from.current = null;
+    counting.current = !!b && c0 !== null;
     if (!b || c0 === null) {
       sw.net.current = to;
       return;
@@ -119,12 +116,17 @@ export default function MonthWeeks({
     const el = card.current;
     const spentAll = spentFig.current;
     const savedAll = fig.current;
-    if (!el || !spentAll || !savedAll) return;
-    const switched = seen.current !== null && seen.current !== month;
+    if (!el || !spentAll || !savedAll || !month) return;
+    const replaying = sw.replay.current;
+    sw.replay.current = false;
+    const switched = !replaying && seen.current !== null && seen.current !== month;
     seen.current = month;
     const rows = [...el.querySelectorAll<HTMLElement>(".mw-week")];
     const all = byWeek(month);
     const back = all.reduce((s, w) => s + w.saved, 0);
+    /* Ahead: from $0.00 by each week's share of the net. Not: from the
+       membership owed, by what each week brought back. */
+    const ahead = month.netCents > 0 && back > 0;
     const parts = all.map((w, k) => {
       const row = rows[k];
       const tiles = row ? [...row.querySelectorAll<HTMLElement>(".mw-tile")] : [];
@@ -135,7 +137,7 @@ export default function MonthWeeks({
         /* The count begins as the week's last tile lands. */
         countAt: k * WEEK + STAGGER * Math.max(0, tiles.length - 1) + ENTER,
         /* This week's part of "You saved", by what it brought back. */
-        share: back > 0 ? (month.netCents * w.saved) / back : 0,
+        share: ahead ? (month.netCents * w.saved) / back : w.saved,
         spentLive: row?.querySelector<HTMLElement>(".mw-spent .mw-live") ?? null,
         savedLive: row?.querySelector<HTMLElement>(".mw-saved .mw-live") ?? null,
       };
@@ -147,7 +149,7 @@ export default function MonthWeeks({
     /* Every figure `t` ms into the play. */
     const paint = (t: number) => {
       let spent = 0;
-      let saved = 0;
+      let saved = ahead ? 0 : month.startCents;
       parts.forEach((w) => {
         if (!w.tiles.length) return;
         const e = easeOut(Math.max(0, Math.min(1, (t - w.countAt) / COUNT)));
@@ -175,13 +177,14 @@ export default function MonthWeeks({
       }
     };
 
-    if (switched || played.current || typeof IntersectionObserver === "undefined" || still(el)) {
+    if (still(el) || (!replaying && (switched || played.current || typeof IntersectionObserver === "undefined"))) {
       played.current = true;
-      rest(!switched);
+      rest(!counting.current);
       return;
     }
 
     el.setAttribute("data-run", "");
+    parts.forEach((w) => w.tiles.forEach((t) => t.classList.remove("is-in")));
     paint(0);
     let raf = 0;
     const play = () => {
@@ -205,6 +208,10 @@ export default function MonthWeeks({
       };
       raf = requestAnimationFrame(tick);
     };
+    if (replaying) {
+      play();
+      return () => cancelAnimationFrame(raf);
+    }
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e || e.intersectionRatio < SEEN) return;
@@ -218,28 +225,24 @@ export default function MonthWeeks({
       io.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [month, sw.net]);
+  }, [month, sw.net, sw.replay]);
+
+  if (!month) return null;
+  const ahead = month.netCents > 0;
+  const weeks = byWeek(month);
 
   return (
     <div className="mw" data-lit="" ref={card} role="group" aria-label={month.head}>
-      {sw.on ? (
-        /* Every choice's head in one cell, the shown one visible, so the
-           control under it never moves. */
-        <div className="mw-heads">
-          {sw.options.map((c) => (
-            <p
-              key={c.id}
-              className={c.id === sw.shownId ? "mw-head" : "mw-head mw-ghost"}
-              aria-hidden={c.id === sw.shownId ? undefined : "true"}
-            >
-              {c.month.head}
-            </p>
-          ))}
-        </div>
-      ) : (
-        <p className="mw-head">{month.head}</p>
-      )}
-      {sw.on ? <MonthSegments options={sw.options} pick={sw.pick} onPick={sw.choose} /> : null}
+      {/* Every head the card can show in one cell, the shown one visible, so
+          the controls under it never move. */}
+      <div className="mw-heads">
+        {sw.heads.map((h) => (
+          <p key={h} className={h === month.head ? "mw-head" : "mw-head mw-ghost"} aria-hidden={h === month.head ? undefined : "true"}>
+            {h}
+          </p>
+        ))}
+      </div>
+      <MonthControls sw={sw} />
       <ol className="mw-weeks">
         {weeks.map(({ label, orders, spent, saved }) => (
           <li key={label} className="mw-week">

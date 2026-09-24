@@ -10,8 +10,7 @@ import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
 import MonthCalendar from "../shell/MonthCalendar";
 import MonthWeeks from "../shell/MonthWeeks";
-import { monthAcross, monthAt } from "../model/month";
-import type { MonthChoice } from "../shell/MonthSwitch";
+import type { MonthPlace } from "../shell/MonthSwitch";
 import { useReserveCta } from "../shell/useReserveCta";
 import { useMedia } from "../shell/useMedia";
 import { logoField, launchWindow, monthlyToday, venues } from "../model/content";
@@ -102,13 +101,12 @@ import {
  *
  * On a phone there is no receipt at all: the cards are the proof there.
  */
-/** This shop's month (§36), built once from its menu, and the same month
- *  with every other Plus place in it (§40), offered side by side. */
-const monthChoices: MonthChoice[] = [
-  { id: "here", label: "Coffeeholics", month: monthAt("coffeeholicsva") },
-  { id: "all", label: "All of Blacksburg", month: monthAcross("coffeeholicsva") },
+/** This shop's month (§36) or every Plus place's (§40), at the amount the
+ *  reader picks (§48). */
+const monthPlaces: MonthPlace[] = [
+  { id: "here", label: "Coffeeholics", scope: "coffeeholicsva" },
+  { id: "all", label: "All of Blacksburg", scope: "all" },
 ];
-const month = monthChoices[0].month;
 
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -329,7 +327,7 @@ export default function Coffeeholics() {
               1024, made of this shop's own orders (§36: "food and drink items
               at coffeeholics, showing multiple purchases a week"), each
               earning its $5, its 15% or its points. */}
-          {desk && month ? <MonthCalendar month={month} choices={monthChoices} /> : null}
+          {desk ? <MonthCalendar places={monthPlaces} /> : null}
         </div>
 
         {/* ══ THREE FIGURES, ON THE GROUND UNDER THE BAND ═══════════════════
@@ -347,9 +345,9 @@ export default function Coffeeholics() {
             "include this on mobile too, right below the header on BOTH
             pages"), under the figure strip (Sam: "have the hero stats show up
             above this"), as the calm week-by-week month. */}
-        {!desk && month ? (
+        {!desk ? (
           <div className="mc-phone">
-            <MonthWeeks month={month} choices={monthChoices} />
+            <MonthWeeks places={monthPlaces} />
           </div>
         ) : null}
       </section>
