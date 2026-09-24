@@ -471,7 +471,9 @@
   }
   .cg-lockup {
     padding-left: var(--s-2xl);
-    border-left: 1px solid var(--hair-lit);
+    /* --hair-lit is a quarter of white and vanishes on the photograph; the
+       rule is white at 45%, the one literal the house allows. */
+    border-left: 1px solid color-mix(in srgb, var(--on-maroon) 45%, transparent);
   }
   .cg-say {
     grid-column: 1;
@@ -1217,15 +1219,19 @@
 
 /* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
    The pitch's calendar (pitch.css `.mc-*`) in the band's right track, both
-   rows: in the flow, centred on the band's height, at the pitch's width.
+   rows: in the flow, on the band's foot with the copy, at the pitch's width.
    The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
 @media (min-width: 1024px) {
+  /* ONE FOOT (Sam, 23 Sep 2026, /impeccable layout: "almost there"). Centred
+     on the band the month's top landed on the masthead's baseline and its
+     bottom hung 40px above the buttons — two near-misses. It ends where the
+     copy ends now, on the band's padding edge, and the air is all above it. */
   .cg-band > .mc {
     position: relative;
     z-index: 1;
     grid-column: 2;
     grid-row: 1 / -1;
-    align-self: center;
+    align-self: end;
     width: 480px;
     max-width: 100%;
   }
