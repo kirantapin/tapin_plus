@@ -14,8 +14,10 @@ export interface MonthPlace {
   scope: string;
 }
 
-/** A month's spend to choose from, in cents; $50 until one is chosen (§48). */
-export const AMOUNTS = [2500, 5000, 10000, 20000];
+/** A month's spend to choose from, in cents: the deck's own four bands
+ *  (Scenes.tsx, SavingsSlider.tsx), so one page never asks it two ways.
+ *  $50 until one is chosen (§48, §48.2). */
+export const AMOUNTS = [5000, 10000, 15000, 30000];
 const AMOUNT = 5000;
 
 const OUT = 160;

@@ -260,7 +260,8 @@ const byId = (id: string) => venues.find((v) => v.id === id && v.plus && v.polic
  * orders, then small items. A week that cannot yet afford a credit order
  * saves instead of buying small items (the last week spends what is left),
  * so a small budget buys the credit it can reach — $25 is two $10 orders,
- * not six coffees and a loss. Cached.
+ * not six coffees and a loss. At one place, a week with more than $10 a
+ * day left to spend orders over $10 rather than alternating. Cached.
  */
 const built = new Map<string, Month | null>();
 export function monthFor(scope: string, budgetCents: number): Month | null {
@@ -296,7 +297,12 @@ export function monthFor(scope: string, budgetCents: number): Month | null {
       round(order, "small");
     } else if (ids.length) {
       const other = (k: "big" | "small") => (k === "big" ? "small" : "big");
+      const floor = cents(BENEFIT.creditMinUsd);
       for (let want: "big" | "small" = "big"; ; ) {
+        /* More a day than small items could spend: $300 at one café buys
+           orders over $10, not $226 and a head that overstates it (§48.2). */
+        const open = SPREAD.length - week.length;
+        if (open && room / open >= floor) want = "big";
         const got = add(ids[0], want) ? want : add(ids[0], other(want)) ? other(want) : null;
         if (!got) break;
         want = other(got);
