@@ -4,9 +4,8 @@
    One construction for the three places that set the benefits as figures: the
    Coffeeholics splash (`display`), the merchant pop-up and the checkout
    (`sheet`). These rules moved here from campaign.css (`.cg-figures`) and
-   venue.css (`.vp-figures`) unchanged in value; the two hosts keep only their
-   own margin, and the extraction was measured to render the same geometry at
-   375 and 1440 before and after.
+   venue.css (`.vp-figures`) unchanged in value; the splash keeps only its own
+   margin, and the pop-up also redraws its equal columns and hairline (§54).
 
    Imported after pitch.css and before the per-surface files, so a host's
    placement rule (one class, later file) wins on source order without having

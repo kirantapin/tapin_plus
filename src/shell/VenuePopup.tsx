@@ -34,9 +34,10 @@ import {
  *
  * The composition now has four objects and a clear largest thing:
  *
- *   THE PHOTOGRAPH      the object, not a band. The name, the PLUS chip and
- *                       `category · street` ride it; the collar is top-left,
- *                       the close top-right. The name is said ONCE.
+ *   THE PHOTOGRAPH      the object, not a band. One lockup rides its foot:
+ *                       collar, name, PLUS chip, then `category · street` and
+ *                       the open state (layout pass, 24 Sep 2026). The close
+ *                       is top-right. The name is said ONCE.
  *   THE FIGURES         $5 / 15% / 1× in three hairlined columns — the
  *                       splash's `.cg-figures` construction at sheet scale.
  *   WORKS ON            the plates Sam likes, compact, one row.
@@ -144,46 +145,49 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
               />
             </svg>
           </button>
-          <span
-            className="collar vp-collar"
-            data-field={logoField(venue.id)}
-            style={{ ["--brand" as string]: venue.brandColor }}
-          >
-            <img src={venue.logo} alt="" decoding="async" />
-          </span>
+          {/* One identity lockup at the photo's foot, the rail card's order:
+              mark, then name, then where and whether it is open now. */}
           <div className="vp-id">
-            <h2 className="vp-name">
-              <span>{venue.name}</span>
-              {venue.plus ? <PlusFlag className="plus vp-plus" /> : null}
-            </h2>
-            <p className="vp-where">
-              {venue.category} · {venue.street}
-            </p>
+            <span
+              className="collar vp-collar"
+              data-field={logoField(venue.id)}
+              style={{ ["--brand" as string]: venue.brandColor }}
+            >
+              <img src={venue.logo} alt="" decoding="async" />
+            </span>
+            <div className="vp-id-text">
+              <h2 className="vp-name">
+                <span>{venue.name}</span>
+                {venue.plus ? <PlusFlag className="plus vp-plus" /> : null}
+              </h2>
+              {/* Filled dot open, ring closed: §9 allows no status hue, so the
+                  state separates on the shape of the mark. */}
+              <p className="vp-where">
+                <span>
+                  {venue.category} · {venue.street}
+                </span>
+                <span className="sr-only">, </span>
+                <span className="vp-state" data-open={venue.open ? "" : undefined}>
+                  <span className="vp-dot" aria-hidden="true" />
+                  {venue.open ? "Open now" : "Closed right now"}
+                </span>
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="vp-body">
-          {/* The one thing on this card that changes by the hour — The Milk
-              Parlor's live page reads CLOSED today and its record says so
-              too. Filled dot open, hollow dot closed: §9 keeps this palette
-              to maroon, so the state separates on the ink ramp and on the
-              shape of the mark, never on a status hue. */}
-          <p className="vp-state" data-open={venue.open ? "" : undefined}>
-            <span className="vp-dot" aria-hidden="true" />
-            {venue.open ? "Open now" : "Closed right now"}
-          </p>
-
           {/* ══ THE BENEFITS ARE FIGURES ═══════════════════════════════════
               §10.2, and the biggest move on the sheet: the numbers that ARE
               the membership are set as the membership, in open columns parted
               by a hairline, with no tile beside them. Same construction as
               the splash's, at the sheet's 30px — one component since 23 Sep
-              (shell/BenefitFigures.tsx, §15), so the pop-up, the splash and
-              the checkout cannot drift apart. Points is "1×", read from the
-              policy's multiplier, so the three are one size (Sam, 22 Sep
-              2026: "it's a bit weird right now"). Each qualifier is a
-              CONDITION or a CADENCE, never the figure restated. A venue with
-              none of the three draws nothing here. */}
+              (shell/BenefitFigures.tsx, §15) for the figures and qualifiers;
+              venue.css redraws this sheet's columns and hairline. Points is
+              "1×", read from the policy's multiplier, so the three are one
+              size (Sam, 22 Sep 2026: "it's a bit weird right now"). Each
+              qualifier is a CONDITION or a CADENCE, never the figure
+              restated. A venue with none of the three draws nothing here. */}
           <BenefitFigures items={figures} size="sheet" className="vp-figures" />
 
           {/* An offer is the merchant's own promotion rather than one of the

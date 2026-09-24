@@ -16,14 +16,18 @@
    button — and it named The Burg three times in its first 300px.
 
    Four objects now, and one of them is clearly the largest:
-     THE PHOTOGRAPH   200px on a phone, 220 in the dialog. The name, the PLUS
-                      chip and `category · street` ride it under a veil; the
-                      collar sits top-left and the close top-right.
-     THE FIGURES      $5 / 15% / Points in three hairlined columns — the
+     THE PHOTOGRAPH   its own proportion, 200 to 220px, anchored top. The
+                      collar, name, PLUS chip, `category · street` and the
+                      open state ride its foot under a veil; the close top-right.
+     THE FIGURES      $5 / 15% / 1× in three hairlined columns — the
                       splash's `.cg-figures` at sheet scale.
      WORKS ON         compact plates, glyph and word on a line, one row.
      THE ACTION       untouched.
    No uppercase eyebrow, no icon tile, no rule under a heading, one button.
+
+   Sam, 24 Sep 2026: "this isn't quite there yet, we need to /impeccable layout".
+   So the collar and open state join the name at the photo's foot, and the body
+   runs on one cadence: 24 between groups, 8 inside one.
 
    NOTHING HERE REACHES THE PITCH. The plates were `.covers`/`.cover` shared
    with pitch.css, and the pitch now wears that tall plate on its own page
@@ -76,15 +80,23 @@
   position: relative;
   isolation: isolate;
   flex: 0 0 auto;
-  height: 200px;
+  /* The heroes' own 1024x528, held between 200 and 220: at the full 237 in the
+     dialog, The Burg's shirt print, its own name, sat directly above the name. */
+  aspect-ratio: 1024 / 528;
+  min-height: 200px;
+  max-height: 220px;
   background: var(--card);
 }
 .vp-shot > img {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Anchored top, so any trim comes off the foot and heads keep the headroom
+     the file has. */
+  object-position: 50% 0%;
   display: block;
 }
 /* ══ THE ONE HERO THAT IS NOT A PHOTOGRAPH ═════════════════════════════════
@@ -114,40 +126,9 @@
     rgba(18, 10, 14, 0.82) 100%
   );
 }
-/* ══ THE VEIL, AND WHY IT HOLDS BEFORE IT RAMPS ═════════════════════════════
-   The venue card's veil, from the foot: barely there across the top so the
-   photograph is seen and the collar sits on the merchant's own artwork, deep
-   at the bottom so the name and the street have a measured ground rather than
-   whatever the picture happens to be there.
-
-   THE STOPS ARE MEASURED, NOT PICKED, and the inherited ones do not hold. The
-   band wore .24 → .06 at 42% → .72 at 100% — three stops, a fast ramp, and
-   nothing laid on it. Put the name on the photograph and that ramp reaches only
-   about .37 where the name's cap-line sets. Sampled at 375 with the two nodes
-   hidden, the brightest ground pixel under each and the contrast white gets on
-   it (the `.bshot` method in pitch.css):
-
-                      INHERITED BAND RAMP     THIS RAMP
-                      name    street          name    street
-     Coffeeholics     4.84    6.34            7.99    8.05
-     The Burg         4.25    5.23            7.22    7.12
-     The Milk Parlor  3.96    6.04            6.78    7.71
-     Olaika           3.48    3.66            6.12    5.36
-     Sweetopia        2.87    4.21            5.33    6.03
-     Italiano's       2.97    4.07            5.44    5.89
-
-   Five of the six failed AA on the name — Sweetopia's white counter at 2.87:1,
-   Olaika's plates at 3.48 — because the ramp is already two thirds open where
-   the type starts. So this one opens LATE: the top wash clears by 30% so the
-   photograph and the collar's own artwork are seen, and the dark side does not
-   begin until 64%, which is above every text node on every venue.
-
-   AND IT IS NO DEEPER THAN IT HAS TO BE. The first pass ran .68/.88 at those
-   two stops and measured 8.17:1 at its worst — a correct number over a
-   photograph nobody could see. .54/.76 holds the floor at 5.33:1, which is the
-   same margin the pitch cards settled on, and gives the picture back. The rgba
-   is the field's own #120A0E at four alphas, written out rather than tokenised
-   because a token cannot carry four stops. */
+/* Light on top so the photo shows, dark from 64% under the lockup; .68/.88 hid
+   the photo. Worst, 24 Sep, 320-1440: name 4.32:1 (large text), street 4.54:1,
+   both at 320, where the lockup wraps up to 58%. #120A0E; a token holds one stop. */
 .vp-shot::after {
   content: "";
   position: absolute;
@@ -162,29 +143,27 @@
     rgba(18, 10, 14, 0.76) 100%
   );
 }
-/* Top-left, ON the photograph rather than straddling its edge: the sheet below
-   starts with the state line now, and a collar hanging into it would push that
-   line down by its own overhang. */
+/* The mark leads the lockup at the photo's foot, as it does on the rail card.
+   44, centred on the two lines beside it; the inner radius nests 12 - 3. */
 .vp-collar {
-  position: absolute;
-  z-index: 2;
-  left: var(--s-2xl);
-  top: var(--s-xl);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-control);
 }
-/* 44, not the 36 it wore before: §6's floor for a tappable at 375, and this is
-   the only control on the sheet besides the action. Its top edge aligns with the
-   collar's across the photograph; the extra 4px falls downward, where there is
-   nothing to line up with. */
+.vp-collar img,
+.vp-collar::after {
+  border-radius: 9px;
+}
+/* A 36px disc on a 44px target (§6's floor at 375): the photo's one corner
+   control reads quieter without getting harder to hit. Insets match the
+   lockup's, 24 across and 16 down. */
 .vp-close {
   position: absolute;
   top: var(--s-xl);
   right: var(--s-2xl);
   z-index: 2;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -196,9 +175,15 @@
   -webkit-tap-highlight-color: transparent;
   transition: transform 150ms var(--ease);
 }
+.vp-close::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--s-xs) * -1);
+  border-radius: 50%;
+}
 .vp-close svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 .vp-close:active {
   transform: scale(0.94);
@@ -221,6 +206,13 @@
   left: var(--s-2xl);
   right: var(--s-2xl);
   bottom: var(--s-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+}
+.vp-id-text {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .vp-name {
   display: flex;
@@ -238,12 +230,35 @@
   align-self: center;
 }
 .vp-where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--s-lg);
   margin: var(--s-xs) 0 0;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.003em;
   line-height: 1.35;
   color: color-mix(in srgb, var(--on-maroon) 84%, transparent);
+}
+/* The open state rides the street line: it is a fact about the place, and on
+   its own row under the photo it floated. Wraps whole, never mid-phrase. */
+.vp-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-sm);
+  white-space: nowrap;
+}
+.vp-dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.vp-state[data-open] .vp-dot {
+  background: currentColor;
+  box-shadow: none;
 }
 
 /* ── THE SHEET ─────────────────────────────────────────────────────────────
@@ -255,34 +270,12 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--s-xl) var(--s-2xl) calc(var(--s-2xl) + env(safe-area-inset-bottom, 0px));
+  padding: var(--s-2xl) var(--s-2xl) calc(var(--s-2xl) + env(safe-area-inset-bottom, 0px));
 }
-
-/* Open or closed, under the photograph. NO STATUS HUE — §9 keeps this palette
-   to maroon and nothing in this build carries a green or a red, so the state
-   separates on the ink ramp and on the shape of the mark: the dot is filled
-   when the door is open and a ring when it is not. */
-.vp-state {
-  display: flex;
-  align-items: center;
-  gap: var(--s-md);
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.003em;
-  line-height: 1.45;
-  color: var(--ink-3);
-}
-.vp-dot {
-  flex: 0 0 auto;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--ink-4);
-}
-.vp-state[data-open] .vp-dot {
-  background: var(--ink-2);
-  box-shadow: none;
+/* Whichever block opens the body (figures, or Italiano's offer) sits on the
+   24px top padding, never on padding plus its own margin. */
+.vp-body > :first-child {
+  margin-top: 0;
 }
 
 /* ══ THE BENEFITS ARE FIGURES ══════════════════════════════════════════════
@@ -292,9 +285,33 @@
    BenefitFigures.tsx `size="sheet"`, rules in styles/figures.css — shared with
    the splash and the checkout (docs/POLISH-2026-09-21.md §15). The 30px, the
    `--hair-lit` rule and the 7.5em qualifier cap all moved there unchanged;
-   what stays here is this sheet's placement. */
+   this sheet keeps its placement and redraws the columns and hairline below. */
+/* Equal content boxes with each hairline centred in a 24px gap: figures.css
+   draws the rule as a border inside the cell, which left the three columns
+   131/119/124 wide at 460. One column per figure, so a missing kind closes up. */
 .vp-figures {
-  margin: var(--s-2xl) 0 0;
+  margin: 0;
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  column-gap: var(--s-2xl);
+}
+.vp-figures > li {
+  position: relative;
+  padding-right: 0;
+}
+.vp-figures > li + li {
+  border-left: 0;
+  padding-left: 0;
+}
+.vp-figures > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--s-lg) * -1);
+  width: 1px;
+  background: var(--figs-rule);
 }
 
 /* The offer-only venue's one line, under the offers glyph — the same mark the
@@ -305,7 +322,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--s-md);
-  margin: var(--s-2xl) 0 0;
+  margin: var(--s-xl) 0 0;
   font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
@@ -339,7 +356,7 @@
    measured that at 1280 and landed on `justify-content: start` for the same
    reason. A lineup is a lineup. */
 .vp-covers-head {
-  margin: var(--s-3xl) 0 var(--s-lg);
+  margin: var(--s-2xl) 0 var(--s-md);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.005em;
@@ -393,10 +410,10 @@
   opacity: 0.86;
 }
 
-/* The venues that are on the membership but cannot take a TapIn order yet. */
+/* The venues that are on the membership but cannot take a TapIn order yet.
+   On the gutter with everything above it; centred, it floated under the plates. */
 .vp-soon {
   margin: var(--s-2xl) 0 0;
-  text-align: center;
   text-wrap: pretty;
 }
 
@@ -459,12 +476,6 @@
   }
   .vp-root.is-closing .vp {
     animation: vpOut 180ms cubic-bezier(0.4, 0, 1, 1) both;
-  }
-  /* §10's one size change between the two shapes. Everything else — the
-     figures, the plates, the gutter — is identical, because the sheet is 375
-     wide and the dialog 460, and the composition already fits the narrower. */
-  .vp-shot {
-    height: 220px;
   }
 }
 @keyframes vpIn {

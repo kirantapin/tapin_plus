@@ -15,7 +15,8 @@
  *
  * THE HOST PLACES IT; THIS DRAWS IT. Margins stay on the caller's class
  * (`className`), so the strip can sit 32px under a lead on the splash and 24px
- * under a status line in the pop-up without either overriding the other.
+ * under the photo in the pop-up without either overriding the other. The
+ * pop-up also redraws its columns and hairline (venue.css, §54).
  *
  * NOTHING HERE IS TYPED. Every figure and qualifier arrives from the model —
  * `campaignBenefits`, `venuePolicyFigure` — so no surface can print a rate the
