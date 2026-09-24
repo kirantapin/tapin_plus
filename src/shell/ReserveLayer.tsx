@@ -87,6 +87,8 @@ interface ReserveFlow {
   paid: string | null;
   /** The Checkout button, and the docked bar: both mean "on to page 1". */
   openCheckout: () => void;
+  /** The path of the page this layer sits over — "/" when opened cold. */
+  over: string;
 }
 
 const FlowContext = createContext<ReserveFlow | null>(null);
@@ -97,7 +99,7 @@ const FlowContext = createContext<ReserveFlow | null>(null);
  */
 export function useReserveFlow(): ReserveFlow {
   return (
-    useContext(FlowContext) ?? { step: 0, paid: null, openCheckout: () => {} }
+    useContext(FlowContext) ?? { step: 0, paid: null, openCheckout: () => {}, over: "/" }
   );
 }
 
@@ -283,9 +285,10 @@ export default function ReserveLayer({
         ? () => go(1)
         : null;
 
+  const over = background?.pathname ?? "/";
   const flow = useMemo<ReserveFlow>(
-    () => ({ step, paid, openCheckout }),
-    [step, paid, openCheckout],
+    () => ({ step, paid, openCheckout, over }),
+    [step, paid, openCheckout, over],
   );
 
   return (

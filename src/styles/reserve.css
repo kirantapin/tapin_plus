@@ -1876,3 +1876,65 @@ html.is-layered{overflow:hidden}
      transition on `all`, which painted one frame at the old width. */
   .reserve-sheet{transition-property:none}
 }
+
+
+/* ══ WHAT YOU'D SAVE, FIRST ON THE PHONE'S PAGE 0 (POLISH §44) ══════════════
+   Sam, with the Coffeeholics page's three photo cards: "can we have this show
+   up at the top of mobile checkout." The page beneath's own cards, compact,
+   in one row that snaps card by card (shell/SaveRow.tsx; it does not render
+   from 1024). 248px cards, 12 between, so the next one peeks and the row
+   reads as swipeable. No scrollbar, no dots, no arrows, no autoplay.
+
+   THE ROW BLEEDS TO THE SHEET'S EDGES: `--sv-bleed` is the margin out, the
+   padding back in and the snap's inset, so the first card starts on the
+   column's edge and snaps back to it. On a phone that is the gutter. In the
+   640 dialog the 560 measure sits at most 39px inside the sheet (a 590
+   column, 24 of padding), so 40 reaches the edge and `.rs-pages`'s
+   `overflow-x:clip` takes the pixel over — nothing scrolls sideways but the
+   row. The 4px of block padding (given back by the margin) is the room the
+   resting shadow needs inside a scroller that clips. */
+.rs-saves{--sv-bleed:var(--gutter);
+  display:flex;gap:var(--s-lg);list-style:none;
+  margin:calc(-1 * var(--s-xs)) calc(-1 * var(--sv-bleed));
+  padding:var(--s-xs) var(--sv-bleed);
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scroll-padding-inline:var(--sv-bleed);
+  scrollbar-width:none}
+.rs-saves::-webkit-scrollbar{display:none}
+@media (min-width:640px){.rs-saves{--sv-bleed:var(--s-3xl)}}
+/* Focusable so a keyboard can scroll it; the ring sits inside the bleed. */
+.rs-saves:focus-visible{outline:2px solid var(--ink-1);outline-offset:-2px}
+
+/* The card: the photograph over a plate, the construction the pitch's cards
+   use, at the sheet's own card dress. */
+.rs-sv{flex:0 0 248px;scroll-snap-align:start;scroll-snap-stop:always;
+  display:flex;flex-direction:column;overflow:hidden;
+  background:var(--card);border:1px solid var(--hair);border-radius:var(--r-card);
+  box-shadow:var(--rest)}
+.rs-sv-img{flex:0 0 auto;display:block;width:100%;height:112px;object-fit:cover;
+  background:var(--inner)}
+.rs-sv-plate{flex:1 1 auto;display:flex;flex-direction:column;gap:var(--s-md);
+  padding:var(--s-lg)}
+.rs-sv-title{margin:0;font-size:16px;font-weight:700;line-height:1.25;
+  letter-spacing:-.01em;color:var(--ink-1)}
+
+/* ONE ROW: the item's picture, the order, the figure at the right. At 248 the
+   three do not fit on one line, so each half stacks inside the row instead —
+   the name over its price, "You save" over its figure — and the row keeps one
+   height across the three cards. */
+.rs-sv-line{display:flex;align-items:center;gap:var(--s-md);margin:0}
+.rs-sv-thumb{flex:0 0 auto;display:block;width:32px;height:32px;
+  border-radius:var(--r-sm);object-fit:cover;background:var(--inner);
+  outline:1px solid var(--hair);outline-offset:-1px}
+/* PhotoCard's break (pitch.css `.bshot-words`): the dot hangs off the price's
+   left edge in the flex gap, so when the price drops to its own line the
+   clip takes the dot with it. */
+.rs-sv-words{--sep:.75em;flex:1 1 auto;min-width:0;
+  display:flex;flex-wrap:wrap;align-items:baseline;column-gap:var(--sep);
+  overflow:hidden;font-size:14px;font-weight:500;line-height:1.3;color:var(--ink-3)}
+.rs-sv-tail{position:relative}
+.rs-sv-sep{position:absolute;right:100%;width:var(--sep);text-align:center}
+.rs-sv-fig{flex:0 0 auto;max-width:5.2em;text-align:right;text-wrap:balance;
+  font-size:15px;font-weight:700;line-height:1.2;letter-spacing:-.01em;
+  color:var(--ink-1)}
+.rs-sv-fig.is-save{color:var(--gain)}

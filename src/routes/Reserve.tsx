@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import GuaranteeLine from "../shell/GuaranteeLine";
+import SaveRow from "../shell/SaveRow";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
@@ -308,6 +309,9 @@ export default function Reserve() {
      on page 2, one tap on. */
   return (
     <div className="rs-modal" ref={modal}>
+      {/* What you'd save, first, below 1024 (§44): the page beneath's own
+          photo cards as a snapping row. Nothing from 1024. */}
+      <SaveRow />
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
           The right column from 1024 (the tiles, then the order card); below
           1024 this wrapper is `display:contents` and draws nothing. */}
