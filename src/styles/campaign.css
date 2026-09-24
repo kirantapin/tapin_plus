@@ -1184,15 +1184,19 @@
   transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* ── WHERE IT SITS ────────────────────────────────────────────────────────
-   Bottom-right of the band, 24 in from its right edge and its foot, over the
-   photograph's window frame rather than the cups (§24). */
+/* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
+   The pitch's calendar (pitch.css `.mc-*`), in the receipt's old place: the
+   band's right, 24 in, centred on the band's height, at the width it has on
+   the pitch. The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
 @media (min-width: 1024px) {
-  .cg-band > .ml {
+  .cg-band > .mc {
     position: absolute;
     z-index: 1;
     right: var(--s-2xl);
+    top: var(--s-2xl);
     bottom: var(--s-2xl);
-    width: min(340px, calc(100% - var(--s-2xl) * 2));
+    margin: auto 0;
+    height: fit-content;
+    width: min(480px, calc(100% - var(--s-2xl) * 2));
   }
 }
