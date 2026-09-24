@@ -649,6 +649,9 @@
    `data-lit` (styles/light.css), so it no longer inherits anything from the
    page beneath it and this page has no reason to switch itself off. */
 :root[data-surface="cg"] {
+  /* The Plus chip in Coffeeholics' purple, as a gradient (tokens.css
+     --plus-plate). */
+  --plus-plate: linear-gradient(67deg, #8B52C4 0%, #6b319e 50%, #4E2078 100%);
   --page: #F3F2F5;
   --subtle: #FFFFFF;
   --card: #FFFFFF;

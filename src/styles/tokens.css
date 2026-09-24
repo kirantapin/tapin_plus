@@ -100,6 +100,14 @@
      white logo and white text on this? even if it breaks contrast rules, i
      just want to see it"). ~1.8:1 on the deep stop, knowingly. */
   --gold-ink:#FFFFFF;
+  /* THE PLUS CHIP'S PLATE (Sam, 24 Sep 2026: "revert the coloring for
+     Coffeeholics to the purple, maybe make it a gradient. And for the primary
+     Blacksburg page, it should also be the maroon Blacksburg / Virginia Tech
+     color gradient"). Here, the house maroon into Virginia Tech's Chicago
+     Maroon; campaign.css gives the Coffeeholics surface its purple. White ink
+     on both (9:1 and up). The logo's gold dot is unchanged. */
+  --plus-plate:linear-gradient(67deg,#9A2A52 0%,#861F41 45%,#630031 100%);
+  --plus-ink:#FFFFFF;
   --loss:#FF8A80;
 
   /* THE WORDMARK'S DOT. Sam, 14 Sep 2026: "we can make the dot in the tapin

@@ -102,12 +102,13 @@
 /* The Plus mark. 11px tracked caps is exactly the house caption role, and at
    that size the chip is 17px tall — the line box of the 14px name beside it, so
    it sits inside the name's line instead of stretching it. */
-/* PLUS, IN THE LOGO'S GOLD (Sam, 24 Sep 2026: "call it plus with the gold
-   branding"): `--gold` on the chip only — the theme stays maroon. Dark ink, as the TapIn app's own gold chip:
+/* THE PLUS CHIP (24 Sep 2026): `--plus-plate`, the page's own colour as a
+   gradient — Virginia Tech maroon here, Coffeeholics purple on its page —
+   white ink. The gold lives in the logo's dot. Dark ink, as the TapIn app's own gold chip:
    white on this gold is about 1.8:1. */
 .plus{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:18px;
   padding:0 7px 0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;
-  line-height:1;color:var(--gold-ink);background:var(--gold);border-radius:var(--r-pill);
+  line-height:1;color:var(--plus-ink);background:var(--plus-plate);border-radius:var(--r-pill);
   flex:0 0 auto;align-self:baseline}
 /* The TapIn mark inside a PLUS flag or chip (shell/PlusFlag.tsx). */
 /* Sized here AND on the element: the PNG is 96px, and a flag that inflated to
@@ -118,7 +119,7 @@
 /* The venue tiles' flag is the same chip in a corner (pitch.css .vflag): gold
    too, except "signed, not open", which never wears the membership's mark.
    (0,2,0), so it wins over pitch.css's (0,1,0) whatever the load order. */
-.vflag:not(.is-soon){background:var(--gold);color:var(--gold-ink)}
+.vflag:not(.is-soon){background:var(--plus-plate);color:var(--plus-ink)}
 
 
 /* -- ways to use ----------------------------------------------------------- */
