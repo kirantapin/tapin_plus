@@ -649,6 +649,11 @@
    `data-lit` (styles/light.css), so it no longer inherits anything from the
    page beneath it and this page has no reason to switch itself off. */
 :root[data-surface="cg"] {
+  /* The logo's dot is Coffeeholics purple on this page, wherever the logo
+     shows (the header, the foot, the toasts' icon inherits the chip's ink).
+     Sam, 24 Sep 2026: "same with the purple dot and the logo wherever the
+     logo shows up". */
+  --dot: #6b319e;
   --page: #F3F2F5;
   --subtle: #FFFFFF;
   --card: #FFFFFF;

@@ -35,21 +35,12 @@ def strip(src: str, css: bool) -> str:
 # re-opened the door on every surface in the build.
 EXEMPT = {
     ("member or seat count", "src/model/seats.ts"),
-    # TAPIN PLUS WEARS THE REAL LOGO'S GOLD (Sam, 24 Sep 2026: "call it plus
-    # with the gold branding", "use the actual gold color that we used in the
-    # logo"). Granted to the three files that DEFINE it — the token and the two
-    # marks that mirror public/tapin_logo.svg's gradient — so gold anywhere else
-    # still fails.
-    ("gold/amber literal", "src/styles/tokens.css"),
-    ("gold/amber literal", "src/shell/TapInLogo.tsx"),
-    ("gold/amber literal", "src/shell/TapInIcon.tsx"),
 }
 
 CHECKS = [
     # Hokie Stone Gray is non-text: 3.99:1 on --card, 2.89:1 over glass.
     ("--stone on a color: declaration", r"color\s*:[^;{}]*--stone"),
-    # The pinned mockup's gold. Premium here is material and light, never metal —
-    # except TapIn Plus's own mark, whose gold is the logo's (see EXEMPT).
+    # The pinned mockup's gold. Premium here is material and light, never metal.
     ("gold/amber literal", r"#(?:e8dca7|cda852|ffd700|ffa500)"),
     # A serial number is a count, and there are no members to count.
     ("seat prop passed", r"seat\s*=\s*[\"{]"),
