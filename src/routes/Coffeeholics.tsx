@@ -10,7 +10,8 @@ import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
 import MonthCalendar from "../shell/MonthCalendar";
 import MonthWeeks from "../shell/MonthWeeks";
-import { monthAt } from "../model/month";
+import { monthAcross, monthAt } from "../model/month";
+import type { MonthChoice } from "../shell/MonthSwitch";
 import { useReserveCta } from "../shell/useReserveCta";
 import { useMedia } from "../shell/useMedia";
 import { logoField, launchWindow, monthlyToday, venues } from "../model/content";
@@ -101,8 +102,13 @@ import {
  *
  * On a phone there is no receipt at all: the cards are the proof there.
  */
-/** This shop's month (§36), built once from its menu. */
-const month = monthAt("coffeeholicsva");
+/** This shop's month (§36), built once from its menu, and the same month
+ *  with every other Plus place in it (§40), offered side by side. */
+const monthChoices: MonthChoice[] = [
+  { id: "here", label: "Coffeeholics", month: monthAt("coffeeholicsva") },
+  { id: "all", label: "All of Blacksburg", month: monthAcross("coffeeholicsva") },
+];
+const month = monthChoices[0].month;
 
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
@@ -323,7 +329,7 @@ export default function Coffeeholics() {
               1024, made of this shop's own orders (§36: "food and drink items
               at coffeeholics, showing multiple purchases a week"), each
               earning its $5, its 15% or its points. */}
-          {desk && month ? <MonthCalendar month={month} /> : null}
+          {desk && month ? <MonthCalendar month={month} choices={monthChoices} /> : null}
         </div>
 
         {/* ══ THREE FIGURES, ON THE GROUND UNDER THE BAND ═══════════════════
@@ -343,7 +349,7 @@ export default function Coffeeholics() {
             above this"), as the calm week-by-week month. */}
         {!desk && month ? (
           <div className="mc-phone">
-            <MonthWeeks month={month} />
+            <MonthWeeks month={month} choices={monthChoices} />
           </div>
         ) : null}
       </section>

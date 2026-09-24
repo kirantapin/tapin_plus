@@ -3829,13 +3829,18 @@ button.vcard:focus-visible {
 }
 .mw-tiles {
   display: flex;
+  align-items: center;
   gap: var(--s-xs);
   min-width: 0;
 }
+/* 28px, giving a little when a week across places holds six (§40): at 375
+   six need 188 of the row's 184, so each yields under a pixel. */
 .mw-tile {
-  flex: 0 0 auto;
+  flex: 0 1 28px;
   width: 28px;
-  height: 28px;
+  height: auto;
+  min-width: 0;
+  aspect-ratio: 1;
   border-radius: var(--r-sm);
   overflow: hidden;
 }
@@ -3904,6 +3909,99 @@ button.vcard:focus-visible {
 }
 .mw-foot.is-ahead .mw-net {
   color: var(--gain);
+}
+
+/* ── ONE MONTH OR ANOTHER (§40) ───────────────────────────────────────────
+   shell/MonthSwitch.tsx. The house `.segments` track (base.css) at 36px:
+   equal cells inset 3px on --inner, the chosen one the white thumb on
+   --rest. Two cells, so no rule between them: it would always touch the
+   thumb. The thumb slides; the label's ink follows. */
+.mcs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 0;
+  height: 36px;
+  margin: var(--s-lg) 0 0;
+  padding: 3px;
+  border-radius: var(--r-control);
+  background: var(--inner);
+}
+.mcs::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / var(--n));
+  border-radius: calc(var(--r-control) - 3px);
+  background: var(--card);
+  box-shadow: var(--rest);
+  transform: translateX(calc(100% * var(--at)));
+  transition: transform 240ms var(--ease);
+}
+.mcs-opt {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0 var(--s-md);
+  border: 0;
+  border-radius: calc(var(--r-control) - 3px);
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color 240ms var(--ease);
+}
+.mcs-opt[aria-checked="true"] {
+  color: var(--ink-1);
+}
+/* On a phone the cell is 30px drawn and 44px to touch: 7px of reach above
+   and below, clear of the head and the first week. */
+.mw .mcs-opt::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+/* The sub under the control, a step away from it. */
+.mcs + .mc-sub {
+  margin-top: var(--s-lg);
+}
+/* Every choice's head in one cell; the others hold the height, unseen. */
+.mc-heads,
+.mw-heads {
+  display: grid;
+}
+.mc-heads > .mc-head,
+.mw-heads > .mw-head {
+  grid-area: 1 / 1;
+}
+.mc-ghost,
+.mw-ghost {
+  visibility: hidden;
+}
+/* THE SWITCH. The rows leave in 160ms on the exit curve and the new month's
+   arrive in 200ms; "You saved" stays and counts. The card clips while its
+   inline height glides, so nothing spills over the section below. */
+.mc[data-swap],
+.mw[data-swap] {
+  overflow: clip;
+}
+.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-latest, .mc-row),
+.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row) {
+  transition: opacity 200ms var(--ease);
+}
+.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-latest, .mc-row),
+.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* ── THE LOOP ─────────────────────────────────────────────────────────────

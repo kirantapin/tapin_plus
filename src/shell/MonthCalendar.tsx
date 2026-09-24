@@ -1,5 +1,6 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
 import { runFigure, signedDollars, type Month } from "../model/month";
+import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from "./MonthSwitch";
 
 /**
  * THE CALENDAR — a month on the membership, filling itself
@@ -37,6 +38,10 @@ import { runFigure, signedDollars, type Month } from "../model/month";
  * `thumb` is the item's photograph filling the day instead of a collar, and
  * the foot is however many rows the model gives, every moving one counted
  * together as each order lands.
+ *
+ * GIVEN `choices` (§40), the card offers them under its head. A switch shows
+ * the new month whole, counts "You saved" across from what it read, holds,
+ * and the loop begins again on the new month.
  */
 const OPEN = 1200;
 const GAP = 900;
@@ -45,9 +50,17 @@ const COUNT = 400;
 const HOLD = 3200;
 const LEAVE = 240;
 
-export default function MonthCalendar({ month }: { month: Month }) {
+export default function MonthCalendar({
+  month: given,
+  choices,
+}: {
+  month: Month;
+  choices?: MonthChoice[];
+}) {
   const card = useRef<HTMLDivElement>(null);
   const headId = useId();
+  const sw = useMonthSwitch(given, choices, card);
+  const month = sw.shown;
 
   /* Layout, not a passive effect: the emptied state has to be in place before
      the first paint, or the finished month flashes and then clears. */
@@ -64,6 +77,9 @@ export default function MonthCalendar({ month }: { month: Month }) {
     const { startCents, runningCents } = month;
     const last = runningCents.length - 1;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    /* Set when this month replaced another: what "You saved" read then. */
+    const before = sw.from.current;
+    sw.from.current = null;
 
     const timers = new Set<number>();
     let raf = 0;
@@ -90,23 +106,25 @@ export default function MonthCalendar({ month }: { month: Month }) {
        "You're ahead" beside it would be a cent from true. */
     const netAt = (k: number) => (k < 0 ? startCents : runningCents[k]);
     const runAt = (r: (typeof runs)[number], k: number) => (k < 0 ? r.start : r.running[k]);
-    /* Every moving figure, `e` of the way from step `from` to step `to`. */
-    const write = (from: number, to: number, e = 1) => {
+    /* Every moving figure, `e` of the way from step `from` to step `to`; the
+       net can start from a figure of its own (a switch's old month). */
+    const write = (from: number, to: number, e = 1, net0 = netAt(from)) => {
       const mix = (a: number, b: number) => Math.round(a + (b - a) * e);
-      const c = mix(netAt(from), netAt(to));
+      const c = mix(net0, netAt(to));
       net.textContent = signedDollars(c);
+      sw.net.current = c;
       runs.forEach((r, i) => {
         figs[i].textContent = runFigure(r.unit, mix(runAt(r, from), runAt(r, to)));
       });
       foot.classList.toggle("is-ahead", c > 0);
     };
-    const count = (from: number, to: number) => {
+    const count = (from: number, to: number, net0?: number, ms = COUNT) => {
       const t0 = performance.now();
       const tick = (now: number) => {
         /* A frame's timestamp can precede the t0 taken when it was asked
            for; clamped at 0 so the first frame never dips past `from`. */
-        const p = Math.max(0, Math.min(1, (now - t0) / COUNT));
-        write(from, to, 1 - Math.pow(1 - p, 3));
+        const p = Math.max(0, Math.min(1, (now - t0) / ms));
+        write(from, to, easeOut(p), net0);
         raf = p < 1 ? requestAnimationFrame(tick) : 0;
       };
       raf = requestAnimationFrame(tick);
@@ -134,6 +152,28 @@ export default function MonthCalendar({ month }: { month: Month }) {
       });
       const settled = OPEN + GAP * (runningCents.length - 1) + ENTER + COUNT;
       later(settled + HOLD, () => {
+        el.setAttribute("data-out", "");
+        later(LEAVE, cycle);
+      });
+    };
+    /* After a switch: the new month whole, "You saved" counted across from
+       the old figure, a hold, then the loop from the top. */
+    const arrive = (c0: number) => {
+      running = true;
+      dirty = true;
+      el.setAttribute("data-run", "");
+      el.removeAttribute("data-out");
+      /* In place at once: the card's crossfade is the entrance, not a pop. */
+      cells.forEach((c) => {
+        c.style.transition = "none";
+        c.classList.add("is-in");
+      });
+      void el.offsetHeight;
+      cells.forEach((c) => (c.style.transition = ""));
+      show(last + 1);
+      write(last, last, 0, c0);
+      count(last, last, c0, TALLY);
+      later(TALLY + HOLD, () => {
         el.setAttribute("data-out", "");
         later(LEAVE, cycle);
       });
@@ -174,7 +214,8 @@ export default function MonthCalendar({ month }: { month: Month }) {
     io.observe(el);
     reduce.addEventListener("change", decide);
     document.addEventListener("visibilitychange", decide);
-    decide();
+    if (before !== null && !reduce.matches && !el.closest("[data-still]")) arrive(before);
+    else decide();
 
     return () => {
       halt();
@@ -182,16 +223,34 @@ export default function MonthCalendar({ month }: { month: Month }) {
       reduce.removeEventListener("change", decide);
       document.removeEventListener("visibilitychange", decide);
     };
-  }, [month]);
+  }, [month, sw.from, sw.net]);
 
   const latest = month.orders.length - 1;
   const at = new Map(month.orders.map((o, k) => [`${o.week}:${o.day}`, k]));
 
   return (
     <div className="mc" data-lit="" ref={card} role="group" aria-labelledby={headId}>
-      <p className="mc-head" id={headId}>
-        {month.head}
-      </p>
+      {sw.on ? (
+        /* Every choice's head in one cell, the shown one visible: the card's
+           top holds the tallest, so the control never moves under a finger. */
+        <div className="mc-heads">
+          {sw.options.map((c) => (
+            <p
+              key={c.id}
+              className={c.id === sw.shownId ? "mc-head" : "mc-head mc-ghost"}
+              id={c.id === sw.shownId ? headId : undefined}
+              aria-hidden={c.id === sw.shownId ? undefined : "true"}
+            >
+              {c.month.head}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <p className="mc-head" id={headId}>
+          {month.head}
+        </p>
+      )}
+      {sw.on ? <MonthSegments options={sw.options} pick={sw.pick} onPick={sw.choose} /> : null}
       <p className="mc-sub">{month.sub}</p>
 
       <div className="mc-grid">

@@ -1,6 +1,6 @@
 import { BENEFIT, WEEKS_PER_MONTH } from "./savings";
-import { cardPlan, logoField, monthlyToday, venues } from "./content";
-import { itemsFor } from "./menu";
+import { cardPlan, logoField, monthlyToday, venues, type Venue } from "./content";
+import { itemsFor, type MenuItem } from "./menu";
 
 /**
  * A MONTH ON THE MEMBERSHIP — the pitch's calendar (docs/POLISH-2026-09-21.md
@@ -46,7 +46,8 @@ import { itemsFor } from "./menu";
  * order is a basket of two; the places word follows on its own.
  *
  * A MONTH AT ONE PLACE is `monthAt(venueId)`, below: the same calendar, that
- * venue's own orders, every benefit counted (§36).
+ * venue's own orders, every benefit counted (§36). `monthAcross(venueId)` is
+ * that month plus these ORDERS everywhere else, by the same rules (§40).
  */
 
 /** Monday first: the weekend closes each row, where the nights out fall. */
@@ -78,10 +79,13 @@ export const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
 export const signedDollars = (c: number) => `${c < 0 ? "−" : ""}${dollars(Math.abs(c))}`;
 /** The chip's short form: whole dollars drop their cents. */
 const chip = (c: number) => `+$${c % 100 ? (c / 100).toFixed(2) : c / 100}`;
+/* To twenty-eight: the lattice holds one order a day, 28 at most (§40's
+   month across places counts 21). */
 const COUNT_WORDS = [
   "no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
   "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
   "eighteen", "nineteen", "twenty",
+  ...["one", "two", "three", "four", "five", "six", "seven", "eight"].map((n) => `twenty-${n}`),
 ];
 const counted = (n: number, noun: string) =>
   `${COUNT_WORDS[n] ?? n} ${noun}${n === 1 ? "" : "s"}`;
@@ -102,24 +106,27 @@ interface Placed {
   at: string;
 }
 
-/** The pitch's cell: the venue's own mark, `venue.logo`, and how its collar
- *  seats it. */
-interface CollarOrder extends Placed {
+/** The one benefit an order earned, and the points every order earns. */
+interface Earned {
+  benefit: "credit" | "percent" | "points";
+  priceCents: number;
+  creditCents: number;
+  percentCents: number;
+  points: number;
+}
+
+/** A cell showing the venue's own mark, `venue.logo`, and how its collar
+ *  seats it. The pitch's orders count only the credit; §40's carry `Earned`. */
+interface CollarOrder extends Placed, Partial<Earned> {
   thumb?: undefined;
   img: string;
   brand: string;
   field: "light" | "dark";
 }
 
-/** A venue's cell: the item's own photograph, and the one benefit it earned
- *  with the points every order earns. */
-interface ThumbOrder extends Placed {
+/** A venue's cell: the item's own photograph, and what it earned. */
+interface ThumbOrder extends Placed, Earned {
   thumb: string;
-  benefit: "credit" | "percent" | "points";
-  priceCents: number;
-  creditCents: number;
-  percentCents: number;
-  points: number;
 }
 
 export type MonthOrder = CollarOrder | ThumbOrder;
@@ -264,45 +271,54 @@ const ORDERS_AT: Record<string, { week: number; day: Day; items: string[] }[]> =
   ],
 };
 
-export function monthAt(venueId: string): Month | null {
-  const venue = venues.find((v) => v.id === venueId);
-  const planned = ORDERS_AT[venueId];
-  if (!venue || !planned) return null;
-  const pointsRate = venue.policies.find((p) => p.kind === "points")?.multiplier ?? 0;
-  const hasCredit = venue.policies.some((p) => p.kind === "credit");
-  const hasPercent = venue.policies.some((p) => p.kind === "percent");
-  const floor = cents(BENEFIT.creditMinUsd);
-  const pct = Math.round(BENEFIT.percentOff * 100);
-  const menu = itemsFor(venueId);
+/** An order in its day, looked up on its venue's menu; nothing earned yet. */
+interface Plan {
+  week: number;
+  day: number;
+  venue: Venue;
+  items: MenuItem[];
+}
 
-  const placed = planned
+/** Menu lookups by name, else by record id; null if any is missing. */
+function lookup(venueId: string, keys: string[]): MenuItem[] | null {
+  const menu = itemsFor(venueId);
+  const found = keys.map((k) => menu.find((i) => i.name === k) ?? menu.find((i) => i.id === k));
+  return found.length && found.every(Boolean) ? (found as MenuItem[]) : null;
+}
+
+/** A venue's own planned orders, as its month pictures them: an item without
+ *  its photograph drops the order. */
+function plansAt(venue: Venue): Plan[] {
+  return (ORDERS_AT[venue.id] ?? [])
     .flatMap((o) => {
       const day = DAYS.indexOf(o.day);
-      if (o.week < 1 || o.week > WEEKS_PER_MONTH || day < 0) return [];
-      const found = o.items.map(
-        (key) => menu.find((i) => i.name === key) ?? menu.find((i) => i.id === key),
-      );
-      if (!found.length || found.some((i) => !i)) return [];
-      const items = found as NonNullable<(typeof found)[number]>[];
-      const thumb = items[0].img;
-      if (!thumb) return [];
-      return [{ week: o.week - 1, day, items, thumb }];
+      const items = lookup(venue.id, o.items);
+      if (o.week < 1 || o.week > WEEKS_PER_MONTH || day < 0 || !items?.[0].img) return [];
+      return [{ week: o.week - 1, day, venue, items }];
     })
     .sort((a, b) => a.week - b.week || a.day - b.day);
+}
 
-  const credited = new Set<number>();
-  const orders = placed.map((o): ThumbOrder => {
+/** One set of rules at every place, in the order things happen: the week's
+ *  first order at or over the floor AT EACH PLACE is the credit; another at
+ *  or over it, where the place gives 15%, is the 15% (never on alcohol); the
+ *  rest is points. Every order earns points at 10 a dollar × the multiplier. */
+function earn(plans: Plan[]) {
+  const floor = cents(BENEFIT.creditMinUsd);
+  const pct = Math.round(BENEFIT.percentOff * 100);
+  const credited = new Set<string>();
+  return plans.map((o) => {
+    const has = (kind: string) => o.venue.policies.some((p) => p.kind === kind);
+    const rate = o.venue.policies.find((p) => p.kind === "points")?.multiplier ?? 0;
     const priceCents = o.items.reduce((sum, i) => sum + cents(i.price), 0);
-    /* The 15% never touches alcohol; the credit and the points earn on it. */
     const percentBase = o.items.reduce((sum, i) => sum + (i.alcohol ? 0 : cents(i.price)), 0);
-    /* Ten points a dollar at 1× (Sam, 23 Sep 2026: "it's 10 points per dollar
-       spent"; BENEFIT.pointsPerDollar), times the venue's own multiplier. */
-    const points = Math.round((priceCents / 100) * BENEFIT.pointsPerDollar * pointsRate);
-    let benefit: ThumbOrder["benefit"] = "points";
-    if (priceCents >= floor && hasCredit && !credited.has(o.week)) {
-      credited.add(o.week);
+    const points = Math.round((priceCents / 100) * BENEFIT.pointsPerDollar * rate);
+    const slot = `${o.week}:${o.venue.id}`;
+    let benefit: Earned["benefit"] = "points";
+    if (priceCents >= floor && has("credit") && !credited.has(slot)) {
+      credited.add(slot);
       benefit = "credit";
-    } else if (priceCents >= floor && hasPercent && percentBase > 0) benefit = "percent";
+    } else if (priceCents >= floor && has("percent") && percentBase > 0) benefit = "percent";
     const creditCents = benefit === "credit" ? Math.min(cents(BENEFIT.creditUsd), priceCents) : 0;
     const percentCents = benefit === "percent" ? Math.round(percentBase * BENEFIT.percentOff) : 0;
     const earned =
@@ -312,12 +328,9 @@ export function monthAt(venueId: string): Month | null {
           ? `${dollars(percentCents)} off`
           : `${points} point${points === 1 ? "" : "s"}`;
     return {
-      id: `${o.week}:${o.day}:${o.items.map((i) => i.id).join("+")}`,
-      week: o.week,
-      day: o.day,
-      venue: venue.name,
+      ...o,
       item: o.items.map((i) => i.name).join(" + "),
-      thumb: o.thumb,
+      earned,
       benefit,
       priceCents,
       creditCents,
@@ -325,29 +338,38 @@ export function monthAt(venueId: string): Month | null {
       points,
       cents: creditCents + percentCents,
       chip: benefit === "credit" ? chip(creditCents) : benefit === "percent" ? `${pct}%` : "pts",
-      /* The price and what it earned are glued, so a basket that wraps
-         breaks after the name and never strands a figure. */
-      at: `\u00A0\u00B7 ${dollars(priceCents)}\u00A0\u00B7\u00A0${earned.replace(" ", "\u00A0")}`,
     };
   });
+}
 
+/** The foot and the running arrays, from earned orders. Only the money nets
+ *  against the plan; null when there is nothing to show or nothing saved. */
+function monthOf(
+  orders: (MonthOrder & Earned)[],
+  text: Pick<Month, "head" | "sub" | "empty">,
+): Month | null {
   const plan = cents(monthlyToday);
-  const sums = (pick: (o: ThumbOrder) => number) =>
+  const pct = Math.round(BENEFIT.percentOff * 100);
+  const sums = (pick: (o: Earned) => number) =>
     orders.reduce<number[]>((acc, o) => [...acc, (acc.length ? acc[acc.length - 1] : 0) + pick(o)], []);
   const runningCredit = sums((o) => o.creditCents);
   const runningPercent = sums((o) => o.percentCents);
   const runningPoints = sums((o) => o.points);
-  const runningCents = sums((o) => o.cents).map((c) => c - plan);
+  const runningCents = sums((o) => o.creditCents + o.percentCents).map((c) => c - plan);
   const last = (xs: number[]) => (xs.length ? xs[xs.length - 1] : 0);
   const netCents = runningCents.length ? last(runningCents) : -plan;
   if (!orders.length || netCents <= 0) return null;
   const nCredit = orders.filter((o) => o.benefit === "credit").length;
   const nPercent = orders.filter((o) => o.benefit === "percent").length;
+  const places = new Set(orders.map((o) => o.venue)).size;
 
   const rows: MonthRow[] = [{ what: `${cardPlan} membership`, figure: dollars(plan) }];
   if (nCredit)
     rows.push({
-      what: `$${BENEFIT.creditUsd} credit, ${counted(nCredit, "week")}`,
+      what:
+        places > 1
+          ? `$${BENEFIT.creditUsd} credit, ${counted(nCredit, "time")} at ${counted(places, "place")}`
+          : `$${BENEFIT.creditUsd} credit, ${counted(nCredit, "week")}`,
       figure: dollars(last(runningCredit)),
       run: { unit: "usd", start: 0, running: runningCredit },
     });
@@ -365,15 +387,105 @@ export function monthAt(venueId: string): Month | null {
     });
 
   return {
-    head: `Your first month at ${venue.name}`,
-    sub: `$${BENEFIT.creditUsd} credit once a week, ${pct}% off the rest, points on all of it`,
+    ...text,
     days: DAYS.map((d) => d[0]),
     weeks: Array.from({ length: WEEKS_PER_MONTH }, (_, k) => `Week ${k + 1}`),
     orders,
-    empty: "Order the way you already do",
     rows,
     startCents: -plan,
     runningCents,
     netCents,
   };
+}
+
+export function monthAt(venueId: string): Month | null {
+  const venue = venues.find((v) => v.id === venueId);
+  if (!venue || !ORDERS_AT[venueId]) return null;
+  const pct = Math.round(BENEFIT.percentOff * 100);
+  const orders = earn(plansAt(venue)).map(
+    (o): ThumbOrder => ({
+      id: `${o.week}:${o.day}:${o.items.map((i) => i.id).join("+")}`,
+      week: o.week,
+      day: o.day,
+      venue: venue.name,
+      item: o.item,
+      thumb: o.items[0].img as string,
+      benefit: o.benefit,
+      priceCents: o.priceCents,
+      creditCents: o.creditCents,
+      percentCents: o.percentCents,
+      points: o.points,
+      cents: o.cents,
+      chip: o.chip,
+      /* The price and what it earned are glued, so a basket that wraps
+         breaks after the name and never strands a figure. */
+      at: `\u00A0\u00B7 ${dollars(o.priceCents)}\u00A0\u00B7\u00A0${o.earned.replace(" ", "\u00A0")}`,
+    }),
+  );
+  return monthOf(orders, {
+    head: `Your first month at ${venue.name}`,
+    sub: `$${BENEFIT.creditUsd} credit once a week, ${pct}% off the rest, points on all of it`,
+    empty: "Order the way you already do",
+  });
+}
+
+/**
+ * ACROSS BLACKSBURG (docs/POLISH-2026-09-21.md §40). Sam: "a toggle for 'all
+ * tapin plus' locations in blacksburg so someone can see how much they would
+ * save across all of these locations." The page's own month plus the pitch's
+ * ORDERS at every other Plus place with a credit, earned by `earn`'s rules.
+ * Every cell is the venue's mark: this month answers "where", not "what".
+ */
+export function monthAcross(venueId: string): Month | null {
+  const home = venues.find((v) => v.id === venueId);
+  if (!home || !ORDERS_AT[venueId]) return null;
+  const own = plansAt(home);
+  const taken = new Set(own.map((o) => `${o.week}:${o.day}`));
+  /* A day the page's own orders hold moves the other place's order to the
+     next free day that week (then the one before), so each day keeps one. */
+  const free = (week: number, day: number) => {
+    const all = [...DAYS.keys()];
+    const order = [...all.filter((d) => d >= day), ...all.filter((d) => d < day).reverse()];
+    return order.find((d) => !taken.has(`${week}:${d}`));
+  };
+  const elsewhere = [...ORDERS]
+    .sort((a, b) => a.week - b.week || DAYS.indexOf(a.day) - DAYS.indexOf(b.day))
+    .flatMap((o): Plan[] => {
+      const venue = venues.find((v) => v.id === o.venueId);
+      const items = lookup(o.venueId, o.items);
+      if (!venue || venue.id === venueId || !venue.plus || !items) return [];
+      if (!venue.policies.some((p) => p.kind === "credit")) return [];
+      if (o.week < 1 || o.week > WEEKS_PER_MONTH || DAYS.indexOf(o.day) < 0) return [];
+      const day = free(o.week - 1, DAYS.indexOf(o.day));
+      if (day === undefined) return [];
+      taken.add(`${o.week - 1}:${day}`);
+      return [{ week: o.week - 1, day, venue, items }];
+    });
+  const plans = [...own, ...elsewhere].sort((a, b) => a.week - b.week || a.day - b.day);
+  const orders = earn(plans).map(
+    (o): CollarOrder & Earned => ({
+      id: `${o.week}:${o.day}:${o.items.map((i) => i.id).join("+")}`,
+      week: o.week,
+      day: o.day,
+      venue: o.venue.name,
+      item: o.item,
+      img: o.venue.logo,
+      brand: o.venue.brandColor,
+      field: logoField(o.venue.id),
+      benefit: o.benefit,
+      priceCents: o.priceCents,
+      creditCents: o.creditCents,
+      percentCents: o.percentCents,
+      points: o.points,
+      cents: o.cents,
+      chip: o.chip,
+      /* Named, since the picture is the place; the figures glued as above. */
+      at: ` at ${o.venue.name}\u00A0\u00B7 ${dollars(o.priceCents)}\u00A0\u00B7\u00A0${o.earned.replace(" ", "\u00A0")}`,
+    }),
+  );
+  return monthOf(orders, {
+    head: "Your first month across Blacksburg",
+    sub: `$${BENEFIT.creditUsd} credit at every place, every week`,
+    empty: "Order once a week at each place",
+  });
 }
