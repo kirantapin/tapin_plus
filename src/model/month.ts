@@ -295,7 +295,9 @@ export function monthAt(venueId: string): Month | null {
     const priceCents = o.items.reduce((sum, i) => sum + cents(i.price), 0);
     /* The 15% never touches alcohol; the credit and the points earn on it. */
     const percentBase = o.items.reduce((sum, i) => sum + (i.alcohol ? 0 : cents(i.price)), 0);
-    const points = Math.round((priceCents / 100) * pointsRate);
+    /* Ten points a dollar at 1× (Sam, 23 Sep 2026: "it's 10 points per dollar
+       spent"; BENEFIT.pointsPerDollar), times the venue's own multiplier. */
+    const points = Math.round((priceCents / 100) * BENEFIT.pointsPerDollar * pointsRate);
     let benefit: ThumbOrder["benefit"] = "points";
     if (priceCents >= floor && hasCredit && !credited.has(o.week)) {
       credited.add(o.week);
