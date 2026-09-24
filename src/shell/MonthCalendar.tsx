@@ -24,9 +24,7 @@ import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from 
  * `data-still` ancestor all get the complete, still month.
  *
  * CHEAP BY CONSTRUCTION. Transform and opacity only, on cells laid out at full
- * size from the start; the latest line is every line stacked in one grid cell
- * and shown one at a time, so a two-line basket never resizes the card. One
- * timeout schedule; `requestAnimationFrame` runs only for the 400ms of each
+ * size from the start, so nothing ever resizes the card. One timeout schedule; `requestAnimationFrame` runs only for the 400ms of each
  * count. Stops when the tab is hidden or the card is off screen; every timer
  * is cleared on unmount.
  *
@@ -68,7 +66,6 @@ export default function MonthCalendar({
     const el = card.current;
     if (!el) return;
     const cells = [...el.querySelectorAll<HTMLElement>(".mc-order")];
-    const lines = [...el.querySelectorAll<HTMLElement>(".mc-line")];
     const foot = el.querySelector<HTMLElement>(".mc-foot");
     const net = el.querySelector<HTMLElement>(".mc-net-fig");
     const figs = [...el.querySelectorAll<HTMLElement>(".mc-run-fig")];
@@ -129,14 +126,11 @@ export default function MonthCalendar({
       };
       raf = requestAnimationFrame(tick);
     };
-    /* Line 0 is the empty state; line k + 1 names order k. */
-    const show = (k: number) => lines.forEach((l, i) => l.classList.toggle("is-now", i === k));
     /* Back to the head of a cycle: an empty month, the membership owed. The
        orders snap back to their start while they are invisible. */
     const reset = () => {
       el.removeAttribute("data-out");
       cells.forEach((c) => c.classList.remove("is-in"));
-      show(0);
       write(-1, -1);
       dirty = false;
     };
@@ -146,7 +140,6 @@ export default function MonthCalendar({
         later(OPEN + GAP * k, () => {
           dirty = true;
           cells[k]?.classList.add("is-in");
-          show(k + 1);
           later(ENTER, () => count(k - 1, k));
         });
       });
@@ -170,7 +163,6 @@ export default function MonthCalendar({
       });
       void el.offsetHeight;
       cells.forEach((c) => (c.style.transition = ""));
-      show(last + 1);
       write(last, last, 0, c0);
       count(last, last, c0, TALLY);
       later(TALLY + HOLD, () => {
@@ -225,7 +217,6 @@ export default function MonthCalendar({
     };
   }, [month, sw.from, sw.net]);
 
-  const latest = month.orders.length - 1;
   const at = new Map(month.orders.map((o, k) => [`${o.week}:${o.day}`, k]));
 
   return (
@@ -251,7 +242,10 @@ export default function MonthCalendar({
         </p>
       )}
       {sw.on ? <MonthSegments options={sw.options} pick={sw.pick} onPick={sw.choose} /> : null}
-      <p className="mc-sub">{month.sub}</p>
+      {/* DECLUTTERED (Sam, 23 Sep 2026: "slightly too busy … we could remove the
+          text right beneath the toggle"): the toggle names the places, so the
+          sub only shows where there is no toggle. */}
+      {sw.on ? null : <p className="mc-sub">{month.sub}</p>}
 
       <div className="mc-grid">
         <span className="mc-corner" aria-hidden="true" />
@@ -277,7 +271,7 @@ export default function MonthCalendar({
                       alt={`${o.item} at ${o.venue}`}
                       decoding="async"
                     />
-                    <b className="mc-chip">{o.chip}</b>
+                    {o.chip !== "pts" ? <b className="mc-chip">{o.chip}</b> : null}
                   </span>
                 </span>
               ) : o ? (
@@ -295,7 +289,7 @@ export default function MonthCalendar({
                       alt={`${o.item} at ${o.venue}`}
                       decoding="async"
                     />
-                    <b className="mc-chip">{o.chip}</b>
+                    {o.chip !== "pts" ? <b className="mc-chip">{o.chip}</b> : null}
                   </span>
                 </span>
               ) : (
@@ -306,21 +300,8 @@ export default function MonthCalendar({
         ))}
       </div>
 
-      <div className="mc-latest">
-        <p className="mc-line" aria-hidden="true">
-          {month.empty}
-        </p>
-        {month.orders.map((o, k) => (
-          <p
-            key={o.id}
-            className={k === latest ? "mc-line is-last" : "mc-line"}
-            aria-hidden={k === latest ? undefined : "true"}
-          >
-            <b>{o.item}</b>
-            {o.at}
-          </p>
-        ))}
-      </div>
+      {/* No order line under the grid (Sam: "not sure this is necessary"): the
+          day's picture and chip already say what was bought and what it earned. */}
 
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
         {month.rows.map((r) => (
