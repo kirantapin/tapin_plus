@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, type Ref } from "react";
 import type { Month, MonthOrder } from "../model/month";
 import { dollars, signedDollars } from "../model/month";
+import { BENEFIT } from "../model/savings";
 import { MonthControls, TALLY, easeOut, still, useMonthSwitch, type MonthPlace } from "./MonthSwitch";
 
 /**
@@ -52,6 +53,11 @@ const byWeek = (month: Month) =>
       orders,
       spent: weekSum(orders, (o) => o.priceCents),
       saved: weekSum(orders, (o) => o.cents),
+      /* What the saving is made of (§56): credits and 15%, cents and counts. */
+      credit: weekSum(orders, (o) => o.creditCents),
+      credits: orders.filter((o) => o.benefit === "credit").length,
+      pct: weekSum(orders, (o) => o.percentCents),
+      pcts: orders.filter((o) => o.benefit === "percent").length,
     };
   });
 
@@ -72,6 +78,10 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
   const card = useRef<HTMLDivElement>(null);
   const fig = useRef<HTMLSpanElement>(null);
   const spentFig = useRef<HTMLSpanElement>(null);
+  const creditFig = useRef<HTMLSpanElement>(null);
+  const creditN = useRef<HTMLElement>(null);
+  const pctFig = useRef<HTMLSpanElement>(null);
+  const pctN = useRef<HTMLElement>(null);
   const sw = useMonthSwitch(places, card);
   const month = sw.shown;
   /** The month the sequence last saw, whether it has had its one play, and
@@ -150,16 +160,31 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
     const paint = (t: number) => {
       let spent = 0;
       let saved = ahead ? 0 : month.startCents;
+      let credit = 0;
+      let credits = 0;
+      let pct = 0;
+      let pcts = 0;
       parts.forEach((w) => {
         if (!w.tiles.length) return;
         const e = easeOut(Math.max(0, Math.min(1, (t - w.countAt) / COUNT)));
         spent += w.spent * e;
         saved += w.share * e;
+        credit += w.credit * e;
+        pct += w.pct * e;
+        /* A count steps as its week's count begins. */
+        if (e > 0) {
+          credits += w.credits;
+          pcts += w.pcts;
+        }
         put(w.spentLive, dollars(Math.round(w.spent * e)));
         put(w.savedLive, `+${dollars(Math.round(w.saved * e))}`);
       });
       put(spentAll, dollars(Math.round(spent)));
       put(savedAll, signedDollars(Math.round(saved)));
+      put(creditFig.current, `+${dollars(Math.round(credit))}`);
+      put(creditN.current, `× ${credits}`);
+      put(pctFig.current, `+${dollars(Math.round(pct))}`);
+      put(pctN.current, `× ${pcts}`);
       sw.net.current = Math.round(saved);
     };
     /* The finished month, as the markup drew it. After a switch "You saved"
@@ -171,6 +196,10 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
         put(w.savedLive, `+${dollars(w.saved)}`);
       });
       put(spentAll, dollars(month.spentCents));
+      put(creditFig.current, `+${dollars(month.creditCents)}`);
+      put(creditN.current, `× ${month.credits}`);
+      put(pctFig.current, `+${dollars(month.percentCents)}`);
+      put(pctN.current, `× ${month.percents}`);
       if (withSaved) {
         put(savedAll, signedDollars(month.netCents));
         sw.net.current = month.netCents;
@@ -290,12 +319,42 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
           <Counted text={dollars(month.spentCents)} live={spentFig} />
           <span className="sr-only">{dollars(month.spentCents)}</span>
         </p>
-        <p className="mw-net">
-          <span className="mw-lab">You saved</span>
-          <Counted text={signedDollars(month.netCents)} live={fig} />
-          <span className="sr-only">{signedDollars(month.netCents)}</span>
-          <span className="mw-after">after the {dollars(month.planCents)} membership</span>
-        </p>
+        {/* The saved tile (§56): what the credits and the 15% brought back,
+            then "You saved" after the membership. */}
+        <div className="mw-save">
+          <ul className="mw-parts">
+            <li className="mw-part">
+              <span>
+                ${BENEFIT.creditUsd} credit{" "}
+                <i className="mw-part-n" aria-hidden="true" ref={creditN}>
+                  × {month.credits}
+                </i>
+              </span>
+              <Counted text={`+${dollars(month.creditCents)}`} live={creditFig} />
+              <span className="sr-only">
+                , {month.credits} times: {dollars(month.creditCents)}
+              </span>
+            </li>
+            <li className="mw-part">
+              <span>
+                {Math.round(BENEFIT.percentOff * 100)}% off{" "}
+                <i className="mw-part-n" aria-hidden="true" ref={pctN}>
+                  × {month.percents}
+                </i>
+              </span>
+              <Counted text={`+${dollars(month.percentCents)}`} live={pctFig} />
+              <span className="sr-only">
+                , {month.percents} orders: {dollars(month.percentCents)}
+              </span>
+            </li>
+          </ul>
+          <p className="mw-net">
+            <span className="mw-lab">You saved</span>
+            <Counted text={signedDollars(month.netCents)} live={fig} />
+            <span className="sr-only">{signedDollars(month.netCents)}</span>
+            <span className="mw-after">after the {dollars(month.planCents)} membership</span>
+          </p>
+        </div>
       </div>
     </div>
   );
