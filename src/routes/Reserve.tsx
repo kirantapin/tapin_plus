@@ -1,10 +1,11 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import GuaranteeLine from "../shell/GuaranteeLine";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
-import { seatsLeft, SEAT_CAP } from "../model/seats";
+import { SEAT_CAP } from "../model/seats";
+import { nextDrop, takeSeats, TICK_MS, useSeatsShown } from "../model/seatsSession";
 import {
   PLANS,
   launchWindow,
@@ -166,6 +167,15 @@ const joinAfter = (k: number, n: number) => (k === n - 1 ? "" : k === n - 2 ? " 
    "need to make sure it says $4.99 deposit"). */
 const checkoutLabel = `Checkout · ${plan.price} deposit`;
 
+/* The drop's two timings (§35): how long after the sheet is still, and each
+   tick's settle. The ticks themselves are model/seatsSession.ts's TICK_MS. */
+const DROP_AFTER_MS = 2_500;
+const SETTLE_MS = 240;
+/** Reduced motion, or a `data-still` ancestor: the count changes in one step. */
+const holdsStill = (el: Element | null | undefined): boolean =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+  el?.closest("[data-still]") != null;
+
 export default function Reserve() {
   /* ══ THE CHECKOUT IS THIS SHEET'S OTHER PAGES NOW (21 Sep 2026) ═══════════
      The charge used to be a second sheet this page opened, so this file held
@@ -173,7 +183,7 @@ export default function Reserve() {
      shell/ReserveLayer.tsx — and what is left to read from here is the two
      things the page's own controls need: whether a seat has been paid for, and
      the one call that moves the sheet on to "Your details". */
-  const { paid, openCheckout } = useReserveFlow();
+  const { paid, step, openCheckout } = useReserveFlow();
 
   /* ══ STANDARD REFUSES IN PLACE ════════════════════════════════════════
      Sam, 20 Sep 2026: "I don't like this toast, let's get rid of it. Instead
@@ -218,7 +228,76 @@ export default function Reserve() {
   const [cardName] = useName();
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
-  const left = seatsLeft();
+  /* The count the sheet prints: the model's, less this session's invented
+     drop (model/seatsSession.ts). `seatsLeft()` is read nowhere on the sheet. */
+  const left = useSeatsShown();
+
+  /* ══ THE ROOM GETS SMALLER WHILE YOU LOOK (23 Sep 2026, POLISH §35) ═══════
+     INVENTED, and model/seatsSession.ts says so at length. Sam: "when someone
+     views either of these checkouts, we should show the count go down 1 or 2
+     seats." Once per open, on page 0 only: 2.5s after the sheet is still (its
+     entrance done, no card in flight), the printed count falls by the
+     session's next drop and the feed is asked, over `window`, for its one
+     card over the layer — the sheet and the feed stay strangers. Never on a
+     return from page 1, once paid, or after the round has closed. */
+  const modal = useRef<HTMLDivElement | null>(null);
+  const spent = useRef(false);
+  useEffect(() => {
+    if (step !== 0 || paid || !FOUNDING_OPEN) spent.current = true;
+    if (spent.current) return;
+    const sheet = modal.current?.closest<HTMLElement>(".reserve-sheet");
+    let timer = 0;
+    let gone = false;
+    const drop = () => {
+      spent.current = true;
+      if (sheet?.closest(".is-closing")) return;
+      if (takeSeats(nextDrop(), holdsStill(sheet) ? 0 : TICK_MS) > 0) {
+        window.dispatchEvent(new CustomEvent("tapin:feed", { detail: { kind: "purchase" } }));
+      }
+    };
+    const wait = () => {
+      if (gone) return;
+      const moving = sheet?.getAnimations().filter((a) => a.playState === "running") ?? [];
+      if (moving.length) {
+        Promise.all(moving.map((a) => a.finished)).then(wait, wait);
+      } else if (document.documentElement.dataset.flight) {
+        timer = window.setTimeout(wait, 100);
+      } else {
+        timer = window.setTimeout(drop, DROP_AFTER_MS);
+      }
+    };
+    wait();
+    return () => {
+      gone = true;
+      window.clearTimeout(timer);
+    };
+  }, [step, paid]);
+
+  /* Each tick: the number settles from 1.06 to its size, and the bar's fill
+     follows the same step over its own transform. Transform only; under
+     reduced motion both change in one step and nothing plays. */
+  const num = useRef<HTMLElement | null>(null);
+  const fill = useRef<HTMLElement | null>(null);
+  const was = useRef(left);
+  useLayoutEffect(() => {
+    const from = was.current;
+    was.current = left;
+    const n = num.current;
+    const f = fill.current;
+    if (left === from || !n || !f || holdsStill(n)) return;
+    const timing = {
+      duration: SETTLE_MS,
+      easing: getComputedStyle(n).getPropertyValue("--ease").trim() || "cubic-bezier(.22,1,.36,1)",
+    };
+    n.animate([{ transform: "scale(1.06)" }, { transform: "none" }], timing);
+    f.animate(
+      [
+        { transform: `scaleX(${1 - from / SEAT_CAP})` },
+        { transform: `scaleX(${1 - left / SEAT_CAP})` },
+      ],
+      timing,
+    );
+  }, [left]);
 
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it
@@ -228,7 +307,7 @@ export default function Reserve() {
      untouched — the rows, the consent and the control still travel together
      on page 2, one tap on. */
   return (
-    <div className="rs-modal">
+    <div className="rs-modal" ref={modal}>
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
           The right column from 1024 (the tiles, then the order card); below
           1024 this wrapper is `display:contents` and draws nothing. */}
@@ -406,14 +485,15 @@ export default function Reserve() {
             under a hairline, and from 1024 its own button (§31.1); below 1024
             the dock is the one Checkout. */}
         <section className="rs-order" aria-labelledby="rs-order-head">
-          {/* The seats lead: `seatsLeft()` of `SEAT_CAP` (model/seats.ts, still
-              artificial) and `foundingCloses`, only while FOUNDING_OPEN. The
-              deadline shares the line from 480 and takes its own below. */}
+          {/* The seats lead: `useSeatsShown()` of `SEAT_CAP` (model/seats.ts
+              and model/seatsSession.ts, both invented) and `foundingCloses`,
+              only while FOUNDING_OPEN. The deadline shares the line from 480
+              and takes its own below. */}
           {FOUNDING_OPEN ? (
             <div className="rs-seats">
               <p className="rs-seats-line">
                 <span>
-                  <b className="tnum">{left}</b> of {SEAT_CAP} {foundingTierName} spots left
+                  <b className="tnum rs-seats-n" ref={num}>{left}</b> of {SEAT_CAP} {foundingTierName} spots left
                 </span>
                 <span className="rs-seats-close">closes at {foundingCloses}</span>
               </p>
@@ -421,7 +501,7 @@ export default function Reserve() {
                   LEFT — DO NOT "FIX" IT. A bar nearly full says what the line
                   says; the line is the statement of record, this is aria-hidden. */}
               <span className="rs-seats-bar" aria-hidden="true">
-                <i style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
+                <i ref={fill} style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
               </span>
             </div>
           ) : null}

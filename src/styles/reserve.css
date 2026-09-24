@@ -1546,6 +1546,9 @@ html.is-layered{overflow:hidden}
   gap:var(--s-xs) var(--s-lg);margin:0;font-size:14px;font-weight:500;
   line-height:1.4;color:var(--ink-2)}
 .rs-seats-line b{font-size:16px;font-weight:700;color:var(--ink-1)}
+/* A box, so the §35 tick's settle (scale 1.06 → 1, Reserve.tsx) has
+   something to transform; the line's baseline is unchanged. */
+.rs-seats-n{display:inline-block}
 .rs-seats-close{color:var(--ink-3);white-space:nowrap}
 @media (max-width:479px){.rs-seats-close{flex-basis:100%}}
 .rs-seats-bar{display:block;height:6px;border-radius:var(--r-pill);

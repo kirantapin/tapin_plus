@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import TapInIcon from "./TapInIcon";
-import { logoField, plusVenues, type Venue } from "../model/content";
+import { logoField, venues, type Venue } from "../model/content";
+import { campaignTrialPlaces } from "../model/campaign";
 
 /**
  * ══ THIS FEED IS INVENTED. NOTHING IT SAYS HAPPENED. ═══════════════════════
@@ -31,10 +33,20 @@ import { logoField, plusVenues, type Venue } from "../model/content";
  * and Coffeeholics (never the deck, never the checkout); text under 14px; any
  * colour but the tokens, and no green "live" dot.
  *
- * ⚠ ONE LINE NAMES AN OFFER THAT IS NOT EVERYWHERE. "Tried it for free at
- * {venue}" draws from every Plus venue, as §34 asks, but the one free trial
- * the site links to today is Coffeeholics' (model/campaign.ts). Flagged for
- * Sam; not narrowed here.
+ * ══ "TRIED IT FOR FREE" NAMES ONLY WHERE THE TRIAL EXISTS (§35) ══════════
+ * It drew from every Plus venue, as §34 asked, and so could name a place with
+ * no free trial at all. It now draws from `campaignTrialPlaces`
+ * (model/campaign.ts) — the places the trial can actually be taken — so an
+ * invented line at least never names an offer that does not exist.
+ *
+ * ══ THE ONE CARD OVER A LAYER (§35) ════════════════════════════════════════
+ * The checkout's invented seat drop (model/seatsSession.ts) asks for
+ * "Someone just got early access · just now" with a `tapin:feed` event on
+ * `window`, so the sheet and the feed stay strangers. It is the only card
+ * shown while a layer is up: the cadence stays paused, and this card runs on
+ * its own clock, above the layer. It is not one of the session's eight, and
+ * the X still stops it. Portalled to <body> for that reason: `main.column`
+ * is a stacking context (z 1) that no z-index inside it can climb out of.
  */
 
 /** One key for the session: "off" once the X is pressed, else how many
@@ -46,6 +58,13 @@ const GAP_MS: readonly [number, number] = [14_000, 30_000];
 /** Matches feed.css's exit, so the card unmounts as it finishes leaving. */
 const OUT_MS = 180;
 const MAX = 8;
+/** The event the checkout's drop sends, and the card it asks for. */
+const FEED_EVENT = "tapin:feed";
+const PURCHASE: Card = {
+  what: "Someone just got early access",
+  when: "just now · Blacksburg",
+  venue: null,
+};
 
 type Kind = "viewed" | "joined" | "tried";
 interface Card {
@@ -54,16 +73,21 @@ interface Card {
   venue: Venue | null;
 }
 
+/** Where the trial can actually be taken — campaign.ts's places, in its order. */
+const trialVenues: Venue[] = campaignTrialPlaces
+  .map((place) => venues.find((v) => v.id === place.venueId))
+  .filter((v): v is Venue => v !== undefined);
+
 const between = (lo: number, hi: number): number =>
   lo + Math.floor(Math.random() * (hi - lo + 1));
 
 /** A line, a time and a place. Never the same kind twice running. */
 const draw = (last: Kind | null): { kind: Kind; card: Card } => {
   const kinds = (["viewed", "joined", "tried"] as const).filter(
-    (k) => k !== last && (k !== "tried" || plusVenues.length > 0),
+    (k) => k !== last && (k !== "tried" || trialVenues.length > 0),
   );
   const kind = kinds[between(0, kinds.length - 1)];
-  const venue = kind === "tried" ? plusVenues[between(0, plusVenues.length - 1)] : null;
+  const venue = kind === "tried" ? trialVenues[between(0, trialVenues.length - 1)] : null;
   const what =
     kind === "viewed"
       ? "Someone just viewed this page"
@@ -101,6 +125,19 @@ const blocked = (): boolean =>
   document.documentElement.classList.contains("is-layered") ||
   document.querySelector('[role="dialog"], dialog[open]') !== null;
 
+/** Below 1024 the card over a layer sits under the open dialog's header: its
+ *  edges, measured, handed to feed.css (which adds the tokens). */
+const underHeader = (): CSSProperties => {
+  const head = document.querySelector('[role="dialog"][aria-modal="true"] > header');
+  if (!head) return {};
+  const r = head.getBoundingClientRect();
+  return {
+    ["--over-top" as string]: `${r.bottom}px`,
+    ["--over-left" as string]: `${r.left}px`,
+    ["--over-right" as string]: `${document.documentElement.clientWidth - r.right}px`,
+  };
+};
+
 /**
  * Mounted on the pitch (`lit`, because every pop-up on that dark page is
  * light) and on Coffeeholics (already light, and tinted; `lit` would drop the
@@ -109,11 +146,12 @@ const blocked = (): boolean =>
 export default function LiveFeed({ lit }: { lit?: boolean }) {
   const [card, setCard] = useState<Card | null>(null);
   const [out, setOut] = useState(false);
+  /* Set while the one card over a layer is up: its place under the header. */
+  const [over, setOver] = useState<CSSProperties | null>(null);
   const dismiss = useRef<() => void>(() => {});
 
   useEffect(() => {
     const start = stored();
-    if (start.off || start.shown >= MAX) return;
 
     /* ══ ONE TIMER SCHEDULE ═══════════════════════════════════════════════
        wait → show (5s) → leave (180ms) → wait (14–30s) → … At most one
@@ -124,10 +162,15 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
     let timer = 0;
     let due = 0;
     let left = FIRST_MS;
-    let stage: "wait" | "show" | "leave" | "done" = "wait";
+    let stage: "wait" | "show" | "leave" | "done" =
+      start.off || start.shown >= MAX ? "done" : "wait";
     let paused = false;
-    let stopped = false;
+    let stopped = start.off;
     let last: Kind | null = null;
+    /* The card over a layer keeps its own clock; `overUntil` is when it will
+       be gone, 0 while it is not up. */
+    let overTimer = 0;
+    let overUntil = 0;
 
     const arm = (ms: number, fn: () => void) => {
       window.clearTimeout(timer);
@@ -138,6 +181,12 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       const s = stored();
       if (stopped || s.off || s.shown >= MAX) {
         stage = "done";
+        return;
+      }
+      /* The card over a layer is still up (the layer closed under it): the
+         cadence's next card waits for it to go. */
+      if (overUntil) {
+        arm(Math.max(0, overUntil - Date.now()), show);
         return;
       }
       store(String(s.shown + 1));
@@ -154,8 +203,10 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       arm(OUT_MS, gone);
     };
     const gone = () => {
-      setCard(null);
-      setOut(false);
+      if (!overUntil) {
+        setCard(null);
+        setOut(false);
+      }
       const s = stored();
       if (stopped || s.off || s.shown >= MAX) {
         stage = "done";
@@ -185,11 +236,56 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       else if (!b && paused) resume();
     };
 
+    /* ══ THE ONE CARD OVER A LAYER ═══════════════════════════════════════
+       Shown however the cadence stands — paused, as it is while the layer
+       that asked is up, or done — for 5s, then out the usual way. */
+    const overGone = () => {
+      overUntil = 0;
+      setCard(null);
+      setOut(false);
+      setOver(null);
+    };
+    const overLeave = () => {
+      setOut(true);
+      overTimer = window.setTimeout(overGone, OUT_MS);
+    };
+    const onFeed = (e: Event) => {
+      if ((e as CustomEvent<{ kind?: string }>).detail?.kind !== "purchase") return;
+      if (stopped || stored().off) return;
+      /* A cadence card on screen (only possible with no layer up) gives way
+         and the cadence starts a fresh gap. */
+      if (stage === "show" || stage === "leave") {
+        stage = "wait";
+        left = between(GAP_MS[0], GAP_MS[1]);
+        if (paused) window.clearTimeout(timer);
+        else arm(left, show);
+      }
+      window.clearTimeout(overTimer);
+      overUntil = Date.now() + SHOW_MS + OUT_MS;
+      setOver(underHeader());
+      setOut(false);
+      setCard(PURCHASE);
+      overTimer = window.setTimeout(overLeave, SHOW_MS);
+    };
+    window.addEventListener(FEED_EVENT, onFeed);
+
     dismiss.current = () => {
       stopped = true;
       store("off");
       if (stage === "show") leave();
+      if (overUntil) {
+        window.clearTimeout(overTimer);
+        overLeave();
+      }
     };
+
+    if (stage === "done") {
+      return () => {
+        window.clearTimeout(overTimer);
+        window.removeEventListener(FEED_EVENT, onFeed);
+        dismiss.current = () => {};
+      };
+    }
 
     if (blocked()) paused = true;
     else arm(FIRST_MS, show);
@@ -209,6 +305,8 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
 
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(overTimer);
+      window.removeEventListener(FEED_EVENT, onFeed);
       watch.disconnect();
       document.removeEventListener("visibilitychange", check);
       dismiss.current = () => {};
@@ -217,9 +315,10 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
 
   if (!card) return null;
 
-  return (
+  return createPortal(
     <div
-      className={`feed${out ? " is-out" : ""}`}
+      className={`feed${out ? " is-out" : ""}${over ? " is-over" : ""}`}
+      style={over ?? undefined}
       data-simulated="true"
       data-lit={lit ? "" : undefined}
       aria-hidden="true"
@@ -260,6 +359,7 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
           </svg>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
