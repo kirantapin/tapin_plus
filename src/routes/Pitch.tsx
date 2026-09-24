@@ -171,7 +171,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                it. Same chip as the app's venue pages (.plus). */
             <span className="hero-brand">
               <TapInLogo className="logo" />
-              <span className="plus hero-plus">PLUS</span>
+              <span className="plus hero-plus"><span className="plus-word">PLUS</span></span>
             </span>
           )}
           {/* ══ A RECURRING EVENT IN DOLLARS, NOT AN AGGREGATE ══════════════
