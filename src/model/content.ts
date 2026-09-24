@@ -389,9 +389,8 @@ export const benefits = (moneyJson.benefits as unknown as Policy[]).map(
  * the Instagram shots are a one-line swap per card and nothing here holds a
  * second copy of an image path.
  *
- * Four ids, four different files, and no `heroIsBright` one: The Burg's hero is
- * a brand card on white (0.891 mean luminance, see BRIGHT_HEROES below) and the
- * §7 veil is built for a photograph of a room, not for a wordmark.
+ * Four ids, four different files, and no `heroIsBright` one: the §7 veil is
+ * built for a photograph of a room, not for a wordmark (see BRIGHT_HEROES).
  */
 export const benefitShots: Record<string, string> = {
   credit: "coffeeholicsva",
@@ -1320,14 +1319,14 @@ export const logoField = (id: string): "light" | "dark" =>
 
 /**
  * Heroes that are a brand card on white rather than a photograph of a room.
+ * Dimming all six to hide one was the wrong fix: it cost the collage its
+ * presence, so only an outlier is seated.
  *
- * MEASURED mean relative luminance of the files in public/heroes:
- *   theburg 0.891 — and the next brightest is coffeeholicsva at 0.220, with the
- *   rest between 0.036 and 0.16. It is one outlier, not a general problem.
- *
- * Dimming all six to hide the one was the wrong fix: it cost the collage its
- * presence. Only the outlier is seated.
+ * EMPTY SINCE 24 SEP (§51): The Burg's hero was the one outlier, a wordmark at
+ * 0.891 mean relative luminance. It is now the bar photograph from its live
+ * storefront, at 0.204, among the others (0.099–0.290). The seat stays for
+ * the next brand card.
  */
-const BRIGHT_HEROES = new Set(["theburg"]);
+const BRIGHT_HEROES = new Set<string>();
 
 export const heroIsBright = (id: string): boolean => BRIGHT_HEROES.has(id);

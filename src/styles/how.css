@@ -952,9 +952,9 @@
   overflow:hidden;background:var(--inner);box-shadow:var(--float)}
 .vs-shot img{width:100%;height:100%;object-fit:cover;display:block;
   filter:saturate(.95) brightness(.92)}
-/* The Burg's hero is the one bright outlier in the set — measured mean relative
-   luminance .891 against .036-.220 for the rest — so it is seated the same way
-   the pitch's mosaic seats it, rather than dimming all four to hide one. */
+/* A bright outlier hero is seated the same way the pitch's mosaic seats it,
+   rather than dimming all four to hide one. No hero needs this since 24 Sep (§51): The Burg's is now a bar photograph.
+   Kept for the next brand card. */
 /* THE PASS TILE NO LONGER CARRIES A DIM OF ITS OWN. brightness(.46) was here to
    seat ONE photograph — The Burg's, a brand card on white at 0.891 luminance,
    the measured outlier among six heroes that otherwise sit between 0.036 and

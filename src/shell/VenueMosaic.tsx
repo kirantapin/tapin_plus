@@ -9,10 +9,9 @@ import { venues, heroIsBright } from "../model/content";
  * panel on `/`, the membership card on `/reserve` — is passed as children and
  * overlaps the band's lower edge.
  *
- * Measured, not eyeballed: five of the six heroes sit between 0.036 and 0.22
- * relative luminance, and only theburg's is a brand card on white at 0.891. That
- * one outlier is seated by `data-bright` so it sits among the photographs rather
- * than punching a hole through them.
+ * Measured, not eyeballed: a hero that is a brand card on white rather than a
+ * photograph is seated by `data-bright` so it sits among the photographs rather
+ * than punching a hole through them. None is today (content.ts BRIGHT_HEROES).
  */
 export default function VenueMosaic({
   children,

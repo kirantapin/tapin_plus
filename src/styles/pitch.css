@@ -29,10 +29,9 @@
   gap: 2px;
   overflow: hidden;
 }
-/* Measured, not eyeballed: five of the six heroes sit between 0.036 and 0.22
-   relative luminance. Only theburg's is a brand card on white, at 0.891. So the
-   collage runs at strength and the single outlier is seated to sit among the
-   photographs rather than punch a hole through them. */
+/* Measured, not eyeballed: every hero is a photograph between 0.099 and 0.290
+   relative luminance (24 Sep), so the collage runs at strength. A brand card
+   on white would be seated by `data-bright` (content.ts BRIGHT_HEROES). */
 .mosaic img {
   width: 100%;
   height: 100%;
@@ -1884,9 +1883,10 @@ button.vcard:focus-visible {
   display: block;
   filter: saturate(0.96);
 }
-/* The Burg's hero is a brand card on white — 0.891 relative luminance against
-   0.220 for the next brightest. Seated, it sits among the photographs instead of
-   punching a hole through the rail. */
+/* A hero that is a brand card on white (The Burg's was, at 0.891) is seated,
+   so it sits among the photographs instead of punching a hole through the
+   rail. No hero needs this since 24 Sep (§51): The Burg's is now a bar photograph.
+   Kept for the next brand card. */
 .vcard .vshot img[data-bright="true"] {
   filter: saturate(0.9) brightness(0.5);
 }
