@@ -13,8 +13,8 @@ import { dollars, signedDollars, type Month } from "../model/month";
  * in step with it on purpose: the foot rests on −$4.99 for 1.2s, then the
  * orders arrive 900ms apart in the order they happened (opacity and a .92
  * scale, 280ms, the house ease); as each lands the foot counts to its new
- * total over 400ms. While it is owed it is `--ink-3` and unlabelled; past zero
- * it takes `--ink-1` and "You're ahead" fades in. It holds 3.2s, the month
+ * total over 400ms. "You saved" and its figure are `--loss` while the month is
+ * still owed and `--gain` past zero (Sam, 23 Sep 2026). It holds 3.2s, the month
  * fades out together over 240ms and begins again (≈13s a cycle).
  *
  * THE MARKUP IS THE FINISHED MONTH. Every order in its day, the last one
@@ -248,7 +248,7 @@ export default function MonthCalendar({ month }: { month: Month }) {
           <span className="sr-only">{month.earned.figure}</span>
         </p>
         <p className="mc-net">
-          <span className="mc-ahead">You're ahead</span>
+          <span className="mc-ahead">You saved</span>
           <b className="mc-net-fig" aria-hidden="true">
             {signedDollars(month.netCents)}
           </b>

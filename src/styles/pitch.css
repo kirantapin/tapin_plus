@@ -3737,18 +3737,17 @@ button.vcard:focus-visible {
   opacity: 1;
   transition: opacity 200ms var(--ease);
 }
-/* THE CROSSING IS TOLD BY INK: owed, the figure is the quiet step and nothing
-   names it; past zero it takes the heading ink (a class flip, not a colour
-   transition) and "You're ahead" fades in. */
-.mc[data-run] .mc-ahead {
-  transition: opacity 200ms var(--ease);
+/* THE CROSSING IS TOLD BY COLOUR (Sam, 23 Sep 2026: "green or red based on
+   whether it's positive or negative, and 'you saved' instead of 'you're
+   ahead'"). "You saved" and its figure are `--loss` while the month is owed
+   and `--gain` past zero — a class flip, not a colour transition. */
+.mc-foot .mc-ahead,
+.mc-foot .mc-net-fig {
+  color: var(--loss);
 }
-.mc[data-run] .mc-foot:not(.is-ahead) .mc-ahead {
-  opacity: 0;
-  transition: none;
-}
-.mc[data-run] .mc-foot:not(.is-ahead) .mc-net-fig {
-  color: var(--ink-3);
+.mc-foot.is-ahead .mc-ahead,
+.mc-foot.is-ahead .mc-net-fig {
+  color: var(--gain);
 }
 .mc[data-run] .mc-net-fig,
 .mc[data-run] .mc-earned-fig {
