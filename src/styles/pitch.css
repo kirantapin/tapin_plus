@@ -4055,12 +4055,12 @@ button.vcard:focus-visible {
 .mw[data-swap] {
   overflow: clip;
 }
-.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-points),
-.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row, .mw-points) {
+.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
+.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row) {
   transition: opacity 200ms var(--ease);
 }
-.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-points),
-.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row, .mw-points) {
+.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
+.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
   opacity: 0;
   transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }
