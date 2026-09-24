@@ -1231,18 +1231,15 @@
     opacity 280ms var(--ease),
     transform 280ms var(--ease);
 }
-/* THE CROSSING IS TOLD BY INK. While the foot is owed it is the quiet step
-   and nothing names it; the frame it reaches zero it takes the heading ink
-   (a class flip, not a colour transition) and "You're ahead" fades in. */
-.ml[data-run] .ml-ahead {
-  transition: opacity 200ms var(--ease);
+/* THE CROSSING IS TOLD BY COLOUR, as on the month (pitch.css): `--loss`
+   while owed, `--gain` past zero, "You saved" throughout. */
+.ml-foot .ml-ahead,
+.ml-foot .ml-net {
+  color: var(--loss);
 }
-.ml[data-run] .ml-foot:not(.is-ahead) .ml-ahead {
-  opacity: 0;
-  transition: none;
-}
-.ml[data-run] .ml-foot:not(.is-ahead) .ml-net {
-  color: var(--ink-3);
+.ml-foot.is-ahead .ml-ahead,
+.ml-foot.is-ahead .ml-net {
+  color: var(--gain);
 }
 .ml[data-run] .ml-net {
   transition: opacity 280ms var(--ease);

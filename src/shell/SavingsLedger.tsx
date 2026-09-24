@@ -202,7 +202,7 @@ export default function SavingsLedger({
         ))}
       </ul>
       <p className={`ml-foot${ledger.netCents > 0 ? " is-ahead" : ""}`}>
-        <span className="ml-ahead">You're ahead</span>
+        <span className="ml-ahead">You saved</span>
         <b className="ml-net" ref={net} aria-hidden="true">
           {signedDollars(ledger.netCents)}
         </b>

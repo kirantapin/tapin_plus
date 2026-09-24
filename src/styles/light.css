@@ -65,6 +65,9 @@
   --ink-2: #3D2F37;
   --ink-3: #55454E;
   --ink-4: #6B5A63;
+  /* On white: gain 5.3:1, loss 6.5:1 — AA for the 15px label too. */
+  --gain: #1F7A4D;
+  --loss: #B3261E;
 
   /* hexToRgba(ink-1, .10) and .18 — the house construction inverted. A white
      hairline on a light ground is not a hairline. */

@@ -85,6 +85,12 @@
      different thing and are not counted here. Eight solid uses as of this
      writing; if a ninth does not fit one of those roles, it is decoration. */
   --maroon:#861F41;
+  /* GAIN AND LOSS (Sam, 23 Sep 2026: "make the you're-ahead text green or
+     red based on whether it's positive or negative"). Only for a signed money
+     total; never a fill, never a second accent. Dark ramp values here; the
+     lit ramp's are in light.css. */
+  --gain:#6ED49B;
+  --loss:#FF8A80;
 
   /* THE WORDMARK'S DOT. Sam, 14 Sep 2026: "we can make the dot in the tapin
      logo the brighter red color I think." On the plum panel the maroon dot was
