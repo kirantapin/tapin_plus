@@ -479,24 +479,6 @@
     justify-content: flex-start;
     gap: var(--s-2xl);
   }
-  /* THE DOT, TWICE (Sam, 23 Sep 2026: "make the dot here in the logo twice —
-     it's a bit too hard to see the tapin dot because the purple doesn't
-     contrast well"). Twice the area is 1.41 across; doubling the diameter
-     would run it into the mark's top arm. It grows about its own centre, the
-     svg lets it overflow its box, and a ring of white at 70% cuts it out of
-     the photograph. Only the band's lockup; the foot's is on light ground. */
-  .cg-lockup svg {
-    overflow: visible;
-  }
-  /* WHITE, NO RING (Sam, 23 Sep 2026: "let's just make the tapin dot white,
-     I don't like the stroke around it"): on the photograph the lockup is
-     white throughout, dot included. */
-  .cg-lockup .tl-dot {
-    transform: scale(1.41);
-    transform-box: fill-box;
-    transform-origin: center;
-    fill: var(--on-maroon);
-  }
   .cg-lockup {
     padding-left: var(--s-2xl);
     /* --hair-lit is a quarter of white and vanishes on the photograph; the
@@ -710,13 +692,10 @@
   --maroon: #6b319e;
   --cg-brand: #6b319e;
 
-  /* The wordmark's dot follows. It is TapIn's one spot of colour and it sat
-     at badge red on a page that is purple from the announcement bar to the
-     button — the one red thing on the surface, in the lockup at the top and
-     again in "Powered by TapIn" at the foot. It is a token for exactly this
-     reason (shell/TapInLogo.tsx fills it with `var(--dot)`), so the whole
-     lockup reads as Coffeeholics' here and nothing else changes. */
-  --dot: #6b319e;
+  /* The wordmark keeps TapIn's own dot, badge red, at every width (Sam,
+     23 Sep 2026: "we need to just use the original tapin logo, the dot is
+     wrong here, same logo should be used for mobile too"). No `--dot`
+     override on this surface. */
 }
 
 /* The field, lit the same way the dark one is: a step off at the top, the
