@@ -4,6 +4,7 @@ import TapInLogo from "../shell/TapInLogo";
 import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
+import LiveFeed from "../shell/LiveFeed";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
@@ -469,6 +470,10 @@ export default function Coffeeholics() {
       <SiteFoot />
 
       {trial ? <TrialModal onClose={() => setTrial(false)} /> : null}
+
+      {/* THE SIMULATED FEED (§34) — invented, and shell/LiveFeed.tsx says so.
+          Not `lit`: this page's own ramp is already light, as the modal's is. */}
+      <LiveFeed />
 
       <div className={`sticky-cta is-pair cg-sticky${past ? "" : " is-away"}`}>
         {/* A button, not a link: it moves the reader to the two offers on this

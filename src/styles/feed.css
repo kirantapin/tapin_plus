@@ -1,0 +1,204 @@
+/* ============================================================================
+   THE SIMULATED FEED — shell/LiveFeed.tsx. docs/POLISH-2026-09-21.md §34.
+
+   INVENTED, AND ITS COMPONENT'S HEADER SAYS SO AT LENGTH. What is here is
+   only where the card sits and how it arrives.
+
+   One plate: `--card` at `--r-card` with the `--float` shadow, and no hairline
+   — elevation is declared once. A 32px tile (the TapIn mark in `--ink-1` on
+   `--inner`, or the named venue's collar), two lines, and the X.
+
+   PLACEMENT. Below 1024 the phone's foot belongs to the docked pair, so the
+   card sits at the top, under the announcement bar, the gutter in from both
+   sides. From 1024 it is a 320px card in the bottom-left corner, `--s-2xl` in
+   from both edges. Fixed either way, so nothing reflows when it comes or goes.
+
+   Z 22: over the announcement bar (21) and the docked bars (20) that share
+   `.column`'s stacking context, under every layer — those are outside the
+   column, and the feed pauses while any of them is up anyway.
+
+   THE COLUMN'S CAP. Every child of `.column` from 1024 is capped at 720 by a
+   `:where()` rule in layout.css at (0,1,0); this file loads after it, so
+   `.feed` takes its own width and margin on source order. Measured in the
+   browser, not read.
+   ============================================================================ */
+.feed {
+  position: fixed;
+  z-index: 22;
+  top: calc(var(--announce-h) + env(safe-area-inset-top, 0px) + var(--s-lg));
+  left: var(--gutter);
+  right: var(--gutter);
+  width: auto;
+  max-width: none;
+  margin: 0;
+  /* The collar's outer ring is white-on-dark by default; on this white plate
+     it takes the surface's own hairline so a white-field mark keeps an edge. */
+  --collar-ring: var(--hair-lit);
+}
+@media (min-width: 1024px) {
+  .feed {
+    top: auto;
+    right: auto;
+    bottom: var(--s-2xl);
+    left: var(--s-2xl);
+    width: 320px;
+  }
+}
+
+.feed-plate {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  padding: var(--s-lg) var(--s-md) var(--s-lg) var(--s-lg);
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--float);
+  animation: feedIn 240ms var(--ease) both;
+}
+/* Leaving is quicker than arriving, and eases in: an object on its way out
+   does not decelerate into the place it is leaving (the house exit curve). */
+.feed.is-out .feed-plate {
+  animation: feedOut 180ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* 32px. Concentric: the mark inside the collar at `--r-sm`, the tile the
+   collar's 3px band wider — 11 on 32, the collar's own 14-on-42 proportion.
+   The TapIn tile takes the same corner so the two read as one slot. */
+.feed .feed-tile {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: calc(var(--r-sm) + 3px);
+}
+.feed .feed-tile.collar img,
+.feed .feed-tile.collar::after {
+  border-radius: var(--r-sm);
+}
+.feed-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--inner);
+  color: var(--ink-1);
+}
+.feed-mark svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.feed-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.feed-what {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--ink-1);
+  text-wrap: pretty;
+}
+.feed-when {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
+/* 28px, as §34 sets it: the card leaves on its own in five seconds, so this
+   is a way to stop the next one, not the only way out of a blocking thing.
+   The glyph sits 6px inside its box, so the box gives back 8 of the plate's
+   12px gap — at 320 that is what keeps "Someone just viewed this page"
+   (216px of Gilroy 600) on one line, and the X lines up with it. */
+.feed-x {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: calc(var(--s-xs) * -1) 0 0 calc(var(--s-md) * -1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+.feed-x svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+@media (hover: hover) {
+  .feed-x:hover {
+    background: var(--inner);
+    color: var(--ink-1);
+  }
+}
+.feed-x:active {
+  background: var(--press);
+}
+
+@keyframes feedIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes feedOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes feedFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes feedFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ══ REDUCED MOTION FADES, IT DOES NOT SNAP ═══════════════════════════════
+   §34: "reduced motion fades only." base.css's house block zeroes every
+   animation to .01ms with `!important` on `*`, which would make the card
+   blink in and out — so the fade is restated here, `!important` at class
+   weight, which is the only thing that outranks it. No translate: the
+   keyframes carry opacity alone. */
+@media (prefers-reduced-motion: reduce) {
+  .feed .feed-plate {
+    animation-name: feedFadeIn !important;
+    animation-duration: 240ms !important;
+  }
+  .feed.is-out .feed-plate {
+    animation-name: feedFadeOut !important;
+    animation-duration: 180ms !important;
+  }
+}
