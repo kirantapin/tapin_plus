@@ -177,6 +177,58 @@ const holdsStill = (el: Element | null | undefined): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
   el?.closest("[data-still]") != null;
 
+/* ══ THE SEATS: ONE OBJECT, TWO HOMES (POLISH §31, §35, §45) ══════════════
+   The count and its bar, from `useSeatsShown()` (model/seatsSession.ts, the
+   §35 drop's store; both it and model/seats.ts are invented) of `SEAT_CAP`.
+   From 1024 it leads the order card; below 1024 it rides on the dock, over
+   the button (Sam, 23 Sep: "make this counter a part of the sticky button").
+   One component in both, so the tick and the settle are one implementation;
+   reserve.css shows the copy that belongs to the width. */
+function Seats() {
+  const left = useSeatsShown();
+  /* Each tick: the number settles from 1.06 to its size, and the bar's fill
+     follows the same step over its own transform. Transform only; under
+     reduced motion both change in one step and nothing plays. */
+  const num = useRef<HTMLElement | null>(null);
+  const fill = useRef<HTMLElement | null>(null);
+  const was = useRef(left);
+  useLayoutEffect(() => {
+    const from = was.current;
+    was.current = left;
+    const n = num.current;
+    const f = fill.current;
+    if (left === from || !n || !f || holdsStill(n)) return;
+    const timing = {
+      duration: SETTLE_MS,
+      easing: getComputedStyle(n).getPropertyValue("--ease").trim() || "cubic-bezier(.22,1,.36,1)",
+    };
+    n.animate([{ transform: "scale(1.06)" }, { transform: "none" }], timing);
+    f.animate(
+      [
+        { transform: `scaleX(${1 - from / SEAT_CAP})` },
+        { transform: `scaleX(${1 - left / SEAT_CAP})` },
+      ],
+      timing,
+    );
+  }, [left]);
+  return (
+    <div className="rs-seats">
+      <p className="rs-seats-line">
+        <span className="rs-seats-count">
+          <b className="tnum rs-seats-n" ref={num}>{left}</b> of {SEAT_CAP} {foundingTierName} spots left
+        </span>
+        <span className="rs-seats-close">closes at {foundingCloses}</span>
+      </p>
+      {/* ⚠ THE FILL IS THE SEATS TAKEN, `1 − left / cap`, NOT THE SEATS
+          LEFT — DO NOT "FIX" IT. A bar nearly full says what the line
+          says; the line is the statement of record, this is aria-hidden. */}
+      <span className="rs-seats-bar" aria-hidden="true">
+        <i ref={fill} style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
+      </span>
+    </div>
+  );
+}
+
 export default function Reserve() {
   /* ══ THE CHECKOUT IS THIS SHEET'S OTHER PAGES NOW (21 Sep 2026) ═══════════
      The charge used to be a second sheet this page opened, so this file held
@@ -229,10 +281,6 @@ export default function Reserve() {
   const [cardName] = useName();
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
-  /* The count the sheet prints: the model's, less this session's invented
-     drop (model/seatsSession.ts). `seatsLeft()` is read nowhere on the sheet. */
-  const left = useSeatsShown();
-
   /* ══ THE ROOM GETS SMALLER WHILE YOU LOOK (23 Sep 2026, POLISH §35) ═══════
      INVENTED, and model/seatsSession.ts says so at length. Sam: "when someone
      views either of these checkouts, we should show the count go down 1 or 2
@@ -273,32 +321,6 @@ export default function Reserve() {
       window.clearTimeout(timer);
     };
   }, [step, paid]);
-
-  /* Each tick: the number settles from 1.06 to its size, and the bar's fill
-     follows the same step over its own transform. Transform only; under
-     reduced motion both change in one step and nothing plays. */
-  const num = useRef<HTMLElement | null>(null);
-  const fill = useRef<HTMLElement | null>(null);
-  const was = useRef(left);
-  useLayoutEffect(() => {
-    const from = was.current;
-    was.current = left;
-    const n = num.current;
-    const f = fill.current;
-    if (left === from || !n || !f || holdsStill(n)) return;
-    const timing = {
-      duration: SETTLE_MS,
-      easing: getComputedStyle(n).getPropertyValue("--ease").trim() || "cubic-bezier(.22,1,.36,1)",
-    };
-    n.animate([{ transform: "scale(1.06)" }, { transform: "none" }], timing);
-    f.animate(
-      [
-        { transform: `scaleX(${1 - from / SEAT_CAP})` },
-        { transform: `scaleX(${1 - left / SEAT_CAP})` },
-      ],
-      timing,
-    );
-  }, [left]);
 
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it
@@ -489,26 +511,9 @@ export default function Reserve() {
             under a hairline, and from 1024 its own button (§31.1); below 1024
             the dock is the one Checkout. */}
         <section className="rs-order" aria-labelledby="rs-order-head">
-          {/* The seats lead: `useSeatsShown()` of `SEAT_CAP` (model/seats.ts
-              and model/seatsSession.ts, both invented) and `foundingCloses`,
-              only while FOUNDING_OPEN. The deadline shares the line from 480
-              and takes its own below. */}
-          {FOUNDING_OPEN ? (
-            <div className="rs-seats">
-              <p className="rs-seats-line">
-                <span>
-                  <b className="tnum rs-seats-n" ref={num}>{left}</b> of {SEAT_CAP} {foundingTierName} spots left
-                </span>
-                <span className="rs-seats-close">closes at {foundingCloses}</span>
-              </p>
-              {/* ⚠ THE FILL IS THE SEATS TAKEN, `1 − left / cap`, NOT THE SEATS
-                  LEFT — DO NOT "FIX" IT. A bar nearly full says what the line
-                  says; the line is the statement of record, this is aria-hidden. */}
-              <span className="rs-seats-bar" aria-hidden="true">
-                <i ref={fill} style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
-              </span>
-            </div>
-          ) : null}
+          {/* The seats lead the card from 1024, only while FOUNDING_OPEN;
+              below 1024 this copy is hidden and the dock's is shown (§45). */}
+          {FOUNDING_OPEN ? <Seats /> : null}
           <h2 className="t-title rs-order-head" id="rs-order-head">
             What you pay, and when
           </h2>
@@ -621,8 +626,11 @@ export default function Reserve() {
       </div>
 
       {/* The phone's foot: sticky to the scroller's bottom, always on, page 0's
-          Checkout below 1024 (reserve.css hides it from there). */}
+          Checkout below 1024 (reserve.css hides it from there). The seats
+          ride on it there, over the button (§45); the button alone once the
+          round has closed. */}
       <div className="rs-dock">
+        {FOUNDING_OPEN ? <Seats /> : null}
         <button type="button" className="action" onClick={openCheckout}>
           {paid ? "View your seat" : checkoutLabel}
         </button>
