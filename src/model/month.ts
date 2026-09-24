@@ -146,9 +146,11 @@ interface Plan {
 }
 
 /** One set of rules at every place, in the order things happen: the week's
- *  first order at or over the floor AT EACH PLACE is the credit; another at
- *  or over it, where the place gives 15%, is the 15% (never on alcohol); the
- *  rest is points. Every order earns points at 10 a dollar × the multiplier. */
+ *  first order at or over the floor AT EACH PLACE is the credit; any other
+ *  order, where the place gives 15%, is the 15% (never on alcohol, and no
+ *  floor: the policy has none, and the storefront's terms read "15% off or
+ *  the week's $5 credit — one per order", §52); the rest is points. Every
+ *  order earns points at 10 a dollar × the multiplier. */
 function earn(list: Plan[]) {
   const floor = cents(BENEFIT.creditMinUsd);
   const pct = Math.round(BENEFIT.percentOff * 100);
@@ -164,7 +166,7 @@ function earn(list: Plan[]) {
     if (priceCents >= floor && has("credit") && !credited.has(slot)) {
       credited.add(slot);
       benefit = "credit";
-    } else if (priceCents >= floor && has("percent") && percentBase > 0) benefit = "percent";
+    } else if (has("percent") && percentBase > 0) benefit = "percent";
     const creditCents = benefit === "credit" ? Math.min(cents(BENEFIT.creditUsd), priceCents) : 0;
     const percentCents = benefit === "percent" ? Math.round(percentBase * BENEFIT.percentOff) : 0;
     return {
