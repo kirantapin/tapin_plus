@@ -9,6 +9,19 @@
    ============================================================================ */
 
 .card-stage{perspective:1100px;width:100%;max-width:420px;margin:0 auto}
+/* ONE CARD, ONE SIZE (POLISH §25/§26): the deck's close and the checkout's
+   panel both draw it at this width. 340 wherever it fits; on a narrow phone,
+   the window less the sheet's gutter and the panel's inset on each side. */
+:root{--tcard-w:min(340px,calc(100vw - 80px))}
+/* FROM 1024 THE CARD FILLS THE CHECKOUT'S PANEL (§32, Sam: "the membership
+   card should be wider here to fill the awkward space on the right and left
+   of it"): the sheet (min(1040, 100vw − 64)) less the modal's gutters, less the
+   column gap, halved, less the panel's padding and its 1px border each side.
+   The deck's slide 9 reads the same number, so the §25 flight stays a pure
+   translate; the card keeps its aspect ratio, its type does not scale. */
+@media (min-width:1024px){
+  :root{--tcard-w:calc((min(1040px,100vw - 64px) - 2 * var(--gutter) - 2 * var(--s-xl)) / 2 - 2 * var(--s-xl) - 2px)}
+}
 
 /* ══ THE CARD IS A DARK OBJECT IN BOTH WORLDS ══════════════════════════════
    It is a maroon card. That is true on a dark page and on a light one, and it
@@ -193,6 +206,9 @@
 .tcard-facts{display:flex;margin:0}
 .tcard-facts > div{padding-right:var(--s-2xl)}
 .tcard-facts > div + div{padding-left:var(--s-2xl);border-left:1px solid var(--hair-lit)}
+/* The padding is the space before the next fact's rule; the last fact has no
+   next, and its 24px ran past the card's content edge (23 Sep 2026, §23). */
+.tcard-facts > div:last-child{padding-right:0}
 .tcard-facts dt{margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-3)}
 .tcard-facts dd{margin:5px 0 0;font-size:18px;font-weight:700;letter-spacing:-.02em;

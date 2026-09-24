@@ -45,6 +45,9 @@ export interface MenuItem {
    * a real kitchen does not serve is a claim about that kitchen.
    */
   img?: string;
+  /** Alcohol, which the 15% never touches. No extracted record carries the
+   *  flag yet; one that does is excluded from the 15% (model/month.ts). */
+  alcohol?: boolean;
 }
 
 export interface MenuSection {
@@ -76,7 +79,14 @@ export function sectionsFor(venueId: string): MenuSection[] {
       // Narrowed at the boundary to exactly the fields a row may render.
       items: s.items
         .filter((i) => i.price > 0)
-        .map(({ id, name, price, desc, img }) => ({ id, name, price, desc, img: img ? asset(img) : undefined })),
+        .map(({ id, name, price, desc, img, alcohol }) => ({
+          id,
+          name,
+          price,
+          desc,
+          img: img ? asset(img) : undefined,
+          alcohol,
+        })),
     }))
     .filter((s) => s.items.length > 0);
 }

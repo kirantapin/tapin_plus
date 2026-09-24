@@ -11,124 +11,230 @@
    scam, which is the exact suspicion "free $5" invites.
    ============================================================================ */
 
-/* -- the lockup, over the headline ------------------------------------------ */
-.cg-lockup {
-  display: flex;
-  align-items: center;
-  gap: var(--s-md);
-  margin: 0 0 var(--s-xl);
-}
-.cg-lockup svg {
-  height: 26px;
-  width: auto;
-  display: block;
+/* ── THE SECTION THAT IS NOT A PANEL ───────────────────────────────────────
+   21 Sep 2026, docs/POLISH-2026-09-21.md §3: the headline, the lead and the
+   three figures left the rounded box everything else sat in, and the
+   membership below became the ONE box, because it is the decision. Since
+   §24 this section is the photographic band and the figure strip under it.
+
+   `margin-top` takes back the step `.column:has(.announce)` adds under the
+   fixed bar, so the photograph meets the bar — at every width now. */
+.cg {
+  margin-top: calc(var(--s-2xl) * -1);
 }
 
-.cg-lead {
-  margin: var(--s-lg) 0 0;
-  text-wrap: pretty;
-}
+/* ══ THE BAND — THE SHOP'S PHOTOGRAPH IS THE HERO'S GROUND (§24) ═══════════
+   Sam, 23 Sep 2026: "the bottom half of this page is great, but the hero
+   section needs some work again" — at both widths. It was a 260px photograph
+   over a stack of type on a phone, and at 1440 two columns of equal weight
+   with the receipt covering the cups. It is now the pitch's own shape: a dark
+   photographic header over the light body, so the two pages read as one
+   family.
 
-/* -- the merchant, as evidence ---------------------------------------------
-   A plate, not a card inside a card: the panel is already the container, so
-   this is one surface with a photograph across the top of it and the mark
-   breaking the seam, which is the venue-card shape the rail and the pop-up
-   both use. */
-.cg-venue {
+   ONE ORDER AT EVERY WIDTH. The shop and the lockup across the head of the
+   photograph, the advert's sentence and both actions at its foot; from 1024
+   the receipt joins them bottom-right. Flex, not absolute placement, so a
+   short phone grows the band rather than overlapping the head and the foot —
+   which is why the height is a MINIMUM: 640, or 88% of a phone's small
+   viewport (`svh`, the height with the browser's bars showing, so the actions
+   are on the first screen, not under Safari's toolbar), whichever is less.
+
+   THE GROUND UNDER THE PHOTOGRAPH IS THE PAGE'S DARKEST INK, so the white
+   type is legible in the moment before the photograph decodes (and if it
+   never does) rather than white on this surface's pale `--inner`.
+
+   Z-ORDER IS DECLARED. The photograph and the veil are positioned at 0, and
+   positioned boxes paint over in-flow ones, so what sits on them names 1. */
+.cg-band {
   position: relative;
-  margin: var(--s-2xl) 0 0;
-  border-radius: var(--r-card);
+  isolation: isolate;
   overflow: hidden;
-  background: var(--inner);
+  box-sizing: border-box;
+  margin-inline: calc(var(--gutter) * -1);
+  min-height: min(88vh, 640px);
+  min-height: min(88svh, 640px);
+  padding: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-2xl);
+  background: var(--ink-1);
 }
 .cg-shot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   display: block;
   width: 100%;
-  height: 128px;
+  height: 100%;
   object-fit: cover;
+  /* PHONE: THE LABELLED CUP, CENTRED. The photograph is 1517×482, so at
+     640 tall it is set 2014 wide and a phone sees 375 of it — less than the
+     two cups span. This puts the right-hand cup (the one wearing the
+     Coffeeholics label) in the middle of the frame. */
+  object-position: 79% 50%;
 }
-.cg-shot[data-bright="true"] {
-  filter: saturate(0.9) brightness(0.72);
-}
-.cg-collar {
+/* THE VENUE-CARD VEIL, DEEP AT THE FOOT (§24) — the field's own #120A0E, and
+   measured rather than taken on trust. The plan's three stops (.14 at the
+   head, .30 at 45%, .86 at the foot) were rendered over this photograph and
+   swept with the text hidden, against the brightest pixel under each line:
+   the H1's first line sat on the lid and the sunlit wall at 3.07:1, the name
+   at 2.65:1 and the street at 2.28:1. So, two changes and no others:
+
+   THE FOOT IS SET FROM THE FOOT, IN PIXELS. The copy is a fixed stack
+   anchored to the band's foot (~300px on a phone, ~310 at 1440), and a
+   percentage stop cannot follow it as the band's height changes with the
+   phone. .86 at the foot, .56 at 340px up — the copy's floor, above its first
+   line at every width measured — then the plan's .30 and .14 above it.
+
+   A HEAD SCRIM FOR THE SHOP AND THE LOCKUP, the idiom this file already
+   used: .66 at the top edge, .50 at 80px, gone by 168px, so it never reaches
+   the cups.
+
+   Measured after, worst line at 375 / 1440: name 10.7 / 8.8, street 7.2 /
+   6.0, H1 5.9 / 5.9, lead 6.4 / 7.2, the try link 12.0 / 19.2 (:1); the
+   narrowest margin anywhere from 360 to 1440 is the street at 500, 4.97. */
+.cg-band::after {
+  content: "";
   position: absolute;
-  left: var(--s-lg);
-  top: calc(128px - 26px);
-  z-index: 2;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--r-control);
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18, 10, 14, 0.66) 0,
+      rgba(18, 10, 14, 0.5) 80px,
+      rgba(18, 10, 14, 0) 168px
+    ),
+    linear-gradient(
+      0deg,
+      rgba(18, 10, 14, 0.86) 0,
+      rgba(18, 10, 14, 0.56) 340px,
+      rgba(18, 10, 14, 0.3) 440px,
+      rgba(18, 10, 14, 0.14) 100%
+    );
 }
-.cg-venue-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: calc(26px + var(--s-md)) var(--s-lg) var(--s-lg);
-}
-.cg-venue-text b {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--ink-1);
-}
-.cg-venue-text > span {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink-4);
+.cg-mast,
+.cg-say {
+  position: relative;
+  z-index: 1;
 }
 
-/* -- what a member gets here ------------------------------------------------ */
-.cg-benefits {
-  list-style: none;
-  margin: var(--s-2xl) 0 0;
-  padding: 0;
+/* -- the head of the photograph: the shop, and whose product this is ------
+   The shop top-left as the venue-card shape (collar, name, street), the
+   lockup top-right. One row, so the two can never collide: the name gives
+   way first and the lockup never shrinks. The gap is only the floor between
+   them; `space-between` spreads them apart everywhere else.
+
+   A STEP SMALLER ON A PHONE — the collar 44, the wordmark 22 tall. At 52 and
+   26 the row needed 355px of a 343px column, and "Draper Road" broke onto a
+   second line; at 44 and 22 it is 325, so the street holds one line down to
+   a 360px phone. The desktop takes 52 and 26 back. */
+.cg-mast {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-md);
+}
+.cg-name {
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
   gap: var(--s-lg);
 }
-.cg-benefits > li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-lg);
-}
-.cg-icon {
+.cg-collar {
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-control);
-  display: grid;
-  place-items: center;
-  background: var(--inner);
-  border: 1px solid var(--hair);
-  color: var(--ink-2);
 }
-.cg-icon svg {
-  width: 20px;
-  height: 20px;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.cg-benefits > li > span:last-child {
+.cg-name-text {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.cg-benefits b {
-  font-size: 16px;
+/* White, and white at .8 — the two inks a photograph allows. A colour value on
+   a dark veil, not an `opacity` dimming live text: the ink ramp has no step
+   that survives a photograph. White is `--on-maroon`, the one white that is
+   declared once and never themed. */
+.cg-name-text b {
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
+  color: var(--on-maroon);
+}
+.cg-name-text > span {
+  font-size: 14px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--on-maroon) 80%, transparent);
+}
+.cg-lockup {
+  flex: 0 0 auto;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  color: var(--on-maroon);
+}
+.cg-lockup svg {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+/* The header's dot is white on the photograph (Sam, 24 Sep 2026: "the dot in
+   this logo should be white"), at both widths. CSS `fill` outranks the path's
+   `fill="var(--dot)"` attribute. The foot's logo, on the light page, keeps
+   the purple `--dot`, where white would vanish. */
+.cg-lockup .tl-dot {
+  fill: #FFFFFF;
+}
+/* On the photograph the chip is the purple PLUS chip (layout.css `.plus`). */
+
+/* -- the foot of the photograph: the advert's sentence and the two actions -- */
+.cg-h1 {
+  margin: 0;
+  max-width: 14ch;
+  color: var(--on-maroon);
+}
+.cg-lead {
+  margin: var(--s-lg) 0 0;
+  max-width: 34ch;
+  text-wrap: pretty;
+  color: color-mix(in srgb, var(--on-maroon) 86%, transparent);
+}
+.cg-acts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+  margin-top: var(--s-2xl);
+}
+/* THE FILLED ACTION, WHITE ON THE PHOTOGRAPH. The house `.action` is the
+   brand fill; laid over a merchant's photograph that is two brands fighting
+   for one spot, so here it is the page's white plate carrying the page's
+   darkest ink (18.2:1). The purple fill is spent once, at the foot. */
+.cg-hero-cta {
+  background: var(--card);
   color: var(--ink-1);
 }
-.cg-benefits b + span {
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--ink-4);
-  text-wrap: pretty;
+.cg-hero-cta:focus-visible {
+  outline-color: var(--on-maroon);
+}
+
+/* -- what a member gets here: THREE FIGURES, NOT THREE ROWS -----------------
+   docs/POLISH-2026-09-21.md §3.3, and the single biggest move on the page: the
+   numbers ARE the offer, so they are set as the offer — open columns on the
+   ground, divided by one hairline each, no tile and no plate. One size, one
+   baseline (Sam, 22 Sep 2026). The construction lives in styles/figures.css
+   (§15); what stays here is where this page puts it.
+
+   UNDER THE BAND, ON THE LIGHT GROUND (§24): the first block after the
+   photograph, one step below it — the claim once, in figures, before the
+   cards prove it. */
+.cg-figures {
+  margin: var(--s-2xl) 0 0;
 }
 
 /* -- the two live trials ---------------------------------------------------
@@ -201,72 +307,295 @@
   text-wrap: pretty;
 }
 
-/* -- the membership, after the proof ---------------------------------------- */
-.cg-member-line {
+/* -- what you'd save here: THREE OF THEIR OWN ITEMS ------------------------
+   docs/POLISH-2026-09-21.md §11. The pitch's `.bshot` photo cards (pitch.css
+   styles them globally; shell/PhotoCard.tsx renders them), each an item from
+   Coffeeholics' menu under the benefit it exercises. Phone sizes are the
+   pitch's own — a 176px photograph for the credit, 152 for the other two, the
+   plate under each as tall as its type, 12 between.
+
+   THE PLATE'S INK IS THIS SURFACE'S. Since 22 Sep the card is §12's A: the
+   copy sits on a `--card` plate, white here, not over the photograph, so the
+   title, line and ledger take this surface's own ink ramp. The re-point of
+   `--ink-1` to `--on-maroon` that type over a photograph needed is gone. */
+.cg-save-h {
+  margin: 0 0 var(--s-lg);
+}
+
+/* -- the membership, after the proof ---------------------------------------
+   THE ONE BOX ON THE PAGE. Three cells: the statement, the price, the action.
+   Stacked on a phone in the order the page already had; one horizontal band
+   from 1024, which is what a single-plan row looks like when it is not a
+   1,120px-wide phone. The wrappers exist for that and change nothing below. */
+.cg-member-h {
   margin: 0;
+}
+.cg-member-line {
+  margin: var(--s-lg) 0 0;
   text-wrap: pretty;
+}
+.cg-member-head,
+.cg-buy,
+.cg-act {
+  min-width: 0;
 }
 .cg-buy {
   margin: var(--s-2xl) 0 0;
 }
-/* THE PITCH'S OWN PRICE RULE, not a second one. `.hero-price` in layout.css
-   already sets the figure, the qualifier beside it and the baseline they share,
-   and the checkout charges the figure this prints — so a campaign page that
-   redeclared the size would be a second place for that type to drift. The two
-   lines added here are the only difference: this qualifier is a sentence
-   rather than one word, so it wraps and is given a measure. */
+/* THE PAGE'S ONE DISPLAY MOMENT. `.hero-price` set this at 32px, one step off
+   the headline, which is the flat ramp §1.3 of the plan describes; the figure
+   now takes `.t-figure` and the qualifier stays a 14px label on its baseline.
+   The class carries tabular figures, so `.tnum` is not also needed here. */
 .cg-price {
+  display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
+  gap: var(--s-lg);
+  margin: 0;
+}
+.cg-price > b {
+  margin: 0;
 }
 .cg-price > span {
-  max-width: 24ch;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-3);
 }
 .cg-seat {
   margin: var(--s-md) 0 0;
   text-wrap: pretty;
 }
+.cg-act {
+  margin: var(--s-2xl) 0 0;
+}
 .cg-cta {
-  margin-top: var(--s-xl);
+  margin: 0;
+}
+/* 40px of column gap plus this makes the 48 the plan asks for between the hero
+   block and the one box. */
+.cg-member {
+  margin-top: var(--s-md);
 }
 
-/* ── FROM 1024px IT IS TWO COLUMNS ─────────────────────────────────────────
-   The argument is "here is the shop, here is what you get". On a phone that is
-   a stack; on a laptop the merchant plate sits beside the benefits it belongs
-   to instead of pushing them a screen down.
+/* ══ FROM 1024px: THE PHOTOGRAPH TAKES THE WINDOW ══════════════════════════
+   Sam, 21 Sep 2026, on this page at 1440: it was a 720px column with nothing
+   either side and the merchant's photograph reduced to a 168px strip inside
+   it — a widened phone, which is §1.4 of the polish plan. §3 answered with
+   two columns, argument beside evidence; §24 (23 Sep, late) replaced that
+   with the band at the window's full width, 640 tall, and the 1,120 grid
+   under it.
 
-   1024, NOT THE 720 THIS FIRST USED. `.column` is capped at 480px until
-   layout.css's 1024 breakpoint releases it, so a split any earlier divides 448
-   usable pixels into two 212px columns — measured at 900px, where it put the
-   benefit rows under half the width their two lines need. The site has one
-   desktop line and this is it. */
+   1024 AND NOT 720. `.column` is capped at 480px until layout.css's own 1024
+   line releases it, so a split any earlier divides 448 usable pixels in two.
+   The site has one desktop line and this is it. */
 @media (min-width: 1024px) {
-  .cg-pair {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* The 1,120 measure, with 48px of gutter either side. Named children, at
+     (0,2,0): layout.css caps every column child at 720 from a `:where()` rule
+     that contributes no specificity precisely so this can be written here. */
+  .column > .cg-save,
+  .column > .cg-member {
+    max-width: min(1120px, calc(100% - 96px));
+    margin-inline: auto;
+  }
+  /* THE HERO SECTION IS THE WINDOW'S WIDTH; its type keeps the grid. The
+     band bleeds edge to edge and sets its text on the same 1,120 lines the
+     cards and the membership use, so the H1, the strip and "What you'd save
+     here" share one left edge. `--grid-in` is that inset: half of what the
+     window has beyond 1,120, never under 48. */
+  .column > .cg {
+    max-width: none;
+    margin-inline: 0;
+    --grid-in: max(calc(var(--s-2xl) * 2), calc((100% - 1120px) / 2));
+  }
+  /* width:100% as well — the cap is a max, and a grid of photographs has no
+     intrinsic width to grow to it on its own. */
+  .column > .cg-save {
+    width: 100%;
+  }
+
+  /* Three across and equal, 24 between. The credit does NOT span as it does
+     on the pitch: here the strip above already leads with it. */
+  .cg-save-h {
+    margin: 0 0 var(--s-2xl);
+  }
+  .cg-save .bshots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--s-2xl);
-    align-items: start;
-    margin-top: var(--s-2xl);
   }
-  .cg-pair > .cg-venue,
-  .cg-pair > .cg-benefits {
-    margin-top: 0;
+  /* The pitch's three-under-the-credit: the photograph at 2:1 over the
+     plate (the lead's taller phone photograph included), the plate's inset
+     at the desktop's 24, and the grid's stretch putting the hairlines on one
+     line. */
+  .cg-save .bshot-img,
+  .cg-save .bshot.is-lead .bshot-img {
+    height: auto;
+    aspect-ratio: 2 / 1;
   }
-  .cg-shot {
-    height: 168px;
+  .cg-save .bshot-say {
+    padding: var(--s-2xl) var(--s-2xl) 0;
+  }
+  .cg-save .bshot-chip {
+    margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
+    padding-top: var(--s-xl);
+  }
+
+  /* The band at 640, its text on the grid. Top and foot at the desktop step,
+     so the head row, the copy's last line and the receipt's foot (24 in, set
+     below) sit on the same two horizontal lines. */
+  /* THE BAND IS A GRID (23 Sep 2026, /impeccable layout — Sam: "it's
+     completely off"). Two rows and two columns: the masthead across the top,
+     then the copy in the left track and the month in a 480 track at the
+     right. The month is IN the flow, so it can never sit over the masthead
+     and the band grows if it must; the copy keeps the foot (§24) by aligning
+     to the end of its row, the month centres in the same row. */
+  /* THE BAND IS THE MONTH'S HEIGHT (Sam, 23 Sep 2026, /impeccable layout:
+     "move the coffeeholics and the tapin logo down a bit, then remove the
+     extra header space"). No 640 floor from 1024: the month is the tallest
+     thing in the band, so the band is its height plus the insets, the
+     masthead starts on the month's top line, and the copy ends on its foot.
+     64 top and foot (Sam, 23 Sep 2026: "move it a bit further down", then
+     "more padding at the bottom … so the components inside the header image
+     have room to breathe"): the masthead sits well off the announce bar and
+     the buttons and the month end as far from the band's edge as the
+     masthead starts from its top, so the photograph frames all three. */
+  .cg-band {
+    margin-inline: 0;
+    min-height: 0;
+    padding: var(--s-4xl) var(--grid-in);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 480px;
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: calc(var(--s-2xl) * 2);
+    row-gap: var(--s-2xl);
+    align-items: end;
+  }
+  /* THE MASTHEAD READS LEFT (Sam, 23 Sep 2026: "bring over the tapin logo to
+     the left for desktop so there's more space for the calendar view"): the
+     shop, a hairline, then the lockup — one line saying whose page and whose
+     product — in the left track only, so the month takes the right track
+     from the band's top and centres on its full height. */
+  .cg-mast {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+    gap: var(--s-2xl);
+  }
+  .cg-lockup {
+    padding-left: var(--s-2xl);
+    /* --hair-lit is a quarter of white and vanishes on the photograph; the
+       rule is white at 45%, the one literal the house allows. */
+    border-left: 1px solid color-mix(in srgb, var(--on-maroon) 45%, transparent);
+  }
+  .cg-say {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
   }
   .cg-collar {
-    top: calc(168px - 26px);
+    width: 52px;
+    height: 52px;
   }
-  .cg-trials {
-    flex-direction: row;
+  .cg-lockup svg {
+    height: 26px;
   }
-  /* THE LIST ITEM, NOT THE ANCHOR. The <li> is the flex item; `.cg-trial` is
-     the <a> inside it, and `.action` already sets that to width:100%. Sizing
-     the anchor left the two items at their content widths — 220px beside
-     170px, measured — for two buttons that are a pair. */
-  .cg-trials > li {
-    flex: 1 1 0;
+  /* BOTH EDGES ON THE GRID (23 Sep 2026, /impeccable layout, Sam at ~1620:
+     "these larger viewports still have formatting that's wrong"). The band
+     used to keep its right inset at 24 so the receipt sat over the
+     photograph's window frame; with the month in a grid track that left the
+     copy 250px in and the month 24px in on a wide screen — lopsided, and the
+     lockup with it. Now `--grid-in` pads both sides, so the shop and the copy
+     share the grid's left line, the lockup and the month share its right,
+     and the photograph alone runs to the window's edges. */
+  /* DESKTOP: THE CUPS CENTRE-RIGHT, THE RECEIPT OFF THEM. Set 640 tall the
+     photograph is 2014 wide; anchored at its right edge, the two cups fall
+     at roughly 42–73% of a 1440 window and the receipt's 340 (24 in from the
+     right) sits over the window frame and the shrub beside them. Anchored
+     at the right because that is where the receipt is: the gap between the
+     right-hand cup and the receipt is fixed in the photograph's own pixels,
+     so it is the same at 1024 as at 1920. */
+  .cg-shot {
+    object-position: 100% 50%;
+  }
+  .cg-lead {
+    font-size: 18px;
+    max-width: 40ch;
+  }
+  /* THE BAND'S CONSTRUCTION, NOT TWO SLABS (§20). These were two equal
+     halves — a 269px purple bar beside a 268px grey one. Now the one filled
+     button is sized to its words and the try link sits beside it as the
+     phone's own text link, 24 apart, centred on the button's axis: the shape
+     of the membership band below, which Sam singled out. The fold holds
+     both, so the docked pair is switched off rather than repeated. */
+  /* The pair shares the copy's track and wraps when the track is too short
+     for two (at 1024 the track is ~400 beside the 480 month), rather than
+     running under the month. */
+  /* STACKED AT EVERY WIDTH (Sam, 23 Sep 2026: "can we stack these CTAs?"):
+     the filled action over the outlined one, one measure, the lead's width
+     at most, so the pair reads as a decision and its alternative. */
+  .cg-acts {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s-md);
+    max-width: 440px;
+  }
+  .cg-hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 100%;
     min-width: 0;
+    height: 48px;
+    padding: 0 calc(var(--s-xl) * 2);
+  }
+  /* NOT ON A DESKTOP (Sam, 23 Sep 2026: "we don't need the hero stats on
+     desktop it's too busy, keep them on mobile though"): the month in the
+     band already states the three figures as a month of orders. The strip
+     stays the phone's first block under the photograph. */
+  .cg-figures {
+    display: none;
+  }
+
+  /* The band: statement | price | action, with a hairline between the cells
+     and the also-at marks under the button. */
+  .cg-member {
+    margin-top: var(--s-xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+    column-gap: calc(var(--s-xl) * 2);
+    align-items: center;
+    padding: calc(var(--s-xl) * 2);
+  }
+  .cg-buy,
+  .cg-act {
+    margin-top: 0;
+    padding-left: calc(var(--s-xl) * 2);
+    border-left: 1px solid var(--hair);
+  }
+  /* The plan's `auto` third track, given a ceiling. Left open it sized to the
+     also-at sentence's max-content — "Also at The Burg, The Milk Parlor,
+     Olaika and Sweetopia." on one line — which took 470px of the band and a
+     470px-wide button with it. The sentence wraps under the button instead;
+     220 is the floor the plan sets for the control. */
+  .cg-act {
+    min-width: 220px;
+    max-width: 320px;
+  }
+  .cg-also {
+    margin-top: var(--s-lg);
+  }
+
+  /* NO DOCKED PAIR HERE. Both actions are in the first fold, and a bar
+     repeating them is the decoy shape layout.css warns about. The floor it
+     reserves goes with it, at the foot of this file — the two conditional
+     rules that set it are (0,4,0) and are written later, so an override here
+     would lose on source order however it is weighted. */
+  .cg-sticky {
+    display: none;
+  }
+  /* The column's own 64px section gap is the whole interval under the band. */
+  .cg-powered {
+    margin-top: 0;
   }
 }
 
@@ -327,6 +656,11 @@
    `data-lit` (styles/light.css), so it no longer inherits anything from the
    page beneath it and this page has no reason to switch itself off. */
 :root[data-surface="cg"] {
+  /* The logo's dot is Coffeeholics purple on this page, wherever the logo
+     shows (the header, the foot, the toasts' icon inherits the chip's ink).
+     Sam, 24 Sep 2026: "same with the purple dot and the logo wherever the
+     logo shows up". */
+  --dot: #6b319e;
   --page: #F3F2F5;
   --subtle: #FFFFFF;
   --card: #FFFFFF;
@@ -364,13 +698,9 @@
   --maroon: #6b319e;
   --cg-brand: #6b319e;
 
-  /* The wordmark's dot follows. It is TapIn's one spot of colour and it sat
-     at badge red on a page that is purple from the announcement bar to the
-     button — the one red thing on the surface, in the lockup at the top and
-     again in "Powered by TapIn" at the foot. It is a token for exactly this
-     reason (shell/TapInLogo.tsx fills it with `var(--dot)`), so the whole
-     lockup reads as Coffeeholics' here and nothing else changes. */
-  --dot: #6b319e;
+  /* The wordmark is TapIn's own mark at its own size on this surface (Sam,
+     23 Sep 2026: "just use the original tapin logo … same logo for mobile
+     too"); the header's dot is white (above, `.cg-lockup .tl-dot`). */
 }
 
 /* The field, lit the same way the dark one is: a step off at the top, the
@@ -392,22 +722,15 @@
 }
 
 /* -- where the merchant's colour does its work ------------------------------
-   Three places, all of them marks rather than surfaces: the glyph plates
-   beside the benefits, the hairline and arrow on the trial buttons, and the
-   label over them. */
-:root[data-surface="cg"] .cg-icon {
-  background: color-mix(in srgb, var(--cg-brand) 9%, #FFFFFF);
-  border-color: color-mix(in srgb, var(--cg-brand) 26%, transparent);
-  color: var(--cg-brand);
-}
+   Marks rather than surfaces: the hairline and the arrow on the trial buttons
+   inside the modal. The glyph plates that used to be the third place went with
+   `.cg-icon` on 21 Sep 2026 — the three benefits are figures now, and a figure
+   wears the page's ink, not the merchant's. */
 :root[data-surface="cg"] .cg-trial {
   border: 1px solid color-mix(in srgb, var(--cg-brand) 30%, transparent);
   background: #FFFFFF;
 }
 :root[data-surface="cg"] .cg-trial svg {
-  color: var(--cg-brand);
-}
-:root[data-surface="cg"] .cg-today .panel-label {
   color: var(--cg-brand);
 }
 
@@ -481,6 +804,8 @@
 .ct-root{position:fixed;inset:0;z-index:70;display:flex;
   align-items:flex-end;justify-content:center}
 .ct-scrim{position:absolute;inset:0;background:rgba(26,16,22,.52);
+  /* Blurred like every other scrim in the build (Sam, 22 Sep 2026). */
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:ctFade 200ms var(--ease) both}
 .ct{position:relative;width:100%;max-height:88vh;display:flex;
   flex-direction:column;overflow:hidden;background:var(--card);
@@ -520,7 +845,13 @@
 .ct-steps b{min-width:0;font-size:15px;font-weight:700;letter-spacing:-.01em;
   line-height:1.35;color:var(--ink-1);text-wrap:pretty}
 
-.ct-trials{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
+/* The places, each a head over its offers (23 Sep 2026). */
+.ct-places{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
+  flex-direction:column;gap:var(--s-xl)}
+.ct-place-h{display:flex;align-items:center;gap:var(--s-md);margin:0 0 var(--s-md);
+  font-size:14px;font-weight:600;color:var(--ink-2)}
+.ct-place-h .collar{width:28px;height:28px;border-radius:8px}
+.ct-trials{list-style:none;margin:0;padding:0;display:flex;
   flex-direction:column;gap:var(--s-md)}
 .ct-once{margin:var(--s-md) 0 0;text-wrap:pretty}
 
@@ -557,6 +888,22 @@
 @media (prefers-reduced-motion:reduce){
   .ct,.ct-scrim,.ct-root.is-closing .ct,.ct-root.is-closing .ct-scrim{animation:none}
 }
+
+/* ── THE SAME MODAL ON A DARK PAGE (`lit`) ─────────────────────────────────
+   The pitch mounts this with `data-lit`, so light.css inverts the nine tokens
+   on the panel and every rule above resolves against the light ramp instead —
+   `--card` is white, `--inner` the step under it, and `--cg-brand` is simply
+   not declared off the campaign surface, so the two rules that reach for it
+   take their `var(--maroon)` fallback. Measured on the panel: 18.59:1 for the
+   headings, 9.19:1 for the button, 7.72:1 for the numerals.
+
+   ONE RULE NEEDS SAYING TWICE. `.cg-trial b + span` is (0,1,2) and was written
+   for a subline this modal does not render; it was beating `.ct-do`'s own
+   13px maroon with 12px `--ink-4`. Here the verb takes the mobile floor and
+   the fill it was specified with, and its arrow follows the label rather than
+   dropping to the ink the row's chevron uses on the splash. */
+[data-lit] .ct-do{font-size:14px;color:var(--maroon)}
+[data-lit] .ct-do svg{color:currentColor}
 
 /* ── POWERED BY TAPIN ──────────────────────────────────────────────────────
    The foot of a co-branded page has to say whose product it is. Quiet: the
@@ -600,30 +947,72 @@
    state the whole page ends in, and so the only state a reader ever sees the
    floor in. Same weight as the rule above, later in the cascade. */
 .column:has(.cg-sticky.is-pair.is-away){padding-bottom:48px}
-
-/* ── THE INVITATION UNDER THE BENEFITS ─────────────────────────────────────
-   A row, not a third filled button: the page already spends its fill on
-   "Get early access" and the docked bar, and a third one here would leave
-   the reader choosing between three equal-looking controls. This reads as
-   the last line of the list it closes, with a chevron doing the work.
-
-   Full width and 48px tall, so it is a real target on a phone rather than a
-   text link pretending to be one. */
-.cg-try{
-  display:flex;align-items:center;justify-content:space-between;gap:var(--s-md);
-  width:100%;min-height:48px;margin:var(--s-lg) 0 0;
-  padding:var(--s-md) var(--s-lg);
-  border:1px solid var(--hair);border-radius:var(--r-control);
-  background:var(--inner);
-  font:inherit;font-size:14px;font-weight:700;letter-spacing:-.01em;
-  color:var(--cg-brand,var(--maroon));text-align:left;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-  transition:transform 150ms var(--ease),background-color 150ms var(--ease);
+/* AND NEITHER OF THEM APPLIES FROM 1024, where the bar is `display:none` and
+   there is nothing to clear. Written here rather than in the desktop block
+   above because both rules above are (0,4,0): an override earlier in the file
+   loses on source order at equal weight, and raising the weight to beat them
+   would be arguing with the cascade rather than reading it. Once the reader
+   scrolls past the band's actions `past` is true at any width, so without
+   this a 1440 page reserved 152px of empty floor under its footer. */
+@media (min-width: 1024px) {
+  .column:has(.cg-sticky.is-pair:not(.is-away)),
+  .column:has(.cg-sticky.is-pair.is-away) {
+    padding-bottom: var(--s-4xl);
+  }
 }
-.cg-try svg{width:18px;height:18px;flex:0 0 auto}
-.cg-try:active{transform:scale(.98)}
-.cg-try:focus-visible{outline:2px solid var(--cg-brand,var(--maroon));outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.cg-try:active{transform:none}}
+
+/* ── THE INVITATION BESIDE THE ASK, AS THE SECOND PILL ──────────────────────
+   Sam, 23 Sep 2026: "the secondary button [should] say 'try for free today'
+   and should follow the button sizing of the header": the same shape as the
+   white action beside it, outlined in white on the photograph rather than
+   filled, so the pair reads as one row of two choices with one of them lit.
+   A <button>, because it opens the trial modal rather than navigating. */
+.cg-try {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid color-mix(in srgb, var(--on-maroon) 60%, transparent);
+  border-radius: var(--r-card);
+  background: color-mix(in srgb, var(--on-maroon) 8%, transparent);
+  box-shadow: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--on-maroon);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
+}
+.cg-try:active {
+  transform: scale(0.98);
+  background: color-mix(in srgb, var(--on-maroon) 16%, transparent);
+  transition-duration: 100ms;
+}
+.cg-try:focus-visible {
+  outline: 2px solid var(--on-maroon);
+  outline-offset: 2px;
+}
+/* AFTER THE BASE RULE, NOT IN THE 1024 BLOCK ABOVE: at equal specificity the
+   later rule wins, and the base rule is written here, below that block. */
+@media (min-width: 1024px) {
+  .cg-try {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: 48px;
+    padding: 0 calc(var(--s-xl) * 2);
+  }
+}
 
 /* The closing row, inside the call-out's plate. Two overrides only: the ring
    that cuts each mark out of the one behind it has to be the plate's colour
@@ -653,4 +1042,219 @@
 [data-lit] .ticker-rail {
   -webkit-mask-image: none;
   mask-image: none;
+}
+
+/* ============================================================================
+   THE MONTH LEDGER — shell/SavingsLedger.tsx (docs/POLISH-2026-09-21.md §17,
+   redrawn in §20).
+
+   Sam, 23 Sep 2026: the desktop header should show "how using the deals can
+   pocket savings for consumers over time — like how much they get back on the
+   $4.99 they spend on the membership." A receipt: the membership, four real
+   baskets each earning the week's credit, and what that leaves you.
+
+   §20: A RECEIPT FROM THE APP, NOT A TABLE. It was nine lines at one weight
+   with "+$5.00 credit" four times. Now each week is the basket's own
+   photograph at 32px, its name over the week, and the figure alone; the word
+   "credit" is said once, under the membership; and the foot is the one
+   large figure on the card.
+
+   A WHITE CARD, THE PLATE §12 A CHOSE for type near a photograph: the ink
+   ramp on `--card`. The credits are `--ink-1`, not green and not the
+   merchant's purple — an outcome, not a chosen thing. Every size is on the
+   ramp and none is under 14.
+
+   Over the photograph from 1024 only (bottom-right, 24 in, 340 wide). Below
+   1024 the page renders no receipt at all (§24): the cards are the proof on
+   a phone.
+   ============================================================================ */
+.ml {
+  box-sizing: border-box;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--float);
+  color: var(--ink-1);
+}
+.ml-head {
+  margin: 0 0 var(--s-lg);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+/* Row 0: what the month costs, closed by the one hairline above the weeks. */
+.ml-plan {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: 0;
+  padding-bottom: var(--s-lg);
+  border-bottom: 1px solid var(--hair);
+}
+.ml-plan-what {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+/* The hairline's caption: what the weeks under it are. */
+.ml-cadence {
+  margin: var(--s-lg) 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+.ml-weeks {
+  list-style: none;
+  margin: var(--s-lg) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-lg);
+}
+/* The thumbnail across both lines; the figure on the basket's own baseline,
+   so a name that wraps ("Cappuccino + Butter Croissant + Baked Cookie") keeps
+   its figure on its first line. A week with no photograph keeps the column
+   empty, so every name still starts on one edge. */
+.ml-week {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "thumb item fig"
+    "thumb when .";
+  column-gap: var(--s-lg);
+  align-items: baseline;
+}
+.ml-thumb {
+  grid-area: thumb;
+  align-self: center;
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--inner);
+}
+.ml-item {
+  grid-area: item;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--ink-1);
+  text-wrap: pretty;
+}
+.ml-when {
+  grid-area: when;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+.ml-fig {
+  grid-area: fig;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.ml-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: var(--s-xl) 0 0;
+  padding-top: var(--s-lg);
+  border-top: 1px solid var(--hair);
+}
+.ml-ahead {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+/* The card's one large figure. Right-aligned and tabular, so the count never
+   moves the digits already standing — only the leading one arrives as the
+   total grows. */
+.ml-net {
+  margin-left: auto;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── THE LOOP ─────────────────────────────────────────────────────────────
+   Only while the script holds `data-run`. Transform and opacity, nothing else:
+   the rows are laid out at full size from the first frame and the card never
+   changes height. Each transition sits on the state it arrives INTO, so the
+   reset (dropping `is-in` and `data-out` together) snaps the invisible rows
+   back 12px with no transition at all. Exit is shorter and accelerating, the
+   modal's own leave curve. */
+.ml[data-run] .ml-week {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.ml[data-run] .ml-week.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 280ms var(--ease),
+    transform 280ms var(--ease);
+}
+/* THE CROSSING IS TOLD BY COLOUR, as on the month (pitch.css): `--loss`
+   while owed, `--gain` past zero, "You saved" throughout. */
+.ml-foot .ml-ahead,
+.ml-foot .ml-net {
+  color: var(--loss);
+}
+.ml-foot.is-ahead .ml-ahead,
+.ml-foot.is-ahead .ml-net {
+  color: var(--gain);
+}
+.ml[data-run] .ml-net {
+  transition: opacity 280ms var(--ease);
+}
+.ml[data-run][data-out] .ml-week.is-in,
+.ml[data-run][data-out] .ml-ahead,
+.ml[data-run][data-out] .ml-net {
+  opacity: 0;
+  transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
+   The pitch's calendar (pitch.css `.mc-*`) in the band's right track, both
+   rows: in the flow, from the masthead's line to the band's foot, at the
+   pitch's width.
+   The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
+@media (min-width: 1024px) {
+  /* ONE TOP LINE AND ONE FOOT. The month starts on the masthead's line and,
+     being the tallest thing in the band, ends on the band's foot, where the
+     copy ends too: two shared edges instead of the near-misses centring gave. */
+  .cg-band > .mc {
+    position: relative;
+    z-index: 1;
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: start;
+    width: 480px;
+    max-width: 100%;
+  }
 }

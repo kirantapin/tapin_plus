@@ -118,10 +118,6 @@
   color:var(--ink-2)}
 .rs-worth b{font-weight:700;color:var(--ink-1)}
 .plan-opt.is-on .plan-save{opacity:1}
-/* The grandfathering, once, between the choice and the charge rows. It must not
-   read as one of the rows — those are what happens to her money — so it keeps
-   body ink and sits on the panel rather than in the list. */
-.plan-locked{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl)}
 .plan-opt:active{transform:scale(.98)}
 .plan-opt:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 /* Two channels, never colour alone: the fill AND the border move. */
@@ -141,7 +137,7 @@
 .charges li:first-child{padding-top:0}
 .charges li + li{border-top:1px solid var(--hair-lit)}
 .charges b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
-.charges span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.charges span{font-size:14px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
 
 /* What a refund costs, directly under the row that offers it. Not fine print
    and not an alarm: the same treatment any other qualifying line gets, sitting
@@ -167,7 +163,7 @@
    sentence above stay visible. That is the condition §4 sets, not a preference. */
 .terms{margin:0;padding:0 0 0 var(--s-xl);display:flex;flex-direction:column;
   gap:var(--s-lg)}
-.terms li{font-size:13px;font-weight:500;line-height:1.5;letter-spacing:.005em;
+.terms li{font-size:14px;font-weight:500;line-height:1.5;letter-spacing:.005em;
   color:var(--ink-3)}
 .terms li::marker{color:var(--ink-4)}
 
@@ -273,10 +269,10 @@
 .reach-collar img{border-radius:8px}
 .reach-collar::after{border-radius:8px}
 .reach-place{display:flex;flex-direction:column;gap:2px;min-width:0}
-.reach-place b{font-size:13px;font-weight:600;color:var(--ink-1);
+.reach-place b{font-size:14px;font-weight:600;color:var(--ink-1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 13px, not 12: a category is a word, not a tracked micro-label. */
-.reach-place span{font-size:13px;font-weight:500;color:var(--ink-4)}
+.reach-place span{font-size:14px;font-weight:500;color:var(--ink-4)}
 
 .rs-split,.rs-read,.rs-decide,.rs-stick{display:contents}
 
@@ -440,57 +436,58 @@
 /* ============================================================================
    THE ARRIVAL — what the card flight lands into.
 
-   The flight itself was never broken. Measured on the live page: the card
-   travels 122px and scales 0.86 → 1 under an expo-out that is ~95% done by
-   300ms of its 820 — so it nudged a tenth of a screen while the whole checkout
-   was already painted around it. Sam read that as "takes me directly to the
-   checkout flow", which is exactly what it looked like.
+   The flight was never the problem on its own: it travelled a tenth of a
+   screen while the whole checkout was already painted around it, and Sam read
+   that as "takes me directly to the checkout flow". So the sheet holds still
+   (`is-still`, set by the layer while a flight is pending) and its content
+   comes up BEHIND the landing card: one authored moment on this route, on one
+   delay tuned to the flight's perceptual finish (~340ms of its 820).
 
-   So the page now holds still and comes up BEHIND the landing card. One
-   authored moment on this route, not scattered entrances: everything except
-   the photo band and the card rises together on one delay tuned to the
-   flight's own perceptual finish (~340ms), landing before the 820ms clone
-   retires. The card is the only thing moving until then, which is the whole
-   point of flying it.
+   What rises is page 0 less the card and its home: the money column's blocks,
+   and the included panel's rows but not the panel's plate or the card's own
+   block, which is where the card lands. `.rs-pay-col` is `display:contents`
+   below 1024, so its CHILDREN are the animatable boxes at every width.
 
-   THE SELECTOR LISTS `.rs-read > *` AND `.rs-decide > *` DELIBERATELY. Those
-   two wrappers are `display:contents` below 1024, so they generate no box and
-   an animation on them does nothing at all — the animatable boxes are their
-   children. `.column > *` would only ever reach `.hero-band`, `.rs-split` (no
-   box) and `.sticky-cta`.
-
-   Gated on the attribute, which only exists while a flight is actually in
-   flight — so a reader who lands on /reserve directly, or from anywhere that
-   did not stash an origin, gets no entrance at all. base.css zeroes duration
-   and delay under `reduce`, and useCardFlight never sets the attribute there
-   in the first place.
+   Gated on the attribute, which exists only while a flight is in the air
+   (shell/cardFlight.ts), so a reader who arrives any other way gets no
+   entrance. useCardFlight never sets it under reduced motion.
    ============================================================================ */
-html[data-flight="in"] .rs-read > *,
-html[data-flight="in"] .rs-decide > *,
-html[data-flight="in"] .column > .sticky-cta{
+html[data-flight="in"] .rs-pay-col > *,
+html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
   animation:arriveIn 420ms 340ms var(--ease) both;
 }
 /* Ends at its resting state, like every other keyframe set in this build. */
 @keyframes arriveIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* ============================================================================
-   THE CHECKOUT SHEET — where the disclosures and the charge live.
+   THE SHEET — now the SIGN-IN sheet, and only that.
 
-   Sam, 13 Sep 2026: "we only need the disclosure and terms right at checkout."
+   It was built as the checkout's second surface ("we only need the disclosure
+   and terms right at checkout", Sam, 13 Sep 2026) and the sign-in sheet reused
+   its chrome. On 21 Sep the checkout stopped having a second surface — the
+   charge is pages 1–3 of the reserve layer's own sheet — so every rule here is
+   now worn by `SignInBar` alone. The class names are kept because that IS the
+   component's chrome and renaming them would rewrite a file this pass did not
+   otherwise touch; `.cs-sheet .charges` below is the one rule left over from
+   the charge, harmless and one line.
 
    A SHEET ON A PHONE, A PANEL ON A DESKTOP, and both are the same element: it
    docks to the bottom edge below 700px, which is where a thumb is, and centres
-   above it. Scrolls internally rather than growing — the full terms are eight
-   numbered paragraphs and the wallet must never be pushed off a short screen.
+   above it. Scrolls internally rather than growing.
    ============================================================================ */
 .cs-scrim{
   position:fixed;inset:0;z-index:60;
   display:flex;align-items:flex-end;justify-content:center;
   padding:0;
-  /* No dim. 23 Sep 2026: the scrim under the sign-in step read as a black
-     overlay; the sheet's own shadow is the separation. The element stays for
-     layout and the backdrop click. */
-  background:transparent;
+  background:rgba(10,5,8,.62);
+  /* 6px, the house value on every scrim in the build (Sam, 21 Sep 2026 — see
+     `.reserve-scrim`). This one was the 3px the others were matched against.
+     Kept over 23 Sep's transparent scrim (Kiran: "read as a black overlay
+     under the sign-in popup"): that overlay was this scrim laid over the
+     checkout when its sign-in step was a second sheet, and §9 made that step
+     page 1 of the checkout. Sam, 22 Sep: "whenever a pop-up or a modal is
+     triggered, blur the background." */
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:csFade 180ms var(--ease) both;
 }
 .cs-sheet{
@@ -504,7 +501,7 @@ html[data-flight="in"] .column > .sticky-cta{
   box-shadow:0 -18px 48px rgba(0,0,0,.46);
   padding:var(--s-xl);
   padding-bottom:calc(var(--s-xl) + env(safe-area-inset-bottom,0px));
-  animation:csRise 260ms var(--ease) both;
+  animation:csUp 420ms var(--ease) both;
 }
 .cs-sheet:focus{outline:none}
 .cs-sheet:focus-visible{outline:2px solid var(--ink-1);outline-offset:-3px}
@@ -526,8 +523,39 @@ html[data-flight="in"] .column > .sticky-cta{
 .receipt .receipt-go{margin-top:var(--s-2xl)}
 
 @keyframes csFade{from{opacity:0}to{opacity:1}}
-@keyframes csRise{from{opacity:0;transform:translateY(14px)}
-  to{opacity:1;transform:none}}
+
+/* ══ IT ARRIVES FROM THE EDGE, LIKE THE SHEET IT SITS IN ════════════════════
+   Sam, 21 Sep 2026, on a phone, pointing at Sign in: "can these modals
+   transition in from the bottom of the screen like the checkout modal?"
+
+   It did not. `csRise` was a 14px lift and a fade over 260ms — a popover's
+   motion, on an element that is docked to the bottom edge and rounded only at
+   the top. The reserve layer directly behind it travels the whole way
+   (`sheetUp`, translateY(100%) → none, 420ms on the house curve), so two
+   sheets on one screen disagreed about what a sheet is.
+
+   Same keyframe, same duration, same curve as `sheetUp`, and TRANSFORM ONLY:
+   the scrim's own 180ms fade is what dims the page, so the sheet has no reason
+   to fade in as well. From 640px this is a centred dialog and `csPop`
+   overrides it — see the block below. csRise is gone rather than left unused. */
+@keyframes csUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes csDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes csFadeOut{from{opacity:1}to{opacity:0}}
+
+/* ══ AND IT LEAVES THE SAME WAY ═════════════════════════════════════════════
+   `is-closing` on the scrim, held by the component for the length of the exit
+   and then unmounted (SignInBar, CheckoutSheet — the pattern is VenuePopup's).
+   Quicker than the entrance and on an ease-IN, because an object leaving
+   through an edge accelerates into it rather than settling: the same 260ms
+   `sheetDown` uses one layer down.
+
+   THE FADE IS ON THE SCRIM ELEMENT, WHICH IS ALSO THE SHEET'S PARENT. Unlike
+   `.vp-scrim` and `.reserve-scrim`, which are children of their own root, this
+   scrim IS the fixed flex box that positions the sheet — so the sheet slides
+   down carrying its parent's fading opacity. That reads as the sheet leaving,
+   and the alternative is restructuring an element three surfaces depend on. */
+.cs-scrim.is-closing{pointer-events:none;animation:csFadeOut 260ms linear both}
+.cs-scrim.is-closing .cs-sheet{animation:csDown 260ms cubic-bezier(.4,0,1,1) both}
 
 /* Above a phone the sheet stops being a sheet: centred, fully rounded, and off
    the bottom edge, because there is no thumb to reach from down there.
@@ -551,17 +579,30 @@ html[data-flight="in"] .column > .sticky-cta{
    anything however wide it is. */
 @media (min-height:700px) and (min-width:640px){
   .cs-scrim{align-items:center;padding:var(--s-2xl)}
+  /* The duration comes with the name: the sheet state is 420ms now, and a
+     centred dialog that took that long to fade in would feel slack. */
   .cs-sheet{border-radius:var(--r-panel);
     box-shadow:0 24px 64px rgba(0,0,0,.5);
-    animation-name:csPop}
+    animation-name:csPop;animation-duration:260ms}
   @keyframes csPop{from{opacity:0;transform:translateY(10px) scale(.985)}
     to{opacity:1;transform:none}}
+  /* THE MATCHING WAY OUT. A dialog does not slide off an edge it is not
+     attached to — it settles back exactly the way it came, in 180ms, which is
+     the pair the merchant pop-up already draws at this width (`vpOut`). After
+     the phone rule above, so it wins on source order at equal specificity. */
+  .cs-scrim.is-closing .cs-sheet{animation:csPopOut 180ms cubic-bezier(.4,0,1,1) both}
+  @keyframes csPopOut{from{opacity:1;transform:none}
+    to{opacity:0;transform:translateY(10px) scale(.985)}}
 }
 
 /* The sheet's motion is decoration on a surface that takes money — first thing
    to go when the reader has asked for less of it. */
 @media (prefers-reduced-motion:reduce){
-  .cs-scrim,.cs-sheet{animation:none}
+  /* The components short-circuit the exit under `reduce` and never set the
+     class — this is the same belt-and-braces venue.css keeps, so a future
+     caller that forgets the check cannot animate anything here. */
+  .cs-scrim,.cs-sheet,
+  .cs-scrim.is-closing,.cs-scrim.is-closing .cs-sheet{animation:none}
 }
 
 /* ============================================================================
@@ -583,7 +624,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-facts li:first-child{padding-top:0}
 .ms-facts li + li{border-top:1px solid var(--hair-lit)}
 .ms-facts b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
-.ms-facts span{font-size:13px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
+.ms-facts span{font-size:14px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
 .ms-locked{margin:var(--s-lg) 0 0;padding-top:var(--s-lg);
   border-top:1px solid var(--hair-lit)}
 
@@ -603,7 +644,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ph{display:flex;flex-direction:column}
 .ph-lede{margin:0 0 var(--s-xl);font-size:15px;font-weight:500;line-height:1.5;
   color:var(--ink-2)}
-.ph-label{display:block;margin:0 0 var(--s-md);font-size:13px;font-weight:600;
+.ph-label{display:block;margin:0 0 var(--s-md);font-size:14px;font-weight:600;
   letter-spacing:.005em;color:var(--ink-3)}
 /* The second label opens a new field group under the first. */
 .ph-label-2{margin-top:var(--s-xl)}
@@ -636,12 +677,12 @@ html[data-flight="in"] .column > .sticky-cta{
   margin:var(--s-lg) 0 0;cursor:pointer}
 .ph-opt input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;
   accent-color:var(--maroon);cursor:pointer}
-.ph-opt span{font-size:13px;font-weight:500;line-height:1.45;color:var(--ink-3)}
+.ph-opt span{font-size:14px;font-weight:500;line-height:1.45;color:var(--ink-3)}
 .ph-opt input:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 
 .ph .action{margin-top:var(--s-xl)}
 .ph-back{margin:var(--s-lg) 0 0;padding:0;border:0;background:none;font:inherit;
-  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--ink-3);cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
 .ph-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
@@ -655,13 +696,13 @@ html[data-flight="in"] .column > .sticky-cta{
 .cs-who{display:flex;align-items:baseline;flex-wrap:wrap;gap:var(--s-md);
   margin:0 0 var(--s-xl);padding-bottom:var(--s-lg);
   border-bottom:1px solid var(--hair-lit);
-  font-size:13px;font-weight:500;color:var(--ink-3)}
+  font-size:14px;font-weight:500;color:var(--ink-3)}
 .cs-who b{font-size:15px;font-weight:700;color:var(--ink-1)}
 /* The number beside the name: same size, a step quieter, so the line reads
    person-then-account rather than two competing facts. */
 .cs-phone{font-size:15px;font-weight:500;color:var(--ink-3)}
 .cs-change{margin-left:auto;padding:0;border:0;background:none;font:inherit;
-  font-size:13px;font-weight:600;color:var(--ink-3);cursor:pointer;
+  font-size:14px;font-weight:600;color:var(--ink-3);cursor:pointer;
   text-decoration:underline;text-underline-offset:3px}
 .cs-change:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
@@ -860,9 +901,18 @@ html[data-flight="in"] .column > .sticky-cta{
 
 /* The everyone-else price takes its own line under the price, in the unit's
    type — the same on all three tiles, so the year's longer figure does not
-   wrap differently from the others. */
+   wrap differently from the others.
+
+   14px, NOT 12 (21 Sep 2026). Both of these read as sentences — "Counts toward
+   your first month", "a month, once the Early Bird spots are gone" — and
+   tokens.css is explicit that a phrase is not a label: if it reads as a
+   sentence it takes the reading floor whatever container it is in. 12px on the
+   one panel that takes money was the smallest type a buyer had to read. */
 .plan-now{flex-wrap:wrap}
-.plan-else{flex:1 0 100%;font-size:12px;font-weight:500;color:var(--ink-4)}
+/* `.plan-opt .plan-else`, not `.plan-else`: line 25's `.plan-opt span` sets
+   every span in a tile to 12px and outranks a single class, which is why this
+   sentence stayed at 12 when the size was first raised here. */
+.plan-opt .plan-else{flex:1 0 100%;font-size:14px;line-height:1.35;font-weight:500;color:var(--ink-4)}
 .plan-opt.is-on .plan-else{color:var(--on-maroon);opacity:.72}
 
 /* ============================================================================
@@ -874,7 +924,15 @@ html[data-flight="in"] .column > .sticky-cta{
    the X, the seat count's new place, and the benefits as chips.
    ============================================================================ */
 .reserve-layer{position:fixed;inset:0;z-index:40}
+/* ══ IT BLURS WHAT IT DIMS ═════════════════════════════════════════════════
+   Sam, 21 Sep 2026: "whenever a pop-up or a modal is triggered, blur the
+   background … the sign-in modal right now blurs the background, but every
+   other modal doesn't." The sign-in sheet's scrim carried a blur and this one
+   did not, so two modals in one build disagreed about what a scrim is. 6px is
+   the value all four now use (`.cs-scrim` below, `.vp-scrim`, `.ct-scrim`), and
+   it rides this element, so the fade below is untouched. */
 .reserve-scrim{position:absolute;inset:0;background:rgba(10,5,8,.62);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:layerFade 180ms var(--ease) both}
 /* ══ IN AND OUT, ONE MATERIAL ══════════════════════════════════════════════
    Sam, 15 Sep 2026: "/impeccable animate for the slide in and out." A sheet
@@ -903,11 +961,17 @@ html[data-flight="in"] .column > .sticky-cta{
 .reserve-layer.is-closing .reserve-scrim{animation:layerFadeOut 260ms linear both}
 @keyframes sheetDown{from{transform:none}to{transform:translateY(100%)}}
 @keyframes layerFadeOut{from{opacity:1}to{opacity:0}}
+/* Both lived in app.css until 20 Sep and were deleted with it: the scrim's
+   own fade-in, and the scroll lock App.tsx toggles on <html> while the layer
+   is up (without it, wheel over the scrim scrolls the page beneath). */
+@keyframes layerFade{from{opacity:0}to{opacity:1}}
+html.is-layered{overflow:hidden}
 .reserve-sheet:focus{outline:none}
 /* Its own scroller, a separate box from the animated surface: see the note
    on fixed children in ReserveLayer.tsx. */
 .sheet-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain}
-/* Back from the app window: the modal was already open. No re-entrance. */
+/* Back from the app window (the modal was already open), or a card flight is
+   pending (it is the one thing that moves): no entrance. */
 .reserve-layer.is-still:not(.is-closing) .reserve-scrim,
 .reserve-layer.is-still:not(.is-closing) .reserve-sheet{animation:none}
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
@@ -965,7 +1029,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .seat-count{margin:0;display:flex;align-items:baseline;gap:var(--s-sm);flex-wrap:wrap;
   font-size:14px;line-height:1.3;color:var(--ink-2)}
 .seat-count b{font-size:17px;line-height:1;font-weight:700;letter-spacing:-.01em;color:var(--ink-1)}
-.seat-closes{margin-left:auto;font-size:13px;font-weight:500;color:var(--ink-3);white-space:nowrap}
+.seat-closes{margin-left:auto;font-size:14px;font-weight:500;color:var(--ink-3);white-space:nowrap}
 .seat-meter{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--hair-lit)}
 .seat-meter i{position:absolute;inset:0;background:var(--ink-1);
   transform-origin:left;transform:scaleX(var(--p,0))}
@@ -1005,10 +1069,6 @@ html[data-flight="in"] .column > .sticky-cta{
 
 }
 
-/* The refund under the plan tiles (14 Sep audit). A term, in the quiet ink,
-   one interval under the lock line. */
-.plan-refund{margin:calc(-1 * var(--s-lg)) 0 var(--s-2xl);color:var(--ink-3)}
-
 /* ── the footer's brand row (checkout only) ───────────────────────────────── */
 .site-foot.has-brand{display:flex;flex-direction:column;align-items:center;gap:var(--s-lg);
   padding-top:var(--s-2xl)}
@@ -1035,14 +1095,9 @@ html[data-flight="in"] .column > .sticky-cta{
    the label does and the fade runs off the panel's edge. */
 .rs-where .ticker-rail{--rail-pad:var(--s-xl)}
 .rs-where .ticker-tile{width:132px}
-/* What you get: four bullets with their glyphs, then the six marks. */
+/* What you get: the six marks. (`.rs-list` / `.rs-li-icon`, the icon-tile
+   rows, went on 23 Sep 2026 — the benefits are figures now, §15.) */
 .rs-what{margin:var(--s-xl) var(--s-xl) var(--s-md);color:var(--ink-3)}
-.rs-list{list-style:none;margin:0 var(--s-xl);padding:0;display:flex;flex-direction:column;gap:var(--s-md)}
-.rs-list li{display:flex;align-items:center;gap:var(--s-lg);font-size:15px;line-height:1.35;color:var(--ink-2)}
-.rs-list li b{font-weight:700;color:var(--ink-1)}
-.rs-li-icon{flex:0 0 auto;width:34px;height:34px;border-radius:var(--r-sm);
-  display:grid;place-items:center;background:var(--inner);border:1px solid var(--hair);color:var(--ink-2)}
-.rs-li-icon svg{width:18px;height:18px;display:block}
 .rs-covers{margin:var(--s-xl) var(--s-xl) 0}
 .rs-covers .covers-head{margin:0 0 var(--s-md);color:var(--ink-3)}
 .rs-covers .covers{grid-template-columns:repeat(6,1fr);gap:var(--s-md) var(--s-sm)}
@@ -1052,22 +1107,28 @@ html[data-flight="in"] .column > .sticky-cta{
    is the container; the pitch's card-row rules keyed on .bcards no longer
    match anything here. */
 
-/* ── the desktop pop-up ─────────────────────────────────────────────────────
+/* ── the pop-up, from 640 ──────────────────────────────────────────────────
    Sam, 15 Sep 2026: "this should be a pop up on desktop not a modal that
    slides up from the bottom … /impeccable animate for the fade in and out …
-   have the background be darker when the pop up is displaying." Below 1024
-   the sheet is unchanged. From 1024 the same surface is a window: centred,
-   inset from the viewport, rounded, and it ARRIVES rather than slides — a
-   fade with a 3.5% settle on the house curve, 240ms, over a scrim that goes
-   to 78% so the page beneath reads as scenery. Leaving is the reverse at
-   180ms with an ease-in. The header and the scroller are unchanged: they are
-   absolute inside the surface and follow it. */
-@media (min-width:1024px){
+   have the background be darker when the pop up is displaying." The same
+   surface is a window: centred, inset from the viewport, rounded, and it
+   ARRIVES rather than slides — a fade with a 3.5% settle on the house curve,
+   240ms. Leaving is the reverse at 180ms with an ease-in.
+
+   ══ ONE COLUMN, SO ONE WIDTH, FROM 640 (23 Sep 2026, POLISH §16) ═════════
+   It was a 1000px two-column dialog from 1024 and the whole window from 640
+   to 1023. A review sheet is one column at every width, so the dialog is
+   that column's width wherever there is room to centre it: 640, or the
+   window less 32px a side. Its height is its content's, capped at the
+   window, and it scrolls inside. Below 640 it is the phone's sheet.
+   From 1024 it is two columns again and 1040 wide — §18, at the foot of this
+   file. */
+@media (min-width:640px){
   .reserve-scrim{background:rgba(6,3,5,.64)}
   .reserve-sheet{
     inset:auto;top:50%;left:50%;
-    width:min(1180px,calc(100vw - 64px));
-    height:min(calc(100vh - 56px),980px);
+    width:min(640px,calc(100vw - 64px));
+    height:auto;max-height:calc(100vh - 48px);
     transform:translate(-50%,-50%);
     border-radius:var(--r-panel);overflow:hidden;
     border:1px solid var(--hair-lit);
@@ -1108,7 +1169,7 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-refer-copy:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 .ms-refer-share{margin-top:var(--s-lg)}
 .ms-refer-track{display:flex;align-items:center;gap:var(--s-lg);margin:var(--s-lg) 0 0;
-  font-size:13px;font-weight:500;color:var(--ink-3)}
+  font-size:14px;font-weight:500;color:var(--ink-3)}
 .ms-refer-track .tnum{font-weight:700;color:var(--ink-1)}
 .ms-refer-meter{position:relative;flex:1 1 auto;max-width:160px;height:3px;border-radius:2px;
   background:var(--hair-lit);overflow:hidden}
@@ -1128,80 +1189,40 @@ html[data-flight="in"] .column > .sticky-cta{
 .sheet-scroll{position:relative;inset:auto;flex:1 1 auto;min-height:0}
 .sheet-column.column{padding-top:var(--s-xl);padding-bottom:var(--s-2xl)}
 .sheet-column.column > .rs-modal{width:100%}
-@media (max-width:1023px){
-  .reserve-sheet{inset:auto 0 0 0;height:auto;max-height:92vh;
+@media (max-width:639px){
+  /* 92vh FLAT, NOT `auto` UP TO 92vh (21 Sep 2026). The sheet has four pages
+     now and they are nothing like the same height, so a frame sized to its
+     content would collapse from full height to a two-field form the instant
+     the reader taps Checkout — and a modal that changes size cannot read as
+     the same modal moving to its next page. Page 0 has always filled this
+     anyway, so nothing about the surface a reader knows has changed. */
+  .reserve-sheet{inset:auto 0 0 0;height:92vh;
     border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
   .reserve-scrim{background:rgba(6,3,5,.6)}
 }
-@media (min-width:1024px){
-  /* Sam, 15 Sep 2026: "more of a horizontal layout for this on desktop."
-     Two movements side by side: the argument (the card, the count, what you
-     get, the guarantee) down the left, the decision (the plans and the one
-     button) on the right, each column as tall as the other. The dialog
-     widens to carry both; nothing scrolls until the window is short. */
-  .reserve-sheet{width:min(1000px,calc(100vw - 48px));height:auto;max-height:calc(100vh - 48px)}
-  .sheet-column.column{padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
+/* ══ ONE COLUMN, AT EVERY WIDTH (23 Sep 2026, POLISH §16) ══════════════════
+   The seven blocks of page 0 stack with one section step between them and
+   the block's own interval inside; nothing is placed in a grid area, because
+   there is no second column for anything to be placed beside. */
+.rs-modal{display:flex;flex-direction:column;gap:var(--s-2xl)}
+/* ── THE MEASURE, FROM 640 ─────────────────────────────────────────────────
+   Inside the 640 dialog the column gives up the phone's 480 cap and its
+   children's 720 one, and page 0 holds a 560px measure, centred — the same
+   measure the paged steps hold (`.rs-step` below), so the sheet does not
+   change width under the reader when Checkout moves it on. */
+@media (min-width:640px){
+  .sheet-column.column{max-width:none;width:100%;
+    padding:var(--s-xl) var(--s-2xl) var(--s-2xl)}
+  .sheet-column.column > .rs-modal{max-width:560px;width:100%;margin-inline:auto}
 }
-.rs-modal{display:flex;flex-direction:column;gap:var(--s-lg)}
-.rs-card > *{max-width:320px;margin:0 auto}
-.rs-seats{margin:0;text-align:center;font-size:14px;font-weight:500;color:var(--ink-2);text-wrap:balance}
-.rs-seats b{font-size:17px;font-weight:700;color:var(--ink-1)}
-.rs-seats-close{color:var(--ink-3)}
-.rs-modal > .checkout{margin:0}
-.rs-includes{list-style:none;margin:var(--s-sm) 0 0;padding:0 var(--s-sm);display:flex;flex-direction:column;gap:var(--s-md)}
-.rs-includes li{display:flex;align-items:flex-start;gap:var(--s-md);font-size:14px;line-height:1.4;color:var(--ink-2)}
-.rs-includes svg{flex:0 0 auto;width:18px;height:18px;margin-top:1px;color:var(--ink-1)}
-.rs-includes b{font-weight:700;color:var(--ink-1)}
-.rs-modal > .rs-closing{margin:var(--s-sm) 0 0}
-
-/* The two-column modal, AFTER the base rules above so source order lets it win
-   (the first cut sat above them and lost, 15 Sep 2026). */
-@media (min-width:1024px){
-  /* The column primitive caps its width and its children's for the phone;
-     inside the dialog the grid needs the whole 1000px. */
-  .sheet-column.column{max-width:none;width:100%}
-  .sheet-column.column > .rs-modal{max-width:none;width:100%}
-  /* THE CARD MOVED TO THE FOOT OF THE LEFT COLUMN (20 Sep 2026) and the
-     places row gained an area of its own — without one it was landing in an
-     implicit row and breaking the two columns it sat under. Reading order
-     down the left is now count, what you get, guarantee, where, card; the
-     decision holds the right the whole way down. */
-  .rs-modal{display:grid;grid-template-columns:minmax(0,1fr) 420px;
-    grid-template-areas:"seats plans" "includes plans" "closing plans"
-      "places plans" "card plans";
-    grid-template-rows:repeat(5,auto);
-    column-gap:var(--s-2xl);row-gap:var(--s-lg);align-items:start}
-  .rs-card-panel{grid-area:card}
-  .rs-places{grid-area:places}
-  /* The card at the size you would hold one, centred over its count;
-     the panels beneath take the column. */
-  .rs-card > *{max-width:380px;margin:0 auto}
-  .rs-seat-card{grid-area:seats;max-width:380px;width:100%;margin:0 auto}
-  /* POLISH, 15 Sep 2026 ("layout still seems a bit off on desktop"). The
-     right column ended 50px short of the left, so the two movements did not
-     finish together. The panel now stretches to the row and is a flex
-     column: the plans at its head, the two lines under them, and the button
-     seated at its foot — on the same baseline as the refund card. */
-  /* ══ IT NO LONGER STRETCHES ═══════════════════════════════════════════
-     The 15 Sep fix seated the button at the foot of a stretched column so
-     the two movements finished together — the right column was ending 50px
-     short of the left and the gap read as a mistake.
-
-     Moving the card to the foot (20 Sep) put two more rows in the left
-     column, so "as tall as the other" became a 600px hole between the terms
-     and the button. Fifty pixels of difference is a misalignment; six
-     hundred is an empty column with a control stranded at the bottom of it.
-     So the panel sizes to its content again and the button follows the
-     sentence it belongs to. The columns now differ in height, which is what
-     two columns of different content do. */
-  .rs-modal > .checkout{grid-area:plans;align-self:start;display:flex;flex-direction:column;
-    position:static}
-  .rs-modal > .checkout > .plan-refund{margin-top:0}
-  .rs-modal > .checkout > .pay-slot{margin-top:var(--s-xl)}
-  /* The left column, one rhythm: the count sits close under the card, the
-     checklist one interval below it, the guarantee at the foot. */
-  .rs-modal > .rs-includes-panel{grid-area:includes;margin:0}
-  .rs-modal > .rs-closing{grid-area:closing;align-self:end;margin:0}
+/* THE DOCKED BAR BLEEDS TO THE SHEET'S EDGES ON A PHONE. Below 640 the sheet
+   is the window and the page hides its scrollbar, so `50% - 50vw` is exactly
+   the distance to its edge at any column width, and the inline padding puts
+   the button back on the column's edge. In the dialog the sheet is not the
+   window; the bar's own `-gutter` margin reaches the column's padding, and its
+   fade is the sheet's ground, so its edges do not show. */
+@media (max-width:639px){
+  .rs-modal > .rs-dock{margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%)}
 }
 
 /* The referral head: the sentence beside the shirt it earns. */
@@ -1209,45 +1230,26 @@ html[data-flight="in"] .column > .sticky-cta{
 .ms-refer-head .ms-refer-lede{flex:1;min-width:0}
 .ms-refer-tee{--tee-h:88px;flex:0 0 auto}
 
-/* ── the docked Checkout, phone only ──────────────────────────────────────── */
-/* Sticky to the sheet's foot while the real button is below the fold; slides
-   away when it is on screen. Bleeds to the sheet's edges over its own fade. */
-/* PINNED TO THE SCROLLER'S OWN BOTTOM. A negative offset here pushed the
-   button's lower half past the sheet's clipped edge on a phone (Sam, 15 Sep
-   2026: "the checkout sticky button doesn't seem to be showing correctly").
-   bottom:0 keeps the whole control inside the visible sheet. */
+/* ── THE DOCK: PAGE 0'S CHECKOUT BELOW 1024, ALWAYS ON (§31) ────────────────
+   Sticky to the scroller's own bottom (a negative offset once pushed half the
+   button past the sheet's clipped edge). Below 1024 it bleeds to the sheet's
+   edges over its own `--page-0 → --page` fade. */
 .rs-dock{position:sticky;bottom:0;z-index:5;
   margin:var(--s-md) calc(-1 * var(--gutter)) 0;
   padding:var(--s-lg) var(--gutter) calc(var(--s-md) + env(safe-area-inset-bottom,0px));
-  /* --page-0, not a literal: this faded from a hard-coded dark page, so on a
-     light sheet it would have fanned out of a colour that is no longer there. */
-  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%);
-  transition:transform 200ms var(--ease),opacity 200ms var(--ease)}
+  background:linear-gradient(180deg,var(--page-0) 0%,var(--page) 45%)}
+/* With the seats on it (§45) the line and the bar sit on solid `--page`,
+   never on scrolled content, and the fade moves up to run over the 24px
+   above the dock: it paints there and takes no room, so the dock does not
+   grow for it, and at the page's end it lands in the gap before the dock. */
+.rs-dock:has(> .rs-seats){background:var(--page)}
+.rs-dock:has(> .rs-seats)::before{content:"";position:absolute;inset-inline:0;
+  bottom:100%;height:var(--s-2xl);pointer-events:none;
+  background:linear-gradient(180deg,var(--page-0),var(--page))}
 .rs-dock .action{margin:0}
-.rs-dock.is-away{transform:translateY(110%);opacity:0;pointer-events:none}
+/* From 1024 the order card carries its own button (§31.1), so the dock goes. */
 @media (min-width:1024px){.rs-dock{display:none}}
-@media (prefers-reduced-motion:reduce){.rs-dock{transition:none}}
 
-/* What you get, as a panel: the list's own inset, one row per benefit. */
-.rs-modal > .rs-includes-panel{margin:0;padding-bottom:var(--s-xl)}
-.rs-includes-panel > .panel-label{margin-bottom:var(--s-md)}
-.rs-includes-panel .rs-list{margin:0 var(--s-xl);gap:var(--s-md)}
-.rs-includes-panel .rs-list li{font-size:14px;line-height:1.35}
-
-/* ── the count card ───────────────────────────────────────────────────────── */
-.rs-seat-card{padding:var(--s-md) var(--s-lg) var(--s-lg);
-  border:1px solid var(--hair);border-radius:var(--r-control);background:var(--inner)}
-.rs-seat-line{display:flex;align-items:baseline;gap:var(--s-sm);flex-wrap:wrap;margin:0;
-  font-size:14px;line-height:1.3;color:var(--ink-2)}
-.rs-seat-line b{font-size:20px;line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--ink-1)}
-/* One continuous bar (Sam, 15 Sep 2026: "a single line, not little blocks"),
-   rounded, the fill scaled from the left so the fraction is exact. */
-.rs-meter{position:relative;display:block;height:5px;margin-top:var(--s-md);border-radius:3px;
-  background:var(--hair-lit);overflow:hidden}
-.rs-meter i{position:absolute;inset:0;border-radius:3px;background:var(--ink-1);transform-origin:left;
-  transform:scaleX(var(--p,0))}
-/* The date, under the bar, as a caption. */
-.rs-seat-close{margin:var(--s-sm) 0 0;font-size:12px;font-weight:500;letter-spacing:.01em;color:var(--ink-3)}
 
 /* ══ ONE TILE, ALREADY CHOSEN ════════════════════════════════════════════════
    The group is down to a single plan, so the grid stops being two columns and
@@ -1377,45 +1379,14 @@ html[data-flight="in"] .column > .sticky-cta{
     align-items:center;justify-content:center}
 }
 
-/* ══ NO SECOND SCRIM INSIDE THE RESERVE LAYER ════════════════════════════════
-   `/reserve` is itself a layer: `.reserve-scrim` already dims the pitch behind
-   it at rgba(10,5,8,.62). The checkout sheet then laid its OWN `.cs-scrim` at
-   the same value with a 3px blur on top, so the phone step sat under two of
-   them — about 86% black, which is the "weird black overlay" and not a
-   deliberate depth cue. Compounding dim is what you get for free by nesting two
-   things that were each designed to be the only modal on screen.
-
-   The element stays, because it is doing the layout: `.cs-scrim` is the fixed
-   flex box that positions the sheet at the bottom of the viewport and catches
-   the backdrop click that dismisses it.
-
-   ══ AND IT PAINTS AGAIN, QUIETLY ═══════════════════════════════════════════
-   Sam, 20 Sep 2026: "when this pops up, the background should fade out a bit.
-   It's too bright."
-
-   The reasoning above was written when the reserve sheet was dark. What the
-   outer scrim dims is the PITCH, two layers down; the thing directly behind
-   the phone step is the reserve sheet itself, and that sheet went white when
-   the modals went light. So the step was sitting on an undimmed white page —
-   nothing compounding, nothing at 86%, just no separation at all.
-
-   .22, not the .62 that caused the original problem. It is dimming one light
-   sheet rather than a dark page, so a quarter of the way down is the whole
-   distance needed; the ink behind stays legible as context and stops
-   competing. Ink rather than black, on the house hue, because everything it
-   covers is now a light surface and pure black on cream reads as grey film.
-
-   The blur stays off. Two backdrop-filters nested is the expensive half of
-   what the first version got wrong, and separation is the job here.
-
-   ══ AND NOW IT DOESN'T ═════════════════════════════════════════════════════
-   23 Sep 2026: the .22 still read as a black overlay under the sign-in popup.
-   Removed — the base `.cs-scrim` is transparent everywhere now, so no
-   override is needed here. */
-
-/* The same line in the checkout, above the locked-rate sentence. `.plan-locked`
-   carries a negative top margin to pull itself against the plan picker, so it
-   has to be cancelled when this sits between the two. */
+/* ── THE CHECKOUT'S SECOND SCRIM IS GONE (21 Sep 2026) ─────────────────────
+   A block stood here dimming `.cs-scrim` when it appeared INSIDE the reserve
+   layer, and before that undoing the double dim of two scrims stacked: the
+   phone step used to arrive as a second sheet over the checkout. It does not
+   any more — it is page 1 of this one (shell/ReserveLayer.tsx, and §9 of
+   docs/POLISH-2026-09-21.md) — so the only `.cs-scrim` left in the build is the
+   sign-in sheet's, which is portalled to <body> over the pitch and needs the
+   full dim it already has. Removed rather than left unreachable. */
 
 /* ── THE PRICE LADDER ──────────────────────────────────────────────────────
    Two tiles stacked, not side by side: an anchor is read top-to-bottom, and
@@ -1500,15 +1471,181 @@ html[data-flight="in"] .column > .sticky-cta{
   .plan-opt:active,.plan-opt.is-later:active{transform:none}
 }
 
-}
+/* ══ PAGE 0 AS A REVIEW SHEET (23 Sep 2026, docs/POLISH-2026-09-21.md §16) ══
+   Sam: "the checkout page needs some more work, can you look at mobbin to take
+   inspiration and use /impeccable to design." The references (Cash App,
+   CLEAR+, Panera Sip Club, Shopify, Fresha) are all one column: a ledger of
+   what you pay and when, a short checklist, a guarantee line, one button that
+   names the amount. What went, and why, so none of it is rebuilt by accident:
+     · the two-column grid and its areas — there is one column now
+     · the subtitle band — its facts are the ledger's first two rows
+     · the figure strip (§15) — a marketing device; the checklist replaces it
+     · the rail — it stays on the pitch; the places are one row here
+     · the guarantee block — it is one line now
+   Every block sits on the sheet's own ground but two plates: the included
+   panel (§18) and the order card (§29). The flex gap on `.rs-modal` is the
+   one section step between blocks (`--s-2xl`), and `--s-lg` is the interval
+   inside a block. */
 
-/* ── WHERE IT WORKS, AT THE FOOT OF THE SHEET ──────────────────────────────
-   The rail, not the grid, and no "View all places": the grid it would open is
-   a page-width object and this is a column. /in hides the same control on the
-   same reasoning (.ms-places, above). */
-.rs-places{margin-top:var(--s-2xl)}
-.rs-places .places-label{margin:0 0 var(--s-md);color:var(--ink-3)}
-.rs-places .ticker-all{display:none}
+/* ── 1. THE TILES, ON THE SHEET'S GROUND ───────────────────────────────────
+   They sat on a white panel, and the Standard tile's `--inner` fill was a
+   recess in it. On the sheet's own ground (`--page`, a rung BELOW white on
+   this ramp) `--inner` is within a point of the surface and the tile's plate
+   disappears, leaving a dashed outline. So `--inner` is re-pointed at white
+   on this tile alone: the plate keeps the step it had, one rung along — the
+   move `.rs-step .ph-field` makes below — and the refusal's keyframes, which
+   read `--inner` at both ends, start and settle on that same white. */
+.rs-modal .plan-pick{margin:0}
+.rs-modal .plan-opt.is-later{--inner:var(--card)}
+/* THE CHOSEN TILE'S SECOND LINE, AT READING CONTRAST. `.plan-opt.is-on span`
+   dims every span in the tile to .82, and `.plan-now` is a span: so the price
+   rendered at 82% (the 14 Sep note above says it must not) and "Counts toward
+   your first month" at .72 inside that, 59% white on maroon — 4.16:1,
+   measured on this pass. The wrapper goes back to full strength, as
+   `.plan-figs` already did; only the line's own .72 remains (5.3:1). */
+.plan-opt.is-on .plan-now{opacity:1}
+
+/* ── 2. THE ORDER CARD (POLISH §29) ────────────────────────────────────────
+   Everything about the money in one object, the pair to the included panel:
+   `--card` on the sheet's ground, a `--hair` edge and the resting shadow,
+   children stacked at `--s-xl`. Text only; no second container inside it. */
+.rs-order{display:flex;flex-direction:column;gap:var(--s-xl);margin:0;
+  padding:var(--s-xl);border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--card);box-shadow:var(--rest)}
+.rs-order-head{margin:0}
+
+/* The timeline: solid 8px dots, Today in `--ink-1` and the stops to come in
+   `--ink-4`, the text 24px from the dot's left edge. The rail is drawn per
+   stop from its dot's centre to the next one's, under the dots, so it ends on
+   the last dot whatever a clause wraps to. */
+.rs-time{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.rs-stop{position:relative;padding-left:var(--s-2xl)}
+.rs-stop:not(:last-child)::before{content:"";position:absolute;left:3px;top:10px;
+  bottom:-24px;width:2px;background:var(--hair-lit)}
+.rs-stop::after{content:"";position:absolute;left:0;top:6px;width:8px;height:8px;
+  border-radius:50%;background:var(--ink-4)}
+.rs-stop:first-child::after{background:var(--ink-1)}
+/* The moment and its figure on one 20px line, every figure on the list's one
+   right edge; the clause under it at the refund's size and ink. */
+.rs-stop-head{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s-xl);margin:0;line-height:20px}
+.rs-when{min-width:0;font-size:15px;font-weight:700;color:var(--ink-1)}
+.rs-fig{flex:0 0 auto;white-space:nowrap;font-size:15px;font-weight:700;color:var(--ink-1)}
+.rs-clause,.rs-refund{margin:0;font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--ink-3);text-wrap:pretty}
+.rs-clause{margin-top:2px}
+/* The hairline is the refund's own top edge, so it goes when the line does. */
+.rs-refund{padding-top:var(--s-xl);border-top:1px solid var(--hair)}
+
+/* ── THE ORDER CARD'S OWN BUTTON, FROM 1024 (§31.1) ───────────────────────
+   Below 1024 the dock is the Checkout and this box does not exist. */
+.rs-buy{display:none}
+@media (min-width:1024px){.rs-buy{display:block}}
+
+/* ── THE SEATS LEAD THE CARD, FROM 1024 (§31, §45) ─────────────────────────
+   One line with two ends — the count on the left, the close on the right,
+   wrapping under it when the column is too narrow — over a 6px bar whose
+   fill is the seats TAKEN (see Reserve.tsx for which fraction, and why). A
+   hairline closes the block; the heading follows at the card's own gap. The
+   fill grows once on first paint; the house reduced-motion block leaves it
+   complete and still. Below 1024 this copy is hidden and the dock's shows. */
+.rs-seats{display:flex;flex-direction:column;gap:var(--s-md);
+  padding-bottom:var(--s-xl);border-bottom:1px solid var(--hair)}
+.rs-seats-line{display:flex;flex-wrap:wrap;justify-content:space-between;
+  gap:var(--s-xs) var(--s-lg);margin:0;font-size:14px;font-weight:500;
+  line-height:1.4;color:var(--ink-2)}
+.rs-seats-line b{font-size:16px;font-weight:700;color:var(--ink-1)}
+/* A box, so the §35 tick's settle (scale 1.06 → 1, Reserve.tsx) has
+   something to transform; the line's baseline is unchanged. */
+.rs-seats-n{display:inline-block}
+.rs-seats-close{color:var(--ink-3);white-space:nowrap}
+.rs-seats-bar{display:block;height:6px;border-radius:var(--r-pill);
+  background:var(--press);overflow:hidden}
+.rs-seats-bar i{display:block;height:100%;border-radius:var(--r-pill);
+  background:var(--ink-1);transform-origin:left;transform:scaleX(var(--p,0));
+  animation:rsBarGrow 600ms var(--ease) both}
+@keyframes rsBarGrow{from{transform:scaleX(0)}}
+@media (max-width:1023px){.rs-order > .rs-seats{display:none}}
+
+/* ── THE SEATS ON THE DOCK, BELOW 1024 (§45) ──────────────────────────────
+   Sam: "make this counter a part of the sticky button for checkout … it'd be
+   slightly smaller of course." The same object over the button: one 20px
+   line at 14px, 8px, a 3px bar at the button's width, 6px, the button. The
+   line is one line by construction: it may not grow past 20px, so when the
+   close does not fit beside the count it wraps out of sight, and the count
+   ellipsises before it ever wraps. NOTE: nothing else on the sheet prints
+   `foundingCloses` (§45 assumed the terms did), so on a phone the date is
+   then read only by a screen reader, from this clipped copy. */
+.rs-dock .rs-seats{gap:var(--s-md);margin-bottom:var(--s-sm);padding:0;border:0}
+.rs-dock .rs-seats-line{height:20px;overflow:hidden;line-height:20px}
+.rs-dock .rs-seats-line b{font-size:14px}
+.rs-dock .rs-seats-count{min-width:0;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis}
+.rs-dock .rs-seats-bar{height:3px}
+
+/* ── 3. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
+   Sam, on the trial modal's call-out: "I like how you formatted this, maybe
+   we use the same on the checkout flow." What you get, where it works and the
+   guarantee were three open blocks after the count; they are one plate in
+   the call-out's construction (campaign.css `.ct-more`: the `--inner` ground,
+   the card radius, `--s-xl` of inset, `--s-lg` between its rows), written
+   here under `.rs-*` so a change to either surface cannot move the other.
+   No button and no price inside it — the ledger carries both. */
+.rs-inc{display:flex;flex-direction:column;gap:var(--s-lg);margin:0;
+  padding:var(--s-xl);border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--card);box-shadow:var(--rest)}
+/* `.t-title` is the heading's size and ink (18/700 `--ink-1`); the plate's
+   row gap is its only interval. */
+.rs-inc-head{margin:0}
+
+/* The checklist, as it was: a check glyph in ink, not a tile, beside each
+   line. The glyph is centred on the FIRST line box (1.4em at 15px), so a
+   line that wraps keeps its check at its head. */
+.rs-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
+  gap:var(--s-md)}
+.rs-checks li{display:flex;align-items:flex-start;gap:var(--s-md);
+  font-size:15px;font-weight:500;line-height:1.4;color:var(--ink-2)}
+.rs-checks svg{flex:0 0 auto;display:block;width:16px;height:16px;
+  margin-top:calc((1.4em - 16px) / 2);color:var(--ink-2)}
+
+/* Where it works, in the call-out's two-column row: the six marks stacked
+   like a hand of cards on the left, the sentence beside them. The ring that
+   cuts each mark out of the one behind it is the PLATE's ground, `--inner`,
+   so it reads as a cut and not a halo. The marks never wrap under the
+   sentence; the names wrap under themselves, and never inside a name. */
+.rs-inc-also{display:flex;align-items:center;gap:var(--s-lg)}
+.rs-inc-marks{display:flex;flex:0 0 auto}
+.rs-inc-marks .collar{width:32px;height:32px;border-radius:10px;
+  box-shadow:0 0 0 2px var(--inner)}
+.rs-inc-marks .collar + .collar{margin-left:-10px}
+.rs-inc-line{flex:1 1 12ch;min-width:0;margin:0;font-size:14px;font-weight:500;
+  line-height:1.45;color:var(--ink-2);text-wrap:pretty}
+.rs-venue-name{white-space:nowrap}
+
+/* The guarantee closes the plate under a hairline: the shield at 20px beside
+   the promise (15/700) and the address after it (14px), one run of text so a
+   narrow plate wraps it as a sentence. `--hair-lit`, the ledger's rule — on
+   this ground `--hair` all but vanishes. */
+.rs-promise{display:flex;align-items:flex-start;gap:var(--s-md);margin:0;
+  padding-top:var(--s-lg);border-top:1px solid var(--hair-lit);
+  font-size:15px;line-height:1.4;color:var(--ink-1);text-wrap:pretty}
+/* The shield in a 32px tile of `--press`, the card radius's small step (Sam,
+   23 Sep 2026: "a parent container with rounded edges, it'd be a subtle gray"). */
+.rs-promise-mark{flex:0 0 auto;display:grid;place-items:center;width:32px;height:32px;
+  border-radius:var(--r-sm);background:var(--press);color:var(--ink-1)}
+.rs-promise-mark svg{display:block;width:18px;height:18px}
+/* On the details page it closes the form under a hairline, at the step's gap. */
+.rs-promise-step{margin-top:var(--s-2xl)}
+.rs-promise b{font-weight:700}
+.rs-promise a{font-size:14px;font-weight:500;color:var(--ink-2);
+  text-underline-offset:3px;white-space:nowrap}
+.rs-promise a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
+
+/* ── THE TWO COLUMNS' WRAPPERS, BELOW 1024 ────────────────────────────────
+   They draw nothing: every block lays out as a child of `.rs-modal`'s one
+   flex column in DOM order — the included panel first (Sam, 24 Sep 2026). */
+.rs-pay-col,.rs-get-col{display:contents}
 
 
 /* ── THE HEADER TAKES THE SHEET'S TOP CORNERS ──────────────────────────────
@@ -1532,13 +1669,22 @@ html[data-flight="in"] .column > .sticky-cta{
 }
 
 
-/* ── THE CARD'S PANEL ──────────────────────────────────────────────────────
-   A flat container with one raised object inside it — the inversion this
-   build uses everywhere else, and what stops the card reading as a loose
-   thing dropped at the end of the sheet. The card keeps its own width cap
-   and centres on the panel's measure. */
-.rs-card-panel{margin-top:var(--s-2xl)}
-.rs-card-panel .rs-card{margin-top:var(--s-md)}
+/* ── THE CARD, AT THE PANEL'S FOOT (POLISH §26) ────────────────────────────
+   It was the sheet's close under its own hairline (§8); the included panel's
+   list adds up to it, so it closes the panel instead. A hairline under the
+   guarantee (`--hair-lit`, the panel's own rule), 20px, the card centred at
+   the one card width (card.css `--tcard-w`), 4px, then the panel's inset.
+   No caption: the card's STARTS field says when it is hers. */
+.rs-inc-card{padding:20px 0 var(--s-xs);border-top:1px solid var(--hair-lit)}
+.rs-inc-card .card-stage{width:var(--tcard-w);max-width:none}
+/* THE FACTS DO NOT WRAP (§23). At the card's type "Early-ish Bird" and
+   "Halloween 2026" each broke onto a second line; at the one card width both
+   hold. Scoped to the card's homes: narrower cards elsewhere would clip. */
+.rs-inc-card .tcard-facts dd{white-space:nowrap}
+/* Not on a phone (Sam, 24 Sep 2026: "remove this from the checkout modal on
+   mobile"): below 1024 the panel ends at the guarantee. cardFlight.ts's
+   `flightPending` reads the same width, so nothing waits to land on it. */
+@media (max-width:1023px){.rs-inc-card{display:none}}
 
 /* ── THE COMING-SOON FLAG ──────────────────────────────────────────────────
    On the tier that is not open, in the tile's top corner.
@@ -1583,8 +1729,179 @@ html[data-flight="in"] .column > .sticky-cta{
 .plan-opt:has(.plan-chip) > b{padding-right:104px}
 
 
-/* The places heading inside the sheet is a section caption like the panels
-   around it, not the page-width heading pitch.css gives it on the pitch —
-   three labels in one column have to be one thing. */
-.rs-places .places-label{font-size:11px;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;line-height:1.3}
+/* ============================================================================
+   THE PAGED SHEET — one modal, four pages, and the move between them.
+
+   Sam, 21 Sep 2026: "the way this pops up is strange, I think it'd be a part of
+   the checkout modal, almost like it swipes to the next screen as if this flow
+   is a part of the same modal. We'd need a back button as well probably." And,
+   describing it again while it was being built: "there's this slight fade/slide-
+   to-the-left animation that takes me to the page where I enter my details. Once
+   I hit send me a code … it does that same left slide/fade animation."
+
+   SLIGHT IS THE WHOLE SPEC. Not a carousel: 32px of travel and an opacity, so
+   the page arrives from the direction it came from and nothing is ever parked
+   off to the side. That is also why there is no horizontal scroll to trap — the
+   pages are a STACK, and only the current one is in flow, which is what keeps
+   the sheet the height of the page you are on rather than of the tallest page
+   in the sequence. shell/Pager.tsx is the one implementation; the checkout's
+   four pages and PhoneStep's two stages both run on it.
+   ============================================================================ */
+.rs-pages{position:relative;
+  /* The 32px of entrance travel is clipped at the sheet's edge, so nothing is
+     ever scrollable sideways. CLIP, not hidden: `hidden` would make this a
+     scroll container and the docked Checkout bar inside page 0 would stick to
+     the bottom of the content instead of to the sheet. Vertical stays visible —
+     the subtitle band pulls up through the header and the dock sticks. */
+  overflow-x:clip;overflow-y:visible}
+.rs-page{min-width:0}
+/* Out of flow the moment it is not the page you are on: leaving (still painted,
+   fading) and parked (not painted, and `inert`/`aria-hidden` from the
+   component) both sit at the top of the stack and contribute no height. */
+.rs-page.is-out,.rs-page.is-off{position:absolute;inset-block-start:0;inset-inline:0}
+/* HEIGHT 0, NOT JUST HIDDEN. An absolutely positioned page still extends the
+   scroller's scrollable overflow by its own height, and page 0 is ~1,640px
+   tall on a phone — so on "Your details" the sheet scrolled through a
+   thousand pixels of empty ground under a 460px form (Fable, 22 Sep 2026,
+   measured scrollHeight 1694 against a 691px scroller). Zero height with
+   its own overflow hidden keeps the page in the DOM, with its state, and
+   out of the measurement. */
+.rs-page.is-off{visibility:hidden;height:0;overflow:hidden}
+.rs-page.is-out{pointer-events:none;animation:rsPageOut 280ms var(--ease) both}
+.rs-page.is-in{animation:rsPageIn 280ms var(--ease) both}
+/* Back plays it mirrored — the direction is on the stack, so a page never has
+   to know where it sits in the sequence. */
+.rs-pages[data-dir="back"] > .rs-page.is-in{animation-name:rsPageInBack}
+.rs-pages[data-dir="back"] > .rs-page.is-out{animation-name:rsPageOutBack}
+@keyframes rsPageIn{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+@keyframes rsPageOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-16px)}}
+@keyframes rsPageInBack{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
+@keyframes rsPageOutBack{from{opacity:1;transform:none}to{opacity:0;transform:translateX(16px)}}
+/* The move is how a reader is told the step changed, and the header's title
+   says the same thing without it: under `reduce` the pages simply swap. */
+@media (prefers-reduced-motion:reduce){
+  .rs-page.is-in,.rs-page.is-out{animation:none}
+}
+
+/* ── PAGES 1–3: THE STEPS' OWN MEASURE ─────────────────────────────────────
+   The steps are not panels. They sit on the sheet's own ground with the
+   column's gutter on a phone, and in the dialog they hold the reading measure
+   page 0 holds (docs/POLISH-2026-09-21.md §9). From 640, since 23 Sep: that
+   is where the sheet becomes the dialog now (§16). */
+.rs-step{padding:var(--s-xl) var(--gutter) var(--s-2xl)}
+@media (min-width:640px){
+  .rs-step{max-width:560px;margin-inline:auto;
+    padding:var(--s-2xl) var(--gutter) var(--s-3xl)}
+}
+/* The step's two pages were flex children of `.ph`; inside a page they still
+   are, so the full-width controls stay full width. */
+.ph .rs-page{display:flex;flex-direction:column}
+/* THE FIELD HAS TO READ AGAINST WHAT IT SITS ON. `--inner` is a step above the
+   sheet's ground on the dark ramp and a step BELOW white on the light one — on
+   the reserve sheet's own `--page` (#F0EDEE) the two are within a point of each
+   other and the field disappeared into the surface. The relationship the field
+   had on the old sheet (a plate against its ground) is white here; same token
+   vocabulary, one rung along. */
+.rs-step .ph-field{background:var(--card)}
+
+/* ── THE WAY BACK, IN BOTH SHEETS' HEADERS ─────────────────────────────────
+   44px of control, because it is the one new tappable this pass adds and 44 is
+   the floor. NOT the X's 36px pill: the X is the way out of the whole layer and
+   has worn that pill since 14 Sep, and a second, larger pill beside it would
+   read as the more important of the two. A bare chevron at the leading edge is
+   the affordance every phone already uses for "one step back", and it leaves
+   the filled shape to mean one thing. */
+.rs-back{flex:0 0 auto;width:44px;height:44px;display:flex;align-items:center;
+  justify-content:center;padding:0;border:0;background:none;color:var(--ink-2);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 150ms var(--ease)}
+.rs-back svg{width:22px;height:22px;display:block}
+.rs-back:active{transform:scale(.94)}
+.rs-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-pill)}
+/* In the checkout's header the title is centred on the viewport and the X is
+   pinned to the right edge, so this pins to the left one the same way. The
+   chevron's own 11px of inset puts its stem on the gutter line. */
+.sheet-back{position:absolute;left:var(--s-lg);top:50%;transform:translateY(-50%)}
+.sheet-back:active{transform:translateY(-50%) scale(.94)}
+/* The sign-in sheet's header is a flex row on the sheet's 16px padding: the
+   pull-back seats the chevron's stem on that padding line instead of 11px
+   inside it, and the row holds 44px whether the chevron is there or not, so the
+   title does not move when the code page arrives. */
+.cs-top{min-height:44px}
+.cs-back{margin-inline-start:calc(-1 * var(--s-lg))}
+/* The title takes focus on every page change so the move is announced. It is a
+   heading, not a control, so it must not also wear a focus ring — the ring is
+   how this build says "you can press this". */
+.sheet-title:focus{outline:none}
+
+
+/* ============================================================================
+   DESKTOP WITHOUT A SCROLL — from 1024 (23 Sep 2026, POLISH §18).
+
+   Sam: "checkout on desktop should be wider so I don't need to scroll
+   through anything." The reader's screen has the width, so the review sheet
+   takes it: `min(1040px, 100vw - 64px)`, height still its content's and
+   still capped at the window, and page 0 in two equal columns — what it
+   buys on the left (the included panel, the card at its foot), the money
+   on the right (the tiles, then the order card). The money
+   column packs to its top; the panel takes the row's height and seats the
+   card on its floor, so the two columns end on one line (§26).
+
+   Pages 1–3 keep their 560 measure (`.rs-step`); since §33 the sheet
+   narrows to it when Checkout moves it on (the foot of this file). The
+   docked bar is already gone from 1024.
+
+   THE FIT (§29). The tiles and the order card outrun the panel by ~153px
+   at 1180 and 1440; the panel takes it up above the card's hairline. The
+   sheet is 782px tall: no scroll at 1180×820 or 1440×900, but a window
+   under ~814px tall (1280×800, any 768) scrolls page 0 by the difference.
+   ============================================================================ */
+@media (min-width:1024px){
+  .reserve-sheet{width:min(1040px,calc(100vw - 64px));
+    /* Kiran's third tile (the sold-out $4.99, 23 Sep) made the left column
+       scroll at 1280x800; on desktop this 32 supersedes §18's 48. */
+    max-height:calc(100vh - 32px)}
+  /* Three classes, to take back the 560 measure the 640 rule gives the
+     modal at the same weight. */
+  .sheet-column.column > .rs-modal{max-width:none;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    column-gap:calc(var(--s-xl) * 2);align-items:stretch}
+  /* NOTHING INSIDE A COLUMN CAN WIDEN IT (§23). The columns were already
+     `minmax(0,1fr)` tracks with `min-width:0`, but each column's own grid
+     had one `auto` track, whose floor is its widest child's min-content — a
+     tile's long line, a ledger clause. `minmax(0,1fr)` takes that floor
+     away, so a long string wraps inside its own block and never
+     pushes the sheet past `100vw - 64px`. */
+  .rs-pay-col,.rs-get-col{display:grid;grid-template-columns:minmax(0,1fr);
+    align-content:start;gap:var(--s-2xl);min-width:0}
+  /* Kiran's third tile (the sold-out $4.99, 23 Sep) is why the money column
+     steps at 16; on desktop this supersedes §16's 24 between its blocks. */
+  .rs-pay-col{gap:var(--s-xl)}
+    /* SIDES SWAPPED, BOTH WHITE (Sam, 23 Sep 2026: "swap the sides these are
+     on — also let's use a white background for both"). What you get reads
+     first, on the left; the money and its button sit on the right, where a
+     checkout keeps them. Since 24 Sep the DOM is panel-first too (it opens
+     the phone's sheet), so no `order` is needed. ONE BOTTOM
+     EDGE (§32, Sam: "I don't think we should have the open space on the
+     bottom left"): the panel fills its track and seats the card on its
+     floor, so the air sits inside the white card, never on the ground. */
+  .rs-get-col{align-self:stretch;grid-template-rows:minmax(0,1fr)}
+  .rs-inc-card{margin-top:auto}
+}
+
+/* ── THE FRAME FOLLOWS ITS PAGE, FROM 1024 (POLISH §33) ─────────────────────
+   Page 0 is two columns; pages 1–3 are one, so once page 0 is out of flow the
+   sheet takes the one-column dialog's measure (the 560 step plus its gutters)
+   and its content's height. Keyed to page 0's own state, so the width changes
+   in the same commit as the pages. shell/useSheetFrame.ts runs the change;
+   while it does, the scroller holds its overflow so no scrollbar flashes. */
+@media (min-width:1024px){
+  .reserve-sheet:has(> .sheet-scroll > .rs-pages > .rs-page:first-child:is(.is-out,.is-off)){
+    width:min(640px,calc(100vw - 64px))}
+  .reserve-sheet[data-frame] > .sheet-scroll{overflow-y:hidden}
+  /* The frame's size is animated by the hook or it snaps; it never
+     transitions. base.css's reduced-motion block gives every element a .01ms
+     transition on `all`, which painted one frame at the old width. */
+  .reserve-sheet{transition-property:none}
+}

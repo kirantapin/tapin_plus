@@ -7,7 +7,11 @@ import { EventTrackingProvider } from "./context/event_tracking_context";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/layout.css";
+/* After layout.css: the simulated feed (§34) takes its own width over the
+   column's `:where()` cap on source order. */
+import "./styles/feed.css";
 import "./styles/pitch.css";
+import "./styles/figures.css";
 import "./styles/how.css";
 import "./styles/reserve.css";
 import "./styles/card.css";

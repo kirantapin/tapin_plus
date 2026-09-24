@@ -29,10 +29,9 @@
   gap: 2px;
   overflow: hidden;
 }
-/* Measured, not eyeballed: five of the six heroes sit between 0.036 and 0.22
-   relative luminance. Only theburg's is a brand card on white, at 0.891. So the
-   collage runs at strength and the single outlier is seated to sit among the
-   photographs rather than punch a hole through them. */
+/* Measured, not eyeballed: every hero is a photograph between 0.099 and 0.290
+   relative luminance (24 Sep), so the collage runs at strength. A brand card
+   on white would be seated by `data-bright` (content.ts BRIGHT_HEROES). */
 .mosaic img {
   width: 100%;
   height: 100%;
@@ -45,16 +44,24 @@
 }
 /* A neutral scrim, never a tinted one: tinting it would borrow the photograph's
    own skin, and these are six different merchants' photographs. It works hardest
-   at the bottom, where the glass panel has to sit on something. */
+   at the bottom, where the glass panel has to sit on something.
+
+   LIGHTER THROUGH THE TOP TWO THIRDS, 21 Sep 2026. The three upper stops were
+   .30/.52/.84 and the photographs behind the hero read as a dark texture
+   rather than as six rooms — the one thing on this page that is evidence was
+   the least legible object in the first screen. The panel is glass and carries
+   its own ground, so the veil only has to keep the band in the same world as
+   the page: .16/.38/.80. The foot is untouched — that stop is what closes the
+   band into the field, and it is load-bearing. */
 .mosaic::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(18, 10, 14, 0.3) 0%,
-    rgba(18, 10, 14, 0.52) 34%,
-    rgba(18, 10, 14, 0.84) 72%,
+    rgba(18, 10, 14, 0.16) 0%,
+    rgba(18, 10, 14, 0.38) 34%,
+    rgba(18, 10, 14, 0.8) 72%,
     var(--page) 100%
   );
 }
@@ -110,15 +117,61 @@
   line-height: 1.4;
   color: var(--ink-2);
 }
-/* Two across here, not the deck's four-row stack: this is a panel on a scrolling
-   page rather than a slide with a stage to fill. */
+/* ══ ONE SEGMENTED CONTROL, NOT FOUR BUTTONS ════════════════════════════════
+   It was a 2×2 of separate rounded plates, which is four objects for one
+   answer — and four plates inside the panel is the nested-card shape the
+   storefront's one hard rule forbids. A segmented control is what this is:
+   one track, four cells, the chosen one filled. The reader sees a single
+   thing with four settings rather than four things one of which is on.
+
+   The track is the `.conc-pair` idiom — 1px of --hair-lit showing between
+   cells that carry the fill — so the divisions are drawn by the gap and no
+   cell owns a border that could bow at the track's corners (base.css warns
+   about exactly that on `.segments`).
+
+   SPECIFICITY IS LOAD-BEARING HERE. `.band`/`.bands` belong to how.css, which
+   loads AFTER this file: `.spendq .band` at (0,2,0) beats its `.band`, but its
+   `.band.on` is also (0,2,0) and would win on source order — hence
+   `.spendq .band.on` at (0,3,0) for the chosen cell and its press. */
 .spendq .bands {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-md);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  padding: 0;
+  background: var(--hair-lit);
+  border: 1px solid var(--hair-lit);
+  border-radius: var(--r-control);
+  overflow: hidden;
 }
 .spendq .band {
-  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--s-sm);
+  background: var(--inner);
+  border: 0;
+  border-radius: 0;
+}
+.spendq .band b {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.spendq .band.on {
+  background: var(--maroon);
+  border-color: transparent;
+  color: var(--on-maroon);
+}
+/* A cell in a track cannot scale — it would lift off its own dividers and out
+   of the clipped corners. The press is answered by the fill, which is the
+   segmented control's own idiom. */
+.spendq .band:active {
+  transform: none;
+  background: var(--press);
+}
+.spendq .band.on:active {
+  background: var(--maroon);
 }
 /* Whose number it is. Never omitted: the figure below is meaningless without it. */
 .save-basis {
@@ -132,12 +185,11 @@
   margin: 0;
   flex-wrap: wrap;
 }
+/* The type comes from `.t-figure` (tokens.css) now — the panel's one display
+   moment. Nothing is declared here that would out-specify it; what is left is
+   the baseline the unit sits on. */
 .save-figure .amount {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: var(--ink-1);
+  line-height: 0.95;
 }
 .save-figure .unit {
   font-size: 15px;
@@ -390,14 +442,23 @@
 /* The rule runs out from the label rather than boxing it: it ties the scope row
    to the benefits above without adding a second container to a panel that
    already has one. */
+/* NO COLOUR DECLARED. It read --ink-4, which was right for an 11px tracked
+   caption and is wrong for the section heading this became on 21 Sep 2026 —
+   and at (0,1,0) it was tying with `.t-section` and winning on source order,
+   so the heading would have arrived at 22px in the ramp's quietest ink. The
+   token carries the colour; this rule carries only the placement. */
 .covers-head {
   display: flex;
   align-items: center;
   gap: var(--s-lg);
   margin: var(--s-xl) var(--s-xl) var(--s-lg);
-  color: var(--ink-4);
 }
-.covers-head::after {
+/* NOT ON THE PITCH (§19, 23 Sep 2026). A head that stands over its own row
+   carries no rule; the plates are the object. `.covers-head` is still shared
+   with /in's panel (Membership.tsx), which keeps its rule, so the pitch's
+   parent is excluded here rather than undone by a second rule. The pop-up
+   (`.vp-covers-head`) and the checkout (`.rs-covers`) have their own heads. */
+:not(.pitch-scope) > .covers-head::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -1426,34 +1487,315 @@ button.vcard:focus-visible {
 /* Desktop: the three cards are composed in THE PAGE BELOW THE HERO, at the end
    of this file, as the first of its four movements. */
 
-/* ══ THE STATEMENT ON A PHONE ═══════════════════════════════════════════
-   BACK IN ITS PANEL. Sam, 14 Sep 2026, on the un-panelled version: "it's still
-   a bit too dense, I liked what we had way earlier… there was a parent
-   container similar to 'what you'd save'." So on the phone this is the same
-   object as the savings panel beside it: a `.panel.flush` with its caption,
-   the four divided rows inside it, then the scope strip and the alcohol
-   sentence under the panel's own hairline caption. Nothing here overrides the
-   panel, the caption or the note — base.css and layout.css draw those — only
-   the strip's grid and the rows' inset are set. The desktop block below
-   un-panels it into the four-card movement. */
-.column > .panel:has(.bcards) > .bcards {
+/* ══ THE PITCH'S BENEFITS ARE PHOTOGRAPHS ═══════════════════════════════════
+   What stood here was §4.3's open statement — `.bcards:not(.is-chips)` dressing
+   the four rows as a display figure, two hairlined columns and a closing line.
+   Sam rejected all three devices on 21 Sep (see BenefitCards.tsx), and nothing
+   renders a non-chips `.bcards` any more, so those rules are gone rather than
+   left to rot behind a selector no tree matches. The `.bcards` BASE block above
+   stays exactly as it was: the compact path and reserve.css's `.bcards.is-chips`
+   still read every line of it.
+
+   ══ THE CARD IS §12's A · SPLIT, SINCE 22 SEP 2026 ═══════════════════════
+   docs/POLISH-2026-09-21.md §12. Three directions were built behind a DEV-only
+   switch and Sam chose A: the photograph above with nothing over it, a solid
+   plate below carrying every word. Why, in one line: a sentence belongs on a
+   plate. §7 set the copy over the photograph, and every line of it was then a
+   negotiation with the brightest pixel under it — the veil went through three
+   ramps and a text-shadow, and Sam still lost the subline in the mural. On a
+   plate the ratio is the ink ramp's own, and the photograph is finally allowed
+   to be a photograph.
+
+   The plate is `--card` (the dark card rung here, white on the splash) and its
+   type is the surface's own ramp: title and figure `--ink-1`, the order line
+   `--ink-2`, the condition and "You save" `--ink-3`. The saving is the card's
+   figure and is never maroon — it is an outcome, not a chosen thing.
+
+   REMOVED, WITH B (the order line) AND C (the poster): §7's veil
+   (`.bshot::after`, four stops of #120A0E), the frosted chip (its fill,
+   hairline and 14px blur), the white-over-photo ink and its text-shadows, the
+   glyph (`.bshot-glyph`), the fixed 220/260 heights, the absolute image with
+   its z-order stack, the switch itself (model/card.ts), and the splash's
+   re-point of `--ink-1` to white (campaign.css). */
+.bshots {
+  display: grid;
+  gap: var(--s-lg);
+}
+/* The credit leads by size and by nothing else — Sam, 12 Sep: "this is the big
+   one". No maroon fill: tokens.css spends a solid maroon on a chosen or acting
+   thing, and a benefit on a marketing page is neither. */
+.bshot {
+  overflow: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--hair);
+}
+/* ~58% of the card §12 drew (176 of 300, 152 of 260). The card is then as tall
+   as its plate needs: the plate's own type is ~150px, which 42% of 260 cannot
+   hold, and a thinner photograph is the thing this direction refuses. */
+.bshot-img {
+  flex: 0 0 auto;
+  display: block;
+  width: 100%;
+  height: 152px;
+  object-fit: cover;
+}
+.bshot.is-lead .bshot-img {
+  height: 176px;
+}
+.bshot-say {
+  flex: 1 1 auto;
+  padding: var(--s-xl) var(--s-xl) 0;
+}
+.bshot-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--ink-1);
+}
+.bshot-line {
+  margin: var(--s-xs) 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.003em;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+/* THE LEDGER ROW. The order line left, the saving right, on one hairline. The
+   row is held at the height of "You save" over the figure even when the figure
+   is a sentence, so the hairlines of a desktop row sit on one line. */
+.bshot-chip {
+  --ledger: calc(14px * 1.3 + 24px * 1.1);
+  box-sizing: content-box;
+  min-height: var(--ledger);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-lg);
+  margin: var(--s-lg) var(--s-xl) var(--s-xl);
+  padding: var(--s-lg) 0 0;
+  border-top: 1px solid var(--hair-lit);
+}
+.bshot-chip-a {
+  display: block;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+/* THE ITEM'S OWN PICTURE (§37), on the splash only: the pitch passes no
+   `thumb`. 40px, the receipt's 32 a step up, at the head of the order line —
+   under the ledger row's 44.6 floor, so the row keeps its height. The words
+   centre on it and wrap beside it, never under it; `min-width: auto` so the
+   column never narrows past its longest word. The ring is drawn over the
+   photograph's edge (an outline: an image element takes no ::after), so a
+   pale dish still has an edge against the white plate. */
+.bshot-chip.has-thumb .bshot-chip-a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  min-width: auto;
+}
+.bshot-thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--inner);
+  outline: 1px solid var(--hair);
+  outline-offset: -1px;
+}
+/* WHERE THE LINE BREAKS, if it must (a card under ~330px: the 1024 row, a
+   320 phone). Name over price, never "California Club ·" over "$12.00". The
+   space between them is a flex gap of `--sep` (the space-dot-space's own
+   10.4px), and the dot hangs in it from the price's left edge. A gap exists
+   only between two things on one line, so when the price drops to a second
+   line the dot hangs off the box's left edge and the clip takes it — and the
+   column's narrowest width is its longest word, with no room held for a dot. */
+.bshot-words {
+  --sep: 0.75em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sep);
+  overflow: hidden;
+}
+.bshot-tail {
+  position: relative;
+}
+.bshot-tail > .bshot-sep {
+  position: absolute;
+  right: 100%;
+  width: var(--sep);
+  text-align: center;
+}
+/* With the picture, the order line is ~52px wider and a sentence figure
+   ("Points toward a free one") beside it no longer fits on one line. So it is
+   set on a short measure, two even lines, the way "You save" sits over its
+   figure — and the order line keeps its one line rather than both halves
+   taking a share of the shortfall and both breaking. */
+.bshot-chip.has-thumb .bshot-chip-b:not(.is-save) {
+  max-width: 7em;
+  text-wrap: balance;
+}
+.bshot-chip-b {
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+}
+/* 14, not §12's 13: the label clears the reading floor, and at 375 it is
+   narrower than the figure under it, so the row keeps its width. */
+.bshot-save {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+.bshot-fig {
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ══ THE SECTION ON A PHONE ════════════════════════════════════════════════
+   NO PANEL AT ANY WIDTH. It was a `.panel.flush` at 14 Sep's request — "there
+   was a parent container similar to 'what you'd save'" — and the photo cards
+   answer that request better than a fill did: they are containers, four of
+   them, and putting a box around four boxes is the nested-card ban this build
+   carries over from the storefront (§7).
+
+   So `.pitch-get` is an open section on the field, taking the page's own
+   gutter from `.column` rather than a panel's inset: the heading, then the
+   cards. "Applies to" and the alcohol note left it on 23 Sep 2026 (§19) for
+   `.pitch-scope`, the first block of the close, below. */
+.pitch-get-head {
+  margin: 0 0 var(--s-lg);
+}
+
+/* ══ A SECTION HEADING INSIDE A PANEL ══════════════════════════════════════
+   `Panel`'s `label` prop renders `.t-caption` — 11px tracked caps — and four
+   of those down one page is an eyebrow on every block rather than a label on
+   a list. The savings panel renders its own `<h2 class="t-section">` instead
+   (Pitch.tsx); Panel.tsx is unchanged, so every other surface keeps the
+   caption it was written with.
+
+   It takes `.panel-label`'s own placement: the label interval below it, and
+   the panel's inset when the panel is `.flush` and its content runs to the
+   edge. */
+.panel-head {
+  margin: 0 0 var(--s-lg);
+}
+.panel.flush > .panel-head {
   padding: 0 var(--s-xl);
 }
-/* THE SCOPE AS A 3x2 GRID OF PLATES (Sam, 20 Sep 2026: the merchant pop-up's
-   treatment, here too). It was three AUTO columns with the glyph beside the
-   word, left-aligned — which read fine while the marks were bare, because
-   uneven columns are invisible when there is no box around them. Put each
-   mark on a plate and the unevenness is the first thing you see: measured at
-   375px the three came out 73, 91 and 71 wide. Equal columns, and the glyph
-   goes back above the word so the row matches the one Sam asked it to
-   match. */
-.column > .panel:has(.bcards) > .covers {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--s-sm);
-  row-gap: var(--s-sm);
-  padding: 0 var(--s-xl);
-  margin: 0;
+
+/* ══ THE SCOPE ROW GETS ITS PLATES BACK ════════════════════════════════════
+   Sam asked for the merchant pop-up's plated tiles here on 20 Sep 2026 — "I
+   liked the styling of the 'works on:' for the individual merchant pages, I
+   think for the main splash page we should use the same styling" — and §4.4
+   overrode him the next morning, stripping them back to a bare glyph row. He
+   named that row on 21 Sep as one of the three things he disliked, so the
+   override is DELETED rather than tuned: what stood here re-declared `.covers`
+   as a flex line and blanked `.cover`'s fill, radius and pad, and every one of
+   those declarations existed only to undo the base. The base plates draw it
+   now, which means this page and the pop-up are once again one rule.
+
+   What is left is placement plus the one thing the plate does not carry: the
+   label at the reading floor. `.cover span` is 11px at base because the pop-up
+   sets six words in a sheet; on the pitch these are six nouns a reader scans
+   at arm's length, and 14 is this build's floor for a word that is not a
+   tracked micro-label (§5). Measured at 375: three plates of 109px against a
+   70px widest label, so the raise costs no wrap. */
+/* THE SCOPE IS THE CLOSE'S FIRST BLOCK (§19). On a phone `.pitch-decide` is
+   `display:contents`, so this is a child of `.pitch-lit`'s column at the
+   room's 40px step. It still reads as the cards' qualifier, so it takes back
+   the 24 it stood at inside `.pitch-get`: the phone's intervals are the ones
+   it had before the block moved. */
+.pitch-scope {
+  margin-top: calc(var(--s-2xl) - var(--s-3xl));
+}
+.pitch-scope .covers-head {
+  margin: 0 0 var(--s-lg);
+}
+.pitch-scope .covers {
+  padding: 0;
+}
+.pitch-scope .cover span {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+}
+.pitch-scope-note {
+  margin: var(--s-lg) 0 0;
+}
+.pitch-get .panel-drill {
+  padding: 0;
+  margin: var(--s-lg) 0 0;
+}
+
+/* ══ THE LIGHT ROOM UNDER THE DARK HEADER (§14, 23 Sep 2026) ════════════════
+   Sam: "this entire page needs to go light mode instead of dark. We can have
+   a dark mode header, but the stuff beneath needs to be more legible." Two
+   grounds, one edge: the hero band stays the dark world, and `.pitch-lit`
+   (Pitch.tsx, `data-lit`) carries everything under it on light.css's ramp.
+   The tokens do the inverting; this block only paints the ground.
+
+   IT TAKES OVER THE COLUMN'S JOB. On a phone `.pitch-decide` is
+   `display:contents`, so this is now the flex parent of the four blocks the
+   column used to space, at the column's own section step.
+
+   EDGE TO EDGE. The margin runs out to the window and the padding pays the
+   same amount back, so the ground bleeds while the content box is exactly
+   the column's — the gutter at 375, and the same 432px at 500 as before.
+
+   `color` is re-declared because inheritance does not re-resolve: body sets
+   `--ink-2` in the dark world, and anything here that inherits rather than
+   naming an ink would arrive as the dark page's pale grey.
+
+   ON A PHONE THE EDGE SITS ONE STEP UNDER THE HERO CARD, not on it. The
+   band there ends at the glass card's own foot, and a light edge touching a
+   rounded card reads as a card set on a ledge; the column's step of dark
+   field under it is the header's foot. From 1024 the band has a hard foot of
+   its own and the edge moves up to meet it (the desktop block below). */
+.pitch-lit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3xl);
+  margin-inline: calc(50% - 50vw);
+  /* The foot is layout.css's clearance for the docked pair, moved inside the
+     ground so the dark field never shows under the footer (the rule below
+     takes it off the column). */
+  padding: var(--s-3xl) calc(50vw - 50%) 184px;
+  background: var(--page);
+  color: var(--ink-2);
+}
+/* (0,4,0) against layout.css's `.column:has(.sticky-cta.is-pair)` at
+   (0,3,0), so it does not rest on source order. */
+.column:has(> .pitch-lit):has(> .sticky-cta.is-pair) {
+  padding-bottom: 0;
+}
+/* A white plate on #F5F2F3 is a step of ~1.09:1, so the photo cards take the
+   ramp's seating shadow beside their hairline — the `.panel` construction. On
+   the pitch only: the splash draws the same card on its own ramp. */
+.pitch-lit .bshot {
+  box-shadow: var(--rest);
 }
 
 /* ══ RETAINED, NOT RENDERED ═══════════════════════════════════════════════
@@ -1541,9 +1883,10 @@ button.vcard:focus-visible {
   display: block;
   filter: saturate(0.96);
 }
-/* The Burg's hero is a brand card on white — 0.891 relative luminance against
-   0.220 for the next brightest. Seated, it sits among the photographs instead of
-   punching a hole through the rail. */
+/* A hero that is a brand card on white (The Burg's was, at 0.891) is seated,
+   so it sits among the photographs instead of punching a hole through the
+   rail. No hero needs this since 24 Sep (§51): The Burg's is now a bar photograph.
+   Kept for the next brand card. */
 .vcard .vshot img[data-bright="true"] {
   filter: saturate(0.9) brightness(0.5);
 }
@@ -1863,10 +2206,12 @@ button.vcard:focus-visible {
        shorter than the one it appeared to sit in, and landed 29px low
        (measured 91px above the wordmark, 55px below the marks). Repaying the
        same amount at the bottom centres it in the box the eye sees. */
-    /* 64 on the seam side, not 24: Sam, 14 Sep 2026 — "it encroaches too close
-       to the collage on the right". The copy also takes a measure of its own
-       below, so a wide panel never hands the headline the whole track. */
-    padding: var(--s-2xl) 64px calc(var(--s-2xl) + var(--clear, 0px)) 0;
+    /* A section step on the seam side, not 24: Sam, 14 Sep 2026 — "it
+       encroaches too close to the collage on the right". The copy also takes
+       a measure of its own below, so a wide panel never hands the headline
+       the whole track. (It was a literal 64; --s-3xl is 40 and is the value
+       the 21 Sep plan sets, on the scale.) */
+    padding: var(--s-2xl) var(--s-3xl) calc(var(--s-2xl) + var(--clear, 0px)) 0;
     background: none;
     border: 0;
     border-radius: 0;
@@ -2004,49 +2349,13 @@ button.vcard:focus-visible {
   );
 }
 
-/* ── the six marks in the hero panel ──────────────────────────────────────
-   DESKTOP ONLY. The phone hero is already a full screen and gains nothing from
-   six more objects; `display:none` rather than a media query around the JSX so
-   the markup is identical on both and nothing has to be kept in sync. */
-.hero-marks {
-  display: none;
-}
+/* THE SIX-COLLAR ROW IS GONE (21 Sep 2026). `.hero-marks` was a desktop-only
+   strip of the same six marks the rail in the same panel already shows, with
+   the names attached — the places stated twice, the second time worse. The
+   markup left Pitch.tsx and every rule that dressed it left with it; nothing
+   else in the build references the class. */
 
 @media (min-width: 1024px) {
-  .hero-marks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--s-md);
-    list-style: none;
-    margin: var(--s-2xl) 0 0;
-    padding: 0;
-    /* The row is evidence, not navigation — nothing here is a link, because a
-       logo that opens a venue page would send a reader OUT of the argument at
-       the exact moment it is being made. The names are one scroll down on the
-       ticker, which is the surface that does route. */
-  }
-  /* `display:flex` on the ROW ITEM, and it is load-bearing. base.css's
-     `.collar` sets a width and a height but never a `display` — everywhere else
-     in the build it sits inside a flex container, which blockifies it for free.
-     In a list item it stays `inline`, where width and height do not apply at
-     all: the 34px box was ignored and the logo rendered at its natural 537px,
-     which took the hero band to 3,705px tall. */
-  .hero-marks li {
-    display: flex;
-  }
-  .hero-marks .collar {
-    display: block;
-    width: 34px;
-    height: 34px;
-    border-radius: 11px;
-  }
-  .hero-marks .collar img {
-    border-radius: 8px;
-  }
-  .hero-marks .collar::after {
-    border-radius: 8px;
-  }
-
   /* The hero's own type, now that it has a column of its own rather than a
      card's inside measure. 42ch keeps the lead at a paragraph's width against
      a panel that is ~590px wide at 1440. */
@@ -2058,12 +2367,42 @@ button.vcard:focus-visible {
      in any measurement, because the box WAS at x=0. */
   .hero .logo {
     align-self: flex-start;
-    margin-bottom: var(--s-2xl);
+    margin-bottom: var(--s-xl);
   }
-  /* The copy's measure inside the panel: two lines of headline at 44px, a
+  /* ══ THE H1 FITS THE COLUMN, AND THE COLUMN FITS A LAPTOP ═══════════════
+     layout.css sets `.hero h1{font-size:44px}` up here — (0,1,1) — and
+     `.t-hero` is (0,1,0), so the ramp's step has to be named with the class
+     to win, and named HERE because pitch.css loads after layout.css.
+
+     It was a flat 56. Sam, 21 Sep, in the app's own browser pane (a hair
+     under 1440 wide, ~900 tall): "don't love the way this looks on desktop"
+     — the headline had gone to four lines with "go" alone on the last, the
+     rail's tiles were 235px tall under it, and the price and the button sat
+     below the fold, so the docked bar was already showing on load, over the
+     wordmark. The column was taller than the screen.
+
+     Fluid between 40 and 52 on the viewport, so the three-line break holds
+     from 1024 up instead of depending on whether the column lands a few
+     pixels either side of 18ch. With the tiles square (below), the logo's
+     gap a step shorter and the price block's rule tighter, the button's foot
+     sits at ~720px at 1440 — inside a 13-inch laptop's viewport. */
+  .hero h1.t-hero {
+    font-size: clamp(40px, 3.5vw, 52px);
+    line-height: 1.02;
+  }
+  /* The copy's measure inside the panel: three lines of headline, a
      paragraph's width for the lead, and the price block no wider than either. */
   .hero-band:not(.is-compact) .hero h1 {
-    max-width: 22ch;
+    max-width: 20ch;
+  }
+  .hero-band:not(.is-compact) .hero-buy {
+    margin-top: var(--s-lg);
+    padding-top: var(--s-lg);
+  }
+  /* 18px, not the phone's 17: the lead has a 56px headline over it here and a
+     column of its own to run in. */
+  .hero-band:not(.is-compact) .hero .hero-lead {
+    font-size: 18px;
   }
   .hero-band:not(.is-compact) .hero-buy {
     max-width: 560px;
@@ -2072,26 +2411,63 @@ button.vcard:focus-visible {
      (`display:block;width:100%`); in a 565px panel that is a slab, and the
      page then carried the same control at three widths. 300 keeps it a
      generous target and lets it read as a button beside the price. */
+  /* ══ TWO PILLS, SHARING THE COLUMN'S OWN MEASURE ════════════════════════
+     `.action` is a phone bar (`display:block;width:100%`); in this panel that
+     was a slab, so the filled button was sized to its words at a 300px floor
+     while the second control was a text link beside it.
+
+     From 21 Sep 2026 the second control is a pill too — the trial — and the
+     two split the row the way `.cg-acts` splits Coffeeholics', so their outer
+     edges land on the same measure the rail and the H1 above them use.
+
+     MEASURED, because the arithmetic is tight. The hero's content box is 549
+     at 1440 and 387 at 1024, and 300 + 260 + a gap fits neither: keeping the
+     300 floor would have left the ghost at 237 and, floored at 260, pushed the
+     pair past the column's edge into its padding. Two equal halves are 268 at
+     1440 — past the 260 the pill was speced at — and hold both labels on one
+     line down to 1024, where each half is 187.
+
+     THE BASIS IS 50%, NOT 0. With `box-sizing:border-box` a zero basis hands
+     each item its own padding on top of an equal share of what is left, and
+     these two wear different padding: measured at 279 against 257, which the
+     eye catches on two controls side by side. From 50% they shrink out of
+     equal boxes and stay equal. The ghost's inset is the tighter of the two
+     deliberately — its label is the longer one, and 1024 is where that bites.
+
+     The gap comes down to `--s-lg` with them: 24px was the interval between a
+     button and a bare text link, not between two pills. */
   .hero-band:not(.is-compact) .hero-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: auto;
-    min-width: 300px;
-    align-self: flex-start;
+    flex: 1 1 50%;
+    min-width: 0;
   }
   .hero-band:not(.is-compact) .hero-actions {
     flex-direction: row;
-    align-items: stretch;
+    flex-wrap: wrap;
+    align-items: center;
     gap: var(--s-lg);
-    align-self: flex-start;
+    align-self: stretch;
+  }
+  /* The pair fills the row; the deck's door takes a line of its own under
+     it, at text size, so it is reachable without competing. With the row
+     allowed to wrap, two 50% bases plus the gap would wrap the pair too, so
+     each base leaves half the gap: they still grow to fill the row. */
+  .hero-band:not(.is-compact) .hero-actions > .hero-cta,
+  .hero-band:not(.is-compact) .hero-actions > .hero-try {
+    flex-basis: calc(50% - var(--s-lg) / 2);
   }
   .hero-band:not(.is-compact) .hero-how {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    flex: 0 0 100%;
+    margin-top: calc(var(--s-xs) - var(--s-lg));
+  }
+  /* The pill is the base rule now; the row only sets its share of it. */
+  .hero-band:not(.is-compact) .hero-try {
     width: auto;
-    padding-inline: var(--s-2xl);
+    flex: 1 1 50%;
+    min-width: 0;
   }
   .hero-buy {
     border-top-color: var(--hair-lit);
@@ -2175,7 +2551,7 @@ button.vcard:focus-visible {
     color: var(--ink-1);
   }
   .top-cta-price span {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--ink-3);
   }
@@ -2214,8 +2590,12 @@ button.vcard:focus-visible {
    READ-ONLY. Deliberately not the `.plan-opt` control from /reserve: these are
    facts on a page that does not take money, and borrowing the selected-state
    maroon would make one of them look chosen. Same figures, no affordance. */
-.pitch-decide,
-.pitch-close {
+/* `.pitch-close` was the second of these and is gone: the guarantee and the
+   foot moved into `.pitch-decide` on 21 Sep 2026 so the figure and the
+   promise could stand side by side at 1024 (see "4 · the close" below). On a
+   phone `display:contents` meant the split never rendered anything either
+   way, so the DOM order, the gaps and the paint are unchanged there. */
+.pitch-decide {
   display: contents;
 }
 
@@ -2365,7 +2745,11 @@ button.vcard:focus-visible {
   }
 
   /* ── headings ─────────────────────────────────────────────────────────── */
-  .column > .panel:has(.bcards) > .panel-label,
+  /* `.places-label` is still a caption in the markup and is still promoted
+     here; the pitch's two panels carry a real `.t-section` heading now
+     (`.panel-head`), so all they need out here is the section's inset and
+     interval. Same size at both widths — 22px IS the heading step, and a
+     second value for it at 1024 was the drift this pass is undoing. */
   .places > .places-label {
     margin: 0 0 var(--s-2xl);
     padding: 0;
@@ -2376,172 +2760,111 @@ button.vcard:focus-visible {
     text-transform: none;
     color: var(--ink-1);
   }
-  .pitch-decide .panel > .panel-label {
+  .pitch-get-head {
+    margin: 0 0 var(--s-2xl);
+  }
+  .pitch-decide .panel > .panel-head {
     margin: 0 0 var(--s-xl);
     padding: 0;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    text-transform: none;
-    color: var(--ink-1);
+  }
+
+  /* ── the light room ──────────────────────────────────────────────────── */
+  /* THE EDGE IS THE BAND'S FOOT. The band ends hard here — the panel's fill
+     and the collage stop on one line — so the light ground climbs over the
+     column's gap to meet it, and pays the gap back inside as its own top
+     padding. One edge, straight, nothing on it. Full width: the column is
+     the window up here, and `.column > :where(…)` would otherwise cap this
+     at 720. The docked pair is `display:none` from 1024, so no clearance. */
+  .column > .pitch-lit {
+    width: 100%;
+    max-width: none;
+    margin: calc(-1 * var(--s-4xl)) 0 0;
+    padding: var(--s-4xl) 0 0;
+    gap: var(--s-4xl);
   }
 
   /* ── 1 · the statement ────────────────────────────────────────────────── */
-  /* The panel un-panels: no fill, no edge, no inset. What is left is a flex
-     row that wraps — heading and cards take full lines, then the scope strip
-     runs as one line beneath them. */
-  .column > .panel:has(.bcards) {
+  /* THE SECTION TAKES THE GRID. It is four photographs, not a paragraph, so
+     it takes the page grid rather than a reading measure. (It sat directly in
+     the column until §14 and had to out-weigh `.column > :where(…)`'s 720 cap;
+     inside `.pitch-lit` the cap no longer reaches it.)
+
+     THE CREDIT ON ITS OWN LINE, THE THREE UNDER IT. Sam, 12 Sep: "this is the
+     big one", and at this width leading by size means a full-width card over a
+     row of three, not a 2×1 share of a grid. The three keep §12's split — the
+     photograph at 2:1 over the plate, so the crop scales with the track at
+     every window between 1024 and 1280 and the plate takes what its type
+     needs; the grid's stretch puts their hairlines on one line. */
+  .pitch-lit > .pitch-get {
     width: 100%;
     max-width: var(--grid);
     margin-inline: auto;
-    background: none;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    column-gap: var(--s-2xl);
-    row-gap: 0;
   }
-  .column > .panel:has(.bcards) > .panel-label {
-    flex: 1 0 100%;
+  .pitch-get .bshots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-2xl);
   }
-  .column > .panel:has(.bcards) > .bcards {
-    flex: 1 0 100%;
-    /* Four, since the offers card joined (14 Sep 2026). */
+  .pitch-get .bshot-img {
+    height: auto;
+    aspect-ratio: 2 / 1;
+  }
+  .pitch-get .bshot-say {
+    padding: var(--s-2xl) var(--s-2xl) 0;
+  }
+  .pitch-get .bshot-chip {
+    margin: var(--s-xl) var(--s-2xl) var(--s-2xl);
+    padding-top: var(--s-xl);
+  }
+  /* THE CREDIT SIDEWAYS. At 1,232px wide "photo above" is a 5:1 strip, so the
+     lead turns the split on its side: the photograph left at the same 58%, the
+     plate right with its copy set to the foot. */
+  .pitch-get .bshot.is-lead {
+    grid-column: 1 / -1;
+    height: 380px;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--s-lg);
-    padding: 0 0 var(--s-2xl);
-    margin: 0 0 var(--s-2xl);
-    border-bottom: 1px solid var(--hair);
+    grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+    grid-template-rows: 1fr auto auto;
+    grid-template-areas:
+      "photo ."
+      "photo say"
+      "photo chip";
   }
-  /* SCOPED TO THE PITCH, every one of them. The first cut wrote these as
-     bare `.bcards` descendants, which is global at 1024 — and /reserve renders
-     the same BenefitCards inside its reading column, where the three arrived
-     as 224px statement cards stacked in a 670px panel, tile at the top and
-     figure at the foot. Seen in Sam's screenshot of the checkout. */
-  .column > .panel:has(.bcards) .bcard-pair {
-    display: contents;
+  .pitch-get .bshot.is-lead .bshot-img {
+    grid-area: photo;
+    height: 100%;
+    aspect-ratio: auto;
   }
-  /* Tall cards: the tile at the top, the figure and its condition at the foot.
-     Display size on the figure, because these three ARE the offer — the hero
-     says "$5 back", and this is where that figure is stated as a benefit. */
-  /* Sam, 15 Sep 2026: "sizing and spacing for text here seems off on
-     desktop." It was: the lead's 30px figure against 24px on the other three,
-     and space-between anchoring each text block to the card's foot, so a
-     two-line condition lifted its title 22px above its neighbours'. One size
-     for the four figures, one gap, and the text hangs from the tile — titles
-     on one line across the row, the conditions ragged at the foot where a
-     ragged edge belongs. */
-  .column > .panel:has(.bcards) .bcard,
-  .column > .panel:has(.bcards) .bcard.is-lead {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: var(--s-xl);
-    min-height: 0;
-    padding: var(--s-2xl) var(--s-2xl) var(--s-2xl);
-    /* The card dress lives here now that the base is a divided list. */
-    background: var(--card);
-    border: 1px solid var(--hair);
-    border-radius: var(--r-panel);
-    box-shadow: var(--rest);
+  .pitch-get .bshot.is-lead .bshot-say {
+    grid-area: say;
+    padding: var(--s-3xl) var(--s-3xl) 0;
   }
-  .column > .panel:has(.bcards) .bcard-tile,
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-tile {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--r-card);
+  .pitch-get .bshot.is-lead .bshot-chip {
+    grid-area: chip;
+    --ledger: calc(14px * 1.3 + 32px * 1.1);
+    margin: var(--s-2xl) var(--s-3xl) var(--s-3xl);
   }
-  .column > .panel:has(.bcards) .bcard-tile svg,
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-tile svg {
-    width: 26px;
-    height: 26px;
+  /* The one title size on this page that is off tokens.css's enumerated ramp,
+     and it is §7's own number: the lead steps up while the other three hold at
+     20, which is how the credit leads without a second device. */
+  .pitch-get .bshot.is-lead .bshot-title {
+    font-size: 28px;
+    letter-spacing: -0.02em;
   }
-  .column > .panel:has(.bcards) .bcard-text b {
-    font-size: 24px;
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-  }
-  /* The credit no longer leads by size: it leads by position (first) and by
-     the hero, and a bigger figure in one card of four broke the row's line. */
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text b {
-    font-size: 24px;
-    letter-spacing: -0.025em;
-  }
-  .column > .panel:has(.bcards) .bcard-text span,
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text span {
-    margin-top: var(--s-md);
+  .pitch-get .bshot.is-lead .bshot-line {
     font-size: 15px;
-    line-height: 1.45;
-    color: var(--ink-2);
   }
-  /* The phone's `flex:1` on the lead's text box survives into the column and
-     grows it, so "$5 credit" sat ~30px above "15% off" and the three
-     conditions shared no baseline. Sized to content, all three land on the
-     card's foot. */
-  .column > .panel:has(.bcards) .bcard.is-lead .bcard-text {
-    flex: 0 0 auto;
+  .pitch-get .bshot.is-lead .bshot-fig {
+    font-size: 32px;
   }
 
-  /* The scope strip: the caption, six glyph-and-word pairs, and the alcohol
-     sentence at the far end — one line under the cards, on the field. The
-     caption's rule goes: the strip is not boxing anything now. */
-  .column > .panel:has(.bcards) > .covers-head {
-    flex: 0 0 auto;
-    margin: 0;
-    color: var(--ink-3);
-  }
-  .column > .panel:has(.bcards) > .covers-head::after {
-    content: none;
-  }
-  /* One row of six at this width, each plate taking an equal share — the same
-     object the phone stacks 3x2, not a different one. */
-  .column > .panel:has(.bcards) > .covers {
-    flex: 1 1 auto;
-    display: flex;
-    flex-wrap: nowrap;
-    gap: var(--s-sm);
-    padding: 0;
-    margin: 0;
-  }
-  .column > .panel:has(.bcards) .cover {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  /* 13px: these are words a reader scans, not tracked micro-labels. */
-  .column > .panel:has(.bcards) .cover span {
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.005em;
-    color: var(--ink-2);
-  }
-  /* Takes the rest of the line and sets right; below ~1100 it drops to its own
-     line and stays right, which still reads as the strip's footnote. */
-  .column > .panel:has(.bcards) > .panel-note {
-    flex: 1 1 260px;
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    text-align: right;
-  }
-  .column > .panel:has(.bcards) > .panel-drill {
-    flex: 1 0 100%;
-    padding: 0;
-    margin-top: var(--s-lg);
-  }
   /* A reading measure for the answer; unbounded, the summary's chevron sat
      1,200px from its own words. */
-  .column > .panel:has(.bcards) > .panel-drill .drill {
+  .pitch-get .panel-drill .drill {
     max-width: 460px;
     margin: 0;
   }
   /* The chevron sits by the words, not at the measure's far end. */
-  .column > .panel:has(.bcards) > .panel-drill .drill > summary {
+  .pitch-get .panel-drill .drill > summary {
     justify-content: flex-start;
     gap: var(--s-md);
   }
@@ -2569,23 +2892,63 @@ button.vcard:focus-visible {
     padding: 0;
   }
 
-  /* ── 3 · the decision ─────────────────────────────────────────────────── */
-  /* `stretch`, and the action pinned to the foot: the two panels are one
-     movement, so they share a top edge AND a bottom one, and the button that
-     closes the decision sits on the shared baseline whatever the left column's
-     drill does above it. */
-  .column > .pitch-decide {
+  /* ── 3 + 4 · the decision AND the close, one movement ─────────────────── */
+  /* ══ ONE COMPOSITION, TWO COLUMNS (§19, 23 Sep 2026) ═════════════════════
+     Sam: "use /impeccable redesign for this desktop section." It was three
+     objects at three weights: six plates across the left of the grid with a
+     bare sentence under them, the savings panel below, and the guarantee
+     floating in the right column over 300px of empty ground.
+
+     Now the control holds the left column, and the right column states what
+     it reaches over the promise that backs it: the scope at the top, the
+     guarantee set to the foot so the two columns end on one line. The rows
+     are `auto 1fr`, so whatever height the panel has, the space between the
+     scope and the guarantee takes it; the panel stretches only if the right
+     column is ever the taller one, so the two feet stay level either way.
+     No box around the scope or the guarantee: the savings panel is the one
+     control here, and a second panel beside it would be a panel on a page
+     of panels again. */
+  .pitch-lit > .pitch-decide {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    gap: var(--s-2xl);
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "save scope"
+      "save guarantee";
+    gap: 32px 48px;
+    align-items: start;
     width: 100%;
-    max-width: var(--grid);
-    margin-inline: auto;
+    max-width: none;
+    margin-inline: 0;
+    /* NO BAND ANY MORE (§14). The close was a --subtle band, field / band,
+       and on the light ramp --subtle is white: the white savings panel inside
+       a white band was a panel on a panel with only a hairline between them.
+       The fill is dropped rather than moved to --inner, so the page below the
+       hero is one ground with one edge and ends on it. The band's own top
+       inset went with its fill — without a seam to pad away from it only
+       doubled the room's 64px step. */
+    padding: 0 calc((100% - var(--grid)) / 2) 96px;
   }
-  .column > .pitch-decide > * {
+  .pitch-lit > .pitch-decide > * {
     max-width: none;
     margin: 0;
+  }
+  .pitch-decide > .pitch-save {
+    grid-area: save;
+    align-self: stretch;
+  }
+  .pitch-decide > .pitch-scope {
+    grid-area: scope;
+  }
+  .pitch-decide > .pitch-guarantee {
+    grid-area: guarantee;
+    align-self: end;
+  }
+  /* Three across in the right column, the §18 plates as they are. (0,2,0)
+     against the base desktop `.covers` six-across, which /in still uses. */
+  .pitch-scope .covers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-lg);
   }
   .pitch-decide .panel {
     display: flex;
@@ -2643,86 +3006,38 @@ button.vcard:focus-visible {
   .pitch-decide .plan-card + .plan-card {
     border-top: 1px solid var(--hair-lit);
   }
-  /* Four bands in a row, figure over its unit, instead of a 2x2 of 290px bars
-     with "$50" and "a month" at opposite ends. (0,2,0) so how.css's `.band`,
-     which loads later, cannot take these back. */
-  .spendq .bands {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--s-md);
-  }
+  /* The segmented track at this width: taller cells, the figure a step up.
+     The 2×2 of separate plates is gone at every width now — see the base
+     block. (0,2,0) so how.css's `.band`, which loads later, cannot take
+     these back; the chosen cell takes (0,3,0) for the same reason.) */
   .spendq .band {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 2px;
-    min-height: 64px;
-    padding: var(--s-md) var(--s-lg);
+    min-height: 56px;
   }
   .spendq .band b {
     font-size: 20px;
     letter-spacing: -0.02em;
   }
 
-  /* ── 4 · the close ────────────────────────────────────────────────────── */
-  /* Not a box. The strongest sentence on the page, set on the field at display
-     size under a rule, with the one remaining door beside it at its own width.
-     Two equal panels here read as two more sections; this reads as an ending. */
-  .column > .pitch-close {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--s-2xl);
-    align-items: center;
-    /* THE SECOND GROUND, AND THE PAGE ENDS ON IT. field / band / field / band:
-       the close takes the same --subtle the evidence band has, full bleed, and
-       runs to the window's foot — so the page finishes on a surface rather
-       than trailing off 46px under a contact line. The hairline it had is
-       gone: the ground change is the seam. */
-    width: 100%;
-    max-width: none;
-    margin-inline: 0;
-    background: var(--subtle);
-    padding: 64px calc((100% - var(--grid)) / 2) 96px;
-  }
-  .column > .pitch-close > * {
-    max-width: none;
-    margin: 0;
-  }
-  .pitch-close .closing {
-    background: none;
-    border: 0;
-    box-shadow: none;
+  /* The close, in the right-hand track. No box, no second band: the hairline
+     the phone draws above it is what separates it from the figure there, and
+     up here the column does that job, so the rule comes off. The sentence
+     takes the headline's own step — it is the last thing said. */
+  .pitch-decide .pitch-guarantee {
+    border-top: 0;
     padding: 0;
   }
-  .pitch-close .guarantee {
+  .pitch-decide .pitch-guarantee .guarantee {
     font-size: 32px;
-    font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1.12;
-    max-width: 24ch;
+    max-width: 20ch;
   }
-  .pitch-close .guarantee-contact {
+  .pitch-decide .pitch-guarantee .guarantee-tile svg {
+    width: 32px;
+    height: 32px;
+  }
+  .pitch-guarantee .guarantee-contact {
     margin-top: var(--s-lg);
-  }
-  .pitch-close .applink {
-    width: auto;
-    flex: 0 0 auto;
-    padding: var(--s-xl) var(--s-2xl);
-    gap: var(--s-lg);
-    border-radius: var(--r-panel);
-  }
-  .pitch-close .applink b {
-    flex: 0 0 auto;
-    font-size: 17px;
-    letter-spacing: -0.015em;
-  }
-  .pitch-close .applink-glyphs svg {
-    width: 20px;
-    height: 20px;
-  }
-  @media (hover: hover) {
-    .pitch-close .applink:hover {
-      background: var(--inner);
-    }
   }
 }
 
@@ -2760,16 +3075,16 @@ button.vcard:focus-visible {
   }
 }
 
-/* The legal footer closes the last movement: full width under the guarantee
-   and the door, left on the copy's axis. */
+/* The legal footer closes the last movement: full width under the figure and
+   the guarantee, left on the copy's axis. */
 @media (min-width: 1024px) {
-  .pitch-close > .site-foot {
+  .pitch-decide > .site-foot {
     grid-column: 1 / -1;
-    margin-top: var(--s-xl);
+    margin-top: var(--s-2xl);
     padding-top: var(--s-lg);
     border-top: 1px solid var(--hair);
   }
-  .pitch-close > .site-foot nav {
+  .pitch-decide > .site-foot nav {
     justify-content: flex-start;
   }
 }
@@ -2863,12 +3178,138 @@ button.vcard:focus-visible {
   }
 }
 
-/* "How it works" under the savings figure: one interval below the drill,
-   full width inside the panel's own inset. */
+/* ══ THE HERO'S SECOND CONTROL: THE HOUSE GHOST PILL, AT EVERY WIDTH ═══════
+   Sam, 23 Sep 2026: "I liked the larger try it once free button for the page
+   header." It was a 16px text link on the phone (three stacked pills was the
+   objection, when How it works was still a pill); with the deck's door now a
+   footnote link under the pair, the trial takes the docked bar's `.sticky-alt`
+   shape: a step of ground, a lit hairline, the card radius, the filled
+   button's height. A <button>, because it opens a dialog. */
+.hero-try {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid var(--hair-lit);
+  border-radius: var(--r-card);
+  background: var(--inner);
+  box-shadow: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
+}
+.hero-try:active {
+  transform: scale(0.98);
+  background: var(--press);
+  transition-duration: 100ms;
+}
+.hero-try:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
+
+/* ══ THE SAVINGS PANEL'S DOOR TO THE DECK IS A PILL (Sam, 23 Sep 2026: "how
+   it works, on this section, should be an actual button"): the hero's trial
+   pill, as a link, at the panel's full width. */
 .save-how {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin: var(--s-lg) 0 0;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: var(--s-md) var(--s-2xl);
+  border: 1px solid var(--hair-lit);
+  border-radius: var(--r-card);
+  background: var(--inner);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease);
+}
+.save-how:active {
+  transform: scale(0.98);
+  background: var(--press);
+  transition-duration: 100ms;
+}
+.save-how:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 2px;
+}
+
+/* ══ THE TEXT LINK: THE DECK'S DOOR IN THE HERO ═══════════════════════════
+   16px, a chevron, and a 44px target met by the line box rather than by a
+   slab of fill. */
+.hero-how {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--s-xs);
+  min-height: 44px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink-1);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-how svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--ink-3);
+  transition: transform 150ms var(--ease);
+}
+@media (hover: hover) {
+  .hero-how:hover svg {
+    transform: translateX(2px);
+  }
+}
+.hero-how:focus-visible {
+  outline: 2px solid var(--ink-1);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+/* The deck's door is the quiet third thing in the hero (Sam, 23 Sep 2026:
+   "bring that back, it just wouldn't be one of the focuses"): the ink ramp's
+   third step rather than the first, so the try link above it stays the
+   second action and this reads as a footnote to the pair. */
+.hero-how {
+  color: var(--ink-3);
+}
+/* Inside the savings panel it sits under the drill, at the panel's own
+   interval; the drill above it already carries a divider's worth of space. */
+.save-how {
+  margin: var(--s-md) 0 0;
+}
+
+/* ══ THE DOCKED PAIR'S SECOND CONTROL IS A BUTTON NOW ═══════════════════════
+   It was a <Link to="/how">; it opens the trial modal. layout.css owns the
+   whole look of `.sticky-alt` and is not touched — this is only the four
+   things a <button> does not inherit from it. `font-family` rather than
+   `font:inherit`, because the shorthand would reset the 15px/700 that rule
+   sets and this would then be a second place the bar's metrics are written. */
+.sticky-cta .sticky-alt {
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
 }
 
 /* The wordmark with the PLUS chip beside it, on the hero. */
@@ -2885,40 +3326,85 @@ button.vcard:focus-visible {
   margin-top: 2px;
 }
 
-/* ══ SIGN IN / SIGN OUT, AT THE FOOT OF THE HERO PANEL ═══════════════════════
-   The last thing in `.hero`, under the venue marks on a desktop and under the
-   two buttons on a phone (`.hero-marks` is display:none there).
+/* ══ SIGN IN / SIGN OUT, IN THE ANNOUNCEMENT BAR ═════════════════════════════
+   It was the last thing in `.hero`: a full-width ghost button under a hairline,
+   which made the first screenful three stacked pills where the rule is one
+   filled action per view. It is chrome, not an offer — it says who you are and
+   sells nothing — so it now lives where chrome lives, at the right edge of the
+   bar that is on screen at every scroll position.
 
-   A hairline above it, because it is a DIFFERENT KIND OF THING from what it
-   follows: everything above sells, this one only says who you are. Without
-   the rule it reads as a third action in the same stack. The CTA's shape and
-   full width, so it is plainly the same class of control — ghost, never
-   maroon, so it cannot compete with the button that sells. */
-.signin-bar {
-  margin: var(--s-2xl) 0 0;
-  padding: var(--s-xl) 0 0;
-  border-top: 1px solid var(--hair);
+   12px on the bar's own ink, which is the sentence beside it: this is the one
+   place the build sets a control under 14px, and it is legitimate for the same
+   reason the sentence is — it is page chrome at the page's own chrome size,
+   not copy. The target is NOT 12px: `::after` opens the hit box past the
+   bar's 34px, the same idiom `.ticker-all` uses for its own short control. */
+.announce-row {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  align-items: center;
+  gap: var(--s-md);
+  padding-inline: var(--gutter);
+}
+/* The sentence keeps its own metrics and gives up only the centring job — it
+   centres in what is left beside the control instead of in the window. */
+.announce-row > .announce-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding-inline: 0;
+}
+.announce-row > .signin-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 .signin-go {
-  width: 100%;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--announce-h);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--on-maroon);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--hair-lit);
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: text-decoration-color 150ms var(--ease);
+}
+/* The 44 floor, met past the bar's own height rather than by padding — the
+   bar is 34px and carries a sentence, and growing it for one control would
+   cost every reader the same strip of page. */
+.signin-go::after {
+  content: "";
+  position: absolute;
+  inset: -7px -12px;
+}
+@media (hover: hover) {
+  .signin-go:hover {
+    text-decoration-color: var(--on-maroon);
+  }
+}
+.signin-go:focus-visible {
+  outline: 2px solid var(--on-maroon);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
 }
 
 @media (min-width: 1024px) {
-  /* Match `.hero-actions`, which goes auto-width and left-aligned here. A
-     panel-wide sign-out button beside two content-width buttons was the
-     awkwardness: the caption looked off-centre because it was centred on the
-     panel while the button it belongs to was not. Now both shrink together
-     and the caption centres on the button. */
-  .hero-band:not(.is-compact) .signin-bar {
-    align-items: flex-start;
-    text-align: left;
-  }
-  .hero-band:not(.is-compact) .signin-go {
-    width: auto;
-    padding-inline: var(--s-2xl);
+  /* The bar's content tracks the page grid, so the control lands on the same
+     right edge as the header's button and the blocks below it. */
+  .announce-row {
+    max-width: min(1280px, calc(100% - 96px));
+    margin-inline: auto;
+    padding-inline: 0;
   }
 }
 
@@ -2978,10 +3464,758 @@ button.vcard:focus-visible {
   width: 132px;
   flex: 0 0 auto;
 }
+/* THREE TILES AT 1440, not four and a sliver. The panel's content is ~549px
+   wide here and 132px tiles fit four of them, which turns the evidence into a
+   strip of thumbnails — three at 176 are three places a reader can name. The
+   rule sits HERE, after the 132 above and not in the desktop block further
+   up, because both are (0,2,0) and an equal-weight rule earlier in the file
+   loses on source order — which is exactly what happened on the first pass. */
+@media (min-width: 1024px) {
+  /* 160 square, not 176 at 3:4: the portrait tile was 235px tall, the
+     tallest thing in a column that has to fit a laptop's viewport (see the
+     H1 rule), and 160 is the width at which three whole tiles sit in the
+     column at 1280 as well as at 1440 (3×160 + 2×12 = 504 in a 505 column).
+     The ratio lives on the `.vcard` button inside the `li`, which is where
+     the base 3:4 is declared — a ratio on the `li` measures nothing. 160
+     square still holds the collar, the name and the category. */
+  .hero-rail .ticker-tile {
+    width: 160px;
+  }
+  .hero-rail .ticker-tile .vcard {
+    aspect-ratio: 1;
+  }
+  .hero-rail {
+    margin-top: var(--s-lg);
+  }
+}
 /* "View all places" opens the grid this mount refuses; it would do nothing
    here, and the section lower down still offers it. */
 .hero-rail .ticker-all {
   display: none;
 }
 
+/* ══ THE HERO'S PRICE, AT DISPLAY SIZE ══════════════════════════════════════
+   layout.css sets `.hero-price b{font-size:32px}` and `.hero-price span
+   {font-size:15px}` — both (0,1,1), both outranking `.t-figure` at (0,1,0),
+   so the token has to be named with the element or it silently does nothing.
+   It went to the token's 48 on 21 Sep and Sam, reading it on a phone: "only
+   issue is how large this looks which is a bit weird" — a price outsizing
+   the 36px headline above it. Back to 32 on a phone, 44 from 1024 under the
+   56px H1: the figure's face and tabular numerals, at a size under the
+   headline's. The label drops to the raised compact floor so it reads as the
+   figure's unit and not as a second line. */
+.hero-price b.t-figure {
+  font-size: 32px;
+}
+.hero-price span {
+  font-size: 14px;
+}
+@media (min-width: 1024px) {
+  .hero-price b.t-figure {
+    font-size: 44px;
+  }
+}
+
+/* ══ THE GUARANTEE, OUT OF ITS BOX ══════════════════════════════════════════
+   The page's strongest sentence was one more --card rectangle at the end of a
+   page of --card rectangles. Open on the field under a hairline: the shield
+   at 28px with no tile under it, the promise at the section step, the address
+   at the reading floor. `.closing` stays on the element, so layout.css's
+   `.closing:has(.guarantee-tile)` still flexes it into shield-and-body and
+   /reserve keeps drawing the same promise the same way. */
+.panel.pitch-guarantee {
+  padding: var(--s-xl) 0 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--hair);
+  border-radius: 0;
+  box-shadow: none;
+  align-items: flex-start;
+  gap: var(--s-lg);
+}
+.pitch-guarantee .guarantee-tile {
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink-2);
+}
+.pitch-guarantee .guarantee-tile svg {
+  width: 28px;
+  height: 28px;
+}
+.pitch-guarantee .guarantee {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  max-width: 22ch;
+}
+
 /* What the deposit earns back, under the price on the hero. */
+
+/* ══ THE PLATES ARE WHITE, LIKE THE CARDS ══════════════════════════════════
+   Sam, 23 Sep 2026, on the light pitch: "applies to cards should be the same
+   white background as the other containers." On the dark page --inner was a
+   step up from the ground; on the light ramp it is a step DOWN from the
+   photo cards' white, so the six plates read as a different, greyer kind of
+   object beside them. Same plate as the cards now: --card with the light
+   ramp's hairline and rest shadow. Scoped to the lit region, so the pop-up's
+   and the splash's plates keep their own. */
+.pitch-lit .cover {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  box-shadow: var(--rest);
+}
+
+/* ============================================================================
+   THE CALENDAR — shell/MonthCalendar.tsx (docs/POLISH-2026-09-21.md §21).
+
+   Sam, 23 Sep 2026, on the canvas's calendar direction: "wondering if you
+   could implement that on the main LP", with "offerings from other
+   locations". The headline shown happening: four weeks of real orders at four
+   places, each day's order the venue's own mark with the week's credit on
+   it, and a foot that counts the membership against what came back. Desktop
+   only (Sam: "I think this would be only on desktop"); below 1024 it is not
+   mounted, so nothing here needs a phone rule.
+
+   A WHITE CARD CARRYING `data-lit`, so its ink is the light ramp over the
+   dark mosaic. The plate §12 A chose for type near a photograph; the
+   Coffeeholics receipt is the same object on its own page (campaign.css,
+   `.ml-*`), and the two keep one construction: the figure is ink, not green;
+   the crossing is told by weight of ink; the only colour is the credit's
+   chip, maroon, the page's one colour for a thing that is TapIn's. Every size
+   is on the ramp and nothing is under 14 but the chip.
+   ============================================================================ */
+.mc {
+  box-sizing: border-box;
+  padding: var(--s-2xl);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--float);
+  color: var(--ink-1);
+}
+.mc-head {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--ink-1);
+}
+.mc-sub {
+  margin: var(--s-xs) 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+/* Week labels down the left, Monday first across the top, square days. */
+.mc-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  gap: var(--s-md);
+  align-items: center;
+  margin: var(--s-xl) 0 0;
+}
+.mc-dow {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-4);
+}
+.mc-week {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+.mc-day {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--inner);
+  overflow: hidden;
+}
+/* The order is one element — the venue's mark and the chip — so it enters as
+   one. It carries the day's radius, so its corners stay round while it
+   scales. */
+.mc-order {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.mc-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* LOGOS, NOT DISHES (Sam, 23 Sep 2026: "maybe it should be the merchant
+   logos"). The order is the site's own collar (base.css) grown to fill the
+   day: the venue's brandColor in the 3px band, the mark rounded inside it at
+   the day's radius less that band, the seat hairline by the mark's measured
+   field. The collar's outer ring is dropped — the day's own --inner edge
+   already seats it, and the day clips it anyway. (0,2,0) over `.collar`. */
+.mc-order.collar {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: inherit;
+  box-shadow: none;
+}
+.mc-order.collar img,
+.mc-order.collar::after {
+  border-radius: 10px;
+}
+/* A 2px brand band in the month, not the collar's 3 (Sam: "slightly too busy"):
+   the places still read by colour, the rings stop dominating the grid. */
+.mc-order.collar {
+  padding: 2px;
+}
+/* A DISH, NOT A MARK (§36): a month at one place pictures each order by its
+   item's own photograph, filling the day at the day's radius. No brand
+   colour; a 1px hairline drawn over the photograph's edge, so a pale dish
+   still has one against the day. The chip sits 3px in, clear of it. */
+.mc-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  pointer-events: none;
+}
+.mc-chip {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 16px;
+  white-space: nowrap;
+  color: var(--on-maroon);
+  background: var(--maroon);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+/* THE FOOT, AS LINE ITEMS (Sam, 24 Sep 2026: "the numbers can be the same
+   size"; "give the 'you saved' its own parent container with a gray light
+   background"; "you saved should show up underneath you spent, and it would
+   still look like line items"). Two rows on one right edge, figures at one
+   size: "You spent" in `--loss`, then "You saved" in its own `--inner` tile
+   in `--gain` (red while the month is still owed), the membership named
+   under its label. No points line (Sam: "I don't think we need to mention
+   the … points"). Mirrored by the phone month (.mw-foot). */
+.mc-foot {
+  display: grid;
+  gap: var(--s-sm);
+  margin: var(--s-xl) 0 0;
+  padding-top: var(--s-md);
+  border-top: 1px solid var(--hair);
+}
+.mc-row,
+.mc-net {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--s-lg);
+  margin: 0;
+  padding: var(--s-sm) var(--s-lg);
+}
+.mc-net {
+  padding-block: var(--s-md);
+  border-radius: var(--r-card);
+  background: var(--inner);
+}
+.mc-ahead {
+  grid-column: 1;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.mc-fig,
+.mc-net-fig {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.mc-foot .mc-spent {
+  color: var(--loss);
+}
+/* The spent row has no second line, so its figure sits on the label's row. */
+.mc-row .mc-fig {
+  grid-row: 1;
+}
+.mc-after {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.mc-after {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* ── ON A PHONE, UNDER THE HEADER: THE MONTH BY WEEK (23 Sep 2026) ────────
+   shell/MonthWeeks.tsx. Four rows — the week, its orders as 28px pictures,
+   what it brought back — then the membership and what you saved. The card is
+   the desktop calendar's plate a step smaller in inset. */
+.mc-phone {
+  margin: var(--s-2xl) 0 0;
+}
+.mw {
+  box-sizing: border-box;
+  padding: var(--s-xl);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--float);
+  color: var(--ink-1);
+}
+.mw-head {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.mw-weeks {
+  list-style: none;
+  margin: var(--s-lg) 0 0;
+  padding: 0;
+}
+.mw-week {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-lg);
+  min-height: 44px;
+  padding: var(--s-sm) 0;
+  border-top: 1px solid var(--hair);
+}
+.mw-week:first-child {
+  border-top: 0;
+}
+.mw-label {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink-3);
+}
+.mw-tiles {
+  display: flex;
+  align-items: center;
+  gap: var(--s-xs);
+  min-width: 0;
+}
+/* 28px, giving a little when a week across places holds six (§40): at 375
+   six need 188 of the row's 184, so each yields under a pixel. */
+.mw-tile {
+  flex: 0 1 28px;
+  width: 28px;
+  height: auto;
+  min-width: 0;
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.mw-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mw-thumb {
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.mw-tile.collar {
+  box-shadow: none;
+}
+.mw-tile.collar img,
+.mw-tile.collar::after {
+  border-radius: calc(var(--r-sm) - 3px);
+}
+/* The week's two figures (§42): what it cost in `--loss`, then what it
+   brought back in `--gain`, tabular so the columns hold down the card. */
+.mw-figs {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-md);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: var(--ink-3);
+}
+.mw-spent {
+  color: var(--loss);
+}
+.mw-saved {
+  color: var(--gain);
+}
+/* A week of points-only orders brought no money back: its +$0.00 is quiet. */
+.mw-saved.is-zero {
+  color: var(--ink-3);
+}
+/* The phone's foot is the desktop's line items (.mc-foot): "You spent", then
+   "You saved" underneath in its grey tile, one figure size, one right edge. */
+.mw-foot {
+  display: grid;
+  gap: var(--s-xs);
+  margin: var(--s-sm) 0 0;
+  padding-top: var(--s-md);
+  border-top: 1px solid var(--hair-lit);
+}
+.mw-row,
+.mw-net {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--s-md);
+  margin: 0;
+  padding: var(--s-sm) var(--s-md);
+}
+.mw-net {
+  border-radius: var(--r-card);
+  background: var(--inner);
+}
+.mw-lab {
+  grid-column: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.mw-row b,
+.mw-net b {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+.mw-row b {
+  grid-row: 1;
+  color: var(--loss);
+}
+.mw-foot .mw-net b {
+  color: var(--loss);
+}
+.mw-foot.is-ahead .mw-net b {
+  color: var(--gain);
+}
+.mw-net .mw-after {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.mw-net .mw-after {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* ── THE PHONE MONTH PLAYS ONCE (§41) ─────────────────────────────────────
+   shell/MonthWeeks.tsx. A counted figure stacks its final text, unseen, under
+   the live one, so the count never widens its column. While the script holds
+   `data-run` the tiles wait small and clear, and arrive into `is-in` on the
+   house ease: transform and opacity only, on tiles laid out at full size. */
+.mw-count {
+  display: inline-grid;
+  justify-items: end;
+}
+.mw-count > span {
+  grid-area: 1 / 1;
+}
+.mw-hold {
+  visibility: hidden;
+}
+.mw[data-run] .mw-tile {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.mw[data-run] .mw-tile.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 240ms var(--ease),
+    transform 240ms var(--ease);
+}
+
+/* ── ONE MONTH OR ANOTHER (§40) ───────────────────────────────────────────
+   shell/MonthSwitch.tsx. The house `.segments` track (base.css) at 36px:
+   equal cells inset 3px on --inner, the chosen one the white thumb on
+   --rest. Two cells, so no rule between them: it would always touch the
+   thumb. The thumb slides; the label's ink follows. */
+.mcs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 0;
+  height: 36px;
+  margin: var(--s-lg) 0 0;
+  padding: 3px;
+  border-radius: var(--r-control);
+  background: var(--inner);
+}
+.mcs::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / var(--n));
+  border-radius: calc(var(--r-control) - 3px);
+  background: var(--card);
+  box-shadow: var(--rest);
+  transform: translateX(calc(100% * var(--at)));
+  transition: transform 240ms var(--ease);
+}
+.mcs-opt {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 0 var(--s-md);
+  border: 0;
+  border-radius: calc(var(--r-control) - 3px);
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color 240ms var(--ease);
+}
+.mcs-opt[aria-checked="true"] {
+  color: var(--ink-1);
+}
+/* On a phone the cell is 30px drawn and 44px to touch: 7px of reach above
+   and below, clear of the head and the first week. */
+.mw .mcs-opt::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+/* HOW MUCH (§48): four equal pills under the head, and under the place
+   toggle when there is one. The second question, so lighter than the first:
+   32px and no track. The chosen pill is the surface's own --maroon (purple
+   on Coffeeholics) in white; on a phone each reaches 44px to touch. */
+.mca {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-sm);
+  margin: var(--s-lg) 0 0;
+}
+.mca-opt {
+  position: relative;
+  height: 32px;
+  min-width: 0;
+  padding: 0 var(--s-md);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--inner);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.003em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background-color 160ms var(--ease),
+    color 160ms var(--ease),
+    transform 120ms var(--ease);
+}
+.mca-opt[aria-checked="true"] {
+  background: var(--maroon);
+  color: var(--on-maroon);
+}
+.mca-opt:active {
+  transform: scale(0.97);
+}
+.mca-opt:focus-visible {
+  border-radius: var(--r-pill);
+}
+@media (hover: hover) {
+  .mca-opt[aria-checked="false"]:hover {
+    color: var(--ink-1);
+  }
+}
+.mw .mca-opt::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+/* The sub under the controls, a step away from them. */
+.mcs + .mc-sub,
+.mca + .mc-sub {
+  margin-top: var(--s-lg);
+}
+/* Every choice's head in one cell; the others hold the height, unseen. */
+.mc-heads,
+.mw-heads {
+  display: grid;
+}
+.mc-heads > .mc-head,
+.mw-heads > .mw-head {
+  grid-area: 1 / 1;
+}
+.mc-ghost,
+.mw-ghost {
+  visibility: hidden;
+}
+/* THE SWITCH. The rows leave in 160ms on the exit curve and the new month's
+   arrive in 200ms; "You saved" stays and counts. The card clips while its
+   inline height glides, so nothing spills over the section below. */
+.mc[data-swap],
+.mw[data-swap] {
+  overflow: clip;
+}
+.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
+.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row) {
+  transition: opacity 200ms var(--ease);
+}
+.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
+.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+/* AN AMOUNT EMPTIES THE MONTH (§48): the head, the orders and the figures
+   leave in 160ms, the lattice and the controls stay, and the card plays the
+   new month in. Doubled classes outrank the loop's own `.is-in` states. */
+.mc[data-replay] .mc-heads,
+.mw[data-replay] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
+  transition: opacity 200ms var(--ease);
+}
+.mc.mc[data-replay="out"] :is(.mc-heads, .mc-day > .mc-order, .mc-foot b),
+.mw.mw[data-replay="out"] :is(.mw-heads, .mw-tiles, .mw-figs, .mw-foot b) {
+  opacity: 0;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ── THE LOOP ─────────────────────────────────────────────────────────────
+   Only while the script holds `data-run`. Transform and opacity, nothing
+   else, on days laid out at full size from the first frame. Each transition
+   sits on the state it arrives INTO, so the reset (dropping `is-in` and
+   `data-out` together) snaps the invisible orders back with none. The exit is
+   shorter and accelerating, the modal's own leave curve. */
+.mc[data-run] .mc-order {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.mc[data-run] .mc-order.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 280ms var(--ease),
+    transform 280ms var(--ease);
+}
+/* THE CROSSING IS TOLD BY COLOUR (Sam, 23 Sep 2026: "green or red based on
+   whether it's positive or negative, and 'you saved' instead of 'you're
+   ahead'"). The saved figure is `--loss` while the month is owed and
+   `--gain` past zero — a class flip, not a colour transition. Its label
+   stays ink (§42: colour only for the money figures). */
+.mc-foot .mc-net-fig {
+  color: var(--loss);
+}
+.mc-foot.is-ahead .mc-net-fig {
+  color: var(--gain);
+}
+.mc[data-run] .mc-net-fig,
+.mc[data-run] .mc-spent {
+  transition: opacity 280ms var(--ease);
+}
+.mc[data-run][data-out] .mc-order.is-in,
+.mc[data-run][data-out] .mc-net-fig,
+.mc[data-run][data-out] .mc-spent {
+  opacity: 0;
+  transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ── OVER THE MOSAIC, FROM 1024 ───────────────────────────────────────────
+   CENTRED IN THE PHOTOGRAPHS, on both axes. Sam, 23 Sep 2026, at 1440: "the
+   placement here doesn't sit with me quite right." Hugging the bottom-right
+   corner 32 in, it read as a card cropped at the band's edge; set down in the
+   middle it reads as an object resting on the venues, with photography on
+   all four sides. Out of flow, placed in the mosaic's own columns (an
+   absolutely positioned grid child takes its grid area as its containing
+   block; `grid-row: auto` spans the band's padding box, which is exactly the
+   mosaic's height, since the mosaic climbs under the bar by the same
+   `--clear`), so the card can never push the hero row taller or reach the
+   copy column. `inset: 0` + `margin: auto` centres it; `fit-content` gives
+   the auto margins a height to share.
+
+   480, NOT §21's 460: with marks in the days the grid needed it. At 460 a day
+   is 42.8px and the 29×16 chip sat over a third of a 36.8px mark; at 480 the
+   mark is 39.7px and the Coffeeholics wordmark clears the chip.
+
+   (0,4,0) — the attribute is the card's own — against the band's
+   `> :not(.mosaic)` rule at (0,3,0), which dresses the copy column (the flex
+   stack, the zeroed plate, the fill pseudo-element run off the window). None
+   of that is this card's, and at this weight none of it rests on source
+   order. */
+@media (min-width: 1024px) {
+  .hero-band:not(.is-compact) > .mc[data-lit] {
+    position: absolute;
+    z-index: 1;
+    grid-column: seam / bleed-end;
+    grid-row: auto;
+    inset: 0;
+    display: block;
+    width: min(480px, calc(100% - 64px));
+    height: fit-content;
+    max-width: none;
+    margin: auto;
+    padding: var(--s-2xl);
+    border-radius: 24px;
+    background: var(--card);
+    box-shadow: var(--float);
+  }
+  .hero-band:not(.is-compact) > .mc[data-lit]::before {
+    content: none;
+  }
+}

@@ -18,6 +18,7 @@ import {
   GUARANTEE_CONTACT,
   lockedRateLines,
   founderSaving,
+  foundingTierName,
   reserveCta,
 } from "../model/content";
 
@@ -212,6 +213,13 @@ export default function Membership() {
   }, []);
 
   const plan = seat ? PLANS[seat.plan] : null;
+  /* The round she bought in, from her record: a founding seat at the live
+     tier's price is an Early-ish Bird; any other founding price predates it. */
+  const tier = seat?.founding
+    ? seat.price === founderSaving.monthly.now
+      ? foundingTierName
+      : "Early Bird"
+    : null;
 
   /* ══ MEMBERS ONLY — CURRENTLY OFF ═════════════════════════════════════════
      Kiran, 15 Sep 2026, while building on this page: "I've commented that logic
@@ -301,7 +309,7 @@ export default function Membership() {
             /* The plan she bought, from her record — never the site's live
              default, which follows the flip. */
             plan={
-              seat ? (seat.founding ? "Early Bird" : "Standard") : undefined
+              seat ? (tier ?? "Standard") : undefined
             }
             className="reserve-card"
           />
@@ -330,7 +338,7 @@ export default function Membership() {
           <>
             <Panel className="ms-head">
               <p className="t-caption ms-state">
-                {`Your ${seat.founding ? "Early Bird Special" : "seat"} is held`}
+                {`Your ${tier ? `${tier} Special` : "seat"} is held`}
               </p>
               <h1 className="ms-title">
                 Opening in Blacksburg, {launchWindow}

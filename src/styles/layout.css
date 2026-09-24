@@ -102,8 +102,10 @@
 /* The Plus mark. 11px tracked caps is exactly the house caption role, and at
    that size the chip is 17px tall — the line box of the 14px name beside it, so
    it sits inside the name's line instead of stretching it. */
-/* Maroon, white ink. A gilt version lived for an hour on 15 Sep 2026 and
-   Sam called it back ("looks kind of tacky … we can just revert"). */
+/* Maroon, white ink — and Coffeeholics purple on its page, where the surface
+   redefines --maroon (Sam, 24 Sep 2026: "revert the change that you made to
+   the chip, let's just use the purple for now … we'll revisit this
+   tomorrow"). The gold directions live on the chip canvas. */
 .plus{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:18px;
   padding:0 7px 0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;
   line-height:1;color:var(--on-maroon);background:var(--maroon);border-radius:var(--r-pill);
@@ -114,6 +116,7 @@
 .plus-mark,.vflag .plus-mark,.plus .plus-mark{display:block;width:11px;height:11px;max-width:11px;
   flex:0 0 auto;color:currentColor}
 .plus-word{display:block;line-height:1}
+
 
 /* -- ways to use ----------------------------------------------------------- */
 .way{display:block;padding:var(--s-lg) var(--s-xl)}
@@ -162,7 +165,7 @@
 .drill{margin:var(--s-lg) 0 0}
 .drill > summary{display:flex;align-items:center;justify-content:space-between;
   gap:var(--s-md);list-style:none;cursor:pointer;padding:var(--s-md) 0;
-  font-size:13px;font-weight:600;letter-spacing:.005em;color:var(--ink-3);
+  font-size:14px;font-weight:600;letter-spacing:.005em;color:var(--ink-3);
   -webkit-tap-highlight-color:transparent;transition:color 150ms var(--ease)}
 .drill > summary::-webkit-details-marker{display:none}
 .drill > summary::marker{content:""}

@@ -1,0 +1,366 @@
+/* ============================================================================
+   THE SIMULATED FEED — shell/LiveFeed.tsx. docs/POLISH-2026-09-21.md §34.
+
+   INVENTED, AND ITS COMPONENT'S HEADER SAYS SO AT LENGTH. What is here is
+   only where the card sits and how it arrives.
+
+   One plate: `--card` at `--r-card` with the `--float` shadow, and no hairline
+   — elevation is declared once. A 32px tile (the TapIn mark in `--ink-1` on
+   `--inner`, or the named venue's collar), two lines, and the X.
+
+   PLACEMENT (§53). At the top at every width, under the announcement bar:
+   the gutter in from both sides below 640, a 360px card at the centre from
+   640. It drops in from above the screen's top edge and lifts back out
+   (Sam, 24 Sep 2026: "slide into view from the top of the screen, then go
+   back up when done"). Fixed, so nothing reflows when it comes or goes.
+
+   Z 22, IN <body>: the component portals itself out of `main.column` (a
+   z 1 stacking context) so that §35's one card can rise over a layer. At 22
+   it still sits over the whole column — the announcement bar (21) and the
+   docked bars (20) inside it — and under every layer (40 and up), as it did
+   when it lived in the column; the feed pauses while any of them is up.
+
+   THE COLUMN'S CAP no longer reaches it (it is not `.column`'s child), but
+   `.feed` keeps its own width and margin so it cannot come back if the
+   portal ever goes.
+   ============================================================================ */
+.feed {
+  /* Where the card rests; its arrival starts this far and its own height
+     above that, so it enters from off the top of the screen. */
+  --feed-top: calc(var(--announce-h) + env(safe-area-inset-top, 0px) + var(--s-lg));
+  --feed-away: translateY(calc(-100% - var(--feed-top) - var(--s-2xl)));
+  position: fixed;
+  z-index: 22;
+  top: var(--feed-top);
+  left: var(--gutter);
+  right: var(--gutter);
+  width: auto;
+  max-width: none;
+  margin: 0;
+  /* The collar's outer ring is white-on-dark by default; on this white plate
+     it takes the surface's own hairline so a white-field mark keeps an edge. */
+  --collar-ring: var(--hair-lit);
+}
+@media (min-width: 640px) {
+  .feed {
+    left: max(var(--gutter), calc(50% - 180px));
+    right: max(var(--gutter), calc(50% - 180px));
+  }
+}
+
+/* ══ THE ONE CARD OVER A LAYER (§35, §35.3) ══════════════════════════════
+   The purchase card, asked for by the checkout's invented seat drop. Its own
+   z-index over the reserve layer (40) and the house's other scrims (60); under
+   the trial modal (70) and the arrival (80), which never share the screen
+   with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "maybe
+   the toasts show above the modal? it's a bit weird when it shows right on
+   the modal itself"), arriving from the top edge and leaving upward. From
+   640 it is this card, 12px down and 360 wide, on the dialog's header band
+   and never on the X; where a short window caps the dialog (its top at 16 at
+   1280×720) its foot also reaches 9px onto the page's first row.
+
+   BELOW 640 IT IS A ONE-LINE PILL (§35.4), in the band the 92vh sheet leaves
+   above itself (65px at 375×812, 53 at 375×667, 45 at 320×568). The card was
+   86 tall there and covered the sheet's X and title for its 5s; the pill is
+   36, 8px down, so its foot (44) clears the sheet's top at every phone size. */
+.feed.is-over {
+  --feed-top: calc(env(safe-area-inset-top, 0px) + var(--s-lg));
+  z-index: 61;
+  bottom: auto;
+  left: max(var(--gutter), calc(50% - 180px));
+  right: max(var(--gutter), calc(50% - 180px));
+  width: auto;
+}
+/* THE PILL. One line of the event, as wide as its words, never wider than the
+   viewport less the gutters, where a long name ellipsises. `max-width` does
+   that, not `left`/`right`: the nowrap line's min-content would push a
+   shrink-to-fit box past them instead of clipping. `--s-lg` a side, not
+   `--s-xl`, for 8px more of the line. No tile, no time line and no X: it
+   goes by itself in 5s and comes once a session, and a second X a few
+   pixels over the sheet's own is a mis-tap for nothing. Same query as the
+   sheet's 92vh (reserve.css), so the two switch together; `.feed.is-over`
+   weight, so the base rules below cannot take it back. */
+@media (max-width: 639px) {
+  .feed.is-over {
+    --feed-top: calc(env(safe-area-inset-top, 0px) + var(--s-md));
+    left: var(--gutter);
+    right: var(--gutter);
+    width: fit-content;
+    max-width: calc(100% - 2 * var(--gutter));
+    margin: 0 auto;
+  }
+  .feed.is-over .feed-plate {
+    height: 36px;
+    padding: 0 var(--s-lg);
+    border-radius: var(--r-pill);
+  }
+  /* The pill keeps the TapIn icon (Sam, 24 Sep 2026: "there should be a
+     tapin logo icon in those toasts"): a 22px tile at the pill's start. */
+  .feed.is-over .feed-when,
+  .feed.is-over .feed-x {
+    display: none;
+  }
+  .feed.is-over .feed-tile {
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+  }
+  .feed.is-over .feed-mark svg {
+    width: 12px;
+    height: 12px;
+  }
+  .feed.is-over .feed-plate {
+    gap: var(--s-md);
+    padding-left: var(--s-sm);
+  }
+  .feed.is-over .feed-what {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+/* The page's own gutter, which layout.css moves to 16 at 380 and under: the
+   portal took the pill out of `.column`, so it restates the move and its
+   widest edges meet the sheet's content edges. With the `--s-lg` sides, 53
+   of the 60 name-and-place lines fit whole at 375 (22 at a 24 gutter and
+   `--s-xl`). At 320 none does: the shortest is 277px, the pill holds 264. */
+@media (max-width: 380px) {
+  .feed.is-over {
+    --gutter: var(--s-xl);
+  }
+}
+/* The plate is the thing a hand works (§53): no page scroll or text
+   selection starts on it, and it clips the bar to its corners. */
+.feed-plate {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  padding: var(--s-lg) var(--s-md) var(--s-lg) var(--s-lg);
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--float);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  animation: feedDrop 420ms var(--ease) both;
+}
+.feed:not(.is-over) .feed-plate {
+  cursor: pointer;
+}
+/* Leaving is quicker than arriving, and eases in: an object on its way out
+   does not decelerate into the place it is leaving (the house exit curve). */
+.feed.is-out .feed-plate {
+  animation: feedLift 260ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* THE BAR (§53): how long the card has left, along its foot, emptying from
+   the right over its life. A hold stops it with the clock. Ink, not the
+   brand fill: it is a state, not a thing chosen or acting. */
+.feed-time {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  pointer-events: none;
+}
+.feed-time i {
+  display: block;
+  height: 100%;
+  background: var(--ink-4);
+  opacity: 0.55;
+  transform-origin: left center;
+  animation: feedTime var(--feed-life, 5000ms) linear both;
+}
+@keyframes feedTime {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.feed.is-held .feed-time i,
+.feed.is-held .feed-mark::after {
+  animation-play-state: paused;
+}
+
+/* 32px. Concentric: the mark inside the collar at `--r-sm`, the tile the
+   collar's 3px band wider — 11 on 32, the collar's own 14-on-42 proportion.
+   The TapIn tile takes the same corner so the two read as one slot. */
+.feed .feed-tile {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: calc(var(--r-sm) + 3px);
+}
+.feed .feed-tile.collar img,
+.feed .feed-tile.collar::after {
+  border-radius: var(--r-sm);
+}
+.feed-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--inner);
+  color: var(--ink-1);
+}
+.feed-mark svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+/* ══ A PURCHASE PULSES (§53) ══════════════════════════════════════════════
+   Sam: "a subtle pulsing animation". A ring in the brand fill leaves the
+   mark's own corner and fades as it grows, three times across the card's 5s,
+   starting once the card has arrived. Transform and opacity only; the plate
+   does not clip, and at 1.5× the ring stays inside its padding. Reduced
+   motion drops the ring (below). */
+.feed.is-buy .feed-mark {
+  position: relative;
+}
+.feed.is-buy .feed-mark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--maroon);
+  opacity: 0;
+  pointer-events: none;
+  animation: feedPulse 1500ms var(--ease) 300ms 3;
+}
+@keyframes feedPulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.feed-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.feed-what {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--ink-1);
+  text-wrap: pretty;
+}
+.feed-when {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
+/* 28px, as §34 sets it: the card leaves on its own in five seconds, so this
+   is a way to stop the next one, not the only way out of a blocking thing.
+   The glyph sits 6px inside its box, so the box gives back 8 of the plate's
+   12px gap, and the X lines up with the first line. From 360 a purchase
+   line fits on one; at 320 the longest ("Isabella just purchased TapIn
+   Plus") takes two. */
+.feed-x {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: calc(var(--s-xs) * -1) 0 0 calc(var(--s-md) * -1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+.feed-x svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+@media (hover: hover) {
+  .feed-x:hover {
+    background: var(--inner);
+    color: var(--ink-1);
+  }
+}
+.feed-x:active {
+  background: var(--press);
+}
+
+@keyframes feedDrop {
+  from {
+    transform: var(--feed-away);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes feedLift {
+  from {
+    transform: none;
+  }
+  to {
+    transform: var(--feed-away);
+  }
+}
+@keyframes feedFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes feedFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ══ REDUCED MOTION FADES, IT DOES NOT SNAP ═══════════════════════════════
+   §34: "reduced motion fades only." base.css's house block zeroes every
+   animation to .01ms with `!important` on `*`, which would make the card
+   blink in and out — so the fade is restated here, `!important` at class
+   weight, which is the only thing that outranks it. No translate: the
+   keyframes carry opacity alone. */
+@media (prefers-reduced-motion: reduce) {
+  .feed .feed-plate {
+    animation-name: feedFadeIn !important;
+    animation-duration: 240ms !important;
+  }
+  .feed.is-out .feed-plate {
+    animation-name: feedFadeOut !important;
+    animation-duration: 180ms !important;
+  }
+  .feed.is-buy .feed-mark::after {
+    animation: none !important;
+  }
+  /* The bar is a clock, not a movement: it keeps its full life. */
+  .feed .feed-time i {
+    animation-duration: var(--feed-life, 5000ms) !important;
+  }
+}

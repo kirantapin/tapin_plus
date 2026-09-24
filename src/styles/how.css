@@ -75,16 +75,25 @@
 
 /* -- rail ------------------------------------------------------------------ */
 .how-top{flex:0 0 auto;display:flex;align-items:center;gap:var(--s-lg);height:36px}
-/* Sometimes an <a> (step 1, leaving for the pitch) and sometimes a <button>
-   (every other step, going back one). `border:0` and `padding:0` so the two
-   render identically — a button carries UA chrome an anchor does not. */
-.how-back{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-pill);
+/* The way out is an X at the right end of the rail (Sam, 23 Sep 2026), the
+   same 36px pill the checkout's and the pop-up's close controls are. It was
+   a back chevron at the left, which read as "previous step" beside a
+   progress rail — the prev/next pair lives in the foot. `margin-left:auto`
+   sends it to the edge past the progress marks. */
+.how-back,
+.how-close{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-pill);
   display:flex;align-items:center;justify-content:center;padding:0;border:0;
   color:var(--ink-2);background:var(--inner);cursor:pointer;
   -webkit-tap-highlight-color:transparent;transition:transform 150ms var(--ease)}
-.how-back:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
+/* `.how-back` stays as the shared circle for the two controls that borrow it
+   (the checkout layer's close, /in's back); the deck itself no longer draws one. */
+.how-close{margin-left:auto}
+.how-back:focus-visible,
+.how-close:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px}
 .how-back svg{width:20px;height:20px}
-.how-back:active{transform:scale(.94)}
+.how-close svg{width:18px;height:18px}
+.how-back:active,
+.how-close:active{transform:scale(.94)}
 
 /* ══ THE RAIL ═════════════════════════════════════════════════════════════
    REVERTED 13 Sep 2026 to the inline form. It was moved flush to the sheet's
@@ -328,8 +337,6 @@
    the one slide everybody leaves, then shrink it by 64px on the next — the
    button would move under the reader's thumb at the one advance that is
    guaranteed to happen. */
-.how-prev:disabled{opacity:.34;cursor:default}
-.how-prev:disabled:active{transform:none;background:var(--inner)}
 
 .how-next{display:block;width:100%;min-height:52px;padding:0 var(--s-2xl);
   border-radius:var(--r-card);border:1px solid var(--hair-lit);
@@ -810,7 +817,7 @@
    This block used to read "NO ENTRANCE ANIMATION ANYWHERE ON THIS SLIDE",
    because `getBoundingClientRect` returns the TRANSFORMED box and the card's
    rect is what the flight into /reserve takes off from — a card measured
-   mid-entrance hands the clone an origin the card never occupied.
+   mid-entrance hands the flight an origin the card never occupied.
 
    That constraint has moved to where it belongs: `stashCardOrigin` now settles
    every animation on the card and its ancestors before it measures — finishing
@@ -858,6 +865,9 @@
             cardFloat 6.4s 640ms ease-in-out infinite;
 }
 .sc-close .card-stage{
+  /* card.css caps a stage at 420; the checkout's card lifts that cap and this
+     one must match it (§25, §32), so the one width is `--tcard-w` on .sc-close. */
+  max-width:none;
   position:relative;transform-style:preserve-3d;
   animation:cardDrift 9.7s 640ms ease-in-out infinite;
 }
@@ -942,9 +952,9 @@
   overflow:hidden;background:var(--inner);box-shadow:var(--float)}
 .vs-shot img{width:100%;height:100%;object-fit:cover;display:block;
   filter:saturate(.95) brightness(.92)}
-/* The Burg's hero is the one bright outlier in the set — measured mean relative
-   luminance .891 against .036-.220 for the rest — so it is seated the same way
-   the pitch's mosaic seats it, rather than dimming all four to hide one. */
+/* A bright outlier hero is seated the same way the pitch's mosaic seats it,
+   rather than dimming all four to hide one. No hero needs this since 24 Sep (§51): The Burg's is now a bar photograph.
+   Kept for the next brand card. */
 /* THE PASS TILE NO LONGER CARRIES A DIM OF ITS OWN. brightness(.46) was here to
    seat ONE photograph — The Burg's, a brand card on white at 0.891 luminance,
    the measured outlier among six heroes that otherwise sit between 0.036 and
@@ -974,8 +984,12 @@
    see `.how-spend` beside `.scene-head.is-figure`. */
 /* Centred. Every other slide's composition runs to the sheet's full measure, so
    the card is the one thing narrower than its column — and left-aligned it read
-   as an object that had failed to fill the row rather than one placed on it. */
-.sc-close{width:100%;max-width:295px;margin-inline:auto}
+   as an object that had failed to fill the row rather than one placed on it.
+   ONE CARD (POLISH §25): the checkout's panel draws it at the same width
+   (card.css `--tcard-w`) with the same one-line facts, so the flight onto it
+   is a pure translate and the card that lands is the card that left. */
+.sc-close{width:100%;max-width:var(--tcard-w);margin-inline:auto}
+.sc-close .tcard-facts dd{white-space:nowrap}
 /* The caption under the card. Sam, 14 Sep 2026: the card takes a name now,
    optionally, and a card cannot say that about itself. Centred with the card
    on a phone; arrives a beat after it and never moves with it. */
@@ -1090,7 +1104,6 @@
      failing to fill one. */
   .how-next{width:auto;min-width:220px;align-self:flex-start}
   .vs-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .sc-close{max-width:320px}
 }
 
 /* ============================================================================
@@ -1186,7 +1199,9 @@
   /* Every composition takes the plate's measure, capped where a wider version
      would stop being the object it depicts. The card keeps its own cap below. */
   .scene-art > *{width:100%;max-width:520px;margin:0}
-  .sc-close{max-width:430px;margin-inline:0}
+  /* The card and its hint, one card wide and centred on the plate; the hint
+     keeps the card's left edge. */
+  .scene-art > .sc-close-wrap{max-width:var(--tcard-w)}
   .sc-hint{text-align:left}
 
   .how-foot{grid-column:2;grid-row:3;padding-top:0;background:none;gap:var(--s-xl)}
