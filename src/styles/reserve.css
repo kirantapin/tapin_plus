@@ -1868,4 +1868,8 @@ html.is-layered{overflow:hidden}
   .reserve-sheet:has(> .sheet-scroll > .rs-pages > .rs-page:first-child:is(.is-out,.is-off)){
     width:min(640px,calc(100vw - 64px))}
   .reserve-sheet[data-frame] > .sheet-scroll{overflow-y:hidden}
+  /* The frame's size is animated by the hook or it snaps; it never
+     transitions. base.css's reduced-motion block gives every element a .01ms
+     transition on `all`, which painted one frame at the old width. */
+  .reserve-sheet{transition-property:none}
 }
