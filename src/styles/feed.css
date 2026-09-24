@@ -52,19 +52,15 @@
    the trial modal (70) and the arrival (80), which never share the screen
    with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "maybe
    the toasts show above the modal? it's a bit weird when it shows right on
-   the modal itself"): 12px down from the top, 360 at most, the viewport less
-   the gutters on a phone, arriving from the top edge and leaving upward.
-   From 640 it lies on the dialog's header band and never on the X; where a
-   short window caps the dialog (its top at 16 at 1280×720) its foot also
-   reaches 9px onto the page's first row.
+   the modal itself"), arriving from the top edge and leaving upward. From
+   640 it is this card, 12px down and 360 wide, on the dialog's header band
+   and never on the X; where a short window caps the dialog (its top at 16 at
+   1280×720) its foot also reaches 9px onto the page's first row.
 
-   ON A PHONE IT IS NOT ABOVE THE SHEET, though §35.3 asks for that. The sheet
-   is 92vh flat (reserve.css), so 65px of the page shows above it at 375×812
-   and 53 at 375×667, and this plate is 86 tall at those widths: two lines of
-   the event and one of the time. At that height it covers the sheet's X and
-   title for its 5s. No padding fits those three lines in the space above the
-   sheet, so the fix is Sam's call: a shorter phone sheet, or another place
-   for the banner below 640. */
+   BELOW 640 IT IS A ONE-LINE PILL (§35.4), in the band the 92vh sheet leaves
+   above itself (65px at 375×812, 53 at 375×667, 45 at 320×568). The card was
+   86 tall there and covered the sheet's X and title for its 5s; the pill is
+   36, 8px down, so its foot (44) clears the sheet's top at every phone size. */
 .feed.is-over {
   z-index: 61;
   top: calc(env(safe-area-inset-top, 0px) + var(--s-lg));
@@ -89,6 +85,51 @@
   to {
     opacity: 0;
     transform: translateY(-12px);
+  }
+}
+/* THE PILL. One line of the event, as wide as its words, never wider than the
+   viewport less the gutters, where a long name ellipsises. `max-width` does
+   that, not `left`/`right`: the nowrap line's min-content would push a
+   shrink-to-fit box past them instead of clipping. `--s-lg` a side, not
+   `--s-xl`, for 8px more of the line. No tile, no time line and no X: it
+   goes by itself in 5s and comes once a session, and a second X a few
+   pixels over the sheet's own is a mis-tap for nothing. Same query as the
+   sheet's 92vh (reserve.css), so the two switch together; `.feed.is-over`
+   weight, so the base rules below cannot take it back. */
+@media (max-width: 639px) {
+  .feed.is-over {
+    top: calc(env(safe-area-inset-top, 0px) + var(--s-md));
+    left: var(--gutter);
+    right: var(--gutter);
+    width: fit-content;
+    max-width: calc(100% - 2 * var(--gutter));
+    margin: 0 auto;
+  }
+  .feed.is-over .feed-plate {
+    height: 36px;
+    padding: 0 var(--s-lg);
+    border-radius: var(--r-pill);
+  }
+  .feed.is-over .feed-tile,
+  .feed.is-over .feed-when,
+  .feed.is-over .feed-x {
+    display: none;
+  }
+  .feed.is-over .feed-what {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+/* The page's own gutter, which layout.css moves to 16 at 380 and under: the
+   portal took the pill out of `.column`, so it restates the move and its
+   widest edges meet the sheet's content edges. With the `--s-lg` sides, 53
+   of the 60 name-and-place lines fit whole at 375 (22 at a 24 gutter and
+   `--s-xl`). At 320 none does: the shortest is 277px, the pill holds 264. */
+@media (max-width: 380px) {
+  .feed.is-over {
+    --gutter: var(--s-xl);
   }
 }
 .feed-plate {

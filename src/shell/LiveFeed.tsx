@@ -26,9 +26,8 @@ import { campaignTrialPlaces } from "../model/campaign";
  * It is `aria-hidden`, because announcing invented activity to a screen
  * reader is noise, not news — and for the same reason the X is kept out of
  * the tab order: a focusable control inside a hidden subtree is a stop that
- * reads as nothing. The card leaves on its own and blocks nothing, but for
- * the one card over a layer on a phone, which covers the sheet's X for its
- * 5s (feed.css says why).
+ * reads as nothing. The card leaves on its own and blocks nothing: the one
+ * card over a layer sits above the sheet's X, not on it (§35.4, feed.css).
  *
  * ══ WHAT IT REFUSES ════════════════════════════════════════════════════════
  * Names, faces or initials (but the one card over a layer, below); a running
@@ -42,7 +41,7 @@ import { campaignTrialPlaces } from "../model/campaign";
  * (model/campaign.ts) — the places the trial can actually be taken — so an
  * invented line at least never names an offer that does not exist.
  *
- * ══ THE ONE CARD OVER A LAYER (§35, §35.1–§35.3) ══════════════════════════
+ * ══ THE ONE CARD OVER A LAYER (§35, §35.1–§35.4) ══════════════════════════
  * The checkout's invented seat drop (model/seatsSession.ts) asks for it with
  * a `tapin:feed` event on `window`, so the sheet and the feed stay strangers.
  * It reads "{name} in {place} just purchased TapIn Plus · just now": the one
@@ -50,10 +49,11 @@ import { campaignTrialPlaces } from "../model/campaign";
  * name in the modal, and the location as well"). The name and the place are
  * as invented as the rest. It is the only card shown while a layer is up: the
  * cadence stays paused, and this card runs on its own clock, above the layer,
- * as a banner at the top centre (feed.css). It is not one of the session's
- * eight, and the X still stops it. Portalled to <body> for that reason:
+ * as a banner at the top centre (feed.css), portalled to <body> because
  * `main.column` is a stacking context (z 1) that no z-index inside it can
- * climb out of.
+ * climb out of. It is not one of the session's eight, and from 640 the X
+ * still stops it; below 640 it is one line in a pill, the event alone, with
+ * no mark, no "just now" and no X (§35.4).
  */
 
 /** One key for the session: "off" once the X is pressed, else how many
