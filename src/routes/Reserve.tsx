@@ -14,7 +14,6 @@ import {
   firstEarlyBirdPrice,
   foundingCloses,
   foundingTierName,
-  guarantee,
   logoField,
   monthlyToday,
   offers,
@@ -99,15 +98,12 @@ const plan = PLANS.monthly;
    clause under it, on a rail, and the refund is the one sentence under the
    rail — the plan's own refund term, while its refund charge row stands. The
    tier in Today's clause is `foundingTierName`, never typed. */
-/* THE WAYS OUT, AS ONE LINE (Sam, 24 Sep 2026: "'save what you pay or we
-   refund the difference' or request refund or cancellation with no reason
-   needed"). Held to the terms: cancel any time; a full refund only while the
-   refund charge row stands, before we open. */
-const refundLine = `${guarantee} ${
-  plan.chargeRows.some((r) => r.id === "refund")
-    ? "Or cancel any time, with a full refund before we open, no reason needed."
-    : "Or cancel any time, no reason needed."
-}`;
+/* THE WAY OUT (Sam, 24 Sep 2026: "shorten it to just the cancel and refund
+   part"; the guarantee is the panel's). Held to the terms: cancel any time; a
+   full refund only while the refund charge row stands, before we open. */
+const refundLine = plan.chargeRows.some((r) => r.id === "refund")
+  ? "Cancel any time, with a full refund before we open, no reason needed."
+  : "Cancel any time, no reason needed.";
 const schedule: { id: string; when: string; figure: string; clause: string }[] = [
   {
     id: "today",
