@@ -458,9 +458,20 @@
     row-gap: var(--s-2xl);
     align-items: end;
   }
+  /* THE MASTHEAD READS LEFT (Sam, 23 Sep 2026: "bring over the tapin logo to
+     the left for desktop so there's more space for the calendar view"): the
+     shop, a hairline, then the lockup — one line saying whose page and whose
+     product — in the left track only, so the month takes the right track
+     from the band's top and centres on its full height. */
   .cg-mast {
-    grid-column: 1 / -1;
+    grid-column: 1;
     grid-row: 1;
+    justify-content: flex-start;
+    gap: var(--s-2xl);
+  }
+  .cg-lockup {
+    padding-left: var(--s-2xl);
+    border-left: 1px solid var(--hair-lit);
   }
   .cg-say {
     grid-column: 1;
@@ -1205,15 +1216,15 @@
 }
 
 /* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
-   The pitch's calendar (pitch.css `.mc-*`) in the band's second row, right
-   track: in the flow, centred on the row, at the width it has on the pitch.
+   The pitch's calendar (pitch.css `.mc-*`) in the band's right track, both
+   rows: in the flow, centred on the band's height, at the pitch's width.
    The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
 @media (min-width: 1024px) {
   .cg-band > .mc {
     position: relative;
     z-index: 1;
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1 / -1;
     align-self: center;
     width: 480px;
     max-width: 100%;
