@@ -452,12 +452,12 @@
      extra header space"). No 640 floor from 1024: the month is the tallest
      thing in the band, so the band is its height plus the insets, the
      masthead starts on the month's top line, and the copy ends on its foot.
-     Top inset a step larger than the foot's, so the masthead sits down off
-     the announce bar. */
+     Top inset 64 to the foot's 24 (Sam, 23 Sep 2026: "move it a bit further
+     down"), so the masthead sits well off the announce bar. */
   .cg-band {
     margin-inline: 0;
     min-height: 0;
-    padding: var(--s-3xl) var(--grid-in) var(--s-2xl);
+    padding: var(--s-4xl) var(--grid-in) var(--s-2xl);
     display: grid;
     grid-template-columns: minmax(0, 1fr) 480px;
     grid-template-rows: auto minmax(0, 1fr);
