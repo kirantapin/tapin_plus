@@ -1,6 +1,8 @@
+import { useLayoutEffect, useRef } from "react";
 import { BENEFIT, illustrate } from "../model/savings";
 import { useSpend } from "../model/spendStore";
 import { Drill } from "./Drill";
+import { TALLY, easeOut, still } from "./MonthSwitch";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
@@ -29,6 +31,37 @@ export default function SavingsSlider() {
   // to stop disagreeing on the way to a charge row. See spendStore.ts.
   const [spend, setSpend] = useSpend();
   const s = illustrate(spend);
+
+  /* A new band counts the figure from what it read to the new one, the month
+     card's count (§48.3): its 400ms, its ease-out, and one step under reduced
+     motion. In place, not held: tabular digits keep it steady, and a held
+     width would push "a month" before the digits got there. */
+  const fig = useRef<HTMLSpanElement>(null);
+  const toCents = Math.round(s.steadyUsd * 100);
+  const shownCents = useRef(toCents);
+  useLayoutEffect(() => {
+    const el = fig.current;
+    const c0 = shownCents.current;
+    if (!el || c0 === toCents) return;
+    if (still(el)) {
+      shownCents.current = toCents;
+      return;
+    }
+    const put = (c: number) => {
+      el.textContent = money(c / 100);
+      shownCents.current = c;
+    };
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.max(0, Math.min(1, (now - t0) / TALLY));
+      put(Math.round(c0 + (toCents - c0) * easeOut(p)));
+      raf = p < 1 ? requestAnimationFrame(tick) : 0;
+    };
+    put(c0);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [toCents]);
 
   /**
    * Three values in one column read as three kinds of the same money, and they
@@ -69,7 +102,9 @@ export default function SavingsSlider() {
           was within a few points of the headings around it and so read as one
           more line rather than as the answer the panel exists to give. */}
       <p className="save-figure">
-        <span className="amount tnum t-figure">{money(s.steadyUsd)}</span>
+        <span className="amount tnum t-figure" ref={fig}>
+          {money(s.steadyUsd)}
+        </span>
         <span className="unit">a month</span>
       </p>
 
