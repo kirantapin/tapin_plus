@@ -441,10 +441,31 @@
   /* The band at 640, its text on the grid. Top and foot at the desktop step,
      so the head row, the copy's last line and the receipt's foot (24 in, set
      below) sit on the same two horizontal lines. */
+  /* THE BAND IS A GRID (23 Sep 2026, /impeccable layout — Sam: "it's
+     completely off"). Two rows and two columns: the masthead across the top,
+     then the copy in the left track and the month in a 480 track at the
+     right. The month is IN the flow, so it can never sit over the masthead
+     and the band grows if it must; the copy keeps the foot (§24) by aligning
+     to the end of its row, the month centres in the same row. */
   .cg-band {
     margin-inline: 0;
     min-height: 640px;
     padding: var(--s-2xl) var(--grid-in);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 480px;
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: calc(var(--s-2xl) * 2);
+    row-gap: var(--s-2xl);
+    align-items: end;
+  }
+  .cg-mast {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .cg-say {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
   }
   .cg-collar {
     width: 52px;
@@ -454,13 +475,13 @@
     height: 26px;
   }
   /* TWO EDGES, ONE PER SIDE. The shop, the H1, the lead and the actions share
-     the grid's left line; the lockup and the receipt share the photograph's
+     the grid's left line; the lockup and the month share the photograph's
      right inset, so the right side reads as one column — the lockup above
-     the receipt — instead of two near-misses 136px apart at 1440. So the
-     band's RIGHT padding is the receipt's inset; the copy is left-set and
-     capped by its own measures, so a wider box moves nothing in it. Only
-     while there is a receipt to line up with. */
-  .cg-band:has(> .ml) {
+     the month — instead of two near-misses at 1440. So the band's RIGHT
+     padding is the month's inset; the copy is left-set and capped by its
+     own measures, so a wider box moves nothing in it. Only
+     while there is a month to line up with. */
+  .cg-band:has(> .mc) {
     padding-right: var(--s-2xl);
   }
   /* DESKTOP: THE CUPS CENTRE-RIGHT, THE RECEIPT OFF THEM. Set 640 tall the
@@ -498,11 +519,12 @@
     height: 48px;
     padding: 0 calc(var(--s-xl) * 2);
   }
-  /* Left-set to the grid, at the width it had in the two-column hero, so
-     its three cells keep their rhythm rather than spreading across 1,120. */
+  /* NOT ON A DESKTOP (Sam, 23 Sep 2026: "we don't need the hero stats on
+     desktop it's too busy, keep them on mobile though"): the month in the
+     band already states the three figures as a month of orders. The strip
+     stays the phone's first block under the photograph. */
   .cg-figures {
-    max-width: 600px;
-    margin-left: var(--grid-in);
+    display: none;
   }
 
   /* The band: statement | price | action, with a hairline between the cells
@@ -1185,18 +1207,17 @@
 }
 
 /* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
-   The pitch's calendar (pitch.css `.mc-*`), in the receipt's old place: the
-   band's right, 24 in, centred on the band's height, at the width it has on
-   the pitch. The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
+   The pitch's calendar (pitch.css `.mc-*`) in the band's second row, right
+   track: in the flow, centred on the row, at the width it has on the pitch.
+   The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
 @media (min-width: 1024px) {
   .cg-band > .mc {
-    position: absolute;
+    position: relative;
     z-index: 1;
-    right: var(--s-2xl);
-    top: var(--s-2xl);
-    bottom: var(--s-2xl);
-    margin: auto 0;
-    height: fit-content;
-    width: min(480px, calc(100% - var(--s-2xl) * 2));
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    width: 480px;
+    max-width: 100%;
   }
 }
