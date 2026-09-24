@@ -447,10 +447,17 @@
      right. The month is IN the flow, so it can never sit over the masthead
      and the band grows if it must; the copy keeps the foot (§24) by aligning
      to the end of its row, the month centres in the same row. */
+  /* THE BAND IS THE MONTH'S HEIGHT (Sam, 23 Sep 2026, /impeccable layout:
+     "move the coffeeholics and the tapin logo down a bit, then remove the
+     extra header space"). No 640 floor from 1024: the month is the tallest
+     thing in the band, so the band is its height plus the insets, the
+     masthead starts on the month's top line, and the copy ends on its foot.
+     Top inset a step larger than the foot's, so the masthead sits down off
+     the announce bar. */
   .cg-band {
     margin-inline: 0;
-    min-height: 640px;
-    padding: var(--s-2xl) var(--grid-in);
+    min-height: 0;
+    padding: var(--s-3xl) var(--grid-in) var(--s-2xl);
     display: grid;
     grid-template-columns: minmax(0, 1fr) 480px;
     grid-template-rows: auto minmax(0, 1fr);
@@ -515,8 +522,12 @@
      phone's own text link, 24 apart, centred on the button's axis: the shape
      of the membership band below, which Sam singled out. The fold holds
      both, so the docked pair is switched off rather than repeated. */
+  /* The pair shares the copy's track and wraps when the track is too short
+     for two (at 1024 the track is ~400 beside the 480 month), rather than
+     running under the month. */
   .cg-acts {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--s-lg);
   }
@@ -524,9 +535,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     width: auto;
-    min-width: 220px;
+    min-width: 200px;
     height: 48px;
     padding: 0 calc(var(--s-xl) * 2);
   }
@@ -986,9 +997,9 @@
    later rule wins, and the base rule is written here, below that block. */
 @media (min-width: 1024px) {
   .cg-try {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     width: auto;
-    min-width: 220px;
+    min-width: 200px;
     min-height: 0;
     height: 48px;
     padding: 0 calc(var(--s-xl) * 2);
@@ -1225,19 +1236,19 @@
 
 /* ── WHERE THE MONTH SITS ─────────────────────────────────────────────────
    The pitch's calendar (pitch.css `.mc-*`) in the band's right track, both
-   rows: in the flow, on the band's foot with the copy, at the pitch's width.
+   rows: in the flow, from the masthead's line to the band's foot, at the
+   pitch's width.
    The receipt (`.ml-*`, SavingsLedger) is unmounted, not deleted. */
 @media (min-width: 1024px) {
-  /* ONE FOOT (Sam, 23 Sep 2026, /impeccable layout: "almost there"). Centred
-     on the band the month's top landed on the masthead's baseline and its
-     bottom hung 40px above the buttons — two near-misses. It ends where the
-     copy ends now, on the band's padding edge, and the air is all above it. */
+  /* ONE TOP LINE AND ONE FOOT. The month starts on the masthead's line and,
+     being the tallest thing in the band, ends on the band's foot, where the
+     copy ends too: two shared edges instead of the near-misses centring gave. */
   .cg-band > .mc {
     position: relative;
     z-index: 1;
     grid-column: 2;
     grid-row: 1 / -1;
-    align-self: end;
+    align-self: start;
     width: 480px;
     max-width: 100%;
   }
