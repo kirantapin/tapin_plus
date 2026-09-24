@@ -272,7 +272,8 @@ export default function Coffeeholics() {
                 sentence is the cost message match exists to avoid. */}
             <h1 className="t-hero cg-h1">$5 credit every week at Coffeeholics</h1>
             <p className="t-lead cg-lead">
-              On any order over $10. Plus 15% off and points toward rewards.
+              On any order over $10, here and at many other Blacksburg
+              favorites. Plus 15% off and points toward rewards.
             </p>
 
             {/* ══ THE ACTIONS ════════════════════════════════════════════
