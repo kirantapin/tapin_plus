@@ -1,22 +1,24 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
-import { runFigure, signedDollars, type Month } from "../model/month";
+import { dollars, signedDollars, type Month } from "../model/month";
 import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from "./MonthSwitch";
 
 /**
  * THE CALENDAR — a month on the membership, filling itself
  * (docs/POLISH-2026-09-21.md §21). The pitch's own claim, "$5 credit every
  * week, at every place you already go", shown happening: four weeks, each
- * order the venue's own mark in its day with a `+$5` chip, a line naming the
- * item and the place, and a foot that counts the membership against the
- * credit. Desktop only, over the mosaic: below 1024 it is not mounted.
+ * order the venue's own mark in its day with a `+$5` chip, and a foot that
+ * answers "spend a little, save a lot" (§42): "You spent" in `--loss`, "You
+ * saved" after the membership in `--gain`, and the month's points, quietly.
+ * Desktop only, over the mosaic: below 1024 it is not mounted.
  *
  * THE ENGINE IS THE COFFEEHOLICS LEDGER'S (§17/§20, SavingsLedger.tsx), kept
  * in step with it on purpose: the foot rests on −$4.99 for 1.2s, then the
  * orders arrive 900ms apart in the order they happened (opacity and a .92
- * scale, 280ms, the house ease); as each lands the foot counts to its new
- * total over 400ms. "You saved" and its figure are `--loss` while the month is
- * still owed and `--gain` past zero (Sam, 23 Sep 2026). It holds 3.2s, the month
- * fades out together over 240ms and begins again (≈13s a cycle).
+ * scale, 280ms, the house ease); as each lands "You spent" and "You saved"
+ * count up together to their new totals over 400ms. The saved figure is
+ * `--loss` while the month is still owed and `--gain` past zero (Sam, 23 Sep
+ * 2026). It holds 3.2s, the month fades out together over 240ms and begins
+ * again.
  *
  * THE MARKUP IS THE FINISHED MONTH. Every order in its day, the last one
  * named, the foot at its net. `data-run` is what empties it for the loop and
@@ -33,9 +35,7 @@ import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from 
  * copies.
  *
  * A MONTH AT ONE PLACE (§36, `monthAt`) is the same object: an order with a
- * `thumb` is the item's photograph filling the day instead of a collar, and
- * the foot is however many rows the model gives, every moving one counted
- * together as each order lands.
+ * `thumb` is the item's photograph filling the day instead of a collar.
  *
  * GIVEN `choices` (§40), the card offers them under its head. A switch shows
  * the new month whole, counts "You saved" across from what it read, holds,
@@ -68,10 +68,9 @@ export default function MonthCalendar({
     const cells = [...el.querySelectorAll<HTMLElement>(".mc-order")];
     const foot = el.querySelector<HTMLElement>(".mc-foot");
     const net = el.querySelector<HTMLElement>(".mc-net-fig");
-    const figs = [...el.querySelectorAll<HTMLElement>(".mc-run-fig")];
-    const runs = month.rows.flatMap((r) => (r.run ? [r.run] : []));
-    if (!foot || !net || figs.length !== runs.length) return;
-    const { startCents, runningCents } = month;
+    const spent = el.querySelector<HTMLElement>(".mc-spent");
+    if (!foot || !net || !spent) return;
+    const { startCents, runningCents, runningSpent } = month;
     const last = runningCents.length - 1;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     /* Set when this month replaced another: what "You saved" read then. */
@@ -102,17 +101,15 @@ export default function MonthCalendar({
        Ahead means above zero — the count can land a frame on $0.00, and
        "You're ahead" beside it would be a cent from true. */
     const netAt = (k: number) => (k < 0 ? startCents : runningCents[k]);
-    const runAt = (r: (typeof runs)[number], k: number) => (k < 0 ? r.start : r.running[k]);
-    /* Every moving figure, `e` of the way from step `from` to step `to`; the
+    const spentAt = (k: number) => (k < 0 ? 0 : runningSpent[k]);
+    /* Both moving figures, `e` of the way from step `from` to step `to`; the
        net can start from a figure of its own (a switch's old month). */
     const write = (from: number, to: number, e = 1, net0 = netAt(from)) => {
       const mix = (a: number, b: number) => Math.round(a + (b - a) * e);
       const c = mix(net0, netAt(to));
       net.textContent = signedDollars(c);
       sw.net.current = c;
-      runs.forEach((r, i) => {
-        figs[i].textContent = runFigure(r.unit, mix(runAt(r, from), runAt(r, to)));
-      });
+      spent.textContent = dollars(mix(spentAt(from), spentAt(to)));
       foot.classList.toggle("is-ahead", c > 0);
     };
     const count = (from: number, to: number, net0?: number, ms = COUNT) => {
@@ -303,29 +300,32 @@ export default function MonthCalendar({
       {/* No order line under the grid (Sam: "not sure this is necessary"): the
           day's picture and chip already say what was bought and what it earned. */}
 
+      {/* SPEND A LITTLE, SAVE A LOT (§42, §42.2): what the month cost, what it
+          brought back after the membership, and the points, quietly. Colour
+          only on the two money figures; the chips carry the breakdown. */}
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
-        {month.rows.map((r) => (
-          <p key={r.what} className="mc-row">
-            <span>{r.what}</span>
-            {r.run ? (
-              <>
-                <b className="mc-fig mc-run-fig" aria-hidden="true">
-                  {r.figure}
-                </b>
-                <span className="sr-only">{r.figure}</span>
-              </>
-            ) : (
-              <b className="mc-fig">{r.figure}</b>
-            )}
-          </p>
-        ))}
+        <p className="mc-row">
+          <span>You spent</span>
+          <b className="mc-fig mc-spent" aria-hidden="true">
+            {dollars(month.spentCents)}
+          </b>
+          <span className="sr-only">{dollars(month.spentCents)}</span>
+        </p>
         <p className="mc-net">
-          <span className="mc-ahead">You saved</span>
+          <span className="mc-ahead">
+            You saved
+            <span className="mc-after">after the {dollars(month.planCents)} membership</span>
+          </span>
           <b className="mc-net-fig" aria-hidden="true">
             {signedDollars(month.netCents)}
           </b>
           <span className="sr-only">{signedDollars(month.netCents)}</span>
         </p>
+        {month.points ? (
+          <p className="mc-points">
+            Plus {month.points.toLocaleString("en-US")} points toward free items
+          </p>
+        ) : null}
       </div>
     </div>
   );

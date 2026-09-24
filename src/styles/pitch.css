@@ -3750,6 +3750,25 @@ button.vcard:focus-visible {
   letter-spacing: -0.01em;
   color: var(--ink-2);
 }
+/* SPEND A LITTLE, SAVE A LOT (§42, §42.2). The spend in `--loss`; the saved
+   label's second line names the membership it is after, at the plan's own
+   price; the points a quiet line under both. Labels stay ink. */
+.mc-foot .mc-spent {
+  color: var(--loss);
+}
+.mc-after,
+.mc-points {
+  display: block;
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.mc-points {
+  margin-top: var(--s-xs);
+}
 /* The card's one large figure. Right-aligned and tabular, so the count never
    moves the digits already standing. */
 .mc-net-fig {
@@ -3841,13 +3860,24 @@ button.vcard:focus-visible {
 .mw-tile.collar::after {
   border-radius: calc(var(--r-sm) - 3px);
 }
-.mw-fig {
+/* The week's two figures (§42): what it cost in `--loss`, then what it
+   brought back in `--gain`, tabular so the columns hold down the card. */
+.mw-figs {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-md);
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  color: var(--ink-1);
+  color: var(--ink-3);
+}
+.mw-spent {
+  color: var(--loss);
+}
+.mw-saved {
+  color: var(--gain);
 }
 .mw-foot {
   display: grid;
@@ -3871,11 +3901,27 @@ button.vcard:focus-visible {
 }
 .mw-row b {
   font-weight: 700;
-  color: var(--ink-1);
+  color: var(--loss);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 .mw-net span {
   font-size: 15px;
   font-weight: 600;
+  color: var(--ink-2);
+}
+.mw-net .mw-after,
+.mw-points {
+  display: block;
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.mw-points {
+  margin-top: var(--s-xs);
 }
 .mw-net b {
   font-size: 28px;
@@ -3885,10 +3931,10 @@ button.vcard:focus-visible {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
-.mw-foot .mw-net {
+.mw-foot .mw-net b {
   color: var(--loss);
 }
-.mw-foot.is-ahead .mw-net {
+.mw-foot.is-ahead .mw-net b {
   color: var(--gain);
 }
 
@@ -3975,12 +4021,12 @@ button.vcard:focus-visible {
 .mw[data-swap] {
   overflow: clip;
 }
-.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
-.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row) {
+.mc[data-swap] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-points),
+.mw[data-swap] :is(.mw-heads, .mw-weeks, .mw-row, .mw-points) {
   transition: opacity 200ms var(--ease);
 }
-.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row),
-.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row) {
+.mc[data-swap="out"] :is(.mc-heads, .mc-sub, .mc-grid, .mc-row, .mc-points),
+.mw[data-swap="out"] :is(.mw-heads, .mw-weeks, .mw-row, .mw-points) {
   opacity: 0;
   transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
 }
@@ -4004,24 +4050,22 @@ button.vcard:focus-visible {
 }
 /* THE CROSSING IS TOLD BY COLOUR (Sam, 23 Sep 2026: "green or red based on
    whether it's positive or negative, and 'you saved' instead of 'you're
-   ahead'"). "You saved" and its figure are `--loss` while the month is owed
-   and `--gain` past zero — a class flip, not a colour transition. */
-.mc-foot .mc-ahead,
+   ahead'"). The saved figure is `--loss` while the month is owed and
+   `--gain` past zero — a class flip, not a colour transition. Its label
+   stays ink (§42: colour only for the money figures). */
 .mc-foot .mc-net-fig {
   color: var(--loss);
 }
-.mc-foot.is-ahead .mc-ahead,
 .mc-foot.is-ahead .mc-net-fig {
   color: var(--gain);
 }
 .mc[data-run] .mc-net-fig,
-.mc[data-run] .mc-run-fig {
+.mc[data-run] .mc-spent {
   transition: opacity 280ms var(--ease);
 }
 .mc[data-run][data-out] .mc-order.is-in,
-.mc[data-run][data-out] .mc-ahead,
 .mc[data-run][data-out] .mc-net-fig,
-.mc[data-run][data-out] .mc-run-fig {
+.mc[data-run][data-out] .mc-spent {
   opacity: 0;
   transition: opacity 240ms cubic-bezier(0.4, 0, 1, 1);
 }

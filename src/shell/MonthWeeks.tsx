@@ -10,15 +10,15 @@ import { MonthSegments, TALLY, easeOut, useMonthSwitch, type MonthChoice } from 
  * The desktop calendar is a 7×4 lattice with a chip on every order, a running
  * legend and a four-row ledger; at 343px that is twenty-eight cells, a dozen
  * chips and nine figures. On a phone the month is told by WEEK instead: four
- * rows, each the week's orders as small pictures and what the week brought
- * back, then the membership and what you saved. No empty days, no chips, no
+ * rows, each the week's orders as small pictures, what the week cost in
+ * `--loss` and what it brought back in `--gain` (§42), then what the month
+ * cost and what you saved after the membership. No empty days, no chips, no
  * running line, no loop. The same model as the desktop (`Month`), so the two
  * can never disagree. Given `choices` (§40) it offers them under the head, and
  * a switch counts "You saved" across while the rows crossfade.
  */
-const weekCents = (orders: MonthOrder[]) => orders.reduce((s, o) => s + o.cents, 0);
-const weekPoints = (orders: MonthOrder[]) =>
-  orders.reduce((s, o) => s + ("points" in o && typeof o.points === "number" ? o.points : 0), 0);
+const weekSum = (orders: MonthOrder[], pick: (o: MonthOrder) => number) =>
+  orders.reduce((s, o) => s + pick(o), 0);
 
 export default function MonthWeeks({
   month: given,
@@ -31,7 +31,6 @@ export default function MonthWeeks({
   const fig = useRef<HTMLElement>(null);
   const sw = useMonthSwitch(given, choices, card);
   const month = sw.shown;
-  const plan = -month.startCents;
   const ahead = month.netCents > 0;
 
   /* After a switch, "You saved" counts from what it read to the new figure,
@@ -85,8 +84,8 @@ export default function MonthWeeks({
       <ol className="mw-weeks">
         {month.weeks.map((label, wk) => {
           const orders = month.orders.filter((o) => o.week === wk);
-          const c = weekCents(orders);
-          const pts = weekPoints(orders);
+          const spent = weekSum(orders, (o) => o.priceCents);
+          const saved = weekSum(orders, (o) => o.cents);
           return (
             <li key={label} className="mw-week">
               <span className="mw-label">{label}</span>
@@ -110,23 +109,39 @@ export default function MonthWeeks({
               </span>
               <span className="sr-only">
                 {orders.map((o) => `${o.item} at ${o.venue}`).join(", ")}
+                {orders.length ? `: spent ${dollars(spent)}, saved ${dollars(saved)}` : ""}
               </span>
-              <b className="mw-fig">
-                {c > 0 ? `+${dollars(c)}` : pts > 0 ? `${pts} pts` : "—"}
-              </b>
+              {orders.length ? (
+                <span className="mw-figs" aria-hidden="true">
+                  <b className="mw-spent">{dollars(spent)}</b>
+                  <b className="mw-saved">+{dollars(saved)}</b>
+                </span>
+              ) : (
+                <b className="mw-figs" aria-hidden="true">
+                  —
+                </b>
+              )}
             </li>
           );
         })}
       </ol>
       <div className={`mw-foot${ahead ? " is-ahead" : ""}`}>
         <p className="mw-row">
-          <span>{month.rows[0]?.what ?? "Membership"}</span>
-          <b>{dollars(plan)}</b>
+          <span>You spent</span>
+          <b>{dollars(month.spentCents)}</b>
         </p>
         <p className="mw-net">
-          <span>You saved</span>
+          <span>
+            You saved
+            <span className="mw-after">after the {dollars(month.planCents)} membership</span>
+          </span>
           <b ref={fig}>{signedDollars(month.netCents)}</b>
         </p>
+        {month.points ? (
+          <p className="mw-points">
+            Plus {month.points.toLocaleString("en-US")} points toward free items
+          </p>
+        ) : null}
       </div>
     </div>
   );
