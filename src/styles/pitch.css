@@ -3782,6 +3782,40 @@ button.vcard:focus-visible {
   font-feature-settings: "tnum" 1;
 }
 
+/* ── ON A PHONE, UNDER THE HEADER (23 Sep 2026) ───────────────────────────
+   The month in the page's flow below 1024, the column's width. A step less
+   inset and a 4px lattice, so seven days and the week labels fit a 343px
+   column with each day ~34px square; the day's corner steps down with it. */
+.mc-phone {
+  margin: var(--s-2xl) 0 0;
+}
+@media (max-width: 1023px) {
+  .mc-phone .mc {
+    padding: var(--s-xl);
+  }
+  .mc-phone .mc-grid {
+    grid-template-columns: auto repeat(7, minmax(0, 1fr));
+    gap: var(--s-xs);
+  }
+  .mc-phone .mc-week {
+    padding-right: var(--s-xs);
+  }
+  .mc-phone .mc-day {
+    border-radius: var(--r-sm);
+  }
+  .mc-phone .mc-order.collar img,
+  .mc-phone .mc-order.collar::after {
+    border-radius: calc(var(--r-sm) - 3px);
+  }
+  .mc-phone .mc-chip {
+    right: 2px;
+    bottom: 2px;
+  }
+  .mc-phone .mc-net-fig {
+    font-size: 28px;
+  }
+}
+
 /* ── THE LOOP ─────────────────────────────────────────────────────────────
    Only while the script holds `data-run`. Transform and opacity, nothing
    else, on days laid out at full size from the first frame. Each transition

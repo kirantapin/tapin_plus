@@ -335,6 +335,15 @@ export default function Coffeeholics() {
             OFF THE PHOTOGRAPH (§24). Over it they were a second ledger of
             figures beside the receipt's; under it they are the claim stated
             once, in figures, before the cards below prove it. */}
+        {/* THE MONTH ON A PHONE, RIGHT UNDER THE HEADER (Sam, 23 Sep 2026:
+            "include this on mobile too, right below the header on BOTH
+            pages"): the band's calendar, first under the photograph, then
+            the figure strip. */}
+        {!desk && month ? (
+          <div className="mc-phone">
+            <MonthCalendar month={month} />
+          </div>
+        ) : null}
         <BenefitFigures items={campaignBenefits} size="display" className="cg-figures" />
       </section>
 

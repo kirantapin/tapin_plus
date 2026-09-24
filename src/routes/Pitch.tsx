@@ -418,6 +418,15 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
           `.pitch-lit` (pitch.css) paints the ground edge to edge and to the
           page's foot. docs/POLISH-2026-09-21.md §14. */}
       <div className="pitch-lit" data-lit="">
+        {/* THE MONTH ON A PHONE, RIGHT UNDER THE HEADER (Sam, 23 Sep 2026: "it'd
+            make sense to include this on mobile too, right below the header on
+            BOTH pages"). The same calendar the desktop sets over the mosaic,
+            first thing on the light ground. */}
+        {!desk && month ? (
+          <div className="mc-phone">
+            <MonthCalendar month={month} />
+          </div>
+        ) : null}
         <section className="pitch-get">
           <h2 className="t-section pitch-get-head">What you get</h2>
           <BenefitCards />
