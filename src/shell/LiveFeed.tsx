@@ -60,11 +60,20 @@ const OUT_MS = 180;
 const MAX = 8;
 /** The event the checkout's drop sends, and the card it asks for. */
 const FEED_EVENT = "tapin:feed";
-const PURCHASE: Card = {
-  what: "Someone just got early access",
-  when: "just now · Blacksburg",
+/* THE PURCHASE CARD NAMES SOMEONE (§35.3, Sam: "we need to show a random
+   name in the modal, and the location as well") — his call over §34's "no
+   names", for this one card only. Invented, like the rest of this file. */
+const NAMES = [
+  "Maya", "Jordan", "Ava", "Ethan", "Chloe", "Liam", "Priya", "Noah", "Sofia", "Caleb",
+  "Emma", "Tyler", "Hannah", "Marcus", "Grace", "Elijah", "Zoe", "Andre", "Lily", "Owen",
+  "Nia", "Ryan", "Isabella", "Jake", "Aisha", "Ben", "Olivia", "Mason", "Leah", "Diego",
+];
+const PLACES = ["Blacksburg", "Blacksburg", "Blacksburg", "Christiansburg"];
+const purchase = (): Card => ({
+  what: `${NAMES[between(0, NAMES.length - 1)]} in ${PLACES[between(0, PLACES.length - 1)]} just purchased TapIn Plus`,
+  when: "just now",
   venue: null,
-};
+});
 
 type Kind = "viewed" | "joined" | "tried";
 interface Card {
@@ -92,7 +101,7 @@ const draw = (last: Kind | null): { kind: Kind; card: Card } => {
     kind === "viewed"
       ? "Someone just viewed this page"
       : kind === "joined"
-        ? "Someone just got early access"
+        ? "Someone just purchased TapIn Plus"
         : `Someone just tried it for free at ${venue?.name}`;
   const ago =
     Math.random() < 0.5
@@ -125,18 +134,9 @@ const blocked = (): boolean =>
   document.documentElement.classList.contains("is-layered") ||
   document.querySelector('[role="dialog"], dialog[open]') !== null;
 
-/** Below 1024 the card over a layer sits under the open dialog's header: its
- *  edges, measured, handed to feed.css (which adds the tokens). */
-const underHeader = (): CSSProperties => {
-  const head = document.querySelector('[role="dialog"][aria-modal="true"] > header');
-  if (!head) return {};
-  const r = head.getBoundingClientRect();
-  return {
-    ["--over-top" as string]: `${r.bottom}px`,
-    ["--over-left" as string]: `${r.left}px`,
-    ["--over-right" as string]: `${document.documentElement.clientWidth - r.right}px`,
-  };
-};
+/** The card over a layer is a banner at the top centre at every width
+ *  (§35.3, Sam: "the toasts show above the modal"); feed.css places it. */
+const overStyle = (): CSSProperties => ({});
 
 /**
  * Mounted on the pitch (`lit`, because every pop-up on that dark page is
@@ -262,9 +262,9 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       }
       window.clearTimeout(overTimer);
       overUntil = Date.now() + SHOW_MS + OUT_MS;
-      setOver(underHeader());
+      setOver(overStyle());
       setOut(false);
-      setCard(PURCHASE);
+      setCard(purchase());
       overTimer = window.setTimeout(overLeave, SHOW_MS);
     };
     window.addEventListener(FEED_EVENT, onFeed);

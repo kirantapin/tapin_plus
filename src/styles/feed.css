@@ -46,28 +46,42 @@
   }
 }
 
-/* ══ THE ONE CARD OVER A LAYER (§35) ═══════════════════════════════════════
-   "Someone just got early access", asked for by the checkout's invented seat
-   drop. Its own z-index over the reserve layer (40) and the house's other
-   scrims (60); under the trial modal (70) and the arrival (80), which never
-   share the screen with the checkout. From 1024 it keeps the feed's own place,
-   bottom left. Below 1024 it sits under the open sheet's header — `--s-lg`
-   below its bottom edge, `--gutter` in from its sides, measured by the
-   component — so it never covers the title, the X or the docked button at
-   the foot. With no header to measure it falls back to the feed's own top. */
+/* ══ THE ONE CARD OVER A LAYER (§35, §35.3) ══════════════════════════════
+   The purchase card, asked for by the checkout's invented seat drop. Its own
+   z-index over the reserve layer (40) and the house's other scrims (60); under
+   the trial modal (70) and the arrival (80), which never share the screen
+   with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "the
+   toasts show above the modal — it's a bit weird when it shows right on the
+   modal itself"): 12px down from the top, 360 at most, the viewport less the
+   gutters on a phone, arriving from the top edge and leaving upward. On a
+   phone that is over the announce bar, above the sheet's own top; on a
+   desktop it touches only the sheet's header band, never its content. */
 .feed.is-over {
   z-index: 61;
+  top: calc(env(safe-area-inset-top, 0px) + var(--s-lg));
+  bottom: auto;
+  left: max(var(--gutter), calc(50% - 180px));
+  right: max(var(--gutter), calc(50% - 180px));
+  width: auto;
 }
-@media (max-width: 1023px) {
-  .feed.is-over {
-    top: calc(
-      var(--over-top, calc(var(--announce-h) + env(safe-area-inset-top, 0px))) + var(--s-lg)
-    );
-    left: calc(var(--over-left, 0px) + var(--gutter));
-    right: calc(var(--over-right, 0px) + var(--gutter));
+.feed.is-over .feed-plate {
+  animation-name: feedDown;
+}
+.feed.is-over.is-out .feed-plate {
+  animation-name: feedUp;
+}
+@keyframes feedDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
   }
 }
-
+@keyframes feedUp {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
 .feed-plate {
   display: flex;
   align-items: center;

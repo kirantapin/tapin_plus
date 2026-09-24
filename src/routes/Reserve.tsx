@@ -169,7 +169,7 @@ const checkoutLabel = `Checkout · ${plan.price} deposit`;
 
 /* The drop's two timings (§35): how long after the sheet is still, and each
    tick's settle. The ticks themselves are model/seatsSession.ts's TICK_MS. */
-const DROP_AFTER_MS = 2_500;
+const DROP_AFTER_MS = 5_000; /* §35.1, Sam: "on checkout for more than 5 seconds" */
 const SETTLE_MS = 240;
 /** Reduced motion, or a `data-still` ancestor: the count changes in one step. */
 const holdsStill = (el: Element | null | undefined): boolean =>
@@ -235,7 +235,7 @@ export default function Reserve() {
   /* ══ THE ROOM GETS SMALLER WHILE YOU LOOK (23 Sep 2026, POLISH §35) ═══════
      INVENTED, and model/seatsSession.ts says so at length. Sam: "when someone
      views either of these checkouts, we should show the count go down 1 or 2
-     seats." Once per open, on page 0 only: 2.5s after the sheet is still (its
+     seats." Once per open, on page 0 only: 5s after the sheet is still (its
      entrance done, no card in flight), the printed count falls by the
      session's next drop and the feed is asked, over `window`, for its one
      card over the layer — the sheet and the feed stay strangers. Never on a

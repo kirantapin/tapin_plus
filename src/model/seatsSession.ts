@@ -34,7 +34,9 @@ import { seatsLeft } from "./seats";
 /** One key: how many seats this session has "watched go", 0 to 3. */
 const KEY = "tapin.seats.takenThisSession";
 /** The most one session can take. */
-const MOST = 3;
+/* ONE drop a session (§35.2, Sam: "only once, not twice — a reopen that
+   drops again might be suspicious"): two seats, then nothing. */
+const MOST = 2;
 /** The count the drop never takes the room below. */
 const FLOOR = 30;
 /** One integer at a time, this far apart. */
@@ -92,7 +94,7 @@ export function useSeatsShown(): number {
  *  once three are gone. */
 export const nextDrop = (): number => {
   const taken = takenThisSession();
-  return taken === 0 ? 2 : taken < MOST ? 1 : 0;
+  return taken === 0 ? 2 : 0;
 };
 
 /**
