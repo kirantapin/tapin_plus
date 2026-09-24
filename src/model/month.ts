@@ -262,7 +262,15 @@ const dish = (o: EarnedPlan): ThumbOrder => ({ ...placed(o), thumb: o.items[0].i
 
 /** The foot's figures, from earned orders; null when there is nothing to
  *  show or the money back does not cover the membership. */
-function monthOf(orders: MonthOrder[], text: Pick<Month, "head" | "sub">): Month | null {
+/** The head is the claim, from the month's own spend, floored to the dollar so
+ *  "spend $X" is never more than the month shows (§42.1, Sam: "if you spend at
+ *  least $40 … this is how far ahead you'll be"). */
+const spend = (spentCents: number) => `$${Math.floor(spentCents / 100)}`;
+
+function monthOf(
+  orders: MonthOrder[],
+  text: { head: (spent: string) => string; sub: string },
+): Month | null {
   const plan = cents(monthlyToday);
   const sums = (pick: (o: MonthOrder) => number) =>
     orders.reduce<number[]>((acc, o) => [...acc, (acc.length ? acc[acc.length - 1] : 0) + pick(o)], []);
@@ -272,7 +280,8 @@ function monthOf(orders: MonthOrder[], text: Pick<Month, "head" | "sub">): Month
   const netCents = last(runningCents, -plan);
   if (!orders.length || netCents <= 0) return null;
   return {
-    ...text,
+    head: text.head(spend(last(runningSpent, 0))),
+    sub: text.sub,
     days: DAYS.map((d) => d[0]),
     weeks: Array.from({ length: WEEKS_PER_MONTH }, (_, k) => `Week ${k + 1}`),
     orders,
@@ -287,7 +296,7 @@ function monthOf(orders: MonthOrder[], text: Pick<Month, "head" | "sub">): Month
 }
 
 export const month: Month | null = monthOf(earn(plans).map(collar), {
-  head: "Your first month on the membership",
+  head: (s) => `Spend ${s} a month across Blacksburg`,
   sub: `$${BENEFIT.creditUsd} credit at every place, every week`,
 });
 
@@ -301,7 +310,7 @@ export function monthAt(venueId: string): Month | null {
   const own = plans.filter((p) => p.venue.id === venueId);
   if (!venue || !own.length) return null;
   return monthOf(earn(own).map(dish), {
-    head: `Your first month at ${venue.name}`,
+    head: (s) => `Spend ${s} a month at ${venue.name}`,
     sub: `$${BENEFIT.creditUsd} credit once a week, points on every order`,
   });
 }
@@ -316,7 +325,7 @@ export function monthAt(venueId: string): Month | null {
 export function monthAcross(venueId: string): Month | null {
   if (!plans.some((p) => p.venue.id === venueId)) return null;
   return monthOf(earn(plans).map(collar), {
-    head: "Your first month across Blacksburg",
+    head: (s) => `Spend ${s} a month across Blacksburg`,
     sub: `$${BENEFIT.creditUsd} credit at every place, every week`,
   });
 }

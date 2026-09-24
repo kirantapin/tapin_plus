@@ -283,17 +283,15 @@ export default function MonthWeeks({
           copies: they read the month, not the count. */}
       <div className={`mw-foot${ahead ? " is-ahead" : ""}`}>
         <p className="mw-row">
-          <span>You spent</span>
+          <span className="mw-lab">You spent</span>
           <Counted text={dollars(month.spentCents)} live={spentFig} />
           <span className="sr-only">{dollars(month.spentCents)}</span>
         </p>
         <p className="mw-net">
-          <span>
-            You saved
-            <span className="mw-after">after the {dollars(month.planCents)} membership</span>
-          </span>
+          <span className="mw-lab">You saved</span>
           <Counted text={signedDollars(month.netCents)} live={fig} />
           <span className="sr-only">{signedDollars(month.netCents)}</span>
+          <span className="mw-after">after the {dollars(month.planCents)} membership</span>
         </p>
         {month.points ? (
           <p className="mw-points">

@@ -3711,75 +3711,79 @@ button.vcard:focus-visible {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+/* THE FOOT, AS LINE ITEMS (Sam, 24 Sep 2026: "the numbers can be the same
+   size"; "give the 'you saved' its own parent container with a gray light
+   background"; "you saved should show up underneath you spent, and it would
+   still look like line items"). Two rows on one right edge, figures at one
+   size: "You spent" in `--loss`, then "You saved" in its own `--inner` tile
+   in `--gain` (red while the month is still owed), the membership named
+   under its label; the points a quiet line under both. Mirrored by the
+   phone month (.mw-foot). */
 .mc-foot {
   display: grid;
   gap: var(--s-sm);
   margin: var(--s-xl) 0 0;
-  padding-top: var(--s-lg);
+  padding-top: var(--s-md);
   border-top: 1px solid var(--hair);
 }
-.mc-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-lg);
+.mc-row,
+.mc-net {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--s-lg);
   margin: 0;
+  padding: var(--s-sm) var(--s-lg);
+}
+.mc-net {
+  padding-block: var(--s-md);
+  border-radius: var(--r-card);
+  background: var(--inner);
+}
+.mc-ahead {
+  grid-column: 1;
   font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   line-height: 1.3;
   color: var(--ink-2);
 }
-.mc-fig {
+.mc-fig,
+.mc-net-fig {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 26px;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   white-space: nowrap;
-  color: var(--ink-1);
+  text-align: right;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
-.mc-net {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-lg);
-  margin: var(--s-xs) 0 0;
-}
-.mc-ahead {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--ink-2);
-}
-/* SPEND A LITTLE, SAVE A LOT (§42, §42.2). The spend in `--loss`; the saved
-   label's second line names the membership it is after, at the plan's own
-   price; the points a quiet line under both. Labels stay ink. */
 .mc-foot .mc-spent {
   color: var(--loss);
+}
+/* The spent row has no second line, so its figure sits on the label's row. */
+.mc-row .mc-fig {
+  grid-row: 1;
 }
 .mc-after,
 .mc-points {
   display: block;
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.003em;
   line-height: 1.35;
   color: var(--ink-3);
 }
-.mc-points {
-  margin-top: var(--s-xs);
+.mc-after {
+  grid-column: 1;
+  grid-row: 2;
 }
-/* The card's one large figure. Right-aligned and tabular, so the count never
-   moves the digits already standing. */
-.mc-net-fig {
-  margin-left: auto;
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--ink-1);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+.mc-points {
+  padding: 0 var(--s-lg);
 }
 
 /* ── ON A PHONE, UNDER THE HEADER: THE MONTH BY WEEK (23 Sep 2026) ────────
@@ -3879,64 +3883,74 @@ button.vcard:focus-visible {
 .mw-saved {
   color: var(--gain);
 }
+/* The phone's foot is the desktop's line items (.mc-foot): "You spent", then
+   "You saved" underneath in its grey tile, one figure size, one right edge. */
 .mw-foot {
   display: grid;
   gap: var(--s-xs);
   margin: var(--s-sm) 0 0;
-  padding-top: var(--s-lg);
+  padding-top: var(--s-md);
   border-top: 1px solid var(--hair-lit);
 }
 .mw-row,
 .mw-net {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-lg);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--s-md);
   margin: 0;
+  padding: var(--s-sm) var(--s-md);
 }
-.mw-row {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--ink-2);
+.mw-net {
+  border-radius: var(--r-card);
+  background: var(--inner);
 }
-.mw-row b {
-  font-weight: 700;
-  color: var(--loss);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-}
-/* The label only: the figure's own spans (§41) take the figure's type. */
-.mw-net > span {
+.mw-lab {
+  grid-column: 1;
   font-size: 15px;
   font-weight: 600;
+  line-height: 1.3;
   color: var(--ink-2);
 }
-.mw-net .mw-after,
-.mw-points {
-  display: block;
-  margin: 2px 0 0;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.003em;
-  line-height: 1.35;
-  color: var(--ink-3);
-}
-.mw-points {
-  margin-top: var(--s-xs);
-}
+.mw-row b,
 .mw-net b {
-  font-size: 28px;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
+  white-space: nowrap;
+  text-align: right;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+.mw-row b {
+  grid-row: 1;
+  color: var(--loss);
 }
 .mw-foot .mw-net b {
   color: var(--loss);
 }
 .mw-foot.is-ahead .mw-net b {
   color: var(--gain);
+}
+.mw-net .mw-after,
+.mw-points {
+  display: block;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.003em;
+  line-height: 1.35;
+  color: var(--ink-3);
+}
+.mw-net .mw-after {
+  grid-column: 1;
+  grid-row: 2;
+}
+.mw-points {
+  padding: 0 var(--s-md);
 }
 
 /* ── THE PHONE MONTH PLAYS ONCE (§41) ─────────────────────────────────────

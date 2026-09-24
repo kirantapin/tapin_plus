@@ -305,21 +305,19 @@ export default function MonthCalendar({
           only on the two money figures; the chips carry the breakdown. */}
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
         <p className="mc-row">
-          <span>You spent</span>
+          <span className="mc-ahead">You spent</span>
           <b className="mc-fig mc-spent" aria-hidden="true">
             {dollars(month.spentCents)}
           </b>
           <span className="sr-only">{dollars(month.spentCents)}</span>
         </p>
         <p className="mc-net">
-          <span className="mc-ahead">
-            You saved
-            <span className="mc-after">after the {dollars(month.planCents)} membership</span>
-          </span>
+          <span className="mc-ahead">You saved</span>
           <b className="mc-net-fig" aria-hidden="true">
             {signedDollars(month.netCents)}
           </b>
           <span className="sr-only">{signedDollars(month.netCents)}</span>
+          <span className="mc-after">after the {dollars(month.planCents)} membership</span>
         </p>
         {month.points ? (
           <p className="mc-points">

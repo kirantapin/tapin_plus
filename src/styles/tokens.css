@@ -94,10 +94,12 @@
      the theme kept maroon, "call it plus with the gold branding"). The chip's
      plate and its ink; the marks carry the same gradient themselves. */
   /* The real logo's dot: #E8DCA7 → #CDA852 on its own axis (67°). The deep
-     stop is the TapIn app's TAPIN_GOLD. Gold takes dark ink, as it does in
-     the app: white on this gold measures about 1.8:1. */
+     stop is the TapIn app's TAPIN_GOLD. */
   --gold:linear-gradient(67deg,#E8DCA7 0%,#CDA852 100%);
-  --gold-ink:#1A1016;
+  /* White on the gold, the mark and the word (Sam, 24 Sep 2026: "can we do
+     white logo and white text on this? even if it breaks contrast rules, i
+     just want to see it"). ~1.8:1 on the deep stop, knowingly. */
+  --gold-ink:#FFFFFF;
   --loss:#FF8A80;
 
   /* THE WORDMARK'S DOT. Sam, 14 Sep 2026: "we can make the dot in the tapin
