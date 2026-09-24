@@ -184,7 +184,14 @@
   width: auto;
   display: block;
 }
-/* On the photograph the chip is the house gold chip (layout.css `.plus`). */
+/* The header's dot is white on the photograph (Sam, 24 Sep 2026: "the dot in
+   this logo should be white"), at both widths. CSS `fill` outranks the path's
+   `fill="var(--dot)"` attribute. The foot's logo, on the light page, keeps
+   the purple `--dot`, where white would vanish. */
+.cg-lockup .tl-dot {
+  fill: #FFFFFF;
+}
+/* On the photograph the chip is the purple PLUS chip (layout.css `.plus`). */
 
 /* -- the foot of the photograph: the advert's sentence and the two actions -- */
 .cg-h1 {
@@ -693,7 +700,7 @@
 
   /* The wordmark is TapIn's own mark at its own size on this surface (Sam,
      23 Sep 2026: "just use the original tapin logo … same logo for mobile
-     too"); the header's dot is white (below, `.cg-lockup .tl-dot`). */
+     too"); the header's dot is white (above, `.cg-lockup .tl-dot`). */
 }
 
 /* The field, lit the same way the dark one is: a step off at the top, the
