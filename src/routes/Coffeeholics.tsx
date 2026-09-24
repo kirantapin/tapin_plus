@@ -356,6 +356,7 @@ export default function Coffeeholics() {
                 line={c.line}
                 lead={c.id === "credit"}
                 chip={c.chip}
+                thumb={c.thumb}
               />
             ))}
           </div>

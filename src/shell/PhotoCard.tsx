@@ -23,6 +23,13 @@ export interface PhotoCardProps {
   title: string;
   line: string;
   chip?: { line: string; figure: string };
+  /**
+   * The item's own photograph, 40px at the head of the chip's order line
+   * (docs/POLISH-2026-09-21.md §37), so the promotional shot above can stay
+   * the card's picture and the dish is still named by its picture. Optional:
+   * the pitch's cards are not items and pass none.
+   */
+  thumb?: string;
   lead?: boolean;
   /**
    * `lit` — the card carries the light ramp (`data-lit`, styles/light.css):
@@ -52,11 +59,34 @@ export default function PhotoCard({
   title,
   line,
   chip,
+  thumb,
   lead = false,
   lit = false,
 }: PhotoCardProps) {
   const order = chip ? ORDER.exec(chip.line) : null;
   const saves = chip ? SAVES.exec(chip.figure) : null;
+  /* With a thumb the separator rides with the price (`bshot-tail`), so a
+     line too narrow for both breaks before it and pitch.css can clip it at
+     the head of the second line: "California Club" over "$12.00". */
+  const words = order ? (
+    thumb ? (
+      <>
+        <span className="bshot-item">{order[1]}</span>
+        <span className="bshot-tail">
+          <span className="bshot-sep"> · </span>
+          <span className="bshot-price">{order[2]}</span>
+        </span>
+      </>
+    ) : (
+      <>
+        <span className="bshot-item">{order[1]}</span>
+        <span className="bshot-sep"> · </span>
+        <span className="bshot-price">{order[2]}</span>
+      </>
+    )
+  ) : (
+    <span className="bshot-item">{chip?.line}</span>
+  );
   return (
     <article className={`bshot${lead ? " is-lead" : ""}`} data-lit={lit ? "" : undefined}>
       {img ? (
@@ -67,16 +97,24 @@ export default function PhotoCard({
         <p className="bshot-line">{line}</p>
       </div>
       {chip ? (
-        <p className="bshot-chip">
+        <p className={`bshot-chip${thumb ? " has-thumb" : ""}`}>
           <span className="bshot-chip-a">
-            {order ? (
+            {thumb ? (
               <>
-                <span className="bshot-item">{order[1]}</span>
-                <span className="bshot-sep"> · </span>
-                <span className="bshot-price">{order[2]}</span>
+                {/* alt="": the item's name is the next thing read. */}
+                <img
+                  className="bshot-thumb"
+                  src={thumb}
+                  alt=""
+                  width={40}
+                  height={40}
+                  decoding="async"
+                  loading="lazy"
+                />
+                <span className="bshot-words">{words}</span>
               </>
             ) : (
-              <span className="bshot-item">{chip.line}</span>
+              words
             )}
           </span>
           <b className={`bshot-chip-b${saves ? " is-save" : ""}`}>

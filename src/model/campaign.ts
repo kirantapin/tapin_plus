@@ -179,6 +179,14 @@ export const campaignHeroShot = "/shots/coffeeholicsva-cup.jpg";
  * public bucket and the same permission as the logos and heroes; three are
  * copied to public/shots/. A card's `shot` wins over the item's thumbnail;
  * the item line stays the record's, so the price is still the menu's.
+ *
+ * AND THE ITEM KEEPS ITS OWN PICTURE (§37). Sam, 23 Sep 2026: "can we bring
+ * back the item images for these? and maybe have the 15% off one be for a
+ * coffee." The shot stays the card's picture; the item's own image rides in
+ * `thumb`, 40px beside its line in the plate. The 15% card is a coffee now.
+ * The menu has no drink called a latte: the Breve is its latte ("Steamed Half
+ * & Half and Espresso", a latte-art cup in its photograph), and the Cappuccino
+ * is already the points card's, so two cards naming one drink is avoided.
  */
 const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const cents = (usd: number) => Math.round(usd * 100);
@@ -197,7 +205,7 @@ const SHOT_ITEMS = [
   },
   {
     id: "percent",
-    item: "French Onion Steak Melt",
+    item: "Breve",
     shot: "/shots/coffeeholicsva-spread.jpg",
     title: `${Math.round(BENEFIT.percentOff * 100)}% off`,
     line: "Everything except alcohol",
@@ -220,6 +228,8 @@ export const campaignShots: {
   img: string;
   title: string;
   line: string;
+  /** The item's own photograph, from the menu record. */
+  thumb: string;
   chip: { line: string; figure: string };
 }[] = SHOT_ITEMS.flatMap((s) => {
   const found = itemsFor("coffeeholicsva").find((i) => i.name === s.item);
@@ -231,6 +241,7 @@ export const campaignShots: {
           img: s.shot ?? found.img,
           title: s.title,
           line: s.line,
+          thumb: found.img,
           chip: { line: `${found.name} · ${dollars(cents(found.price))}`, figure },
         },
       ]

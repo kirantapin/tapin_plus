@@ -1590,6 +1590,63 @@ button.vcard:focus-visible {
   line-height: 1.4;
   color: var(--ink-2);
 }
+/* THE ITEM'S OWN PICTURE (§37), on the splash only: the pitch passes no
+   `thumb`. 40px, the receipt's 32 a step up, at the head of the order line —
+   under the ledger row's 44.6 floor, so the row keeps its height. The words
+   centre on it and wrap beside it, never under it; `min-width: auto` so the
+   column never narrows past its longest word. The ring is drawn over the
+   photograph's edge (an outline: an image element takes no ::after), so a
+   pale dish still has an edge against the white plate. */
+.bshot-chip.has-thumb .bshot-chip-a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  min-width: auto;
+}
+.bshot-thumb {
+  flex: 0 0 auto;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--inner);
+  outline: 1px solid var(--hair);
+  outline-offset: -1px;
+}
+/* WHERE THE LINE BREAKS, if it must (a card under ~330px: the 1024 row, a
+   320 phone). Name over price, never "California Club ·" over "$12.00". The
+   space between them is a flex gap of `--sep` (the space-dot-space's own
+   10.4px), and the dot hangs in it from the price's left edge. A gap exists
+   only between two things on one line, so when the price drops to a second
+   line the dot hangs off the box's left edge and the clip takes it — and the
+   column's narrowest width is its longest word, with no room held for a dot. */
+.bshot-words {
+  --sep: 0.75em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sep);
+  overflow: hidden;
+}
+.bshot-tail {
+  position: relative;
+}
+.bshot-tail > .bshot-sep {
+  position: absolute;
+  right: 100%;
+  width: var(--sep);
+  text-align: center;
+}
+/* With the picture, the order line is ~52px wider and a sentence figure
+   ("Points toward a free one") beside it no longer fits on one line. So it is
+   set on a short measure, two even lines, the way "You save" sits over its
+   figure — and the order line keeps its one line rather than both halves
+   taking a share of the shortfall and both breaking. */
+.bshot-chip.has-thumb .bshot-chip-b:not(.is-save) {
+  max-width: 7em;
+  text-wrap: balance;
+}
 .bshot-chip-b {
   flex: 0 1 auto;
   display: flex;
