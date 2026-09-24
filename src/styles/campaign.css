@@ -474,16 +474,14 @@
   .cg-lockup svg {
     height: 26px;
   }
-  /* TWO EDGES, ONE PER SIDE. The shop, the H1, the lead and the actions share
-     the grid's left line; the lockup and the month share the photograph's
-     right inset, so the right side reads as one column — the lockup above
-     the month — instead of two near-misses at 1440. So the band's RIGHT
-     padding is the month's inset; the copy is left-set and capped by its
-     own measures, so a wider box moves nothing in it. Only
-     while there is a month to line up with. */
-  .cg-band:has(> .mc) {
-    padding-right: var(--s-2xl);
-  }
+  /* BOTH EDGES ON THE GRID (23 Sep 2026, /impeccable layout, Sam at ~1620:
+     "these larger viewports still have formatting that's wrong"). The band
+     used to keep its right inset at 24 so the receipt sat over the
+     photograph's window frame; with the month in a grid track that left the
+     copy 250px in and the month 24px in on a wide screen — lopsided, and the
+     lockup with it. Now `--grid-in` pads both sides, so the shop and the copy
+     share the grid's left line, the lockup and the month share its right,
+     and the photograph alone runs to the window's edges. */
   /* DESKTOP: THE CUPS CENTRE-RIGHT, THE RECEIPT OFF THEM. Set 640 tall the
      photograph is 2014 wide; anchored at its right edge, the two cups fall
      at roughly 42–73% of a 1440 window and the receipt's 340 (24 in from the
