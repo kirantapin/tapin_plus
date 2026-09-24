@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { campaignTrials, campaignVenue } from "../model/campaign";
+import { campaignTrialPlaces, campaignVenue } from "../model/campaign";
 import { useReserveCta } from "./useReserveCta";
 import {
   monthlyToday,
@@ -57,7 +57,6 @@ export default function TrialModal({
 }) {
   const [closing, setClosing] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
-  const venue = campaignVenue;
   /* ══ THE SILO HELD ON THE PAGE AND BROKE IN HERE ═══════════════════════
      Sam, 20 Sep 2026: "when I clicked on get early access again it took me
      to the main tapin page checkout not the one for coffeeholics."
@@ -110,7 +109,7 @@ export default function TrialModal({
      was only ever in them — the ticket — because that is the part nobody
      expects and the only reason this list is longer than one line. */
   const steps = [
-    { k: "open", h: `Open ${venue?.name ?? "the shop"} on TapIn` },
+    { k: "open", h: "Open the shop on TapIn" },
     { k: "order", h: "Order what you want" },
     { k: "collect", h: "It goes straight to the counter as a ticket" },
   ];
@@ -157,49 +156,74 @@ export default function TrialModal({
             ))}
           </ol>
 
-          <ul className="ct-trials">
-            {campaignTrials.map((t) => (
-              <li key={t.id}>
-                <a
-                  className="action action-ghost cg-trial"
-                  href={t.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {/* ══ THE LABEL, AND THE ACTION ═════════════════════════
-                      Sam, 20 Sep 2026, converging on it in four messages:
-                      "click here to use", then "too wordy", then "or just
-                      'redeem'", then "Or 'try now'".
+          {/* TWO PLACES (Sam, 23 Sep 2026: "add two places for this, try at
+              coffeeholics and try at the burg"): each place is a small head —
+              its collar and name — over its own offers, from the same records
+              the rest of the page draws. */}
+          <ul className="ct-places">
+            {campaignTrialPlaces.map((place) => {
+              const at = venues.find((v) => v.id === place.venueId);
+              if (!at) return null;
+              return (
+                <li key={place.venueId}>
+                  <p className="ct-place-h">
+                    <span
+                      className="collar"
+                      data-field={logoField(at.id)}
+                      style={{ ["--brand" as string]: at.brandColor }}
+                      aria-hidden="true"
+                    >
+                      <img src={at.logo} alt="" decoding="async" />
+                    </span>
+                    At {at.name}
+                  </p>
+                  <ul className="ct-trials">
+                    {place.trials.map((t) => (
+                  <li key={t.id}>
+                    <a
+                      className="action action-ghost cg-trial"
+                      href={t.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {/* ══ THE LABEL, AND THE ACTION ═════════════════════════
+                          Sam, 20 Sep 2026, converging on it in four messages:
+                          "click here to use", then "too wordy", then "or just
+                          'redeem'", then "Or 'try now'".
 
-                      "Try now" over "Redeem" because it is already this
-                      page's word — the docked bar says "Try it once for
-                      free", the list says "Try the first two free today" and
-                      this modal is titled "Try it once, free". Redeem is what
-                      the merchant's own page calls it one tap later, which is
-                      the right place for a second vocabulary, not here.
+                          "Try now" over "Redeem" because it is already this
+                          page's word — the docked bar says "Try it once for
+                          free", the list says "Try the first two free today" and
+                          this modal is titled "Try it once, free". Redeem is what
+                          the merchant's own page calls it one tap later, which is
+                          the right place for a second vocabulary, not here.
 
-                      Two words, and beside the arrow rather than under the
-                      label — a second line would have been another fact about
-                      the offer, which is what the sublines cut from here were.
-                      On the right it reads as the row's verb, which is what
-                      the external-link glyph alone was having to carry. */}
-                  <b>{t.label}</b>
-                  <span className="ct-do">
-                    Try now
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.9"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </a>
-              </li>
-            ))}
+                          Two words, and beside the arrow rather than under the
+                          label — a second line would have been another fact about
+                          the offer, which is what the sublines cut from here were.
+                          On the right it reads as the row's verb, which is what
+                          the external-link glyph alone was having to carry. */}
+                      <b>{t.label}</b>
+                      <span className="ct-do">
+                        Try now
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M14 5h5v5M19 5l-8 8M9 6H6a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-3"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.9"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </a>
+                  </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
           </ul>
           {/* The two facts worth keeping from the four lines that went: it is
               one use each, and the credit keeps. */}

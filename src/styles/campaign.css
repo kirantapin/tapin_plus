@@ -826,7 +826,13 @@
 .ct-steps b{min-width:0;font-size:15px;font-weight:700;letter-spacing:-.01em;
   line-height:1.35;color:var(--ink-1);text-wrap:pretty}
 
-.ct-trials{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
+/* The places, each a head over its offers (23 Sep 2026). */
+.ct-places{list-style:none;margin:var(--s-2xl) 0 0;padding:0;display:flex;
+  flex-direction:column;gap:var(--s-xl)}
+.ct-place-h{display:flex;align-items:center;gap:var(--s-md);margin:0 0 var(--s-md);
+  font-size:14px;font-weight:600;color:var(--ink-2)}
+.ct-place-h .collar{width:28px;height:28px;border-radius:8px}
+.ct-trials{list-style:none;margin:0;padding:0;display:flex;
   flex-direction:column;gap:var(--s-md)}
 .ct-once{margin:var(--s-md) 0 0;text-wrap:pretty}
 
