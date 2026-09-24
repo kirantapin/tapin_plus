@@ -85,7 +85,9 @@ export function stashCardOrigin(el: Element | null) {
  * own entrance under the flight. False under reduced motion: no flight there.
  */
 export function flightPending(): boolean {
-  return !reduced() && peek() !== null;
+  /* The checkout's card is not drawn below 1024 (reserve.css `.rs-inc-card`). */
+  const shown = window.matchMedia?.("(min-width: 1024px)").matches ?? true;
+  return shown && !reduced() && peek() !== null;
 }
 
 /* Off-screen, or not the same card (a resize between routes): no flight

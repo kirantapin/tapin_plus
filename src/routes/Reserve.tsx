@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import GuaranteeLine from "../shell/GuaranteeLine";
-import SaveRow from "../shell/SaveRow";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
@@ -15,6 +14,7 @@ import {
   firstEarlyBirdPrice,
   foundingCloses,
   foundingTierName,
+  guarantee,
   logoField,
   monthlyToday,
   offers,
@@ -59,8 +59,8 @@ import { BENEFIT } from "../model/savings";
    guarantee block (docs/POLISH-2026-09-21.md §16).
 
    The pitch and the splash persuade; this sheet CONFIRMS. So page 0 is the
-   plan tiles, the order card (the seats, the schedule), the included panel
-   with the card at its foot, and the docked button (§31).
+   included panel with the card at its foot, the plan tiles, the order card
+   (the seats, the schedule), and the docked button (§31).
 
    ══ THE INCLUDED PANEL, AND DESKTOP WITHOUT A SCROLL (23 Sep 2026, §18) ════
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe we
@@ -71,7 +71,7 @@ import { BENEFIT } from "../model/savings";
    1024 the sheet is two columns — what it buys on the left (the panel, the
    card inside it), the money on the right (tiles, order card; §30), the dock
    under both. Below 1024 the column wrappers generate no boxes, so the phone
-   reads the DOM order. */
+   reads the DOM order: the panel first, then the money (24 Sep 2026). */
 const plan = PLANS.monthly;
 
 /* ══ THE SCHEDULE — WHAT YOU PAY, AND WHEN ══════════════════════════════════
@@ -99,9 +99,15 @@ const plan = PLANS.monthly;
    clause under it, on a rail, and the refund is the one sentence under the
    rail — the plan's own refund term, while its refund charge row stands. The
    tier in Today's clause is `foundingTierName`, never typed. */
-const refundLine = plan.chargeRows.some((r) => r.id === "refund")
-  ? plan.terms.find((t) => t.id === "refund")?.term
-  : undefined;
+/* THE WAYS OUT, AS ONE LINE (Sam, 24 Sep 2026: "'save what you pay or we
+   refund the difference' or request refund or cancellation with no reason
+   needed"). Held to the terms: cancel any time; a full refund only while the
+   refund charge row stands, before we open. */
+const refundLine = `${guarantee} ${
+  plan.chargeRows.some((r) => r.id === "refund")
+    ? "Or cancel any time, with a full refund before we open, no reason needed."
+    : "Or cancel any time, no reason needed."
+}`;
 const schedule: { id: string; when: string; figure: string; clause: string }[] = [
   {
     id: "today",
@@ -331,12 +337,94 @@ export default function Reserve() {
      on page 2, one tap on. */
   return (
     <div className="rs-modal" ref={modal}>
-      {/* What you'd save, first, below 1024 (§44): the page beneath's own
-          photo cards as a snapping row. Nothing from 1024. */}
-      <SaveRow />
+      {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════
+          The left column from 1024; `display:contents` below it, where the
+          panel opens the sheet in place of the photo-card row (Sam, 24 Sep
+          2026: "get rid of the top section of the checkout… and replace it"). */}
+      <div className="rs-get-col">
+        {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
+            Sam, on the trial modal's call-out: "I like how you formatted
+            this, maybe we use the same on the checkout flow." Its
+            construction, rebuilt under `.rs-*`: one `--inner` plate, a
+            heading, then what you get, where it works and the guarantee —
+            the three open blocks that followed the count — as its rows.
+
+            THE HEADING ANSWERS THE MODAL'S QUESTION. The call-out asks "Want
+            this every week? And at every location?"; by checkout the reader
+            has said yes, so the plate states it. Words, never a figure.
+
+            NO BUTTON AND NO PRICE INSIDE IT. The action is the dock's and
+            the money is the tiles' and the order card's; a second
+            price here would be the same figure stated twice on one sheet. */}
+        <section className="rs-inc" aria-labelledby="rs-inc-head">
+          <h2 className="t-title rs-inc-head" id="rs-inc-head">
+            Every week, at every location
+          </h2>
+          {/* Four lines, a check each — the checklist every reference plan
+              sheet carries. The glyph is ink, not a tile. */}
+          {included.length ? (
+            <ul className="rs-checks">
+              {included.map((item) => (
+                <li key={item.id}>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m3.2 8.4 3 3 6.6-6.8" />
+                  </svg>
+                  <span>{item.line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {/* Where it works: the six marks stacked on the left, their names
+              in a sentence beside them — the call-out's two-column row. */}
+          <div className="rs-inc-also">
+            <span className="rs-inc-marks" aria-hidden="true">
+              {venues.map((v) => (
+                <span
+                  key={v.id}
+                  className="collar"
+                  data-field={logoField(v.id)}
+                  style={{ ["--brand" as string]: v.brandColor }}
+                >
+                  <img src={v.logo} alt="" decoding="async" />
+                </span>
+              ))}
+            </span>
+            <p className="rs-inc-line">
+              At{" "}
+              {venues.map((v, k, all) => (
+                <Fragment key={v.id}>
+                  <span className="rs-venue-name">{v.name}</span>
+                  {joinAfter(k, all.length)}
+                </Fragment>
+              ))}
+              .
+            </p>
+          </div>
+          {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
+          <GuaranteeLine />
+          {/* ══ THE CARD LIVES IN THE PANEL (23 Sep 2026, POLISH §26) ══════
+              It was the sheet's close under its own hairline (§8), a second
+              object after the panel. The heading's list adds up to it, so the
+              panel grows a foot: a hairline, the card centred at the one card
+              width, no caption (its STARTS field says when it is hers). On a
+              phone the panel opens page 0 (24 Sep), so the card leads into
+              the tiles. `cardRef` is what the deck's card flies onto (shell/cardFlight.ts),
+              and the name field on page 1 still fills it as she types. */}
+          <div className="rs-inc-card">
+            <TapInCard
+              name={cardName.trim() || undefined}
+              innerRef={cardRef}
+              className="reserve-card"
+            />
+          </div>
+        </section>
+
+      </div>
+
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
           The right column from 1024 (the tiles, then the order card); below
-          1024 this wrapper is `display:contents` and draws nothing. */}
+          1024 this wrapper is `display:contents` and follows the panel. */}
       <div className="rs-pay-col">
         {/* ══ ONE PLAN. THE PICKER IS GONE (15 Sep 2026, Sam) ═══════════════
            It offered monthly, the 3-month pass and the year-with-a-shirt as a
@@ -539,90 +627,6 @@ export default function Reserve() {
             </button>
           </div>
         </section>
-      </div>
-
-      {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════
-          The left column from 1024; `display:contents` below it, where the
-          panel follows the order card. */}
-      <div className="rs-get-col">
-        {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
-            Sam, on the trial modal's call-out: "I like how you formatted
-            this, maybe we use the same on the checkout flow." Its
-            construction, rebuilt under `.rs-*`: one `--inner` plate, a
-            heading, then what you get, where it works and the guarantee —
-            the three open blocks that followed the count — as its rows.
-
-            THE HEADING ANSWERS THE MODAL'S QUESTION. The call-out asks "Want
-            this every week? And at every location?"; by checkout the reader
-            has said yes, so the plate states it. Words, never a figure.
-
-            NO BUTTON AND NO PRICE INSIDE IT. The action is the dock's and
-            the money is the tiles' and the order card's; a second
-            price here would be the same figure stated twice on one sheet. */}
-        <section className="rs-inc" aria-labelledby="rs-inc-head">
-          <h2 className="t-title rs-inc-head" id="rs-inc-head">
-            Every week, at every location
-          </h2>
-          {/* Four lines, a check each — the checklist every reference plan
-              sheet carries. The glyph is ink, not a tile. */}
-          {included.length ? (
-            <ul className="rs-checks">
-              {included.map((item) => (
-                <li key={item.id}>
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
-                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="m3.2 8.4 3 3 6.6-6.8" />
-                  </svg>
-                  <span>{item.line}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {/* Where it works: the six marks stacked on the left, their names
-              in a sentence beside them — the call-out's two-column row. */}
-          <div className="rs-inc-also">
-            <span className="rs-inc-marks" aria-hidden="true">
-              {venues.map((v) => (
-                <span
-                  key={v.id}
-                  className="collar"
-                  data-field={logoField(v.id)}
-                  style={{ ["--brand" as string]: v.brandColor }}
-                >
-                  <img src={v.logo} alt="" decoding="async" />
-                </span>
-              ))}
-            </span>
-            <p className="rs-inc-line">
-              At{" "}
-              {venues.map((v, k, all) => (
-                <Fragment key={v.id}>
-                  <span className="rs-venue-name">{v.name}</span>
-                  {joinAfter(k, all.length)}
-                </Fragment>
-              ))}
-              .
-            </p>
-          </div>
-          {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
-          <GuaranteeLine />
-          {/* ══ THE CARD LIVES IN THE PANEL (23 Sep 2026, POLISH §26) ══════
-              It was the sheet's close under its own hairline (§8), a second
-              object after the panel. The heading's list adds up to it, so the
-              panel grows a foot: a hairline, the card centred at the one card
-              width, no caption (its STARTS field says when it is hers). On a
-              phone the panel closes page 0, so the card closes it there too.
-              `cardRef` is what the deck's card flies onto (shell/cardFlight.ts),
-              and the name field on page 1 still fills it as she types. */}
-          <div className="rs-inc-card">
-            <TapInCard
-              name={cardName.trim() || undefined}
-              innerRef={cardRef}
-              className="reserve-card"
-            />
-          </div>
-        </section>
-
       </div>
 
       {/* The phone's foot: sticky to the scroller's bottom, always on, page 0's
