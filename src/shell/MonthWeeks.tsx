@@ -293,11 +293,6 @@ export default function MonthWeeks({
           <span className="sr-only">{signedDollars(month.netCents)}</span>
           <span className="mw-after">after the {dollars(month.planCents)} membership</span>
         </p>
-        {month.points ? (
-          <p className="mw-points">
-            Plus {month.points.toLocaleString("en-US")} points toward free items
-          </p>
-        ) : null}
       </div>
     </div>
   );

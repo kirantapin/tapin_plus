@@ -3717,8 +3717,8 @@ button.vcard:focus-visible {
    still look like line items"). Two rows on one right edge, figures at one
    size: "You spent" in `--loss`, then "You saved" in its own `--inner` tile
    in `--gain` (red while the month is still owed), the membership named
-   under its label; the points a quiet line under both. Mirrored by the
-   phone month (.mw-foot). */
+   under its label. No points line (Sam: "I don't think we need to mention
+   the … points"). Mirrored by the phone month (.mw-foot). */
 .mc-foot {
   display: grid;
   gap: var(--s-sm);
@@ -3768,8 +3768,7 @@ button.vcard:focus-visible {
 .mc-row .mc-fig {
   grid-row: 1;
 }
-.mc-after,
-.mc-points {
+.mc-after {
   display: block;
   margin: 0;
   font-size: 14px;
@@ -3781,9 +3780,6 @@ button.vcard:focus-visible {
 .mc-after {
   grid-column: 1;
   grid-row: 2;
-}
-.mc-points {
-  padding: 0 var(--s-lg);
 }
 
 /* ── ON A PHONE, UNDER THE HEADER: THE MONTH BY WEEK (23 Sep 2026) ────────
@@ -3935,8 +3931,7 @@ button.vcard:focus-visible {
 .mw-foot.is-ahead .mw-net b {
   color: var(--gain);
 }
-.mw-net .mw-after,
-.mw-points {
+.mw-net .mw-after {
   display: block;
   margin: 0;
   font-size: 14px;
@@ -3948,9 +3943,6 @@ button.vcard:focus-visible {
 .mw-net .mw-after {
   grid-column: 1;
   grid-row: 2;
-}
-.mw-points {
-  padding: 0 var(--s-md);
 }
 
 /* ── THE PHONE MONTH PLAYS ONCE (§41) ─────────────────────────────────────
