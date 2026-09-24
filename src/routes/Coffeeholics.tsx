@@ -256,7 +256,10 @@ export default function Coffeeholics() {
               <span className="cg-name-text">
                 <b>{v.name}</b>
                 <span>
-                  {v.category} · {v.street}
+                  {/* The category alone; Sam, 23 Sep 2026: "don't need the
+                      'draper road' in the headline". The street stays on the
+                      venue card and the pop-up, where it is an address. */}
+                  {v.category}
                 </span>
               </span>
             </p>
