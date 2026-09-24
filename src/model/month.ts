@@ -40,6 +40,13 @@ import { itemsFor } from "./menu";
  * Sam's cover at The Milk Parlor, weekend line skips and drinks at The Burg or
  * Olaika are the intent, and the model has no price for any of them yet; when
  * the pass and drink records land, each is one line in ORDERS.
+ *
+ * SWEETOPIA IS THE FIFTH PLACE (§36.1, Sam: "be sure to throw sweet topia in
+ * there as well"). Every item on its menu is $7.20, under the floor, so its
+ * order is a basket of two; the places word follows on its own.
+ *
+ * A MONTH AT ONE PLACE is `monthAt(venueId)`, below: the same calendar, that
+ * venue's own orders, every benefit counted (§36).
  */
 
 /** Monday first: the weekend closes each row, where the nights out fall. */
@@ -54,6 +61,7 @@ const ORDERS: { week: number; day: Day; venueId: string; items: string[] }[] = [
   { week: 2, day: "Sat", venueId: "themilkparlor", items: ["Loaded Fries Basket"] },
   { week: 3, day: "Mon", venueId: "coffeeholicsva", items: ["French Onion Steak Melt"] },
   { week: 3, day: "Fri", venueId: "theburg", items: ["Lomo Saltado — Peru"] },
+  { week: 3, day: "Sat", venueId: "sweetopia", items: ["Strawberry Shortcake", "Cookies & Cream"] },
   {
     week: 4,
     day: "Wed",
@@ -70,9 +78,15 @@ export const dollars = (c: number) => `$${(c / 100).toFixed(2)}`;
 export const signedDollars = (c: number) => `${c < 0 ? "−" : ""}${dollars(Math.abs(c))}`;
 /** The chip's short form: whole dollars drop their cents. */
 const chip = (c: number) => `+$${c % 100 ? (c / 100).toFixed(2) : c / 100}`;
-const COUNT_WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven"];
+const COUNT_WORDS = [
+  "no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+  "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+  "eighteen", "nineteen", "twenty",
+];
+const counted = (n: number, noun: string) =>
+  `${COUNT_WORDS[n] ?? n} ${noun}${n === 1 ? "" : "s"}`;
 
-export interface MonthOrder {
+interface Placed {
   id: string;
   /** 0-based row and column: week, then day of the week (Monday first). */
   week: number;
@@ -80,16 +94,47 @@ export interface MonthOrder {
   venue: string;
   /** The item's own name from the menu; a basket's names joined by " + ". */
   item: string;
-  /** The venue's own mark, `venue.logo`, and how its collar seats it. */
+  /** What the order brings back in money: its credit, or its 15%. */
+  cents: number;
+  /** `+$5`, `15%` or `pts` on the cell. */
+  chip: string;
+  /** What follows the item's name in the latest line. */
+  at: string;
+}
+
+/** The pitch's cell: the venue's own mark, `venue.logo`, and how its collar
+ *  seats it. */
+interface CollarOrder extends Placed {
+  thumb?: undefined;
   img: string;
   brand: string;
   field: "light" | "dark";
-  cents: number;
-  /** `+$5` on the cell. */
-  chip: string;
-  /** ` at {venue} · +$5.00`, after the item's name in the latest line. */
-  at: string;
 }
+
+/** A venue's cell: the item's own photograph, and the one benefit it earned
+ *  with the points every order earns. */
+interface ThumbOrder extends Placed {
+  thumb: string;
+  benefit: "credit" | "percent" | "points";
+  priceCents: number;
+  creditCents: number;
+  percentCents: number;
+  points: number;
+}
+
+export type MonthOrder = CollarOrder | ThumbOrder;
+
+/** A line of the foot. One that moves carries its value before the first
+ *  order and after each, in order; the last is the figure. */
+export interface MonthRow {
+  what: string;
+  figure: string;
+  run?: { unit: "usd" | "pts"; start: number; running: number[] };
+}
+
+/** A running value as its row prints it. */
+export const runFigure = (unit: "usd" | "pts", v: number) =>
+  unit === "pts" ? `${v}\u00A0pts` : dollars(v);
 
 export interface Month {
   head: string;
@@ -101,11 +146,11 @@ export interface Month {
   orders: MonthOrder[];
   /** The latest line before the first order. */
   empty: string;
-  plan: { what: string; figure: string; cents: number };
-  earned: { what: string; figure: string; cents: number };
-  /** The foot before any credit: the membership, owed. */
+  /** The foot above "You're ahead": the membership, then what came back. */
+  rows: MonthRow[];
+  /** The net before any order: the membership, owed. */
   startCents: number;
-  /** The foot after each order lands, in order. The last is `netCents`. */
+  /** The net after each order lands, in order. The last is `netCents`. */
   runningCents: number[];
   netCents: number;
 }
@@ -157,7 +202,6 @@ export const month: Month | null = (() => {
   const netCents = runningCents.length ? runningCents[runningCents.length - 1] : -plan;
   if (!orders.length || netCents <= 0) return null;
   const places = new Set(orders.map((o) => o.venue)).size;
-  const earned = netCents + plan;
 
   return {
     head: "Your first month on the membership",
@@ -166,14 +210,168 @@ export const month: Month | null = (() => {
     weeks: Array.from({ length: WEEKS_PER_MONTH }, (_, k) => `Week ${k + 1}`),
     orders,
     empty: "Order once a week at each place",
-    plan: { what: `${cardPlan} membership`, figure: dollars(plan), cents: plan },
-    earned: {
-      what: `Credit earned, ${COUNT_WORDS[places] ?? places} place${places === 1 ? "" : "s"}`,
-      figure: dollars(earned),
-      cents: earned,
-    },
+    rows: [
+      { what: `${cardPlan} membership`, figure: dollars(plan) },
+      {
+        what: `Credit earned, ${counted(places, "place")}`,
+        figure: dollars(netCents + plan),
+        run: { unit: "usd", start: 0, running: runningCents.map((c) => c + plan) },
+      },
+    ],
     startCents: -plan,
     runningCents,
     netCents,
   };
 })();
+
+/**
+ * A MONTH AT ONE PLACE (docs/POLISH-2026-09-21.md §36). Sam, on the calendar
+ * in the Coffeeholics band: "these should be food and drink items at
+ * coffeeholics, showing multiple purchases a week — including the 15%
+ * benefit, $5 benefit, and points benefit."
+ *
+ * Three or four orders a week from that venue's own menu, each pictured by
+ * its first item's own photograph and each carrying the ONE benefit it earns,
+ * by the model's rules, in the order they happen:
+ *   credit   the week's first order at or over the floor: min($5, price)
+ *   percent  every other order at or over it: 15% of what is not alcohol
+ *   points   an order under it: points only
+ * Every order also earns points, whole, at the venue's own multiplier (1×,
+ * content.ts) on its dollars; the foot counts them all. An item missing from
+ * the menu or without its photograph drops its order, and the benefits
+ * re-derive from what is left. Only the money nets against the plan.
+ *
+ * The sandwich picked by id is the one campaign.ts and ORDERS pick by id: its
+ * name trips scripts/guards.py if typed. There is no latte on this menu, so
+ * there is none here.
+ */
+const ORDERS_AT: Record<string, { week: number; day: Day; items: string[] }[]> = {
+  coffeeholicsva: [
+    { week: 1, day: "Tue", items: ["Cappuccino"] },
+    { week: 1, day: "Wed", items: ["California Club"] },
+    { week: 1, day: "Fri", items: ["French Onion Steak Melt", "Americano"] },
+    { week: 2, day: "Mon", items: ["Cortado"] },
+    { week: 2, day: "Tue", items: ["coffeeholicsva-160-49"] },
+    { week: 2, day: "Thu", items: ["Butter Croissant", "Breve"] },
+    { week: 2, day: "Sat", items: ["California Club", "Breve"] },
+    { week: 3, day: "Tue", items: ["Breve", "Brownie"] },
+    { week: 3, day: "Wed", items: ["French Onion Steak Melt"] },
+    { week: 3, day: "Fri", items: ["Americano", "Brownie", "Butter Croissant"] },
+    { week: 4, day: "Mon", items: ["Baked Cookie"] },
+    { week: 4, day: "Wed", items: ["Cappuccino", "Butter Croissant", "Baked Cookie"] },
+    { week: 4, day: "Thu", items: ["coffeeholicsva-160-49"] },
+    { week: 4, day: "Sat", items: ["Cheesecake", "Cortado"] },
+  ],
+};
+
+export function monthAt(venueId: string): Month | null {
+  const venue = venues.find((v) => v.id === venueId);
+  const planned = ORDERS_AT[venueId];
+  if (!venue || !planned) return null;
+  const pointsRate = venue.policies.find((p) => p.kind === "points")?.multiplier ?? 0;
+  const hasCredit = venue.policies.some((p) => p.kind === "credit");
+  const hasPercent = venue.policies.some((p) => p.kind === "percent");
+  const floor = cents(BENEFIT.creditMinUsd);
+  const pct = Math.round(BENEFIT.percentOff * 100);
+  const menu = itemsFor(venueId);
+
+  const placed = planned
+    .flatMap((o) => {
+      const day = DAYS.indexOf(o.day);
+      if (o.week < 1 || o.week > WEEKS_PER_MONTH || day < 0) return [];
+      const found = o.items.map(
+        (key) => menu.find((i) => i.name === key) ?? menu.find((i) => i.id === key),
+      );
+      if (!found.length || found.some((i) => !i)) return [];
+      const items = found as NonNullable<(typeof found)[number]>[];
+      const thumb = items[0].img;
+      if (!thumb) return [];
+      return [{ week: o.week - 1, day, items, thumb }];
+    })
+    .sort((a, b) => a.week - b.week || a.day - b.day);
+
+  const credited = new Set<number>();
+  const orders = placed.map((o): ThumbOrder => {
+    const priceCents = o.items.reduce((sum, i) => sum + cents(i.price), 0);
+    /* The 15% never touches alcohol; the credit and the points earn on it. */
+    const percentBase = o.items.reduce((sum, i) => sum + (i.alcohol ? 0 : cents(i.price)), 0);
+    const points = Math.round((priceCents / 100) * pointsRate);
+    let benefit: ThumbOrder["benefit"] = "points";
+    if (priceCents >= floor && hasCredit && !credited.has(o.week)) {
+      credited.add(o.week);
+      benefit = "credit";
+    } else if (priceCents >= floor && hasPercent && percentBase > 0) benefit = "percent";
+    const creditCents = benefit === "credit" ? Math.min(cents(BENEFIT.creditUsd), priceCents) : 0;
+    const percentCents = benefit === "percent" ? Math.round(percentBase * BENEFIT.percentOff) : 0;
+    const earned =
+      benefit === "credit"
+        ? `${dollars(creditCents)} credit`
+        : benefit === "percent"
+          ? `${dollars(percentCents)} off`
+          : `${points} point${points === 1 ? "" : "s"}`;
+    return {
+      id: `${o.week}:${o.day}:${o.items.map((i) => i.id).join("+")}`,
+      week: o.week,
+      day: o.day,
+      venue: venue.name,
+      item: o.items.map((i) => i.name).join(" + "),
+      thumb: o.thumb,
+      benefit,
+      priceCents,
+      creditCents,
+      percentCents,
+      points,
+      cents: creditCents + percentCents,
+      chip: benefit === "credit" ? chip(creditCents) : benefit === "percent" ? `${pct}%` : "pts",
+      /* The price and what it earned are glued, so a basket that wraps
+         breaks after the name and never strands a figure. */
+      at: `\u00A0\u00B7 ${dollars(priceCents)}\u00A0\u00B7\u00A0${earned.replace(" ", "\u00A0")}`,
+    };
+  });
+
+  const plan = cents(monthlyToday);
+  const sums = (pick: (o: ThumbOrder) => number) =>
+    orders.reduce<number[]>((acc, o) => [...acc, (acc.length ? acc[acc.length - 1] : 0) + pick(o)], []);
+  const runningCredit = sums((o) => o.creditCents);
+  const runningPercent = sums((o) => o.percentCents);
+  const runningPoints = sums((o) => o.points);
+  const runningCents = sums((o) => o.cents).map((c) => c - plan);
+  const last = (xs: number[]) => (xs.length ? xs[xs.length - 1] : 0);
+  const netCents = runningCents.length ? last(runningCents) : -plan;
+  if (!orders.length || netCents <= 0) return null;
+  const nCredit = orders.filter((o) => o.benefit === "credit").length;
+  const nPercent = orders.filter((o) => o.benefit === "percent").length;
+
+  const rows: MonthRow[] = [{ what: `${cardPlan} membership`, figure: dollars(plan) }];
+  if (nCredit)
+    rows.push({
+      what: `$${BENEFIT.creditUsd} credit, ${counted(nCredit, "week")}`,
+      figure: dollars(last(runningCredit)),
+      run: { unit: "usd", start: 0, running: runningCredit },
+    });
+  if (nPercent)
+    rows.push({
+      what: `${pct}% off, ${counted(nPercent, "order")}`,
+      figure: dollars(last(runningPercent)),
+      run: { unit: "usd", start: 0, running: runningPercent },
+    });
+  if (last(runningPoints))
+    rows.push({
+      what: `Points, ${counted(orders.length, "order")}`,
+      figure: runFigure("pts", last(runningPoints)),
+      run: { unit: "pts", start: 0, running: runningPoints },
+    });
+
+  return {
+    head: `Your first month at ${venue.name}`,
+    sub: `$${BENEFIT.creditUsd} credit once a week, ${pct}% off the rest, points on all of it`,
+    days: DAYS.map((d) => d[0]),
+    weeks: Array.from({ length: WEEKS_PER_MONTH }, (_, k) => `Week ${k + 1}`),
+    orders,
+    empty: "Order the way you already do",
+    rows,
+    startCents: -plan,
+    runningCents,
+    netCents,
+  };
+}

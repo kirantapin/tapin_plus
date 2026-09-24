@@ -9,7 +9,7 @@ import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
 import MonthCalendar from "../shell/MonthCalendar";
-import { month } from "../model/month";
+import { monthAt } from "../model/month";
 import { useReserveCta } from "../shell/useReserveCta";
 import { useMedia } from "../shell/useMedia";
 import { logoField, launchWindow, monthlyToday, venues } from "../model/content";
@@ -100,6 +100,9 @@ import {
  *
  * On a phone there is no receipt at all: the cards are the proof there.
  */
+/** This shop's month (§36), built once from its menu. */
+const month = monthAt("coffeeholicsva");
+
 export default function Coffeeholics() {
   /* ══ THE LIGHT SURFACE, FOR THIS ROUTE ONLY ═════════════════════════════
      Sam, 20 Sep 2026: "the whole thing is too dark. Maybe we use coffeeholics
@@ -315,10 +318,10 @@ export default function Coffeeholics() {
 
           {/* THE MONTH, NOT THE RECEIPT (Sam, 23 Sep 2026: "bring over the same
               calendar view that was used for the main one for the coffeeholics
-              desktop page — it can be all the locations that we list"). The
-              pitch's calendar, the same component and model, at the band's
-              right from 1024: a month of orders across the listed places, each
-              earning the week's credit. */}
+              desktop page"). The pitch's calendar at the band's right from
+              1024, made of this shop's own orders (§36: "food and drink items
+              at coffeeholics, showing multiple purchases a week"), each
+              earning its $5, its 15% or its points. */}
           {desk && month ? <MonthCalendar month={month} /> : null}
         </div>
 

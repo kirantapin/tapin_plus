@@ -1,5 +1,5 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
-import { dollars, signedDollars, type Month } from "../model/month";
+import { runFigure, signedDollars, type Month } from "../model/month";
 
 /**
  * THE CALENDAR — a month on the membership, filling itself
@@ -32,6 +32,11 @@ import { dollars, signedDollars, type Month } from "../model/month";
  * SCREEN READERS READ THE MONTH, NOT THE COUNT: each order is its item and
  * place, and its chip; the moving figures are `aria-hidden` beside still
  * copies.
+ *
+ * A MONTH AT ONE PLACE (§36, `monthAt`) is the same object: an order with a
+ * `thumb` is the item's photograph filling the day instead of a collar, and
+ * the foot is however many rows the model gives, every moving one counted
+ * together as each order lands.
  */
 const OPEN = 1200;
 const GAP = 900;
@@ -53,9 +58,11 @@ export default function MonthCalendar({ month }: { month: Month }) {
     const lines = [...el.querySelectorAll<HTMLElement>(".mc-line")];
     const foot = el.querySelector<HTMLElement>(".mc-foot");
     const net = el.querySelector<HTMLElement>(".mc-net-fig");
-    const earned = el.querySelector<HTMLElement>(".mc-earned-fig");
-    if (!foot || !net || !earned) return;
-    const { startCents, runningCents, netCents, plan } = month;
+    const figs = [...el.querySelectorAll<HTMLElement>(".mc-run-fig")];
+    const runs = month.rows.flatMap((r) => (r.run ? [r.run] : []));
+    if (!foot || !net || figs.length !== runs.length) return;
+    const { startCents, runningCents } = month;
+    const last = runningCents.length - 1;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const timers = new Set<number>();
@@ -78,12 +85,19 @@ export default function MonthCalendar({ month }: { month: Month }) {
       raf = 0;
       running = false;
     };
-    /* One value drives both figures: what is earned is what is ahead plus the
-       membership. Ahead means above zero — the count can land a frame on
-       $0.00, and "You're ahead" beside it would be a cent from true. */
-    const write = (c: number) => {
+    /* The foot at step k: −1 is the head of the month, before any order.
+       Ahead means above zero — the count can land a frame on $0.00, and
+       "You're ahead" beside it would be a cent from true. */
+    const netAt = (k: number) => (k < 0 ? startCents : runningCents[k]);
+    const runAt = (r: (typeof runs)[number], k: number) => (k < 0 ? r.start : r.running[k]);
+    /* Every moving figure, `e` of the way from step `from` to step `to`. */
+    const write = (from: number, to: number, e = 1) => {
+      const mix = (a: number, b: number) => Math.round(a + (b - a) * e);
+      const c = mix(netAt(from), netAt(to));
       net.textContent = signedDollars(c);
-      earned.textContent = dollars(c + plan.cents);
+      runs.forEach((r, i) => {
+        figs[i].textContent = runFigure(r.unit, mix(runAt(r, from), runAt(r, to)));
+      });
       foot.classList.toggle("is-ahead", c > 0);
     };
     const count = (from: number, to: number) => {
@@ -92,7 +106,7 @@ export default function MonthCalendar({ month }: { month: Month }) {
         /* A frame's timestamp can precede the t0 taken when it was asked
            for; clamped at 0 so the first frame never dips past `from`. */
         const p = Math.max(0, Math.min(1, (now - t0) / COUNT));
-        write(Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))));
+        write(from, to, 1 - Math.pow(1 - p, 3));
         raf = p < 1 ? requestAnimationFrame(tick) : 0;
       };
       raf = requestAnimationFrame(tick);
@@ -105,17 +119,17 @@ export default function MonthCalendar({ month }: { month: Month }) {
       el.removeAttribute("data-out");
       cells.forEach((c) => c.classList.remove("is-in"));
       show(0);
-      write(startCents);
+      write(-1, -1);
       dirty = false;
     };
     const cycle = () => {
       reset();
-      runningCents.forEach((to, k) => {
+      runningCents.forEach((_, k) => {
         later(OPEN + GAP * k, () => {
           dirty = true;
           cells[k]?.classList.add("is-in");
           show(k + 1);
-          later(ENTER, () => count(k ? runningCents[k - 1] : startCents, to));
+          later(ENTER, () => count(k - 1, k));
         });
       });
       const settled = OPEN + GAP * (runningCents.length - 1) + ENTER + COUNT;
@@ -140,7 +154,7 @@ export default function MonthCalendar({ month }: { month: Month }) {
       halt();
       el.removeAttribute("data-run");
       el.removeAttribute("data-out");
-      write(netCents);
+      write(last, last);
       dirty = true;
     };
     const decide = () => {
@@ -170,7 +184,7 @@ export default function MonthCalendar({ month }: { month: Month }) {
     };
   }, [month]);
 
-  const last = month.orders.length - 1;
+  const latest = month.orders.length - 1;
   const at = new Map(month.orders.map((o, k) => [`${o.week}:${o.day}`, k]));
 
   return (
@@ -193,7 +207,21 @@ export default function MonthCalendar({ month }: { month: Month }) {
             {month.days.map((_, day) => {
               const k = at.get(`${wk}:${day}`);
               const o = k === undefined ? undefined : month.orders[k];
-              return o ? (
+              return o?.thumb !== undefined ? (
+                <span key={`${wk}:${day}`} className="mc-day">
+                  {/* The item's own photograph, filling the day: no brand
+                      colour, a hairline ring at the day's radius. */}
+                  <span className="mc-order mc-thumb">
+                    <img
+                      className="mc-img"
+                      src={o.thumb}
+                      alt={`${o.item} at ${o.venue}`}
+                      decoding="async"
+                    />
+                    <b className="mc-chip">{o.chip}</b>
+                  </span>
+                </span>
+              ) : o ? (
                 <span key={`${wk}:${day}`} className="mc-day">
                   {/* The venue's collar, filling the day: brand colour
                       round the mark, the seat hairline by the mark's field. */}
@@ -226,8 +254,8 @@ export default function MonthCalendar({ month }: { month: Month }) {
         {month.orders.map((o, k) => (
           <p
             key={o.id}
-            className={k === last ? "mc-line is-last" : "mc-line"}
-            aria-hidden={k === last ? undefined : "true"}
+            className={k === latest ? "mc-line is-last" : "mc-line"}
+            aria-hidden={k === latest ? undefined : "true"}
           >
             <b>{o.item}</b>
             {o.at}
@@ -236,17 +264,21 @@ export default function MonthCalendar({ month }: { month: Month }) {
       </div>
 
       <div className={`mc-foot${month.netCents > 0 ? " is-ahead" : ""}`}>
-        <p className="mc-row">
-          <span>{month.plan.what}</span>
-          <b className="mc-fig">{month.plan.figure}</b>
-        </p>
-        <p className="mc-row">
-          <span>{month.earned.what}</span>
-          <b className="mc-fig mc-earned-fig" aria-hidden="true">
-            {month.earned.figure}
-          </b>
-          <span className="sr-only">{month.earned.figure}</span>
-        </p>
+        {month.rows.map((r) => (
+          <p key={r.what} className="mc-row">
+            <span>{r.what}</span>
+            {r.run ? (
+              <>
+                <b className="mc-fig mc-run-fig" aria-hidden="true">
+                  {r.figure}
+                </b>
+                <span className="sr-only">{r.figure}</span>
+              </>
+            ) : (
+              <b className="mc-fig">{r.figure}</b>
+            )}
+          </p>
+        ))}
         <p className="mc-net">
           <span className="mc-ahead">You're ahead</span>
           <b className="mc-net-fig" aria-hidden="true">
