@@ -46,8 +46,10 @@ export default function TapInLogo({ className }: { className?: string }) {
         d="M325.425 26.6569C331.068 26.6569 335.712 28.5525 339.415 32.403C343.119 36.1942 344.941 41.5255 344.941 48.2194V80.2076H331.597V49.878C331.597 46.383 330.657 43.7766 328.834 41.9402C326.953 40.1038 324.484 39.156 321.369 39.156C317.901 39.156 315.197 40.2223 313.08 42.3549C311.023 44.4874 309.965 47.7455 309.965 52.0106V80.1484H296.621V28.1379H309.965V33.9431C313.257 29.0857 318.43 26.6569 325.425 26.6569Z"
         fill="currentColor"
       />
-      {/* The dot — the wordmark's one point of colour, TapIn's badge red (tokens.css --dot). */}
+      {/* The dot — the wordmark's one point of colour, TapIn's badge red (tokens.css --dot).
+          Classed so a surface can grow it or ring it (campaign.css `.tl-dot`). */}
       <path
+        className="tl-dot"
         d="M69.3056 29.2633C77.3245 29.2633 83.8252 22.7125 83.8252 14.6317C83.8252 6.55082 77.3245 0 69.3056 0C61.2867 0 54.7861 6.55082 54.7861 14.6317C54.7861 22.7125 61.2867 29.2633 69.3056 29.2633Z"
         fill="var(--dot)"
       />

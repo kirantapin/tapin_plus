@@ -476,6 +476,23 @@
     justify-content: flex-start;
     gap: var(--s-2xl);
   }
+  /* THE DOT, TWICE (Sam, 23 Sep 2026: "make the dot here in the logo twice —
+     it's a bit too hard to see the tapin dot because the purple doesn't
+     contrast well"). Twice the area is 1.41 across; doubling the diameter
+     would run it into the mark's top arm. It grows about its own centre, the
+     svg lets it overflow its box, and a ring of white at 70% cuts it out of
+     the photograph. Only the band's lockup; the foot's is on light ground. */
+  .cg-lockup svg {
+    overflow: visible;
+  }
+  .cg-lockup .tl-dot {
+    transform: scale(1.41);
+    transform-box: fill-box;
+    transform-origin: center;
+    stroke: color-mix(in srgb, var(--on-maroon) 70%, transparent);
+    stroke-width: 2.5px;
+    paint-order: stroke;
+  }
   .cg-lockup {
     padding-left: var(--s-2xl);
     /* --hair-lit is a quarter of white and vanishes on the photograph; the
