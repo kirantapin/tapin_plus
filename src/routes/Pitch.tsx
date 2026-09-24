@@ -695,7 +695,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
 
       {/* THE SIMULATED FEED (§34) — invented, and shell/LiveFeed.tsx says so.
           `lit` like the modal above: every pop-up on this dark page is light. */}
-      <LiveFeed lit />
+      <LiveFeed lit onTry={() => setTrial(true)} />
 
       {/* Lit for the same reason as the header bar: it floats over the
           light region, and fades into that ground rather than the dark one. */}

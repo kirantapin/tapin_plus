@@ -1,6 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import TapInIcon from "./TapInIcon";
+import { useReserveCta } from "./useReserveCta";
 import { logoField, venues, type Venue } from "../model/content";
 import { campaignTrialPlaces } from "../model/campaign";
 
@@ -29,8 +37,42 @@ import { campaignTrialPlaces } from "../model/campaign";
  * reads as nothing. The card leaves on its own and blocks nothing: the one
  * card over a layer sits above the sheet's X, not on it (§35.4, feed.css).
  *
+ * ══ WHAT IT SAYS (§53) ══════════════════════════════════════════════════════
+ * Purchases and free tries only. Sam, 24 Sep 2026: "these should be purchase
+ * notifications and 'tried it free' notifications … Purchase notifications
+ * should be more frequent, and … have a subtle pulsing animation … While
+ * someone is viewing either page, they should be seeing purchase
+ * notifications." So "viewed this page" is gone, about three cards in four
+ * are purchases (a try never follows a try), and a purchase card's mark
+ * pulses (feed.css `.is-buy`). The first comes 4s in, then one every 10–20s
+ * while the page is in front, up to 20 a session.
+ *
+ * ══ WHAT A HAND CAN DO TO IT (§53) ═════════════════════════════════════════
+ * Sam, 24 Sep 2026: a bar "that shows when they're going to close", "if
+ * someone presses and holds the notification it stops, if they swipe up it
+ * goes away, and if they click it it'd take them to the relevant page", and
+ * "slide into view from the top of the screen, then go back up when done".
+ * So every card drops in from above the screen's top edge and lifts back out;
+ * a bar along its foot runs down its 5s; a press (or a mouse resting on it)
+ * holds the bar and the clock; a swipe up sends that one card away; a tap
+ * opens the checkout for a purchase and the free-try window for a try. The X
+ * still turns the feed off for the session. Keyboards never reach it: it is
+ * a second door to the page's own buttons, hidden from assistive tech.
+ *
+ * ══ THE BURG'S TRIES ARE ON WEEKEND EVENINGS (§53) ═════════════════════════
+ * Sam: "people only actually use the burg on weekends in the evening, but
+ * coffee holics can be all day." A try at The Burg is only drawn when the
+ * moment it claims (now less its "ago") falls on a Friday, Saturday or Sunday
+ * evening, 5pm to 2am, Blacksburg time. Coffeeholics' can be any time.
+ *
+ * ══ PURCHASES CARRY A FIRST NAME (§53) ══════════════════════════════════════
+ * Sam, 24 Sep 2026: "we can have fake names for those who purchased tapin
+ * plus." A purchase reads "{name} just purchased TapIn Plus", the name drawn
+ * from the same invented pool as the card over a layer, never the same one
+ * twice running. A free try still reads "Someone".
+ *
  * ══ WHAT IT REFUSES ════════════════════════════════════════════════════════
- * Names, faces or initials (but the one card over a layer, below); a running
+ * Names on anything but a purchase, faces or initials; a running
  * count; sound; any page but the pitch and Coffeeholics (never the deck, and
  * over the checkout only that one card); text under 14px; any colour but the
  * tokens, and no green "live" dot.
@@ -51,7 +93,7 @@ import { campaignTrialPlaces } from "../model/campaign";
  * cadence stays paused, and this card runs on its own clock, above the layer,
  * as a banner at the top centre (feed.css), portalled to <body> because
  * `main.column` is a stacking context (z 1) that no z-index inside it can
- * climb out of. It is not one of the session's eight, and from 640 the X
+ * climb out of. It is not one of the session's twenty, and from 640 the X
  * still stops it; below 640 it is one line in a pill, the event alone, with
  * no mark, no "just now" and no X (§35.4).
  */
@@ -59,16 +101,27 @@ import { campaignTrialPlaces } from "../model/campaign";
 /** One key for the session: "off" once the X is pressed, else how many
  *  cards this session has shown. A reload keeps both. */
 const KEY = "tapin.feed";
-const FIRST_MS = 6_000;
+const FIRST_MS = 4_000;
+/** A card's life on screen; feed.css's bar reads it from `--feed-life`. */
 const SHOW_MS = 5_000;
-const GAP_MS: readonly [number, number] = [14_000, 30_000];
-/** Matches feed.css's exit, so the card unmounts as it finishes leaving. */
-const OUT_MS = 180;
-const MAX = 8;
+const GAP_MS: readonly [number, number] = [10_000, 20_000];
+/** How often a card is a free try rather than a purchase (never twice running). */
+const TRIED_SHARE = 0.3;
+/** Matches feed.css's lift, so the card unmounts as it finishes leaving. */
+const OUT_MS = 260;
+const MAX = 20;
 /** The event the checkout's drop sends, and the card it asks for. */
 const FEED_EVENT = "tapin:feed";
-/* The purchase card's names and places (§35.3): invented, weighted to
-   Blacksburg. The feed's own cards keep "Someone". */
+
+/* The gestures (§53). Up this far on release, or flicked up this fast, and
+   the card goes; still and shorter than a hold, and it is a tap. */
+const SWIPE_PX = 28;
+const FLICK_PX_PER_MS = -0.35;
+const SLOP_PX = 6;
+const TAP_MS = 450;
+
+/* The purchase cards' names and places (§35.3, §53): invented. A free try
+   keeps "Someone". */
 const NAMES = [
   "Maya", "Jordan", "Ava", "Ethan", "Chloe", "Liam", "Priya", "Noah", "Sofia", "Caleb",
   "Emma", "Tyler", "Hannah", "Marcus", "Grace", "Elijah", "Zoe", "Andre", "Lily", "Owen",
@@ -77,45 +130,86 @@ const NAMES = [
 /* Always Blacksburg (Sam, 24 Sep 2026: "we should say it's in blacksburg - not
    some random place"). */
 const PLACES = ["Blacksburg"];
-const purchase = (): Card => ({
-  what: `${NAMES[between(0, NAMES.length - 1)]} in ${PLACES[between(0, PLACES.length - 1)]} just purchased TapIn Plus`,
-  when: "just now",
-  venue: null,
-});
 
-type Kind = "viewed" | "joined" | "tried";
+type Kind = "joined" | "tried";
 interface Card {
+  /** A fresh id a card, so each one mounts anew and its bar starts full. */
+  id: number;
   what: string;
   when: string;
   venue: Venue | null;
+  /** A purchase: its mark pulses and a tap opens the checkout. */
+  buy: boolean;
 }
+let serial = 0;
+
+const between = (lo: number, hi: number): number =>
+  lo + Math.floor(Math.random() * (hi - lo + 1));
+
+/** An invented first name, never the one before it. */
+let lastName = "";
+const aName = (): string => {
+  const pool = NAMES.filter((n) => n !== lastName);
+  lastName = pool[between(0, pool.length - 1)];
+  return lastName;
+};
+
+const purchase = (): Card => ({
+  id: ++serial,
+  what: `${aName()} in ${PLACES[between(0, PLACES.length - 1)]} just purchased TapIn Plus`,
+  when: "just now",
+  venue: null,
+  buy: true,
+});
 
 /** Where the trial can actually be taken — campaign.ts's places, in its order. */
 const trialVenues: Venue[] = campaignTrialPlaces
   .map((place) => venues.find((v) => v.id === place.venueId))
   .filter((v): v is Venue => v !== undefined);
 
-const between = (lo: number, hi: number): number =>
-  lo + Math.floor(Math.random() * (hi - lo + 1));
+/** Day (0 = Sunday) and hour in Blacksburg at an instant. */
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const blacksburgClock = (ms: number): { day: number; hour: number } => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    hour: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(new Date(ms));
+  const day = WEEKDAYS.indexOf(parts.find((p) => p.type === "weekday")?.value ?? "");
+  const hour = Number(parts.find((p) => p.type === "hour")?.value);
+  return { day, hour };
+};
+/** When a try at a place is believable (§53); a place not listed: any time. */
+const TRY_WHEN: Record<string, (day: number, hour: number) => boolean> = {
+  /* Friday, Saturday and Sunday evenings, 5pm to 2am: after midnight belongs
+     to the night before (Saturday, Sunday and Monday before 2am). */
+  theburg: (day, hour) => (hour >= 17 && (day === 5 || day === 6 || day === 0)) ||
+    (hour < 2 && (day === 6 || day === 0 || day === 1)),
+};
+const tryable = (venue: Venue, at: number): boolean => {
+  const rule = TRY_WHEN[venue.id];
+  if (!rule) return true;
+  const { day, hour } = blacksburgClock(at);
+  return rule(day, hour);
+};
 
-/** A line, a time and a place. Never the same kind twice running. */
+/** A line, a time and a place. Mostly purchases; never two tries running. */
 const draw = (last: Kind | null): { kind: Kind; card: Card } => {
-  const kinds = (["viewed", "joined", "tried"] as const).filter(
-    (k) => k !== last && (k !== "tried" || trialVenues.length > 0),
-  );
-  const kind = kinds[between(0, kinds.length - 1)];
-  const venue = kind === "tried" ? trialVenues[between(0, trialVenues.length - 1)] : null;
+  const agoS = Math.random() < 0.5 ? between(8, 59) : between(2, 9) * 60;
+  const ago = agoS < 60 ? `${agoS} seconds ago` : `${agoS / 60} minutes ago`;
+  const open = trialVenues.filter((v) => tryable(v, Date.now() - agoS * 1000));
+  const kind: Kind =
+    open.length > 0 && last !== "tried" && Math.random() < TRIED_SHARE ? "tried" : "joined";
+  const venue = kind === "tried" ? open[between(0, open.length - 1)] : null;
   const what =
-    kind === "viewed"
-      ? "Someone just viewed this page"
-      : kind === "joined"
-        ? "Someone just purchased TapIn Plus"
-        : `Someone just tried it for free at ${venue?.name}`;
-  const ago =
-    Math.random() < 0.5
-      ? `${between(8, 59)} seconds ago`
-      : `${between(2, 9)} minutes ago`;
-  return { kind, card: { what, when: `${ago} · Blacksburg`, venue } };
+    kind === "joined"
+      ? `${aName()} just purchased TapIn Plus`
+      : `Someone just tried it for free at ${venue?.name}`;
+  return {
+    kind,
+    card: { id: ++serial, what, when: `${ago} · Blacksburg`, venue, buy: kind === "joined" },
+  };
 };
 
 const stored = (): { off: boolean; shown: number } => {
@@ -142,39 +236,62 @@ const blocked = (): boolean =>
   document.documentElement.classList.contains("is-layered") ||
   document.querySelector('[role="dialog"], dialog[open]') !== null;
 
+/** What the gestures ask of the schedule, which lives in the effect. */
+interface Controls {
+  dismiss: () => void;
+  hold: (why: string) => void;
+  release: (why: string) => void;
+  away: () => void;
+  open: () => void;
+}
+const idle: Controls = { dismiss() {}, hold() {}, release() {}, away() {}, open() {} };
+
 /**
  * Mounted on the pitch (`lit`, because every pop-up on that dark page is
  * light) and on Coffeeholics (already light, and tinted; `lit` would drop the
- * house neutral on it — TrialModal's reasoning).
+ * house neutral on it — TrialModal's reasoning). `onTry` opens the page's own
+ * free-try window; a purchase opens the page's own checkout.
  */
-export default function LiveFeed({ lit }: { lit?: boolean }) {
+export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => void }) {
   const [card, setCard] = useState<Card | null>(null);
   const [out, setOut] = useState(false);
   /* Set while the one card over a layer is up; feed.css places it. */
   const [over, setOver] = useState(false);
-  const dismiss = useRef<() => void>(() => {});
+  const ctl = useRef<Controls>(idle);
+  const root = useRef<HTMLDivElement>(null);
+  const press = useRef<{ id: number; x: number; y: number; t: number; moved: boolean } | null>(null);
+  /* A tap found on pointerup, acted on at the click that follows it. */
+  const tapped = useRef(false);
+  const cta = useReserveCta();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const start = stored();
 
     /* ══ ONE TIMER SCHEDULE ═══════════════════════════════════════════════
-       wait → show (5s) → leave (180ms) → wait (14–30s) → … At most one
+       wait → show (5s) → leave (260ms) → wait (10–20s) → … At most one
        timeout is pending at any moment, and `arm` is the only thing that
        sets one. A pause keeps what was left of a wait; a pause during a card
        sends it out, and the next card is a fresh gap after the page is
-       clear again. */
+       clear again. A hold stops a card's clock where it is (§53). */
     let timer = 0;
     let due = 0;
     let left = FIRST_MS;
+    let showLeft = 0;
     let stage: "wait" | "show" | "leave" | "done" =
       start.off || start.shown >= MAX ? "done" : "wait";
     let paused = false;
     let stopped = start.off;
     let last: Kind | null = null;
+    /* Why the card on screen is held: a press, a resting mouse. */
+    const holds = new Set<string>();
     /* The card over a layer keeps its own clock; `overUntil` is when it will
        be gone, 0 while it is not up. */
     let overTimer = 0;
     let overUntil = 0;
+    let overDue = 0;
+    let overLeft = 0;
+    let overLeaving = false;
 
     const arm = (ms: number, fn: () => void) => {
       window.clearTimeout(timer);
@@ -188,14 +305,16 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
         return;
       }
       /* The card over a layer is still up (the layer closed under it): the
-         cadence's next card waits for it to go. */
+         cadence's next card waits for it to go. Polled, since a hold can
+         keep it up for as long as a finger stays down. */
       if (overUntil) {
-        arm(Math.max(0, overUntil - Date.now()), show);
+        arm(Math.max(250, overUntil - Date.now()), show);
         return;
       }
       store(String(s.shown + 1));
       const next = draw(last);
       last = next.kind;
+      holds.clear();
       setOut(false);
       setCard(next.card);
       stage = "show";
@@ -203,6 +322,7 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
     };
     const leave = () => {
       stage = "leave";
+      holds.clear();
       setOut(true);
       arm(OUT_MS, gone);
     };
@@ -245,13 +365,23 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
        that asked is up, or done — for 5s, then out the usual way. */
     const overGone = () => {
       overUntil = 0;
+      overLeaving = false;
+      holds.clear();
       setCard(null);
       setOut(false);
       setOver(false);
     };
     const overLeave = () => {
+      overLeaving = true;
+      window.clearTimeout(overTimer);
       setOut(true);
       overTimer = window.setTimeout(overGone, OUT_MS);
+    };
+    const overFor = (ms: number) => {
+      window.clearTimeout(overTimer);
+      overDue = Date.now() + ms;
+      overUntil = overDue + OUT_MS;
+      overTimer = window.setTimeout(overLeave, ms);
     };
     const onFeed = (e: Event) => {
       if ((e as CustomEvent<{ kind?: string }>).detail?.kind !== "purchase") return;
@@ -264,30 +394,62 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
         if (paused) window.clearTimeout(timer);
         else arm(left, show);
       }
-      window.clearTimeout(overTimer);
-      overUntil = Date.now() + SHOW_MS + OUT_MS;
+      holds.clear();
+      overLeaving = false;
       setOver(true);
       setOut(false);
       setCard(purchase());
-      overTimer = window.setTimeout(overLeave, SHOW_MS);
+      overFor(SHOW_MS);
     };
     window.addEventListener(FEED_EVENT, onFeed);
 
-    dismiss.current = () => {
-      stopped = true;
-      store("off");
-      if (stage === "show") leave();
-      if (overUntil) {
+    /* ══ WHAT THE HAND ASKS (§53) ═════════════════════════════════════════ */
+    const hold = (why: string) => {
+      const first = holds.size === 0;
+      holds.add(why);
+      if (!first) return;
+      if (overUntil && !overLeaving) {
+        overLeft = Math.max(0, overDue - Date.now());
         window.clearTimeout(overTimer);
-        overLeave();
+      } else if (stage === "show") {
+        showLeft = Math.max(0, due - Date.now());
+        window.clearTimeout(timer);
+      } else {
+        holds.clear();
+        return;
       }
+      root.current?.classList.add("is-held");
+    };
+    const release = (why: string) => {
+      if (!holds.delete(why) || holds.size) return;
+      root.current?.classList.remove("is-held");
+      if (overUntil && !overLeaving) overFor(overLeft);
+      else if (stage === "show") arm(showLeft, leave);
+    };
+    /* One card goes; the feed carries on. */
+    const away = () => {
+      if (overUntil && !overLeaving) overLeave();
+      else if (stage === "show") leave();
+    };
+
+    ctl.current = {
+      dismiss: () => {
+        stopped = true;
+        store("off");
+        if (stage === "show") leave();
+        if (overUntil && !overLeaving) overLeave();
+      },
+      hold,
+      release,
+      away,
+      open: away,
     };
 
     if (stage === "done") {
       return () => {
         window.clearTimeout(overTimer);
         window.removeEventListener(FEED_EVENT, onFeed);
-        dismiss.current = () => {};
+        ctl.current = idle;
       };
     }
 
@@ -313,27 +475,97 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       window.removeEventListener(FEED_EVENT, onFeed);
       watch.disconnect();
       document.removeEventListener("visibilitychange", check);
-      dismiss.current = () => {};
+      ctl.current = idle;
     };
   }, []);
 
   if (!card) return null;
 
+  /* ══ THE GESTURES (§53) ═════════════════════════════════════════════════
+     Pointer events on the plate, captured for the length of a press. The
+     drag moves the root, never the plate, whose arrival animation would
+     hold its own transform over an inline one. */
+  const snapBack = () => {
+    const el = root.current;
+    if (!el) return;
+    el.style.transition = "transform 200ms var(--ease)";
+    el.style.transform = "";
+  };
+  const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    tapped.current = false;
+    if (e.button > 0 || (e.target as Element).closest(".feed-x")) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    press.current = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: false };
+    if (root.current) root.current.style.transition = "none";
+    ctl.current.hold("press");
+  };
+  const onMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const p = press.current;
+    if (!p || p.id !== e.pointerId) return;
+    const dx = e.clientX - p.x;
+    const dy = e.clientY - p.y;
+    if (!p.moved && Math.hypot(dx, dy) > SLOP_PX) p.moved = true;
+    /* Up follows the finger; down gives a little, and resists. */
+    if (p.moved && root.current) root.current.style.transform = `translateY(${dy < 0 ? dy : dy * 0.2}px)`;
+  };
+  const onUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const p = press.current;
+    if (!p || p.id !== e.pointerId) return;
+    press.current = null;
+    const dy = e.clientY - p.y;
+    const dt = Math.max(1, performance.now() - p.t);
+    if (p.moved && (dy <= -SWIPE_PX || (dy < -SLOP_PX && dy / dt <= FLICK_PX_PER_MS))) {
+      ctl.current.away();
+      return;
+    }
+    snapBack();
+    ctl.current.release("press");
+    tapped.current = e.type === "pointerup" && !p.moved && dt < TAP_MS && !over;
+  };
+  /* A tap opens the page's own door for what the card is about — on the
+     click, not the pointerup: opened any sooner, a phone's click lands on
+     the new window's scrim beneath the finger and closes it again. */
+  const onClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (!tapped.current || (e.target as Element).closest(".feed-x")) return;
+    tapped.current = false;
+    ctl.current.open();
+    if (card.buy) navigate(cta.to, { state: cta.state });
+    else onTry?.();
+  };
+  const onEnter = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse") ctl.current.hold("hover");
+  };
+  const onLeave = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse") ctl.current.release("hover");
+  };
+
   return createPortal(
     <div
-      className={`feed${out ? " is-out" : ""}${over ? " is-over" : ""}`}
+      key={card.id}
+      ref={root}
+      className={`feed${out ? " is-out" : ""}${over ? " is-over" : ""}${card.buy ? " is-buy" : ""}`}
       data-simulated="true"
       data-lit={lit ? "" : undefined}
       aria-hidden="true"
+      style={{ ["--feed-life" as string]: `${SHOW_MS}ms` }}
     >
-      <div className="feed-plate">
+      <div
+        className="feed-plate"
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+        onPointerEnter={onEnter}
+        onPointerLeave={onLeave}
+        onClick={onClick}
+      >
         {card.venue ? (
           <span
             className="collar feed-tile"
             data-field={logoField(card.venue.id)}
             style={{ ["--brand" as string]: card.venue.brandColor }}
           >
-            <img src={card.venue.logo} alt="" decoding="async" />
+            <img src={card.venue.logo} alt="" decoding="async" draggable={false} />
           </span>
         ) : (
           <span className="feed-tile feed-mark">
@@ -349,7 +581,7 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
           className="feed-x"
           tabIndex={-1}
           aria-label="Close"
-          onClick={() => dismiss.current()}
+          onClick={() => ctl.current.dismiss()}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -361,6 +593,9 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
             />
           </svg>
         </button>
+        <span className="feed-time">
+          <i />
+        </span>
       </div>
     </div>,
     document.body,

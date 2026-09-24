@@ -494,7 +494,7 @@ export default function Coffeeholics() {
 
       {/* THE SIMULATED FEED (§34) — invented, and shell/LiveFeed.tsx says so.
           Not `lit`: this page's own ramp is already light, as the modal's is. */}
-      <LiveFeed />
+      <LiveFeed onTry={() => setTrial(true)} />
 
       <div className={`sticky-cta is-pair cg-sticky${past ? "" : " is-away"}`}>
         {/* A button, not a link: it moves the reader to the two offers on this
