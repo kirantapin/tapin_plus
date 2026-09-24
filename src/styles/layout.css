@@ -102,11 +102,12 @@
 /* The Plus mark. 11px tracked caps is exactly the house caption role, and at
    that size the chip is 17px tall — the line box of the 14px name beside it, so
    it sits inside the name's line instead of stretching it. */
-/* Maroon, white ink. A gilt version lived for an hour on 15 Sep 2026 and
-   Sam called it back ("looks kind of tacky … we can just revert"). */
+/* PLUS, IN THE LOGO'S GOLD (Sam, 24 Sep 2026: "call it plus with the gold
+   branding"): `--gold` on the chip only — the theme stays maroon. Dark ink, as the TapIn app's own gold chip:
+   white on this gold is about 1.8:1. */
 .plus{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:18px;
   padding:0 7px 0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;
-  line-height:1;color:var(--on-maroon);background:var(--maroon);border-radius:var(--r-pill);
+  line-height:1;color:var(--gold-ink);background:var(--gold);border-radius:var(--r-pill);
   flex:0 0 auto;align-self:baseline}
 /* The TapIn mark inside a PLUS flag or chip (shell/PlusFlag.tsx). */
 /* Sized here AND on the element: the PNG is 96px, and a flag that inflated to
@@ -114,6 +115,11 @@
 .plus-mark,.vflag .plus-mark,.plus .plus-mark{display:block;width:11px;height:11px;max-width:11px;
   flex:0 0 auto;color:currentColor}
 .plus-word{display:block;line-height:1}
+/* The venue tiles' flag is the same chip in a corner (pitch.css .vflag): gold
+   too, except "signed, not open", which never wears the membership's mark.
+   (0,2,0), so it wins over pitch.css's (0,1,0) whatever the load order. */
+.vflag:not(.is-soon){background:var(--gold);color:var(--gold-ink)}
+
 
 /* -- ways to use ----------------------------------------------------------- */
 .way{display:block;padding:var(--s-lg) var(--s-xl)}

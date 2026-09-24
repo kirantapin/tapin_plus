@@ -179,24 +179,12 @@
   gap: var(--s-md);
   color: var(--on-maroon);
 }
-/* THE DOT, WHITE (Sam, 23 Sep 2026: "for the tapin logo, let's make the dot
-   white"): on the photograph the whole lockup is white, at the mark's own
-   size and every width. The foot's "Powered by" keeps the house red. */
-.cg-lockup .tl-dot {
-  fill: var(--on-maroon);
-}
 .cg-lockup svg {
   height: 22px;
   width: auto;
   display: block;
 }
-/* The chip inverts on the photograph: a purple plate over a photograph is a
-   chip nobody sees. White with the merchant's purple is the same 8.21:1 pair
-   the plate measures, read the other way round. */
-.cg-lockup .plus {
-  background: var(--on-maroon);
-  color: var(--cg-brand, var(--maroon));
-}
+/* On the photograph the chip is the house gold chip (layout.css `.plus`). */
 
 /* -- the foot of the photograph: the advert's sentence and the two actions -- */
 .cg-h1 {

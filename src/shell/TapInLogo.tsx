@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 /**
  * The real TapIn lockup, from ~/desktop-ui/public/tapin_logo.svg — the actual
  * production vector, not a trace.
@@ -17,6 +19,7 @@
  * a raster or external asset can carry neither a token nor the surface's ink.
  */
 export default function TapInLogo({ className }: { className?: string }) {
+  const gold = `tl-gold-${useId().replace(/:/g, "")}`;
   return (
     <svg
       className={className}
@@ -26,6 +29,14 @@ export default function TapInLogo({ className }: { className?: string }) {
       aria-label="TapIn"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        {/* The real logo's dot (public/tapin_logo.svg in the TapIn app): the
+            same gradient, the same stops, the same axis. */}
+        <linearGradient id={gold} x1="55.5896" y1="28.2056" x2="88.3605" y2="14.0742" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#E8DCA7" />
+          <stop offset="1" stopColor="#CDA852" />
+        </linearGradient>
+      </defs>
       <path
         d="M128.794 41.0517H117.096V62.7326C117.096 64.5098 117.567 65.8722 118.449 66.7015C119.33 67.5309 120.624 68.0048 122.387 68.1232C124.092 68.2417 126.267 68.1825 128.794 68.064V80.2669C119.624 81.3332 113.158 80.4446 109.396 77.6605C105.634 74.8763 103.753 69.9004 103.753 62.7919V41.0517H94.7588V28.1379H103.753V17.5936L117.096 13.5062V28.0787H128.794V41.0517Z"
         fill="currentColor"
@@ -46,12 +57,12 @@ export default function TapInLogo({ className }: { className?: string }) {
         d="M325.425 26.6569C331.068 26.6569 335.712 28.5525 339.415 32.403C343.119 36.1942 344.941 41.5255 344.941 48.2194V80.2076H331.597V49.878C331.597 46.383 330.657 43.7766 328.834 41.9402C326.953 40.1038 324.484 39.156 321.369 39.156C317.901 39.156 315.197 40.2223 313.08 42.3549C311.023 44.4874 309.965 47.7455 309.965 52.0106V80.1484H296.621V28.1379H309.965V33.9431C313.257 29.0857 318.43 26.6569 325.425 26.6569Z"
         fill="currentColor"
       />
-      {/* The dot — the wordmark's one point of colour, TapIn's badge red (tokens.css --dot).
-          Classed so a surface can grow it or ring it (campaign.css `.tl-dot`). */}
+      {/* The dot — the real logo's gold gradient (Sam, 24 Sep 2026: "use the
+          actual gold color that we used in the logo"). */}
       <path
         className="tl-dot"
         d="M69.3056 29.2633C77.3245 29.2633 83.8252 22.7125 83.8252 14.6317C83.8252 6.55082 77.3245 0 69.3056 0C61.2867 0 54.7861 6.55082 54.7861 14.6317C54.7861 22.7125 61.2867 29.2633 69.3056 29.2633Z"
-        fill="var(--dot)"
+        fill={`url(#${gold})`}
       />
       <path d="M48.32 36.2534V11.9067H0V36.2534H48.32Z" fill="currentColor" />
       <path

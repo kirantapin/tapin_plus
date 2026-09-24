@@ -1,7 +1,7 @@
 import TapInIcon from "./TapInIcon";
 
 /**
- * The TapIn Plus mark: the TapIn icon and the word PLUS, on gold.
+ * The TapIn Plus mark: the TapIn icon and the word PLUS, on the logo's gold.
  *
  * Sam, 15 Sep 2026: "it'd be the tapin icon and 'PLUS' instead of 'Tapin
  * Plus'" — then, on the badge: "we should use the tapin gold gradient."

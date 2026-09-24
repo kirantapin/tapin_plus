@@ -74,7 +74,9 @@ const NAMES = [
   "Emma", "Tyler", "Hannah", "Marcus", "Grace", "Elijah", "Zoe", "Andre", "Lily", "Owen",
   "Nia", "Ryan", "Isabella", "Jake", "Aisha", "Ben", "Olivia", "Mason", "Leah", "Diego",
 ];
-const PLACES = ["Blacksburg", "Blacksburg", "Blacksburg", "Christiansburg"];
+/* Always Blacksburg (Sam, 24 Sep 2026: "we should say it's in blacksburg - not
+   some random place"). */
+const PLACES = ["Blacksburg"];
 const purchase = (): Card => ({
   what: `${NAMES[between(0, NAMES.length - 1)]} in ${PLACES[between(0, PLACES.length - 1)]} just purchased TapIn Plus`,
   when: "just now",

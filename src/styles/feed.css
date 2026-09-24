@@ -110,10 +110,24 @@
     padding: 0 var(--s-lg);
     border-radius: var(--r-pill);
   }
-  .feed.is-over .feed-tile,
+  /* The pill keeps the TapIn icon (Sam, 24 Sep 2026: "there should be a
+     tapin logo icon in those toasts"): a 22px tile at the pill's start. */
   .feed.is-over .feed-when,
   .feed.is-over .feed-x {
     display: none;
+  }
+  .feed.is-over .feed-tile {
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+  }
+  .feed.is-over .feed-mark svg {
+    width: 12px;
+    height: 12px;
+  }
+  .feed.is-over .feed-plate {
+    gap: var(--s-md);
+    padding-left: var(--s-sm);
   }
   .feed.is-over .feed-what {
     font-size: 14px;

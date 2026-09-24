@@ -90,6 +90,14 @@
      total; never a fill, never a second accent. Dark ramp values here; the
      lit ramp's are in light.css. */
   --gain:#6ED49B;
+  /* TAPIN PLUS'S GOLD (Sam, 24 Sep 2026: the chip and the logo's dot in gold,
+     the theme kept maroon, "call it plus with the gold branding"). The chip's
+     plate and its ink; the marks carry the same gradient themselves. */
+  /* The real logo's dot: #E8DCA7 → #CDA852 on its own axis (67°). The deep
+     stop is the TapIn app's TAPIN_GOLD. Gold takes dark ink, as it does in
+     the app: white on this gold measures about 1.8:1. */
+  --gold:linear-gradient(67deg,#E8DCA7 0%,#CDA852 100%);
+  --gold-ink:#1A1016;
   --loss:#FF8A80;
 
   /* THE WORDMARK'S DOT. Sam, 14 Sep 2026: "we can make the dot in the tapin
