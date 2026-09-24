@@ -71,6 +71,32 @@ export const campaignTrials = [
 ];
 
 /**
+ * WHERE THE TRIAL CAN BE TAKEN, in the order Sam named them (23 Sep 2026: "add
+ * two places for this, try at coffeeholics and try at the burg"). Each place
+ * carries its own gated offers and the merchant page's own link, so a reader
+ * meets the same promise one tap later. The Burg's is the "spend $10, get $5
+ * credit" link Sam sent; its page's exact label has not been read back, so the
+ * sentence here is this site's, not a quotation.
+ */
+export const campaignTrialPlaces: {
+  venueId: string;
+  trials: { id: string; label: string; note: string; href: string }[];
+}[] = [
+  { venueId: "coffeeholicsva", trials: campaignTrials },
+  {
+    venueId: "theburg",
+    trials: [
+      {
+        id: "credit",
+        label: `Spend $${Math.round(BENEFIT.creditMinUsd)}, get $${BENEFIT.creditUsd} credit`,
+        note: "Your credit waits in My Spot until you want it",
+        href: "https://tapin.app/theburg?l=5833a857-8707-4cf1-bde8-95c9cd86bf54",
+      },
+    ],
+  },
+];
+
+/**
  * What a MEMBER gets at Coffeeholics, worded as the advert words it.
  *
  * ══ MESSAGE MATCH, WHICH IS NOT A STYLE PREFERENCE ═════════════════════════
