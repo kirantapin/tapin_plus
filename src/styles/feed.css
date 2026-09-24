@@ -50,12 +50,21 @@
    The purchase card, asked for by the checkout's invented seat drop. Its own
    z-index over the reserve layer (40) and the house's other scrims (60); under
    the trial modal (70) and the arrival (80), which never share the screen
-   with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "the
-   toasts show above the modal — it's a bit weird when it shows right on the
-   modal itself"): 12px down from the top, 360 at most, the viewport less the
-   gutters on a phone, arriving from the top edge and leaving upward. On a
-   phone that is over the announce bar, above the sheet's own top; on a
-   desktop it touches only the sheet's header band, never its content. */
+   with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "maybe
+   the toasts show above the modal? it's a bit weird when it shows right on
+   the modal itself"): 12px down from the top, 360 at most, the viewport less
+   the gutters on a phone, arriving from the top edge and leaving upward.
+   From 640 it lies on the dialog's header band and never on the X; where a
+   short window caps the dialog (its top at 16 at 1280×720) its foot also
+   reaches 9px onto the page's first row.
+
+   ON A PHONE IT IS NOT ABOVE THE SHEET, though §35.3 asks for that. The sheet
+   is 92vh flat (reserve.css), so 65px of the page shows above it at 375×812
+   and 53 at 375×667, and this plate is 86 tall at those widths: two lines of
+   the event and one of the time. At that height it covers the sheet's X and
+   title for its 5s. No padding fits those three lines in the space above the
+   sheet, so the fix is Sam's call: a shorter phone sheet, or another place
+   for the banner below 640. */
 .feed.is-over {
   z-index: 61;
   top: calc(env(safe-area-inset-top, 0px) + var(--s-lg));

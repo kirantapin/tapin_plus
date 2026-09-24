@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import TapInIcon from "./TapInIcon";
 import { logoField, venues, type Venue } from "../model/content";
@@ -26,12 +26,15 @@ import { campaignTrialPlaces } from "../model/campaign";
  * It is `aria-hidden`, because announcing invented activity to a screen
  * reader is noise, not news — and for the same reason the X is kept out of
  * the tab order: a focusable control inside a hidden subtree is a stop that
- * reads as nothing. The card never blocks anything and leaves on its own.
+ * reads as nothing. The card leaves on its own and blocks nothing, but for
+ * the one card over a layer on a phone, which covers the sheet's X for its
+ * 5s (feed.css says why).
  *
  * ══ WHAT IT REFUSES ════════════════════════════════════════════════════════
- * Names, faces or initials; a running count; sound; any page but the pitch
- * and Coffeeholics (never the deck, never the checkout); text under 14px; any
- * colour but the tokens, and no green "live" dot.
+ * Names, faces or initials (but the one card over a layer, below); a running
+ * count; sound; any page but the pitch and Coffeeholics (never the deck, and
+ * over the checkout only that one card); text under 14px; any colour but the
+ * tokens, and no green "live" dot.
  *
  * ══ "TRIED IT FOR FREE" NAMES ONLY WHERE THE TRIAL EXISTS (§35) ══════════
  * It drew from every Plus venue, as §34 asked, and so could name a place with
@@ -39,14 +42,18 @@ import { campaignTrialPlaces } from "../model/campaign";
  * (model/campaign.ts) — the places the trial can actually be taken — so an
  * invented line at least never names an offer that does not exist.
  *
- * ══ THE ONE CARD OVER A LAYER (§35) ════════════════════════════════════════
- * The checkout's invented seat drop (model/seatsSession.ts) asks for
- * "Someone just got early access · just now" with a `tapin:feed` event on
- * `window`, so the sheet and the feed stay strangers. It is the only card
- * shown while a layer is up: the cadence stays paused, and this card runs on
- * its own clock, above the layer. It is not one of the session's eight, and
- * the X still stops it. Portalled to <body> for that reason: `main.column`
- * is a stacking context (z 1) that no z-index inside it can climb out of.
+ * ══ THE ONE CARD OVER A LAYER (§35, §35.1–§35.3) ══════════════════════════
+ * The checkout's invented seat drop (model/seatsSession.ts) asks for it with
+ * a `tapin:feed` event on `window`, so the sheet and the feed stay strangers.
+ * It reads "{name} in {place} just purchased TapIn Plus · just now": the one
+ * card that names someone, Sam's call over §34 ("we need to show a random
+ * name in the modal, and the location as well"). The name and the place are
+ * as invented as the rest. It is the only card shown while a layer is up: the
+ * cadence stays paused, and this card runs on its own clock, above the layer,
+ * as a banner at the top centre (feed.css). It is not one of the session's
+ * eight, and the X still stops it. Portalled to <body> for that reason:
+ * `main.column` is a stacking context (z 1) that no z-index inside it can
+ * climb out of.
  */
 
 /** One key for the session: "off" once the X is pressed, else how many
@@ -60,9 +67,8 @@ const OUT_MS = 180;
 const MAX = 8;
 /** The event the checkout's drop sends, and the card it asks for. */
 const FEED_EVENT = "tapin:feed";
-/* THE PURCHASE CARD NAMES SOMEONE (§35.3, Sam: "we need to show a random
-   name in the modal, and the location as well") — his call over §34's "no
-   names", for this one card only. Invented, like the rest of this file. */
+/* The purchase card's names and places (§35.3): invented, weighted to
+   Blacksburg. The feed's own cards keep "Someone". */
 const NAMES = [
   "Maya", "Jordan", "Ava", "Ethan", "Chloe", "Liam", "Priya", "Noah", "Sofia", "Caleb",
   "Emma", "Tyler", "Hannah", "Marcus", "Grace", "Elijah", "Zoe", "Andre", "Lily", "Owen",
@@ -134,10 +140,6 @@ const blocked = (): boolean =>
   document.documentElement.classList.contains("is-layered") ||
   document.querySelector('[role="dialog"], dialog[open]') !== null;
 
-/** The card over a layer is a banner at the top centre at every width
- *  (§35.3, Sam: "the toasts show above the modal"); feed.css places it. */
-const overStyle = (): CSSProperties => ({});
-
 /**
  * Mounted on the pitch (`lit`, because every pop-up on that dark page is
  * light) and on Coffeeholics (already light, and tinted; `lit` would drop the
@@ -146,8 +148,8 @@ const overStyle = (): CSSProperties => ({});
 export default function LiveFeed({ lit }: { lit?: boolean }) {
   const [card, setCard] = useState<Card | null>(null);
   const [out, setOut] = useState(false);
-  /* Set while the one card over a layer is up: its place under the header. */
-  const [over, setOver] = useState<CSSProperties | null>(null);
+  /* Set while the one card over a layer is up; feed.css places it. */
+  const [over, setOver] = useState(false);
   const dismiss = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -243,7 +245,7 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       overUntil = 0;
       setCard(null);
       setOut(false);
-      setOver(null);
+      setOver(false);
     };
     const overLeave = () => {
       setOut(true);
@@ -262,7 +264,7 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
       }
       window.clearTimeout(overTimer);
       overUntil = Date.now() + SHOW_MS + OUT_MS;
-      setOver(overStyle());
+      setOver(true);
       setOut(false);
       setCard(purchase());
       overTimer = window.setTimeout(overLeave, SHOW_MS);
@@ -318,7 +320,6 @@ export default function LiveFeed({ lit }: { lit?: boolean }) {
   return createPortal(
     <div
       className={`feed${out ? " is-out" : ""}${over ? " is-over" : ""}`}
-      style={over ?? undefined}
       data-simulated="true"
       data-lit={lit ? "" : undefined}
       aria-hidden="true"
