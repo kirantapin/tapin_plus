@@ -332,21 +332,24 @@ export default function MonthWeeks({ places }: { places: MonthPlace[] }) {
               </span>
               <Counted text={`+${dollars(month.creditCents)}`} live={creditFig} />
               <span className="sr-only">
-                , {month.credits} times: {dollars(month.creditCents)}
+                , {month.credits} {month.credits === 1 ? "time" : "times"}: {dollars(month.creditCents)}
               </span>
             </li>
-            <li className="mw-part">
-              <span>
-                {Math.round(BENEFIT.percentOff * 100)}% off{" "}
-                <i className="mw-part-n" aria-hidden="true" ref={pctN}>
-                  × {month.percents}
-                </i>
-              </span>
-              <Counted text={`+${dollars(month.percentCents)}`} live={pctFig} />
-              <span className="sr-only">
-                , {month.percents} orders: {dollars(month.percentCents)}
-              </span>
-            </li>
+            {/* No 15% row in a month of credits alone (§58). */}
+            {month.percents ? (
+              <li className="mw-part">
+                <span>
+                  {Math.round(BENEFIT.percentOff * 100)}% off{" "}
+                  <i className="mw-part-n" aria-hidden="true" ref={pctN}>
+                    × {month.percents}
+                  </i>
+                </span>
+                <Counted text={`+${dollars(month.percentCents)}`} live={pctFig} />
+                <span className="sr-only">
+                  , {month.percents} {month.percents === 1 ? "order" : "orders"}: {dollars(month.percentCents)}
+                </span>
+              </li>
+            ) : null}
           </ul>
           <p className="mw-net">
             <span className="mw-lab">You saved</span>

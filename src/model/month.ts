@@ -278,11 +278,89 @@ function larder(ids: string[]) {
 const byId = (id: string) => venues.find((v) => v.id === id && v.plus && v.policies.some((p) => p.kind === "credit"));
 
 /**
- * WHAT A MONTHLY BUDGET BUYS (§48). Each week spends a quarter of it plus what
- * earlier weeks left, greedily, one order a day. One place: the credit order,
- * then a 15% order and a small item in turn until nothing fits. "all": each
- * place's credit order in PLACES order (a place later each week), then 15%
- * orders, then small items. A week that cannot yet afford a credit order
+ * ACROSS BLACKSBURG, THE CREDITS COME FIRST (§58). Sam, 25 Sep 2026:
+ * "prioritize and exhaust the $5 credit before we worry about points or
+ * percent discounts … if I spend $50 around blacks burg a month, I'm going to
+ * be redeeming 5 $5 credits … I'd prefer to argue the best case scenario."
+ *
+ * So the month takes as many credit orders as the amount buys, one a place a
+ * week at that place's cheapest order that earns it, spread evenly over the
+ * weeks. It may run up to `OVER` past the amount, which is what lets $50 buy
+ * five. The places within $1 of the cheapest take turns leading each week so
+ * the month shows more than one place. What is left goes on 15% orders.
+ */
+const OVER = 1.03;
+function creditsFirst(ids: string[], budgetCents: number): Plan[] {
+  const floor = cents(BENEFIT.creditMinUsd);
+  /* Built once: `baskets` makes new objects each call, and a reorder is
+     recognised by identity. */
+  const menus = new Map(ids.map((id) => [id, baskets(id)]));
+  const cheapest = (id: string) => menus.get(id)?.[0]?.c ?? Infinity;
+  const byCheap = ids.filter((id) => cheapest(id) < Infinity).sort((a, b) => cheapest(a) - cheapest(b));
+  if (!byCheap.length) return [];
+  const tier = byCheap.filter((id) => cheapest(id) - cheapest(byCheap[0]) <= cents(1));
+  const rest = byCheap.filter((id) => !tier.includes(id));
+  const cap = budgetCents * OVER;
+  /* A regular reorders: a place's credit order is a new one only while it
+     costs within 50¢ of that place's cheapest, else the cheapest again. */
+  const credit = (n: number) => {
+    const shop = larder(ids);
+    const had = new Map<string, Set<Basket>>();
+    const order = (id: string) => {
+      const list = menus.get(id) ?? [];
+      const seen = had.get(id) ?? new Set<Basket>();
+      had.set(id, seen);
+      const b = list.find((x) => !seen.has(x) && x.c <= list[0].c + 50) ?? list[0];
+      seen.add(b);
+      return b;
+    };
+    let total = 0;
+    const weeks = Array.from({ length: WEEKS_PER_MONTH }, (_, wk) => {
+      const count = Math.floor(n / WEEKS_PER_MONTH) + (wk < n % WEEKS_PER_MONTH ? 1 : 0);
+      const lead = tier.map((_, k) => tier[(k + wk) % tier.length]);
+      return [...lead, ...rest].slice(0, count).map((id) => {
+        const b = order(id);
+        total += b.c;
+        return { id, b };
+      });
+    });
+    return { shop, weeks, total };
+  };
+  let n = Math.min(byCheap.length * WEEKS_PER_MONTH, Math.floor(cap / floor));
+  let month = credit(n);
+  while (n > 0 && month.total > cap) month = credit(--n);
+
+  /* The rest, spread over the weeks, on 15% orders: a place's next order
+     over $10 where one fits, else its dearest small item that does. */
+  const { shop, weeks } = month;
+  const spare = Math.max(0, budgetCents - month.total);
+  let room = 0;
+  const plans: Plan[] = [];
+  weeks.forEach((week, wk) => {
+    room += Math.floor(spare / WEEKS_PER_MONTH);
+    const order = ids.map((_, k) => ids[(k + wk) % ids.length]);
+    for (let k = 0, miss = 0; miss < order.length && week.length < SPREAD.length; k++) {
+      const id = order[k % order.length];
+      const b = shop.take(id, "big", room) ?? shop.take(id, "small", room);
+      if (!b) {
+        miss++;
+        continue;
+      }
+      miss = 0;
+      week.push({ id, b });
+      room -= b.c;
+    }
+    const days = SPREAD.slice(0, week.length).sort((a, b) => a - b);
+    week.forEach(({ id, b }, k) => plans.push({ week: wk, day: days[k], venue: byId(id) as Venue, items: b.items }));
+  });
+  return plans;
+}
+
+/**
+ * WHAT A MONTHLY BUDGET BUYS (§48). "all" is `creditsFirst` (§58). One place:
+ * each week spends a quarter of it plus what earlier weeks left, greedily,
+ * one order a day: the credit order, then a 15% order and a small item in
+ * turn until nothing fits. A week that cannot yet afford a credit order
  * saves instead of buying small items (the last week spends what is left),
  * so a small budget buys the credit it can reach — $25 is two $10 orders,
  * not six coffees and a loss. At one place, a week with more than $10 a
@@ -295,9 +373,10 @@ export function monthFor(scope: string, budgetCents: number): Month | null {
   const all = scope === "all";
   const ids = (all ? PLACES : [scope]).filter((id) => byId(id));
   const shop = larder(ids);
-  const plans: Plan[] = [];
+  const plans: Plan[] = all ? creditsFirst(ids, budgetCents) : [];
   let room = 0;
-  for (let wk = 0; wk < WEEKS_PER_MONTH; wk++) {
+  /* One place: week by week. */
+  for (let wk = 0; wk < (all ? 0 : WEEKS_PER_MONTH); wk++) {
     room += Math.floor(budgetCents / WEEKS_PER_MONTH);
     const week: { id: string; b: Basket }[] = [];
     const add = (id: string, kind: "big" | "small") => {
@@ -308,18 +387,10 @@ export function monthFor(scope: string, budgetCents: number): Month | null {
       room -= b.c;
       return true;
     };
-    /* Round the places until a whole round adds nothing. */
-    const round = (places: string[], kind: "big" | "small") => {
-      for (let k = 0, miss = 0; miss < places.length; k++) miss = add(places[k % places.length], kind) ? 0 : miss + 1;
-    };
-    const order = all ? ids.map((_, k) => ids[(k + wk) % ids.length]) : ids;
-    const credited = order.filter((id) => shop.has(id) && add(id, "big"));
+    const credited = ids.filter((id) => shop.has(id) && add(id, "big"));
     const last = wk === WEEKS_PER_MONTH - 1;
     if (!credited.length && !last) {
       /* Nothing reached the credit floor this week: carry the room forward. */
-    } else if (all) {
-      round(credited, "big");
-      round(order, "small");
     } else if (ids.length) {
       const other = (k: "big" | "small") => (k === "big" ? "small" : "big");
       const floor = cents(BENEFIT.creditMinUsd);
