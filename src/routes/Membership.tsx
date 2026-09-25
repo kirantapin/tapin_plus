@@ -7,6 +7,8 @@ import SiteFoot from "../shell/SiteFoot";
 import IncludedPanel from "../shell/IncludedPanel";
 import Timeline, { type Stop } from "../shell/Timeline";
 import { readablePhone } from "../shell/PhoneStep";
+import TrialModal from "../shell/TrialModal";
+import { useMedia } from "../shell/useMedia";
 import { useAuth } from "../context/auth_context";
 import {
   PLANS,
@@ -236,6 +238,9 @@ export default function Membership() {
   const location = useLocation();
   /* Stripe's answer, for the reader whose record is on another device. */
   const { userSession, subscribed, displayName, logout } = useAuth();
+  const [trial, setTrial] = useState(false);
+  /* From 1024 the join sits on the light page, not the dark band (§65). */
+  const desk = useMedia("(min-width: 1024px)");
   const navigate = useNavigate();
   /* Read in an effect, not during render: reading `window` in a component
      body only breaks once, and the one-frame null is invisible. */
@@ -323,10 +328,35 @@ export default function Membership() {
           desktop it holds still with it. One button — the old second copy at
           the foot of the signed-out state is gone. */}
         {showJoin ? (
-          <div className="ms-join">
-            <Link className="action" to="/reserve">
-              {reserveCta}
-            </Link>
+          <div className="ms-join" data-lit={desk ? "" : undefined}>
+            {userSession ? (
+              /* Signed in, this page is theirs, not a sales page (§65; Sam, 25
+                 Sep 2026: "the get early access button doesn't make sense to
+                 include here either, maybe the 'try it once free' and the 'how
+                 it works' link"). Signed out, the way in stays. */
+              <>
+                <button type="button" className="action" onClick={() => setTrial(true)}>
+                  Try it once for free
+                </button>
+                <Link className="hero-how ms-how" to="/how">
+                  How it works
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="m9 5 7 7-7 7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Link>
+              </>
+            ) : (
+              <Link className="action" to="/reserve">
+                {reserveCta}
+              </Link>
+            )}
           </div>
         ) : null}
       </div>
@@ -481,6 +511,7 @@ export default function Membership() {
           </p>
         ) : null}
         <SiteFoot />
+      {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
       </div>
     </>
   );
