@@ -1307,7 +1307,9 @@ html.is-layered{overflow:hidden}
    `display:contents`, so the band and the CTA lay out as children of
    `.column`, on the dark field above the light room. */
 .ms-left{display:contents}
-.ms-join{display:flex;flex-direction:column;margin-top:var(--s-2xl)}
+.ms-join{display:flex;flex-direction:column;gap:var(--s-md);margin-top:var(--s-2xl)}
+/* The deck's door under the try button (§65), centred under it. */
+.ms-join .ms-how{align-self:center}
 
 @media (min-width:1024px){
   /* Under the band, measured to the card (420, or the band less its inline

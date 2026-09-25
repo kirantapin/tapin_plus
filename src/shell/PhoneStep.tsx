@@ -125,11 +125,13 @@ const PhoneStep = forwardRef<
     onDone: (id: PhoneIdentity) => void;
     /** Fires on every stage change, so the host's title can follow it. */
     onStage?: (stage: PhoneStage) => void;
-    /** Whether to ask for the name. The checkout does (it is the sign-up);
-     *  signing in does not, since the account has one (§60). */
-    askName?: boolean;
+    /** Signing in, not signing up (§60, §65): no name, no seat lede, no texts
+     *  disclosure or marketing box, one line about the code, and nothing
+     *  written to the account but the session. */
+    signIn?: boolean;
   }
->(function PhoneStep({ onDone, onStage, askName = true }, ref) {
+>(function PhoneStep({ onDone, onStage, signIn = false }, ref) {
+  const askName = !signIn;
   /* The session's one name — typed here, or onto the card on the deck's close
      (Sam, 14 Sep 2026). Either way it is the same value, so the field opens
      already filled if she named the card, and the /reserve card fills in as
@@ -207,7 +209,14 @@ const PhoneStep = forwardRef<
     setError(null);
     /* The name goes with it — it is written onto the auth user so the account
        is identifiable as a person, not just a number. See authEnv.ts. */
-    const err = await verifyCode(toE164(digits), code, askName ? name.trim() : undefined, optIn);
+    /* Signing in writes neither: the account has its name, and an unticked box
+       here would record "no" before the checkout could ask (§65). */
+    const err = await verifyCode(
+      toE164(digits),
+      code,
+      signIn ? undefined : name.trim(),
+      signIn ? undefined : optIn,
+    );
     setBusy(false);
     if (err) {
       setError(err);
@@ -218,10 +227,14 @@ const PhoneStep = forwardRef<
 
   return (
     <div className="ph">
-      <p className="ph-lede">
-        Your seat is held against your number, so we can hand you the membership
-        when we open.
-      </p>
+      {/* Sam, 25 Sep 2026, of signing in: "isn't all of this other text not
+          relevant to people who have already signed up". It is not (§65). */}
+      {signIn ? null : (
+        <p className="ph-lede">
+          Your seat is held against your number, so we can hand you the membership
+          when we open.
+        </p>
+      )}
 
       {/* ══ TWO PAGES, ONE MOVE ═══════════════════════════════════════════
           The number and the code are the same track the checkout's own pages
@@ -300,7 +313,7 @@ const PhoneStep = forwardRef<
               onKeyDown={(e) => {
                 if (e.key === "Enter") submitPhone();
               }}
-              aria-describedby="ph-err ph-tx ph-consent"
+              aria-describedby={signIn ? "ph-err ph-tx" : "ph-err ph-tx ph-consent"}
               aria-invalid={error ? true : undefined}
             />
           </div>
@@ -317,10 +330,16 @@ const PhoneStep = forwardRef<
               rates disclosure attached to the number rather than to the
               marketing choice. It is a sentence, not a control — there is
               nothing to decline short of not giving a number. */}
-          <p id="ph-tx" className="t-compact ph-tx">
-            We&rsquo;ll text this number when your seat is held, if it&rsquo;s
-            refunded, and when we open. Message and data rates may apply.
-          </p>
+          {signIn ? (
+            <p id="ph-tx" className="t-compact ph-tx">
+              We&rsquo;ll text you a code to sign in. Message and data rates may apply.
+            </p>
+          ) : (
+            <p id="ph-tx" className="t-compact ph-tx">
+              We&rsquo;ll text this number when your seat is held, if it&rsquo;s
+              refunded, and when we open. Message and data rates may apply.
+            </p>
+          )}
 
           {/* ══ MARKETING: OPTIONAL, UNCHECKED, AND NOT A GATE ══════════════
               See the header. Consent to marketing texts cannot be a condition
@@ -337,17 +356,19 @@ const PhoneStep = forwardRef<
               party the reader is consenting to unnamed — and the identity of
               the sender is the one element express written consent turns on.
               The merchants do not send these; TapIn does, about them. */}
-          <label className="ph-opt">
-            <input
-              type="checkbox"
-              checked={optIn}
-              onChange={(e) => setOptIn(e.target.checked)}
-            />
-            <span id="ph-consent">
-              Also text me offers and news from TapIn App, Inc. Optional.
-              Reply STOP anytime.
-            </span>
-          </label>
+          {signIn ? null : (
+            <label className="ph-opt">
+              <input
+                type="checkbox"
+                checked={optIn}
+                onChange={(e) => setOptIn(e.target.checked)}
+              />
+              <span id="ph-consent">
+                Also text me offers and news from TapIn App, Inc. Optional.
+                Reply STOP anytime.
+              </span>
+            </label>
+          )}
 
           <button
             type="button"
