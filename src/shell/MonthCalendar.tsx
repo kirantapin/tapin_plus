@@ -340,21 +340,24 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
               </span>
               <b aria-hidden="true">+{dollars(month.creditCents)}</b>
               <span className="sr-only">
-                , {month.credits} times: {dollars(month.creditCents)}
+                , {month.credits} {month.credits === 1 ? "time" : "times"}: {dollars(month.creditCents)}
               </span>
             </li>
-            <li className="mc-part mc-part-pct">
-              <span>
-                {Math.round(BENEFIT.percentOff * 100)}% off{" "}
-                <i className="mc-part-n" aria-hidden="true">
-                  × {month.percents}
-                </i>
-              </span>
-              <b aria-hidden="true">+{dollars(month.percentCents)}</b>
-              <span className="sr-only">
-                , {month.percents} orders: {dollars(month.percentCents)}
-              </span>
-            </li>
+            {/* No 15% row in a month of credits alone (§58). */}
+            {month.percents ? (
+              <li className="mc-part mc-part-pct">
+                <span>
+                  {Math.round(BENEFIT.percentOff * 100)}% off{" "}
+                  <i className="mc-part-n" aria-hidden="true">
+                    × {month.percents}
+                  </i>
+                </span>
+                <b aria-hidden="true">+{dollars(month.percentCents)}</b>
+                <span className="sr-only">
+                  , {month.percents} {month.percents === 1 ? "order" : "orders"}: {dollars(month.percentCents)}
+                </span>
+              </li>
+            ) : null}
           </ul>
           <p className="mc-net">
             <span className="mc-ahead">You saved</span>
