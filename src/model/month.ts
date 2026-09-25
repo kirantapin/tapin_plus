@@ -290,6 +290,8 @@ const byId = (id: string) => venues.find((v) => v.id === id && v.plus && v.polic
  * the month shows more than one place. What is left goes on 15% orders.
  */
 const OVER = 1.03;
+/** From this amount the month holds every place (§58.1). */
+const EVERY_FROM = 10_000;
 function creditsFirst(ids: string[], budgetCents: number): Plan[] {
   const floor = cents(BENEFIT.creditMinUsd);
   /* Built once: `baskets` makes new objects each call, and a reorder is
@@ -314,16 +316,40 @@ function creditsFirst(ids: string[], budgetCents: number): Plan[] {
       seen.add(b);
       return b;
     };
-    let total = 0;
-    const weeks = Array.from({ length: WEEKS_PER_MONTH }, (_, wk) => {
+    const slots = Array.from({ length: WEEKS_PER_MONTH }, (_, wk) => {
       const count = Math.floor(n / WEEKS_PER_MONTH) + (wk < n % WEEKS_PER_MONTH ? 1 : 0);
       const lead = tier.map((_, k) => tier[(k + wk) % tier.length]);
-      return [...lead, ...rest].slice(0, count).map((id) => {
+      return [...lead, ...rest].slice(0, count);
+    });
+    /* EVERY PLACE FROM $100 (§58.1; Sam, 25 Sep 2026: "include sweetopia and
+       olaika at $100 too"): a place the cheap turns left out takes a cheap
+       place's slot, from week two, a week apiece. Under $100 the cheapest
+       credits win, so $50 keeps its five. */
+    if (budgetCents >= EVERY_FROM && n >= byCheap.length) {
+      byCheap
+        .filter((id) => !slots.some((w) => w.includes(id)))
+        .forEach((id, k) => {
+          for (let t = 0; t < WEEKS_PER_MONTH; t++) {
+            const week = slots[(k + 1 + t) % WEEKS_PER_MONTH];
+            let j = -1;
+            week.forEach((p, i) => {
+              if (tier.includes(p)) j = i;
+            });
+            if (j >= 0 && !week.includes(id)) {
+              week[j] = id;
+              return;
+            }
+          }
+        });
+    }
+    let total = 0;
+    const weeks = slots.map((week) =>
+      week.map((id) => {
         const b = order(id);
         total += b.c;
         return { id, b };
-      });
-    });
+      }),
+    );
     return { shop, weeks, total };
   };
   let n = Math.min(byCheap.length * WEEKS_PER_MONTH, Math.floor(cap / floor));
