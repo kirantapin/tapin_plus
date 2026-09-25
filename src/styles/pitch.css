@@ -3357,6 +3357,30 @@ button.vcard:focus-visible {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  /* "Your membership" and "Sign out" when signed in (§61): 24px apart, which
+     also keeps their 44px hit areas from overlapping. */
+  gap: var(--s-2xl);
+}
+/* On a phone the bar holds one control: signed in, "Your membership", and
+   "Sign out" lives on that page (§61). Beside the sentence, two would not
+   fit. And where even one is tight, the sentence gives way, not the control. */
+.signin-short {
+  display: none;
+}
+@media (max-width: 639px) {
+  .signin-bar .signin-out,
+  .signin-long {
+    display: none;
+  }
+  .signin-short {
+    display: inline;
+  }
+}
+.ann-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .signin-go {
   position: relative;

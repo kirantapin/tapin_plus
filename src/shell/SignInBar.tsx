@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PhoneStep, { type PhoneStage, type PhoneStepHandle } from "./PhoneStep";
 import { useAuth } from "../context/auth_context";
 
@@ -38,6 +39,7 @@ import { useAuth } from "../context/auth_context";
  */
 export default function SignInBar() {
   const { userSession, logout } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   /* Which of the step's two pages is up — the title reads from it, and the
      chevron only exists on the second one. */
@@ -101,9 +103,22 @@ export default function SignInBar() {
           properties undone, and a control that is styled by negation is the
           next person's puzzle. Nothing about the sheet changes. */}
       <div className="signin-bar">
+        {/* SIGNED IN, THE MEMBERSHIP IS ONE TAP AWAY (§61; Sam, 25 Sep 2026:
+            "once im signed in it should be a different experience"). */}
+        {userSession ? (
+          <Link className="signin-go" to="/in" aria-label="Your membership">
+            {/* "Membership" on a phone, where the sentence beside it needs the room. */}
+            <span className="signin-long" aria-hidden="true">
+              Your membership
+            </span>
+            <span className="signin-short" aria-hidden="true">
+              Membership
+            </span>
+          </Link>
+        ) : null}
         <button
           type="button"
-          className="signin-go"
+          className={userSession ? "signin-go signin-out" : "signin-go"}
           onClick={() => (userSession ? logout() : openSheet())}
         >
           {userSession ? "Sign out" : "Sign in"}
@@ -187,7 +202,17 @@ export default function SignInBar() {
             {/* The session is what matters here, and `verifyCode` leaves it
                 behind through `onAuthStateChange` — so the sheet just closes
                 and everything reading `useAuth` re-renders itself. */}
-            <PhoneStep ref={phone} askName={false} onStage={setStage} onDone={close} />
+            {/* A verified sign-in lands on the membership (§61); an unverified
+                one (no SMS provider) has no session to show there. */}
+            <PhoneStep
+              ref={phone}
+              askName={false}
+              onStage={setStage}
+              onDone={(id) => {
+                close();
+                if (id.verified) navigate("/in");
+              }}
+            />
           </div>
         </div>,
             document.body,
