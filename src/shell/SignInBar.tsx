@@ -187,7 +187,7 @@ export default function SignInBar() {
             {/* The session is what matters here, and `verifyCode` leaves it
                 behind through `onAuthStateChange` — so the sheet just closes
                 and everything reading `useAuth` re-renders itself. */}
-            <PhoneStep ref={phone} onStage={setStage} onDone={close} />
+            <PhoneStep ref={phone} askName={false} onStage={setStage} onDone={close} />
           </div>
         </div>,
             document.body,
