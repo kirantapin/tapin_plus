@@ -11,6 +11,8 @@ import TapInIcon from "./TapInIcon";
 import { useReserveCta } from "./useReserveCta";
 import { logoField, venues, type Venue } from "../model/content";
 import { campaignTrialPlaces } from "../model/campaign";
+import { tryable } from "../model/feedHours";
+import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
 
 /**
  * ══ THIS FEED IS INVENTED. NOTHING IT SAYS HAPPENED. ═══════════════════════
@@ -44,8 +46,18 @@ import { campaignTrialPlaces } from "../model/campaign";
  * someone is viewing either page, they should be seeing purchase
  * notifications." So "viewed this page" is gone, about three cards in four
  * are purchases (a try never follows a try), and a purchase card's mark
- * pulses (feed.css `.is-buy`). The first comes 4s in, then one every 10–20s
- * while the page is in front, up to 20 a session.
+ * pulses (feed.css `.is-buy`).
+ *
+ * ══ LATER, AND A HISTORY THAT HOLDS TOGETHER (§57) ═════════════════════════
+ * Sam, 25 Sep 2026: the cards were "a bit too frequent … It looks a bit fake";
+ * they should be "for those who have spent a decent amount of time on the
+ * platform, like 30 seconds or so"; "it's fine to show them more frequently,
+ * if it's like '[name] purchased Tapin plus 4 hours ago' but … more
+ * realistic"; "use best practices". So the first card waits for 30s of the
+ * site in front, summed across both pages and reloads (`SEEN_KEY`); then one
+ * every 25–45s, up to 8 a session. What they show is the session's invented
+ * history (model/feedLedger.ts): purchases hours apart, newest first, each
+ * with its own "ago"; never a card twice; never "just now" but the one below.
  *
  * ══ WHAT A HAND CAN DO TO IT (§53) ═════════════════════════════════════════
  * Sam, 24 Sep 2026: a bar "that shows when they're going to close", "if
@@ -59,17 +71,16 @@ import { campaignTrialPlaces } from "../model/campaign";
  * still turns the feed off for the session. Keyboards never reach it: it is
  * a second door to the page's own buttons, hidden from assistive tech.
  *
- * ══ THE BURG'S TRIES ARE ON WEEKEND EVENINGS (§53) ═════════════════════════
- * Sam: "people only actually use the burg on weekends in the evening, but
- * coffee holics can be all day." A try at The Burg is only drawn when the
- * moment it claims (now less its "ago") falls on a Friday, Saturday or Sunday
- * evening, 5pm to 2am, Blacksburg time. Coffeeholics' can be any time.
+ * ══ FREE TRIES KEEP REAL HOURS (§53, §57) ═════════════════════════════════
+ * A try is only drawn when the moment it claims (now less its "ago") falls in
+ * its place's hours, Blacksburg time (model/feedHours.ts): Coffeeholics every
+ * day 10am–7pm, The Burg Thursday to Saturday from 9pm to 2am. Outside them
+ * every card is a purchase.
  *
- * ══ PURCHASES CARRY A FIRST NAME (§53) ══════════════════════════════════════
+ * ══ PURCHASES CARRY A FIRST NAME (§53, §57) ═══════════════════════════════
  * Sam, 24 Sep 2026: "we can have fake names for those who purchased tapin
- * plus." A purchase reads "{name} just purchased TapIn Plus", the name drawn
- * from the same invented pool as the card over a layer, never the same one
- * twice running. A free try still reads "Someone".
+ * plus." A purchase reads "{name} purchased TapIn Plus" over its "ago", each
+ * name once a session. A free try still reads "Someone".
  *
  * ══ WHAT IT REFUSES ════════════════════════════════════════════════════════
  * Names on anything but a purchase, faces or initials; a running
@@ -101,15 +112,18 @@ import { campaignTrialPlaces } from "../model/campaign";
 /** One key for the session: "off" once the X is pressed, else how many
  *  cards this session has shown. A reload keeps both. */
 const KEY = "tapin.feed";
-const FIRST_MS = 4_000;
+/** Time with the site in front, summed across the session, in ms (§57). */
+const SEEN_KEY = "tapin.feed.seen";
+/** How much of it comes before the first card. */
+const ENGAGED_MS = 30_000;
 /** A card's life on screen; feed.css's bar reads it from `--feed-life`. */
 const SHOW_MS = 5_000;
-const GAP_MS: readonly [number, number] = [10_000, 20_000];
+const GAP_MS: readonly [number, number] = [25_000, 45_000];
 /** How often a card is a free try rather than a purchase (never twice running). */
 const TRIED_SHARE = 0.3;
 /** Matches feed.css's lift, so the card unmounts as it finishes leaving. */
 const OUT_MS = 260;
-const MAX = 20;
+const MAX = 8;
 /** The event the checkout's drop sends, and the card it asks for. */
 const FEED_EVENT = "tapin:feed";
 
@@ -146,11 +160,49 @@ let serial = 0;
 const between = (lo: number, hi: number): number =>
   lo + Math.floor(Math.random() * (hi - lo + 1));
 
-/** An invented first name, never the one before it. */
+/** Where the trial can actually be taken — campaign.ts's places, in its order. */
+const trialVenues: Venue[] = campaignTrialPlaces
+  .map((place) => venues.find((v) => v.id === place.venueId))
+  .filter((v): v is Venue => v !== undefined);
+
+/* ══ THE SESSION'S HISTORY (§57, model/feedLedger.ts) ══════════════════════
+   Built on first use and kept for the session with what has been shown, so a
+   card is never shown twice and every "ago" agrees across pages and reloads.
+   `memo` keeps it where sessionStorage is refused. */
+const LEDGER_KEY = "tapin.feed.ledger";
+interface Ledger {
+  events: FeedEvent[];
+  shown: string[];
+}
+let memo: Ledger | null = null;
+const keepLedger = (l: Ledger): void => {
+  memo = l;
+  try {
+    sessionStorage.setItem(LEDGER_KEY, JSON.stringify(l));
+  } catch {
+    /* private mode: `memo` keeps it for this page */
+  }
+};
+const ledger = (): Ledger => {
+  if (memo) return memo;
+  try {
+    const v = JSON.parse(sessionStorage.getItem(LEDGER_KEY) ?? "null") as Ledger | null;
+    if (v && Array.isArray(v.events) && Array.isArray(v.shown)) return (memo = v);
+  } catch {
+    /* unreadable: build a new one */
+  }
+  const fresh = { events: buildLedger(Date.now(), NAMES, trialVenues.map((v) => v.id)), shown: [] };
+  keepLedger(fresh);
+  return fresh;
+};
+
+/** An invented first name for the checkout's card: never one the history
+ *  already used, nor the one before it. */
 let lastName = "";
 const aName = (): string => {
-  const pool = NAMES.filter((n) => n !== lastName);
-  lastName = pool[between(0, pool.length - 1)];
+  const used = new Set(ledger().events.map((e) => e.name));
+  const pool = NAMES.filter((n) => n !== lastName && !used.has(n));
+  lastName = pool.length ? pool[between(0, pool.length - 1)] : NAMES[between(0, NAMES.length - 1)];
   return lastName;
 };
 
@@ -162,53 +214,32 @@ const purchase = (): Card => ({
   buy: true,
 });
 
-/** Where the trial can actually be taken — campaign.ts's places, in its order. */
-const trialVenues: Venue[] = campaignTrialPlaces
-  .map((place) => venues.find((v) => v.id === place.venueId))
-  .filter((v): v is Venue => v !== undefined);
-
-/** Day (0 = Sunday) and hour in Blacksburg at an instant. */
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const blacksburgClock = (ms: number): { day: number; hour: number } => {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    weekday: "short",
-    hour: "numeric",
-    hourCycle: "h23",
-  }).formatToParts(new Date(ms));
-  const day = WEEKDAYS.indexOf(parts.find((p) => p.type === "weekday")?.value ?? "");
-  const hour = Number(parts.find((p) => p.type === "hour")?.value);
-  return { day, hour };
-};
-/** When a try at a place is believable (§53); a place not listed: any time. */
-const TRY_WHEN: Record<string, (day: number, hour: number) => boolean> = {
-  /* Friday, Saturday and Sunday evenings, 5pm to 2am: after midnight belongs
-     to the night before (Saturday, Sunday and Monday before 2am). */
-  theburg: (day, hour) => (hour >= 17 && (day === 5 || day === 6 || day === 0)) ||
-    (hour < 2 && (day === 6 || day === 0 || day === 1)),
-};
-const tryable = (venue: Venue, at: number): boolean => {
-  const rule = TRY_WHEN[venue.id];
-  if (!rule) return true;
-  const { day, hour } = blacksburgClock(at);
-  return rule(day, hour);
-};
-
-/** A line, a time and a place. Mostly purchases; never two tries running. */
-const draw = (last: Kind | null): { kind: Kind; card: Card } => {
-  const agoS = Math.random() < 0.5 ? between(8, 59) : between(2, 9) * 60;
-  const ago = agoS < 60 ? `${agoS} seconds ago` : `${agoS / 60} minutes ago`;
-  const open = trialVenues.filter((v) => tryable(v, Date.now() - agoS * 1000));
-  const kind: Kind =
-    open.length > 0 && last !== "tried" && Math.random() < TRIED_SHARE ? "tried" : "joined";
-  const venue = kind === "tried" ? open[between(0, open.length - 1)] : null;
+/** The next event not yet shown: purchases newest first, and now and then
+ *  a free try, only while its place's hours are open now (feedHours.ts) and
+ *  never two tries running. Null once the history is spent. */
+const nextCard = (last: Kind | null): { kind: Kind; card: Card } | null => {
+  const l = ledger();
+  const left = l.events.filter((e) => !l.shown.includes(e.id));
+  const buys = left.filter((e) => e.kind === "joined");
+  const tries = left.filter((e) => e.kind === "tried" && e.venueId && tryable(e.venueId, Date.now()));
+  const takeTry = tries.length > 0 && last !== "tried" && (!buys.length || Math.random() < TRIED_SHARE);
+  const e = takeTry ? tries[0] : buys[0];
+  if (!e) return null;
+  keepLedger({ ...l, shown: [...l.shown, e.id] });
+  const venue = e.kind === "tried" ? (venues.find((v) => v.id === e.venueId) ?? null) : null;
   const what =
-    kind === "joined"
-      ? `${aName()} just purchased TapIn Plus`
-      : `Someone just tried it for free at ${venue?.name}`;
+    e.kind === "joined"
+      ? `${e.name} purchased TapIn Plus`
+      : `Someone tried it for free at ${venue?.name}`;
   return {
-    kind,
-    card: { id: ++serial, what, when: `${ago} · Blacksburg`, venue, buy: kind === "joined" },
+    kind: e.kind,
+    card: {
+      id: ++serial,
+      what,
+      when: `${agoText(Date.now() - e.at)} · Blacksburg`,
+      venue,
+      buy: e.kind === "joined",
+    },
   };
 };
 
@@ -227,6 +258,21 @@ const store = (v: string): void => {
     sessionStorage.setItem(KEY, v);
   } catch {
     /* private mode: the feed simply runs again after a reload */
+  }
+};
+const seenBefore = (): number => {
+  try {
+    const n = Number(sessionStorage.getItem(SEEN_KEY));
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+};
+const keepSeen = (ms: number): void => {
+  try {
+    sessionStorage.setItem(SEEN_KEY, String(Math.round(ms)));
+  } catch {
+    /* private mode: each page counts its own 30s */
   }
 };
 
@@ -269,14 +315,27 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     const start = stored();
 
     /* ══ ONE TIMER SCHEDULE ═══════════════════════════════════════════════
-       wait → show (5s) → leave (260ms) → wait (10–20s) → … At most one
+       wait → show (5s) → leave (260ms) → wait (25–45s) → … At most one
        timeout is pending at any moment, and `arm` is the only thing that
        sets one. A pause keeps what was left of a wait; a pause during a card
        sends it out, and the next card is a fresh gap after the page is
        clear again. A hold stops a card's clock where it is (§53). */
+    /* ══ TIME ON THE SITE (§57) ═══════════════════════════════════════════
+       Counted while the tab is in front and kept for the session, so a
+       reader who moves between the two pages, or reloads, is not made to
+       wait 30s again. */
+    let seenBase = seenBefore();
+    let seenSince = document.hidden ? 0 : Date.now();
+    const seen = () => seenBase + (seenSince ? Date.now() - seenSince : 0);
+    const tally = () => {
+      seenBase = seen();
+      seenSince = document.hidden ? 0 : Date.now();
+      keepSeen(seenBase);
+    };
+
     let timer = 0;
     let due = 0;
-    let left = FIRST_MS;
+    let left = Math.max(0, ENGAGED_MS - seen());
     let showLeft = 0;
     let stage: "wait" | "show" | "leave" | "done" =
       start.off || start.shown >= MAX ? "done" : "wait";
@@ -311,8 +370,12 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
         arm(Math.max(250, overUntil - Date.now()), show);
         return;
       }
+      const next = nextCard(last);
+      if (!next) {
+        stage = "done";
+        return;
+      }
       store(String(s.shown + 1));
-      const next = draw(last);
       last = next.kind;
       holds.clear();
       setOut(false);
@@ -453,8 +516,10 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
       };
     }
 
+    document.addEventListener("visibilitychange", tally);
+    window.addEventListener("pagehide", tally);
     if (blocked()) paused = true;
-    else arm(FIRST_MS, show);
+    else arm(left, show);
 
     const watch = new MutationObserver(check);
     watch.observe(document.documentElement, {
@@ -470,11 +535,14 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     document.addEventListener("visibilitychange", check);
 
     return () => {
+      tally();
       window.clearTimeout(timer);
       window.clearTimeout(overTimer);
       window.removeEventListener(FEED_EVENT, onFeed);
       watch.disconnect();
       document.removeEventListener("visibilitychange", check);
+      document.removeEventListener("visibilitychange", tally);
+      window.removeEventListener("pagehide", tally);
       ctl.current = idle;
     };
   }, []);
