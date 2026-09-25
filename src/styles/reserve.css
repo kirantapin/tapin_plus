@@ -1190,13 +1190,14 @@ html.is-layered{overflow:hidden}
 .sheet-column.column{padding-top:var(--s-xl);padding-bottom:var(--s-2xl)}
 .sheet-column.column > .rs-modal{width:100%}
 @media (max-width:639px){
-  /* 92vh FLAT, NOT `auto` UP TO 92vh (21 Sep 2026). The sheet has four pages
-     now and they are nothing like the same height, so a frame sized to its
-     content would collapse from full height to a two-field form the instant
-     the reader taps Checkout — and a modal that changes size cannot read as
-     the same modal moving to its next page. Page 0 has always filled this
-     anyway, so nothing about the surface a reader knows has changed. */
-  .reserve-sheet{inset:auto 0 0 0;height:92vh;
+  /* FLAT, NOT `auto` (21 Sep 2026). The sheet has four pages and they are
+     nothing like the same height, so a frame sized to its content would
+     collapse to a two-field form the instant the reader taps Checkout — and a
+     modal that changes size cannot read as the same modal moving on.
+     THE TRY-IT-ONCE WINDOW'S HEIGHT (§59; Sam, 25 Sep 2026: "almost a full
+     page modal … roughly the same height as the 'try it once'"): 84vh up to
+     720px, where it was 92vh — 709 against its 706 at 390×844. */
+  .reserve-sheet{inset:auto 0 0 0;height:min(84vh,720px);
     border-radius:22px 22px 0 0;box-shadow:0 -12px 40px rgba(0,0,0,.35)}
   .reserve-scrim{background:rgba(6,3,5,.6)}
 }

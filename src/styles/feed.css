@@ -59,7 +59,7 @@
    and never on the X; where a short window caps the dialog (its top at 16 at
    1280×720) its foot also reaches 9px onto the page's first row.
 
-   BELOW 640 IT IS A ONE-LINE PILL (§35.4), in the band the 92vh sheet leaves
+   BELOW 640 IT IS A ONE-LINE PILL (§35.4), in the band the phone sheet (84vh since §59, 92vh then) leaves
    above itself (65px at 375×812, 53 at 375×667, 45 at 320×568). The card was
    86 tall there and covered the sheet's X and title for its 5s; the pill is
    36, 8px down, so its foot (44) clears the sheet's top at every phone size. */
@@ -78,7 +78,7 @@
    `--s-xl`, for 8px more of the line. No tile, no time line and no X: it
    goes by itself in 5s and comes once a session, and a second X a few
    pixels over the sheet's own is a mis-tap for nothing. Same query as the
-   sheet's 92vh (reserve.css), so the two switch together; `.feed.is-over`
+   sheet's height rule (reserve.css), so the two switch together; `.feed.is-over`
    weight, so the base rules below cannot take it back. */
 @media (max-width: 639px) {
   .feed.is-over {
