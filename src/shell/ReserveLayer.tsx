@@ -20,7 +20,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import {
   FOUNDING_OPEN,
   PLANS,
-  lockedRateLine,
+  lockedRateFor,
   seatNoun,
 } from "../model/content";
 
@@ -388,7 +388,9 @@ export default function ReserveLayer({
                       price: plan.price,
                       per: plan.per,
                       saving: plan.saving,
-                      locked: lockedRateLine,
+                      /* The plan's own figure (§63): the monthly line was
+                         written into 3-month and yearly records too. */
+                      locked: lockedRateFor(plan.price, plan.per),
                       terms: plan.terms,
                       name: identity.current?.name ?? null,
                       phone: identity.current?.phone ?? null,

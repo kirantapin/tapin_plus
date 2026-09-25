@@ -685,13 +685,16 @@ export const monthlyPlan = {
      states the grandfathering in Sam's own frame ("for good") with the
      condition attached, because term 7 is where the forfeit lives and a reader
      should not have to reach it to understand term 4. */
+  /* NEVER GOES UP, HERE TOO (§63; Sam, 25 Sep 2026: "let's just say it never
+     goes up"). Term 4 still said "locked for your first year" while every
+     other surface said it never goes up; the condition stays in the sentence. */
   terms: (moneyJson.plans.monthly.terms as Term[]).map((t) =>
     t.id === "rate"
       ? {
           ...t,
           term:
-            `${usd(FOUNDING_MONTHLY)} a month is locked for your first year. After the first ` +
-            `${SEAT_CAP} seats, new members pay ${usd(AFTER_MONTHLY)} a month.`,
+            `${usd(FOUNDING_MONTHLY)} a month never goes up, for as long as you stay a member. ` +
+            `After the first ${SEAT_CAP} seats, new members pay ${usd(AFTER_MONTHLY)} a month.`,
         }
       : t,
   ),
@@ -829,10 +832,6 @@ export const lockedRateLines = {
      the odd one out. */
   standard: "Your rate is locked for as long as you keep the membership.",
 } as const;
-/** Today's line. /in reads the one she bought under instead, from her record. */
-export const lockedRateLine: string = FOUNDING_OPEN
-  ? lockedRateLines.founding
-  : lockedRateLines.standard;
 /** $11.99 across 3 months. Derived, so the two can never disagree. */
 const PASS_PER_MONTH = usd(Math.round((PASS_TODAY / PASS_MONTHS) * 100) / 100);
 const WINDOW = launchWindow;
@@ -888,8 +887,8 @@ export const passPlan = {
          monthly's. Quoting "$14.99 a month" here, as it used to, asked a pass
          buyer to do the arithmetic for a plan she did not pick. */
       term:
-        `${usd(PASS_TODAY)} every ${PASS_MONTHS} months is locked for your first year. ` +
-        `After the first ${SEAT_CAP} seats, new members ` +
+        `${usd(PASS_TODAY)} every ${PASS_MONTHS} months never goes up, for as long as you ` +
+        `stay a member. After the first ${SEAT_CAP} seats, new members ` +
         `pay ${usd(AFTER_PASS)} every ${PASS_MONTHS} months.`,
     },
     {
@@ -996,8 +995,8 @@ export const yearPlan = {
     {
       id: "rate",
       term:
-        `${usd(YEAR_TODAY)} is your whole first year. After the first ${SEAT_CAP} seats, ` +
-        `new members pay ` +
+        `${usd(YEAR_TODAY)} a year never goes up, for as long as you stay a member. ` +
+        `After the first ${SEAT_CAP} seats, new members pay ` +
         `${usd(AFTER_YEAR)} a year.`,
     },
     {
