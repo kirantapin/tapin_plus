@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Panel } from "../shell/Panel";
 import { Drill } from "../shell/Drill";
 import TapInCard from "../shell/TapInCard";
@@ -198,7 +198,8 @@ export default function Membership() {
   /* Where the app window opens over, on a desktop (AppLayer). */
   const location = useLocation();
   /* Stripe's answer, for the reader whose record is on another device. */
-  const { userSession, subscribed } = useAuth();
+  const { userSession, subscribed, displayName, logout } = useAuth();
+  const navigate = useNavigate();
   /**
    * Read in an effect, not during render. This page is rendered on a server
    * nowhere today, but reading `window` in a component body is the kind of
@@ -305,7 +306,7 @@ export default function Membership() {
             /* The name on the reservation, else the signed-in one, else the
              placeholder — a record written before the field existed still
              gets a name now if we hold one. */
-            name={seat?.name ?? undefined}
+            name={seat?.name ?? displayName ?? undefined}
             /* The plan she bought, from her record — never the site's live
              default, which follows the flip. */
             plan={
@@ -483,6 +484,32 @@ export default function Membership() {
               </p>
             </Panel>
           </>
+        ) : userSession && subscribed === null ? null : userSession ? (
+          /* ══ SIGNED IN, NOT YET A MEMBER (§61) ══════════════════════════════
+           Sam, 25 Sep 2026: "once im signed in it should be a different
+           experience." Signing in lands here (SignInBar), so the signed-in
+           reader who has not bought is told who they are and what the card
+           in front of them gets them, with the join button under the card —
+           not "No seat on this device", which is about browsers. Nothing
+           shows while `subscribed` resolves, or a member would flash it. */
+          <>
+            <Panel className="ms-head">
+              <p className="t-caption ms-state">
+                {displayName ? `Signed in as ${displayName}` : "Signed in"}
+              </p>
+              <h1 className="ms-title">Your membership starts when you join</h1>
+              <p className="t-compact ms-sub">
+                Hold a seat and it opens with us in Blacksburg, {launchWindow}.
+              </p>
+            </Panel>
+            <Panel label="What you get when we open">
+              <AppliesTo />
+              <p className="t-compact ms-note">
+                15% off, a $5 weekly credit and points at the TapIn Plus places.
+                The 15% skips alcohol. Points land on everything.
+              </p>
+            </Panel>
+          </>
         ) : (
           /* ══ NOT AN ERROR, AND IT MUST NOT LOOK LIKE ONE ═══════════════════
            The overwhelmingly likely reader here has not bought anything — /in
@@ -515,6 +542,22 @@ export default function Membership() {
             </div>
           </>
         )}
+        {/* SIGNING OUT LIVES HERE TOO (§61): on a phone the pitch's bar has
+            room for one control, and signed in it is "Your membership". */}
+        {userSession ? (
+          <p className="ms-session">
+            <button
+              type="button"
+              className="ms-signout"
+              onClick={async () => {
+                await logout();
+                navigate("/");
+              }}
+            >
+              Sign out
+            </button>
+          </p>
+        ) : null}
       </div>
       <SiteFoot />
     </>

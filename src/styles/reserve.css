@@ -632,6 +632,12 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
 .ms-drill{margin-top:var(--s-lg)}
 .ms-see{margin-top:var(--s-md)}
 .ms-cta{margin-top:var(--s-lg)}
+/* Sign out, at the foot of the membership (§61): a text control, 44px tall. */
+.ms-session{margin:var(--s-md) 0 0;display:flex}
+.ms-signout{min-height:44px;padding:0 var(--s-xs);border:0;background:none;
+  font:inherit;font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--hair-lit)}
+.ms-signout:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;border-radius:var(--r-sm)}
 
 /* ============================================================================
    THE PHONE STEP — who is buying, before what they are buying.

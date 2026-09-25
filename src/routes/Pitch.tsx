@@ -135,7 +135,7 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 strokeWidth="1.9"
               />
             </svg>
-            Opening in Blacksburg, {launchWindow}
+            <span className="ann-text">Opening in Blacksburg, {launchWindow}</span>
           </p>
           {/* Sign in / sign out. The sheet still portals to <body>; only the
               control moved. See shell/SignInBar.tsx. */}
