@@ -125,8 +125,11 @@ const PhoneStep = forwardRef<
     onDone: (id: PhoneIdentity) => void;
     /** Fires on every stage change, so the host's title can follow it. */
     onStage?: (stage: PhoneStage) => void;
+    /** Whether to ask for the name. The checkout does (it is the sign-up);
+     *  signing in does not, since the account has one (§60). */
+    askName?: boolean;
   }
->(function PhoneStep({ onDone, onStage }, ref) {
+>(function PhoneStep({ onDone, onStage, askName = true }, ref) {
   /* The session's one name — typed here, or onto the card on the deck's close
      (Sam, 14 Sep 2026). Either way it is the same value, so the field opens
      already filled if she named the card, and the /reserve card fills in as
@@ -150,7 +153,7 @@ const PhoneStep = forwardRef<
      "Your name" since it was built — so a reservation without one hands over
      a card with a placeholder on it. Trimmed, non-empty; nothing stricter,
      because a name is whatever she says it is. */
-  const valid = digits.length === 10 && name.trim().length > 0;
+  const valid = digits.length === 10 && (!askName || name.trim().length > 0);
 
   /* ══ THE WAY BACK, AND THERE IS ONLY ONE ═══════════════════════════════════
      The foot's "Use a different number" and the host header's Back chevron are
@@ -204,7 +207,7 @@ const PhoneStep = forwardRef<
     setError(null);
     /* The name goes with it — it is written onto the auth user so the account
        is identifiable as a person, not just a number. See authEnv.ts. */
-    const err = await verifyCode(toE164(digits), code, name.trim(), optIn);
+    const err = await verifyCode(toE164(digits), code, askName ? name.trim() : undefined, optIn);
     setBusy(false);
     if (err) {
       setError(err);
@@ -234,37 +237,43 @@ const PhoneStep = forwardRef<
               autofill do the typing. 40 is the card's own line: the name
               renders nowrap with an ellipsis, so a longer one would be cut on
               the card while looking accepted here. */}
-          <label className="ph-label" htmlFor="ph-name">
-            Your name
-          </label>
-          <div className="ph-field">
-            <input
-              id="ph-name"
-              className="ph-input"
-              type="text"
-              autoComplete="name"
-              autoCapitalize="words"
-              name="name"
-              /* Password managers draw their icon into any field that looks
-                 like a login (Sam's screenshot, 14 Sep 2026). The vendors'
-                 own opt-outs; same as the card's name line. */
-              data-1p-ignore=""
-              data-lpignore="true"
-              data-bwignore=""
-              maxLength={40}
-              placeholder="As you'd like it on your card"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setError(null);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") phoneRef.current?.focus();
-              }}
-            />
-          </div>
+          {/* Signing in skips it (Sam, 25 Sep 2026: "sign in doesn't need a name
+              because they provide that at sign up"). */}
+          {askName ? (
+            <>
+              <label className="ph-label" htmlFor="ph-name">
+                Your name
+              </label>
+              <div className="ph-field">
+                <input
+                  id="ph-name"
+                  className="ph-input"
+                  type="text"
+                  autoComplete="name"
+                  autoCapitalize="words"
+                  name="name"
+                  /* Password managers draw their icon into any field that looks
+                     like a login (Sam's screenshot, 14 Sep 2026). The vendors'
+                     own opt-outs; same as the card's name line. */
+                  data-1p-ignore=""
+                  data-lpignore="true"
+                  data-bwignore=""
+                  maxLength={40}
+                  placeholder="As you'd like it on your card"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setError(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") phoneRef.current?.focus();
+                  }}
+                />
+              </div>
+            </>
+          ) : null}
 
-          <label className="ph-label ph-label-2" htmlFor="ph-num">
+          <label className={askName ? "ph-label ph-label-2" : "ph-label"} htmlFor="ph-num">
             Mobile number
           </label>
           <div className="ph-field">
