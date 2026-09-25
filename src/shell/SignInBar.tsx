@@ -206,7 +206,7 @@ export default function SignInBar() {
                 one (no SMS provider) has no session to show there. */}
             <PhoneStep
               ref={phone}
-              askName={false}
+              signIn
               onStage={setStage}
               onDone={(id) => {
                 close();
