@@ -306,7 +306,7 @@ export default function ReserveLayer({
           The X, reading "Done" there, still closes. aria-hidden, because
           this is a pointer shortcut; the X and Escape are the named ways out.
 
-          On a phone the sheet is 92vh, so the scrim shows as a band above it
+          On a phone the sheet is 84vh (§59), so the scrim shows as a band above it
           and a tap there closes too — a bottom sheet's usual behaviour, and
           the pop-up's (`.vp-root`). */}
       <div
