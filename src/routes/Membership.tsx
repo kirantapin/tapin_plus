@@ -162,6 +162,20 @@ function demoReservation(): Reservation | null {
   };
 }
 
+/* FOR LIFE, FOR EVERY FOUNDER (§64; Sam, 25 Sep 2026: "we can just update the
+   terms to for life … it's a better benefit anyways"). A founding record from
+   before §63 says its rate is locked for its first year; it now reads as the
+   promise every founder has, in the record's own figures. Nothing else moves. */
+const LIFETIME = "never goes up, for as long as you stay a member.";
+const forLife = (t: Term): Term => {
+  if (t.id !== "rate") return t;
+  const firstYear = /^(.+?) is locked for your first year\./;
+  const wholeYear = /^(\$[\d,.]+) is your whole first year\./;
+  if (firstYear.test(t.term)) return { ...t, term: t.term.replace(firstYear, (_, price) => `${price} ${LIFETIME}`) };
+  if (wholeYear.test(t.term)) return { ...t, term: t.term.replace(wholeYear, (_, price) => `${price} a year ${LIFETIME}`) };
+  return t;
+};
+
 const heldOn = (iso: string): string => {
   if (!iso) return "";
   const d = new Date(iso);
@@ -373,8 +387,9 @@ export default function Membership() {
             <div className="ms-terms">
               <Drill summary="The full terms">
                 <ol className="terms">
-                  {/* The terms she agreed to, from the record — not today's. */}
-                  {seat.terms.map((t) => (
+                  {/* The terms she agreed to, from the record — not today's —
+                      with the rate raised to for life for a founder (§64). */}
+                  {(seat.founding ? seat.terms.map(forLife) : seat.terms).map((t) => (
                     <li key={t.id}>{t.term}</li>
                   ))}
                 </ol>
