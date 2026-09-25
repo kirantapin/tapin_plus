@@ -1,6 +1,7 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
-import GuaranteeLine from "../shell/GuaranteeLine";
+import IncludedPanel from "../shell/IncludedPanel";
+import Timeline, { type Stop } from "../shell/Timeline";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
@@ -9,17 +10,11 @@ import { nextDrop, takeSeats, TICK_MS, useSeatsShown } from "../model/seatsSessi
 import {
   PLANS,
   launchWindow,
-  benefits,
   FOUNDING_OPEN,
   firstEarlyBirdPrice,
   foundingCloses,
   foundingTierName,
-  logoField,
   monthlyToday,
-  offers,
-  plusVenues,
-  venuePolicyFigure,
-  venues,
 } from "../model/content";
 /* The credit's own constants, from the model that computes the saving — the
    floor and the amount are read, never retyped beside a price. */
@@ -104,7 +99,7 @@ const plan = PLANS.monthly;
 const refundLine = plan.chargeRows.some((r) => r.id === "refund")
   ? "Cancel any time, with a full refund before we open, no reason needed."
   : "Cancel any time, no reason needed.";
-const schedule: { id: string; when: string; figure: string; clause: string }[] = [
+const schedule: Stop[] = [
   {
     id: "today",
     when: "Today",
@@ -130,41 +125,8 @@ const schedule: { id: string; when: string; figure: string; clause: string }[] =
   { id: "always", when: "Always", figure: plan.price, clause: "Never goes up while you stay a member" },
 ];
 
-/* ══ WHAT YOU GET, AS A CHECKLIST ══════════════════════════════════════════
-   A receipt lists what is included; it does not display it. The figure strip
-   (§15) is a marketing device and stays on the splash and the pop-up.
-
-   `benefits` says WHICH lines stand; the figure in each is a held venue
-   policy's, through `venuePolicyFigure` — the $5 and the 15 are BENEFIT's,
-   and the 1× is the multiplier content.ts corrects on the venue records
-   (the extraction's benefit record still says 2×, which the product retired
-   on 15 Sep). The words after each figure are the splash's and the pop-up's
-   qualifiers. A kind with no figure prints no line. */
-const heldFigure = (kind: string) => {
-  if (!benefits.some((b) => b.kind === kind)) return undefined;
-  const held = plusVenues.flatMap((v) => v.policies).find((p) => p.kind === kind);
-  return held ? venuePolicyFigure(held) : undefined;
-};
-const creditFig = heldFigure("credit");
-const percentFig = heldFigure("percent");
-const pointsFig = heldFigure("points");
-const included: { id: string; line: string }[] = [
-  ...(creditFig ? [{ id: "credit", line: `${creditFig.figure} credit every week` }] : []),
-  ...(percentFig ? [{ id: "percent", line: `${percentFig.figure} ${percentFig.qualifier}` }] : []),
-  ...(pointsFig ? [{ id: "points", line: `${pointsFig.figure} points, toward free items` }] : []),
-  ...(offers.length ? [{ id: "offers", line: "Special offers from the places" }] : []),
-];
-
-/* ══ WHERE IT WORKS, AS ONE ROW ═══════════════════════════════════════════
-   The trial modal's call-out row — the marks overlapped on the left, the names
-   in a sentence beside them — for all six, rebuilt under `.rs-*` so the sheet
-   and the modal never share a rule. Names as the records hold them, so a real
-   business's name is never shortened or retyped here. The rail stays on the
-   pitch; on a sheet that confirms, it was a second carousel to scroll. */
-/* The joins between the names, in the splash's own grammar: commas, then
-   " and " before the last. Each name is kept whole on a narrow sheet (a line
-   break inside "The Burg" reads as two places). */
-const joinAfter = (k: number, n: number) => (k === n - 1 ? "" : k === n - 2 ? " and " : ", ");
+/* The checklist, the six marks and the guarantee are shell/IncludedPanel.tsx
+   now, shared with /in; the schedule's rail is shell/Timeline.tsx. */
 
 /* The dock's words. NOT `plan.per` — what this opens takes a DEPOSIT (Sam:
    "need to make sure it says $4.99 deposit"). */
@@ -338,67 +300,10 @@ export default function Reserve() {
           panel opens the sheet in place of the photo-card row (Sam, 24 Sep
           2026: "get rid of the top section of the checkout… and replace it"). */}
       <div className="rs-get-col">
-        {/* ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════
-            Sam, on the trial modal's call-out: "I like how you formatted
-            this, maybe we use the same on the checkout flow." Its
-            construction, rebuilt under `.rs-*`: one `--inner` plate, a
-            heading, then what you get, where it works and the guarantee —
-            the three open blocks that followed the count — as its rows.
-
-            THE HEADING ANSWERS THE MODAL'S QUESTION. The call-out asks "Want
-            this every week? And at every location?"; by checkout the reader
-            has said yes, so the plate states it. Words, never a figure.
-
-            NO BUTTON AND NO PRICE INSIDE IT. The action is the dock's and
-            the money is the tiles' and the order card's; a second
-            price here would be the same figure stated twice on one sheet. */}
-        <section className="rs-inc" aria-labelledby="rs-inc-head">
-          <h2 className="t-title rs-inc-head" id="rs-inc-head">
-            Every week, at every location
-          </h2>
-          {/* Four lines, a check each — the checklist every reference plan
-              sheet carries. The glyph is ink, not a tile. */}
-          {included.length ? (
-            <ul className="rs-checks">
-              {included.map((item) => (
-                <li key={item.id}>
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
-                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="m3.2 8.4 3 3 6.6-6.8" />
-                  </svg>
-                  <span>{item.line}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {/* Where it works: the six marks stacked on the left, their names
-              in a sentence beside them — the call-out's two-column row. */}
-          <div className="rs-inc-also">
-            <span className="rs-inc-marks" aria-hidden="true">
-              {venues.map((v) => (
-                <span
-                  key={v.id}
-                  className="collar"
-                  data-field={logoField(v.id)}
-                  style={{ ["--brand" as string]: v.brandColor }}
-                >
-                  <img src={v.logo} alt="" decoding="async" />
-                </span>
-              ))}
-            </span>
-            <p className="rs-inc-line">
-              At{" "}
-              {venues.map((v, k, all) => (
-                <Fragment key={v.id}>
-                  <span className="rs-venue-name">{v.name}</span>
-                  {joinAfter(k, all.length)}
-                </Fragment>
-              ))}
-              .
-            </p>
-          </div>
-          {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
-          <GuaranteeLine />
+        {/* The included panel (shell/IncludedPanel.tsx, POLISH §18): the
+            heading, the checklist, the six marks and the guarantee, with the
+            card at its foot. Shared with /in, which has its own card above. */}
+        <IncludedPanel>
           {/* ══ THE CARD LIVES IN THE PANEL (23 Sep 2026, POLISH §26) ══════
               It was the sheet's close under its own hairline (§8), a second
               object after the panel. The heading's list adds up to it, so the
@@ -414,7 +319,7 @@ export default function Reserve() {
               className="reserve-card"
             />
           </div>
-        </section>
+        </IncludedPanel>
 
       </div>
 
@@ -601,18 +506,7 @@ export default function Reserve() {
           <h2 className="t-title rs-order-head" id="rs-order-head">
             What you pay, and when
           </h2>
-          <ol className="rs-time">
-            {schedule.map((stop) => (
-              <li className="rs-stop" key={stop.id}>
-                <p className="rs-stop-head">
-                  <span className="rs-when">{stop.when}</span>
-                  <span className="rs-fig tnum">{stop.figure}</span>
-                </p>
-                <p className="rs-clause">{stop.clause}</p>
-              </li>
-            ))}
-          </ol>
-          {refundLine ? <p className="rs-refund">{refundLine}</p> : null}
+          <Timeline stops={schedule} foot={refundLine} />
           {/* DESKTOP KEEPS ITS OWN BUTTON (Sam, 23 Sep 2026: "we still need a
               checkout button on desktop, unlike the sticky one we have on the
               mobile version"): shown from 1024; below it the dock is the one

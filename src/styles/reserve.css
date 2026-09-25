@@ -608,32 +608,58 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
 /* ============================================================================
    /in — the membership, after it has been bought.
 
-   Deliberately NOT a second checkout. The page's job is to reassure and to
-   hold one string the member will need, so nothing on it is a figure display
-   and nothing takes money. It reuses the checkout's own panels and type rather
-   than inventing a third surface language for one screen.
+   Deliberately NOT a second checkout, and drawn in the checkout's language
+   (Sam, 25 Sep 2026: "can you bring the membership page up to date?"). The
+   band stays in the dark world; `.ms-body` carries `data-lit`, so light.css
+   inverts the tokens under it. Its cards are the sheet's: `--card` on the
+   light ground, a `--hair` edge, the resting shadow.
+
+   PHONE: the light room runs edge to edge one column step under the band,
+   the pitch's `.pitch-lit` construction, and down to the window's foot.
    ============================================================================ */
-.ms-head{text-align:left}
-.ms-state{margin:0 0 var(--s-md);color:var(--ink-3)}
+.column:has(> .ms-body){padding-bottom:0;min-height:100svh}
+/* Its own layer, so the card's deep shadow ends at the edge instead of
+   smearing grey across the light room (light.css, the card's shadow). */
+.ms-body{position:relative;z-index:1;
+  display:flex;flex-direction:column;gap:var(--s-2xl);flex:1 0 auto;
+  margin-inline:calc(50% - 50vw);
+  padding:var(--s-3xl) calc(50vw - 50%) var(--s-2xl);
+  background:var(--page);color:var(--ink-2)}
+
+/* The status head: a real heading and one sentence, on the ground. */
+.ms-head{display:flex;flex-direction:column;gap:var(--s-md)}
 .ms-title{margin:0;font-size:24px;font-weight:700;letter-spacing:-.025em;
-  line-height:1.2;color:var(--ink-1)}
-.ms-sub{margin:var(--s-md) 0 0}
+  line-height:1.2;color:var(--ink-1);text-wrap:balance}
+.ms-sub{margin:0;font-size:15px;font-weight:500;line-height:1.5;
+  color:var(--ink-2);text-wrap:pretty}
 
-.ms-facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.ms-facts li{display:flex;flex-direction:column;gap:3px;padding:var(--s-lg) 0}
-.ms-facts li:first-child{padding-top:0}
-.ms-facts li + li{border-top:1px solid var(--hair-lit)}
-.ms-facts b{font-size:17px;font-weight:700;letter-spacing:-.015em;color:var(--ink-1)}
-.ms-facts span{font-size:14px;font-weight:500;letter-spacing:.005em;color:var(--ink-3)}
-.ms-locked{margin:var(--s-lg) 0 0;padding-top:var(--s-lg);
-  border-top:1px solid var(--hair-lit)}
+/* A card that leads with a heading: the included panel's construction. */
+.ms-card{display:flex;flex-direction:column;gap:var(--s-lg);margin:0;
+  padding:var(--s-xl);border:1px solid var(--hair);border-radius:var(--r-card);
+  background:var(--card);box-shadow:var(--rest)}
+.ms-card-head{margin:0}
+.ms-card p{margin:0;font-size:15px;font-weight:500;line-height:1.5;
+  color:var(--ink-2);text-wrap:pretty}
+.ms-card a{color:var(--ink-1);text-underline-offset:3px;text-decoration-thickness:1px}
+.ms-card a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
 
-.ms-note{margin:var(--s-lg) 0 0}
-.ms-drill{margin-top:var(--s-lg)}
-.ms-see{margin-top:var(--s-md)}
-.ms-cta{margin-top:var(--s-lg)}
-/* Sign out, at the foot of the membership (§61): a text control, 44px tall. */
-.ms-session{margin:var(--s-md) 0 0;display:flex}
+/* The number it was bought with: a quiet row under the schedule, the
+   guarantee line's grey tile beside it. */
+.ms-phone{display:flex;align-items:flex-start;gap:var(--s-lg)}
+.ms-phone-line{display:flex;flex-direction:column;gap:2px;min-width:0;margin:0}
+.ms-phone-line b{font-size:15px;font-weight:700;line-height:20px;color:var(--ink-1)}
+.ms-phone-line span{font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--ink-3);text-wrap:pretty}
+
+/* The full terms: the checkout's drill, on the ground under a hairline. */
+.ms-terms{border-top:1px solid var(--hair-lit)}
+.ms-terms > .drill{margin:0}
+.ms-terms > .drill > summary{min-height:44px}
+
+/* Sign out, at the foot of the membership (§61): a text control, 44px tall,
+   pulled back so the word, not its padding, sits on the column's edge. */
+.ms-session{margin:calc(-1 * var(--s-md)) 0 0 calc(-1 * var(--s-xs));display:flex}
 .ms-signout{min-height:44px;padding:0 var(--s-xs);border:0;background:none;
   font:inherit;font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer;
   text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--hair-lit)}
@@ -827,37 +853,34 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
 /* ============================================================================
    /in ON A DESKTOP — the card, and what it says, side by side.
 
-   The receipt of the checkout above, so it takes the checkout's grid: the
-   object on its photo tile at the left, the details down a reading track on
-   the right. The tile stays on screen while the details scroll — this is the
-   one page where the card is literally the thing being described. The wrapper
-   is `display:contents` on a phone.
+   The checkout's desktop sheet: two equal columns at its 1040 measure and its
+   32px gutter. The band is a photo tile on the left and stays on screen while
+   the body scrolls on the right; the light room is the whole window.
    ============================================================================ */
-.ms-body{display:contents}
-
 @media (min-width:1024px){
   .column:has(.ms-body){
     display:grid;
-    grid-template-columns:minmax(0,1fr) 520px;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
     grid-template-rows:auto;
-    column-gap:48px;
-    width:min(1180px,calc(100% - 96px));max-width:none;
+    column-gap:calc(var(--s-xl) * 2);
+    width:min(1040px,calc(100% - 96px));max-width:none;
     margin-inline:auto;padding:48px 0 64px;
-    align-items:start;
+    align-items:start;align-content:start;
   }
   .column:has(.ms-body) > .ms-left{
     grid-column:1;grid-row:1;
     position:sticky;top:48px;
-    /* STRETCH, not center. The band fills the track on its own that way, which
-       is what it did before this wrapper existed; centring made it shrink to
-       its content and squashed the mosaic with it. The CTA below centres
-       itself with an auto inline margin instead. */
+    /* STRETCH, not center: the band fills the track on its own; the CTA
+       below centres itself with an auto inline margin. */
     display:flex;flex-direction:column;align-items:stretch;gap:var(--s-2xl);
   }
+  /* The block padding clears the back chevron (16 in, 36 across, 12 of air):
+     in this half-width tile the card's corner otherwise runs under it. */
   .column:has(.ms-body) .ms-left > .hero-band.is-compact{
     position:relative;
     width:auto;max-width:none;margin:0;
-    min-height:340px;padding:var(--s-2xl);
+    min-height:340px;
+    padding:calc(var(--s-xl) + 36px + var(--s-lg)) var(--s-2xl);
     display:flex;align-items:center;justify-content:center;
     border-radius:var(--r-panel);overflow:hidden;box-shadow:var(--rest);
   }
@@ -873,13 +896,18 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
     position:relative;z-index:1;margin:0;width:100%;max-width:420px}
   .column:has(.ms-body) .ms-left > .hero-band.is-compact > .reserve-back{
     position:absolute;left:var(--s-xl);top:var(--s-xl);margin:0;z-index:2}
+  /* Static here, so the ground below measures the column, not this track. */
   .column:has(.ms-body) > .ms-body{
-    grid-column:2;grid-row:1;
-    display:flex;flex-direction:column;gap:var(--s-2xl);
-    width:auto;max-width:none;margin:0;
+    grid-column:2;grid-row:1;position:static;z-index:auto;
+    width:auto;max-width:none;margin:0;padding:0;background:none;
   }
-  .ms-body .ms-cta .action{width:auto;min-width:300px;display:inline-flex;
-    align-items:center;justify-content:center}
+  /* The ground, painted once under both columns: the column's own box (at
+     least the window's height) bled to the window's edges, behind its content. */
+  .column:has(.ms-body) > .ms-body::before{content:"";position:absolute;
+    inset-block:0;inset-inline:calc(50% - 50vw);z-index:-1;
+    background:var(--page);pointer-events:none}
+  .ms-body > .site-foot{padding-top:var(--s-lg)}
+  .ms-body > .site-foot nav{justify-content:flex-start}
 }
 
 /* The mystery row's mark: the collar's frame with a question mark in it, dashed
@@ -888,13 +916,11 @@ html[data-flight="in"] .rs-inc > :not(.rs-inc-card){
   background:var(--inner);border:1px dashed var(--hair-lit);color:var(--ink-2);
   font-size:18px;font-weight:700;line-height:1}
 
-/* The legal footer spans both tracks of the checkout's and the membership's
-   grids, under everything. */
+/* The legal footer spans both tracks of the checkout's grid, under
+   everything. (/in's foot closes its body column; see above.) */
 @media (min-width:1024px){
-  .column:has(#checkout) > .site-foot,
-  .column:has(.ms-body) > .site-foot{grid-column:1 / -1;padding-top:var(--s-2xl)}
-  .column:has(#checkout) > .site-foot nav,
-  .column:has(.ms-body) > .site-foot nav{justify-content:flex-start}
+  .column:has(#checkout) > .site-foot{grid-column:1 / -1;padding-top:var(--s-2xl)}
+  .column:has(#checkout) > .site-foot nav{justify-content:flex-start}
 }
 
 /* ══ THREE PLANS, THREE ROWS ══════════════════════════════════════════════
@@ -1275,111 +1301,19 @@ html.is-layered{overflow:hidden}
    take from the price above them; nothing is pushed out of view by it. */
 .pay-slot{margin-top:var(--s-xl)}
 
-/* ══ "WHERE IT WORKS" ON /in ═════════════════════════════════════════════════
-   The pitch's own `.places` rail, reused on the membership page under the head
-   panel. Everything it needs is already in pitch.css; only two things differ
-   because of where it sits here.
-
-   PHONE: `.ms-body` is `display:contents`, so the section lays out as a child
-   of `.column` and the rail's negative gutter margin bleeds to the screen edge
-   exactly as it does on the pitch. Nothing to add.
-
-   DESKTOP: the pitch's full-bleed treatment comes from `.column > .places`,
-   which cannot match here — this section's DOM parent is `.ms-body` — so the
-   rail simply sits in the 520px right-hand track beside the membership card.
-   That is what we want; it only needs to be allowed to shrink, because a flex
-   item defaults to `min-width:auto` and the ticker's track is far wider than
-   the column, which would otherwise push the whole grid wide. */
-/* CONTAINED, HARD. This sits in a 520px grid track next to a STICKY membership
-   card, and the rail it wraps is built to bleed: a negative gutter margin on a
-   phone, a full-bleed `.column > .places` treatment on the pitch, and an
-   overflow-x scroller inside. Anything that escapes this box lands in the
-   48px column gap and paints over the card, which is exactly what it did.
-   `overflow:hidden` on the section is the backstop; the resets below remove the
-   bleed at its source so the backstop never has to clip anything. */
-.ms-places{min-width:0;overflow:hidden}
-.ms-places .ticker-rail{max-width:100%;margin-inline:0}
-
-/* ══ NO FADE ON THE LEADING EDGE ═════════════════════════════════════════════
-   The rail's mask is `transparent 0 → #000 36px` at its left. On the pitch that
-   is right: the rail bleeds past the column's gutter, so the fade lands in the
-   bleed and the first tile is at full strength exactly where the reading column
-   begins. Here the rail does not bleed — it is flush with a 520px track — so
-   those 36px fell ON the first tile, which read as the rail starting empty and
-   filling up as it moved (Kiran: "the very first image is off the div").
-
-   The trailing fade stays. It is doing real work: it says the list continues
-   past the frame, which is true, and nothing is flush against that edge. */
-.ms-places .ticker-rail{
-  -webkit-mask-image:linear-gradient(90deg,#000 0,
-    #000 calc(100% - 44px),transparent 100%);
-  mask-image:linear-gradient(90deg,#000 0,
-    #000 calc(100% - 44px),transparent 100%);
-}
-
-/* ══ THE RAIL STAYS A RAIL HERE ══════════════════════════════════════════════
-   The ticker sizes itself off the VIEWPORT, which is the right call on the
-   pitch, where it runs full bleed — and the wrong one here, where it lives in a
-   520px track beside the membership card. Two rules of its own fought this
-   column:
-
-   · `.ticker-tile{width:176px}` from 1024 — a fixed pixel width that knows
-     nothing about what contains it, so the tiles never adjust.
-   · `is-open` is set by a viewport media query at 1280 (VenueTicker.tsx), and
-     pitch.css then reflows the rail to `repeat(7, 1fr)`. Seven columns across
-     520px is ~70px a tile: the "completely mis positioned" state.
-
-   So on this page the grid state is refused and the rail keeps scrolling at
-   every width, with the tiles measured as a FRACTION OF THE RAIL rather than of
-   the window — three in view, whatever the column turns out to be. Phone is
-   untouched: below 1024 this section is a child of `.column` and behaves
-   exactly as it does on the pitch. */
-@media (min-width:1024px){
-  /* BOTH SELECTORS, and the second is not redundant: pitch.css sets
-     `.ticker.is-open .ticker-tile{width:auto}` at three classes, which outranks
-     a two-class rule here — so with only `.ms-places .ticker-tile` the tiles
-     fell back to sizing on their own content and every one came out a different
-     width. Four classes takes it back.
-
-     A PIXEL WIDTH, NOT A PERCENTAGE OF THE RAIL. The percentage resolved
-     against the scroll container's content box, which the ticker also measures
-     on mount to size its track — and between 1024 and 1279 the rail auto-scrolls
-     off that measurement. Get the two out of step and it parks past the end of
-     its own content, which renders as an empty section (Kiran: "at 1092px width
-     it disappears"). The column this sits in is a fixed 520px at every desktop
-     width, so a percentage was buying nothing that a constant does not. */
-  .ms-places .ticker-tile{width:168px;flex:0 0 auto}
-  /* "View all places" would open the 7-across grid, which is a page-width
-     object and unreadable in this column — the same reason `rail` is passed.
-     The rail shows every place on its own. */
-  .ms-places .ticker-all{display:none}
-}
-
 /* ══ THE JOIN CTA ON /in ═════════════════════════════════════════════════════
-   Lives inside the card band, so on a desktop it is carried by that band's
-   `position:sticky` and holds still with the card. As a grid row of its own it
-   scrolled away while the card stayed, which read as the sentence detaching
-   from the thing it describes.
-
-   PHONE: `.hero-band > :not(.mosaic)` pushes every child down 216px to clear
-   the photography — right for the card, wrong for the block under it, so the
-   margin is taken back here. */
-/* PHONE: the wrapper does nothing at all. `display:contents` removes its box,
-   so the band and the CTA lay out as direct children of `.column` exactly as
-   they did before it existed — no margin, no stacking context, no change. */
+   Inside the left track, so on a desktop the band's `position:sticky` carries
+   it and it holds still with the card it offers. PHONE: `.ms-left` is
+   `display:contents`, so the band and the CTA lay out as children of
+   `.column`, on the dark field above the light room. */
 .ms-left{display:contents}
-
-.ms-join{display:flex;flex-direction:column;gap:var(--s-lg);
-  margin-top:var(--s-2xl)}
-.ms-join-line{margin:0;font-size:15px;font-weight:500;line-height:1.5;
-  color:var(--ink-2);text-wrap:pretty}
+.ms-join{display:flex;flex-direction:column;margin-top:var(--s-2xl)}
 
 @media (min-width:1024px){
-  /* Below the band, on the page's own field — off the photography, which is
-     what the mosaic backdrop made impossible from inside it. Measured to the
-     card rather than to the full 520px track so the two read as one object. */
+  /* Under the band, measured to the card (420, or the band less its inline
+     padding when narrower) so the two read as one object. */
   .column:has(.ms-body) > .ms-left > .ms-join{
-    width:100%;max-width:420px;margin:0 auto;
+    width:min(420px,calc(100% - 2 * var(--s-2xl)));max-width:none;margin:0 auto;
     align-items:center;text-align:center;
   }
   .ms-join .action{width:100%;display:inline-flex;
