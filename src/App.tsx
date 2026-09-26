@@ -19,6 +19,15 @@ import Membership from "./routes/Membership";
  * don't animate page changes." This build does not animate them.
  */
 /** See the note on the place route: the key is the whole point of this. */
+/** `/try` → `/?try&…`, the ad's own parameters kept (§66). */
+function TryLink() {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  params.delete("try");
+  const rest = params.toString();
+  return <Navigate to={{ pathname: "/", search: `?try${rest ? `&${rest}` : ""}` }} replace />;
+}
+
 export default function App() {
   const location = useLocation();
 
@@ -47,8 +56,12 @@ export default function App() {
      route change lands. So it plays on every full load of / and /welcome
      (Sam, 15 Sep 2026: "on refresh or first load") and never on a tap back
      to the landing page from the deck. See shell/Arrival.tsx. */
+  /* Not under an ad's try link (§66): the window is what it came for, and the
+     arrival would play over it. */
   const [arrive] = useState(
-    () => location.pathname === "/" || location.pathname === "/welcome",
+    () =>
+      (location.pathname === "/" || location.pathname === "/welcome") &&
+      !new URLSearchParams(location.search).has("try"),
   );
   const layered = isReserve;
   const background = (location.state as { background?: Location } | null)?.background;
@@ -87,6 +100,9 @@ export default function App() {
               in shared links and in anyone's muscle memory. Left unhandled
               they render a blank page; they send you home instead. */}
           <Route path="/app/*" element={<Navigate to="/" replace />} />
+          {/* The ad link (§66): the pitch with the try-it-once window open,
+              keeping whatever the ad appended (utm_*, fbclid). */}
+          <Route path="/try" element={<TryLink />} />
         </Route>
       </Routes>
       {isReserve ? (

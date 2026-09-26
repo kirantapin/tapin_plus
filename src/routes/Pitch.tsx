@@ -19,6 +19,7 @@ import SeatCapLine from "../shell/SeatCapLine";
 import { useReserveCta } from "../shell/useReserveCta";
 import SignInBar from "../shell/SignInBar";
 import TrialModal from "../shell/TrialModal";
+import { useTrialLink } from "../shell/useTrialLink";
 import LiveFeed from "../shell/LiveFeed";
 import MonthCalendar from "../shell/MonthCalendar";
 import MonthWeeks from "../shell/MonthWeeks";
@@ -64,7 +65,8 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
   const [past, setPast] = useState(false);
   /* The "try it once" sheet, opened from the hero and from the docked pair.
      Same modal the campaign splash uses; `lit` because this page is dark. */
-  const [trial, setTrial] = useState(false);
+  /* Also opened by an ad's link, `?try` (§66). */
+  const [trial, setTrial] = useTrialLink();
   /* The calendar rides the mosaic from 1024 and is not mounted below it:
      Sam, 23 Sep 2026, "I think this would be only on desktop" (§21). */
   const desk = useMedia("(min-width: 1024px)");
