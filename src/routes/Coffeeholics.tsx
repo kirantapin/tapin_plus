@@ -4,6 +4,7 @@ import TapInLogo from "../shell/TapInLogo";
 import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
+import { useTrialLink } from "../shell/useTrialLink";
 import LiveFeed from "../shell/LiveFeed";
 import SeatCapLine from "../shell/SeatCapLine";
 import PhotoCard from "../shell/PhotoCard";
@@ -200,7 +201,8 @@ export default function Coffeeholics() {
      the page rather than doing something is the weakest thing this page can
      put in its most valuable slot, and the panel it arrived at answered
      "which offer" without answering "and then what happens". */
-  const [trial, setTrial] = useState(false);
+  /* Also opened by an ad's link, `?try` (§66). */
+  const [trial, setTrial] = useTrialLink();
 
   /* The record, not a typed name: this venue's photograph, mark, category and
      street change here when they change anywhere. */
