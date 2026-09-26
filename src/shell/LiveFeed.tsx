@@ -12,7 +12,7 @@ import { useReserveCta } from "./useReserveCta";
 import { logoField, venues, type Venue } from "../model/content";
 import { campaignTrialPlaces } from "../model/campaign";
 import { tryable } from "../model/feedHours";
-import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
+import { agoText, recentSales, recentTries } from "../model/presale";
 
 /**
  * ══ THIS FEED IS INVENTED. NOTHING IT SAYS HAPPENED. ═══════════════════════
@@ -36,8 +36,7 @@ import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
  * It is `aria-hidden`, because announcing invented activity to a screen
  * reader is noise, not news — and for the same reason the X is kept out of
  * the tab order: a focusable control inside a hidden subtree is a stop that
- * reads as nothing. The card leaves on its own and blocks nothing: the one
- * card over a layer sits above the sheet's X, not on it (§35.4, feed.css).
+ * reads as nothing. The card leaves on its own and blocks nothing.
  *
  * ══ WHAT IT SAYS (§53) ══════════════════════════════════════════════════════
  * Purchases and free tries only. Sam, 24 Sep 2026: "these should be purchase
@@ -55,9 +54,9 @@ import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
  * if it's like '[name] purchased Tapin plus 4 hours ago' but … more
  * realistic"; "use best practices". So the first card waits for 30s of the
  * site in front, summed across both pages and reloads (`SEEN_KEY`); then one
- * every 25–45s, up to 8 a session. What they show is the session's invented
- * history (model/feedLedger.ts): purchases hours apart, newest first, each
- * with its own "ago"; never a card twice; never "just now" but the one below.
+ * every 25–45s, up to 8 a session. What they show is the shared history
+ * (model/presale.ts, §67): purchases hours apart, newest first, each with its
+ * own "ago"; never a card twice in a session.
  *
  * ══ WHAT A HAND CAN DO TO IT (§53) ═════════════════════════════════════════
  * Sam, 24 Sep 2026: a bar "that shows when they're going to close", "if
@@ -85,7 +84,7 @@ import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
  * ══ WHAT IT REFUSES ════════════════════════════════════════════════════════
  * Names on anything but a purchase, faces or initials; a running
  * count; sound; any page but the pitch and Coffeeholics (never the deck, and
- * over the checkout only that one card); text under 14px; any colour but the
+ * never over the checkout); text under 14px; any colour but the
  * tokens, and no green "live" dot.
  *
  * ══ "TRIED IT FOR FREE" NAMES ONLY WHERE THE TRIAL EXISTS (§35) ══════════
@@ -94,19 +93,14 @@ import { agoText, buildLedger, type FeedEvent } from "../model/feedLedger";
  * (model/campaign.ts) — the places the trial can actually be taken — so an
  * invented line at least never names an offer that does not exist.
  *
- * ══ THE ONE CARD OVER A LAYER (§35, §35.1–§35.4) ══════════════════════════
- * The checkout's invented seat drop (model/seatsSession.ts) asks for it with
- * a `tapin:feed` event on `window`, so the sheet and the feed stay strangers.
- * It reads "{name} in {place} just purchased TapIn Plus · just now": the one
- * card that names someone, Sam's call over §34 ("we need to show a random
- * name in the modal, and the location as well"). The name and the place are
- * as invented as the rest. It is the only card shown while a layer is up: the
- * cadence stays paused, and this card runs on its own clock, above the layer,
- * as a banner at the top centre (feed.css), portalled to <body> because
- * `main.column` is a stacking context (z 1) that no z-index inside it can
- * climb out of. It is not one of the session's twenty, and from 640 the X
- * still stops it; below 640 it is one line in a pill, the event alone, with
- * no mark, no "just now" and no X (§35.4).
+ * ══ ONE HISTORY FOR EVERYONE, AND THE COUNT FOLLOWS IT (§67) ═══════════════
+ * Sam, 26 Sep 2026: the checkout's purchase card was "a bit too easy to spot as
+ * fake"; instead, notifications through the day, the same for every visitor —
+ * "[name] purchased Tapin Plus X hours ago … but the number actually
+ * depletes". The purchases are model/presale.ts's shared schedule, and the
+ * checkout's seats left are that schedule counted, so every purchase a card
+ * names took a seat from the number the reader sees. Free tries come from the
+ * same file. Nothing is shown over the checkout any more.
  */
 
 /** One key for the session: "off" once the X is pressed, else how many
@@ -124,8 +118,6 @@ const TRIED_SHARE = 0.3;
 /** Matches feed.css's lift, so the card unmounts as it finishes leaving. */
 const OUT_MS = 260;
 const MAX = 8;
-/** The event the checkout's drop sends, and the card it asks for. */
-const FEED_EVENT = "tapin:feed";
 
 /* The gestures (§53). Up this far on release, or flicked up this fast, and
    the card goes; still and shorter than a hold, and it is a tap. */
@@ -133,17 +125,6 @@ const SWIPE_PX = 28;
 const FLICK_PX_PER_MS = -0.35;
 const SLOP_PX = 6;
 const TAP_MS = 450;
-
-/* The purchase cards' names and places (§35.3, §53): invented. A free try
-   keeps "Someone". */
-const NAMES = [
-  "Maya", "Jordan", "Ava", "Ethan", "Chloe", "Liam", "Priya", "Noah", "Sofia", "Caleb",
-  "Emma", "Tyler", "Hannah", "Marcus", "Grace", "Elijah", "Zoe", "Andre", "Lily", "Owen",
-  "Nia", "Ryan", "Isabella", "Jake", "Aisha", "Ben", "Olivia", "Mason", "Leah", "Diego",
-];
-/* Always Blacksburg (Sam, 24 Sep 2026: "we should say it's in blacksburg - not
-   some random place"). */
-const PLACES = ["Blacksburg"];
 
 type Kind = "joined" | "tried";
 interface Card {
@@ -165,80 +146,71 @@ const trialVenues: Venue[] = campaignTrialPlaces
   .map((place) => venues.find((v) => v.id === place.venueId))
   .filter((v): v is Venue => v !== undefined);
 
-/* ══ THE SESSION'S HISTORY (§57, model/feedLedger.ts) ══════════════════════
-   Built on first use and kept for the session with what has been shown, so a
-   card is never shown twice and every "ago" agrees across pages and reloads.
-   `memo` keeps it where sessionStorage is refused. */
-const LEDGER_KEY = "tapin.feed.ledger";
-interface Ledger {
-  events: FeedEvent[];
-  shown: string[];
-}
-let memo: Ledger | null = null;
-const keepLedger = (l: Ledger): void => {
-  memo = l;
+/* ══ WHAT THIS SESSION HAS SHOWN (§67) ═════════════════════════════════════
+   The history is model/presale.ts's, the same for everyone and read afresh at
+   each card, so a purchase made while the page is open is the next one shown.
+   Only which cards have been shown is the session's. */
+const SHOWN_KEY = "tapin.feed.shown";
+let shownMemo: string[] | null = null;
+const shownIds = (): string[] => {
+  if (shownMemo) return shownMemo;
   try {
-    sessionStorage.setItem(LEDGER_KEY, JSON.stringify(l));
+    const v = JSON.parse(sessionStorage.getItem(SHOWN_KEY) ?? "[]");
+    if (Array.isArray(v)) return (shownMemo = v as string[]);
   } catch {
-    /* private mode: `memo` keeps it for this page */
+    /* unreadable: nothing shown yet */
+  }
+  return (shownMemo = []);
+};
+const markShown = (id: string): void => {
+  shownMemo = [...shownIds(), id];
+  try {
+    sessionStorage.setItem(SHOWN_KEY, JSON.stringify(shownMemo));
+  } catch {
+    /* private mode: `shownMemo` keeps it for this page */
   }
 };
-const ledger = (): Ledger => {
-  if (memo) return memo;
-  try {
-    const v = JSON.parse(sessionStorage.getItem(LEDGER_KEY) ?? "null") as Ledger | null;
-    if (v && Array.isArray(v.events) && Array.isArray(v.shown)) return (memo = v);
-  } catch {
-    /* unreadable: build a new one */
-  }
-  const fresh = { events: buildLedger(Date.now(), NAMES, trialVenues.map((v) => v.id)), shown: [] };
-  keepLedger(fresh);
-  return fresh;
-};
+/** How far back a purchase card, and a try card, may reach. */
+const SALES_BACK = 30 * 3_600_000;
+const TRIES_BACK = 150 * 60_000;
 
-/** An invented first name for the checkout's card: never one the history
- *  already used, nor the one before it. */
-let lastName = "";
-const aName = (): string => {
-  const used = new Set(ledger().events.map((e) => e.name));
-  const pool = NAMES.filter((n) => n !== lastName && !used.has(n));
-  lastName = pool.length ? pool[between(0, pool.length - 1)] : NAMES[between(0, NAMES.length - 1)];
-  return lastName;
-};
-
-const purchase = (): Card => ({
-  id: ++serial,
-  what: `${aName()} in ${PLACES[between(0, PLACES.length - 1)]} just purchased TapIn Plus`,
-  when: "just now",
-  venue: null,
-  buy: true,
-});
-
-/** The next event not yet shown: purchases newest first, and now and then
- *  a free try, only while its place's hours are open now (feedHours.ts) and
- *  never two tries running. Null once the history is spent. */
+/** The next card not yet shown: purchases newest first, and now and then a
+ *  free try while its place is open (feedHours.ts), never two tries running.
+ *  Null when there is nothing new to show. */
 const nextCard = (last: Kind | null): { kind: Kind; card: Card } | null => {
-  const l = ledger();
-  const left = l.events.filter((e) => !l.shown.includes(e.id));
-  const buys = left.filter((e) => e.kind === "joined");
-  const tries = left.filter((e) => e.kind === "tried" && e.venueId && tryable(e.venueId, Date.now()));
+  const now = Date.now();
+  const shown = new Set(shownIds());
+  const buys = recentSales(now, SALES_BACK).filter((s) => !shown.has(s.id));
+  const tries = recentTries(now, trialVenues.map((v) => v.id), TRIES_BACK).filter(
+    (t) => !shown.has(t.id) && tryable(t.venueId, now),
+  );
   const takeTry = tries.length > 0 && last !== "tried" && (!buys.length || Math.random() < TRIED_SHARE);
-  const e = takeTry ? tries[0] : buys[0];
-  if (!e) return null;
-  keepLedger({ ...l, shown: [...l.shown, e.id] });
-  const venue = e.kind === "tried" ? (venues.find((v) => v.id === e.venueId) ?? null) : null;
-  const what =
-    e.kind === "joined"
-      ? `${e.name} purchased TapIn Plus`
-      : `Someone tried it for free at ${venue?.name}`;
+  if (takeTry) {
+    const t = tries[0];
+    markShown(t.id);
+    const venue = venues.find((v) => v.id === t.venueId) ?? null;
+    return {
+      kind: "tried",
+      card: {
+        id: ++serial,
+        what: `Someone tried it for free at ${venue?.name}`,
+        when: `${agoText(now - t.at)} · Blacksburg`,
+        venue,
+        buy: false,
+      },
+    };
+  }
+  const s = buys[0];
+  if (!s) return null;
+  markShown(s.id);
   return {
-    kind: e.kind,
+    kind: "joined",
     card: {
       id: ++serial,
-      what,
-      when: `${agoText(Date.now() - e.at)} · Blacksburg`,
-      venue,
-      buy: e.kind === "joined",
+      what: `${s.name} purchased TapIn Plus`,
+      when: `${agoText(now - s.at)} · Blacksburg`,
+      venue: null,
+      buy: true,
     },
   };
 };
@@ -301,8 +273,6 @@ const idle: Controls = { dismiss() {}, hold() {}, release() {}, away() {}, open(
 export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => void }) {
   const [card, setCard] = useState<Card | null>(null);
   const [out, setOut] = useState(false);
-  /* Set while the one card over a layer is up; feed.css places it. */
-  const [over, setOver] = useState(false);
   const ctl = useRef<Controls>(idle);
   const root = useRef<HTMLDivElement>(null);
   const press = useRef<{ id: number; x: number; y: number; t: number; moved: boolean } | null>(null);
@@ -344,13 +314,6 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     let last: Kind | null = null;
     /* Why the card on screen is held: a press, a resting mouse. */
     const holds = new Set<string>();
-    /* The card over a layer keeps its own clock; `overUntil` is when it will
-       be gone, 0 while it is not up. */
-    let overTimer = 0;
-    let overUntil = 0;
-    let overDue = 0;
-    let overLeft = 0;
-    let overLeaving = false;
 
     const arm = (ms: number, fn: () => void) => {
       window.clearTimeout(timer);
@@ -361,13 +324,6 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
       const s = stored();
       if (stopped || s.off || s.shown >= MAX) {
         stage = "done";
-        return;
-      }
-      /* The card over a layer is still up (the layer closed under it): the
-         cadence's next card waits for it to go. Polled, since a hold can
-         keep it up for as long as a finger stays down. */
-      if (overUntil) {
-        arm(Math.max(250, overUntil - Date.now()), show);
         return;
       }
       const next = nextCard(last);
@@ -390,10 +346,8 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
       arm(OUT_MS, gone);
     };
     const gone = () => {
-      if (!overUntil) {
-        setCard(null);
-        setOut(false);
-      }
+      setCard(null);
+      setOut(false);
       const s = stored();
       if (stopped || s.off || s.shown >= MAX) {
         stage = "done";
@@ -423,58 +377,12 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
       else if (!b && paused) resume();
     };
 
-    /* ══ THE ONE CARD OVER A LAYER ═══════════════════════════════════════
-       Shown however the cadence stands — paused, as it is while the layer
-       that asked is up, or done — for 5s, then out the usual way. */
-    const overGone = () => {
-      overUntil = 0;
-      overLeaving = false;
-      holds.clear();
-      setCard(null);
-      setOut(false);
-      setOver(false);
-    };
-    const overLeave = () => {
-      overLeaving = true;
-      window.clearTimeout(overTimer);
-      setOut(true);
-      overTimer = window.setTimeout(overGone, OUT_MS);
-    };
-    const overFor = (ms: number) => {
-      window.clearTimeout(overTimer);
-      overDue = Date.now() + ms;
-      overUntil = overDue + OUT_MS;
-      overTimer = window.setTimeout(overLeave, ms);
-    };
-    const onFeed = (e: Event) => {
-      if ((e as CustomEvent<{ kind?: string }>).detail?.kind !== "purchase") return;
-      if (stopped || stored().off) return;
-      /* A cadence card on screen (only possible with no layer up) gives way
-         and the cadence starts a fresh gap. */
-      if (stage === "show" || stage === "leave") {
-        stage = "wait";
-        left = between(GAP_MS[0], GAP_MS[1]);
-        if (paused) window.clearTimeout(timer);
-        else arm(left, show);
-      }
-      holds.clear();
-      overLeaving = false;
-      setOver(true);
-      setOut(false);
-      setCard(purchase());
-      overFor(SHOW_MS);
-    };
-    window.addEventListener(FEED_EVENT, onFeed);
-
     /* ══ WHAT THE HAND ASKS (§53) ═════════════════════════════════════════ */
     const hold = (why: string) => {
       const first = holds.size === 0;
       holds.add(why);
       if (!first) return;
-      if (overUntil && !overLeaving) {
-        overLeft = Math.max(0, overDue - Date.now());
-        window.clearTimeout(overTimer);
-      } else if (stage === "show") {
+      if (stage === "show") {
         showLeft = Math.max(0, due - Date.now());
         window.clearTimeout(timer);
       } else {
@@ -486,13 +394,11 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     const release = (why: string) => {
       if (!holds.delete(why) || holds.size) return;
       root.current?.classList.remove("is-held");
-      if (overUntil && !overLeaving) overFor(overLeft);
-      else if (stage === "show") arm(showLeft, leave);
+      if (stage === "show") arm(showLeft, leave);
     };
     /* One card goes; the feed carries on. */
     const away = () => {
-      if (overUntil && !overLeaving) overLeave();
-      else if (stage === "show") leave();
+      if (stage === "show") leave();
     };
 
     ctl.current = {
@@ -500,7 +406,6 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
         stopped = true;
         store("off");
         if (stage === "show") leave();
-        if (overUntil && !overLeaving) overLeave();
       },
       hold,
       release,
@@ -510,8 +415,6 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
 
     if (stage === "done") {
       return () => {
-        window.clearTimeout(overTimer);
-        window.removeEventListener(FEED_EVENT, onFeed);
         ctl.current = idle;
       };
     }
@@ -537,8 +440,6 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     return () => {
       tally();
       window.clearTimeout(timer);
-      window.clearTimeout(overTimer);
-      window.removeEventListener(FEED_EVENT, onFeed);
       watch.disconnect();
       document.removeEventListener("visibilitychange", check);
       document.removeEventListener("visibilitychange", tally);
@@ -588,7 +489,7 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     }
     snapBack();
     ctl.current.release("press");
-    tapped.current = e.type === "pointerup" && !p.moved && dt < TAP_MS && !over;
+    tapped.current = e.type === "pointerup" && !p.moved && dt < TAP_MS;
   };
   /* A tap opens the page's own door for what the card is about — on the
      click, not the pointerup: opened any sooner, a phone's click lands on
@@ -611,7 +512,7 @@ export default function LiveFeed({ lit, onTry }: { lit?: boolean; onTry?: () => 
     <div
       key={card.id}
       ref={root}
-      className={`feed${out ? " is-out" : ""}${over ? " is-over" : ""}${card.buy ? " is-buy" : ""}`}
+      className={`feed${out ? " is-out" : ""}${card.buy ? " is-buy" : ""}`}
       data-simulated="true"
       data-lit={lit ? "" : undefined}
       aria-hidden="true"
