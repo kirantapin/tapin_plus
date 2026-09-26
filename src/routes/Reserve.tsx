@@ -6,7 +6,7 @@ import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
 import { SEAT_CAP } from "../model/seats";
-import { nextDrop, takeSeats, TICK_MS, useSeatsShown } from "../model/seatsSession";
+import { useSeatsLeft } from "../model/presale";
 import {
   PLANS,
   launchWindow,
@@ -132,24 +132,22 @@ const schedule: Stop[] = [
    "need to make sure it says $4.99 deposit"). */
 const checkoutLabel = `Checkout · ${plan.price} deposit`;
 
-/* The drop's two timings (§35): how long after the sheet is still, and each
-   tick's settle. The ticks themselves are model/seatsSession.ts's TICK_MS. */
-const DROP_AFTER_MS = 5_000; /* §35.1, Sam: "on checkout for more than 5 seconds" */
+/* A count that falls while the sheet is open settles over this long. */
 const SETTLE_MS = 240;
 /** Reduced motion, or a `data-still` ancestor: the count changes in one step. */
 const holdsStill = (el: Element | null | undefined): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
   el?.closest("[data-still]") != null;
 
-/* ══ THE SEATS: ONE OBJECT, TWO HOMES (POLISH §31, §35, §45) ══════════════
-   The count and its bar, from `useSeatsShown()` (model/seatsSession.ts, the
-   §35 drop's store; both it and model/seats.ts are invented) of `SEAT_CAP`.
+/* ══ THE SEATS: ONE OBJECT, TWO HOMES (POLISH §31, §45, §67) ══════════════
+   The count and its bar, from `useSeatsLeft()` (model/presale.ts, the invented
+   schedule every visitor shares; it re-reads each minute) of `SEAT_CAP`.
    From 1024 it leads the order card; below 1024 it rides on the dock, over
    the button (Sam, 23 Sep: "make this counter a part of the sticky button").
    One component in both, so the tick and the settle are one implementation;
    reserve.css shows the copy that belongs to the width. */
 function Seats() {
-  const left = useSeatsShown();
+  const left = useSeatsLeft();
   /* Each tick: the number settles from 1.06 to its size, and the bar's fill
      follows the same step over its own transform. Transform only; under
      reduced motion both change in one step and nothing plays. */
@@ -200,7 +198,7 @@ export default function Reserve() {
      shell/ReserveLayer.tsx — and what is left to read from here is the two
      things the page's own controls need: whether a seat has been paid for, and
      the one call that moves the sheet on to "Your details". */
-  const { paid, step, openCheckout } = useReserveFlow();
+  const { paid, openCheckout } = useReserveFlow();
 
   /* ══ STANDARD REFUSES IN PLACE ════════════════════════════════════════
      Sam, 20 Sep 2026: "I don't like this toast, let's get rid of it. Instead
@@ -245,46 +243,11 @@ export default function Reserve() {
   const [cardName] = useName();
   // If the walkthrough sent us here, its card flies onto this one.
   useCardFlight(cardRef);
-  /* ══ THE ROOM GETS SMALLER WHILE YOU LOOK (23 Sep 2026, POLISH §35) ═══════
-     INVENTED, and model/seatsSession.ts says so at length. Sam: "when someone
-     views either of these checkouts, we should show the count go down 1 or 2
-     seats." Once per open, on page 0 only: 5s after the sheet is still (its
-     entrance done, no card in flight), the printed count falls by the
-     session's next drop and the feed is asked, over `window`, for its one
-     card over the layer — the sheet and the feed stay strangers. Never on a
-     return from page 1, once paid, or after the round has closed. */
+  /* ══ NO DROP AND NO BANNER AT CHECKOUT (§67) ══════════════════════════════
+     Sam, 26 Sep 2026: the purchase notification here was "a bit too easy to
+     spot as fake". The count falls on the shared schedule instead, and the
+     purchases it counts are the ones the pages' notifications name. */
   const modal = useRef<HTMLDivElement | null>(null);
-  const spent = useRef(false);
-  useEffect(() => {
-    if (step !== 0 || paid || !FOUNDING_OPEN) spent.current = true;
-    if (spent.current) return;
-    const sheet = modal.current?.closest<HTMLElement>(".reserve-sheet");
-    let timer = 0;
-    let gone = false;
-    const drop = () => {
-      spent.current = true;
-      if (sheet?.closest(".is-closing")) return;
-      if (takeSeats(nextDrop(), holdsStill(sheet) ? 0 : TICK_MS) > 0) {
-        window.dispatchEvent(new CustomEvent("tapin:feed", { detail: { kind: "purchase" } }));
-      }
-    };
-    const wait = () => {
-      if (gone) return;
-      const moving = sheet?.getAnimations().filter((a) => a.playState === "running") ?? [];
-      if (moving.length) {
-        Promise.all(moving.map((a) => a.finished)).then(wait, wait);
-      } else if (document.documentElement.dataset.flight) {
-        timer = window.setTimeout(wait, 100);
-      } else {
-        timer = window.setTimeout(drop, DROP_AFTER_MS);
-      }
-    };
-    wait();
-    return () => {
-      gone = true;
-      window.clearTimeout(timer);
-    };
-  }, [step, paid]);
 
   /* ══ THE MODAL IS THE DECISION, AND ONLY THE DECISION ═══════════════════
      Sam, 15 Sep 2026: "the main focus is just on the sale." Since 23 Sep it

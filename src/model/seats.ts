@@ -1,11 +1,12 @@
 import moneyJson from "../../docs/data/money-and-terms.json";
+import { seatsLeftAt } from "./presale";
 
 /**
  * ══ THE SEAT COUNTER IS ARTIFICIAL. READ THIS BEFORE TRUSTING THE NUMBER. ═══
  *
  * It counts nothing. There is no reservations table behind it, no query, no
- * server. It is a pure function of today's date that starts at a chosen number
- * and subtracts three a day until it reaches zero.
+ * server. It is a pure function of the clock: model/presale.ts's invented
+ * schedule of purchases, subtracted from a chosen start (§67).
  *
  * Sam asked for it in those terms on 13 Sep 2026 — "I think it'd be neat to
  * show a fake counter of how many seats are left. This should decrease by 3
@@ -23,24 +24,15 @@ import moneyJson from "../../docs/data/money-and-terms.json";
  * on a given day sees the same figure, it needs no infrastructure at all, and it
  * cannot drift. It is also trivially auditable: one constant, one subtraction.
  *
- * ══ HOW IT SITS BESIDE THE REAL DEADLINE ═══════════════════════════════════
- * The page states a REAL close — founding pricing ends "the end of October" —
- * and Sam's framing of it is "closes at the end of october, OR when all seats
- * are gone". This lands on the second branch: from 42 at three a day the room
- * empties in a fortnight, so the counter always runs out first and the date is
- * never left advertising seats that the counter says do not exist. The failure
- * mode to avoid was the other order.
+ * ══ HOW IT SITS BESIDE THE DEADLINE ════════════════════════════════════════
+ * The checkout says the round "closes at the end of September". On the §67
+ * schedule the count reaches 9 on 30 Sep and falls 1–2 a day after it, so the
+ * number never runs out before the date it sits beside.
  *
- * ⚠ WHAT HAPPENS AT ZERO IS NOT DECIDED, AND ZERO IS NOW CLOSE. Starting at 42
- * and dropping three a day, this returns 0 on **27 Sep 2026** — fourteen days
- * after it was switched on, and five weeks BEFORE the close date the same line
- * advertises. From that morning the page reads "Early Bird spots are gone" while
- * the $4.99 checkout still works, because nothing in this file touches pricing
- * or the payment path.
- *
- * Someone has to choose, before then, whether hitting zero flips the rate to
- * $14.99, closes the purchase, or whether the floor sits above zero. Flagged
- * for Sam; not invented here.
+ * ⚠ ZERO IS NOT REACHED ON ITS OWN. The schedule (model/presale.ts, §67) stops
+ * at one, because zero flips every price below (`foundingOpen`) and the
+ * checkout's wallet amount does not follow that flip. Closing the round is an
+ * edit, not a date.
  */
 
 /** Real: 100 founding seats. The cap is the one true thing in this file. */
@@ -57,56 +49,11 @@ export const SEAT_CAP = 100;
 export const foundingTierName = "Early-ish Bird";
 void moneyJson;
 
-/**
- * What the counter reads on day zero. Sam, 13 Sep 2026: "I'd say we want to
- * show 42 seats out of 100 left."
- *
- * So the line opens mid-round rather than full — it asserts that 58 seats have
- * already gone, which is a larger invented claim than a countdown from the cap
- * and is called out here for exactly that reason. His call, asked for in those
- * words.
- */
-/* Kiran, 16 Sep 2026: the number of spots left is 11. Sam's earlier figures
-   (45, then 35) drifted down three a day from 15 Sep; this one does not — see
-   SEATS_PER_DAY. Still an invented figure, and this file's header says so. */
-/* Kiran, 18 Sep 2026: 11 → 6. Fixed, not drifting, for the same reason 11 was:
-   SEATS_PER_DAY is 0, so this is what the line reads every day until someone
-   edits it again. Of 100, so the page now asserts 59 seats have gone (Sam,
-   22 Sep 2026: "100 spots, with 41 left now"). */
-const SEATS_AT_OPEN = 41;
-
-/**
- * ══ THE COUNTER NO LONGER MOVES ════════════════════════════════════════════
- * Was 3 a day (Sam, 13 Sep: "decrease by 3 daily"), which took 45 on 15 Sep to
- * 0 on 30 Sep so the number and the close date agreed for the whole round.
- *
- * Kiran, 16 Sep 2026 asked for the figure to BE 11. A drifting 11 is 8
- * tomorrow, so the drift is off rather than the number being right for one day
- * and wrong after. The consequence is deliberate and worth knowing: the counter
- * is now a fixed claim rather than a countdown, and it never reaches zero —
- * so `FOUNDING_OPEN` stays true and the $4.99 → $14.99 flip will not fire on
- * its own. Closing the round is now an edit, not a date.
- *
- * Put a positive number back here and the countdown resumes unchanged.
- */
-const SEATS_PER_DAY = 0;
-
-/**
- * Day zero, when the counter still reads SEATS_AT_OPEN. Local midnight, because
- * the figure should change overnight for a reader in Blacksburg rather than at
- * some fraction of a day determined by when the page was built.
- */
-const OPENED_AT = new Date(2026, 8, 15); // 15 Sep 2026, month is 0-indexed
-
-/** Whole days elapsed, floored — the number only ever moves at midnight. */
-const daysSince = (now: Date): number => {
-  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.max(
-    0,
-    Math.round((midnight.getTime() - OPENED_AT.getTime()) / 86_400_000),
-  );
-};
-
+/* ══ THE COUNT NOW FALLS, AND IT IS THE SCHEDULE'S (§67) ═══════════════════
+   Sam, 26 Sep 2026: down 5–10 a day until 9–11 are left, then 1–2 a day, and
+   "it should actually go down". model/presale.ts holds that schedule — the
+   same one the purchase notifications read — and stops at one, so the round
+   never closes on its own. The earlier fixed 41 was its starting point. */
 /**
  * Seats "left" today. Clamped at both ends: never above the cap (a clock set to
  * last year must not advertise more seats than exist) and never below zero.
@@ -120,11 +67,7 @@ const override = (): number | null => {
 };
 
 export const seatsLeft = (now: Date = new Date()): number =>
-  override() ??
-  Math.min(
-    SEAT_CAP,
-    Math.max(0, SEATS_AT_OPEN - daysSince(now) * SEATS_PER_DAY),
-  );
+  override() ?? Math.min(SEAT_CAP, seatsLeftAt(now.getTime()));
 
 /**
  * Is the founding round still open?

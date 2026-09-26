@@ -14,11 +14,10 @@
    (Sam, 24 Sep 2026: "slide into view from the top of the screen, then go
    back up when done"). Fixed, so nothing reflows when it comes or goes.
 
-   Z 22, IN <body>: the component portals itself out of `main.column` (a
-   z 1 stacking context) so that §35's one card can rise over a layer. At 22
-   it still sits over the whole column — the announcement bar (21) and the
-   docked bars (20) inside it — and under every layer (40 and up), as it did
-   when it lived in the column; the feed pauses while any of them is up.
+   Z 22, IN <body>: portalled out of `main.column` (a z 1 stacking context).
+   At 22 it sits over the whole column — the announcement bar (21) and the
+   docked bars (20) inside it — and under every layer (40 and up); the feed
+   pauses while any of them is up. Nothing shows over the checkout (§67).
 
    THE COLUMN'S CAP no longer reaches it (it is not `.column`'s child), but
    `.feed` keeps its own width and margin so it cannot come back if the
@@ -48,88 +47,6 @@
   }
 }
 
-/* ══ THE ONE CARD OVER A LAYER (§35, §35.3) ══════════════════════════════
-   The purchase card, asked for by the checkout's invented seat drop. Its own
-   z-index over the reserve layer (40) and the house's other scrims (60); under
-   the trial modal (70) and the arrival (80), which never share the screen
-   with the checkout. A BANNER AT THE TOP CENTRE at every width (Sam: "maybe
-   the toasts show above the modal? it's a bit weird when it shows right on
-   the modal itself"), arriving from the top edge and leaving upward. From
-   640 it is this card, 12px down and 360 wide, on the dialog's header band
-   and never on the X; where a short window caps the dialog (its top at 16 at
-   1280×720) its foot also reaches 9px onto the page's first row.
-
-   BELOW 640 IT IS A ONE-LINE PILL (§35.4), in the band the phone sheet (84vh since §59, 92vh then) leaves
-   above itself (65px at 375×812, 53 at 375×667, 45 at 320×568). The card was
-   86 tall there and covered the sheet's X and title for its 5s; the pill is
-   36, 8px down, so its foot (44) clears the sheet's top at every phone size. */
-.feed.is-over {
-  --feed-top: calc(env(safe-area-inset-top, 0px) + var(--s-lg));
-  z-index: 61;
-  bottom: auto;
-  left: max(var(--gutter), calc(50% - 180px));
-  right: max(var(--gutter), calc(50% - 180px));
-  width: auto;
-}
-/* THE PILL. One line of the event, as wide as its words, never wider than the
-   viewport less the gutters, where a long name ellipsises. `max-width` does
-   that, not `left`/`right`: the nowrap line's min-content would push a
-   shrink-to-fit box past them instead of clipping. `--s-lg` a side, not
-   `--s-xl`, for 8px more of the line. No tile, no time line and no X: it
-   goes by itself in 5s and comes once a session, and a second X a few
-   pixels over the sheet's own is a mis-tap for nothing. Same query as the
-   sheet's height rule (reserve.css), so the two switch together; `.feed.is-over`
-   weight, so the base rules below cannot take it back. */
-@media (max-width: 639px) {
-  .feed.is-over {
-    --feed-top: calc(env(safe-area-inset-top, 0px) + var(--s-md));
-    left: var(--gutter);
-    right: var(--gutter);
-    width: fit-content;
-    max-width: calc(100% - 2 * var(--gutter));
-    margin: 0 auto;
-  }
-  .feed.is-over .feed-plate {
-    height: 36px;
-    padding: 0 var(--s-lg);
-    border-radius: var(--r-pill);
-  }
-  /* The pill keeps the TapIn icon (Sam, 24 Sep 2026: "there should be a
-     tapin logo icon in those toasts"): a 22px tile at the pill's start. */
-  .feed.is-over .feed-when,
-  .feed.is-over .feed-x {
-    display: none;
-  }
-  .feed.is-over .feed-tile {
-    width: 22px;
-    height: 22px;
-    border-radius: var(--r-pill);
-  }
-  .feed.is-over .feed-mark svg {
-    width: 12px;
-    height: 12px;
-  }
-  .feed.is-over .feed-plate {
-    gap: var(--s-md);
-    padding-left: var(--s-sm);
-  }
-  .feed.is-over .feed-what {
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-/* The page's own gutter, which layout.css moves to 16 at 380 and under: the
-   portal took the pill out of `.column`, so it restates the move and its
-   widest edges meet the sheet's content edges. With the `--s-lg` sides, 53
-   of the 60 name-and-place lines fit whole at 375 (22 at a 24 gutter and
-   `--s-xl`). At 320 none does: the shortest is 277px, the pill holds 264. */
-@media (max-width: 380px) {
-  .feed.is-over {
-    --gutter: var(--s-xl);
-  }
-}
 /* The plate is the thing a hand works (§53): no page scroll or text
    selection starts on it, and it clips the bar to its corners. */
 .feed-plate {
@@ -148,7 +65,7 @@
   -webkit-touch-callout: none;
   animation: feedDrop 420ms var(--ease) both;
 }
-.feed:not(.is-over) .feed-plate {
+.feed .feed-plate {
   cursor: pointer;
 }
 /* Leaving is quicker than arriving, and eases in: an object on its way out
