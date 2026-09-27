@@ -81,7 +81,11 @@
   isolation: isolate;
   flex: 0 0 auto;
   /* The heroes' own 1024x528, held between 200 and 220: at the full 237 in the
-     dialog, The Burg's shirt print, its own name, sat directly above the name. */
+     dialog, The Burg's shirt print, its own name, sat directly above the name.
+     The explicit width matters in Safari: with width left to the flex stretch,
+     WebKit carries max-height through the ratio into a 427px max-width, and
+     the photo stopped short of the dialog's right edge. */
+  width: 100%;
   aspect-ratio: 1024 / 528;
   min-height: 200px;
   max-height: 220px;
