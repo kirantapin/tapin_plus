@@ -27,7 +27,22 @@ export interface BenefitFigure {
   id: string;
   figure: string;
   qualifier: string;
+  /** A word inside `qualifier` set in ink, e.g. the credit's "anything". */
+  stress?: string;
 }
+
+/** The qualifier with its stressed word, if any, wrapped for figures.css. */
+const Qualifier = ({ text, stress }: { text: string; stress?: string }) => {
+  const at = stress ? text.indexOf(stress) : -1;
+  if (!stress || at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <strong className="figs-stress">{stress}</strong>
+      {text.slice(at + stress.length)}
+    </>
+  );
+};
 
 export default function BenefitFigures({
   items,
@@ -48,7 +63,9 @@ export default function BenefitFigures({
       {items.map((f) => (
         <li key={f.id}>
           <b className={display ? "figs-fig t-figure" : "figs-fig"}>{f.figure}</b>
-          <span className={display ? "figs-q t-compact" : "figs-q"}>{f.qualifier}</span>
+          <span className={display ? "figs-q t-compact" : "figs-q"}>
+            <Qualifier text={f.qualifier} stress={f.stress} />
+          </span>
         </li>
       ))}
     </ul>
