@@ -134,6 +134,8 @@ const checkoutLabel = `Checkout · ${plan.price} deposit`;
 
 /* A count that falls while the sheet is open settles over this long. */
 const SETTLE_MS = 240;
+/* Under this many spots the bar turns red and pulses (Sam, 30 Sep 2026). */
+const LOW_SEATS = 20;
 /** Reduced motion, or a `data-still` ancestor: the count changes in one step. */
 const holdsStill = (el: Element | null | undefined): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -167,25 +169,26 @@ function Seats() {
     n.animate([{ transform: "scale(1.06)" }, { transform: "none" }], timing);
     f.animate(
       [
-        { transform: `scaleX(${1 - from / SEAT_CAP})` },
-        { transform: `scaleX(${1 - left / SEAT_CAP})` },
+        { transform: `scaleX(${from / SEAT_CAP})` },
+        { transform: `scaleX(${left / SEAT_CAP})` },
       ],
       timing,
     );
   }, [left]);
   return (
-    <div className="rs-seats">
+    <div className={left < LOW_SEATS ? "rs-seats is-low" : "rs-seats"}>
       <p className="rs-seats-line">
         <span className="rs-seats-count">
           <b className="tnum rs-seats-n" ref={num}>{left}</b> of {SEAT_CAP} {foundingTierName} spots left
         </span>
         <span className="rs-seats-close">closes at {foundingCloses}</span>
       </p>
-      {/* ⚠ THE FILL IS THE SEATS TAKEN, `1 − left / cap`, NOT THE SEATS
-          LEFT — DO NOT "FIX" IT. A bar nearly full says what the line
-          says; the line is the statement of record, this is aria-hidden. */}
+      {/* The fill is the spots LEFT, `left / cap` (Sam, 30 Sep 2026: "this
+          should be inverted, the black bar would be shorter now"), so it
+          shrinks as they go. The line is the statement of record; this is
+          aria-hidden. */}
       <span className="rs-seats-bar" aria-hidden="true">
-        <i ref={fill} style={{ ["--p" as string]: `${1 - left / SEAT_CAP}` }} />
+        <i ref={fill} style={{ ["--p" as string]: `${left / SEAT_CAP}` }} />
       </span>
     </div>
   );
