@@ -1477,6 +1477,12 @@ html.is-layered{overflow:hidden}
 .rs-clause,.rs-refund{margin:0;font-size:14px;font-weight:500;line-height:1.4;
   color:var(--ink-3);text-wrap:pretty}
 .rs-clause{margin-top:2px}
+/* The app line under the rail, on the credit note's plate (figures.css). */
+.rs-app{display:flex;align-items:center;gap:var(--s-md);margin:0;
+  padding:var(--s-md) var(--s-lg);border-radius:var(--r-control);background:var(--inner);
+  font-size:14px;font-weight:500;line-height:1.4;color:var(--ink-2);text-wrap:pretty}
+.rs-app-glyph{flex:0 0 auto;display:block;color:var(--ink-3)}
+.rs-app-glyph svg{width:20px;height:20px;display:block}
 /* The hairline is the refund's own top edge, so it goes when the line does. */
 .rs-refund{padding-top:var(--s-xl);border-top:1px solid var(--hair)}
 
