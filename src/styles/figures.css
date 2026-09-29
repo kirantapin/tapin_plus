@@ -47,11 +47,6 @@
   margin-top: var(--s-md);
   text-wrap: balance;
 }
-/* One word of a qualifier carried in the figure's ink, not a second colour. */
-.figs-stress {
-  font-weight: 700;
-  color: var(--ink-1);
-}
 
 /* ── display: the page's one display moment ──────────────────────────────────
    The figure is `.t-figure` itself (48 on a phone, 64 from 1024) and the

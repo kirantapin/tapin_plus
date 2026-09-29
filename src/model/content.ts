@@ -275,18 +275,22 @@ export const venuePolicyDetail = (kind: string, fallback: string): string =>
  * whole reason the figures are derived rather than written beside the venue
  * they are claimed at.
  */
-const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string; stress?: string }> = {
-  /* Sam, 28 Sep 2026: the credit is used on anything, alcohol included,
-     without saying alcohol. "Anything" is set in ink beside "except alcohol". */
+const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }> = {
   credit: {
     figure: `$${BENEFIT.creditUsd}`,
-    qualifier: `a week, on anything $${Math.round(BENEFIT.creditMinUsd)}+`,
-    stress: "anything",
+    qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
   },
   percent: {
     figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
     qualifier: "off, except alcohol",
   },
+};
+
+/** The pop-up's note under the figures (Sam, 29 Sep 2026): the credit covers
+ *  all food and drink, alcohol included, without naming alcohol. */
+export const venueCreditNote = {
+  lead: `Your $${BENEFIT.creditUsd} credit goes toward`,
+  scope: "all food and drink",
 };
 
 /** The figure and qualifier for one venue policy, or undefined for a kind this
@@ -295,7 +299,7 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string; s
  *  the three at one size), so a points policy without one prints no column. */
 export const venuePolicyFigure = (
   policy: Pick<Policy, "kind" | "multiplier">,
-): { figure: string; qualifier: string; stress?: string } | undefined =>
+): { figure: string; qualifier: string } | undefined =>
   policy.kind === "points"
     ? policy.multiplier
       ? { figure: `${policy.multiplier}\u00D7`, qualifier: "points, on every order" }
