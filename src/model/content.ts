@@ -288,6 +288,13 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
   },
 };
 
+/** The checkout panel's lead (Sam, 30 Sep 2026). One order's credit and its
+ *  points cover the month; the points go unmentioned on purpose. */
+export const paysForItself = {
+  lead: `One $${Math.round(BENEFIT.creditMinUsd)} order pays for your membership.`,
+  rest: "The rest is savings.",
+};
+
 /** The footnote to the 15%'s asterisk (Sam, 29 Sep 2026). */
 export const percentFootnote = `*Age-restricted items may not be eligible for the ${Math.round(
   BENEFIT.percentOff * 100,
