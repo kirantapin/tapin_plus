@@ -1488,7 +1488,7 @@ html.is-layered{overflow:hidden}
 /* ── THE SEATS LEAD THE CARD, FROM 1024 (§31, §45) ─────────────────────────
    One line with two ends — the count on the left, the close on the right,
    wrapping under it when the column is too narrow — over a 6px bar whose
-   fill is the seats TAKEN (see Reserve.tsx for which fraction, and why). A
+   fill is the spots LEFT (Reserve.tsx), red and pulsing under 20. A
    hairline closes the block; the heading follows at the card's own gap. The
    fill grows once on first paint; the house reduced-motion block leaves it
    complete and still. Below 1024 this copy is hidden and the dock's shows. */
@@ -1508,6 +1508,11 @@ html.is-layered{overflow:hidden}
   background:var(--ink-1);transform-origin:left;transform:scaleX(var(--p,0));
   animation:rsBarGrow 600ms var(--ease) both}
 @keyframes rsBarGrow{from{transform:scaleX(0)}}
+/* Under 20 left: the loss red, pulsing slowly after the grow. The house
+   reduced-motion block stops the pulse and leaves it red. */
+.rs-seats.is-low .rs-seats-bar i{background:var(--loss);
+  animation:rsBarGrow 600ms var(--ease) both,rsBarLow 2400ms ease-in-out 600ms infinite}
+@keyframes rsBarLow{50%{opacity:.35}}
 @media (max-width:1023px){.rs-order > .rs-seats{display:none}}
 
 /* ── THE SEATS ON THE DOCK, BELOW 1024 (§45) ──────────────────────────────
