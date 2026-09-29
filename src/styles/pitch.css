@@ -1742,7 +1742,8 @@ button.vcard:focus-visible {
   font-weight: 500;
   letter-spacing: 0.003em;
 }
-.pitch-scope-note {
+/* Two classes: figures.css's `.fine-print` loads after this file. */
+.fine-print.pitch-scope-note {
   margin: var(--s-lg) 0 0;
 }
 .pitch-get .panel-drill {

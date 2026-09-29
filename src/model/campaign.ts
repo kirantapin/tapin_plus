@@ -208,7 +208,8 @@ const SHOT_ITEMS = [
     item: "Breve",
     shot: "/shots/coffeeholicsva-spread.jpg",
     title: `${Math.round(BENEFIT.percentOff * 100)}% off`,
-    line: "Everything except alcohol",
+    /* The asterisk is answered by the footnote under the cards. */
+    line: "Everything*",
     saves: (price: number) => `You save ${dollars(Math.round(cents(price) * BENEFIT.percentOff))}`,
   },
   {
