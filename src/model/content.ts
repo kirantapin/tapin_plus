@@ -280,11 +280,18 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
     figure: `$${BENEFIT.creditUsd}`,
     qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
   },
+  /* Sam, 29 Sep 2026: an asterisk and a footnote rather than "except
+     alcohol" (`percentFootnote`, printed wherever this qualifier is). */
   percent: {
     figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
-    qualifier: "off, except alcohol",
+    qualifier: "off everything*",
   },
 };
+
+/** The footnote to the 15%'s asterisk (Sam, 29 Sep 2026). */
+export const percentFootnote = `*Age-restricted items may not be eligible for the ${Math.round(
+  BENEFIT.percentOff * 100,
+)}% off, depending on the jurisdiction.`;
 
 /** The pop-up's note under the figures (Sam, 29 Sep 2026): the credit covers
  *  all food and drink, alcohol included, without naming alcohol. */

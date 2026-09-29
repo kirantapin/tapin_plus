@@ -135,3 +135,15 @@
   color: var(--ink-1);
   white-space: nowrap;
 }
+
+/* ── fine print ──────────────────────────────────────────────────────────────
+   The footnote to the 15%'s asterisk (shell/PercentFootnote.tsx): the reading
+   floor, in the quietest ink. No margin: each host places it. */
+.fine-print {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-4);
+  text-wrap: pretty;
+}
