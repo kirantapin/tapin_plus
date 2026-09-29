@@ -1519,6 +1519,9 @@ html.is-layered{overflow:hidden}
 .rs-seats.is-low .rs-seats-bar i{background:var(--loss);
   animation:rsBarGrow 600ms var(--ease) both,rsBarLow 2400ms ease-in-out 600ms infinite}
 @keyframes rsBarLow{50%{opacity:.35}}
+/* The count in the same red, steady (Sam, 30 Sep). `--loss` is 6.5:1 on the
+   card and 5.6:1 on the dock's page ground in the light ramp. */
+.rs-seats.is-low .rs-seats-line b{color:var(--loss)}
 @media (max-width:1023px){.rs-order > .rs-seats{display:none}}
 
 /* ── THE SEATS ON THE DOCK, BELOW 1024 (§45) ──────────────────────────────
