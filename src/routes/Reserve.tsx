@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import IncludedPanel from "../shell/IncludedPanel";
+import GuaranteeCard from "../shell/GuaranteeCard";
+import PercentFootnote from "../shell/PercentFootnote";
 import Timeline, { type Stop } from "../shell/Timeline";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
@@ -286,7 +288,7 @@ export default function Reserve() {
             />
           </div>
         </IncludedPanel>
-
+        <GuaranteeCard />
       </div>
 
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
@@ -484,6 +486,10 @@ export default function Reserve() {
           </div>
         </section>
       </div>
+
+      {/* The 15%'s footnote closes the checkout, across both columns from 1024
+          and last before the dock below it (Sam, 30 Sep 2026). */}
+      <PercentFootnote className="rs-fine" />
 
       {/* The phone's foot: sticky to the scroller's bottom, always on, page 0's
           Checkout below 1024 (reserve.css hides it from there). The seats

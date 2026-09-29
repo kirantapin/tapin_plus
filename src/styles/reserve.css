@@ -1606,6 +1606,14 @@ html.is-layered{overflow:hidden}
 .rs-promise a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
 
+/* The guarantee's own card, under the included panel (shell/GuaranteeCard,
+   Sam 30 Sep): the panel's plate, and no hairline now it stands alone. */
+.rs-guarantee{margin:0;padding:var(--s-xl);border:1px solid var(--hair);
+  border-radius:var(--r-card);background:var(--card);box-shadow:var(--rest)}
+.rs-guarantee .rs-promise{padding-top:0;border-top:0;align-items:center}
+/* The 15%'s footnote closes the checkout, across both columns from 1024. */
+.fine-print.rs-fine{grid-column:1 / -1}
+
 /* ── THE TWO COLUMNS' WRAPPERS, BELOW 1024 ────────────────────────────────
    They draw nothing: every block lays out as a child of `.rs-modal`'s one
    flex column in DOM order — the included panel first (Sam, 24 Sep 2026). */

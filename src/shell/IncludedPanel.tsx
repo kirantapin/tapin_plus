@@ -1,7 +1,5 @@
 import { type ReactNode } from "react";
-import GuaranteeLine from "./GuaranteeLine";
 import CreditNote from "./CreditNote";
-import PercentFootnote from "./PercentFootnote";
 import {
   benefits,
   logoField,
@@ -96,10 +94,9 @@ export default function IncludedPanel({
         </span>
         <p className="rs-inc-line">At {venues.length} places in Blacksburg.</p>
       </div>
-      {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
-      <GuaranteeLine />
-      {/* The footnote to "15% off everything*", the panel's last line. */}
-      {percentFig ? <PercentFootnote /> : null}
+      {/* The guarantee and the 15%'s footnote live outside the panel since
+          30 Sep: shell/GuaranteeCard.tsx under it, PercentFootnote at the foot
+          of the page that holds it. */}
       {children}
     </section>
   );
