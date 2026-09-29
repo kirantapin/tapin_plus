@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import GuaranteeLine from "./GuaranteeLine";
 import CreditNote from "./CreditNote";
 import PercentFootnote from "./PercentFootnote";
@@ -6,6 +6,7 @@ import {
   benefits,
   logoField,
   offers,
+  paysForItself,
   plusVenues,
   venuePolicyFigure,
   venues,
@@ -32,9 +33,8 @@ const included: { id: string; line: string }[] = [
   ...(offers.length ? [{ id: "offers", line: "Special offers from the places" }] : []),
 ];
 
-/* The joins between the names, in the splash's own grammar: commas, then
-   " and " before the last. Names as the records hold them, never retyped. */
-const joinAfter = (k: number, n: number) => (k === n - 1 ? "" : k === n - 2 ? " and " : ", ");
+/* The six names, for the marks' accessible label now the line only counts them. */
+const venueNames = venues.map((v) => v.name).join(", ");
 
 /**
  * ══ THE INCLUDED PANEL (23 Sep 2026, POLISH §18) ════════════════════════════
@@ -55,6 +55,11 @@ export default function IncludedPanel({
 }) {
   return (
     <section className="rs-inc" aria-labelledby={headId}>
+      {/* The lead (Sam, 30 Sep): what one order is worth against the price. */}
+      <p className="rs-pays">
+        <b>{paysForItself.lead}</b>
+        <span>{paysForItself.rest}</span>
+      </p>
       <h2 className="t-title rs-inc-head" id={headId}>
         Every week, at every location
       </h2>
@@ -74,10 +79,10 @@ export default function IncludedPanel({
       ) : null}
       {/* The credit's scope, the venue pop-up's note (Sam, 29 Sep). */}
       {creditFig ? <CreditNote /> : null}
-      {/* Where it works: the six marks stacked on the left, their names
-          in a sentence beside them — the call-out's two-column row. */}
+      {/* Where it works: the six marks stacked on the left and a count beside
+          them (Sam, 30 Sep: "simplify"); the names are the marks' label. */}
       <div className="rs-inc-also">
-        <span className="rs-inc-marks" aria-hidden="true">
+        <span className="rs-inc-marks" role="img" aria-label={venueNames}>
           {venues.map((v) => (
             <span
               key={v.id}
@@ -89,16 +94,7 @@ export default function IncludedPanel({
             </span>
           ))}
         </span>
-        <p className="rs-inc-line">
-          At{" "}
-          {venues.map((v, k, all) => (
-            <Fragment key={v.id}>
-              <span className="rs-venue-name">{v.name}</span>
-              {joinAfter(k, all.length)}
-            </Fragment>
-          ))}
-          .
-        </p>
+        <p className="rs-inc-line">At {venues.length} places in Blacksburg.</p>
       </div>
       {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
       <GuaranteeLine />
