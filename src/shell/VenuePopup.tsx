@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { BenefitIcon, CoverIcon, NavIcon } from "./Icons";
+import { CoverIcon, NavIcon } from "./Icons";
+import CreditNote from "./CreditNote";
 import PlusFlag from "./PlusFlag";
 import BenefitFigures from "./BenefitFigures";
 import {
@@ -9,7 +10,6 @@ import {
   heroIsBright,
   logoField,
   venueCovers,
-  venueCreditNote,
   venuePolicyFigure,
   type Venue,
 } from "../model/content";
@@ -193,14 +193,7 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
 
           {/* The credit's scope, in its own full-width plate (Sam, 29 Sep). */}
           {venue.policies.some((p) => p.kind === "credit") ? (
-            <p className="vp-note">
-              <span className="vp-note-glyph" aria-hidden="true">
-                <BenefitIcon id="credit" />
-              </span>
-              <span>
-                {venueCreditNote.lead} <b>{venueCreditNote.scope}</b>.
-              </span>
-            </p>
+            <CreditNote className="vp-note" />
           ) : null}
 
           {/* An offer is the merchant's own promotion rather than one of the

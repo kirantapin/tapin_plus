@@ -318,36 +318,10 @@
   background: var(--figs-rule);
 }
 
-/* The credit's scope, full width on the plates' ground: one sentence the
-   figures above cannot hold, so it gets its own container (Sam, 29 Sep). */
+/* The credit note (shell/CreditNote.tsx, figures.css) sits 24px under the
+   figures here; the checkout's panel spaces it with its own gap. */
 .vp-note {
-  display: flex;
-  align-items: center;
-  gap: var(--s-md);
-  margin: var(--s-xl) 0 0;
-  padding: var(--s-md) var(--s-lg);
-  border-radius: var(--r-control);
-  background: var(--inner);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--ink-2);
-  text-wrap: pretty;
-}
-.vp-note-glyph {
-  flex: 0 0 auto;
-  display: block;
-  color: var(--ink-3);
-}
-.vp-note-glyph svg {
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-.vp-note b {
-  font-weight: 700;
-  color: var(--ink-1);
-  white-space: nowrap;
+  margin-top: var(--s-xl);
 }
 
 /* The offer-only venue's one line, under the offers glyph — the same mark the
