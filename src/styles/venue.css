@@ -318,7 +318,7 @@
   background: var(--figs-rule);
 }
 
-/* The credit note (shell/CreditNote.tsx, figures.css) sits 24px under the
+/* The credit note (shell/CreditNote.tsx, figures.css) sits 16px under the
    figures here; the checkout's panel spaces it with its own gap. */
 .vp-note {
   margin-top: var(--s-xl);
