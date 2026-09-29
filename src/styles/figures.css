@@ -100,3 +100,38 @@
   line-height: 1.35;
   color: var(--ink-3);
 }
+
+/* ── the credit note ─────────────────────────────────────────────────────────
+   The credit's scope in one full-width plate on the `--inner` ground (Sam,
+   29 Sep 2026): under the venue pop-up's figures and in the checkout's
+   included panel. No margin: each host places it. The bold phrase never
+   splits, so a narrow line breaks before it. */
+.credit-note {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  margin: 0;
+  padding: var(--s-md) var(--s-lg);
+  border-radius: var(--r-control);
+  background: var(--inner);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.credit-note-glyph {
+  flex: 0 0 auto;
+  display: block;
+  color: var(--ink-3);
+}
+.credit-note-glyph svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.credit-note b {
+  font-weight: 700;
+  color: var(--ink-1);
+  white-space: nowrap;
+}

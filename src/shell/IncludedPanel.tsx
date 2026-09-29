@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import GuaranteeLine from "./GuaranteeLine";
+import CreditNote from "./CreditNote";
 import {
   benefits,
   logoField,
@@ -70,6 +71,8 @@ export default function IncludedPanel({
           ))}
         </ul>
       ) : null}
+      {/* The credit's scope, the venue pop-up's note (Sam, 29 Sep). */}
+      {creditFig ? <CreditNote /> : null}
       {/* Where it works: the six marks stacked on the left, their names
           in a sentence beside them — the call-out's two-column row. */}
       <div className="rs-inc-also">
