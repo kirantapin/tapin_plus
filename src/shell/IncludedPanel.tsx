@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 import GuaranteeLine from "./GuaranteeLine";
 import CreditNote from "./CreditNote";
+import PercentFootnote from "./PercentFootnote";
 import {
   benefits,
   logoField,
@@ -101,6 +102,8 @@ export default function IncludedPanel({
       </div>
       {/* The guarantee, under a hairline (shell/GuaranteeLine.tsx). */}
       <GuaranteeLine />
+      {/* The footnote to "15% off everything*", the panel's last line. */}
+      {percentFig ? <PercentFootnote /> : null}
       {children}
     </section>
   );

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CoverIcon, NavIcon } from "./Icons";
 import CreditNote from "./CreditNote";
+import PercentFootnote from "./PercentFootnote";
 import PlusFlag from "./PlusFlag";
 import BenefitFigures from "./BenefitFigures";
 import {
@@ -270,6 +271,11 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
               Ordering through TapIn opens here when we do.
             </p>
           )}
+
+          {/* The footnote to the 15% column's asterisk, at the sheet's foot. */}
+          {venue.policies.some((p) => p.kind === "percent") ? (
+            <PercentFootnote className="vp-fine" />
+          ) : null}
         </div>
       </div>
     </div>,

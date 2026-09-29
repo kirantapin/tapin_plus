@@ -324,6 +324,11 @@
   margin-top: var(--s-xl);
 }
 
+/* The 15%'s footnote, the last line of the sheet. */
+.vp-fine {
+  margin-top: var(--s-xl);
+}
+
 /* The offer-only venue's one line, under the offers glyph — the same mark the
    pitch gives an offer, so a reader recognizes it as the merchant's own
    promotion rather than one of the standing three. Bare glyph, no tile: a tile
