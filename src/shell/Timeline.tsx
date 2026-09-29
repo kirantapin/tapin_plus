@@ -1,3 +1,6 @@
+import { AppIcon } from "./Icons";
+import { appLinkLine } from "../model/content";
+
 /* ══ A TIMELINE, NOT A TABLE (23 Sep 2026, POLISH §26) ══════════════════════
    The order card's schedule: each stop is a moment with its figure on one line
    and a clause under it, on a rail, and one sentence under the rail. Shared by
@@ -24,6 +27,13 @@ export default function Timeline({ stops, foot }: { stops: Stop[]; foot?: string
           </li>
         ))}
       </ol>
+      {/* How the benefits reach them: the app, by link (Sam, 30 Sep). */}
+      <p className="rs-app">
+        <span className="rs-app-glyph" aria-hidden="true">
+          <AppIcon />
+        </span>
+        <span>{appLinkLine}</span>
+      </p>
       {foot ? <p className="rs-refund">{foot}</p> : null}
     </>
   );

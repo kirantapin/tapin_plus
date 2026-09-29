@@ -45,6 +45,18 @@ const Points = () => (
   </svg>
 );
 
+/* The app the link downloads (the timeline's app line). */
+const Phone = () => (
+  <svg {...box}>
+    <rect x="6.5" y="2.8" width="11" height="18.4" rx="2.6" />
+    <path d="M10.6 17.8h2.8" />
+  </svg>
+);
+
+export function AppIcon() {
+  return <Phone />;
+}
+
 /* ---- the seven ways to use it ---- */
 
 const MySpot = () => (

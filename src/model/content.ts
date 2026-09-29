@@ -288,6 +288,10 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
   },
 };
 
+/** The timeline's app line, checkout and /in (Sam, 30 Sep 2026). */
+export const appLinkLine =
+  "We'll send you a link to download the app, so you can start using your benefits and manage your membership.";
+
 /** The checkout panel's lead (Sam, 30 Sep 2026). One order's credit and its
  *  points cover the month; the points go unmentioned on purpose. */
 export const paysForItself = {
