@@ -371,7 +371,8 @@ const BENEFIT_LABEL: Record<string, string> = {
   points: "Points toward rewards",
 };
 const BENEFIT_DETAIL: Record<string, string> = {
-  percent: "Everything except alcohol",
+  /* Sam, 29 Sep 2026: an asterisk, answered by `percentFootnote`. */
+  percent: "Everything*",
   /* Sam, 15 Sep 2026: "mention that credit acts like cash, can be used
      towards anything." One string, so the pitch card, the checkout's
      checklist and the app's Deals row all say it the same way. */

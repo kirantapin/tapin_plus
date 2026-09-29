@@ -296,6 +296,8 @@
   color:var(--ink-1);border:1px solid var(--hair-lit)}
 .scene-line{margin:var(--s-md) 0 0;font-size:15px;font-weight:500;line-height:1.45;
   max-width:34ch;color:var(--ink-2);text-wrap:pretty}
+/* The 15%'s footnote on the one slide that carries the asterisk. */
+.scene-fine{margin-top:var(--s-md);max-width:40ch}
 
 /* -- foot: sticky, opaque, NEVER animated --------------------------------- */
 /* No longer sticky: that existed to keep the seat line, the charge line and

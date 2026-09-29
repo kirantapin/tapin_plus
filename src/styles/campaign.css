@@ -318,6 +318,10 @@
    copy sits on a `--card` plate, white here, not over the photograph, so the
    title, line and ledger take this surface's own ink ramp. The re-point of
    `--ink-1` to `--on-maroon` that type over a photograph needed is gone. */
+/* The footnote to the 15% card's asterisk, under the three cards. */
+.cg-fine {
+  margin-top: var(--s-xl);
+}
 .cg-save-h {
   margin: 0 0 var(--s-lg);
 }

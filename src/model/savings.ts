@@ -175,7 +175,7 @@ export function illustrate(
   const basis =
     `About ${visits} visits of $${VISIT_SIZE_USD}, across ${places} ` +
     `${places === 1 ? "place" : "places"}. ` +
-    `${pct}% of it alcohol, which only the 15% skips.`;
+    `${pct}% of it age-restricted, which we don't count toward the 15%.`;
 
   return {
     monthlySpendUsd,

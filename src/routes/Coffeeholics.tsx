@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import TapInLogo from "../shell/TapInLogo";
+import PercentFootnote from "../shell/PercentFootnote";
 import PlusFlag from "../shell/PlusFlag";
 import SiteFoot from "../shell/SiteFoot";
 import TrialModal from "../shell/TrialModal";
@@ -376,6 +377,9 @@ export default function Coffeeholics() {
               />
             ))}
           </div>
+          {campaignShots.some((c) => c.id === "percent") ? (
+            <PercentFootnote className="cg-fine" />
+          ) : null}
         </section>
       ) : null}
 
