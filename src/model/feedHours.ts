@@ -4,8 +4,15 @@
  * notifications for coffeeholics (every day), and after 9pm EST
  * (thurs,friday,sat) you can show the try it once at the burg."
  *
- * Blacksburg time. The Burg's nights run to 2am, so the hours after midnight
- * belong to the night before. A place with no hours here never shows a try.
+ * Blacksburg time. A place with no hours here never shows a try.
+ *
+ * The Burg moved off its nights on 30 Sep 2026 (Sam: "add that", after the
+ * Virginia compliance check): the credit keeps to food and soft drinks from
+ * 9 p.m. to 2 a.m. (docs/CREDIT-HOURS-2026-09-30.md), so a "tried it for
+ * free" card at a bar in that window advertised the one thing the credit
+ * does not do then. Its tries now sit in the evening before 9, the hours
+ * where a drink discount is lawful. The days are still Sam's: Thursday,
+ * Friday, Saturday.
  */
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -25,10 +32,9 @@ export const blacksburgClock = (ms: number): { day: number; hour: number } => {
 const TRY_HOURS: Record<string, (day: number, hour: number) => boolean> = {
   /* Every day, 10am to 7pm. */
   coffeeholicsva: (_day, hour) => hour >= 10 && hour < 19,
-  /* Thursday, Friday and Saturday from 9pm, to 2am the morning after. */
-  theburg: (day, hour) =>
-    (hour >= 21 && (day === 4 || day === 5 || day === 6)) ||
-    (hour < 2 && (day === 5 || day === 6 || day === 0)),
+  /* Thursday, Friday and Saturday, 5pm to 9pm: before the credit's quiet
+     hours begin (BENEFIT.creditQuietFrom). */
+  theburg: (day, hour) => hour >= 17 && hour < 21 && (day === 4 || day === 5 || day === 6),
 };
 
 /** Whether a try at this place fits the moment `at` (epoch ms). */
