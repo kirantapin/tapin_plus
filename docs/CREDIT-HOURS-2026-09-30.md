@@ -70,11 +70,12 @@ venue's POS in step: a drink line the credit touched is a reduced-price sale.
 ## What the site says
 
 - Venue pop-up, checkout, pitch, Coffeeholics and /how: "Your $5 credit and
-  15% off go toward all food and drink. From 9 p.m. to 2 a.m., food and soft
-  drinks."
+  15% off go toward all food and drink outside the hours of 9 p.m. to 2 a.m.
+  Within those hours, age-restricted items are not eligible."
 - Terms (every plan, after the guarantee): "Your $5 credit (on a $10+ order,
-  once a week at each place) and the 15% off go toward all food and drink.
-  From 9 p.m. to 2 a.m., food and soft drinks."
+  once a week at each place) and the 15% off go toward all food and drink
+  outside the hours of 9 p.m. to 2 a.m. Within those hours, age-restricted
+  items are not eligible."
 
 The 21:00 and 02:00 are `BENEFIT.creditQuietFrom` and `BENEFIT.creditQuietTo`
 in `src/model/savings.ts`, so the copy and the rule share one source. If the
