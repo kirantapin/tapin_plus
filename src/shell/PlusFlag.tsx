@@ -1,4 +1,3 @@
-import TapInIcon from "./TapInIcon";
 
 /**
  * The TapIn Plus mark: the TapIn icon and the word PLUS, on the logo's gold.
@@ -20,6 +19,17 @@ import TapInIcon from "./TapInIcon";
  * wordmark (Sam, 22 Sep 2026: "can we remove the tapin logo from the plus
  * chip here"), where the mark is already the word to its left.
  */
+/** The mark behind PLUS: a bolt (Sam, 30 Sep 2026: "can this be the branding
+ *  behind plus, that electricity icon"). Filled, in currentColor, so it takes
+ *  the chip's ink wherever the chip sits. */
+export function PlusBolt({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+      <path d="M13.2 2.2 4.6 13.4h6.2l-1.4 8.4 8.6-11.2h-6.2l1.4-8.4Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export default function PlusFlag({
   className = "",
   mark = true,
@@ -29,7 +39,7 @@ export default function PlusFlag({
 }) {
   return (
     <span className={className}>
-      {mark ? <TapInIcon className="plus-mark" /> : null}
+      {mark ? <PlusBolt className="plus-mark" /> : null}
       <span className="plus-word">PLUS</span>
     </span>
   );

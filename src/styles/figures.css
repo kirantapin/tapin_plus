@@ -147,3 +147,55 @@
   color: var(--ink-4);
   text-wrap: pretty;
 }
+
+/* ── the refund plate ────────────────────────────────────────────────────────
+   shell/RefundPlate.tsx: the shield in a tile, the promise beside it, in one
+   plate on the `--inner` ground with the lit hairline, so it reads on the
+   hero's dark glass and the checkout's white card from the same tokens
+   (Sam, 30 Sep 2026). The optional second line takes the savings green. */
+.refund-plate {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  margin: 0;
+  padding: var(--s-lg) var(--s-xl);
+  border-radius: var(--r-card);
+  border: 1px solid var(--hair-lit);
+  background: var(--inner);
+}
+.refund-plate-mark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  /* White tile, maroon shield (Sam, 30 Sep): the one literal the house
+     allows, and the accent as the mark's ink on both grounds. */
+  background: #FFFFFF;
+  color: var(--maroon);
+}
+.refund-plate-mark svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.refund-plate-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.refund-plate-text b {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink-1);
+  text-wrap: balance;
+}
+.refund-plate-text span {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--gain);
+}

@@ -1,0 +1,110 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   /simple: THE 5TH-GRADE PAGE (routes/Simple.tsx, POLISH §84).
+
+   It wears the pitch's hero and sticky bar and the checkout's panel as they
+   are; only the blocks that exist nowhere else are drawn here. Everything
+   takes the tokens, and the light half sits under `data-lit` like the pitch's.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The refund plate (shell/RefundPlate), third line of the hero. */
+.hero-refund {
+  margin: var(--s-lg) 0 0;
+}
+
+/* The two new panels take the panel's own inset (layout.css) and the
+   section heading; from 1024 they hold a reading measure, like the pitch's
+   savings panel, instead of the full 1,300px row. */
+.simple-how,
+.simple-faq {
+  display: flex;
+  flex-direction: column;
+}
+.simple-how .panel-head,
+.simple-faq .panel-head {
+  margin: 0 0 var(--s-lg);
+}
+
+/* The sequence, as the venue pop-up sets its three figures (figures.css
+   `.figs.is-sheet`); the hairline is the lit surface's. */
+.how-figs {
+  --figs-rule: var(--hair-lit);
+  margin: 0;
+}
+
+/* Under the figures: the reach (Sam, 30 Sep: "make it clear that this
+   applies to all 6 locations"). */
+.how-note {
+  margin: var(--s-lg) 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink-1);
+  text-wrap: pretty;
+}
+
+/* The example as the deck's own order ticket (how.css `.ticket`, `.tk-*`):
+   the place's mark, the item's photo, one credit row in the savings green,
+   and the total that swaps from the menu price to what she pays. */
+.how-ticket {
+  margin: var(--s-xl) 0 0;
+}
+.how-ticket .tk-off.is-credit b {
+  color: var(--gain);
+}
+/* The points row keeps the deck's shape at the site's 14px floor. */
+.how-ticket .tk-earned span {
+  font-size: 14px;
+}
+
+/* The questions: one list with divisions, not a stack of rows. Each drill
+   sits on a hairline; the answer reads at the compact size in the second
+   ink; the chevron stays by the words. */
+.simple-faq .drill {
+  margin: 0;
+  padding: var(--s-lg) 0;
+  border-top: 1px solid var(--hair-lit);
+}
+.simple-faq .drill:last-child {
+  padding-bottom: 0;
+}
+.simple-faq .drill > summary {
+  justify-content: space-between;
+  gap: var(--s-md);
+}
+.simple-faq .drill p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* The guarantee in the panel's own plate, the tile beside the words. */
+.simple-guarantee {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-lg);
+}
+.simple-guarantee .guarantee {
+  margin: 0;
+}
+.simple-guarantee .guarantee-contact {
+  margin: var(--s-md) 0 0;
+}
+
+/* From 1024 the three panels hold a reading measure, centred, while the
+   photo cards keep the page grid. The grid token is the pitch's, set there on
+   `.column:has(.pitch-decide)` (pitch.css), which this page has no part of. */
+@media (min-width: 1024px) {
+  .simple-lit {
+    --grid: min(1280px, calc(100% - 96px));
+  }
+  .simple-how,
+  .simple-faq,
+  .simple-guarantee {
+    width: 100%;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
