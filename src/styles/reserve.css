@@ -1555,13 +1555,13 @@ html.is-layered{overflow:hidden}
    row gap is its only interval. */
 .rs-inc-head{margin:0}
 
-/* The lead: one order against the price, on a wash of the savings green. */
-.rs-pays{display:flex;flex-direction:column;gap:var(--s-xs);margin:0;
+/* The lead: the guarantee as a refund, on a wash of the savings green. */
+.rs-lead{display:flex;flex-direction:column;gap:var(--s-xs);margin:0;
   padding:var(--s-lg) var(--s-xl);border-radius:var(--r-control);
   background:color-mix(in srgb, var(--gain) 10%, var(--card))}
-.rs-pays b{font-size:16px;font-weight:700;line-height:1.35;color:var(--ink-1);
+.rs-lead b{font-size:16px;font-weight:700;line-height:1.35;color:var(--ink-1);
   text-wrap:balance}
-.rs-pays span{font-size:15px;font-weight:700;line-height:1.35;color:var(--gain)}
+.rs-lead span{font-size:15px;font-weight:700;line-height:1.35;color:var(--gain)}
 
 /* The checklist, as it was: a check glyph in ink, not a tile, beside each
    line. The glyph is centred on the FIRST line box (1.4em at 15px), so a
@@ -1606,11 +1606,6 @@ html.is-layered{overflow:hidden}
 .rs-promise a:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
   border-radius:var(--r-sm)}
 
-/* The guarantee's own card, under the included panel (shell/GuaranteeCard,
-   Sam 30 Sep): the panel's plate, and no hairline now it stands alone. */
-.rs-guarantee{margin:0;padding:var(--s-xl);border:1px solid var(--hair);
-  border-radius:var(--r-card);background:var(--card);box-shadow:var(--rest)}
-.rs-guarantee .rs-promise{padding-top:0;border-top:0;align-items:center}
 /* The 15%'s footnote closes the checkout, across both columns from 1024. */
 .fine-print.rs-fine{grid-column:1 / -1}
 

@@ -5,7 +5,6 @@ import TapInCard from "../shell/TapInCard";
 import VenueMosaic from "../shell/VenueMosaic";
 import SiteFoot from "../shell/SiteFoot";
 import IncludedPanel from "../shell/IncludedPanel";
-import GuaranteeCard from "../shell/GuaranteeCard";
 import PercentFootnote from "../shell/PercentFootnote";
 import Timeline, { type Stop } from "../shell/Timeline";
 import { readablePhone } from "../shell/PhoneStep";
@@ -415,7 +414,6 @@ export default function Membership() {
             ) : null}
 
             <IncludedPanel headId="ms-inc-head" />
-            <GuaranteeCard />
 
             <div className="ms-terms">
               <Drill summary="The full terms">
@@ -457,7 +455,6 @@ export default function Membership() {
               </p>
             </section>
             <IncludedPanel headId="ms-inc-head" />
-            <GuaranteeCard />
             <PercentFootnote />
           </>
         ) : userSession && subscribed === null ? null : userSession ? (
@@ -475,7 +472,6 @@ export default function Membership() {
               </p>
             </div>
             <IncludedPanel headId="ms-inc-head" />
-            <GuaranteeCard />
             <PercentFootnote />
           </>
         ) : (

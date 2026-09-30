@@ -302,11 +302,13 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
 export const appLinkLine =
   "We'll send you a link to download the app, so you can start using your benefits and manage your membership.";
 
-/** The checkout panel's lead (Sam, 30 Sep 2026). One order's credit and its
- *  points cover the month; the points go unmentioned on purpose. */
-export const paysForItself = {
-  lead: `One $${Math.round(BENEFIT.creditMinUsd)} order pays for your membership.`,
-  rest: "The rest is savings.",
+/** The checkout panel's lead: the guarantee, as the refund it is (Sam, 30 Sep
+ *  2026: "get auto refunded if you don't save at least what you pay for the
+ *  membership"). It replaced "One $10 order pays for your membership", and
+ *  the guarantee card under the panel, which said the same thing twice. */
+export const guaranteeLead = {
+  lead: "If you don't save at least what you pay, you're refunded automatically.",
+  rest: "Checked against your TapIn orders.",
 };
 
 /** The footnote to the 15%'s asterisk (Sam, 29 Sep 2026). */
