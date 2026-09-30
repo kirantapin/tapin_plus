@@ -194,6 +194,16 @@ export const venueCovers: Record<string, string[]> = {
   italianospizza: ["food", "drinks"],
 };
 
+/** The quiet hours as copy: "9 p.m." and "2 a.m.". */
+/* A no-break space, so "9 p.m." never splits across lines. */
+const clock12 = (h: number) => `${((h + 11) % 12) + 1}\u00A0${h < 12 ? "a.m." : "p.m."}`;
+/** The credit's hours rule in one sentence, everywhere the scope is stated
+ *  (Sam, 30 Sep 2026: "let's do the 9pm to 2am thing"). "Soft drinks" says
+ *  what it covers without naming alcohol. */
+export const creditHoursLine = `From ${clock12(BENEFIT.creditQuietFrom)} to ${clock12(
+  BENEFIT.creditQuietTo,
+)}, food and soft drinks.`;
+
 /**
  * What a venue's own benefit rows SAY, at that venue.
  *
@@ -230,7 +240,7 @@ const VENUE_POLICY_DETAIL: Record<string, string> = {
      the 15% does not, which is the distinction TRUTH is built on — and this
      is how it gets stated without the surface ever advertising a discount on
      a drink, which §10 forbids outright. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spends like cash, on anything`,
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spends like cash, on anything. ${creditHoursLine}`,
   /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
      The density pass took this line out on the reasoning that it only
      restated scope, which the `venueCovers` row below now says once for all
@@ -305,10 +315,12 @@ export const percentFootnote = `*Age-restricted items may not be eligible for th
 )}% off, depending on the jurisdiction.`;
 
 /** The pop-up's note under the figures (Sam, 29 Sep 2026): the credit covers
- *  all food and drink, alcohol included, without naming alcohol. */
+ *  all food and drink, alcohol included, without naming alcohol; and since
+ *  30 Sep, the hours it does not. */
 export const venueCreditNote = {
   lead: `Your $${BENEFIT.creditUsd} credit goes toward`,
   scope: "all food and drink",
+  hours: creditHoursLine,
 };
 
 /** The figure and qualifier for one venue policy, or undefined for a kind this
@@ -387,7 +399,7 @@ const BENEFIT_DETAIL: Record<string, string> = {
   /* Sam, 15 Sep 2026: "mention that credit acts like cash, can be used
      towards anything." One string, so the pitch card, the checkout's
      checklist and the app's Deals row all say it the same way. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spends like cash, on anything`,
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spends like cash, on anything. ${creditHoursLine}`,
   /* Sam's wording, 14 Sep 2026: "redeem for free food, drinks, etc. at each
      place". "Drinks" was raised as an alcohol-adjacent word beside a 15% that
      excludes alcohol (docs/virginia-alcohol-research.md); his call to keep it —
@@ -1159,9 +1171,21 @@ function subscribise(
                     `by emailing ${GUARANTEE_CONTACT}.`,
                 }
               : t,
+    ).flatMap((t) =>
+      /* The credit's hours (30 Sep 2026), stated as a term so the record a
+         member holds says it; it follows the guarantee in every plan. */
+      t.id === "guarantee" ? [t, creditHoursTerm] : [t],
     ),
   };
 }
+
+/** The credit's scope and hours as one term (docs/CREDIT-HOURS-2026-09-30.md). */
+const creditHoursTerm: Term = {
+  id: "credit-hours",
+  term:
+    `Your $${BENEFIT.creditUsd} credit goes toward anything on a $${Math.round(BENEFIT.creditMinUsd)}+ ` +
+    `order, once a week at each place. ${creditHoursLine}`,
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    THE PRICE FLIPS WHEN THE SEATS RUN OUT.
