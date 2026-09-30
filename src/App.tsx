@@ -20,13 +20,18 @@ import Membership from "./routes/Membership";
  * don't animate page changes." This build does not animate them.
  */
 /** See the note on the place route: the key is the whole point of this. */
-/** `/try` → `/?try&…`, the ad's own parameters kept (§66). */
+/** `/try` → `/`, the ad's own parameters kept (§66). It no longer opens the
+ *  trial modal on arrival: PostHog (30 Sep 2026, 30 days) showed the ad
+ *  sessions that landed on `?try` bouncing 89% in 3 seconds, against 0% for
+ *  the same ads landing on `/`. The page loads as itself; "Try it once for
+ *  free" is one tap away in the hero. `?try` on `/` still opens the modal,
+ *  for anyone who wants that link on purpose. */
 function TryLink() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   params.delete("try");
   const rest = params.toString();
-  return <Navigate to={{ pathname: "/", search: `?try${rest ? `&${rest}` : ""}` }} replace />;
+  return <Navigate to={{ pathname: "/", search: rest ? `?${rest}` : "" }} replace />;
 }
 
 export default function App() {
