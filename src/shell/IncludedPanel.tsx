@@ -1,9 +1,9 @@
 import { type ReactNode } from "react";
 import ScopeLine from "./ScopeLine";
+import RefundPlate from "./RefundPlate";
 import {
   benefits,
   logoField,
-  offers,
   guaranteeLead,
   plusVenues,
   venuePolicyFigure,
@@ -28,7 +28,6 @@ const included: { id: string; line: string }[] = [
   ...(creditFig ? [{ id: "credit", line: `${creditFig.figure} credit every week` }] : []),
   ...(percentFig ? [{ id: "percent", line: `${percentFig.figure} ${percentFig.qualifier}` }] : []),
   ...(pointsFig ? [{ id: "points", line: `${pointsFig.figure} points, toward free items` }] : []),
-  ...(offers.length ? [{ id: "offers", line: "Special offers from the places" }] : []),
 ];
 
 /* The six names, for the marks' accessible label now the line only counts them. */
@@ -53,11 +52,8 @@ export default function IncludedPanel({
 }) {
   return (
     <section className="rs-inc" aria-labelledby={headId}>
-      {/* The lead (Sam, 30 Sep): the guarantee, as the refund it is. */}
-      <p className="rs-lead">
-        <b>{guaranteeLead.lead}</b>
-        <span>{guaranteeLead.rest}</span>
-      </p>
+      {/* The lead (Sam, 30 Sep): the refund, on the plate the hero shares. */}
+      <RefundPlate className="rs-lead" rest={guaranteeLead.rest} />
       <h2 className="t-title rs-inc-head" id={headId}>
         Every week, at every location
       </h2>
