@@ -122,9 +122,16 @@ function Spots() {
   );
 }
 
-export default function Simple() {
-  const cta = useReserveCta();
-  const [trial, setTrial] = useTrialLink();
+/* ══ HOW IT WORKS, ONE CONTAINER IN TWO SEATS ═══════════════════════════════
+   Three figures, the reach line and the cycling ticket, in a panel like the
+   pitch's own (Sam, 30 Sep 2026: "show this above the 'what you get'"). On a
+   phone it stands in the light half under the hero; from 1024 the same
+   container sits on the right of the hero over the photographs, where the
+   month sits on the Coffeeholics band (Sam: "the same mobile container just
+   on the right side of the desktop hero"). It is rendered in both seats and
+   CSS shows one per width; a hidden panel never enters view, so only the
+   shown one cycles. */
+function HowItWorks() {
   /* The ticket's total swaps the menu price to what she pays on mount
      (how.css); it is mounted when the panel enters view, so the swap plays
      where it can be seen, and while it stays in view the examples cycle,
@@ -147,6 +154,77 @@ export default function Simple() {
     return () => window.clearInterval(t);
   }, [inView]);
   const ex = EXAMPLES[which] ?? EXAMPLES[0];
+  return (
+    <Panel className="simple-how" innerRef={howPanel}>
+      <h2 className="t-section panel-head">How it works</h2>
+      <BenefitFigures items={STEPS} size="sheet" className="how-figs" />
+      <p className="how-note">
+        Every week, at all {PLACES} places. Up to ${MONTH_MAX} of credit a month.
+      </p>
+      {ex ? (
+        <div
+          key={seen ? `seen-${which}` : "waiting"}
+          className={`ticket is-order how-ticket${ex.price === null ? " is-pass" : ""}`}
+          style={seen ? undefined : { visibility: "hidden" }}
+          aria-live="polite"
+          aria-label={
+            ex.price === null
+              ? `An example: ${ex.item} at ${ex.venue.name}. $${CREDIT} credit comes off, and you earn points.`
+              : `An example order: ${ex.item} at ${ex.venue.name}, $${ex.price.toFixed(2)}, $${CREDIT} credit, you pay $${(ex.price - CREDIT).toFixed(2)}, and earn ${pointsOn(ex.price)} points.`
+          }
+        >
+          <p className="tk-where">
+            <span className="collar" data-field={logoField(ex.venue.id)} style={{ ["--brand" as string]: ex.venue.brandColor }}>
+              <img src={ex.venue.logo} alt="" decoding="async" />
+            </span>
+            <b>{ex.venue.name}</b>
+          </p>
+          <p className="tk-item">
+            <img src={ex.img} alt="" decoding="async" />
+            <span>{ex.item}</span>
+            {ex.price !== null ? <b className="tnum">${ex.price.toFixed(2)}</b> : null}
+          </p>
+          <p className="tk-rule" />
+          <p className="tk-off is-credit">
+            <span>${CREDIT} credit</span>
+            <b className="tnum">&minus;${CREDIT.toFixed(2)}</b>
+          </p>
+          <p className="tk-total">
+            <span>You pay</span>
+            {ex.price !== null ? (
+              <span className="tk-swap">
+                <b className="was tnum">${ex.price.toFixed(2)}</b>
+                <b className="now tnum">${(ex.price - CREDIT).toFixed(2)}</b>
+              </span>
+            ) : (
+              <b className="tnum">${CREDIT} less</b>
+            )}
+          </p>
+          {/* The earn side, as the deck's ticket carries it (how.css `.tk-earned`). */}
+          <ul className="tk-earned">
+            <li>
+              {ex.price !== null ? (
+                <>
+                  <b>+{pointsOn(ex.price)} points</b>
+                  <span>toward free items here</span>
+                </>
+              ) : (
+                <>
+                  <b>Points too</b>
+                  <span>{POINTS_PER_DOLLAR} on every dollar, toward free items here</span>
+                </>
+              )}
+            </li>
+          </ul>
+        </div>
+      ) : null}
+    </Panel>
+  );
+}
+
+export default function Simple() {
+  const cta = useReserveCta();
+  const [trial, setTrial] = useTrialLink();
   const heroCta = useRef<HTMLAnchorElement>(null);
   const [past, setPast] = useState(false);
   useEffect(() => {
@@ -220,81 +298,18 @@ export default function Simple() {
             </div>
           </div>
         </Panel>
+        {/* The desktop seat (§89): shown from 1024, on the light ramp. */}
+        <div className="how-in-hero" data-lit="">
+          <HowItWorks />
+        </div>
       </VenueMosaic>
 
       <div className="pitch-lit simple-lit" data-lit="">
-        {/* Three steps and one example lead (Sam, 30 Sep 2026: "show this above
-            the 'what you get'"), in a panel like the pitch's own. */}
-        <Panel className="simple-how" innerRef={howPanel}>
-          {/* The words in one block, so from 1024 they take the left track and
-              the ticket the right, where the month sat on the Coffeeholics band
-              (Sam, 30 Sep 2026: "on desktop it should show up how the last
-              animation did on the right"). */}
-          <div className="how-copy">
-            <h2 className="t-section panel-head">How it works</h2>
-            <BenefitFigures items={STEPS} size="sheet" className="how-figs" />
-            <p className="how-note">
-              Every week, at all {PLACES} places. Up to ${MONTH_MAX} of credit a month.
-            </p>
-          </div>
-          {ex ? (
-            <div
-              key={seen ? `seen-${which}` : "waiting"}
-              className={`ticket is-order how-ticket${ex.price === null ? " is-pass" : ""}`}
-              style={seen ? undefined : { visibility: "hidden" }}
-              aria-live="polite"
-              aria-label={
-                ex.price === null
-                  ? `An example: ${ex.item} at ${ex.venue.name}. $${CREDIT} credit comes off, and you earn points.`
-                  : `An example order: ${ex.item} at ${ex.venue.name}, $${ex.price.toFixed(2)}, $${CREDIT} credit, you pay $${(ex.price - CREDIT).toFixed(2)}, and earn ${pointsOn(ex.price)} points.`
-              }
-            >
-              <p className="tk-where">
-                <span className="collar" data-field={logoField(ex.venue.id)} style={{ ["--brand" as string]: ex.venue.brandColor }}>
-                  <img src={ex.venue.logo} alt="" decoding="async" />
-                </span>
-                <b>{ex.venue.name}</b>
-              </p>
-              <p className="tk-item">
-                <img src={ex.img} alt="" decoding="async" />
-                <span>{ex.item}</span>
-                {ex.price !== null ? <b className="tnum">${ex.price.toFixed(2)}</b> : null}
-              </p>
-              <p className="tk-rule" />
-              <p className="tk-off is-credit">
-                <span>${CREDIT} credit</span>
-                <b className="tnum">&minus;${CREDIT.toFixed(2)}</b>
-              </p>
-              <p className="tk-total">
-                <span>You pay</span>
-                {ex.price !== null ? (
-                  <span className="tk-swap">
-                    <b className="was tnum">${ex.price.toFixed(2)}</b>
-                    <b className="now tnum">${(ex.price - CREDIT).toFixed(2)}</b>
-                  </span>
-                ) : (
-                  <b className="tnum">${CREDIT} less</b>
-                )}
-              </p>
-              {/* The earn side, as the deck's ticket carries it (how.css `.tk-earned`). */}
-              <ul className="tk-earned">
-                <li>
-                  {ex.price !== null ? (
-                    <>
-                      <b>+{pointsOn(ex.price)} points</b>
-                      <span>toward free items here</span>
-                    </>
-                  ) : (
-                    <>
-                      <b>Points too</b>
-                      <span>{POINTS_PER_DOLLAR} on every dollar, toward free items here</span>
-                    </>
-                  )}
-                </li>
-              </ul>
-            </div>
-          ) : null}
-        </Panel>
+        {/* How it works, on the phone: below the hero, above the cards (§84).
+            From 1024 it lives in the hero instead (`.how-in-hero`, §89). */}
+        <div className="how-in-column">
+          <HowItWorks />
+        </div>
 
 
         {/* The four photo cards, as on the pitch; the scope line under them.

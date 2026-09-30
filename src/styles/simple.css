@@ -10,6 +10,10 @@
 .hero-refund {
   margin: var(--s-lg) 0 0;
 }
+/* The hero's How it works seat is desktop only (§89). */
+.how-in-hero {
+  display: none;
+}
 
 /* The two new panels take the panel's own inset (layout.css) and the
    section heading; from 1024 they hold a reading measure, like the pitch's
@@ -107,22 +111,30 @@
     margin-left: auto;
     margin-right: auto;
   }
-  /* THE TICKET TAKES THE RIGHT (Sam, 30 Sep 2026: "on desktop it should show
-     up how the last animation did on the right"): the words in the left
-     track, the ticket in a 460 track like the month on the Coffeeholics band
-     (campaign.css `.cg-band`), the two centred on each other. The panel
-     widens for the pair; the figures keep their row on the left. */
-  .simple-how {
-    max-width: 1080px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 460px;
-    column-gap: calc(var(--s-2xl) * 2);
-    align-items: center;
+  /* THE HERO CARRIES HOW IT WORKS (Sam, 30 Sep 2026: "the same mobile
+     container just on the right side of the desktop hero", like the month on
+     the Coffeeholics band). The phone's seat in the light half goes; the
+     band's seat takes the photograph tracks, centred over them, above the
+     collage and its veil. (0,4,0) so it out-weighs pitch.css's
+     `> :not(.mosaic)` placement of every other child in the copy track, and
+     that rule's fill runs off the edge is not drawn behind this one. */
+  .how-in-column {
+    display: none;
   }
-  .simple-how .how-copy {
-    min-width: 0;
+  .hero-band:not(.is-compact) > .how-in-hero.how-in-hero {
+    display: block;
+    grid-column: seam / grid-end;
+    grid-row: 1;
+    align-self: center;
+    justify-self: center;
+    width: min(100%, 440px);
+    max-width: none;
+    margin: 0;
+    padding: var(--s-2xl) 0;
+    position: relative;
+    z-index: 2;
   }
-  .simple-how .how-ticket {
-    margin-top: 0;
+  .hero-band:not(.is-compact) > .how-in-hero.how-in-hero::before {
+    content: none;
   }
 }
