@@ -73,7 +73,7 @@ import { agoText, recentSales, recentTries } from "../model/presale";
  * ══ FREE TRIES KEEP REAL HOURS (§53, §57) ═════════════════════════════════
  * A try is only drawn when the moment it claims (now less its "ago") falls in
  * its place's hours, Blacksburg time (model/feedHours.ts): Coffeeholics every
- * day 10am–7pm, The Burg Thursday to Saturday from 9pm to 2am. Outside them
+ * day 10am–7pm, The Burg Thursday to Saturday 5pm to 9pm. Outside them
  * every card is a purchase.
  *
  * ══ PURCHASES CARRY A FIRST NAME (§53, §57) ═══════════════════════════════
