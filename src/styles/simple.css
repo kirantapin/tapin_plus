@@ -107,4 +107,22 @@
     margin-left: auto;
     margin-right: auto;
   }
+  /* THE TICKET TAKES THE RIGHT (Sam, 30 Sep 2026: "on desktop it should show
+     up how the last animation did on the right"): the words in the left
+     track, the ticket in a 460 track like the month on the Coffeeholics band
+     (campaign.css `.cg-band`), the two centred on each other. The panel
+     widens for the pair; the figures keep their row on the left. */
+  .simple-how {
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 460px;
+    column-gap: calc(var(--s-2xl) * 2);
+    align-items: center;
+  }
+  .simple-how .how-copy {
+    min-width: 0;
+  }
+  .simple-how .how-ticket {
+    margin-top: 0;
+  }
 }
