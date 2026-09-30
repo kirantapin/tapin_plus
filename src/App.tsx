@@ -5,6 +5,7 @@ import ReserveLayer from "./shell/ReserveLayer";
 import Arrival from "./shell/Arrival";
 import { useEventTracking } from "./context/event_tracking_context";
 import Pitch from "./routes/Pitch";
+import Simple from "./routes/Simple";
 import How from "./routes/How";
 import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
@@ -83,6 +84,8 @@ export default function App() {
           <Route path="/" element={<Pitch />} />
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
           <Route path="/welcome" element={<Pitch invite="welcomeweek" />} />
+          {/* The 5th-grade page, beside the pitch for comparison (§84). */}
+          <Route path="/simple" element={<Simple />} />
           <Route path="/how" element={<How />} />
           {/* ══ THE CAMPAIGN SPLASH ══════════════════════════════════════
               One venue, for one Meta advert. Sam, 20 Sep 2026: "Should be a

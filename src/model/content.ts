@@ -313,7 +313,8 @@ export const appLinkLine =
  *  membership"). It replaced "One $10 order pays for your membership", and
  *  the guarantee card under the panel, which said the same thing twice. */
 export const guaranteeLead = {
-  lead: "If you don't save at least what you pay, you're refunded automatically.",
+  /* Sam's phrasing, 30 Sep 2026; one string for the hero and the checkout. */
+  lead: "Auto-refunded if you don\u2019t save what you pay.",
   rest: "Checked against your TapIn orders.",
 };
 
@@ -1311,6 +1312,8 @@ export const PLANS = {
  * and would have gone on saying $4.99 beside a checkout charging $14.99.
  */
 export const monthlyToday: number = MONTHLY_NOW;
+/** What new members pay once the early-access spots are gone. */
+export const monthlyAfter: number = AFTER_MONTHLY;
 /** The standard rate, formatted, for a surface that names what the Early Bird
  *  price is cheaper THAN. Same constant the seat line and the plan ladder
  *  print, so a campaign page cannot quote a figure this build does not hold. */
