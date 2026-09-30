@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CoverIcon, NavIcon } from "./Icons";
 import CreditNote from "./CreditNote";
-import PercentFootnote from "./PercentFootnote";
 import PlusFlag from "./PlusFlag";
 import BenefitFigures from "./BenefitFigures";
 import {
@@ -192,8 +191,9 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
               restated. A venue with none of the three draws nothing here. */}
           <BenefitFigures items={figures} size="sheet" className="vp-figures" />
 
-          {/* The credit's scope, in its own full-width plate (Sam, 29 Sep). */}
-          {venue.policies.some((p) => p.kind === "credit") ? (
+          {/* The credit's and the 15%'s scope, in one full-width plate (Sam,
+              29 and 30 Sep). */}
+          {venue.policies.some((p) => p.kind === "credit" || p.kind === "percent") ? (
             <CreditNote className="vp-note" />
           ) : null}
 
@@ -272,10 +272,6 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
             </p>
           )}
 
-          {/* The footnote to the 15% column's asterisk, at the sheet's foot. */}
-          {venue.policies.some((p) => p.kind === "percent") ? (
-            <PercentFootnote className="vp-fine" />
-          ) : null}
         </div>
       </div>
     </div>,

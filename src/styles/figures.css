@@ -137,7 +137,7 @@
 }
 
 /* ── fine print ──────────────────────────────────────────────────────────────
-   The footnote to the 15%'s asterisk (shell/PercentFootnote.tsx): the reading
+   The scope line for the credit and the 15% (shell/ScopeLine.tsx): the reading
    floor, in the quietest ink. No margin: each host places it. */
 .fine-print {
   margin: 0;

@@ -1,9 +1,9 @@
 import { BenefitIcon } from "./Icons";
-import { venueCreditNote } from "../model/content";
+import { benefitScopeNote } from "../model/content";
 
-/** The credit's scope as a full-width note (POLISH §70–71): the venue pop-up
- *  under its figures, the checkout and /in under the checklist. The host's
- *  class places it; figures.css draws it. */
+/** The credit's and the 15%'s scope as a full-width note (POLISH §70, §82):
+ *  the venue pop-up, under its figures. The host's class places it;
+ *  figures.css draws it. The checkout prints the same words as ScopeLine. */
 export default function CreditNote({ className }: { className?: string }) {
   return (
     <p className={`credit-note${className ? ` ${className}` : ""}`}>
@@ -11,7 +11,7 @@ export default function CreditNote({ className }: { className?: string }) {
         <BenefitIcon id="credit" />
       </span>
       <span>
-        {venueCreditNote.lead} <b>{venueCreditNote.scope}</b>. {venueCreditNote.hours}
+        {benefitScopeNote.lead} <b>{benefitScopeNote.scope}</b>. {benefitScopeNote.hours}
       </span>
     </p>
   );

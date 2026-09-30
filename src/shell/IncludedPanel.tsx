@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import CreditNote from "./CreditNote";
+import ScopeLine from "./ScopeLine";
 import {
   benefits,
   logoField,
@@ -75,8 +75,9 @@ export default function IncludedPanel({
           ))}
         </ul>
       ) : null}
-      {/* The credit's scope, the venue pop-up's note (Sam, 29 Sep). */}
-      {creditFig ? <CreditNote /> : null}
+      {/* The scope and hours of the credit and the 15%, as one quiet line
+          (Sam, 30 Sep: "this image is quite busy"); it replaced the plate. */}
+      {creditFig || percentFig ? <ScopeLine className="rs-scope" /> : null}
       {/* Where it works: the six marks stacked on the left and a count beside
           them (Sam, 30 Sep: "simplify"); the names are the marks' label. */}
       <div className="rs-inc-also">
@@ -94,8 +95,7 @@ export default function IncludedPanel({
         </span>
         <p className="rs-inc-line">At {venues.length} places in Blacksburg.</p>
       </div>
-      {/* The guarantee is the lead above since 30 Sep; the 15%'s footnote is
-          PercentFootnote, at the foot of the page that holds this panel. */}
+      {/* The guarantee is the lead above since 30 Sep. */}
       {children}
     </section>
   );
