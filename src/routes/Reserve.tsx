@@ -11,8 +11,8 @@ import {
   PLANS,
   launchWindow,
   FOUNDING_OPEN,
-  firstEarlyBirdPrice,
   foundingCloses,
+  firstEarlyBirdPrice,
   foundingTierName,
   monthlyToday,
 } from "../model/content";
@@ -120,9 +120,9 @@ const schedule: Stop[] = [
     id: "opens",
     when: launchWindow,
     figure: `${plan.price} ${plan.per}`,
-    clause: "Then automatically, your first month already paid",
+    /* The "Always" row folded in here (Sam, 30 Sep 2026: the sheet was busy). */
+    clause: "Then automatically, your first month already paid. Never goes up while you stay a member.",
   },
-  { id: "always", when: "Always", figure: plan.price, clause: "Never goes up while you stay a member" },
 ];
 
 /* The checklist, the six marks and the guarantee are shell/IncludedPanel.tsx
@@ -219,21 +219,6 @@ export default function Reserve() {
      keeps the flash from being the only explanation. */
   /* Which unavailable tile was last tapped — the sold-out first round above
      the live tile, or Standard below it. Both refuse the same way. */
-  const [refused, setRefused] = useState<"sold" | "later" | null>(null);
-  const calm = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(calm.current), []);
-  const refuse = (which: "sold" | "later") => {
-    setRefused(null);
-    /* Restart the animation even on a second tap: the class has to leave the
-       element for a frame or the keyframe does not re-run. */
-    window.clearTimeout(calm.current);
-    window.requestAnimationFrame(() => {
-      setRefused(which);
-      calm.current = window.setTimeout(() => setRefused(null), 900);
-    });
-  };
-  const sayLater = () => refuse("later");
-  const saySoldOut = () => refuse("sold");
   /* ══ ONE BUTTON A WIDTH (23 Sep 2026, POLISH §31, §31.1) ═════════════════
      Sam: "just have the checkout button always be sticky to the bottom instead
      of a dedicated button here" — then, at desktop: "we still need a checkout
@@ -259,6 +244,19 @@ export default function Reserve() {
      foot. §4 is
      untouched — the rows, the consent and the control still travel together
      on page 2, one tap on. */
+  /* The sold-out tile refuses a tap with a brief shake and a status line
+     (Kiran's tile, 23 Sep; kept 30 Sep, Sam: "creates scarcity"). */
+  const [refused, setRefused] = useState<"sold" | null>(null);
+  const calm = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(calm.current), []);
+  const saySoldOut = () => {
+    setRefused(null);
+    window.clearTimeout(calm.current);
+    window.requestAnimationFrame(() => {
+      setRefused("sold");
+      calm.current = window.setTimeout(() => setRefused(null), 900);
+    });
+  };
   return (
     <div className="rs-modal" ref={modal}>
       {/* ══ WHAT IT BUYS: THE INCLUDED PANEL, THE CARD AT ITS FOOT ═════════
@@ -324,11 +322,12 @@ export default function Reserve() {
             no handler; a control that cannot change state must not pretend it
             can. */}
         <div
-          className={`plan-pick${FOUNDING_OPEN && plan.saving ? " is-ladder" : " is-solo"}`}
+          className={`plan-pick${FOUNDING_OPEN ? " is-ladder" : " is-solo"}`}
           role="radiogroup"
           aria-label="Your plan"
         >
-          {/* ══ THE FIRST EARLY BIRD, SOLD OUT ═════════════════════════════
+          
+{/* ══ THE FIRST EARLY BIRD, SOLD OUT ═════════════════════════════
               Kiran, 23 Sep 2026: the $4.99 Early Bird is over; the live tile
               below is an "Early-ish Bird" at $5.99. Shown, struck and flagged
               "Sold out" in the same corner flag Standard uses for "Coming
@@ -358,7 +357,6 @@ export default function Reserve() {
               </span>
             </div>
           ) : null}
-
           <div className="plan-opt is-on" role="radio" aria-checked="true" tabIndex={0}>
             {/* NOT `plan.label` ("Monthly"), and NO `plan.per` ("a month").
                 Kiran, 15 Sep 2026. What is taken today is one charge that holds
@@ -389,77 +387,23 @@ export default function Reserve() {
               </span>
             </span>
           </div>
-
-          {/* ══ THE STANDARD TIER, SHOWN AND NOT SELECTABLE ═══════════════
-              Sam, 20 Sep 2026: "I think we should have a second tier right
-              beneath and it'd be the $14.99 membership. This creates a really
-              strong price anchor. Of course no one would be able to select it
-              because it's not live yet."
-
-              WHAT KEEPS THIS THE RIGHT SIDE OF §10. An anchor is a dark
-              pattern when the reference price is invented, or when the option
-              looks available and is not. Neither holds: $14.99 is the real
-              standard rate this build already prints in the seat line and in
-              the founding lock, read from the same `plan.saving.after` the
-              tile above used to carry — and this tile says in its own words
-              that it is not open yet, rather than leaving a reader to discover
-              that by tapping.
-
-              `aria-disabled` AND reachable, which is the pair that makes an
-              unavailable option honest: a screen reader meets "Standard, not
-              selected, dimmed, 2 of 2", the tile is in the tab order so the
-              same reader can reach it, and activating it produces the same
-              sentence a tap does rather than nothing at all. */}
-          {FOUNDING_OPEN && plan.saving ? (
-            <div
-              className={`plan-opt is-later${refused === "later" ? " is-refused" : ""}`}
-              role="radio"
-              aria-checked="false"
-              aria-disabled="true"
-              tabIndex={0}
-              onClick={sayLater}
-              onKeyDown={(e) => {
-                if (e.key === " " || e.key === "Enter") {
-                  e.preventDefault();
-                  sayLater();
-                }
-              }}
-            >
-              {/* Sam, 20 Sep 2026: "this should have a chip that says 'coming
-                  soon'." The tile's second line already said WHEN it opens;
-                  this says THAT it is not open, which is the faster read and
-                  the one a reader needs before they tap.
-
-                  A CORNER FLAG, not a pill beside the label. This build
-                  already marks "signed, not open" on the venue cards with a
-                  flag in the tile's top corner (.vflag.is-soon), and reusing
-                  it does two things a pill could not: the status leaves the
-                  reading line entirely, so "Standard" sits alone above its
-                  own price the way "Early Bird Deposit" does, and the two
-                  places this product says "not yet" now say it the same way.
-                  As a pill it was also wider than the word it qualified. */}
-              <span className="plan-chip">Coming soon</span>
-              <b>Standard</b>
-              <span className="plan-figs">
-                <span className="plan-now">
-                  <b className="tnum">{plan.saving.after}</b>
-                  <span className="plan-else">{`a month, once the ${foundingTierName} spots are gone`}</span>
-                </span>
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        {/* The sentence the toast used to carry, for a reader who cannot see
-            a tile change colour. `status`, not `alert`: nothing failed. */}
         <p className="sr-only" role="status">
-          {refused === "later"
-            ? "Standard opens after launch. Early-ish Bird Deposit is the only plan open now."
-            : refused === "sold"
-              ? `The ${firstEarlyBirdPrice} Early Bird is sold out. Early-ish Bird Deposit is the only plan open now.`
-              : ""}
+          {refused === "sold"
+            ? `The ${firstEarlyBirdPrice} Early Bird is sold out. ${foundingTierName} Deposit is the only plan open now.`
+            : ""}
         </p>
+        {/* The price anchor as one line, not a tile (Sam, 30 Sep 2026: the
+            sheet was busy). The $14.99 is the same `plan.saving.after` the
+            Standard tile carried. */}
+        {FOUNDING_OPEN && plan.saving ? (
+          <p className="t-compact plan-after">
+            After the first {SEAT_CAP} spots, it&rsquo;s {plan.saving.after} a month.
+          </p>
+        ) : null}
 
+                  </div>
+
+        
         {/* ══ THE ORDER CARD (23 Sep 2026, POLISH §29, §31) ═════════════════
             One card, text only: the seats, the schedule on its rail, the refund
             under a hairline, and from 1024 its own button (§31.1); below 1024
