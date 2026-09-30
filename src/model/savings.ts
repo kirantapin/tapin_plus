@@ -45,6 +45,11 @@ export const BENEFIT = {
   pointsPerDollar: 10,
   pointValueUsd: 0.01,
   plusPlaces: 5,
+  /** Virginia bars drink discounts 9 p.m.–2 a.m. (3VAC5-50-160 C 1). In that
+   *  window the credit goes to food and soft drinks only (Sam, 30 Sep 2026;
+   *  docs/CREDIT-HOURS-2026-09-30.md). Blacksburg time, 24h. */
+  creditQuietFrom: 21,
+  creditQuietTo: 2,
 } as const;
 
 export const VISIT_SIZE_USD = 15;

@@ -11,7 +11,7 @@ export default function CreditNote({ className }: { className?: string }) {
         <BenefitIcon id="credit" />
       </span>
       <span>
-        {venueCreditNote.lead} <b>{venueCreditNote.scope}</b>.
+        {venueCreditNote.lead} <b>{venueCreditNote.scope}</b>. {venueCreditNote.hours}
       </span>
     </p>
   );
