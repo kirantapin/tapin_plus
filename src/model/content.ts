@@ -197,12 +197,17 @@ export const venueCovers: Record<string, string[]> = {
 /** The quiet hours as copy: "9 p.m." and "2 a.m.". */
 /* A no-break space, so "9 p.m." never splits across lines. */
 const clock12 = (h: number) => `${((h + 11) % 12) + 1}\u00A0${h < 12 ? "a.m." : "p.m."}`;
-/** The credit's hours rule in one sentence, everywhere the scope is stated
- *  (Sam, 30 Sep 2026: "let's do the 9pm to 2am thing"). "Soft drinks" says
- *  what it covers without naming alcohol. */
-export const creditHoursLine = `From ${clock12(BENEFIT.creditQuietFrom)} to ${clock12(
-  BENEFIT.creditQuietTo,
-)}, food and soft drinks.`;
+/** The quiet hours, "9 p.m. to 2 a.m.". */
+const quietHours = `${clock12(BENEFIT.creditQuietFrom)} to ${clock12(BENEFIT.creditQuietTo)}`;
+/** The hours rule, in Sam's words (30 Sep 2026: "$5 credit and 15% off go
+ *  toward ALL food and drink outside the hours of 9pm and 2am. Within those
+ *  hours, age restricted items are not eligible."). `scopeClause` finishes
+ *  the sentence that names the benefits; `quietClause` is the second one. */
+/* No full stop of its own: "a.m." already ends the sentence. */
+export const scopeClause = `food and drink outside the hours of ${quietHours}`;
+export const quietClause = "Within those hours, age-restricted items are not eligible.";
+/** The tail of the rule, for a sentence that already names the benefits. */
+export const creditHoursLine = `all ${scopeClause} ${quietClause}`;
 
 /**
  * What a venue's own benefit rows SAY, at that venue.
@@ -227,7 +232,7 @@ export const creditHoursLine = `From ${clock12(BENEFIT.creditQuietFrom)} to ${cl
  * same four words at each other.
  */
 const VENUE_POLICY_DETAIL: Record<string, string> = {
-  percent: `All food and drink. ${creditHoursLine}`,
+  percent: `Goes toward ${creditHoursLine}`,
   /* ══ "ON ANYTHING" EARNS ITS WORDS ══════════════════════════════════════
      Sam, 20 Sep 2026: "mention here, that credit can be used towards
      anything, implying alcohol without actually saying it."
@@ -240,7 +245,7 @@ const VENUE_POLICY_DETAIL: Record<string, string> = {
      the 15% does not, which is the distinction TRUTH is built on — and this
      is how it gets stated without the surface ever advertising a discount on
      a drink, which §10 forbids outright. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spends like cash, on anything. ${creditHoursLine}`,
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Goes toward ${creditHoursLine}`,
   /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
      The density pass took this line out on the reasoning that it only
      restated scope, which the `venueCovers` row below now says once for all
@@ -320,10 +325,12 @@ export const guaranteeLead = {
  *  (ScopeLine). It replaced the 15%'s asterisk and footnote (§72). */
 export const benefitScopeNote = {
   lead: `Your $${BENEFIT.creditUsd} credit and ${Math.round(BENEFIT.percentOff * 100)}% off go toward`,
-  scope: "all food and drink",
-  hours: creditHoursLine,
+  /** Set in bold on the plate: Sam wrote it ALL. */
+  scope: "all",
+  rest: scopeClause,
+  hours: quietClause,
 };
-export const benefitScopeLine = `${benefitScopeNote.lead} ${benefitScopeNote.scope}. ${benefitScopeNote.hours}`;
+export const benefitScopeLine = `${benefitScopeNote.lead} ${benefitScopeNote.scope} ${benefitScopeNote.rest} ${benefitScopeNote.hours}`;
 
 /** The figure and qualifier for one venue policy, or undefined for a kind this
  *  build has no figure form of — which prints no column rather than a guessed
@@ -1188,8 +1195,7 @@ const creditHoursTerm: Term = {
   id: "hours",
   term:
     `Your $${BENEFIT.creditUsd} credit (on a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week ` +
-    `at each place) and the ${Math.round(BENEFIT.percentOff * 100)}% off go toward all food and drink. ` +
-    creditHoursLine,
+    `at each place) and the ${Math.round(BENEFIT.percentOff * 100)}% off go toward ${creditHoursLine}`,
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════

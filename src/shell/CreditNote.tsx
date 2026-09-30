@@ -11,7 +11,8 @@ export default function CreditNote({ className }: { className?: string }) {
         <BenefitIcon id="credit" />
       </span>
       <span>
-        {benefitScopeNote.lead} <b>{benefitScopeNote.scope}</b>. {benefitScopeNote.hours}
+        {benefitScopeNote.lead} <b>{benefitScopeNote.scope}</b> {benefitScopeNote.rest}{" "}
+        {benefitScopeNote.hours}
       </span>
     </p>
   );
