@@ -26,6 +26,12 @@ import Membership from "./routes/Membership";
  *  the same ads landing on `/`. The page loads as itself; "Try it once for
  *  free" is one tap away in the hero. `?try` on `/` still opens the modal,
  *  for anyone who wants that link on purpose. */
+/** `/simple` → `/`, parameters kept: the page's old address, from before it
+ *  became the home page (§88). */
+function HomeLink() {
+  const { search } = useLocation();
+  return <Navigate to={{ pathname: "/", search }} replace />;
+}
 function TryLink() {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
@@ -86,11 +92,15 @@ export default function App() {
     <>
       <Routes location={under}>
         <Route element={<Shell layered={layered} />}>
-          <Route path="/" element={<Pitch />} />
+          {/* THE HOME PAGE IS THE 5TH-GRADE PAGE (Sam, 30 Sep 2026: "it should
+              replace plus.tapin.app, not be plus.tapin.app/simple"; §88). The
+              pitch it replaced stays at /pitch, and /simple, already shared,
+              comes here. */}
+          <Route path="/" element={<Simple />} />
+          <Route path="/pitch" element={<Pitch />} />
+          <Route path="/simple" element={<HomeLink />} />
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
           <Route path="/welcome" element={<Pitch invite="welcomeweek" />} />
-          {/* The 5th-grade page, beside the pitch for comparison (§84). */}
-          <Route path="/simple" element={<Simple />} />
           <Route path="/how" element={<How />} />
           {/* ══ THE CAMPAIGN SPLASH ══════════════════════════════════════
               One venue, for one Meta advert. Sam, 20 Sep 2026: "Should be a
