@@ -4,7 +4,7 @@ import {
   benefits,
   logoField,
   offers,
-  paysForItself,
+  guaranteeLead,
   plusVenues,
   venuePolicyFigure,
   venues,
@@ -53,10 +53,10 @@ export default function IncludedPanel({
 }) {
   return (
     <section className="rs-inc" aria-labelledby={headId}>
-      {/* The lead (Sam, 30 Sep): what one order is worth against the price. */}
-      <p className="rs-pays">
-        <b>{paysForItself.lead}</b>
-        <span>{paysForItself.rest}</span>
+      {/* The lead (Sam, 30 Sep): the guarantee, as the refund it is. */}
+      <p className="rs-lead">
+        <b>{guaranteeLead.lead}</b>
+        <span>{guaranteeLead.rest}</span>
       </p>
       <h2 className="t-title rs-inc-head" id={headId}>
         Every week, at every location
@@ -94,9 +94,8 @@ export default function IncludedPanel({
         </span>
         <p className="rs-inc-line">At {venues.length} places in Blacksburg.</p>
       </div>
-      {/* The guarantee and the 15%'s footnote live outside the panel since
-          30 Sep: shell/GuaranteeCard.tsx under it, PercentFootnote at the foot
-          of the page that holds it. */}
+      {/* The guarantee is the lead above since 30 Sep; the 15%'s footnote is
+          PercentFootnote, at the foot of the page that holds this panel. */}
       {children}
     </section>
   );

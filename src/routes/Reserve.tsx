@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import IncludedPanel from "../shell/IncludedPanel";
-import GuaranteeCard from "../shell/GuaranteeCard";
 import PercentFootnote from "../shell/PercentFootnote";
 import Timeline, { type Stop } from "../shell/Timeline";
 import { useCardFlight } from "../shell/cardFlight";
@@ -288,7 +287,6 @@ export default function Reserve() {
             />
           </div>
         </IncludedPanel>
-        <GuaranteeCard />
       </div>
 
       {/* ══ THE MONEY: WHAT YOU PAY, AND THE DOOR TO PAYING IT ═════════════
