@@ -15,7 +15,7 @@ import VenueMosaic from "../shell/VenueMosaic";
 import VenueTicker from "../shell/VenueTicker";
 import SiteFoot from "../shell/SiteFoot";
 import BenefitCards from "../shell/BenefitCards";
-import PercentFootnote from "../shell/PercentFootnote";
+import ScopeLine from "../shell/ScopeLine";
 import SeatCapLine from "../shell/SeatCapLine";
 import { useReserveCta } from "../shell/useReserveCta";
 import SignInBar from "../shell/SignInBar";
@@ -556,9 +556,8 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 never market the credit as meant for drinks, age-gate the spend)
                 are flagged there and not resolved here. Stated once, as scope, in
                 body type, under the benefits it qualifies — not as a headline. */}
-            {/* Sam, 29 Sep 2026: the 15% card's asterisk is answered here, and
-                the credit card already says "on anything". */}
-            <PercentFootnote className="pitch-scope-note" />
+            {/* The one rule for the credit and the 15% (Sam, 30 Sep 2026). */}
+            <ScopeLine className="pitch-scope-note" />
           </div>
 
           <Panel className="pitch-save">

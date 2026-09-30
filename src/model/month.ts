@@ -157,7 +157,9 @@ interface Plan {
 
 /** One set of rules at every place, in the order things happen: the week's
  *  first order at or over the floor AT EACH PLACE is the credit; any other
- *  order, where the place gives 15%, is the 15% (never on alcohol, and no
+ *  order, where the place gives 15%, is the 15% (not counted on alcohol
+ *  here: it applies outside the credit's quiet hours, and the model has no
+ *  clock, so the estimate stays under; and no
  *  floor: the policy has none, and the storefront's terms read "15% off or
  *  the week's $5 credit — one per order", §52); the rest is points. Every
  *  order earns points at 10 a dollar × the multiplier. */

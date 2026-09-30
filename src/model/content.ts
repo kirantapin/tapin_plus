@@ -227,7 +227,7 @@ export const creditHoursLine = `From ${clock12(BENEFIT.creditQuietFrom)} to ${cl
  * same four words at each other.
  */
 const VENUE_POLICY_DETAIL: Record<string, string> = {
-  percent: "Everything except alcohol",
+  percent: `All food and drink. ${creditHoursLine}`,
   /* ══ "ON ANYTHING" EARNS ITS WORDS ══════════════════════════════════════
      Sam, 20 Sep 2026: "mention here, that credit can be used towards
      anything, implying alcohol without actually saying it."
@@ -290,11 +290,12 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
     figure: `$${BENEFIT.creditUsd}`,
     qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
   },
-  /* Sam, 29 Sep 2026: an asterisk and a footnote rather than "except
-     alcohol" (`percentFootnote`, printed wherever this qualifier is). */
+  /* Sam, 30 Sep 2026: the 15% reaches drinks too, outside the credit's
+     quiet hours, so the asterisk (§72) is gone and `benefitScopeNote` says
+     the one rule for both. */
   percent: {
     figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
-    qualifier: "off everything*",
+    qualifier: "off everything",
   },
 };
 
@@ -311,19 +312,18 @@ export const guaranteeLead = {
   rest: "Checked against your TapIn orders.",
 };
 
-/** The footnote to the 15%'s asterisk (Sam, 29 Sep 2026). */
-export const percentFootnote = `*Age-restricted items may not be eligible for the ${Math.round(
-  BENEFIT.percentOff * 100,
-)}% off, depending on the jurisdiction.`;
-
-/** The pop-up's note under the figures (Sam, 29 Sep 2026): the credit covers
- *  all food and drink, alcohol included, without naming alcohol; and since
- *  30 Sep, the hours it does not. */
-export const venueCreditNote = {
-  lead: `Your $${BENEFIT.creditUsd} credit goes toward`,
+/** The one rule for the credit and the 15% (Sam, 30 Sep 2026: "the 15% off
+ *  and credit can be used towards alcohol outside the hours of 9pm to 2am"):
+ *  all food and drink, alcohol included without naming it, and the hours it
+ *  is food and soft drinks. The pop-up sets it on a plate (CreditNote); the
+ *  checkout, the pitch, Coffeeholics and /how print it as one line
+ *  (ScopeLine). It replaced the 15%'s asterisk and footnote (§72). */
+export const benefitScopeNote = {
+  lead: `Your $${BENEFIT.creditUsd} credit and ${Math.round(BENEFIT.percentOff * 100)}% off go toward`,
   scope: "all food and drink",
   hours: creditHoursLine,
 };
+export const benefitScopeLine = `${benefitScopeNote.lead} ${benefitScopeNote.scope}. ${benefitScopeNote.hours}`;
 
 /** The figure and qualifier for one venue policy, or undefined for a kind this
  *  build has no figure form of — which prints no column rather than a guessed
@@ -396,12 +396,13 @@ const BENEFIT_LABEL: Record<string, string> = {
   points: "Points toward rewards",
 };
 const BENEFIT_DETAIL: Record<string, string> = {
-  /* Sam, 29 Sep 2026: an asterisk, answered by `percentFootnote`. */
-  percent: "Everything*",
+  /* Sam, 30 Sep 2026: drinks too, outside the quiet hours; the scope line
+     under the cards carries the hours. */
+  percent: "All food and drink",
   /* Sam, 15 Sep 2026: "mention that credit acts like cash, can be used
      towards anything." One string, so the pitch card, the checkout's
      checklist and the app's Deals row all say it the same way. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spends like cash, on anything. ${creditHoursLine}`,
+  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spends like cash, on anything`,
   /* Sam's wording, 14 Sep 2026: "redeem for free food, drinks, etc. at each
      place". "Drinks" was raised as an alcohol-adjacent word beside a 15% that
      excludes alcohol (docs/virginia-alcohol-research.md); his call to keep it —
@@ -1181,12 +1182,14 @@ function subscribise(
   };
 }
 
-/** The credit's scope and hours as one term (docs/CREDIT-HOURS-2026-09-30.md). */
+/** The credit's and the 15%'s scope and hours as one term
+ *  (docs/CREDIT-HOURS-2026-09-30.md). */
 const creditHoursTerm: Term = {
-  id: "credit-hours",
+  id: "hours",
   term:
-    `Your $${BENEFIT.creditUsd} credit goes toward anything on a $${Math.round(BENEFIT.creditMinUsd)}+ ` +
-    `order, once a week at each place. ${creditHoursLine}`,
+    `Your $${BENEFIT.creditUsd} credit (on a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week ` +
+    `at each place) and the ${Math.round(BENEFIT.percentOff * 100)}% off go toward all food and drink. ` +
+    creditHoursLine,
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════

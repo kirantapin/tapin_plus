@@ -7,7 +7,7 @@ import { useSpend } from "../model/spendStore";
 import { wholeUsd } from "../model/order";
 import { launchWindow } from "../model/content";
 import { useReserveCta } from "../shell/useReserveCta";
-import PercentFootnote from "../shell/PercentFootnote";
+import ScopeLine from "../shell/ScopeLine";
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
@@ -157,8 +157,8 @@ function buildSlides(spend: number) {
          never consecutive: four unbuilt screens in a row before the ask is
          what made readers bail at step seven. */
       headline: "Cover and line skips earn too",
-      /* Sam, 29 Sep 2026: an asterisk and the footnote, not "alcohol". */
-      line: "Everything earns points and gets 15% off.*",
+      /* Sam, 30 Sep 2026: the scope line under it says the hours. */
+      line: "Everything earns points and gets 15% off.",
       footnote: true,
       tag: null,
       hold: false,
@@ -640,7 +640,7 @@ export default function How() {
               {slide.tag ? <span className="scene-tag">{slide.tag}</span> : null}
             </h1>
             <p className="scene-line">{slide.line}</p>
-            {"footnote" in slide && slide.footnote ? <PercentFootnote className="scene-fine" /> : null}
+            {"footnote" in slide && slide.footnote ? <ScopeLine className="scene-fine" /> : null}
           </div>
         )}
       </div>
