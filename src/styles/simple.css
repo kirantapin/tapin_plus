@@ -83,6 +83,13 @@
   text-wrap: pretty;
 }
 
+/* What it works on (§90): the pitch's `.pitch-scope` block set in a panel,
+   so it takes the pitch's plates and head but not the negative step the
+   pitch gives it under the cards. */
+.simple-scope {
+  margin-top: 0;
+}
+
 /* The guarantee in the panel's own plate, the tile beside the words. */
 .simple-guarantee {
   display: flex;
@@ -105,6 +112,7 @@
   }
   .simple-how,
   .simple-faq,
+  .simple-scope,
   .simple-guarantee {
     width: 100%;
     max-width: 720px;

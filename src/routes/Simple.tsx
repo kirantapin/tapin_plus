@@ -9,6 +9,7 @@ import SiteFoot from "../shell/SiteFoot";
 import SignInBar from "../shell/SignInBar";
 import TrialModal from "../shell/TrialModal";
 import ScopeLine from "../shell/ScopeLine";
+import AppliesTo from "../shell/AppliesTo";
 import BenefitCards from "../shell/BenefitCards";
 import RefundPlate from "../shell/RefundPlate";
 import { PlusBolt } from "../shell/PlusFlag";
@@ -317,7 +318,6 @@ export default function Simple() {
         <section className="pitch-get">
           <h2 className="t-section pitch-get-head">What you get</h2>
           <BenefitCards />
-          <ScopeLine className="pitch-scope-note" />
         </section>
 
 
@@ -346,6 +346,16 @@ export default function Simple() {
           <Drill summary="When does it start?">
             <p>{launchWindow}. You pay {price} today, and nothing more until we open.</p>
           </Drill>
+        </Panel>
+
+        {/* What it works on, at the foot (Sam, 30 Sep 2026: "we should still
+            have the what it works on section too, at the bottom"): the pitch's
+            six plates and the one rule for the credit and the 15%, in a panel
+            like the two above. The rule moved here from under the cards, so
+            it is said once. */}
+        <Panel className="pitch-scope simple-scope">
+          <AppliesTo />
+          <ScopeLine className="pitch-scope-note" />
         </Panel>
 
         {/* The guarantee closes the page in a white panel like the two above
