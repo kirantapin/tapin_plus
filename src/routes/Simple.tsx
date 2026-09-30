@@ -226,11 +226,17 @@ export default function Simple() {
         {/* Three steps and one example lead (Sam, 30 Sep 2026: "show this above
             the 'what you get'"), in a panel like the pitch's own. */}
         <Panel className="simple-how" innerRef={howPanel}>
-          <h2 className="t-section panel-head">How it works</h2>
-          <BenefitFigures items={STEPS} size="sheet" className="how-figs" />
-          <p className="how-note">
-            Every week, at all {PLACES} places. Up to ${MONTH_MAX} of credit a month.
-          </p>
+          {/* The words in one block, so from 1024 they take the left track and
+              the ticket the right, where the month sat on the Coffeeholics band
+              (Sam, 30 Sep 2026: "on desktop it should show up how the last
+              animation did on the right"). */}
+          <div className="how-copy">
+            <h2 className="t-section panel-head">How it works</h2>
+            <BenefitFigures items={STEPS} size="sheet" className="how-figs" />
+            <p className="how-note">
+              Every week, at all {PLACES} places. Up to ${MONTH_MAX} of credit a month.
+            </p>
+          </div>
           {ex ? (
             <div
               key={seen ? `seen-${which}` : "waiting"}
