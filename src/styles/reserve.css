@@ -1487,6 +1487,11 @@ html.is-layered{overflow:hidden}
 .rs-app-glyph svg{width:20px;height:20px;display:block}
 /* The hairline is the refund's own top edge, so it goes when the line does. */
 .rs-refund{padding-top:var(--s-xl);border-top:1px solid var(--hair)}
+/* The support address in the refund line, set as the guarantee's own
+   contact link (layout.css `.guarantee-contact a`). */
+.rs-refund .rs-contact{color:var(--ink-2);text-underline-offset:3px}
+.rs-refund .rs-contact:focus-visible{outline:2px solid var(--ink-1);outline-offset:2px;
+  border-radius:var(--r-sm)}
 
 /* ── THE ORDER CARD'S OWN BUTTON, FROM 1024 (§31.1) ───────────────────────
    Below 1024 the dock is the Checkout and this box does not exist. */

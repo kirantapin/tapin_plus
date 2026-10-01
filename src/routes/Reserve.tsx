@@ -15,6 +15,7 @@ import {
   firstEarlyBirdPrice,
   foundingTierName,
   monthlyToday,
+  GUARANTEE_CONTACT,
 } from "../model/content";
 /* The credit's own constants, from the model that computes the saving — the
    floor and the amount are read, never retyped beside a price. */
@@ -99,6 +100,15 @@ const plan = PLANS.monthly;
 const refundLine = plan.chargeRows.some((r) => r.id === "refund")
   ? "Cancel any time, with a full refund before we open, no reason needed."
   : "Cancel any time, no reason needed.";
+/* And the door to a person (Sam, 30 Sep 2026: "can we add support@tapin.app
+   here?"): the same address the guarantee gives, as a mailto, after the
+   sentence. */
+const refundFoot = (
+  <>
+    {refundLine} Questions?{" "}
+    <a className="rs-contact" href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+  </>
+);
 const schedule: Stop[] = [
   {
     id: "today",
@@ -415,7 +425,7 @@ export default function Reserve() {
           <h2 className="t-title rs-order-head" id="rs-order-head">
             What you pay, and when
           </h2>
-          <Timeline stops={schedule} foot={refundLine} />
+          <Timeline stops={schedule} foot={refundFoot} />
           {/* DESKTOP KEEPS ITS OWN BUTTON (Sam, 23 Sep 2026: "we still need a
               checkout button on desktop, unlike the sticky one we have on the
               mobile version"): shown from 1024; below it the dock is the one

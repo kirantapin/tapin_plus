@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AppIcon } from "./Icons";
 import { appLinkLine } from "../model/content";
 
@@ -13,7 +14,7 @@ export interface Stop {
   clause: string;
 }
 
-export default function Timeline({ stops, foot }: { stops: Stop[]; foot?: string | null }) {
+export default function Timeline({ stops, foot }: { stops: Stop[]; foot?: ReactNode }) {
   return (
     <>
       <ol className="rs-time">
