@@ -255,6 +255,10 @@ export default function Simple() {
           <p className="t-lead hero-lead">
             restaurants and bars around Blacksburg, plus {PCT}% off and points toward rewards.
           </p>
+          {/* On a phone the plate as §84 set it, under the lead (Sam, 30 Sep
+              2026: "revert changes here for mobile"); from 1024 the line
+              beside the price (§94–§95). Two seats, one shown per width. */}
+          <RefundPlate className="hero-refund is-phone" />
           <div className="hero-rail">
             <VenueTicker rail />
           </div>
@@ -267,7 +271,7 @@ export default function Simple() {
             {FOUNDING_OPEN ? <Spots /> : null}
             {/* The guarantee beside the price it backs (§95): the stack reads
                 as three movements, the claim, the places, the ask. */}
-            <RefundPlate className="hero-refund" />
+            <RefundPlate className="hero-refund is-desktop" />
             <div className="hero-actions">
               <Link className="action hero-cta" to={cta.to} state={cta.state} ref={heroCta}>
                 {cta.label}
