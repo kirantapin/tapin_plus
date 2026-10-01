@@ -98,8 +98,9 @@
    And it'd fade to the background color … merchant logo and text on the
    colored background"). The where-row becomes a band on the card's own
    ground: the brand colour edge to edge under the card's radius, the collar
-   and the name on it in the ink that reads there, and a short fade below it
-   into the card. `--brand` and `--brand-ink` are set on the ticket by
+   and the name on it in the ink that reads there, ending on a clean edge
+   (a fade was drawn first; Sam, 30 Sep 2026: "shouldn't have that weird
+   fade out"). `--brand` and `--brand-ink` are set on the ticket by
    Simple.tsx; the collar takes `--brand` as it always has. */
 .ticket.how-ticket {
   padding-top: 0;
@@ -110,16 +111,6 @@
   margin: 0 calc(-1 * var(--s-xl)) var(--s-xl);
   padding: var(--s-lg) var(--s-xl);
   background: var(--brand);
-}
-.how-ticket .tk-where::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 24px;
-  background: linear-gradient(180deg, var(--brand), transparent);
-  pointer-events: none;
 }
 [data-lit] .how-ticket .tk-where b {
   color: var(--brand-ink);
