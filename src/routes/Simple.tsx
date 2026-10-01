@@ -98,6 +98,15 @@ const EXAMPLES: Example[] = [
   passAt("themilkparlor", "Cover + line skip", 12),
   ...venues.filter((v) => v.id === "olaika").map(cheapestAt),
 ].filter((e): e is Example => e !== null);
+/** The ink that reads on a brand colour: white on a dark brand, the first ink
+ *  on a light one (relative luminance, WCAG's own formula). The four brands
+ *  that cycle today are all dark; this is for the next one that is not. */
+function inkOn(hex: string): string {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const ch = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const l = 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
+  return l > 0.4 ? "var(--ink-1)" : "#FFFFFF";
+}
 /** Points on the menu price, at the deck's rate; the credit does not lower them. */
 const pointsOn = (price: number) => Math.round(price * POINTS_PER_DOLLAR);
 /** One example holds this long before the next rises in. */
@@ -168,12 +177,18 @@ function HowItWorks() {
         <div
           key={seen ? `seen-${which}` : "waiting"}
           className="ticket is-order how-ticket"
-          style={seen ? undefined : { visibility: "hidden" }}
+          style={{
+            ...(seen ? {} : { visibility: "hidden" }),
+            /* The place's colour heads the ticket (§98): a band inside the
+               card, the mark and the name on it, fading into the card. */
+            ["--brand" as string]: ex.venue.brandColor,
+            ["--brand-ink" as string]: inkOn(ex.venue.brandColor),
+          }}
           aria-live="polite"
           aria-label={`An example order: ${ex.item} at ${ex.venue.name}, $${ex.price.toFixed(2)}, $${CREDIT} credit, you pay $${(ex.price - CREDIT).toFixed(2)}, and earn ${pointsOn(ex.price)} points.`}
         >
           <p className="tk-where">
-            <span className="collar" data-field={logoField(ex.venue.id)} style={{ ["--brand" as string]: ex.venue.brandColor }}>
+            <span className="collar" data-field={logoField(ex.venue.id)}>
               <img src={ex.venue.logo} alt="" decoding="async" />
             </span>
             <b>{ex.venue.name}</b>
