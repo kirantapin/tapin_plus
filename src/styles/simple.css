@@ -18,6 +18,10 @@
   align-self: flex-start;
   gap: var(--s-md);
   margin: var(--s-lg) 0 0;
+  /* Under the spots line, above the actions (§95): the line sits with the
+     price it backs, at the list interval, and the actions take their own
+     section step below it. */
+  order: 0;
   padding: var(--s-md) var(--s-lg);
   border-radius: var(--r-control);
   border: 1px solid var(--hair);
@@ -117,6 +121,12 @@
   margin-top: 0;
 }
 
+/* The close: two wrappers that are nothing on a phone. */
+.simple-close,
+.simple-close-side {
+  display: contents;
+}
+
 /* The guarantee in the panel's own plate, the tile beside the words. */
 .simple-guarantee {
   display: flex;
@@ -134,17 +144,58 @@
    photo cards keep the page grid. The grid token is the pitch's, set there on
    `.column:has(.pitch-decide)` (pitch.css), which this page has no part of. */
 @media (min-width: 1024px) {
+  /* THE HERO'S RHYTHM (§95; Sam: "the layout of this section on desktop
+     still feels off"). Measured before: every row sat 8–12px from the next,
+     so the column read as one undifferentiated list. Now three movements at
+     section intervals (the claim; the places; the ask) and list intervals
+     within them: lead → rail 32, rail → the ask's hairline 32 and 24 under
+     it, price → spots 8, spots → guarantee 20, guarantee → actions 24. */
+  .hero-band:not(.is-compact) .hero .hero-rail {
+    margin-top: var(--s-2xl);
+  }
+  .hero-band:not(.is-compact) .hero .hero-buy {
+    margin-top: var(--s-2xl);
+    padding-top: var(--s-xl);
+  }
+  .hero-band:not(.is-compact) .hero .hero-seat {
+    margin-top: var(--s-sm);
+  }
+  .hero-band:not(.is-compact) .hero .hero-refund {
+    margin-top: var(--s-lg);
+  }
+  .hero-band:not(.is-compact) .hero .hero-actions {
+    margin-top: var(--s-xl);
+  }
   .simple-lit {
     --grid: min(1280px, calc(100% - 96px));
   }
-  .simple-how,
-  .simple-faq,
-  .simple-scope,
-  .simple-guarantee {
+  .simple-how {
     width: 100%;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
+  }
+  /* THE CLOSE IS A GRID (§96): Questions left, what it works on and the
+     guarantee right, on the page grid, the pitch's own `.pitch-decide`
+     shape. The side stacks at the band interval; the two tracks start on
+     one line. */
+  .simple-close {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--s-2xl);
+    align-items: start;
+    width: 100%;
+    max-width: var(--grid);
+    margin-inline: auto;
+  }
+  .simple-close-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2xl);
+    min-width: 0;
+  }
+  .simple-close .simple-faq {
+    min-width: 0;
   }
   /* THE HERO CARRIES HOW IT WORKS (Sam, 30 Sep 2026: "the same mobile
      container just on the right side of the desktop hero", like the month on
