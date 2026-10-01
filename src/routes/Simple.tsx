@@ -343,7 +343,12 @@ export default function Simple() {
             </p>
           </Drill>
           <Drill summary="Do I have to use it every week?">
-            <p>No. The ${CREDIT} is there each week if you want it.</p>
+            {/* One credit a week, said as one (Sam, 30 Sep 2026: the old
+                answer did not make it clear there is a single $5). */}
+            <p>
+              No. It&rsquo;s one ${CREDIT} credit a week at each place: order ${MIN} or more and
+              it&rsquo;s yours. Skip a week, and the next week has its own.
+            </p>
           </Drill>
           <Drill summary="Where does it work?">
             <p>{namesLine}. More places get added at no extra cost.</p>
