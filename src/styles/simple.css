@@ -6,9 +6,36 @@
    takes the tokens, and the light half sits under `data-lit` like the pitch's.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* The refund plate (shell/RefundPlate), third line of the hero. */
+/* The refund plate (shell/RefundPlate), third line of the hero, in the
+   hero's own material (Sam, 30 Sep 2026: "the 'auto refunded' card here
+   looks a bit out of place"). The checkout's plate is a white tile with a
+   maroon shield on a light panel; on the dark band that tile was the one
+   bright object in the copy column. Here it is sized to its words like the
+   buttons beside it, on the band's hairline with no fill, the shield as a
+   glyph in the words' own ink; the sentence keeps its weight. */
 .hero-refund {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: var(--s-md);
   margin: var(--s-lg) 0 0;
+  padding: var(--s-md) var(--s-lg);
+  border-radius: var(--r-control);
+  border: 1px solid var(--hair);
+  background: none;
+}
+.hero-refund .refund-plate-mark {
+  width: 22px;
+  height: 22px;
+  background: none;
+  color: var(--ink-2);
+}
+.hero-refund .refund-plate-mark svg {
+  width: 20px;
+  height: 20px;
+}
+.hero-refund .refund-plate-text b {
+  font-size: 15px;
+  color: var(--ink-1);
 }
 /* The hero's How it works seat is desktop only (§89). */
 .how-in-hero {
