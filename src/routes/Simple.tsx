@@ -71,14 +71,16 @@ const MONTH_MAX = CREDIT * PLACES * 4;
    parlor") ══════════════════════════════════════════════════════════════════
    Two real orders (Coffeeholics first, then Olaika): the cheapest non-alcohol
    item at or over the $10 floor, name, price and photo the menu's own. Then a
-   ticket at The Burg and cover with a line skip at The Milk Parlor, with NO
-   price, name or date: none exists in the extracted data, and a figure beside
-   a real business is a claim about it (the deck's entry scene holds the same
-   line). Cover stays off The Burg, which sells its door through LineLeap (Sam,
-   13 Sep 2026). Points are the deck's own rate on the menu price. Italiano's
+   show ticket at The Burg and cover with a line skip at The Milk Parlor at
+   EXAMPLE prices, Sam's call (30 Sep 2026: "just make up a price for a show
+   ticket or a lineskip or cover, it's easier to visualize. No need to include
+   a disclaimer either, it's implied that these are all examples"): no ticket
+   or cover price exists in the data, so those two figures are his, not the
+   venues'. Cover stays off The Burg, which sells its door through LineLeap
+   (Sam, 13 Sep 2026). Points are the deck's own rate on the price. Italiano's
    is out: offers only, not the credit. */
 type Venue = (typeof venues)[number];
-interface Example { venue: Venue; item: string; price: number | null; img: string }
+interface Example { venue: Venue; item: string; price: number; img: string }
 function cheapestAt(venue: Venue): Example | null {
   if (!hasMenu(venue.id)) return null;
   const single = itemsFor(venue.id)
@@ -86,14 +88,14 @@ function cheapestAt(venue: Venue): Example | null {
     .sort((a, b) => a.price - b.price)[0];
   return single ? { venue, item: single.name, price: single.price, img: single.img ?? venue.hero } : null;
 }
-function passAt(id: string, item: string): Example | null {
+function passAt(id: string, item: string, price: number): Example | null {
   const venue = venues.find((v) => v.id === id);
-  return venue ? { venue, item, price: null, img: venue.hero } : null;
+  return venue ? { venue, item, price, img: venue.hero } : null;
 }
 const EXAMPLES: Example[] = [
   ...venues.filter((v) => v.id === "coffeeholicsva").map(cheapestAt),
-  passAt("theburg", "A show ticket"),
-  passAt("themilkparlor", "Cover + line skip"),
+  passAt("theburg", "A show ticket", 15),
+  passAt("themilkparlor", "Cover + line skip", 12),
   ...venues.filter((v) => v.id === "olaika").map(cheapestAt),
 ].filter((e): e is Example => e !== null);
 /** Points on the menu price, at the deck's rate; the credit does not lower them. */
@@ -165,14 +167,10 @@ function HowItWorks() {
       {ex ? (
         <div
           key={seen ? `seen-${which}` : "waiting"}
-          className={`ticket is-order how-ticket${ex.price === null ? " is-pass" : ""}`}
+          className="ticket is-order how-ticket"
           style={seen ? undefined : { visibility: "hidden" }}
           aria-live="polite"
-          aria-label={
-            ex.price === null
-              ? `An example: ${ex.item} at ${ex.venue.name}. $${CREDIT} credit comes off, and you earn points.`
-              : `An example order: ${ex.item} at ${ex.venue.name}, $${ex.price.toFixed(2)}, $${CREDIT} credit, you pay $${(ex.price - CREDIT).toFixed(2)}, and earn ${pointsOn(ex.price)} points.`
-          }
+          aria-label={`An example order: ${ex.item} at ${ex.venue.name}, $${ex.price.toFixed(2)}, $${CREDIT} credit, you pay $${(ex.price - CREDIT).toFixed(2)}, and earn ${pointsOn(ex.price)} points.`}
         >
           <p className="tk-where">
             <span className="collar" data-field={logoField(ex.venue.id)} style={{ ["--brand" as string]: ex.venue.brandColor }}>
@@ -183,7 +181,7 @@ function HowItWorks() {
           <p className="tk-item">
             <img src={ex.img} alt="" decoding="async" />
             <span>{ex.item}</span>
-            {ex.price !== null ? <b className="tnum">${ex.price.toFixed(2)}</b> : null}
+            <b className="tnum">${ex.price.toFixed(2)}</b>
           </p>
           <p className="tk-rule" />
           <p className="tk-off is-credit">
@@ -192,29 +190,16 @@ function HowItWorks() {
           </p>
           <p className="tk-total">
             <span>You pay</span>
-            {ex.price !== null ? (
-              <span className="tk-swap">
-                <b className="was tnum">${ex.price.toFixed(2)}</b>
-                <b className="now tnum">${(ex.price - CREDIT).toFixed(2)}</b>
-              </span>
-            ) : (
-              <b className="tnum">${CREDIT} less</b>
-            )}
+            <span className="tk-swap">
+              <b className="was tnum">${ex.price.toFixed(2)}</b>
+              <b className="now tnum">${(ex.price - CREDIT).toFixed(2)}</b>
+            </span>
           </p>
           {/* The earn side, as the deck's ticket carries it (how.css `.tk-earned`). */}
           <ul className="tk-earned">
             <li>
-              {ex.price !== null ? (
-                <>
-                  <b>+{pointsOn(ex.price)} points</b>
-                  <span>toward free items here</span>
-                </>
-              ) : (
-                <>
-                  <b>Points too</b>
-                  <span>{POINTS_PER_DOLLAR} on every dollar, toward free items here</span>
-                </>
-              )}
+              <b>+{pointsOn(ex.price)} points</b>
+              <span>toward free items here</span>
             </li>
           </ul>
         </div>
