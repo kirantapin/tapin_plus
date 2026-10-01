@@ -255,8 +255,6 @@ export default function Simple() {
           <p className="t-lead hero-lead">
             restaurants and bars around Blacksburg, plus {PCT}% off and points toward rewards.
           </p>
-          <RefundPlate className="hero-refund" />
-
           <div className="hero-rail">
             <VenueTicker rail />
           </div>
@@ -267,6 +265,9 @@ export default function Simple() {
               <span>a month</span>
             </p>
             {FOUNDING_OPEN ? <Spots /> : null}
+            {/* The guarantee beside the price it backs (§95): the stack reads
+                as three movements, the claim, the places, the ask. */}
+            <RefundPlate className="hero-refund" />
             <div className="hero-actions">
               <Link className="action hero-cta" to={cta.to} state={cta.state} ref={heroCta}>
                 {cta.label}
@@ -308,6 +309,12 @@ export default function Simple() {
 
         {/* The objections, answered before they form, nested so the page
             stays short for the reader who has none. */}
+        {/* The close (§96; Sam, 30 Sep 2026: "on desktop … these can be a
+            grid, like the FAQ on the left, and the other stuff on the
+            right?"): Questions in the left track, what it works on and the
+            guarantee stacked in the right. Below 1024 the wrappers are
+            `display: contents`, so the phone's column is as it was. */}
+        <div className="simple-close">
         <Panel className="simple-faq">
           <h2 className="t-section panel-head">Questions</h2>
           <Drill summary="What if I barely go out?">
@@ -332,28 +339,31 @@ export default function Simple() {
             <p>{launchWindow}. You pay {price} today, and nothing more until we open.</p>
           </Drill>
         </Panel>
+          <div className="simple-close-side">
 
-        {/* What it works on, at the foot (Sam, 30 Sep 2026: "we should still
-            have the what it works on section too, at the bottom"): the pitch's
-            six plates and the one rule for the credit and the 15%, in a panel
-            like the two above. The rule moved here from under the cards, so
-            it is said once. */}
-        <Panel className="pitch-scope simple-scope">
-          <AppliesTo />
-          <ScopeLine className="pitch-scope-note" />
-        </Panel>
+          {/* What it works on, at the foot (Sam, 30 Sep 2026: "we should still
+              have the what it works on section too, at the bottom"): the pitch's
+              six plates and the one rule for the credit and the 15%, in a panel
+              like the two above. The rule moved here from under the cards, so
+              it is said once. */}
+          <Panel className="pitch-scope simple-scope">
+            <AppliesTo />
+            <ScopeLine className="pitch-scope-note" />
+          </Panel>
 
-        {/* The guarantee closes the page in a white panel like the two above
-            it (Sam, 30 Sep), and says the refund is automatic. */}
-        <Panel className="simple-guarantee">
-          <span className="guarantee-tile" aria-hidden="true"><Shield /></span>
-          <div className="guarantee-body">
-            <p className="guarantee">{GUARANTEE_AUTO}</p>
-            <p className="t-compact guarantee-contact">
-              <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
-            </p>
+          {/* The guarantee closes the page in a white panel like the two above
+              it (Sam, 30 Sep), and says the refund is automatic. */}
+          <Panel className="simple-guarantee">
+            <span className="guarantee-tile" aria-hidden="true"><Shield /></span>
+            <div className="guarantee-body">
+              <p className="guarantee">{GUARANTEE_AUTO}</p>
+              <p className="t-compact guarantee-contact">
+                <a href={`mailto:${GUARANTEE_CONTACT}`}>{GUARANTEE_CONTACT}</a>
+              </p>
+            </div>
+          </Panel>
           </div>
-        </Panel>
+        </div>
 
         <SiteFoot />
       </div>
