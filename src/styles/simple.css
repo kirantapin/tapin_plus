@@ -131,7 +131,10 @@
   }
   .hero-band:not(.is-compact) > .how-in-hero.how-in-hero {
     display: block;
-    grid-column: seam / grid-end;
+    /* Over the whole collage, which runs to the window's edge, not the grid
+       track that ends inside it (Sam, 30 Sep 2026: "feels a bit off center …
+       the right side component should be centered within that image grid"). */
+    grid-column: seam / bleed-end;
     grid-row: 1;
     align-self: center;
     justify-self: center;
