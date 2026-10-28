@@ -32,8 +32,7 @@ export const blacksburgClock = (ms: number): { day: number; hour: number } => {
 const TRY_HOURS: Record<string, (day: number, hour: number) => boolean> = {
   /* Every day, 10am to 7pm. */
   coffeeholicsva: (_day, hour) => hour >= 10 && hour < 19,
-  /* Thursday, Friday and Saturday, 5pm to 9pm: before the credit's quiet
-     hours begin (BENEFIT.creditQuietFrom). */
+  /* Thursday, Friday and Saturday, 5pm to 9pm (§80). */
   theburg: (day, hour) => hour >= 17 && hour < 21 && (day === 4 || day === 5 || day === 6),
 };
 

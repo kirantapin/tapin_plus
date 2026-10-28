@@ -157,8 +157,9 @@ function buildSlides(spend: number) {
          never consecutive: four unbuilt screens in a row before the ask is
          what made readers bail at step seven. */
       headline: "Cover and line skips earn too",
-      /* Sam, 30 Sep 2026: the scope line under it says the hours. */
-      line: "Everything earns points and gets 15% off.",
+      /* They are not alcohol, so the 15% reaches them (28 Oct 2026); the
+         scope line under it says the rule. */
+      line: "They earn points and get 15% off.",
       footnote: true,
       tag: null,
       hold: false,
