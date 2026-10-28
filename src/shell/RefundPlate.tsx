@@ -1,6 +1,6 @@
 import { guaranteeLead } from "../model/content";
 
-/** The auto-refund in its own plate (Sam, 30 Sep 2026: "nest the auto refund
+/** The refund guarantee in its own plate (Sam, 30 Sep 2026: "nest the auto refund
  *  thing in its own container and make it a bit easier to see, and we can
  *  use the same container design on the checkout"). The hero and the
  *  checkout's included panel both mount this; figures.css draws it from the

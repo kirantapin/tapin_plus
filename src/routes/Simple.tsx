@@ -25,6 +25,7 @@ import {
   FOUNDING_OPEN,
   GUARANTEE_CONTACT,
   benefitScopeLine,
+  guaranteeFull,
   launchWindow,
   logoField,
   monthlyAfter,
@@ -113,8 +114,9 @@ function inkOn(hex: string): string {
 const pointsOn = (price: number) => Math.round(price * POINTS_PER_DOLLAR);
 /** One example holds this long before the next rises in. */
 const CYCLE_MS = 4000;
-/** The guarantee, with the refund named as automatic (Sam, 30 Sep 2026). */
-const GUARANTEE_AUTO = "Save at least what you pay, or we automatically refund the difference.";
+/** The guarantee in full (Sam, 28 Oct 2026: the refund is auto-approved
+ *  on request, not paid automatically). */
+const GUARANTEE_AUTO = guaranteeFull;
 const namesLine = `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 const Shield = () => (
@@ -340,8 +342,8 @@ export default function Simple() {
           <h2 className="t-section panel-head">Questions</h2>
           <Drill summary="What if I barely go out?">
             <p>
-              Then you&rsquo;re refunded. If you don&rsquo;t save at least what you pay, we refund the
-              difference, automatically.
+              Ask for a refund. If you don&rsquo;t save what you spend on the membership, your
+              refund of the difference is auto-approved.
             </p>
           </Drill>
           <Drill summary="Do I have to use it every week?">
@@ -378,7 +380,7 @@ export default function Simple() {
           </Panel>
 
           {/* The guarantee closes the page in a white panel like the two above
-              it (Sam, 30 Sep), and says the refund is automatic. */}
+              it (Sam, 30 Sep), and says the refund is auto-approved (28 Oct). */}
           <Panel className="simple-guarantee">
             <span className="guarantee-tile" aria-hidden="true"><Shield /></span>
             <div className="guarantee-body">
