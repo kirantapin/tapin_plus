@@ -33,8 +33,14 @@ def strip(src: str, css: bool) -> str:
 # header says at length that it counts nothing, and anything that wants to print
 # a seat number has to go through it. A looser pattern would have quietly
 # re-opened the door on every surface in the build.
+#
+# THE SECOND, 28 Oct 2026, ON THE SAME TERMS. Sam asked for a countdown to
+# October 31, after which new members pay more: a real date, unlike the seat
+# count. `src/shell/Deadline.tsx` is the one file that prints it, reading the
+# date from `src/model/deadline.ts`; every other surface stays guarded.
 EXEMPT = {
     ("member or seat count", "src/model/seats.ts"),
+    ("urgency theatre", "src/shell/Deadline.tsx"),
 }
 
 CHECKS = [
