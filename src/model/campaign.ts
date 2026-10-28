@@ -65,7 +65,7 @@ export const campaignTrials = [
   {
     id: "percent",
     label: "15% off your order",
-    note: "Comes off the top, on anything",
+    note: "Comes off the top, on anything but alcohol",
     href: "https://tapin.app/coffeeholicsva?l=d50544d7-ac2d-46c2-89b4-1a1d2205bf17",
   },
 ];
@@ -208,8 +208,8 @@ const SHOT_ITEMS = [
     item: "Breve",
     shot: "/shots/coffeeholicsva-spread.jpg",
     title: `${Math.round(BENEFIT.percentOff * 100)}% off`,
-    /* Drinks too, outside the quiet hours; the scope line under the cards. */
-    line: "All food and drink",
+    /* Never alcohol (Sam, 28 Oct 2026). */
+    line: "Anything but alcohol",
     saves: (price: number) => `You save ${dollars(Math.round(cents(price) * BENEFIT.percentOff))}`,
   },
   {

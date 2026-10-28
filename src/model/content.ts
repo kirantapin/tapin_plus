@@ -194,20 +194,21 @@ export const venueCovers: Record<string, string[]> = {
   italianospizza: ["food", "drinks"],
 };
 
-/** The quiet hours as copy: "9 p.m." and "2 a.m.". */
-/* A no-break space, so "9 p.m." never splits across lines. */
-const clock12 = (h: number) => `${((h + 11) % 12) + 1}\u00A0${h < 12 ? "a.m." : "p.m."}`;
-/** The quiet hours, "9 p.m. to 2 a.m.". */
-const quietHours = `${clock12(BENEFIT.creditQuietFrom)} to ${clock12(BENEFIT.creditQuietTo)}`;
-/** The hours rule, in Sam's words (30 Sep 2026: "$5 credit and 15% off go
- *  toward ALL food and drink outside the hours of 9pm and 2am. Within those
- *  hours, age restricted items are not eligible."). `scopeClause` finishes
- *  the sentence that names the benefits; `quietClause` is the second one. */
-/* No full stop of its own: "a.m." already ends the sentence. */
-export const scopeClause = `food and drink outside the hours of ${quietHours}`;
-export const quietClause = "Within those hours, age-restricted items are not eligible.";
-/** The tail of the rule, for a sentence that already names the benefits. */
-export const creditHoursLine = `all ${scopeClause} ${quietClause}`;
+/* ══ THE ALCOHOL RULE (Sam, 28 Oct 2026) ════════════════════════════════════
+   "the credit and 15% off can't be used on alcohol at all unfortunately, but
+   they can be applied to food that's ordered with alcohol", and "You can earn
+   credit from purchasing any items though, which is a big one. So if I bought
+   a bunch of alcohol I can use the credit I earned on that towards anything
+   that's not alcohol." It replaces the 9 p.m.–2 a.m. hours rule of 30 Sep
+   (docs/CREDIT-ALCOHOL-2026-10-28.md for the backend). EARNING is stated as
+   "whatever you order" and never names alcohol: a reward advertised for
+   buying drinks is the inducement the Virginia caution (§10) is about. */
+/** What the credit and the 15% are spent on. */
+export const spendScope = "anything but alcohol";
+/** The earning sentence: any $10+ order, whatever is on it. */
+export const earnLine = `Every $${Math.round(BENEFIT.creditMinUsd)}+ order earns your $${BENEFIT.creditUsd} credit, whatever you order.`;
+/** The spending sentence, with the mixed order Sam named. */
+export const spendLine = `Your credit and ${Math.round(BENEFIT.percentOff * 100)}% off go toward ${spendScope}, even when alcohol is on the same order.`;
 
 /**
  * What a venue's own benefit rows SAY, at that venue.
@@ -232,7 +233,7 @@ export const creditHoursLine = `all ${scopeClause} ${quietClause}`;
  * same four words at each other.
  */
 const VENUE_POLICY_DETAIL: Record<string, string> = {
-  percent: `Goes toward ${creditHoursLine}`,
+  percent: `Goes toward ${spendScope}`,
   /* ══ "ON ANYTHING" EARNS ITS WORDS ══════════════════════════════════════
      Sam, 20 Sep 2026: "mention here, that credit can be used towards
      anything, implying alcohol without actually saying it."
@@ -245,7 +246,7 @@ const VENUE_POLICY_DETAIL: Record<string, string> = {
      the 15% does not, which is the distinction TRUTH is built on — and this
      is how it gets stated without the surface ever advertising a discount on
      a drink, which §10 forbids outright. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Goes toward ${creditHoursLine}`,
+  credit: `Earned on any $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week here. Spend it on ${spendScope}`,
   /* ══ IT WAS EMPTY FOR AN HOUR, AND THAT WAS THE WRONG CUT ════════════════
      The density pass took this line out on the reasoning that it only
      restated scope, which the `venueCovers` row below now says once for all
@@ -295,12 +296,10 @@ const VENUE_POLICY_FIGURE: Record<string, { figure: string; qualifier: string }>
     figure: `$${BENEFIT.creditUsd}`,
     qualifier: `a week, on $${Math.round(BENEFIT.creditMinUsd)}+ orders`,
   },
-  /* Sam, 30 Sep 2026: the 15% reaches drinks too, outside the credit's
-     quiet hours, so the asterisk (§72) is gone and `benefitScopeNote` says
-     the one rule for both. */
+  /* Sam, 28 Oct 2026: never on alcohol, at any hour. */
   percent: {
     figure: `${Math.round(BENEFIT.percentOff * 100)}%`,
-    qualifier: "off everything",
+    qualifier: `off ${spendScope}`,
   },
 };
 
@@ -318,20 +317,13 @@ export const guaranteeLead = {
   rest: "Checked against your TapIn orders.",
 };
 
-/** The one rule for the credit and the 15% (Sam, 30 Sep 2026: "the 15% off
- *  and credit can be used towards alcohol outside the hours of 9pm to 2am"):
- *  all food and drink, alcohol included without naming it, and the hours it
- *  is food and soft drinks. The pop-up sets it on a plate (CreditNote); the
- *  checkout, the pitch, Coffeeholics and /how print it as one line
- *  (ScopeLine). It replaced the 15%'s asterisk and footnote (§72). */
-export const benefitScopeNote = {
-  lead: `Your $${BENEFIT.creditUsd} credit and ${Math.round(BENEFIT.percentOff * 100)}% off go toward`,
-  /** Set in bold on the plate: Sam wrote it ALL. */
-  scope: "all",
-  rest: scopeClause,
-  hours: quietClause,
-};
-export const benefitScopeLine = `${benefitScopeNote.lead} ${benefitScopeNote.scope} ${benefitScopeNote.rest} ${benefitScopeNote.hours}`;
+/** The one rule for the credit and the 15% (Sam, 28 Oct 2026): earned on
+ *  any $10+ order, spent on anything but alcohol. The pop-up sets it on a
+ *  plate with the earning in bold (CreditNote, Sam: "which is a big one");
+ *  the checkout, the home page, the pitch, Coffeeholics and /how print it as
+ *  one line (ScopeLine). It replaced the hours rule of 30 Sep (§83). */
+export const benefitScopeNote = { earn: earnLine, spend: spendLine };
+export const benefitScopeLine = `${earnLine} ${spendLine}`;
 
 /** The figure and qualifier for one venue policy, or undefined for a kind this
  *  build has no figure form of — which prints no column rather than a guessed
@@ -404,13 +396,14 @@ const BENEFIT_LABEL: Record<string, string> = {
   points: "Points toward rewards",
 };
 const BENEFIT_DETAIL: Record<string, string> = {
-  /* Sam, 30 Sep 2026: drinks too, outside the quiet hours; the scope line
-     under the cards carries the hours. */
-  percent: "All food and drink",
+  /* Sam, 28 Oct 2026: never alcohol, even on an order that has some. */
+  percent: "Anything but alcohol",
   /* Sam, 15 Sep 2026: "mention that credit acts like cash, can be used
      towards anything." One string, so the pitch card, the checkout's
      checklist and the app's Deals row all say it the same way. */
-  credit: `On a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spends like cash, on anything`,
+  /* Sam, 28 Oct 2026: earned on any $10+ order, spent on anything but
+     alcohol; his 15 Sep "spends like cash, on anything" is retired. */
+  credit: `Earned on any $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at each place. Spend it on ${spendScope}`,
   /* Sam's wording, 14 Sep 2026: "redeem for free food, drinks, etc. at each
      place". "Drinks" was raised as an alcohol-adjacent word beside a 15% that
      excludes alcohol (docs/virginia-alcohol-research.md); his call to keep it —
@@ -1183,20 +1176,22 @@ function subscribise(
                 }
               : t,
     ).flatMap((t) =>
-      /* The credit's hours (30 Sep 2026), stated as a term so the record a
-         member holds says it; it follows the guarantee in every plan. */
-      t.id === "guarantee" ? [t, creditHoursTerm] : [t],
+      /* The credit's and the 15%'s scope (28 Oct 2026), stated as a term so
+         the record a member holds says it; it follows the guarantee in every
+         plan. */
+      t.id === "guarantee" ? [t, creditScopeTerm] : [t],
     ),
   };
 }
 
-/** The credit's and the 15%'s scope and hours as one term
- *  (docs/CREDIT-HOURS-2026-09-30.md). */
-const creditHoursTerm: Term = {
-  id: "hours",
+/** The credit's and the 15%'s scope as one term
+ *  (docs/CREDIT-ALCOHOL-2026-10-28.md). */
+const creditScopeTerm: Term = {
+  id: "scope",
   term:
-    `Your $${BENEFIT.creditUsd} credit (on a $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week ` +
-    `at each place) and the ${Math.round(BENEFIT.percentOff * 100)}% off go toward ${creditHoursLine}`,
+    `Your $${BENEFIT.creditUsd} credit is earned on any $${Math.round(BENEFIT.creditMinUsd)}+ order, once a week at ` +
+    `each place, whatever the order includes. The credit and the ${Math.round(BENEFIT.percentOff * 100)}% off go toward ` +
+    `anything but alcohol; on an order that includes alcohol, they apply to the other items.`,
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════

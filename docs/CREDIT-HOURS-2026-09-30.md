@@ -1,3 +1,5 @@
+> **Superseded 28 Oct 2026** by `docs/CREDIT-ALCOHOL-2026-10-28.md`: the credit and the 15% never apply to alcohol, at any hour. The rule below is history.
+
 # The $5 credit, the 15% and alcohol: the hours rule
 
 Decision, Sam, 30 Sep 2026: "let's do the 9pm to 2am thing", and later the

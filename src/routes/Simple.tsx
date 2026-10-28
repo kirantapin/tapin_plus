@@ -60,7 +60,9 @@ const names = venues.map((v) => v.name);
    use, and the example is a receipt, so the arithmetic is shown, not told. */
 const STEPS = [
   { id: "join", figure: price, qualifier: "a month to join" },
-  { id: "order", figure: `$${MIN}+`, qualifier: `an order, at any of the ${PLACES}` },
+  /* "of anything" carries the earning rule (Sam, 28 Oct 2026: "You can earn
+     credit from purchasing any items though, which is a big one"). */
+  { id: "order", figure: `$${MIN}+`, qualifier: `of anything, at any of the ${PLACES}` },
   { id: "off", figure: `\u2212$${CREDIT}`, qualifier: "comes off, every week" },
 ];
 /** The credit at every place, every week of a month: the biggest true number. */
