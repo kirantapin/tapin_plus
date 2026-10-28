@@ -1,17 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TapInCard from "../shell/TapInCard";
 import IncludedPanel from "../shell/IncludedPanel";
 import Timeline, { type Stop } from "../shell/Timeline";
 import { useCardFlight } from "../shell/cardFlight";
 import { useReserveFlow } from "../shell/ReserveLayer";
 import { useName } from "../model/nameStore";
-import { SEAT_CAP } from "../model/seats";
-import { useSeatsLeft } from "../model/presale";
+import { DeadlineBlock, DeadlineLine } from "../shell/Deadline";
+import { deadlineDay } from "../model/deadline";
 import {
   PLANS,
   launchWindow,
   FOUNDING_OPEN,
-  foundingCloses,
   firstEarlyBirdPrice,
   foundingTierName,
   monthlyToday,
@@ -141,68 +140,6 @@ const schedule: Stop[] = [
 /* The dock's words. NOT `plan.per` — what this opens takes a DEPOSIT (Sam:
    "need to make sure it says $4.99 deposit"). */
 const checkoutLabel = `Checkout · ${plan.price} deposit`;
-
-/* A count that falls while the sheet is open settles over this long. */
-const SETTLE_MS = 240;
-/* Under this many spots the bar turns red and pulses (Sam, 30 Sep 2026). */
-const LOW_SEATS = 20;
-/** Reduced motion, or a `data-still` ancestor: the count changes in one step. */
-const holdsStill = (el: Element | null | undefined): boolean =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-  el?.closest("[data-still]") != null;
-
-/* ══ THE SEATS: ONE OBJECT, TWO HOMES (POLISH §31, §45, §67) ══════════════
-   The count and its bar, from `useSeatsLeft()` (model/presale.ts, the invented
-   schedule every visitor shares; it re-reads each minute) of `SEAT_CAP`.
-   From 1024 it leads the order card; below 1024 it rides on the dock, over
-   the button (Sam, 23 Sep: "make this counter a part of the sticky button").
-   One component in both, so the tick and the settle are one implementation;
-   reserve.css shows the copy that belongs to the width. */
-function Seats() {
-  const left = useSeatsLeft();
-  /* Each tick: the number settles from 1.06 to its size, and the bar's fill
-     follows the same step over its own transform. Transform only; under
-     reduced motion both change in one step and nothing plays. */
-  const num = useRef<HTMLElement | null>(null);
-  const fill = useRef<HTMLElement | null>(null);
-  const was = useRef(left);
-  useLayoutEffect(() => {
-    const from = was.current;
-    was.current = left;
-    const n = num.current;
-    const f = fill.current;
-    if (left === from || !n || !f || holdsStill(n)) return;
-    const timing = {
-      duration: SETTLE_MS,
-      easing: getComputedStyle(n).getPropertyValue("--ease").trim() || "cubic-bezier(.22,1,.36,1)",
-    };
-    n.animate([{ transform: "scale(1.06)" }, { transform: "none" }], timing);
-    f.animate(
-      [
-        { transform: `scaleX(${from / SEAT_CAP})` },
-        { transform: `scaleX(${left / SEAT_CAP})` },
-      ],
-      timing,
-    );
-  }, [left]);
-  return (
-    <div className={left < LOW_SEATS ? "rs-seats is-low" : "rs-seats"}>
-      <p className="rs-seats-line">
-        <span className="rs-seats-count">
-          <b className="tnum rs-seats-n" ref={num}>{left}</b> of {SEAT_CAP} {foundingTierName} spots left
-        </span>
-        <span className="rs-seats-close">closes at {foundingCloses}</span>
-      </p>
-      {/* The fill is the spots LEFT, `left / cap` (Sam, 30 Sep 2026: "this
-          should be inverted, the black bar would be shorter now"), so it
-          shrinks as they go. The line is the statement of record; this is
-          aria-hidden. */}
-      <span className="rs-seats-bar" aria-hidden="true">
-        <i ref={fill} style={{ ["--p" as string]: `${left / SEAT_CAP}` }} />
-      </span>
-    </div>
-  );
-}
 
 export default function Reserve() {
   /* ══ THE CHECKOUT IS THIS SHEET'S OTHER PAGES NOW (21 Sep 2026) ═══════════
@@ -407,7 +344,7 @@ export default function Reserve() {
             Standard tile carried. */}
         {FOUNDING_OPEN && plan.saving ? (
           <p className="t-compact plan-after">
-            After the first {SEAT_CAP} spots, it&rsquo;s {plan.saving.after} a month.
+            After {deadlineDay}, it&rsquo;s {plan.saving.after} a month for new members.
           </p>
         ) : null}
 
@@ -419,9 +356,10 @@ export default function Reserve() {
             under a hairline, and from 1024 its own button (§31.1); below 1024
             the dock is the one Checkout. */}
         <section className="rs-order" aria-labelledby="rs-order-head">
-          {/* The seats lead the card from 1024, only while FOUNDING_OPEN;
-              below 1024 this copy is hidden and the dock's is shown (§45). */}
-          {FOUNDING_OPEN ? <Seats /> : null}
+          {/* The $5.99-for-life countdown leads the card from 1024, in place
+              of the seat count (Sam, 28 Oct 2026); below 1024 the dock's line
+              is shown instead. */}
+          {FOUNDING_OPEN ? <DeadlineBlock /> : null}
           <h2 className="t-title rs-order-head" id="rs-order-head">
             What you pay, and when
           </h2>
@@ -443,7 +381,7 @@ export default function Reserve() {
           ride on it there, over the button (§45); the button alone once the
           round has closed. */}
       <div className="rs-dock">
-        {FOUNDING_OPEN ? <Seats /> : null}
+        {FOUNDING_OPEN ? <DeadlineLine /> : null}
         <button type="button" className="action" onClick={openCheckout}>
           {paid ? "View your seat" : checkoutLabel}
         </button>

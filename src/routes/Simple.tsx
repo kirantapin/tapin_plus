@@ -18,8 +18,8 @@ import { hasMenu, itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { useTrialLink } from "../shell/useTrialLink";
 import { useReserveCta } from "../shell/useReserveCta";
-import { useSeatsLeft } from "../model/presale";
-import { SEAT_CAP } from "../model/seats";
+import { deadlineDay } from "../model/deadline";
+import { DeadlineChip } from "../shell/Deadline";
 import { BENEFIT } from "../model/savings";
 import {
   FOUNDING_OPEN,
@@ -127,12 +127,12 @@ const Shield = () => (
   </svg>
 );
 
-/** The seats line: real count, plain words. Only while the round is open. */
+/** The offer's deadline, in place of the seat count (Sam, 28 Oct 2026); the
+ *  clock itself ticks in the announcement bar above. */
 function Spots() {
-  const left = useSeatsLeft();
   return (
     <p className="t-compact hero-seat">
-      <b className="tnum">{left}</b> of {SEAT_CAP} early-access spots left at {price}. After that, it&rsquo;s{" "}
+      Lock in {price} a month for life by {deadlineDay}. After that, it&rsquo;s{" "}
       <span className="tnum">{after}</span>.
     </p>
   );
@@ -245,14 +245,18 @@ export default function Simple() {
       <div className="announce">
         <div className="announce-row">
           <p className="announce-in">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
-              <path
-                d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"
-                fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
-              />
-              <circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" strokeWidth="1.7" />
-            </svg>
-            <span className="ann-text">Opening in Blacksburg, {launchWindow}</span>
+            <span className="ann-place">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
+                <path
+                  d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"
+                  fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
+                />
+                <circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" strokeWidth="1.7" />
+              </svg>
+              <span className="ann-text">Opening in Blacksburg, {launchWindow}</span>
+            </span>
+            {/* The $5.99-for-life clock, sticky with the bar (Sam, 28 Oct 2026). */}
+            <DeadlineChip />
           </p>
           <SignInBar />
         </div>

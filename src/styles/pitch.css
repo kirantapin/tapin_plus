@@ -3383,6 +3383,51 @@ button.vcard:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ══ THE COUNTDOWN IN THE BAR (Sam, 28 Oct 2026: "in the announcement bar
+   … That way, it's kind of sticky") ══════════════════════════════════════
+   The place and the clock are two spans in the bar's sentence. Below 1024
+   the clock replaces the place, because one line at 12px holds one of them
+   beside Sign in; from 1024 both stand, the clock after a dot. Tabular digits,
+   so the bar does not twitch each second. Once the deadline passes the clock
+   renders nothing and the place comes back on its own. */
+.ann-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ann-deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.ann-deadline b {
+  font-weight: 700;
+}
+.ann-deadline-n {
+  font-weight: 700;
+}
+.ann-clock {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  display: block;
+  color: var(--on-maroon);
+}
+@media (max-width: 1023px) {
+  .announce-in:has(.ann-deadline) > .ann-place {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .ann-deadline::before {
+    content: "\00B7";
+    margin-right: 6px;
+    opacity: 0.7;
+  }
+}
 .signin-go {
   position: relative;
   display: inline-flex;

@@ -15,6 +15,7 @@ import waysJson from "../../docs/data/ways-to-use.json";
 import moneyJson from "../../docs/data/money-and-terms.json";
 import { BENEFIT } from "./savings";
 import { foundingOpen, foundingTierName, SEAT_CAP } from "./seats";
+import { deadlineDay } from "./deadline";
 
 export interface Policy {
   id: string;
@@ -671,7 +672,8 @@ export const seatCapParts: SeatCapPart[] = FOUNDING_OPEN
       /* Sam, 14 Sep 2026: "remove the strike through here on the header — and
          instead say 'Price for everyone else is $14.99'". No `role`, so the
          figure renders as plain text; TRUTH §2 re-fenced to match. */
-      { text: `${SEAT_CAP} ${foundingTierName} spots · Price for everyone else is ` },
+      /* Sam, 28 Oct 2026: the offer ends on a date, not with the seats. */
+      { text: `Locked for life if you join by ${deadlineDay} · Price for everyone else is ` },
       { text: usd(AFTER_MONTHLY) },
     ]
   : /* The founding round is over. The sentence cannot go on advertising a rate
@@ -709,8 +711,9 @@ export const launchWindow = "Halloween 2026";
  * is stated once, plainly, in body type — never as a countdown clock, never
  * animated, never coloured as an alarm (§10).
  */
-/* Sam, 15 Sep 2026: "Early bird will close at the end of september." */
-export const foundingCloses = "the end of September";
+/* Sam, 15 Sep 2026: "Early bird will close at the end of september." Then
+   28 Oct 2026: the $5.99 rate ends October 31 (model/deadline.ts). */
+export const foundingCloses = deadlineDay;
 
 export interface ChargeRow {
   id: string;
@@ -746,7 +749,7 @@ export const monthlyPlan = {
           ...t,
           term:
             `${usd(FOUNDING_MONTHLY)} a month never goes up, for as long as you stay a member. ` +
-            `After the first ${SEAT_CAP} seats, new members pay ${usd(AFTER_MONTHLY)} a month.`,
+            `After ${deadlineDay}, 2026, new members pay ${usd(AFTER_MONTHLY)} a month.`,
         }
       : t,
   ),
@@ -940,7 +943,7 @@ export const passPlan = {
          buyer to do the arithmetic for a plan she did not pick. */
       term:
         `${usd(PASS_TODAY)} every ${PASS_MONTHS} months never goes up, for as long as you ` +
-        `stay a member. After the first ${SEAT_CAP} seats, new members ` +
+        `stay a member. After ${deadlineDay}, 2026, new members ` +
         `pay ${usd(AFTER_PASS)} every ${PASS_MONTHS} months.`,
     },
     {
@@ -1048,7 +1051,7 @@ export const yearPlan = {
       id: "rate",
       term:
         `${usd(YEAR_TODAY)} a year never goes up, for as long as you stay a member. ` +
-        `After the first ${SEAT_CAP} seats, new members pay ` +
+        `After ${deadlineDay}, 2026, new members pay ` +
         `${usd(AFTER_YEAR)} a year.`,
     },
     {

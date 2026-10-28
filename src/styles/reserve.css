@@ -1275,8 +1275,8 @@ html.is-layered{overflow:hidden}
    never on scrolled content, and the fade moves up to run over the 24px
    above the dock: it paints there and takes no room, so the dock does not
    grow for it, and at the page's end it lands in the gap before the dock. */
-.rs-dock:has(> .rs-seats){background:var(--page)}
-.rs-dock:has(> .rs-seats)::before{content:"";position:absolute;inset-inline:0;
+.rs-dock:has(> .rs-deadline-line){background:var(--page)}
+.rs-dock:has(> .rs-deadline-line)::before{content:"";position:absolute;inset-inline:0;
   bottom:100%;height:var(--s-2xl);pointer-events:none;
   background:linear-gradient(180deg,var(--page-0),var(--page))}
 .rs-dock .action{margin:0}
@@ -1498,54 +1498,32 @@ html.is-layered{overflow:hidden}
 .rs-buy{display:none}
 @media (min-width:1024px){.rs-buy{display:block}}
 
-/* ── THE SEATS LEAD THE CARD, FROM 1024 (§31, §45) ─────────────────────────
-   One line with two ends — the count on the left, the close on the right,
-   wrapping under it when the column is too narrow — over a 6px bar whose
-   fill is the spots LEFT (Reserve.tsx), red and pulsing under 20. A
-   hairline closes the block; the heading follows at the card's own gap. The
-   fill grows once on first paint; the house reduced-motion block leaves it
-   complete and still. Below 1024 this copy is hidden and the dock's shows. */
-.rs-seats{display:flex;flex-direction:column;gap:var(--s-md);
+/* ══ THE $5.99-FOR-LIFE COUNTDOWN (Sam, 28 Oct 2026) ════════════════════════
+   In place of the seat count and its bar. From 1024 it leads the order card:
+   the offer, four cells, the date, a hairline closing the block as the seats
+   did. Below 1024 the card's copy is hidden and the dock carries one line
+   over the button. The digits are tabular so the row does not shift as they
+   tick; nothing animates. */
+.rs-deadline{display:flex;flex-direction:column;gap:var(--s-md);
   padding-bottom:var(--s-xl);border-bottom:1px solid var(--hair)}
-.rs-seats-line{display:flex;flex-wrap:wrap;justify-content:space-between;
-  gap:var(--s-xs) var(--s-lg);margin:0;font-size:14px;font-weight:500;
-  line-height:1.4;color:var(--ink-2)}
-.rs-seats-line b{font-size:16px;font-weight:700;color:var(--ink-1)}
-/* A box, so the §35 tick's settle (scale 1.06 → 1, Reserve.tsx) has
-   something to transform; the line's baseline is unchanged. */
-.rs-seats-n{display:inline-block}
-.rs-seats-close{color:var(--ink-3);white-space:nowrap}
-.rs-seats-bar{display:block;height:6px;border-radius:var(--r-pill);
-  background:var(--press);overflow:hidden}
-.rs-seats-bar i{display:block;height:100%;border-radius:var(--r-pill);
-  background:var(--ink-1);transform-origin:left;transform:scaleX(var(--p,0));
-  animation:rsBarGrow 600ms var(--ease) both}
-@keyframes rsBarGrow{from{transform:scaleX(0)}}
-/* Under 20 left: the loss red, pulsing slowly after the grow. The house
-   reduced-motion block stops the pulse and leaves it red. */
-.rs-seats.is-low .rs-seats-bar i{background:var(--loss);
-  animation:rsBarGrow 600ms var(--ease) both,rsBarLow 2400ms ease-in-out 600ms infinite}
-@keyframes rsBarLow{50%{opacity:.35}}
-/* The count in the same red, steady (Sam, 30 Sep). `--loss` is 6.5:1 on the
-   card and 5.6:1 on the dock's page ground in the light ramp. */
-.rs-seats.is-low .rs-seats-line b{color:var(--loss)}
-@media (max-width:1023px){.rs-order > .rs-seats{display:none}}
-
-/* ── THE SEATS ON THE DOCK, BELOW 1024 (§45) ──────────────────────────────
-   Sam: "make this counter a part of the sticky button for checkout … it'd be
-   slightly smaller of course." The same object over the button: one 20px
-   line at 14px, 8px, a 3px bar at the button's width, 6px, the button. The
-   line is one line by construction: it may not grow past 20px, so when the
-   close does not fit beside the count it wraps out of sight, and the count
-   ellipsises before it ever wraps. NOTE: nothing else on the sheet prints
-   `foundingCloses` (§45 assumed the terms did), so on a phone the date is
-   then read only by a screen reader, from this clipped copy. */
-.rs-dock .rs-seats{gap:var(--s-md);margin-bottom:var(--s-sm);padding:0;border:0}
-.rs-dock .rs-seats-line{height:20px;overflow:hidden;line-height:20px}
-.rs-dock .rs-seats-line b{font-size:14px}
-.rs-dock .rs-seats-count{min-width:0;overflow:hidden;white-space:nowrap;
+.rs-deadline-head{margin:0;font-size:16px;font-weight:700;line-height:1.35;
+  color:var(--ink-1);text-wrap:balance}
+.rs-deadline-clock{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:var(--s-sm);margin:0}
+.rs-deadline-clock span{display:flex;flex-direction:column;align-items:center;
+  gap:2px;padding:var(--s-md) 0;border-radius:var(--r-sm);background:var(--inner)}
+.rs-deadline-clock b{font-size:24px;font-weight:700;line-height:1.1;
+  letter-spacing:-.01em;color:var(--ink-1)}
+.rs-deadline-clock small{font-size:14px;font-weight:500;color:var(--ink-3)}
+.rs-deadline-foot{margin:0;font-size:14px;font-weight:500;line-height:1.4;
+  color:var(--ink-3);text-wrap:pretty}
+@media (max-width:1023px){.rs-order > .rs-deadline{display:none}}
+/* The dock's line: one 20px line at 14px over the button. */
+.rs-deadline-line{margin:0 0 var(--s-md);font-size:14px;font-weight:500;
+  line-height:20px;color:var(--ink-2);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
-.rs-dock .rs-seats-bar{height:3px}
+.rs-deadline-line b{font-weight:700;color:var(--ink-1)}
+.rs-deadline-line .tnum{font-weight:700;color:var(--ink-1)}
 
 /* ── 3. THE INCLUDED PANEL (§18) ───────────────────────────────────────────
    Sam, on the trial modal's call-out: "I like how you formatted this, maybe
