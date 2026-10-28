@@ -312,10 +312,17 @@ export const appLinkLine =
  *  membership"). It replaced "One $10 order pays for your membership", and
  *  the guarantee card under the panel, which said the same thing twice. */
 export const guaranteeLead = {
-  /* Sam's phrasing, 30 Sep 2026; one string for the hero and the checkout. */
-  lead: "Auto-refunded if you don\u2019t save what you pay.",
+  /* Sam, 28 Oct 2026: "refund auto approved if you don't save what you spend
+     on the membership - we don't auto refund, but their refund is approved
+     should they want it." One string for the hero and the checkout. */
+  lead: "Refund auto-approved if you don\u2019t save what you spend on the membership.",
   rest: "Checked against your TapIn orders.",
 };
+/** The guarantee in full (Sam, 28 Oct 2026): the member asks; the refund of
+ *  the difference is approved without review. The home page's foot, its FAQ,
+ *  the pitch and /in print this. */
+export const guaranteeFull =
+  "If you don\u2019t save what you spend on the membership, ask for a refund of the difference and it\u2019s auto-approved.";
 
 /** The one rule for the credit and the 15% (Sam, 28 Oct 2026): earned on
  *  any $10+ order, spent on anything but alcohol. The pop-up sets it on a
@@ -486,7 +493,10 @@ export const benefitFragments: Record<string, { line: string; figure: string }> 
  * The DIFFERENCE, not the whole fee — and it is a promise the SERVER keeps.
  * No surface may imply a client computes it (TRUTH.md §3).
  */
-export const guarantee: string = moneyJson.guarantee;
+/* money-and-terms.json's "Save at least what you pay, or we refund the
+   difference." gives way to Sam's 28 Oct wording: the member asks, and the
+   refund is approved. The JSON is left as extracted. */
+export const guarantee: string = guaranteeFull;
 
 export const GUARANTEE_CONTACT = "support@tapin.app";
 
@@ -935,7 +945,7 @@ export const passPlan = {
     },
     {
       id: "guarantee",
-      term: `Save at least what you pay, or we refund the difference. Checked every ${PASS_MONTHS} months against your TapIn orders.`,
+      term: `If you don\u2019t save at least what you spend on the membership, ask for a refund of the difference and it is approved automatically. Checked every ${PASS_MONTHS} months against your TapIn orders.`,
     },
     {
       id: "refund",
@@ -1043,7 +1053,7 @@ export const yearPlan = {
     },
     {
       id: "guarantee",
-      term: "Save at least what you pay, or we refund the difference. Checked every year against your TapIn orders.",
+      term: "If you don\u2019t save at least what you spend on the membership, ask for a refund of the difference and it is approved automatically. Checked every year against your TapIn orders.",
     },
     {
       id: "refund",
