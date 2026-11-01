@@ -1,6 +1,7 @@
 import { Fragment, useId, useLayoutEffect, useRef } from "react";
 import { dollars, signedDollars } from "../model/month";
 import { BENEFIT } from "../model/savings";
+import { EARLY_ACCESS_CLOSED } from "../model/closed";
 import { MonthControls, TALLY, easeOut, still, useMonthSwitch, type MonthPlace } from "./MonthSwitch";
 
 /**
@@ -365,7 +366,14 @@ export default function MonthCalendar({ places }: { places: MonthPlace[] }) {
               {signedDollars(month.netCents)}
             </b>
             <span className="sr-only">{signedDollars(month.netCents)}</span>
-            <span className="mc-after">after the {dollars(month.planCents)} membership</span>
+            {/* Early access is closed (Sam, 1 Nov 2026: "Remove leftover
+                $5.99s"): the example keeps its net, without naming a price
+                this site no longer sells at. */}
+            <span className="mc-after">
+              {EARLY_ACCESS_CLOSED
+                ? "after the membership"
+                : `after the ${dollars(month.planCents)} membership`}
+            </span>
           </p>
         </div>
       </div>

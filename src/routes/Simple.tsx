@@ -34,6 +34,7 @@ import {
   monthlyToday,
   venues,
 } from "../model/content";
+import { TAPIN_HOST } from "../model/closed";
 
 /* ══ /simple: THE PAGE A 5TH GRADER CAN READ (30 Sep 2026, POLISH §84) ══════
    Sam: "how do we make this landing page so unbelievably simple that a 5th
@@ -62,7 +63,11 @@ const names = venues.map((v) => v.name);
    language. The sequence is now the three-figure strip the venue pop-ups
    use, and the example is a receipt, so the arithmetic is shown, not told. */
 const STEPS = [
-  { id: "join", figure: price, qualifier: "a month to join" },
+  /* Early access is closed (Sam, 1 Nov 2026: "Remove leftover $5.99s"): the
+     first step says where to join, not a price this site no longer sells at. */
+  EARLY_ACCESS_CLOSED
+    ? { id: "join", figure: "Join", qualifier: `at ${TAPIN_HOST}` }
+    : { id: "join", figure: price, qualifier: "a month to join" },
   /* "of anything" carries the earning rule (Sam, 28 Oct 2026: "You can earn
      credit from purchasing any items though, which is a big one"). */
   { id: "order", figure: `$${MIN}+`, qualifier: `of anything, at any of the ${PLACES}` },

@@ -9,7 +9,7 @@ import { useTrialLink } from "../shell/useTrialLink";
 import LiveFeed from "../shell/LiveFeed";
 import SeatCapLine from "../shell/SeatCapLine";
 import { DeadlineChip } from "../shell/Deadline";
-import { ClosedBar } from "../shell/EarlyAccessClosed";
+import { ClosedBar, ClosedHero } from "../shell/EarlyAccessClosed";
 import { EARLY_ACCESS_CLOSED } from "../model/closed";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
@@ -434,13 +434,21 @@ export default function Coffeeholics() {
               `.t-figure` RATHER THAN `.hero-price`: the price is this page's
               one display moment, and the ramp gained the step for it. The
               class carries tabular figures, so `.tnum` is not also needed. */}
-          <p className="cg-price">
-            <b className="t-figure">${monthlyToday.toFixed(2)}</b>
-            <span>deposit</span>
-          </p>
-          <p className="t-compact cg-seat">
-            <SeatCapLine />
-          </p>
+          {/* Early access is closed (Sam, 1 Nov 2026): the block says so and
+              where to go, in place of the deposit and the seat line. */}
+          {EARLY_ACCESS_CLOSED ? (
+            <ClosedHero />
+          ) : (
+            <>
+              <p className="cg-price">
+                <b className="t-figure">${monthlyToday.toFixed(2)}</b>
+                <span>deposit</span>
+              </p>
+              <p className="t-compact cg-seat">
+                <SeatCapLine />
+              </p>
+            </>
+          )}
         </div>
 
         <div className="cg-act" ref={buy}>
