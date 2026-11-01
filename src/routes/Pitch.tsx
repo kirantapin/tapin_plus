@@ -18,7 +18,7 @@ import BenefitCards from "../shell/BenefitCards";
 import ScopeLine from "../shell/ScopeLine";
 import SeatCapLine from "../shell/SeatCapLine";
 import { DeadlineChip } from "../shell/Deadline";
-import { ClosedBar } from "../shell/EarlyAccessClosed";
+import { ClosedBar, ClosedHero } from "../shell/EarlyAccessClosed";
 import { EARLY_ACCESS_CLOSED } from "../model/closed";
 import { useReserveCta } from "../shell/useReserveCta";
 import SignInBar from "../shell/SignInBar";
@@ -294,10 +294,16 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
                 dollar step — because the thing this page is selling is a
                 number, and it was set at 32px between a 36px headline and a
                 17px lead, which is a price mentioned rather than stated. */}
-            <p className="hero-price">
-              <b className="tnum t-figure">${monthlyToday.toFixed(2)}</b>
-              <span>deposit</span>
-            </p>
+            {/* Early access is closed (Sam, 1 Nov 2026): the block says so and
+                where to go, in place of the deposit and the seat line. */}
+            {EARLY_ACCESS_CLOSED ? (
+              <ClosedHero />
+            ) : (
+              <p className="hero-price">
+                <b className="tnum t-figure">${monthlyToday.toFixed(2)}</b>
+                <span>deposit</span>
+              </p>
+            )}
             {/* NO SENTENCE UNDER THE FIGURE. It carried "Your first $10+ order
                 earns $5 credit, more than the deposit" — Sam, 20 Sep 2026:
                 "let's remove the 'first $10 order' thing it's too
@@ -307,9 +313,11 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
             {/* §2: the only seat sentence any surface may print, from the
                 constant, never typed — rendered by the one component that
                 strikes the after-price (Sam, 14 Sep 2026). */}
-            <p className="t-compact hero-seat">
-              <SeatCapLine />
-            </p>
+            {EARLY_ACCESS_CLOSED ? null : (
+              <p className="t-compact hero-seat">
+                <SeatCapLine />
+              </p>
+            )}
             {/* NO LOCKED-RATE SENTENCE HERE. Distilled 14 Sep 2026 (Rob's readers:
                 "too much text"): the seat line already carries both prices, and
                 the lock-in promise is stated on /reserve, where the decision is. */}
@@ -692,10 +700,12 @@ export default function Pitch({ invite }: { invite?: InviteId } = {}) {
       <div className={`top-cta${past ? "" : " is-away"}`} data-lit="">
         <div className="top-cta-in">
           <TapInLogo className="top-cta-logo" />
-          <p className="top-cta-price">
-            <b className="tnum">${monthlyToday.toFixed(2)}</b>
-            <span>deposit</span>
-          </p>
+          {EARLY_ACCESS_CLOSED ? null : (
+            <p className="top-cta-price">
+              <b className="tnum">${monthlyToday.toFixed(2)}</b>
+              <span>deposit</span>
+            </p>
+          )}
           <Link className="action top-cta-go" to={cta.to} state={cta.state}>
             {cta.label}
           </Link>
