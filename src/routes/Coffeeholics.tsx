@@ -9,6 +9,8 @@ import { useTrialLink } from "../shell/useTrialLink";
 import LiveFeed from "../shell/LiveFeed";
 import SeatCapLine from "../shell/SeatCapLine";
 import { DeadlineChip } from "../shell/Deadline";
+import { ClosedBar } from "../shell/EarlyAccessClosed";
+import { EARLY_ACCESS_CLOSED } from "../model/closed";
 import PhotoCard from "../shell/PhotoCard";
 import BenefitFigures from "../shell/BenefitFigures";
 import MonthCalendar from "../shell/MonthCalendar";
@@ -229,20 +231,24 @@ export default function Coffeeholics() {
           twice into one screen that already has both on the plate below. */}
       <div className="announce">
         <p className="announce-in">
-          <span className="ann-place">
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
-              <path
-                d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.9"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="12" cy="10" r="2.4" fill="currentColor" />
-            </svg>
-            Blacksburg, Virginia
-          </span>
+          {EARLY_ACCESS_CLOSED ? (
+            <ClosedBar />
+          ) : (
+            <span className="ann-place">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
+                <path
+                  d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="12" cy="10" r="2.4" fill="currentColor" />
+              </svg>
+              Blacksburg, Virginia
+            </span>
+          )}
           {/* The $5.99-for-life clock, sticky with the bar (Sam, 28 Oct 2026). */}
           <DeadlineChip />
         </p>
