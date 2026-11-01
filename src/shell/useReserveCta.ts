@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { reserveCta } from "../model/content";
 import { useAuth } from "../context/auth_context";
+import { EARLY_ACCESS_CLOSED, TAPIN_URL, closedCta } from "../model/closed";
 
 /**
  * THE ONE CTA, AND WHERE IT GOES FOR SOMEONE WHO HAS ALREADY BOUGHT.
@@ -31,6 +32,13 @@ export function useReserveCta(): {
   const location = useLocation();
   const { subscribed } = useAuth();
   const held = subscribed === true;
+
+  /* Early access is closed (Sam, 1 Nov 2026; model/closed.ts): everyone who
+     has not bought goes to www.tapin.app. React Router's Link renders an
+     absolute URL as a plain anchor, so every call site keeps its markup. */
+  if (EARLY_ACCESS_CLOSED && !held) {
+    return { to: TAPIN_URL, label: closedCta, state: undefined, subscribed: false };
+  }
 
   return {
     to: held ? "/in" : "/reserve",

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { campaignTrialPlaces, campaignVenue } from "../model/campaign";
 import { useReserveCta } from "./useReserveCta";
+import { EARLY_ACCESS_CLOSED, TAPIN_HOST, closedLead, closedMore } from "../model/closed";
 import {
   monthlyToday,
   standardAfter,
@@ -280,7 +281,10 @@ export default function TrialModal({
               </div>
             ) : null}
             <p className="t-compact ct-more-p">
-              ${monthlyToday.toFixed(2)} now, {standardAfter} once the spots are gone.
+              {/* Early access is closed (model/closed.ts): no price to quote. */}
+              {EARLY_ACCESS_CLOSED
+                ? `${closedLead} ${closedMore} ${TAPIN_HOST}.`
+                : `$${monthlyToday.toFixed(2)} now, ${standardAfter} once the spots are gone.`}
             </p>
             <Link
               className="action ct-go"

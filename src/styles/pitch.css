@@ -3383,6 +3383,20 @@ button.vcard:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ══ EARLY ACCESS IS CLOSED, IN THE BAR (Sam, 1 Nov 2026) ═════════════════
+   The address is the link, underlined so it reads as one in a bar that
+   carries no other. Below 1024 the bar is one short line beside Sign in, so
+   "You can still get TapIn at" steps out and the address stays. */
+.ann-link {
+  color: var(--on-maroon);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (max-width: 1023px) {
+  .ann-closed-more {
+    display: none;
+  }
+}
 /* ══ THE COUNTDOWN IN THE BAR (Sam, 28 Oct 2026: "in the announcement bar
    … That way, it's kind of sticky") ══════════════════════════════════════
    The place and the clock are two spans in the bar's sentence. Below 1024

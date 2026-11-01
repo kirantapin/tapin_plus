@@ -10,6 +10,7 @@ import How from "./routes/How";
 import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
 import Membership from "./routes/Membership";
+import { EARLY_ACCESS_CLOSED } from "./model/closed";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -61,7 +62,9 @@ export default function App() {
      page instead — shell/VenuePopup.tsx. The preview mocked a product that does
      not open until Spring 2027; the six merchant pages are real today, which is
      the stronger thing to show. */
-  const isReserve = location.pathname === "/reserve";
+  /* Early access is closed (model/closed.ts): no checkout layer, and the
+     route below sends /reserve home, where the page says where to go. */
+  const isReserve = !EARLY_ACCESS_CLOSED && location.pathname === "/reserve";
 
   /* ══ THE ARRIVAL, ON THE DOOR ONLY ════════════════════════════════════════
      Decided once, from the path the browser LOADED on — never from where a
@@ -109,7 +112,10 @@ export default function App() {
               that path, and vercel.json's "/blacksburg/:path*" rewrite
               already hands it to index.html. The host is a DNS matter. */}
           <Route path="/coffeeholics" element={<Coffeeholics />} />
-          <Route path="/reserve" element={<Reserve />} />
+          <Route
+            path="/reserve"
+            element={EARLY_ACCESS_CLOSED ? <Navigate to="/" replace /> : <Reserve />}
+          />
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}
           <Route path="/in" element={<Membership />} />

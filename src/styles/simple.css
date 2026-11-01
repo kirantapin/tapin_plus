@@ -266,3 +266,34 @@
     content: none;
   }
 }
+
+/* ══ EARLY ACCESS IS CLOSED, WHERE THE PRICE WAS (Sam, 1 Nov 2026) ════════
+   The price block's slot, said plainly: the lead at the price's place in the
+   hierarchy (smaller than the headline, larger than the lead), the address
+   under it as a link, and the button below unchanged in place. */
+.hero-closed {
+  display: grid;
+  gap: var(--s-xs);
+}
+.hero-closed-lead {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink-1);
+}
+.hero-closed-more {
+  margin: 0;
+  color: var(--ink-3);
+}
+.hero-closed-link {
+  color: var(--ink-1);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (min-width: 1024px) {
+  .hero-closed-lead {
+    font-size: 32px;
+  }
+}

@@ -20,6 +20,8 @@ import { useTrialLink } from "../shell/useTrialLink";
 import { useReserveCta } from "../shell/useReserveCta";
 import { deadlineDay } from "../model/deadline";
 import { DeadlineChip } from "../shell/Deadline";
+import { ClosedBar, ClosedHero } from "../shell/EarlyAccessClosed";
+import { EARLY_ACCESS_CLOSED } from "../model/closed";
 import { BENEFIT } from "../model/savings";
 import {
   FOUNDING_OPEN,
@@ -245,16 +247,20 @@ export default function Simple() {
       <div className="announce">
         <div className="announce-row">
           <p className="announce-in">
-            <span className="ann-place">
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
-                <path
-                  d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"
-                  fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
-                />
-                <circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" strokeWidth="1.7" />
-              </svg>
-              <span className="ann-text">Opening in Blacksburg, {launchWindow}</span>
-            </span>
+            {EARLY_ACCESS_CLOSED ? (
+              <ClosedBar />
+            ) : (
+              <span className="ann-place">
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="ann-pin">
+                  <path
+                    d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"
+                    fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
+                  />
+                  <circle cx="12" cy="10" r="2.3" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                </svg>
+                <span className="ann-text">Opening in Blacksburg, {launchWindow}</span>
+              </span>
+            )}
             {/* The $5.99-for-life clock, sticky with the bar (Sam, 28 Oct 2026). */}
             <DeadlineChip />
           </p>
@@ -287,14 +293,23 @@ export default function Simple() {
           </div>
 
           <div className="hero-buy">
-            <p className="hero-price">
-              <b className="tnum t-figure">{price}</b>
-              <span>a month</span>
-            </p>
-            {FOUNDING_OPEN ? <Spots /> : null}
-            {/* The guarantee beside the price it backs (§95): the stack reads
-                as three movements, the claim, the places, the ask. */}
-            <RefundPlate className="hero-refund is-desktop" />
+            {/* Early access is closed (Sam, 1 Nov 2026; model/closed.ts): the
+                block says so and where to go, in place of a price this site no
+                longer sells at. */}
+            {EARLY_ACCESS_CLOSED ? (
+              <ClosedHero />
+            ) : (
+              <>
+                <p className="hero-price">
+                  <b className="tnum t-figure">{price}</b>
+                  <span>a month</span>
+                </p>
+                {FOUNDING_OPEN ? <Spots /> : null}
+                {/* The guarantee beside the price it backs (§95): the stack reads
+                    as three movements, the claim, the places, the ask. */}
+                <RefundPlate className="hero-refund is-desktop" />
+              </>
+            )}
             <div className="hero-actions">
               <Link className="action hero-cta" to={cta.to} state={cta.state} ref={heroCta}>
                 {cta.label}
@@ -364,12 +379,18 @@ export default function Simple() {
           <Drill summary="What can I use it on?">
             <p>{benefitScopeLine}</p>
           </Drill>
-          <Drill summary="Can I cancel?">
-            <p>Any time. Full refund before we open, no reason needed.</p>
-          </Drill>
-          <Drill summary="When does it start?">
-            <p>{launchWindow}. You pay {price} today, and nothing more until we open.</p>
-          </Drill>
+          {/* Paying here is over (model/closed.ts), so the two answers about
+              paying here are left out rather than left wrong. */}
+          {EARLY_ACCESS_CLOSED ? null : (
+            <>
+              <Drill summary="Can I cancel?">
+                <p>Any time. Full refund before we open, no reason needed.</p>
+              </Drill>
+              <Drill summary="When does it start?">
+                <p>{launchWindow}. You pay {price} today, and nothing more until we open.</p>
+              </Drill>
+            </>
+          )}
         </Panel>
           <div className="simple-close-side">
 
