@@ -455,6 +455,19 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <span>your first month</span>
           </p>
           <p className="tpa-offer-then">Then {MONTHLY}/month</p>
+          {/* The payback, in one order (Sam, 3 Nov 2026, from "your first $10
+              order covers the month"). The $5 is credit toward the next order,
+              so it "earns $5 back" rather than paying for anything, and it is
+              said of the first month only: at $7.99 it takes two orders. */}
+          <p className="tpa-payback">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="currentColor" />
+              <path d="m7.6 12.3 3 3 5.8-6.1" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>
+              Your first ${MIN_ORDER} order earns ${CREDIT} back. That’s more than your first month.
+            </span>
+          </p>
           <WelcomeChip />
           {joinCta("hero")}
           {tryCta}

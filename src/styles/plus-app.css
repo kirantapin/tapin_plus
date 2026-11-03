@@ -887,6 +887,23 @@ html[data-surface="tpa"] body {
   margin-top: 4px;
   color: var(--muted);
 }
+.tpa-payback {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+  text-wrap: pretty;
+}
+.tpa-payback svg {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.5px;
+  color: #1f8a4c;
+}
 /* One line that opens to its detail (the FAQ's disclosure, lighter). */
 .tpa-more {
   margin-top: 12px;
