@@ -253,10 +253,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
         data-edge={which === 0 ? "first" : which === EXAMPLES.length - 1 ? "last" : undefined}
       >
         {look === "tag" ? null : (
+          /* The name only: the tab above already shows the logo (Sam, 3 Nov
+             2026: "showing the logos twice is a bit unnecessary"). */
           <p className="tpa-order-band">
-            <span className="collar tpa-logo" data-field={logoField(ex.venue.id)}>
-              <img src={ex.venue.logo} alt="" decoding="async" />
-            </span>
             <b>{ex.venue.name}</b>
           </p>
         )}
