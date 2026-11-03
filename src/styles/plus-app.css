@@ -1509,3 +1509,60 @@ html[data-surface="tpa"] .hs-scene .dock {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
+/* The value slide (SceneValue), polished (Sam, 3 Nov 2026). Always two by
+   two, so no name is cut off ("Cappucci…") and the cover tile's place does
+   not break the row; wide, short photos so the grid still fits a short phone;
+   the photos at their own colour, flat; name, price, saving on their own
+   lines, the saving in the green the app uses for money back. */
+html[data-surface="tpa"] .hs-scene .value-scene {
+  gap: 14px;
+}
+html[data-surface="tpa"] .hs-scene .vs-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 12px;
+}
+html[data-surface="tpa"] .hs-scene .vs-grid li {
+  gap: 2px;
+}
+html[data-surface="tpa"] .hs-scene .vs-shot {
+  aspect-ratio: 2 / 1;
+  margin-bottom: 6px;
+  border-radius: 14px;
+  box-shadow: none;
+}
+html[data-surface="tpa"] .hs-scene .vs-shot img,
+html[data-surface="tpa"] .hs-scene .vs-shot img[data-bright="true"] {
+  filter: none;
+}
+html[data-surface="tpa"] .hs-scene .vs-mark {
+  left: 8px;
+  bottom: 8px;
+  width: 28px;
+  height: 28px;
+}
+html[data-surface="tpa"] .hs-scene .vs-grid b {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: normal;
+  text-wrap: balance;
+}
+html[data-surface="tpa"] .hs-scene :is(.vs-price, .vs-save) {
+  margin-top: 0;
+  font-size: 14px;
+  line-height: 18px;
+}
+html[data-surface="tpa"] .hs-scene .vs-price {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+html[data-surface="tpa"] .hs-scene .vs-save {
+  font-weight: 600;
+  color: var(--gain);
+}
+html[data-surface="tpa"] .hs-scene .vs-also {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--ink-3);
+}
