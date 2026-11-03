@@ -1,0 +1,1077 @@
+/* ══ THE HOME PAGE IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═══════════════════
+   routes/PlusHome.tsx. Scoped under .tpa. The values are the app's light
+   look as captured from its source on 3 Nov (~/tapin-plus-tools/app-ref/
+   APP-LOOK.md): shop_home.css tokens, app_geometry.css radii, the Account
+   collage band (account_header.css), modules, buttons, glass. Ink, white and
+   #F0F0F0 everywhere; the collage art and the paper Plus mark are the only
+   colour, as in the app. Resets sit in :where() so every rule after them
+   wins on order, not on weight. */
+
+html[data-surface="tpa"],
+html[data-surface="tpa"] body {
+  background: #f0f0f0;
+  color-scheme: light;
+}
+
+.tpa {
+  --ground: #f0f0f0;
+  --module: #ffffff;
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --well: #e5e5ea;
+  --hair: rgba(20, 22, 24, 0.08);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --gutter: 16px;
+  --column: 480px;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.tpa *,
+.tpa *::before,
+.tpa *::after {
+  box-sizing: border-box;
+}
+.tpa :where(p, h1, h2, ul, ol) {
+  margin: 0;
+  padding: 0;
+}
+.tpa :where(ul, ol) {
+  list-style: none;
+}
+.tpa :where(a) {
+  color: inherit;
+}
+.tpa .tnum {
+  font-variant-numeric: tabular-nums;
+}
+.tpa :where(a, button, summary):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ── The one glass (overlay_chrome.ts), over the photograph only ────────── */
+.tpa-glass {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(20, 20, 20, 0.65);
+  color: #ffffff;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ── The collage band (Account's A · Band) ──────────────────────────────── */
+.tpa-band {
+  position: relative;
+  overflow: hidden;
+  height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
+  background: #716a62;
+  color: #ffffff;
+}
+.tpa-band-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 40%;
+}
+.tpa-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) calc(env(safe-area-inset-top) + 80px)),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.4) 38%, rgba(0, 0, 0, 0) 66%);
+}
+.tpa-band-top {
+  position: absolute;
+  z-index: 1;
+  top: calc(env(safe-area-inset-top) + 12px);
+  left: var(--gutter);
+  right: var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.tpa-badge {
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.01em;
+}
+.tpa-badge-mark {
+  width: 15px;
+  height: 15px;
+}
+.tpa-signin {
+  height: 44px;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+}
+.tpa-band-title {
+  position: absolute;
+  z-index: 1;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tpa-band-title h1 {
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+  max-width: 15ch;
+  text-wrap: balance;
+}
+.tpa-band-title span {
+  flex: 0 0 auto;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  padding-bottom: 5px;
+}
+
+/* The ground rises over the band's foot (the lip). */
+.tpa-sheet {
+  position: relative;
+  z-index: 1;
+  margin: -20px auto 0;
+  max-width: var(--column);
+  padding: 8px 0 0;
+  background: var(--ground);
+  border-radius: 16px 16px 0 0;
+}
+
+/* ── Modules ────────────────────────────────────────────────────────────── */
+.tpa-module {
+  margin: 12px var(--gutter) 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--module);
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.tpa-h2 {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+.tpa-h2-out {
+  margin: 28px var(--gutter) 0;
+}
+
+/* The offer: the paper mark leads, the way it does when you join. */
+.tpa-offer {
+  padding-top: 20px;
+}
+.tpa-paper {
+  display: block;
+  width: 112px;
+  height: auto;
+  margin: 0 0 12px -6px;
+}
+.tpa-lead {
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+.tpa-marks {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+.tpa-logo {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+/* Logos are the app's round discs with a hairline, not the presale's
+   brand-coloured square collar (base.css .collar), which would otherwise
+   take the shown place's colour on every logo near it. */
+.tpa .collar {
+  padding: 0;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tpa .collar img {
+  border-radius: 50%;
+  background: #ffffff;
+}
+.tpa .collar::after {
+  display: none;
+}
+.tpa-price {
+  margin-top: 20px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpa-price-h {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpa-price-h b {
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  margin-right: 4px;
+}
+.tpa-price-then {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+/* Buttons (.sh-order): ink, 14px radius; white on the black card. */
+.tpa-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  margin-top: 16px;
+  padding: 0 24px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-decoration: none;
+  transition: transform 0.15s var(--ease);
+}
+.tpa-cta:active {
+  transform: scale(0.98);
+}
+.tpa .tpa-cta {
+  color: #ffffff;
+}
+.tpa .tpa-cta-white {
+  background: #ffffff;
+  color: var(--ink);
+}
+.tpa-rises {
+  margin-top: 12px;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+.tpa-refund {
+  margin-top: 6px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* The Plus Promise: one row, the well holding a shield. */
+.tpa-promise {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.tpa-promise-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.tpa-promise-h {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+.tpa-promise-line {
+  margin-top: 4px;
+  font-weight: 600;
+}
+.tpa-promise-more {
+  margin-top: 4px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* How it works: three figures like the wallet's cells. */
+.tpa-figs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 12px 0 16px;
+}
+.tpa-figs li {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 10px;
+  box-shadow: inset 1px 0 0 var(--hair);
+}
+.tpa-figs li:first-child {
+  padding-left: 0;
+  box-shadow: none;
+}
+.tpa-figs b {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.tpa-figs span {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+/* The order: the old card's shape (§98), a well inside the module headed by
+   the place's own colour band with its mark and name, then the item, then
+   the $5 back and the points arriving a beat later. */
+.tpa-order {
+  border-radius: 12px;
+  background: var(--ground);
+  overflow: hidden;
+}
+.tpa-order-band {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--brand);
+  color: var(--brand-ink);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+.tpa-order-band b {
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tpa-order-in {
+  padding: 0 12px 12px;
+}
+.tpa-order-item {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+}
+.tpa-order-item img {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--well);
+}
+.tpa-order-item b {
+  font-weight: 600;
+}
+.tpa-order-off {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  box-shadow: inset 0 1px 0 var(--hair);
+  font-weight: 600;
+}
+.tpa-order-off b {
+  color: #1f8a4c;
+}
+.tpa-order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 26px;
+  letter-spacing: -0.01em;
+}
+/* The old swap: the rest state is the finished total; the menu price only
+   shows while the animation holds it (fill: both), so a still card is one
+   number in one box. */
+.tpa-swap {
+  position: relative;
+  display: inline-block;
+  min-width: 80px;
+  text-align: right;
+}
+.tpa-swap .was {
+  opacity: 0;
+}
+.tpa-swap .now {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.tpa-order-earn {
+  margin-top: 6px;
+  color: var(--muted);
+}
+.tpa-order-earn b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* The places as the carousel's indicators: each logo in a ring that fills
+   as its order's countdown; tap one to see its order. */
+.tpa-pick {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 0 -2px 10px;
+}
+.tpa-pick button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.tpa-ring {
+  position: absolute;
+  inset: 0;
+  width: 48px;
+  height: 48px;
+  transform: rotate(-90deg);
+}
+.tpa-ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+.tpa-ring-track {
+  stroke: transparent;
+}
+.tpa-pick button[data-on] .tpa-ring-track {
+  stroke: var(--well);
+}
+.tpa-ring-run {
+  stroke: var(--ink);
+  stroke-linecap: round;
+}
+.tpa-pick button:not([data-on]) .tpa-ring-run {
+  stroke: transparent;
+}
+.tpa-pick-logo {
+  width: 36px;
+  height: 36px;
+  opacity: 0.55;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.tpa-pick button[data-on] .tpa-pick-logo,
+.tpa-pick button:hover .tpa-pick-logo {
+  opacity: 1;
+}
+.tpa-pick button[data-on] .tpa-pick-logo {
+  transform: scale(0.92);
+}
+
+/* Every Plus place: the app's place cards, photo, glass tag, name on it. */
+.tpa-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 168px;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0 var(--gutter) 2px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--gutter);
+  scrollbar-width: none;
+}
+.tpa-rail::-webkit-scrollbar {
+  display: none;
+}
+.tpa-place {
+  position: relative;
+  height: 188px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--well);
+  scroll-snap-align: start;
+  color: #ffffff;
+}
+.tpa-place-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tpa-place::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.66) 0, rgba(0, 0, 0, 0.3) 36%, rgba(0, 0, 0, 0) 60%);
+}
+.tpa-tag {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+  gap: 5px;
+  height: 28px;
+  padding: 0 11px 0 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpa-tag-mark {
+  width: 16px;
+  height: 16px;
+}
+.tpa-place-name {
+  position: absolute;
+  z-index: 1;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+}
+.tpa-place-name b {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+.tpa-place-name small {
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* What you get: the app's list rows with a well. */
+.tpa-rows {
+  margin-top: 8px;
+}
+.tpa-rows li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 0;
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpa-rows li:first-child {
+  box-shadow: none;
+}
+.tpa-well {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--well);
+  font-weight: 700;
+  font-size: 14px;
+}
+.tpa-well-mark {
+  width: 18px;
+  height: 18px;
+}
+.tpa-rows li > span:last-child {
+  display: grid;
+  gap: 2px;
+  padding-top: 1px;
+}
+.tpa-rows b {
+  font-weight: 600;
+}
+.tpa-rows li > span:last-child > span {
+  color: var(--muted);
+}
+
+/* Questions. */
+.tpa-qa {
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpa-qa:first-of-type {
+  margin-top: 8px;
+}
+.tpa-qa summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.tpa-qa summary::-webkit-details-marker {
+  display: none;
+}
+.tpa-qa summary svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.tpa-qa[open] summary svg {
+  transform: rotate(180deg);
+}
+.tpa-qa p {
+  padding: 0 28px 14px 0;
+  color: var(--muted);
+}
+
+/* The close: the app's black feature card. */
+.tpa-close {
+  position: relative;
+  margin: 12px var(--gutter) 0;
+  padding: 22px 20px 20px;
+  border-radius: 16px;
+  background: #141414;
+  color: #ffffff;
+  overflow: hidden;
+}
+.tpa-close-paper {
+  display: block;
+  width: 84px;
+  height: auto;
+  margin-bottom: 12px;
+}
+.tpa-close-h {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 27px;
+  letter-spacing: -0.02em;
+}
+.tpa-close-line {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.tpa-foot {
+  margin: 20px var(--gutter) 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.tpa-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin-top: 8px;
+}
+.tpa-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* The dock: the app's floating white plate. */
+.tpa-dock {
+  position: fixed;
+  z-index: 30;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  max-width: calc(var(--column) - 24px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 18px;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(20, 22, 24, 0.14), 0 0 0 0.5px rgba(20, 22, 24, 0.08);
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s var(--ease), opacity 0.25s ease;
+}
+.tpa-dock[data-shown] {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+.tpa-dock p {
+  display: grid;
+  min-width: 0;
+}
+.tpa-dock b {
+  font-weight: 600;
+  font-size: 16px;
+}
+.tpa-dock span {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tpa-dock .tpa-cta {
+  margin: 0;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpa-cta,
+  .tpa-dock,
+  .tpa-pick-logo,
+  .tpa-order-band,
+  .tpa-qa summary svg {
+    transition: none;
+  }
+}
+
+/* ── Desktop: the app's desk column, the band as a card (account_desk.css) ─ */
+@media (min-width: 1024px) {
+  .tpa {
+    --column: 720px;
+    padding-top: 16px;
+  }
+  .tpa-band {
+    width: calc(100% - 32px);
+    max-width: 688px;
+    height: 300px;
+    margin: 8px auto 0;
+    border-radius: 16px;
+  }
+  .tpa-band-title {
+    left: 24px;
+    right: 24px;
+    bottom: 22px;
+  }
+  .tpa-band-title h1 {
+    font-size: 36px;
+    line-height: 40px;
+    max-width: 18ch;
+  }
+  .tpa-band-top {
+    left: 20px;
+    right: 20px;
+    top: 16px;
+  }
+  .tpa-sheet {
+    margin-top: 4px;
+    border-radius: 0;
+    padding-top: 0;
+  }
+  .tpa-rail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+    padding: 0 var(--gutter);
+  }
+  .tpa-place {
+    height: 200px;
+  }
+  .tpa-place-name b {
+    font-size: 16px;
+  }
+}
+
+.tpa-how-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tpa-quiet {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ══ HOW IT WORKS, THE SHEET (shell/HowSheet.tsx) ═══════════════════════════
+   Portalled to <body>, so it carries its own tokens. The app's sheet: white,
+   32px radius, its shadow; story bars at the top, a well for each step's
+   picture, the headline at page-title size, Back and Next at the foot. */
+.hs-layer {
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --well: #e5e5ea;
+  --ground: #f0f0f0;
+  --hair: rgba(20, 22, 24, 0.08);
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(20, 22, 24, 0.42);
+  font-family: "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.hs-layer *,
+.hs-layer *::before,
+.hs-layer *::after {
+  box-sizing: border-box;
+}
+.hs-layer :where(p, h2, ol, ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hs-layer .tnum {
+  font-variant-numeric: tabular-nums;
+}
+.hs-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  height: min(720px, calc(100dvh - 24px));
+  margin: 0 8px 8px;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 32px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+.hs-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hs-bars {
+  flex: 1 1 auto;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+}
+.hs-bars li {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--well);
+  transition: background-color 0.25s ease;
+}
+.hs-bars li[data-done],
+.hs-bars li[data-on] {
+  background: var(--ink);
+}
+.hs-x {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.hs-x svg {
+  width: 22px;
+  height: 22px;
+}
+.hs-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 8px;
+}
+.hs-art {
+  flex: 1 1 auto;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--ground);
+  overflow: hidden;
+}
+.hs-big {
+  font-weight: 700;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.hs-art-percent span {
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--muted);
+}
+.hs-logos {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.hs-logos .collar {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.hs-logos .collar img {
+  border-radius: 50%;
+}
+.hs-logos .collar::after {
+  display: none;
+}
+.hs-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  width: min(100%, 300px);
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font-weight: 600;
+  font-size: 15px;
+}
+.hs-chip b {
+  font-size: 17px;
+}
+.hs-chip-gain b,
+.hs-green {
+  color: #1f8a4c;
+}
+.hs-chip-total {
+  font-weight: 700;
+  font-size: 17px;
+}
+.hs-chip-total b {
+  font-size: 22px;
+}
+.hs-shield {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.hs-shield svg {
+  width: 56px;
+  height: 56px;
+}
+.hs-art-join {
+  position: relative;
+  padding: 0;
+}
+.hs-collage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 40%;
+}
+.hs-paper {
+  position: relative;
+  width: 132px;
+  height: auto;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.35));
+}
+.hs-head {
+  margin-top: 20px;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.hs-line {
+  margin-top: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.hs-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+}
+.hs-back {
+  height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px var(--hair);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.hs-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-width: 140px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.hs-layer :where(button, a):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+@media (min-width: 720px) {
+  .hs-layer {
+    align-items: center;
+  }
+  .hs-sheet {
+    margin: 0;
+  }
+}
+

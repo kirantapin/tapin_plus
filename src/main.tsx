@@ -22,6 +22,8 @@ import "./styles/simple.css";
    per-surface token blocks in reserve.css that it is overriding. */
 import "./styles/light.css";
 import "./styles/arrival.css";
+/* The home page in the app's own look (3 Nov 2026), scoped under .tpa. */
+import "./styles/plus-app.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
