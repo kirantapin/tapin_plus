@@ -318,7 +318,8 @@ html[data-surface="tpa"] body {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  min-height: 44px;
+  padding: 12px 12px 6px;
   background: var(--brand);
   color: var(--brand-ink);
   transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
