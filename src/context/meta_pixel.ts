@@ -42,6 +42,15 @@ function injectBaseCode(): void {
 
 let started = false;
 
+/* ══ EVENTS THAT ARRIVE BEFORE THE PIXEL (3 Nov 2026) ═════════════════════
+   The landing page's own $pageview fires from App's route effect, and a
+   child's effect runs before its provider's, so it reached `mirror` a moment
+   before `load` had run and was dropped: Meta saw no PageView from anyone who
+   landed from an ad and stayed on one page (checked live: eventCount 0).
+   Events that come early now wait here and go out right after `init`. */
+const early: Array<[string, Record<string, unknown>]> = [];
+const EARLY_MAX = 20;
+
 /** Idempotent — `init` twice would double every event that follows. */
 export function load(enabled: boolean): boolean {
   if (!enabled || !META_PIXEL_ID) return false;
@@ -52,7 +61,9 @@ export function load(enabled: boolean): boolean {
     injectBaseCode();
     window.fbq!("init", META_PIXEL_ID);
     /* No `fbq("track", "PageView")` here — see the note above. The first one
-       arrives from the app's own route effect, like every one after it. */
+       arrives from the app's own route effect, like every one after it; if it
+       came before this ran, it is waiting in `early`. */
+    early.splice(0).forEach(([event, props]) => mirror(event, props));
   } catch {
     /* Analytics must never break a page that takes money. */
     console.error("Meta Pixel failed to load");
@@ -113,9 +124,13 @@ const MIRRORED: Record<
  * and for a pixel that never loaded, so the caller needs no branch of its own.
  */
 export function mirror(event: string, props: Record<string, unknown>): void {
-  if (!started || !window.fbq) return;
   const rule = MIRRORED[event];
   if (!rule) return;
+  if (!started) {
+    if (early.length < EARLY_MAX) early.push([event, props]);
+    return;
+  }
+  if (!window.fbq) return;
 
   try {
     window.fbq("track", rule.name, rule.props ? rule.props(props) : undefined);
