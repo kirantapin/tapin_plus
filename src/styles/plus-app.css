@@ -33,7 +33,7 @@ html[data-surface="tpa"] body {
   font-size: 15px;
   line-height: 20px;
   -webkit-font-smoothing: antialiased;
-  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  padding-bottom: calc(150px + env(safe-area-inset-bottom));
 }
 .tpa *,
 .tpa *::before,
@@ -1318,7 +1318,8 @@ html[data-surface="tpa"] body {
   font-weight: 600;
 }
 
-/* The dock: two buttons on a white plate, floating, always on screen. */
+/* The dock: Join over See how much I'd save, on a white plate, floating,
+   always on screen. */
 .tpa-dock {
   position: fixed;
   z-index: 30;
@@ -1328,8 +1329,7 @@ html[data-surface="tpa"] body {
   max-width: calc(var(--column) - 24px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   padding: 8px;
   border-radius: 20px;
   background: #ffffff;
@@ -1351,13 +1351,8 @@ html[data-surface="tpa"] body {
   text-align: center;
   white-space: nowrap;
 }
-@media (max-width: 374px) {
-  .tpa .tpa-dock-cta,
-  .tpa-dock-save {
-    font-size: 15px;
-  }
-}
 .tpa-dock-save {
+  height: 44px;
   border: 0;
   background: var(--well);
   color: var(--ink);
@@ -2018,34 +2013,6 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
   .tpa-home .tpa-h2-out {
     margin: 40px 0 0;
   }
-  /* How it works: the order card and the walkthrough side by side. */
-  .tpa-home .tpa-sheet > .tpa-module:first-child {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 220px;
-    grid-template-areas: "head head" "card step";
-    column-gap: 20px;
-    align-items: end;
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-h2 {
-    grid-area: head;
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-carousel {
-    grid-area: card;
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
-    grid-area: step;
-    height: auto;
-    min-height: 120px;
-    margin: 0;
-    flex-direction: column;
-    gap: 10px;
-    border-radius: 16px;
-    font-size: 17px;
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide .tpa-play {
-    width: 22px;
-    height: 22px;
-  }
   /* The places: one row of five. */
   .tpa-home .tpa-rail {
     grid-auto-flow: row;
@@ -2082,16 +2049,6 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
 @media (min-width: 1024px) and (max-width: 1180px) {
   .tpa-home .tpa-sheet {
     grid-template-columns: minmax(0, 1fr) 360px;
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "head" "card" "step";
-  }
-  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
-    min-height: 0;
-    height: 48px;
-    margin-top: 12px;
-    flex-direction: row;
   }
 }
 
