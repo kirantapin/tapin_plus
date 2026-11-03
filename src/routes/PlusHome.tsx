@@ -6,8 +6,9 @@ import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
-import { tapinHref } from "../model/closed";
+import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
+import { openPlusCheckout } from "../shell/PlusCheckout";
 import TrialModal from "../shell/TrialModal";
 import { WelcomeBar, WelcomeChip, WelcomeDays, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
@@ -26,11 +27,10 @@ import { useTrialLink } from "../shell/useTrialLink";
 
    The order is the one that sold 46 memberships here between 16 Sep and 26
    Oct: the offer and Join first, an order earning its $5, the places, what
-   you get, the questions, Join again. Join goes to www.tapin.app's Plus
-   sign-up with the ad's tags (tapinHref). Every figure is the app's. */
+   you get, the questions, Join again. Join opens the checkout here
+   (shell/PlusCheckout.tsx), and the prices are the Plus bundle's
+   (model/plus.ts). Every figure is the app's. */
 
-const FIRST_MONTH = "$3.99";
-const MONTHLY = "$7.99";
 const CREDIT = 5;
 const MIN_ORDER = 10;
 const PERCENT = 15;
@@ -218,7 +218,7 @@ const orderLook = (): OrderLook => {
   return v === "0" ? "tabs" : v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "grey";
 };
 
-function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderLook }) {
+function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look?: OrderLook; monthly: string }) {
   const card = useRef<HTMLDivElement | null>(null);
   const rings = useRef<Array<SVGCircleElement | null>>([]);
   const [inView, setInView] = useState(false);
@@ -367,7 +367,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
           <div className="tpa-order-in tpa-next" key="next">
             <p className="tpa-next-h">More places are joining Plus</p>
             <p className="tpa-next-p">
-              Every new place is yours too, at no extra cost. Your {MONTHLY} a month stays locked in as they join.
+              Every new place is yours too, at no extra cost. Your {monthly} a month stays locked in as they join.
             </p>
           </div>
         ) : null}
@@ -439,7 +439,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
   );
 }
 
-const FAQ: ReadonlyArray<{ q: string; a: string }> = [
+const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   {
     q: "What if I barely go out?",
     a: "Ask for a refund. Every month counts on its own: if Plus saved you less than you paid that month, your refund is auto-approved.",
@@ -486,10 +486,17 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [look] = useState(orderLook);
+  const price = usePlusPrice();
+  const FIRST_MONTH = usd(price?.first);
+  const MONTHLY = usd(price?.monthly);
+  const join = (where: string) => {
+    track("plus_join_clicked", { where });
+    openPlusCheckout(where);
+  };
   const joinCta = (where: string, white = false) => (
-    <a className={`tpa-cta${white ? " tpa-cta-white" : ""}`} href={tapinHref()} onClick={go(where)}>
+    <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={() => join(where)}>
       Join Tapin Plus
-    </a>
+    </button>
   );
   const tryCta = (
     <button
@@ -525,13 +532,6 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       delete root.dataset.surface;
     };
   }, []);
-
-  /* Read at click time so the ad's tags on this visit go with it. */
-  const go = (where: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const href = tapinHref();
-    e.currentTarget.href = href;
-    track("plus_join_clicked", { where, destination: href.split("?")[0] });
-  };
 
   return (
     <div className="tpa tpa-home">
@@ -570,7 +570,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-how" className="tpa-h2">
             How it works
           </h2>
-          <OrderCard start={startAt} look={look} />
+          <OrderCard start={startAt} look={look} monthly={MONTHLY} />
           <button type="button" className="tpa-step-wide" onClick={openHow}>
             <Play />
             Step through it
@@ -795,7 +795,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
-          {FAQ.map((f) => (
+          {faqFor(MONTHLY).map((f) => (
             <details key={f.q} className="tpa-qa">
               <summary>
                 <span>{f.q}</span>
@@ -811,9 +811,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 className="tpa-close-h">{FIRST_MONTH} your first month</h2>
           <p className="tpa-close-line">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
           <WelcomeEnds className="tpa-close-ends" />
-          <a className="tpa-cta tpa-cta-white" href={tapinHref()} onClick={go("close")}>
-            Join Tapin Plus
-          </a>
+          {joinCta("close", true)}
         </section>
 
         <footer className="tpa-foot">
@@ -834,7 +832,15 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </main>
 
       {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
-      {how ? <HowSheet onClose={() => setHow(false)} joinHref={tapinHref()} onJoin={go("how_sheet")} /> : null}
+      {how ? (
+        <HowSheet
+          onClose={() => setHow(false)}
+          onJoin={() => {
+            setHow(false);
+            join("how_sheet");
+          }}
+        />
+      ) : null}
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
@@ -842,10 +848,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           "we should have a full width button here - college students have an
           impossibly short attention span"). */}
       <div className="tpa-dock" data-shown="">
-        <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
+        <button type="button" className="tpa-cta tpa-dock-cta" onClick={() => join("dock")}>
           <span>Join Tapin Plus</span>
           <span className="tpa-dock-price tnum">{FIRST_MONTH} first month</span>
-        </a>
+        </button>
       </div>
     </div>
   );

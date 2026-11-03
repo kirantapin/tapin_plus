@@ -1,12 +1,9 @@
-import { useEffect, useLayoutEffect, useState } from "react";
-import { Navigate, Route, Routes, useLocation, type Location } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Shell from "./shell/Shell";
-import ReserveLayer from "./shell/ReserveLayer";
 import Arrival from "./shell/Arrival";
+import { PlusCheckoutMount } from "./shell/PlusCheckout";
 import { useEventTracking } from "./context/event_tracking_context";
-import Simple from "./routes/Simple";
-import Reserve from "./routes/Reserve";
-import { EARLY_ACCESS_CLOSED } from "./model/closed";
 import PlusHome from "./routes/PlusHome";
 import Members from "./routes/Members";
 import { asset } from "./asset";
@@ -72,10 +69,6 @@ export default function App() {
      page instead — shell/VenuePopup.tsx. The preview mocked a product that does
      not open until Spring 2027; the six merchant pages are real today, which is
      the stronger thing to show. */
-  /* Early access is closed (model/closed.ts): no checkout layer, and the
-     route below sends /reserve home, where the page says where to go. */
-  const isReserve = !EARLY_ACCESS_CLOSED && location.pathname === "/reserve";
-
   /* ══ THE ARRIVAL, ON THE DOOR ONLY ════════════════════════════════════════
      Decided once, from the path the browser LOADED on — never from where a
      route change lands. So it plays on every full load of / and /welcome
@@ -88,34 +81,19 @@ export default function App() {
   /* /welcome now redirects home (3 Nov 2026), so nothing plays the arrival;
      it stays wired for the day a page wants it again. */
   const [arrive] = useState(() => false);
-  const layered = isReserve;
-  const background = (location.state as { background?: Location } | null)?.background;
-  const under: Location | string = layered ? (background ?? "/") : location;
-
-  /* The page beneath is scenery while the window is open: no wheel-scroll
-     through the scrim (`overflow:hidden` keeps the scroll offset), and no focus
-     or click reaches it (`inert`). Layout effect so the first painted frame of
-     the layer already has both. */
-  useLayoutEffect(() => {
-    document.documentElement.classList.toggle("is-layered", layered);
-    document.querySelector("main.column")?.toggleAttribute("inert", layered);
-  }, [layered]);
 
   return (
     <>
-      <Routes location={under}>
+      <Routes>
         {/* THE HOME PAGE IN THE APP'S OWN LOOK (Sam, 3 Nov 2026). Outside
             the shell: it paints the app's light ground edge to edge. */}
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
         <Route path="/in" element={<Members />} />
-        <Route element={<Shell layered={layered} />}>
-          {/* THE HOME PAGE IS THE 5TH-GRADE PAGE (Sam, 30 Sep 2026: "it should
-              replace plus.tapin.app, not be plus.tapin.app/simple"; §88). The
-              pitch it replaced stays at /pitch, and /simple, already shared,
-              comes here. */}
-          {/* The page before the 3 Nov redesign, kept for comparison. */}
-          <Route path="/classic" element={<Simple />} />
+        <Route element={<Shell />}>
+          {/* The page before the 3 Nov redesign went with the Early Access
+              checkout it sold through (3 Nov 2026). */}
+          <Route path="/classic" element={<ToHome />} />
           <Route path="/pitch" element={<ToHome />} />
           <Route path="/simple" element={<HomeLink />} />
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
@@ -128,10 +106,9 @@ export default function App() {
               that path, and vercel.json's "/blacksburg/:path*" rewrite
               already hands it to index.html. The host is a DNS matter. */}
 
-          <Route
-            path="/reserve"
-            element={EARLY_ACCESS_CLOSED ? <Navigate to="/" replace /> : <Reserve />}
-          />
+          {/* Early Access's checkout, closed 1 Nov 2026: Join opens the
+              Plus checkout on the home page now. */}
+          <Route path="/reserve" element={<Navigate to="/" replace />} />
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}
 
@@ -145,11 +122,7 @@ export default function App() {
           <Route path="/try" element={<TryLink />} />
         </Route>
       </Routes>
-      {isReserve ? (
-        <ReserveLayer background={background}>
-          <Reserve />
-        </ReserveLayer>
-      ) : null}
+      <PlusCheckoutMount />
       {arrive ? <Arrival /> : null}
     </>
   );

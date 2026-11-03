@@ -46,12 +46,10 @@ const LINES: Record<string, string> = {
 
 export default function HowSheet({
   onClose,
-  joinHref,
   onJoin,
 }: {
   onClose: () => void;
-  joinHref: string;
-  onJoin: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onJoin: () => void;
 }) {
   /* A month's spend, and a month back (Sam, 3 Nov 2026: "a month and a
      month"), worked order by order (savings.ts monthlyBack). */
@@ -236,9 +234,9 @@ export default function HowSheet({
               </button>
             ) : null}
             {last ? (
-              <a className="hs-next" href={joinHref} onClick={onJoin}>
+              <button type="button" className="hs-next" onClick={onJoin}>
                 Join Tapin Plus
-              </a>
+              </button>
             ) : (
               <button type="button" className="hs-next" onClick={() => go(i + 1)}>
                 {nextLabel}

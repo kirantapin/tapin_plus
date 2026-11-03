@@ -1,15 +1,9 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import { campaignTrialPlaces, campaignVenue } from "../model/campaign";
-import { useReserveCta } from "./useReserveCta";
-import { EARLY_ACCESS_CLOSED, TAPIN_HOST, closedLead, closedMore } from "../model/closed";
-import {
-  monthlyToday,
-  standardAfter,
-  logoField,
-  venues,
-} from "../model/content";
+import { logoField, venues } from "../model/content";
+import { usd, usePlusPrice } from "../model/plus";
+import { openPlusCheckout } from "./PlusCheckout";
 
 /**
  * HOW TO TRY IT FREE — the campaign page's one modal.
@@ -58,16 +52,7 @@ export default function TrialModal({
 }) {
   const [closing, setClosing] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
-  /* ══ THE SILO HELD ON THE PAGE AND BROKE IN HERE ═══════════════════════
-     Sam, 20 Sep 2026: "when I clicked on get early access again it took me
-     to the main tapin page checkout not the one for coffeeholics."
-
-     `/reserve` is a layer over `state.background ?? "/"`, and this Link was
-     written as a bare `to="/reserve"` — so it took the fallback and put the
-     pitch under the sheet. The page's own two buttons have carried the
-     background since the silo was asked for; this one was added later and
-     did not. It uses the same hook now, which is the point of the hook. */
-  const cta = useReserveCta();
+  const price = usePlusPrice();
   /* The rest of the network, from the records. Same list and same marks the
      page's own closing row draws, so the two say it identically. */
   /* The rest of Plus: not a place this window already offers a try at (it
@@ -287,24 +272,20 @@ export default function TrialModal({
                 </p>
               </div>
             ) : null}
+            {/* The window closes on Plus's offer, from the bundle (model/plus.ts). */}
             <p className="t-compact ct-more-p">
-              {/* Early access is closed (model/closed.ts): no price to quote. */}
-              {/* On the app-look home page (3 Nov 2026) the window closes on
-                  the app's offer, not on "early access is closed". */}
-              {EARLY_ACCESS_CLOSED
-                ? document.documentElement.dataset.surface === "tpa"
-                  ? "$3.99 your first month, then $7.99."
-                  : `${closedLead} ${closedMore} ${TAPIN_HOST}.`
-                : `$${monthlyToday.toFixed(2)} now, ${standardAfter} once the spots are gone.`}
+              {`${usd(price?.first)} your first month, then ${usd(price?.monthly)}.`}
             </p>
-            <Link
+            <button
+              type="button"
               className="action ct-go"
-              to={cta.to}
-              state={cta.state}
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                openPlusCheckout("trial");
+              }}
             >
-              {EARLY_ACCESS_CLOSED && document.documentElement.dataset.surface === "tpa" ? "Join Tapin Plus" : cta.label}
-            </Link>
+              Join Tapin Plus
+            </button>
           </div>
         </div>
       </div>

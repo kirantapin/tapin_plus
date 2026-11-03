@@ -10,15 +10,14 @@
  * Supabase client — ~40kB to send two POSTs — and a `phoneAuth.live` pair that
  * let the step collect a number without verifying it when nothing was
  * configured. Both were right for a one-off anonymous deposit. Neither
- * survived the subscription: `create_simple_intent` takes its customer from an
+ * survived the subscription: the checkout takes its customer from an
  * access token, and a token has to be persisted and refreshed. The two raw
  * fetches verified a code and then THREW THE SESSION AWAY. See `supabase.ts`.
  *
  * ══ THE STEP IS ALSO THE ONLY PLACE THE ACCOUNT IS WRITTEN ═════════════════
- * Both entry points — the checkout sheet and the pitch's sign-in sheet — mount
- * the same `PhoneStep`, and both land in `verifyCode` below. So this is the one
- * function where the name and the marketing consent reach the auth user, and
- * the reason neither can be lost by taking a different door in.
+ * The Plus checkout's sign-in (shell/PlusCheckout.tsx) lands in `verifyCode`
+ * below, so this is the one function where the name and the marketing consent
+ * reach the auth user.
  */
 import { supabase } from "../supabase";
 

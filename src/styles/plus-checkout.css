@@ -1,0 +1,210 @@
+/* ══ THE PLUS CHECKOUT (shell/PlusCheckout.tsx) ═════════════════════════════
+   Portalled to <body>, so it carries its own tokens: the app's sheet, as the
+   How it works sheet is (plus-app.css .hs-*). White, 32px radius, ink type in
+   Gilroy, black actions. */
+.pck-layer {
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --well: #e5e5ea;
+  --hair: rgba(20, 22, 24, 0.08);
+  position: fixed;
+  z-index: 110;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(20, 22, 24, 0.42);
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.pck-layer *,
+.pck-layer *::before,
+.pck-layer *::after {
+  box-sizing: border-box;
+}
+:where(.pck-layer) :where(p, h2, ul) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pck-layer .tnum {
+  font-variant-numeric: tabular-nums;
+}
+.pck-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  margin: 0 8px 8px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 32px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+.pck-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+}
+.pck-title {
+  flex: 1 1 auto;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 700;
+}
+.pck-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--well);
+  color: var(--ink);
+  cursor: pointer;
+}
+.pck-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+}
+.pck-wait {
+  min-height: 240px;
+}
+.pck-lede {
+  color: var(--muted);
+}
+.pck-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.pck-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  margin-top: -6px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.pck-field:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.pck-cc {
+  color: var(--muted);
+}
+.pck-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  color: var(--ink);
+}
+.pck-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.pck-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--ink);
+}
+.pck-fine {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 17px;
+}
+.pck-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pck-cta:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pck-link {
+  align-self: center;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.pck-error {
+  color: #c0392b;
+  font-size: 14px;
+  line-height: 18px;
+}
+.pck-rows {
+  border-radius: 16px;
+  background: #f0f0f0;
+}
+.pck-rows li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+}
+.pck-rows li + li {
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.pck-rows b {
+  font-weight: 600;
+}
+.pck-rows span {
+  text-align: right;
+}
+.pck-consent {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 17px;
+}
+.pck-consent a {
+  color: var(--ink);
+}
+.pck-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pck-done {
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 700;
+}
+.pck-layer :where(a, button, input):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

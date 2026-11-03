@@ -103,10 +103,10 @@ const MIRRORED: Record<
 > = {
   $pageview: { name: "PageView" },
 
-  /* The checkout sheet opening — the last step before money. routes/Reserve.tsx. */
+  /* The checkout sheet opening — the last step before money. shell/PlusCheckout.tsx. */
   checkout_opened: { name: "InitiateCheckout" },
 
-  /* The subscription, paid. `amount_cents` is FIRST_INVOICE_TOTAL_CENTS. */
+  /* The subscription, paid. `amount_cents` is the signed cart's total. */
   purchase: {
     name: "Purchase",
     props: (p) => ({
@@ -115,6 +115,16 @@ const MIRRORED: Record<
       currency: "USD",
       content_type: "product",
       content_ids: ["tapin_plus_membership"],
+    }),
+  },
+
+  /* The same purchase, as a subscription's first payment (the app sends both). */
+  subscription_purchase: {
+    name: "Subscribe",
+    props: (p) => ({
+      value:
+        typeof p.amount_cents === "number" ? p.amount_cents / 100 : undefined,
+      currency: "USD",
     }),
   },
 };

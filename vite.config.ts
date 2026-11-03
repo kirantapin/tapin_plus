@@ -19,12 +19,11 @@ import react from "@vitejs/plugin-react";
  * both branches — an assigned port that is somehow taken should fail loudly,
  * which is the guarantee this comment existed for in the first place.
  *
- * NO SUPABASE CLIENT AND NO AUTH PAIR. The checkout added 13 Sep 2026 calls ONE
- * endpoint by URL (`create_simple_intent`) and reads two build-time variables —
- * a Stripe publishable key, which is designed to ship in a bundle, and a
- * connected-account id. Neither is a secret and neither is in a file:
+ * The checkout (src/model/checkout.ts) calls the backend through the Supabase
+ * client and reads build-time variables — the Supabase anon key and a Stripe
+ * publishable key, both designed to ship in a bundle. Neither is in a file:
  * `.vercelignore` excludes `.env*` so a local copy cannot ride along in an
- * upload. See src/shell/checkoutEnv.ts.
+ * upload.
  */
 export default defineConfig({
   /* Served under staging.tapin.app/blacksburg via a rewrite in the main app, so

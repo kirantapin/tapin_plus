@@ -24,6 +24,7 @@ import "./styles/light.css";
 import "./styles/arrival.css";
 /* The home page in the app's own look (3 Nov 2026), scoped under .tpa. */
 import "./styles/plus-app.css";
+import "./styles/plus-checkout.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

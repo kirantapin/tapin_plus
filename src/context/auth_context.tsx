@@ -10,6 +10,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
 import { useEventTracking } from "./event_tracking_context";
+import { isPlusMember } from "../model/plus";
 
 interface AuthContextProps {
   userSession: Session | null | undefined;
@@ -61,37 +62,27 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   /* ══ HAS THIS PERSON ALREADY BOUGHT? ═══════════════════════════════════════
-     Asked of the server, because the browser is not a record. A reservation
-     used to live only in `localStorage`, which meant a second device, a new
-     browser or a cleared cache made a real purchase invisible and sent the
-     buyer back into the checkout. There is a Stripe customer behind the
-     session now, and `create_simple_intent` answers this in one call. */
+     Asked of the server, because the browser is not a record: whether they
+     hold TapIn's Plus bundle right now (model/plus.ts isPlusMember), the same
+     check the app makes. */
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const accessToken = userSession?.access_token;
+  const memberId = userSession?.user?.id;
 
   const refreshSubscription = useCallback(async () => {
-    if (!accessToken) {
+    if (!memberId) {
       setSubscribed(null);
       return;
     }
     try {
-      const response = await supabase.functions.invoke("create_simple_intent", {
-        body: { mode: "subscription_status", userAccessToken: accessToken },
-      });
-      if (response.error) {
-        console.error("subscription_status failed", response.error);
-        setSubscribed(null);
-        return;
-      }
-      console.log(response);
-      setSubscribed(Boolean(response.data?.subscribed));
+      setSubscribed(await isPlusMember(memberId));
     } catch (err) {
-      /* Unknown, not false. The checkout renders its wallet on `false` and a
-         wrong false is the 409 path — so a failed check stays silent. */
-      console.error("subscription_status threw", err);
+      /* Unknown, not false: a wrong false would offer the checkout to a
+         member (create_intent refuses them anyway). */
+      console.error("Reading Plus membership failed", err);
       setSubscribed(null);
     }
-  }, [accessToken]);
+  }, [memberId]);
 
   useEffect(() => {
     refreshSubscription();
