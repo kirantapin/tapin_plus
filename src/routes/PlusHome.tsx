@@ -624,11 +624,18 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         <div className="tpa-band-title">
           {/* Sam, 3 Nov 2026: "header copy should be something like '$5 back
               at every place you already go in blacksburg'". */}
-          <h1>
-            {place
-              ? `$${CREDIT} back every week at ${place.name}`
-              : `$${CREDIT} back at every place you already go in Blacksburg`}
-          </h1>
+          <div>
+            <h1>
+              {place
+                ? `$${CREDIT} back every week at ${place.name}`
+                : `$${CREDIT} back at every place you already go in Blacksburg`}
+            </h1>
+            {/* Social proof, at the top (Sam, 3 Nov 2026). Plus members, by
+                Sam's count: "let's just say over 500 ... we're just below
+                1,000, I think. I have to check." Raise it only once the real
+                count is past the new figure. */}
+            <p className="tpa-proof">Join over 500 Virginia Tech students on Tapin Plus</p>
+          </div>
         </div>
       </header>
 

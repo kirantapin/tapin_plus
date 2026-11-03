@@ -2249,3 +2249,38 @@ html[data-surface="tpa"] .ct .ct-go {
 .tpa-s2-blank .tpa-roll-was {
   left: 2px;
 }
+
+/* Social proof under the headline, on the band's shade. */
+.tpa-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+.tpa-proof::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.28);
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-proof {
+    margin-top: 16px;
+    font-size: 18px;
+  }
+}
+@media (max-width: 374px) {
+  .tpa-proof {
+    font-size: 13px;
+    gap: 7px;
+  }
+}
