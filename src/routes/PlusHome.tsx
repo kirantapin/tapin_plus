@@ -95,20 +95,59 @@ const FIRST_ORDER = EXAMPLES[0];
    walkthrough (savings.ts monthlyBack). */
 const SPEND_BANDS = [50, 100, 200, 300] as const;
 
+/** A figure that rolls when it changes, like an odometer: the old value
+ *  lifts out of a clipped slot as the new one rises in, and the slot eases
+ *  to the new width so the words beside it glide rather than jump. Nothing
+ *  else in the sentence moves. Reduced motion: the new value, at once. */
+function RollFigure({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
+  const slot = useRef<HTMLSpanElement | null>(null);
+  const prev = useRef(text);
+  useLayoutEffect(() => {
+    const el = slot.current;
+    const was = prev.current;
+    prev.current = text;
+    if (!el || was === text || reducedMotion() || typeof el.animate !== "function") return;
+    const ease = "cubic-bezier(.22,1,.36,1)";
+    const next = el.querySelector<HTMLElement>(".tpa-roll-now");
+    const ghost = document.createElement("span");
+    ghost.className = "tpa-roll-was";
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.textContent = was;
+    el.appendChild(ghost);
+    const to = el.getBoundingClientRect().width;
+    const from = ghost.getBoundingClientRect().width;
+    el.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: 360, delay, easing: ease, fill: "backwards" });
+    next?.animate([{ transform: "translateY(85%)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+      duration: 360,
+      delay,
+      easing: ease,
+      fill: "backwards",
+    });
+    const out = ghost.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(-85%)", opacity: 0 }], {
+      duration: 300,
+      delay,
+      easing: ease,
+      fill: "forwards",
+    });
+    out.onfinish = () => ghost.remove();
+    return () => ghost.remove();
+  }, [text, delay]);
+  return (
+    <b ref={slot} className={`tpa-roll tnum ${className ?? ""}`}>
+      <span className="tpa-roll-now">{text}</span>
+    </b>
+  );
+}
+
 function PaybackCounter() {
   const [m, setM] = useState<number>(200);
-  const said = useRef<HTMLSpanElement | null>(null);
   const back = monthlyBack(m);
   const top = m === SPEND_BANDS[SPEND_BANDS.length - 1];
-  const pick = (k: number) => {
-    setM(k);
-    if (!reducedMotion()) {
-      said.current?.animate?.([{ transform: "translateY(8px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
-        duration: 320,
-        easing: "cubic-bezier(.22,1,.36,1)",
-      });
-    }
-  };
+  /* Only the two figures move when the spend changes, the words around them
+     stay put (Sam, 3 Nov 2026: "only the numbers that change based on my
+     selection should actually animate"). They roll (RollFigure), the amount
+     back a beat after the spend it comes from. */
+  const pick = (k: number) => setM(k);
   return (
     <div className="tpa-s2-calc">
       <div className="tpa-s2-picks" role="radiogroup" aria-label="What you spend a month on food and drinks">
@@ -122,14 +161,10 @@ function PaybackCounter() {
         ))}
       </div>
       <p className="tpa-s2-lib" aria-live="polite">
-        <span ref={said}>
-          Spend{" "}
-          <b className="tnum tpa-s2-blank">
-            ${m}
-            {top ? "+" : ""}
-          </b>{" "}
-          a month on food and drinks at Plus places, and get about{" "}
-          <b className="tnum tpa-s2-back">${back.monthlyUsd}</b> back a month.
+        <span>
+          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month on food and drinks at
+          Plus places, and get about <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back a
+          month.
         </span>
       </p>
       <p className="tpa-s2-note">

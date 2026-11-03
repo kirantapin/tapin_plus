@@ -2261,3 +2261,26 @@ html[data-surface="tpa"] .ct .ct-go {
   line-height: 22px;
   text-wrap: pretty;
 }
+
+/* The rolling figure (PlusHome RollFigure): a slot the old value lifts out
+   of and the new one rises into. Clipped with clip-path, not overflow, so
+   the figure keeps the sentence's baseline (an overflow-hidden inline-block
+   sits on its bottom edge and rides high). */
+.tpa-roll {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  clip-path: inset(0 -6px);
+}
+.tpa-roll-now {
+  display: inline-block;
+}
+.tpa-roll-was {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.tpa-s2-blank .tpa-roll-was {
+  left: 2px;
+}
