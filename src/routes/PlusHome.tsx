@@ -139,6 +139,40 @@ function RollFigure({ text, className, delay = 0 }: { text: string; className?: 
   );
 }
 
+/** The social-proof line, with a little life (Sam, 3 Nov 2026: "slight
+ *  animate for this"): it rises in just after the headline, and its green
+ *  dot breathes, a ring easing out from it every couple of seconds, the way
+ *  a live indicator does. Reduced motion: still, the dot steady. */
+function SocialProof({ text }: { text: string }) {
+  const line = useRef<HTMLParagraphElement | null>(null);
+  const ring = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (reducedMotion()) return;
+    const ease = "cubic-bezier(.22,1,.36,1)";
+    line.current?.animate?.([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], {
+      duration: 520,
+      delay: 260,
+      easing: ease,
+      fill: "backwards",
+    });
+    const pulse = ring.current?.animate?.([{ transform: "scale(1)", opacity: 0.55 }, { transform: "scale(2.6)", opacity: 0 }], {
+      duration: 1800,
+      delay: 900,
+      easing: "cubic-bezier(.2,.6,.3,1)",
+      iterations: Infinity,
+    });
+    return () => pulse?.cancel();
+  }, []);
+  return (
+    <p ref={line} className="tpa-proof">
+      <span className="tpa-proof-dot" aria-hidden="true">
+        <i ref={ring} />
+      </span>
+      {text}
+    </p>
+  );
+}
+
 function PaybackCounter() {
   const [m, setM] = useState<number>(200);
   const back = monthlyBack(m);
@@ -662,7 +696,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 Sam's count: "let's just say over 500 ... we're just below
                 1,000, I think. I have to check." Raise it only once the real
                 count is past the new figure. */}
-            <p className="tpa-proof">Join over 500 Virginia Tech students on Tapin Plus</p>
+            <SocialProof text="Join over 500 Virginia Tech students on Tapin Plus" />
           </div>
         </div>
       </header>
