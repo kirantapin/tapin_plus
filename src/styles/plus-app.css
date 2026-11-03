@@ -935,6 +935,107 @@ html[data-surface="tpa"] body {
   margin-top: 0.5px;
   color: #1f8a4c;
 }
+/* The payback as the hero, three versions (PlusHome offerLook). */
+/* A · Headline. */
+.tpa-pa-h {
+  max-width: 11ch;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 38px;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.tpa-pa-sub {
+  margin-top: 10px;
+  max-width: 34ch;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 21px;
+  text-wrap: pretty;
+}
+/* B · Sum. */
+.tpa-pb-h {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 29px;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.tpa-pb-sum {
+  display: grid;
+  margin-top: 14px;
+  padding: 4px 14px;
+  border-radius: 14px;
+  background: var(--well);
+}
+.tpa-pb-sum p {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 0;
+}
+.tpa-pb-sum p + p {
+  box-shadow: inset 0 1px 0 rgba(20, 22, 24, 0.1);
+}
+.tpa-pb-sum b {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  text-align: right;
+}
+.tpa-pb-sum span {
+  color: var(--muted);
+}
+.tpa-pb-sum p:first-child b,
+.tpa-pb-total b {
+  color: #1f8a4c;
+}
+.tpa-pb-total span {
+  color: var(--ink);
+  font-weight: 600;
+}
+.tpa-pb .tpa-offer-then {
+  margin-top: 10px;
+}
+/* C · Ledger. */
+.tpa-pc-h {
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 42px;
+  letter-spacing: -0.035em;
+}
+.tpa-pc-ledger {
+  margin-top: 16px;
+}
+.tpa-pc-ledger li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  box-shadow: inset 0 -1px 0 var(--hair);
+}
+.tpa-pc-ledger b {
+  font-weight: 600;
+}
+.tpa-pc-gain {
+  color: #1f8a4c;
+}
+.tpa-pc-total {
+  box-shadow: none !important;
+  font-weight: 700;
+  font-size: 20px;
+}
+.tpa-pc-total b {
+  font-weight: 700;
+  color: #1f8a4c;
+}
+.tpa-pc .tpa-offer-then {
+  margin-top: 4px;
+}
+
 /* One line that opens to its detail (the FAQ's disclosure, lighter). */
 .tpa-more {
   margin-top: 12px;

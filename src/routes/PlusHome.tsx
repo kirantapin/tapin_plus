@@ -29,6 +29,8 @@ import { useTrialLink } from "../shell/useTrialLink";
    sign-up with the ad's tags (tapinHref). Every figure is the app's. */
 
 const FIRST_MONTH = "$3.99";
+/** What one first $10+ order's $5 back leaves over the first month. */
+const AHEAD = (5 - 3.99).toFixed(2);
 const MONTHLY = "$7.99";
 const CREDIT = 5;
 const MIN_ORDER = 10;
@@ -144,6 +146,12 @@ const Play = () => (
    it's just the same gray background that the 'step through it' button
    has"): Colour's layout, tab to total, in the button's grey with ink. The
    default; the coloured version stays at ?hiw=2. */
+type OfferLook = "shipped" | "a" | "b" | "c";
+const offerLook = (): OfferLook => {
+  if (typeof window === "undefined") return "shipped";
+  const v = new URLSearchParams(window.location.search).get("offer");
+  return v === "a" || v === "b" || v === "c" ? v : "shipped";
+};
 type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
 const orderLook = (): OrderLook => {
   if (typeof window === "undefined") return "grey";
@@ -395,6 +403,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       Try it once for free
     </button>
   );
+  const [offer] = useState(offerLook);
+  const lockMore = (
+    <details className="tpa-more">
+      <summary>
+        Your {MONTHLY} is locked in
+        <Chevron />
+      </summary>
+      <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
+    </details>
+  );
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -463,6 +481,80 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             here. Make it way simpler, and if you have to nest that's fine"):
             the price, the clock, Join and Try. Where it works is the tabs
             above; the price lock folds away under one line. */}
+        {/* THE PAYBACK AS THE HERO, THREE VERSIONS (Sam, 3 Nov 2026: "wouldn't
+            we want 'first $10 order covers it' as the hero? ... 3 versions").
+            Preview with ?offer=a|b|c; without it the offer is as shipped.
+            The $5 is credit toward the next order, so every version says it
+            "earns $5 back" somewhere near the claim, and it is said of the
+            first month only.
+            A · Headline: the sentence at display size, the price under it.
+            B · Sum: $5 back against $3.99, and what's left over.
+            C · Ledger: the first order and the first month as two lines of
+              one account, ending in what you're ahead. */}
+        {offer === "a" ? (
+          <section className="tpa-module tpa-offer tpa-pa" aria-label="Tapin Plus">
+            <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
+            <h2 className="tpa-pa-h">Your first ${MIN_ORDER} order covers the month.</h2>
+            <p className="tpa-pa-sub">
+              It earns ${CREDIT} back. Plus is {FIRST_MONTH} your first month, then {MONTHLY}.
+            </p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            {lockMore}
+          </section>
+        ) : offer === "b" ? (
+          <section className="tpa-module tpa-offer tpa-pb" aria-label="Tapin Plus">
+            <h2 className="tpa-pb-h">One ${MIN_ORDER} order covers your first month</h2>
+            <div className="tpa-pb-sum" role="group" aria-label={`$${CREDIT} back on your first $${MIN_ORDER} order, less ${FIRST_MONTH} for your first month, leaves you $${AHEAD} ahead`}>
+              <p aria-hidden="true">
+                <b className="tnum">${CREDIT}</b>
+                <span>back on your first ${MIN_ORDER} order</span>
+              </p>
+              <p aria-hidden="true">
+                <b className="tnum">&minus;{FIRST_MONTH}</b>
+                <span>your first month of Plus</span>
+              </p>
+              <p className="tpa-pb-total" aria-hidden="true">
+                <b className="tnum">+${AHEAD}</b>
+                <span>ahead, on one order</span>
+              </p>
+            </div>
+            <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            {lockMore}
+          </section>
+        ) : offer === "c" ? (
+          <section className="tpa-module tpa-offer tpa-pc" aria-label="Tapin Plus">
+            <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
+            <h2 className="tpa-pc-h">
+              Covered
+              <br />
+              by one order.
+            </h2>
+            <ul className="tpa-pc-ledger">
+              <li>
+                <span>Your first ${MIN_ORDER} order earns</span>
+                <b className="tnum tpa-pc-gain">+${CREDIT}.00</b>
+              </li>
+              <li>
+                <span>Your first month of Plus</span>
+                <b className="tnum">&minus;{FIRST_MONTH}</b>
+              </li>
+              <li className="tpa-pc-total">
+                <span>You’re ahead</span>
+                <b className="tnum">+${AHEAD}</b>
+              </li>
+            </ul>
+            <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            {lockMore}
+          </section>
+        ) : (
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
           <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
           <p className="tpa-offer-price">
@@ -486,14 +578,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <WelcomeChip />
           {joinCta("hero")}
           {tryCta}
-          <details className="tpa-more">
-            <summary>
-              Your {MONTHLY} is locked in
-              <Chevron />
-            </summary>
-            <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
-          </details>
+          {lockMore}
         </section>
+        )}
 
         {/* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show
             the plus promise guarantee - every month is refundable"). The
