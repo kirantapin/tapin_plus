@@ -689,6 +689,228 @@ html[data-surface="tpa"] body {
   text-underline-offset: 3px;
 }
 
+/* ── How it works, three versions (PlusHome howLook, ?hiw=a|b|c) ───────── */
+.tpa-play {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+/* A · Chips. The row bleeds to the module's edges and swipes. */
+.tpa-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--well);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease);
+}
+.tpa-step:active {
+  transform: scale(0.97);
+}
+.tpa-chips {
+  display: flex;
+  gap: 8px;
+  margin: 14px -16px 12px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  scroll-padding: 0 16px;
+}
+.tpa-chips::-webkit-scrollbar {
+  display: none;
+}
+.tpa-chip {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px 0 6px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.12);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.tpa-chip[data-on] {
+  background: var(--ink);
+  color: #ffffff;
+  box-shadow: none;
+}
+.tpa-chip-fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.16);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.tpa-chip:not([data-on]) .tpa-chip-fill {
+  display: none;
+}
+.tpa-chip-logo {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+/* B · Bars. Five even columns, a story bar under each logo. */
+.tpa-step-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+.tpa-step-link svg {
+  width: 18px;
+  height: 18px;
+}
+.tpa-bars,
+.tpa-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.tpa-bars {
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+.tpa-bars button,
+.tpa-tabs button {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.tpa-bars-logo {
+  width: 44px;
+  height: 44px;
+  transition: transform 0.25s var(--ease);
+}
+.tpa-bars button[data-on] .tpa-bars-logo {
+  transform: scale(1.06);
+}
+.tpa-bars-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--well);
+  overflow: hidden;
+}
+.tpa-bars-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+/* C · Tabs. The active tab wears the place's colour and runs into the band. */
+.tpa-tabs {
+  margin-top: 14px;
+}
+.tpa-tabs button {
+  position: relative;
+  place-items: center;
+  height: 56px;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  transition: background-color 0.35s var(--ease);
+}
+.tpa-tabs button[data-on] {
+  background: var(--brand);
+}
+.tpa-tabs .tpa-bars-logo {
+  width: 36px;
+  height: 36px;
+}
+.tpa-tabs button[data-on] .tpa-bars-logo {
+  transform: none;
+}
+.tpa-tabs .tpa-bars-track {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  width: auto;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: transparent;
+}
+.tpa-tabs .tpa-bars-fill {
+  background: var(--brand-ink);
+}
+.tpa-tabs button:not([data-on]) .tpa-bars-fill {
+  display: none;
+}
+.tpa-order[data-edge="first"] {
+  border-top-left-radius: 0;
+}
+.tpa-order[data-edge="last"] {
+  border-top-right-radius: 0;
+}
+.tpa-how-head[data-look="c"] {
+  min-height: 0;
+}
+.tpa-step-wide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--well);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease);
+}
+.tpa-step-wide:active {
+  transform: scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-chip,
+  .tpa-bars-logo,
+  .tpa-tabs button,
+  .tpa-step,
+  .tpa-step-wide {
+    transition: none;
+  }
+}
+
 /* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
    the whole width, pinned; the cells are wells, the app's #E5E5EA. */
 .tpa-wbar {
