@@ -216,3 +216,27 @@ export function illustrate(
     disclaimer: "An estimate.",
   };
 }
+
+/* ══ $5 BACK A WEEK AT EACH PLACE (Sam, 3 Nov 2026) ═════════════════════════════
+   "it'd be like $5 back per week per location so if I spend $50 a week, it'd
+   be $200 spent a month, and $100 back." The walkthrough asks what you spend
+   in a WEEK and counts the credit only: one $10+ order earns $5, once a week
+   at each Plus place. $50 a week is five such orders, one at each place, so
+   $25 a week, $100 a month; past five places a week the credit stops growing. */
+export interface WeeklyBack {
+  weeklySpendUsd: number;
+  /** Places a week the spend covers with a $10+ order. */
+  places: number;
+  monthlyUsd: number;
+  condition: string;
+}
+export function weeklyBack(weeklySpendUsd: number): WeeklyBack {
+  const places = Math.max(0, Math.min(BENEFIT.plusPlaces, Math.floor(weeklySpendUsd / 10)));
+  const monthlyUsd = places * BENEFIT.creditUsd * WEEKS_PER_MONTH;
+  const condition =
+    places > 0
+      ? `With a $10+ order at ${places} ${places === 1 ? "place" : "places"} every week. An estimate.`
+      : "An order of $10 or more earns $5 back. An estimate.";
+  return { weeklySpendUsd, places, monthlyUsd, condition };
+}
+

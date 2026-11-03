@@ -103,18 +103,18 @@ html[data-surface="tpa"] body {
   align-items: center;
   gap: 12px;
 }
+/* The badge and Members are one height, one type (Sam, 3 Nov 2026). */
 .tpa-badge {
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px 0 10px;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 16px;
-  letter-spacing: 0.01em;
+  gap: 7px;
+  height: 44px;
+  padding: 0 16px 0 14px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
 }
 .tpa-badge-mark {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
 .tpa-signin {
   height: 44px;
@@ -950,8 +950,10 @@ html[data-surface="tpa"] body {
   padding: calc(env(safe-area-inset-top) + 8px) var(--gutter) 8px;
   background: var(--ink);
   color: #ffffff;
-  font-weight: 600;
-  font-size: 13px;
+  /* One weight, and a firm one: 600 at 13px read thin on black (Sam, 3 Nov
+     2026: "i don't love the light weight text here"). */
+  font-weight: 700;
+  font-size: 14px;
   line-height: 18px;
   text-align: center;
 }
@@ -1340,6 +1342,8 @@ html[data-surface="tpa"] body {
   line-height: 18px;
   color: var(--muted);
 }
+/* One weight in the line (Sam, 3 Nov 2026: no mixed weights in a sentence). */
+.hs-price,
 .hs-price b {
   color: var(--ink);
   font-weight: 600;
