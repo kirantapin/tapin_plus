@@ -259,7 +259,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     const ease = "cubic-bezier(.22,1,.36,1)";
     const q = (sel: string) => body.querySelector<HTMLElement>(sel);
     q(".tpa-order-in")?.animate?.([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 420, easing: ease });
-    q(".tpa-order-off")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 500, easing: ease, fill: "backwards" });
+    /* The credit drops in from above, onto the order it comes off (Sam,
+       3 Nov 2026: "the your credit should animate in downward"). */
+    q(".tpa-order-off")?.animate?.([{ opacity: 0, transform: "translateY(-12px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 500, easing: ease, fill: "backwards" });
     q(".tpa-swap .was")?.animate?.([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-7px)" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
     q(".tpa-swap .now")?.animate?.([{ opacity: 0, transform: "translateY(9px)" }, { opacity: 1, transform: "none" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
     q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
