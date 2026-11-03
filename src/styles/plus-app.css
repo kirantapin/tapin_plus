@@ -437,61 +437,6 @@ html[data-surface="tpa"] body {
 
 /* The places as the carousel's indicators: each logo in a ring that fills
    as its order's countdown; tap one to see its order. */
-.tpa-pick {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin: 0 -2px 10px;
-}
-.tpa-pick button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  cursor: pointer;
-}
-.tpa-ring {
-  position: absolute;
-  inset: 0;
-  width: 48px;
-  height: 48px;
-  transform: rotate(-90deg);
-}
-.tpa-ring circle {
-  fill: none;
-  stroke-width: 2.5;
-}
-.tpa-ring-track {
-  stroke: transparent;
-}
-.tpa-pick button[data-on] .tpa-ring-track {
-  stroke: var(--well);
-}
-.tpa-ring-run {
-  stroke: var(--ink);
-  stroke-linecap: round;
-}
-.tpa-pick button:not([data-on]) .tpa-ring-run {
-  stroke: transparent;
-}
-.tpa-pick-logo {
-  width: 36px;
-  height: 36px;
-  opacity: 0.55;
-  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
-}
-.tpa-pick button[data-on] .tpa-pick-logo,
-.tpa-pick button:hover .tpa-pick-logo {
-  opacity: 1;
-}
-.tpa-pick button[data-on] .tpa-pick-logo {
-  transform: scale(0.92);
-}
 
 /* Every Plus place: the app's place cards, photo, glass tag, name on it. */
 .tpa-rail {
@@ -689,186 +634,51 @@ html[data-surface="tpa"] body {
   text-underline-offset: 3px;
 }
 
-/* ── How it works, three versions (PlusHome howLook, ?hiw=a|b|c) ───────── */
+/* ── How it works: the places as tabs on the order (PlusHome OrderCard) ──
+   The playing tab wears the place's colour and runs into the card's band;
+   a line along its top counts the order down. */
 .tpa-play {
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
 }
-/* A · Chips. The row bleeds to the module's edges and swipes. */
-.tpa-step {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 14px 0 12px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--well);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.15s var(--ease);
-}
-.tpa-step:active {
-  transform: scale(0.97);
-}
-.tpa-chips {
-  display: flex;
-  gap: 8px;
-  margin: 14px -16px 12px;
-  padding: 0 16px;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-  scroll-padding: 0 16px;
-}
-.tpa-chips::-webkit-scrollbar {
-  display: none;
-}
-.tpa-chip {
-  position: relative;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 16px 0 6px;
-  border: 0;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.12);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  isolation: isolate;
-  scroll-snap-align: start;
-  cursor: pointer;
-  transition: background-color 0.25s var(--ease), color 0.25s var(--ease), box-shadow 0.25s var(--ease);
-}
-.tpa-chip[data-on] {
-  background: var(--ink);
-  color: #ffffff;
-  box-shadow: none;
-}
-.tpa-chip-fill {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: rgba(255, 255, 255, 0.16);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-.tpa-chip:not([data-on]) .tpa-chip-fill {
-  display: none;
-}
-.tpa-chip-logo {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
-}
-/* B · Bars. Five even columns, a story bar under each logo. */
-.tpa-step-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-}
-.tpa-step-link svg {
-  width: 18px;
-  height: 18px;
-}
-.tpa-bars,
 .tpa-tabs {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.tpa-bars {
-  gap: 10px;
-  margin: 12px 0 14px;
-}
-.tpa-bars button,
-.tpa-tabs button {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-.tpa-bars-logo {
-  width: 44px;
-  height: 44px;
-  transition: transform 0.25s var(--ease);
-}
-.tpa-bars button[data-on] .tpa-bars-logo {
-  transform: scale(1.06);
-}
-.tpa-bars-track {
-  position: relative;
-  width: 100%;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--well);
-  overflow: hidden;
-}
-.tpa-bars-fill {
-  position: absolute;
-  inset: 0;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-/* C · Tabs. The active tab wears the place's colour and runs into the band. */
-.tpa-tabs {
   margin-top: 14px;
 }
 .tpa-tabs button {
   position: relative;
+  display: grid;
   place-items: center;
   height: 56px;
+  padding: 0;
+  border: 0;
   border-radius: 12px 12px 0 0;
+  background: none;
   overflow: hidden;
+  cursor: pointer;
   transition: background-color 0.35s var(--ease);
 }
 .tpa-tabs button[data-on] {
   background: var(--brand);
 }
-.tpa-tabs .tpa-bars-logo {
+.tpa-tab-logo {
   width: 36px;
   height: 36px;
 }
-.tpa-tabs button[data-on] .tpa-bars-logo {
-  transform: none;
-}
-.tpa-tabs .tpa-bars-track {
+.tpa-tab-line {
   position: absolute;
   top: 0;
   left: 12px;
   right: 12px;
-  width: auto;
   height: 3px;
   border-radius: 0 0 2px 2px;
-  background: transparent;
-}
-.tpa-tabs .tpa-bars-fill {
   background: var(--brand-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
 }
-.tpa-tabs button:not([data-on]) .tpa-bars-fill {
+.tpa-tabs button:not([data-on]) .tpa-tab-line {
   display: none;
 }
 .tpa-order[data-edge="first"] {
@@ -876,9 +686,6 @@ html[data-surface="tpa"] body {
 }
 .tpa-order[data-edge="last"] {
   border-top-right-radius: 0;
-}
-.tpa-how-head[data-look="c"] {
-  min-height: 0;
 }
 .tpa-step-wide {
   display: flex;
@@ -902,13 +709,154 @@ html[data-surface="tpa"] body {
   transform: scale(0.98);
 }
 @media (prefers-reduced-motion: reduce) {
-  .tpa-chip,
-  .tpa-bars-logo,
   .tpa-tabs button,
-  .tpa-step,
   .tpa-step-wide {
     transition: none;
   }
+}
+
+/* ── Three variations on the tabs (PlusHome orderLook, ?hiw=1|2|3) ───── */
+/* 1 · Plate: the band grows into a colour panel holding the dish. */
+.tpa-carousel[data-look="plate"] .tpa-order-band {
+  padding-bottom: 6px;
+}
+.tpa-order-plate {
+  padding: 6px 12px 12px;
+  background: var(--brand);
+  transition: background-color 0.35s var(--ease);
+}
+.tpa-order-plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--well);
+}
+.tpa-carousel[data-look="plate"] .tpa-order-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  font-weight: 600;
+  font-size: 17px;
+}
+/* 2 · Colour: the whole order in the place's colour, its ink on top. */
+.tpa-carousel[data-look="colour"] .tpa-order {
+  background: var(--brand);
+  color: var(--brand-ink);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+.tpa-carousel[data-look="colour"] .tpa-order-band {
+  padding-bottom: 2px;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-off {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, currentColor 22%, transparent);
+}
+.tpa-carousel[data-look="colour"] .tpa-order-off b {
+  color: inherit;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-total {
+  font-size: 26px;
+  line-height: 32px;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-earn,
+.tpa-carousel[data-look="colour"] .tpa-order-earn b {
+  color: inherit;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-earn {
+  opacity: 0.86;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-item img {
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent);
+}
+/* 3 · Price tag: grey tab into a grey card, what you pay as the hero. */
+.tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] {
+  background: var(--ground);
+}
+.tpa-carousel[data-look="tag"] .tpa-tab-line {
+  background: var(--ink);
+}
+.tpa-ptag {
+  padding: 14px;
+}
+.tpa-ptag-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tpa-ptag-item img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--well);
+}
+.tpa-ptag-item > span {
+  display: grid;
+}
+.tpa-ptag-item b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpa-ptag-item > span > span {
+  color: var(--muted);
+}
+.tpa-ptag-pay {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 14px;
+}
+.tpa-ptag-pay .tpa-swap {
+  min-width: 0;
+  text-align: left;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.03em;
+}
+.tpa-ptag-pay .tpa-swap .was {
+  visibility: hidden;
+}
+.tpa-ptag-pay .tpa-swap .now {
+  left: 0;
+  right: auto;
+}
+.tpa-ptag-pay s {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--muted);
+}
+.tpa-ptag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--ink);
+}
+.tpa-ptag-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpa-ptag-off {
+  background: #1f8a4c;
+  color: #ffffff;
+}
+.tpa-ptag-pts {
+  padding-left: 4px;
+  font-size: 14px;
+  color: var(--muted);
 }
 
 /* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
@@ -1036,7 +984,6 @@ html[data-surface="tpa"] body {
 @media (prefers-reduced-motion: reduce) {
   .tpa-cta,
   .tpa-dock,
-  .tpa-pick-logo,
   .tpa-order-band,
   .tpa-qa summary svg {
     transition: none;
@@ -1093,25 +1040,6 @@ html[data-surface="tpa"] body {
   }
 }
 
-.tpa-how-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.tpa-quiet {
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
 
 /* ══ HOW IT WORKS, THE SHEET (shell/HowSheet.tsx) ═══════════════════════════
    Portalled to <body>, so it carries its own tokens. The app's sheet: white,

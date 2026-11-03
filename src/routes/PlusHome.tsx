@@ -111,27 +111,8 @@ function FlatMark({ className }: { className?: string }) {
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const COLLAGE = asset("/collage/blacksburg.webp");
 
-/** Each place's order holds this long; its logo's ring counts it down. */
+/** Each place's order holds this long; its tab's line counts it down. */
 const HOLD_MS = 4500;
-const RING = 2 * Math.PI * 21;
-
-/* ══ HOW IT WORKS, THREE VERSIONS (Sam, 3 Nov 2026: "redesign this section -
-   3 options for me to view") ════════════════════════════════════════════════
-   Preview with ?hiw=a|b|c; without it the page is as shipped ("ring").
-   A · Chips: each place by logo and name in a row you can swipe; the active
-     chip is ink and fills as its order plays.
-   B · Bars: the five logos at full colour, a story bar under each that
-     fills, the way Instagram counts a story down.
-   C · Tabs: the logos are tabs on the order card; the active tab wears the
-     place's colour and runs into the card's band.
-   Every version shows the logos at full strength (the shipped ring dims the
-   others to 55%, which loses Sweetopia and The Milk Parlor on white). */
-type HowLook = "ring" | "a" | "b" | "c";
-const howLook = (): HowLook => {
-  if (typeof window === "undefined") return "ring";
-  const v = new URLSearchParams(window.location.search).get("hiw");
-  return v === "a" || v === "b" || v === "c" ? v : "ring";
-};
 
 const Play = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-play">
@@ -139,10 +120,31 @@ const Play = () => (
   </svg>
 );
 
-function OrderCard({ start = 0, look = "ring" }: { start?: number; look?: HowLook }) {
+/* ══ THE PLACES AS TABS ON THE ORDER (Sam, 3 Nov 2026, from three versions:
+   "let's try this one") ═════════════════════════════════════════════════════
+   The five logos are tabs on the order card, at full colour. The playing tab
+   wears the place's colour and runs into the card's band, and a line along
+   its top counts its order down. */
+/* THREE VARIATIONS ON THE TABS (Sam, 3 Nov 2026: "3 /impeccable redesign
+   variations of this section"). Preview with ?hiw=1|2|3; without it the card
+   is the Tabs version as picked.
+   1 · Plate: the dish leads. The place's colour panel holds a big photo of
+     the order, the way the app's item sheet opens on its picture.
+   2 · Colour: the whole order wears the place's colour, tab to total.
+   3 · Price tag: quiet grey tab and card, no band; what you pay is the
+     big number, the menu price struck beside it, the $5 and the next $5 as
+     two chips. */
+type OrderLook = "tabs" | "plate" | "colour" | "tag";
+const orderLook = (): OrderLook => {
+  if (typeof window === "undefined") return "tabs";
+  const v = new URLSearchParams(window.location.search).get("hiw");
+  return v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "tabs";
+};
+
+function OrderCard({ start = 0 }: { start?: number }) {
+  const [look] = useState(orderLook);
   const card = useRef<HTMLDivElement | null>(null);
-  const rings = useRef<Array<Element | null>>([]);
-  const row = useRef<HTMLDivElement | null>(null);
+  const lines = useRef<Array<HTMLSpanElement | null>>([]);
   const [inView, setInView] = useState(false);
   const [which, setWhich] = useState(start);
   const [paused, setPaused] = useState(false);
@@ -154,33 +156,22 @@ function OrderCard({ start = 0, look = "ring" }: { start?: number; look?: HowLoo
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  /* The active logo's ring fills over HOLD_MS, and its end moves the card
+  /* The playing tab's line fills over HOLD_MS, and its end moves the card
      on: one clock for what you see and what happens. A pointer or focus on
-     the card holds it (the ring stops where it is); tapping a logo shows
-     that place and starts its ring from empty. Reduced motion: no ring, no
-     advance, the logos still switch. */
+     the card holds it (the line stops where it is); tapping a tab shows that
+     place and starts its line from empty. Reduced motion: a full line, no
+     advance, the tabs still switch. */
   useEffect(() => {
-    const ring = rings.current[which];
-    if (!ring || still || EXAMPLES.length < 2 || typeof ring.animate !== "function") return;
-    const frames = look === "ring" ? [{ strokeDashoffset: RING }, { strokeDashoffset: 0 }] : [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }];
-    const run = ring.animate(frames, { duration: HOLD_MS, easing: "linear", fill: "forwards" });
+    const line = lines.current[which];
+    if (!line || still || EXAMPLES.length < 2 || typeof line.animate !== "function") return;
+    const run = line.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: HOLD_MS, easing: "linear", fill: "forwards" });
     if (!inView || paused) run.pause();
     run.onfinish = () => setWhich((n) => (n + 1) % EXAMPLES.length);
     return () => {
       run.onfinish = null;
       run.cancel();
     };
-  }, [which, inView, paused, still, look]);
-  /* A's row scrolls itself, never the page, to keep the playing chip in view. */
-  useEffect(() => {
-    const r = row.current;
-    const chip = r?.children[which] as HTMLElement | undefined;
-    if (!r || !chip) return;
-    const left = chip.offsetLeft - r.offsetLeft;
-    if (left < r.scrollLeft || left + chip.offsetWidth > r.scrollLeft + r.clientWidth) {
-      r.scrollTo({ left: Math.max(0, left - 16), behavior: still ? "auto" : "smooth" });
-    }
-  }, [which, still]);
+  }, [which, inView, paused, still]);
   /* THE ORIGINAL PAGE'S BEAT (Sam, 3 Nov 2026: "I like the old way the
      numbers animated here on the original plus.tapin.app page"), its timings
      from how.css: the order lands; at 500ms the credit row comes in; at
@@ -206,6 +197,7 @@ function OrderCard({ start = 0, look = "ring" }: { start?: number; look?: HowLoo
     <div
       ref={card}
       className="tpa-carousel"
+      data-look={look}
       role="group"
       aria-label="Example orders"
       style={{ ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }}
@@ -216,122 +208,96 @@ function OrderCard({ start = 0, look = "ring" }: { start?: number; look?: HowLoo
     >
       {/* The places first, then their order (Sam, 3 Nov 2026: "these should
           show up above the carousel"). */}
-      {EXAMPLES.length > 1 && look === "a" ? (
-        <div ref={row} className="tpa-chips">
+      {EXAMPLES.length > 1 ? (
+        <div className="tpa-tabs">
           {EXAMPLES.map((e, i) => (
             <button
               key={e.venue.id}
               type="button"
-              className="tpa-chip"
               aria-label={`Show an order at ${e.venue.name}`}
               aria-pressed={i === which}
               data-on={i === which ? "" : undefined}
               onClick={() => setWhich(i)}
             >
+              <span className="collar tpa-tab-logo" data-field={logoField(e.venue.id)}>
+                <img src={e.venue.logo} alt="" decoding="async" />
+              </span>
               <span
                 ref={(n) => {
-                  rings.current[i] = n;
+                  lines.current[i] = n;
                 }}
-                className="tpa-chip-fill"
+                className="tpa-tab-line"
                 aria-hidden="true"
                 style={i === which && still ? { transform: "none" } : undefined}
               />
-              <span className="collar tpa-chip-logo" data-field={logoField(e.venue.id)}>
-                <img src={e.venue.logo} alt="" decoding="async" />
-              </span>
-              <span className="tpa-chip-name">{e.venue.name}</span>
             </button>
           ))}
         </div>
-      ) : EXAMPLES.length > 1 && (look === "b" || look === "c") ? (
-        <div className={look === "b" ? "tpa-bars" : "tpa-tabs"}>
-          {EXAMPLES.map((e, i) => (
-            <button
-              key={e.venue.id}
-              type="button"
-              aria-label={`Show an order at ${e.venue.name}`}
-              aria-pressed={i === which}
-              data-on={i === which ? "" : undefined}
-              onClick={() => setWhich(i)}
-            >
-              <span className="collar tpa-bars-logo" data-field={logoField(e.venue.id)}>
-                <img src={e.venue.logo} alt="" decoding="async" />
-              </span>
-              <span className="tpa-bars-track" aria-hidden="true">
-                <span
-                  ref={(n) => {
-                    rings.current[i] = n;
-                  }}
-                  className="tpa-bars-fill"
-                  style={i === which && still ? { transform: "none" } : undefined}
-                />
-              </span>
-            </button>
-          ))}
-        </div>
-      ) : EXAMPLES.length > 1 ? (
-        <p className="tpa-pick">
-          {EXAMPLES.map((e, i) => (
-            <button
-              key={e.venue.id}
-              type="button"
-              aria-label={`Show an order at ${e.venue.name}`}
-              aria-pressed={i === which}
-              data-on={i === which ? "" : undefined}
-              onClick={() => setWhich(i)}
-            >
-              <svg className="tpa-ring" viewBox="0 0 48 48" aria-hidden="true">
-                <circle className="tpa-ring-track" cx="24" cy="24" r="21" />
-                <circle
-                  ref={(n) => {
-                    rings.current[i] = n;
-                  }}
-                  className="tpa-ring-run"
-                  cx="24"
-                  cy="24"
-                  r="21"
-                  strokeDasharray={RING}
-                  strokeDashoffset={i === which && still ? 0 : RING}
-                />
-              </svg>
-              <span className="collar tpa-pick-logo" data-field={logoField(e.venue.id)}>
-                <img src={e.venue.logo} alt="" decoding="async" />
-              </span>
-            </button>
-          ))}
-        </p>
       ) : null}
       <div
         className="tpa-order"
-        data-edge={look === "c" ? (which === 0 ? "first" : which === EXAMPLES.length - 1 ? "last" : undefined) : undefined}
+        data-edge={which === 0 ? "first" : which === EXAMPLES.length - 1 ? "last" : undefined}
       >
-        <p className="tpa-order-band">
-          <span className="collar tpa-logo" data-field={logoField(ex.venue.id)}>
-            <img src={ex.venue.logo} alt="" decoding="async" />
-          </span>
-          <b>{ex.venue.name}</b>
-        </p>
-        <div className="tpa-order-in" key={which}>
-          <p className="tpa-order-item">
-            <img src={ex.img} alt="" decoding="async" />
-            <span>{ex.label}</span>
-            <b className="tnum">{money(ex.price)}</b>
-          </p>
-          <p className="tpa-order-off">
-            <span>Your ${CREDIT} credit</span>
-            <b className="tnum">&minus;{money(CREDIT)}</b>
-          </p>
-          <p className="tpa-order-total">
-            <span>You pay</span>
-            <span className="tpa-swap">
-              <b className="was tnum">{money(ex.price)}</b>
-              <b className="now tnum">{money(ex.price - CREDIT)}</b>
+        {look === "tag" ? null : (
+          <p className="tpa-order-band">
+            <span className="collar tpa-logo" data-field={logoField(ex.venue.id)}>
+              <img src={ex.venue.logo} alt="" decoding="async" />
             </span>
+            <b>{ex.venue.name}</b>
           </p>
-          <p className="tpa-order-earn">
-            <b>+${CREDIT} back for next week</b> · +{points} points
-          </p>
-        </div>
+        )}
+        {look === "plate" ? (
+          <div className="tpa-order-plate" key={`plate-${which}`}>
+            <img src={ex.img} alt="" decoding="async" />
+          </div>
+        ) : null}
+        {look === "tag" ? (
+          <div className="tpa-order-in tpa-ptag" key={which}>
+            <p className="tpa-ptag-item">
+              <img src={ex.img} alt="" decoding="async" />
+              <span>
+                <b>{ex.label}</b>
+                <span>{ex.venue.name}</span>
+              </span>
+            </p>
+            <p className="tpa-ptag-pay">
+              <span className="tpa-swap">
+                <b className="was tnum">{money(ex.price)}</b>
+                <b className="now tnum">{money(ex.price - CREDIT)}</b>
+              </span>
+              <s className="tpa-order-off tnum" aria-label={`instead of ${money(ex.price)}`}>
+                {money(ex.price)}
+              </s>
+            </p>
+            <p className="tpa-order-earn tpa-ptag-chips">
+              <span className="tpa-ptag-chip tpa-ptag-off">&minus;${CREDIT} credit</span>
+              <span className="tpa-ptag-chip">+${CREDIT} back for next week</span>
+              <span className="tpa-ptag-pts">+{points} points</span>
+            </p>
+          </div>
+        ) : (
+          <div className="tpa-order-in" key={which}>
+            <p className="tpa-order-item">
+              {look === "plate" ? null : <img src={ex.img} alt="" decoding="async" />}
+              <span>{ex.label}</span>
+              <b className="tnum">{money(ex.price)}</b>
+            </p>
+            <p className="tpa-order-off">
+              <span>Your ${CREDIT} credit</span>
+              <b className="tnum">&minus;{money(CREDIT)}</b>
+            </p>
+            <p className="tpa-order-total">
+              <span>You pay</span>
+              <span className="tpa-swap">
+                <b className="was tnum">{money(ex.price)}</b>
+                <b className="now tnum">{money(ex.price - CREDIT)}</b>
+              </span>
+            </p>
+            <p className="tpa-order-earn">
+              <b>+${CREDIT} back for next week</b> · +{points} points
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -383,10 +349,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   /* "Try it once for free" (Sam, 3 Nov 2026: "we should have the Try it once
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
-  const [look] = useState(howLook);
   const openHow = () => {
     setHow(true);
-    track("plus_how_opened", { where: "how", look });
+    track("plus_how_opened", { where: "how" });
   };
 
   useLayoutEffect(() => {
@@ -438,35 +403,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             up at the top"); the offer and Join follow, and the dock keeps
             Join on screen the whole way down. */}
         <section className="tpa-module" aria-labelledby="tpa-how">
-          <div className="tpa-how-head" data-look={look}>
-            <h2 id="tpa-how" className="tpa-h2">
-              How it works
-            </h2>
-            {look === "a" ? (
-              <button type="button" className="tpa-step" onClick={openHow}>
-                <Play />
-                Step through it
-              </button>
-            ) : look === "b" ? (
-              <button type="button" className="tpa-step-link" onClick={openHow}>
-                Step through it
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            ) : look === "c" ? null : (
-              <button type="button" className="tpa-quiet" onClick={openHow}>
-                Step through it
-              </button>
-            )}
-          </div>
-          <OrderCard start={startAt} look={look} />
-          {look === "c" ? (
-            <button type="button" className="tpa-step-wide" onClick={openHow}>
-              <Play />
-              Step through it
-            </button>
-          ) : null}
+          <h2 id="tpa-how" className="tpa-h2">
+            How it works
+          </h2>
+          <OrderCard start={startAt} />
+          <button type="button" className="tpa-step-wide" onClick={openHow}>
+            <Play />
+            Step through it
+          </button>
         </section>
 
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
