@@ -333,7 +333,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         <div className="tpa-band-top">
           <span className="tpa-glass tpa-badge">
             <FlatMark className="tpa-badge-mark" />
-            Tapin Plus
+            {/* The app's pill (Sam, 3 Nov 2026: "plus blacksburg"). */}
+            Plus Blacksburg
           </span>
           <Link className="tpa-glass tpa-signin" to="/in">
             Members
