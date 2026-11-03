@@ -1,4 +1,4 @@
-import { TAPIN_HOST, TAPIN_URL, closedLead, closedMore } from "../model/closed";
+import { TAPIN_HOST, tapinHref, closedLead, closedMore } from "../model/closed";
 
 /** The announcement bar's sentence while early access is closed (Sam, 1 Nov
  *  2026). Replaces the town and the countdown; the link is the point of it.
@@ -9,7 +9,7 @@ export function ClosedBar() {
     <span className="ann-place">
       <span className="ann-text">
         {closedLead} <span className="ann-closed-more">{closedMore} </span>
-        <a className="ann-link" href={TAPIN_URL}>
+        <a className="ann-link" href={tapinHref()}>
           {TAPIN_HOST}
         </a>
       </span>
@@ -25,7 +25,7 @@ export function ClosedHero() {
       <p className="hero-closed-lead">{closedLead}</p>
       <p className="t-compact hero-closed-more">
         {closedMore}{" "}
-        <a className="hero-closed-link" href={TAPIN_URL}>
+        <a className="hero-closed-link" href={tapinHref()}>
           {TAPIN_HOST}
         </a>
         .

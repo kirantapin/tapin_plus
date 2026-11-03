@@ -21,7 +21,7 @@ import {
   foundingTierName,
   reserveCta,
 } from "../model/content";
-import { EARLY_ACCESS_CLOSED, TAPIN_URL, closedCta } from "../model/closed";
+import { EARLY_ACCESS_CLOSED, tapinHref, closedCta } from "../model/closed";
 
 /**
  * /in — your membership, after you have paid for it.
@@ -356,7 +356,7 @@ export default function Membership() {
             ) : (
               /* Early access is closed (model/closed.ts): send them where
                  TapIn is now, not to a checkout that sends them home. */
-              <Link className="action" to={EARLY_ACCESS_CLOSED ? TAPIN_URL : "/reserve"}>
+              <Link className="action" to={EARLY_ACCESS_CLOSED ? tapinHref() : "/reserve"}>
                 {EARLY_ACCESS_CLOSED ? closedCta : reserveCta}
               </Link>
             )}
