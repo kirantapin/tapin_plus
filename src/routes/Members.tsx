@@ -11,6 +11,7 @@ import { asset } from "../asset";
 
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const COLLAGE = asset("/collage/blacksburg.webp");
+const TAPIN_HOME = "https://www.tapin.app/discovery?zone=blacksburg";
 
 export default function Members() {
   useLayoutEffect(() => {
@@ -47,32 +48,24 @@ export default function Members() {
               who to ask. */}
           <p className="tpa-lead">Joined early access? You’re on file.</p>
           <p className="tpa-price-then">
-            Your membership is saved with us. For anything about it, your credit, your plan or a refund, email
-            support@tapin.app and a person will sort it out.
+            Your membership is saved with us. Every Plus place takes orders on Tapin. For anything about your plan,
+            your credit or a refund, email support@tapin.app and a person will sort it out.
           </p>
-          <a className="tpa-cta" href="mailto:support@tapin.app">
+          {/* Sam, 3 Nov 2026: "the CTA would be to download the tapin app or go
+              to www.tapin.app". www.tapin.app until the App Store link exists. */}
+          <a className="tpa-cta" href={TAPIN_HOME}>
+            Go to www.tapin.app
+          </a>
+          <a className="tpa-try" href="mailto:support@tapin.app">
             Email support@tapin.app
           </a>
         </section>
 
         <section className="tpa-module" aria-labelledby="tpa-help">
           <h2 id="tpa-help" className="tpa-h2">
-            Need a hand?
+            Good to know
           </h2>
           <ul className="tpa-rows">
-            <li>
-              <span className="tpa-well" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                  <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <span>
-                <b>
-                  <a href="https://www.tapin.app/discovery?zone=blacksburg">Order at www.tapin.app</a>
-                </b>
-                <span>Every Plus place takes orders on Tapin.</span>
-              </span>
-            </li>
             <li>
               <span className="tpa-well" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="18" height="18">

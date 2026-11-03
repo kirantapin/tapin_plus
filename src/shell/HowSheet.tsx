@@ -1,10 +1,10 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SCENES } from "./Scenes";
-import { illustrate } from "../model/savings";
-import { useSpend } from "../model/spendStore";
-import { buildSlides, valueHead } from "../routes/How";
+import { weeklyBack } from "../model/savings";
+import { buildSlides } from "../routes/How";
 import { asset } from "../asset";
+import { WelcomeEnds } from "./WelcomeOffer";
 
 /* ══ HOW IT WORKS, THE OLD WALKTHROUGH IN THE APP'S LOOK (Sam, 3 Nov 2026) ══
    "I like the new 'how it works' modal - but i feel like it got rid of a lot
@@ -24,7 +24,12 @@ import { asset } from "../asset";
 
 const ease = "cubic-bezier(.22,1,.36,1)";
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-const money = (n: number) => `$${n.toFixed(2)}`;
+const money = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
+
+/** The spend question is asked by the week now (Sam, 3 Nov 2026). */
+const HEADS: Record<string, string> = {
+  spend: "What do you spend in a week in Blacksburg?",
+};
 
 /** The 3 Nov facts over the old copy, by slide id. */
 const LINES: Record<string, string> = {
@@ -41,9 +46,11 @@ export default function HowSheet({
   joinHref: string;
   onJoin: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
-  const [spend, setSpend] = useSpend();
+  /* What you spend in a week, and the $5 a week at each place it covers
+     (Sam, 3 Nov 2026: "$50 a week … $100 back"). */
+  const [spend, setSpend] = useState(50);
   const slides = useMemo(() => buildSlides(spend), [spend]);
-  const s = illustrate(spend);
+  const s = weeklyBack(spend);
   const [i, setI] = useState(0);
   const [auto, setAuto] = useState(!still());
   const dir = useRef(1);
@@ -172,26 +179,25 @@ export default function HowSheet({
           {isFigure ? (
             <>
               <h2 className="hs-head">
-                {slide.id === "value"
-                  ? valueHead(spend, s.steadyUsd).map((p, k) =>
-                      typeof p === "string" ? (
-                        <Fragment key={k}>{p}</Fragment>
-                      ) : (
-                        <button key={k} type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`${p.spend} a month, change what you spend`}>
-                          {p.spend}
-                        </button>
-                      ),
-                    )
-                  : `About ${money(s.steadyUsd)} back a month`}
+                {slide.id === "value" ? (
+                  <>
+                    Spend{" "}
+                    <button type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`$${spend} a week, change what you spend`}>
+                      ${spend}
+                      {spend >= 50 ? "+" : ""}
+                    </button>{" "}
+                    a week, get about {money(s.monthlyUsd)} back a month
+                  </>
+                ) : (
+                  `About ${money(s.monthlyUsd)} back a month`
+                )}
               </h2>
-              <p className="hs-line">
-                {s.condition} {s.disclaimer}
-              </p>
+              <p className="hs-line">{s.condition}</p>
             </>
           ) : (
             <>
               <h2 className="hs-head">
-                {slide.headline}
+                {HEADS[slide.id] ?? slide.headline}
                 {slide.tag ? <span className="hs-tag">{slide.tag}</span> : null}
               </h2>
               <p className="hs-line">{LINES[slide.id] ?? slide.line}</p>
@@ -204,9 +210,12 @@ export default function HowSheet({
 
         <div className="hs-foot">
           {last ? (
-            <p className="hs-price">
-              <b>$3.99 your first month</b>, then $7.99/month, locked in for as long as you’re a member.
-            </p>
+            <div>
+              <p className="hs-price">
+                <b>$3.99 your first month</b>, then $7.99/month, locked in for as long as you’re a member.
+              </p>
+              <WelcomeEnds className="hs-ends" />
+            </div>
           ) : (
             <p className="hs-when">
               <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>

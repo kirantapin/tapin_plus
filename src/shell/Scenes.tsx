@@ -117,7 +117,10 @@ export interface SceneProps {
  *  a student on the tightest budget actually spends, so her honest answer was
  *  not on the screen and the deck closed on a figure measured off someone
  *  else. The model returns real computed values the whole way down. */
-const BANDS = [50, 100, 150, 300];
+/* A WEEK, NOT A MONTH (Sam, 3 Nov 2026: "if I spend $50 a week…"). $10 a
+   step, so each band is one more place's $5 a week (savings.ts weeklyBack);
+   $50 covers all five. */
+const BANDS = [20, 30, 40, 50];
 
 /**
  * 0 — What do you spend?
@@ -163,7 +166,7 @@ function SpendBands({ spend, setSpend, label }: SceneProps & { label: string }) 
           </b>
           {/* 13px, not 12. 12 is under the documented secondary floor and this
               is a phrase, not a tracked micro-label. */}
-          <span>a month</span>
+          <span>a week</span>
         </button>
       ))}
     </div>
@@ -175,7 +178,7 @@ export function SceneSpend({ spend, setSpend }: SceneProps) {
     <SpendBands
       spend={spend}
       setSpend={setSpend}
-      label="What you spend in a month around Blacksburg"
+      label="What you spend in a week around Blacksburg"
     />
   );
 }

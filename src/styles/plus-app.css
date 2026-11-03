@@ -103,18 +103,18 @@ html[data-surface="tpa"] body {
   align-items: center;
   gap: 12px;
 }
+/* The badge and Members are one height, one type (Sam, 3 Nov 2026). */
 .tpa-badge {
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px 0 10px;
-  font-weight: 700;
-  font-size: 13px;
-  line-height: 16px;
-  letter-spacing: 0.01em;
+  gap: 7px;
+  height: 44px;
+  padding: 0 16px 0 14px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
 }
 .tpa-badge-mark {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
 .tpa-signin {
   height: 44px;
@@ -198,11 +198,6 @@ html[data-surface="tpa"] body {
   letter-spacing: -0.01em;
   text-wrap: pretty;
 }
-.tpa-marks {
-  display: flex;
-  gap: 6px;
-  margin-top: 14px;
-}
 .tpa-logo {
   width: 32px;
   height: 32px;
@@ -223,23 +218,6 @@ html[data-surface="tpa"] body {
 }
 .tpa .collar::after {
   display: none;
-}
-.tpa-price {
-  margin-top: 20px;
-  padding-top: 16px;
-  box-shadow: inset 0 1px 0 var(--hair);
-}
-.tpa-price-h {
-  font-weight: 600;
-  font-size: 17px;
-  line-height: 22px;
-}
-.tpa-price-h b {
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 32px;
-  letter-spacing: -0.02em;
-  margin-right: 4px;
 }
 .tpa-price-then {
   margin-top: 4px;
@@ -273,16 +251,6 @@ html[data-surface="tpa"] body {
   background: #ffffff;
   color: var(--ink);
 }
-.tpa-rises {
-  margin-top: 12px;
-  font-weight: 600;
-  text-wrap: pretty;
-}
-.tpa-refund {
-  margin-top: 6px;
-  color: var(--muted);
-  text-wrap: pretty;
-}
 
 /* The Plus Promise: one row, the well holding a shield. */
 .tpa-promise {
@@ -304,11 +272,6 @@ html[data-surface="tpa"] body {
 .tpa-promise-line {
   margin-top: 4px;
   font-weight: 600;
-}
-.tpa-promise-more {
-  margin-top: 4px;
-  color: var(--muted);
-  text-wrap: pretty;
 }
 
 /* How it works: three figures like the wallet's cells. */
@@ -437,61 +400,6 @@ html[data-surface="tpa"] body {
 
 /* The places as the carousel's indicators: each logo in a ring that fills
    as its order's countdown; tap one to see its order. */
-.tpa-pick {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin: 0 -2px 10px;
-}
-.tpa-pick button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  cursor: pointer;
-}
-.tpa-ring {
-  position: absolute;
-  inset: 0;
-  width: 48px;
-  height: 48px;
-  transform: rotate(-90deg);
-}
-.tpa-ring circle {
-  fill: none;
-  stroke-width: 2.5;
-}
-.tpa-ring-track {
-  stroke: transparent;
-}
-.tpa-pick button[data-on] .tpa-ring-track {
-  stroke: var(--well);
-}
-.tpa-ring-run {
-  stroke: var(--ink);
-  stroke-linecap: round;
-}
-.tpa-pick button:not([data-on]) .tpa-ring-run {
-  stroke: transparent;
-}
-.tpa-pick-logo {
-  width: 36px;
-  height: 36px;
-  opacity: 0.55;
-  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
-}
-.tpa-pick button[data-on] .tpa-pick-logo,
-.tpa-pick button:hover .tpa-pick-logo {
-  opacity: 1;
-}
-.tpa-pick button[data-on] .tpa-pick-logo {
-  transform: scale(0.92);
-}
 
 /* Every Plus place: the app's place cards, photo, glass tag, name on it. */
 .tpa-rail {
@@ -689,6 +597,382 @@ html[data-surface="tpa"] body {
   text-underline-offset: 3px;
 }
 
+/* ── How it works: the places as tabs on the order (PlusHome OrderCard) ──
+   The playing tab wears the place's colour and runs into the card's band;
+   a line along its top counts the order down. */
+.tpa-play {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+.tpa-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 14px;
+}
+.tpa-tabs button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px 12px 0 0;
+  background: none;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.35s var(--ease);
+}
+.tpa-tabs button[data-on] {
+  background: var(--brand);
+}
+.tpa-tab-logo {
+  width: 36px;
+  height: 36px;
+}
+.tpa-tabs button > * {
+  grid-area: 1 / 1;
+}
+.tpa-tab-ring {
+  width: 46px;
+  height: 46px;
+  transform: rotate(-90deg);
+}
+.tpa-tab-ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+.tpa-tab-ring-track {
+  stroke: transparent;
+}
+.tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: color-mix(in srgb, var(--brand-ink) 28%, transparent);
+}
+.tpa-tab-ring-run {
+  stroke: var(--brand-ink);
+  stroke-linecap: round;
+}
+.tpa-tabs button:not([data-on]) .tpa-tab-ring-run {
+  stroke: transparent;
+}
+.tpa-order[data-edge="first"] {
+  border-top-left-radius: 0;
+}
+.tpa-order[data-edge="last"] {
+  border-top-right-radius: 0;
+}
+.tpa-step-wide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--well);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease);
+}
+.tpa-step-wide:active {
+  transform: scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-tabs button,
+  .tpa-step-wide {
+    transition: none;
+  }
+}
+
+/* ── Three variations on the tabs (PlusHome orderLook, ?hiw=1|2|3) ───── */
+/* 1 · Plate: the band grows into a colour panel holding the dish. */
+.tpa-carousel[data-look="plate"] .tpa-order-band {
+  padding-bottom: 6px;
+}
+.tpa-order-plate {
+  padding: 6px 12px 12px;
+  background: var(--brand);
+  transition: background-color 0.35s var(--ease);
+}
+/* A strip, not a poster (Sam, 3 Nov 2026: "the image is too large now"):
+   the menu photos are small files, so they stay short enough to stay sharp. */
+.tpa-order-plate img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 2;
+  max-height: 140px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--well);
+}
+.tpa-carousel[data-look="plate"] .tpa-order-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  font-weight: 600;
+  font-size: 17px;
+}
+/* 2 · Colour: Plate's photo, and the whole order card in the place's
+   colour, white on top (ink only on a pale colour, inkOn). */
+.tpa-carousel[data-look="colour"] .tpa-order,
+.tpa-carousel[data-look="colour"] .tpa-order-band {
+  background: var(--brand);
+  color: var(--brand-ink);
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
+}
+.tpa-carousel[data-look="colour"] .tpa-order-band {
+  padding-bottom: 6px;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  font-weight: 600;
+  font-size: 17px;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-off {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, currentColor 22%, transparent);
+}
+.tpa-carousel[data-look="colour"] .tpa-order-off b,
+.tpa-carousel[data-look="colour"] .tpa-order-earn,
+.tpa-carousel[data-look="colour"] .tpa-order-earn b {
+  color: inherit;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-earn {
+  opacity: 0.86;
+}
+.tpa-carousel[data-look="colour"] .tpa-order-total {
+  font-size: 24px;
+  line-height: 30px;
+}
+
+/* 3 · Price tag: grey tab into a grey card, what you pay as the hero. */
+.tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] {
+  background: var(--ground);
+}
+.tpa-carousel[data-look="tag"] .tpa-tab-ring-run {
+  stroke: var(--ink);
+}
+.tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: var(--hair);
+}
+.tpa-ptag {
+  padding: 14px;
+}
+.tpa-ptag-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tpa-ptag-item img {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--well);
+}
+.tpa-ptag-item > span {
+  display: grid;
+}
+.tpa-ptag-item b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpa-ptag-item > span > span {
+  color: var(--muted);
+}
+.tpa-ptag-pay {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 14px;
+}
+.tpa-ptag-pay .tpa-swap {
+  min-width: 0;
+  text-align: left;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.03em;
+}
+.tpa-ptag-pay .tpa-swap .was {
+  visibility: hidden;
+}
+.tpa-ptag-pay .tpa-swap .now {
+  left: 0;
+  right: auto;
+}
+.tpa-ptag-pay s {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--muted);
+}
+.tpa-ptag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--ink);
+}
+.tpa-ptag-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpa-ptag-off {
+  background: #1f8a4c;
+  color: #ffffff;
+}
+.tpa-ptag-pts {
+  padding-left: 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ── The offer, simple (PlusHome) ──────────────────────────────────────── */
+.tpa-wchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpa-offer {
+  position: relative;
+  padding-top: 22px;
+}
+.tpa-offer-mark {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  width: 76px;
+  height: auto;
+}
+.tpa-offer-price {
+  display: grid;
+  gap: 2px;
+}
+.tpa-offer-price b {
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 56px;
+  letter-spacing: -0.035em;
+}
+.tpa-offer-price span {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpa-offer-then {
+  margin-top: 4px;
+  color: var(--muted);
+}
+/* One line that opens to its detail (the FAQ's disclosure, lighter). */
+.tpa-more {
+  margin-top: 12px;
+}
+.tpa-more summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.tpa-more summary::-webkit-details-marker {
+  display: none;
+}
+.tpa-more summary svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.tpa-more[open] summary svg {
+  transform: rotate(180deg);
+}
+.tpa-more p {
+  padding: 0 28px 4px 0;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpa-promise-more-d {
+  margin-top: 0;
+}
+.tpa-promise-more-d summary > span {
+  display: grid;
+  gap: 2px;
+}
+.tpa-promise-more-d .tpa-promise-line {
+  margin-top: 0;
+  font-weight: 500;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-more summary svg {
+    transition: none;
+  }
+}
+
+/* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
+   the whole width, pinned; the cells are wells, the app's #E5E5EA. */
+.tpa-wbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: calc(env(safe-area-inset-top) + 8px) var(--gutter) 8px;
+  background: var(--ink);
+  color: #ffffff;
+  /* One weight, and a firm one: 600 at 13px read thin on black (Sam, 3 Nov
+     2026: "i don't love the light weight text here"). */
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+}
+.tpa-clock {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+.tpa-close-ends {
+  margin-top: 10px;
+  font-weight: 600;
+}
+.hs-ends {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
 /* The dock: the app's floating white plate. */
 .tpa-dock {
   position: fixed;
@@ -742,7 +1026,6 @@ html[data-surface="tpa"] body {
 @media (prefers-reduced-motion: reduce) {
   .tpa-cta,
   .tpa-dock,
-  .tpa-pick-logo,
   .tpa-order-band,
   .tpa-qa summary svg {
     transition: none;
@@ -754,6 +1037,9 @@ html[data-surface="tpa"] body {
   .tpa {
     --column: 720px;
     padding-top: 16px;
+  }
+  .tpa-wbar {
+    margin: -16px 0 16px;
   }
   .tpa-band {
     width: calc(100% - 32px);
@@ -796,25 +1082,6 @@ html[data-surface="tpa"] body {
   }
 }
 
-.tpa-how-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.tpa-quiet {
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
 
 /* ══ HOW IT WORKS, THE SHEET (shell/HowSheet.tsx) ═══════════════════════════
    Portalled to <body>, so it carries its own tokens. The app's sheet: white,
@@ -842,7 +1109,10 @@ html[data-surface="tpa"] body {
 .hs-layer *::after {
   box-sizing: border-box;
 }
-.hs-layer :where(p, h2, ol, ul) {
+/* Zero specificity: at .hs-layer's weight this reset outranked every
+   scene's own spacing (.tk-item, .tk-rule…) and packed the slides' rows
+   edge to edge. */
+:where(.hs-layer) :where(p, h2, ol, ul) {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1072,6 +1342,8 @@ html[data-surface="tpa"] body {
   line-height: 18px;
   color: var(--muted);
 }
+/* One weight in the line (Sam, 3 Nov 2026: no mixed weights in a sentence). */
+.hs-price,
 .hs-price b {
   color: var(--ink);
   font-weight: 600;
@@ -1113,6 +1385,7 @@ html[data-surface="tpa"] body {
   font-weight: 600;
   font-size: 16px;
   color: #141618;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -1152,4 +1425,86 @@ html[data-surface="tpa"] [data-lit] {
 }
 .tpa-signin {
   gap: 2px;
+}
+
+/* ── The walkthrough's scenes in the app's look (Sam, 3 Nov 2026: "this
+   needs polish, all of these slides do") ─────────────────────────────────
+   The scenes keep how.css's layout and motion; here they take the page's
+   objects. Logos are the app's round discs, every card is one white plate
+   with a hairline (no border-plus-shadow), the order slides lose the label
+   that repeated their own state, and the cover charge is a photograph with
+   a glass label rather than a ticket stub (no ticket cards, 21 Oct). */
+html[data-surface="tpa"] .hs-scene .collar {
+  padding: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair-lit);
+}
+html[data-surface="tpa"] .hs-scene .collar img {
+  border-radius: 50%;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .hs-scene .collar::after {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene :is(.ticket, .offer, .pass) {
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--hair), 0 2px 8px rgba(20, 22, 24, 0.06);
+}
+html[data-surface="tpa"] .hs-scene .spot-label {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene .tk-item img {
+  border-radius: 10px;
+  box-shadow: none;
+}
+html[data-surface="tpa"] .hs-scene .pass {
+  min-height: 240px;
+  padding: 16px;
+  background: #141414;
+}
+html[data-surface="tpa"] .hs-scene .pass::before {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene :is(.pass-shot, .pass-veil) {
+  left: 0;
+  width: 100%;
+}
+html[data-surface="tpa"] .hs-scene .pass-shot {
+  filter: none;
+}
+html[data-surface="tpa"] .hs-scene .pass-veil {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.72) 100%);
+}
+html[data-surface="tpa"] .hs-scene .pass-kind {
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  writing-mode: horizontal-tb;
+  transform: none;
+  background: rgba(20, 20, 20, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+html[data-surface="tpa"] .hs-scene .pass-mark {
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+}
+html[data-surface="tpa"] .hs-scene .dock {
+  padding: 7px 14px;
+  border: 0;
+  background: #ffffff;
+  color: #141618;
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }

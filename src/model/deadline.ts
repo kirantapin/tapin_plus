@@ -37,7 +37,34 @@ const split = (ms: number): Remaining => {
 
 /** Time left to the deadline, ticking each second; null once it has passed. */
 export function useDeadline(): Remaining | null {
-  const end = deadlineAt();
+  return useCountdown(deadlineAt());
+}
+
+/* ══ THE WELCOME OFFER'S END (Sam, 3 Nov 2026) ═════════════════════════════════
+   "do the welcome offer countdown, ends at end of month": $3.99 for the first
+   month, then $7.99, for anyone who joins by the end of 30 November,
+   Blacksburg time (EST, UTC−5 since 1 November). Like the October clock it
+   counts down to a real date and renders nothing once it passes; the price in
+   the app changes by Kiran's hand, not this file's. */
+export const WELCOME_ENDS_MS = Date.UTC(2026, 11, 1, 5, 0, 0);
+/** The date as the copy says it. */
+export const welcomeEndsDay = "November 30";
+
+/** Dev only: `?welcome=<ISO>` moves the end, to see the last hours and the
+ *  expired state. Never read in a production build. */
+const welcomeAt = (): number => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return WELCOME_ENDS_MS;
+  const raw = new URLSearchParams(window.location.search).get("welcome");
+  const t = raw ? Date.parse(raw) : NaN;
+  return Number.isFinite(t) ? t : WELCOME_ENDS_MS;
+};
+
+/** Time left on the welcome offer; null once it has ended. */
+export function useWelcomeEnds(): Remaining | null {
+  return useCountdown(welcomeAt());
+}
+
+function useCountdown(end: number): Remaining | null {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (now >= end) return;

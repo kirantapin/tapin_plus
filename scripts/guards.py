@@ -38,9 +38,14 @@ def strip(src: str, css: bool) -> str:
 # October 31, after which new members pay more: a real date, unlike the seat
 # count. `src/shell/Deadline.tsx` is the one file that prints it, reading the
 # date from `src/model/deadline.ts`; every other surface stays guarded.
+#
+# THE THIRD, 3 Nov 2026, ON THE SAME TERMS. Sam: "do the welcome offer
+# countdown, ends at end of month". `src/shell/WelcomeOffer.tsx` prints it,
+# reading 30 November from the same `src/model/deadline.ts`.
 EXEMPT = {
     ("member or seat count", "src/model/seats.ts"),
     ("urgency theatre", "src/shell/Deadline.tsx"),
+    ("urgency theatre", "src/shell/WelcomeOffer.tsx"),
 }
 
 CHECKS = [
