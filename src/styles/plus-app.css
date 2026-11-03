@@ -88,7 +88,12 @@ html[data-surface="tpa"] body {
   content: "";
   position: absolute;
   inset: 0;
+  /* A photograph's shade, not a fill (the no-gradients rule keeps these):
+     a soft pool of dark behind the headline, bottom left, so the words read
+     over the tower and the sun (Sam, 3 Nov 2026: "a slight gradient there
+     behind the text specifically"). */
   background:
+    radial-gradient(ellipse 95% 70% at 0% 100%, rgba(0, 0, 0, 0.62) 0, rgba(0, 0, 0, 0.36) 45%, rgba(0, 0, 0, 0) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) calc(env(safe-area-inset-top) + 80px)),
     linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.4) 38%, rgba(0, 0, 0, 0) 66%);
 }
@@ -1110,14 +1115,17 @@ html[data-surface="tpa"] body {
   color: #1f8a4c;
 }
 .tpa-s2 .tpa-offer-then {
-  margin-top: 14px;
+  margin-top: 16px;
+  color: var(--ink);
+  font-weight: 600;
 }
+/* Sits with the price it is about, above Join, not loose under the
+   buttons (Sam, 3 Nov 2026: "looks a little weird"). */
 .tpa-wdays {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  margin-top: 14px;
+  margin-top: 6px;
   font-weight: 600;
   font-size: 14px;
   line-height: 18px;

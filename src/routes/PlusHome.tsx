@@ -669,9 +669,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <p className="tpa-offer-then">
               Plus is {FIRST_MONTH} your first month, then {MONTHLY}/month.
             </p>
+            <WelcomeDays />
             {joinCta("hero")}
             {tryCta}
-            <WelcomeDays />
             {lockMore}
           </section>
         ) : offer === "3" ? (
