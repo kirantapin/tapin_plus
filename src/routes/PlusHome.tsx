@@ -190,11 +190,13 @@ const Play = () => (
    it's just the same gray background that the 'step through it' button
    has"): Colour's layout, tab to total, in the button's grey with ink. The
    default; the coloured version stays at ?hiw=2. */
+/* Counter is the offer (Sam, 3 Nov 2026, picked from the three). Sticker
+   and Poster stay previewable at ?offer=1|3, the plain price at ?offer=0. */
 type OfferLook = "shipped" | "1" | "2" | "3";
 const offerLook = (): OfferLook => {
-  if (typeof window === "undefined") return "shipped";
+  if (typeof window === "undefined") return "2";
   const v = new URLSearchParams(window.location.search).get("offer");
-  return v === "1" || v === "2" || v === "3" ? v : "shipped";
+  return v === "0" ? "shipped" : v === "1" || v === "3" ? v : "2";
 };
 type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
 const orderLook = (): OrderLook => {
