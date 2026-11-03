@@ -198,11 +198,6 @@ html[data-surface="tpa"] body {
   letter-spacing: -0.01em;
   text-wrap: pretty;
 }
-.tpa-marks {
-  display: flex;
-  gap: 6px;
-  margin-top: 14px;
-}
 .tpa-logo {
   width: 32px;
   height: 32px;
@@ -223,23 +218,6 @@ html[data-surface="tpa"] body {
 }
 .tpa .collar::after {
   display: none;
-}
-.tpa-price {
-  margin-top: 20px;
-  padding-top: 16px;
-  box-shadow: inset 0 1px 0 var(--hair);
-}
-.tpa-price-h {
-  font-weight: 600;
-  font-size: 17px;
-  line-height: 22px;
-}
-.tpa-price-h b {
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 32px;
-  letter-spacing: -0.02em;
-  margin-right: 4px;
 }
 .tpa-price-then {
   margin-top: 4px;
@@ -273,16 +251,6 @@ html[data-surface="tpa"] body {
   background: #ffffff;
   color: var(--ink);
 }
-.tpa-rises {
-  margin-top: 12px;
-  font-weight: 600;
-  text-wrap: pretty;
-}
-.tpa-refund {
-  margin-top: 6px;
-  color: var(--muted);
-  text-wrap: pretty;
-}
 
 /* The Plus Promise: one row, the well holding a shield. */
 .tpa-promise {
@@ -304,11 +272,6 @@ html[data-surface="tpa"] body {
 .tpa-promise-line {
   margin-top: 4px;
   font-weight: 600;
-}
-.tpa-promise-more {
-  margin-top: 4px;
-  color: var(--muted);
-  text-wrap: pretty;
 }
 
 /* How it works: three figures like the wallet's cells. */
@@ -667,19 +630,30 @@ html[data-surface="tpa"] body {
   width: 36px;
   height: 36px;
 }
-.tpa-tab-line {
-  position: absolute;
-  top: 0;
-  left: 12px;
-  right: 12px;
-  height: 3px;
-  border-radius: 0 0 2px 2px;
-  background: var(--brand-ink);
-  transform: scaleX(0);
-  transform-origin: left center;
+.tpa-tabs button > * {
+  grid-area: 1 / 1;
 }
-.tpa-tabs button:not([data-on]) .tpa-tab-line {
-  display: none;
+.tpa-tab-ring {
+  width: 46px;
+  height: 46px;
+  transform: rotate(-90deg);
+}
+.tpa-tab-ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+.tpa-tab-ring-track {
+  stroke: transparent;
+}
+.tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: color-mix(in srgb, var(--brand-ink) 28%, transparent);
+}
+.tpa-tab-ring-run {
+  stroke: var(--brand-ink);
+  stroke-linecap: round;
+}
+.tpa-tabs button:not([data-on]) .tpa-tab-ring-run {
+  stroke: transparent;
 }
 .tpa-order[data-edge="first"] {
   border-top-left-radius: 0;
@@ -742,7 +716,7 @@ html[data-surface="tpa"] body {
   font-size: 17px;
 }
 /* 2 · Colour: Plate's photo, and the whole order card in the place's
-   colour, its ink on top (inkOn strict: Sweetopia's pink takes ink). */
+   colour, white on top (ink only on a pale colour, inkOn). */
 .tpa-carousel[data-look="colour"] .tpa-order,
 .tpa-carousel[data-look="colour"] .tpa-order-band {
   background: var(--brand);
@@ -777,8 +751,11 @@ html[data-surface="tpa"] body {
 .tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] {
   background: var(--ground);
 }
-.tpa-carousel[data-look="tag"] .tpa-tab-line {
-  background: var(--ink);
+.tpa-carousel[data-look="tag"] .tpa-tab-ring-run {
+  stroke: var(--ink);
+}
+.tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: var(--hair);
 }
 .tpa-ptag {
   padding: 14px;
@@ -865,8 +842,7 @@ html[data-surface="tpa"] body {
   color: var(--muted);
 }
 
-/* ── The offer, three versions (PlusHome offerLook, ?offer=1|2|3) ───────── */
-/* The clock as one pill, and November as a bar (shell/WelcomeOffer.tsx). */
+/* ── The offer, simple (PlusHome) ──────────────────────────────────────── */
 .tpa-wchip {
   display: inline-flex;
   align-items: center;
@@ -880,184 +856,84 @@ html[data-surface="tpa"] body {
   font-size: 14px;
   line-height: 18px;
 }
-.tpa-wmonth {
-  margin-top: 18px;
-  padding-top: 16px;
-  box-shadow: inset 0 1px 0 var(--hair);
-}
-.tpa-wmonth p {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
-  line-height: 18px;
-}
-.tpa-wmonth b {
-  font-weight: 600;
-}
-.tpa-wmonth p span {
-  white-space: nowrap;
-  color: var(--muted);
-  font-weight: 600;
-}
-.tpa-wmonth-bar {
-  display: block;
-  height: 6px;
-  margin-top: 8px;
-  border-radius: 999px;
-  background: var(--well);
-  overflow: hidden;
-}
-.tpa-wmonth-bar i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--ink);
-  transform-origin: left center;
-}
-/* 1 · Price first. */
-.tpa-o1 {
+.tpa-offer {
   position: relative;
   padding-top: 22px;
 }
-.tpa-o1-mark {
+.tpa-offer-mark {
   position: absolute;
   top: 16px;
   right: 14px;
   width: 76px;
   height: auto;
 }
-.tpa-o1-price {
+.tpa-offer-price {
   display: grid;
   gap: 2px;
 }
-.tpa-o1-price b {
+.tpa-offer-price b {
   font-weight: 700;
   font-size: 56px;
   line-height: 56px;
   letter-spacing: -0.035em;
 }
-.tpa-o1-price span {
+.tpa-offer-price span {
   font-weight: 600;
   font-size: 17px;
   line-height: 22px;
 }
-.tpa-o1-then {
-  margin-top: 6px;
-  max-width: 34ch;
+.tpa-offer-then {
+  margin-top: 4px;
   color: var(--muted);
-  text-wrap: pretty;
 }
-.tpa-o1-where {
-  display: grid;
-  gap: 10px;
-  margin-top: 18px;
-  padding-top: 16px;
-  box-shadow: inset 0 1px 0 var(--hair);
+/* One line that opens to its detail (the FAQ's disclosure, lighter). */
+.tpa-more {
+  margin-top: 12px;
 }
-.tpa-o1-where .tpa-marks {
-  margin: 0;
-}
-.tpa-o1-where p {
-  font-weight: 600;
-  text-wrap: pretty;
-}
-/* 2 · Black card: the app's black feature card. */
-.tpa-o2 {
-  margin: 12px var(--gutter) 0;
-  padding: 20px 16px 18px;
-  border-radius: 16px;
-  background: #141414;
-  color: #ffffff;
-}
-.tpa-o2-mark {
-  display: block;
-  width: 132px;
-  height: auto;
-  margin: 0 0 14px -6px;
-}
-.tpa-o2-lead {
-  font-weight: 600;
-  font-size: 19px;
-  line-height: 24px;
-  letter-spacing: -0.01em;
-  text-wrap: pretty;
-}
-.tpa-o2 .tpa-marks {
-  margin-top: 14px;
-}
-.tpa-o2 .collar {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
-}
-.tpa-o2-price {
-  margin-top: 18px;
-  padding-top: 16px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-.tpa-o2 .tpa-wcells-h,
-.tpa-o2 .tpa-wcells-row small,
-.tpa-o2 .tpa-price-then {
-  color: rgba(255, 255, 255, 0.7);
-}
-.tpa-o2 .tpa-wcells-row span {
-  background: rgba(255, 255, 255, 0.1);
-}
-.tpa-o2 .tpa-try {
-  background: transparent;
-  color: #ffffff;
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3);
-}
-.tpa-o2 .tpa-rises {
-  color: #ffffff;
-}
-.tpa-o2 :where(a, button):focus-visible {
-  outline-color: #ffffff;
-}
-/* 3 · November: the collage across the top, the mark on its edge. */
-.tpa-o3 {
-  padding-top: 0;
-  overflow: hidden;
-}
-.tpa-o3-art {
-  position: relative;
-  margin: 0 -16px 46px;
-  height: 120px;
-}
-.tpa-o3-collage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 38%;
-}
-.tpa-o3-mark {
-  position: absolute;
-  left: 10px;
-  bottom: -40px;
-  width: 96px;
-  height: auto;
-}
-.tpa-o3-price {
+.tpa-more summary {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-top: 14px;
-}
-.tpa-o3-price span:first-child {
+  gap: 12px;
+  min-height: 44px;
   font-weight: 600;
-  font-size: 17px;
+  cursor: pointer;
+  list-style: none;
 }
-.tpa-o3-price b {
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 34px;
-  letter-spacing: -0.02em;
-  margin-right: 4px;
+.tpa-more summary::-webkit-details-marker {
+  display: none;
 }
-.tpa-o3-price span:last-child {
+.tpa-more summary svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
   color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.tpa-more[open] summary svg {
+  transform: rotate(180deg);
+}
+.tpa-more p {
+  padding: 0 28px 4px 0;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpa-promise-more-d {
+  margin-top: 0;
+}
+.tpa-promise-more-d summary > span {
+  display: grid;
+  gap: 2px;
+}
+.tpa-promise-more-d .tpa-promise-line {
+  margin-top: 0;
+  font-weight: 500;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-more summary svg {
+    transition: none;
+  }
 }
 
 /* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
@@ -1074,52 +950,15 @@ html[data-surface="tpa"] body {
   padding: calc(env(safe-area-inset-top) + 8px) var(--gutter) 8px;
   background: var(--ink);
   color: #ffffff;
+  font-weight: 600;
   font-size: 13px;
   line-height: 18px;
   text-align: center;
-}
-.tpa-wbar b {
-  font-weight: 700;
 }
 .tpa-clock {
   flex: 0 0 auto;
   width: 15px;
   height: 15px;
-}
-.tpa-wcells {
-  margin-bottom: 16px;
-}
-.tpa-wcells-h {
-  font-weight: 600;
-  font-size: 13px;
-  line-height: 18px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.tpa-wcells-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 8px;
-}
-.tpa-wcells-row span {
-  display: grid;
-  justify-items: center;
-  padding: 8px 0 7px;
-  border-radius: 12px;
-  background: var(--well);
-}
-.tpa-wcells-row b {
-  font-weight: 700;
-  font-size: 22px;
-  line-height: 26px;
-  letter-spacing: -0.01em;
-}
-.tpa-wcells-row small {
-  font-size: 12px;
-  line-height: 14px;
-  color: var(--muted);
 }
 .tpa-close-ends {
   margin-top: 10px;
