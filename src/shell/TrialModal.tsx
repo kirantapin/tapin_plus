@@ -282,8 +282,12 @@ export default function TrialModal({
             ) : null}
             <p className="t-compact ct-more-p">
               {/* Early access is closed (model/closed.ts): no price to quote. */}
+              {/* On the app-look home page (3 Nov 2026) the window closes on
+                  the app's offer, not on "early access is closed". */}
               {EARLY_ACCESS_CLOSED
-                ? `${closedLead} ${closedMore} ${TAPIN_HOST}.`
+                ? document.documentElement.dataset.surface === "tpa"
+                  ? "$3.99 your first month, then $7.99/month, locked in for as long as you’re a member."
+                  : `${closedLead} ${closedMore} ${TAPIN_HOST}.`
                 : `$${monthlyToday.toFixed(2)} now, ${standardAfter} once the spots are gone.`}
             </p>
             <Link
@@ -292,7 +296,7 @@ export default function TrialModal({
               state={cta.state}
               onClick={onClose}
             >
-              {cta.label}
+              {EARLY_ACCESS_CLOSED && document.documentElement.dataset.surface === "tpa" ? "Join Tapin Plus" : cta.label}
             </Link>
           </div>
         </div>
