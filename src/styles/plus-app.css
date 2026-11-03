@@ -725,10 +725,13 @@ html[data-surface="tpa"] body {
   background: var(--brand);
   transition: background-color 0.35s var(--ease);
 }
+/* A strip, not a poster (Sam, 3 Nov 2026: "the image is too large now"):
+   the menu photos are small files, so they stay short enough to stay sharp. */
 .tpa-order-plate img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 5 / 2;
+  max-height: 140px;
   border-radius: 10px;
   object-fit: cover;
   background: var(--well);
