@@ -5,6 +5,7 @@ import { illustrate } from "../model/savings";
 import { useSpend } from "../model/spendStore";
 import { buildSlides, valueHead } from "../routes/How";
 import { asset } from "../asset";
+import { WelcomeEnds } from "./WelcomeOffer";
 
 /* ══ HOW IT WORKS, THE OLD WALKTHROUGH IN THE APP'S LOOK (Sam, 3 Nov 2026) ══
    "I like the new 'how it works' modal - but i feel like it got rid of a lot
@@ -204,9 +205,12 @@ export default function HowSheet({
 
         <div className="hs-foot">
           {last ? (
-            <p className="hs-price">
-              <b>$3.99 your first month</b>, then $7.99/month, locked in for as long as you’re a member.
-            </p>
+            <div>
+              <p className="hs-price">
+                <b>$3.99 your first month</b>, then $7.99/month, locked in for as long as you’re a member.
+              </p>
+              <WelcomeEnds className="hs-ends" />
+            </div>
           ) : (
             <p className="hs-when">
               <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>

@@ -8,6 +8,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
+import { WelcomeBar, WelcomeCells, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -324,6 +325,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
   return (
     <div className="tpa">
+      {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
+          countdown, ends at end of month"), pinned so it stays on screen. */}
+      <WelcomeBar price={FIRST_MONTH} />
       <header className="tpa-band">
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
@@ -383,6 +387,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             ))}
           </ul>
           <div className="tpa-price">
+            <WelcomeCells />
             <p className="tpa-price-h">
               <b className="tnum">{FIRST_MONTH}</b> your first month
             </p>
@@ -499,6 +504,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <img className="tpa-close-paper" src={PAPER_MARK} alt="" width="96" height="76" decoding="async" loading="lazy" />
           <h2 className="tpa-close-h">{FIRST_MONTH} your first month</h2>
           <p className="tpa-close-line">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
+          <WelcomeEnds className="tpa-close-ends" />
           <a ref={closeJoin} className="tpa-cta tpa-cta-white" href={tapinHref()} onClick={go("close")}>
             Join Tapin Plus
           </a>

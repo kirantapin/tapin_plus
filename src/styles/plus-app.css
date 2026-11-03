@@ -689,6 +689,78 @@ html[data-surface="tpa"] body {
   text-underline-offset: 3px;
 }
 
+/* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
+   the whole width, pinned; the cells are wells, the app's #E5E5EA. */
+.tpa-wbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: calc(env(safe-area-inset-top) + 8px) var(--gutter) 8px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+.tpa-wbar b {
+  font-weight: 700;
+}
+.tpa-clock {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+.tpa-wcells {
+  margin-bottom: 16px;
+}
+.tpa-wcells-h {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tpa-wcells-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.tpa-wcells-row span {
+  display: grid;
+  justify-items: center;
+  padding: 8px 0 7px;
+  border-radius: 12px;
+  background: var(--well);
+}
+.tpa-wcells-row b {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 26px;
+  letter-spacing: -0.01em;
+}
+.tpa-wcells-row small {
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--muted);
+}
+.tpa-close-ends {
+  margin-top: 10px;
+  font-weight: 600;
+}
+.hs-ends {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
 /* The dock: the app's floating white plate. */
 .tpa-dock {
   position: fixed;
@@ -754,6 +826,9 @@ html[data-surface="tpa"] body {
   .tpa {
     --column: 720px;
     padding-top: 16px;
+  }
+  .tpa-wbar {
+    margin: -16px 0 16px;
   }
   .tpa-band {
     width: calc(100% - 32px);
