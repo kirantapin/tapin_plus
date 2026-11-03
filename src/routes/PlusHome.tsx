@@ -165,8 +165,8 @@ function PaybackCounter() {
           is coming from"). */}
       <p className="tpa-s2-lib" aria-live="polite">
         <span>
-          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month, get about{" "}
-          <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back.
+          Spend about <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month at these places, get
+          about <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back.
         </span>
       </p>
       <details className="tpa-more tpa-s2-how">
