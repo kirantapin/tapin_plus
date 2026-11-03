@@ -464,9 +464,8 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
                 <b className="now tnum">{money(ex.price - CREDIT)}</b>
               </span>
             </p>
-            <p className="tpa-order-earn">
-              <b>+${CREDIT} back for next week</b> · +{points} points
-            </p>
+            {/* The order ends on what you pay: the "+$5 back for next week ·
+                +N points" line was clutter (Sam, 3 Nov 2026). */}
           </div>
         )}
       </div>
