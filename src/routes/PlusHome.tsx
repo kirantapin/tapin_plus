@@ -90,12 +90,14 @@ const FIRST_ORDER = EXAMPLES[0];
 /* WHAT YOU SPEND, WHAT COMES BACK (Sam, 3 Nov 2026: "how much do you spend
    on non-alcohol in blacksburg, and what you can get back for that if you
    just spent it at these places"). A week's food and non-alcoholic drinks,
-   the same bands and the same sum as the walkthrough (savings.ts
-   weeklyBack): each $10 is one more place's $5 a week, up to all five. */
-const SPEND_BANDS = [20, 30, 40, 50] as const;
+   the same sum as the walkthrough (savings.ts weeklyBack): each $10 is one
+   more place's $5 a week, up to all five. $25 / $50 / $75 / $100+ (Sam,
+   3 Nov 2026: "can we make the amounts a bit different"); from $50 a week
+   every place is covered, so the top three read as the most Plus gives. */
+const SPEND_BANDS = [25, 50, 75, 100] as const;
 
 function PaybackCounter() {
-  const [w, setW] = useState<number>(40);
+  const [w, setW] = useState<number>(50);
   const out = useRef<HTMLElement | null>(null);
   const back = weeklyBack(w);
   const pick = (k: number) => {
@@ -142,7 +144,9 @@ function PaybackCounter() {
         ))}
       </ul>
       <p className="tpa-s2-note">
-        ${CREDIT} back a week at {back.places === 1 ? "1 place" : `${back.places} places`}, on $10+ orders. Then {MONTHLY}/month.
+        {back.places === PLACES.length
+          ? `The most Plus gives: $${CREDIT} back a week at all ${PLACES.length} places, on $10+ orders. Then ${MONTHLY}/month.`
+          : `$${CREDIT} back a week at ${back.places === 1 ? "1 place" : `${back.places} places`}, on $10+ orders. Then ${MONTHLY}/month.`}
       </p>
     </div>
   );
