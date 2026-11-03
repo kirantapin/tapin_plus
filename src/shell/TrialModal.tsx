@@ -70,7 +70,10 @@ export default function TrialModal({
   const cta = useReserveCta();
   /* The rest of the network, from the records. Same list and same marks the
      page's own closing row draws, so the two say it identically. */
-  const others = venues.filter((o) => o.id !== campaignVenue?.id && o.plus);
+  /* The rest of Plus: not a place this window already offers a try at (it
+     listed The Burg twice, above and under "Also at"). */
+  const tried = new Set(campaignTrialPlaces.map((p) => p.venueId));
+  const others = venues.filter((o) => o.id !== campaignVenue?.id && !tried.has(o.id) && o.plus);
 
   const close = () => {
     if (closing) return;
@@ -253,7 +256,11 @@ export default function TrialModal({
                 own closing row — the same list from the same records, so a
                 reader meets the network described identically in both places
                 rather than twice in two voices. */}
-            <p className="ct-more-h">Want this every week? And at every location?</p>
+            <p className="ct-more-h">
+              {document.documentElement.dataset.surface === "tpa"
+                ? "Every week, at every place"
+                : "Want this every week? And at every location?"}
+            </p>
             {others.length ? (
               <div className="cg-also ct-also">
                 <span className="cg-also-marks" aria-hidden="true">
@@ -286,7 +293,7 @@ export default function TrialModal({
                   the app's offer, not on "early access is closed". */}
               {EARLY_ACCESS_CLOSED
                 ? document.documentElement.dataset.surface === "tpa"
-                  ? "$3.99 your first month, then $7.99/month, locked in for as long as you’re a member."
+                  ? "$3.99 your first month, then $7.99."
                   : `${closedLead} ${closedMore} ${TAPIN_HOST}.`
                 : `$${monthlyToday.toFixed(2)} now, ${standardAfter} once the spots are gone.`}
             </p>

@@ -47,3 +47,19 @@ export function WelcomeChip() {
     </p>
   );
 }
+
+/** A quiet line for a card: "Welcome offer ends November 30 · 27 days left".
+ *  Days, not a ticking clock: the bar at the top already ticks. */
+export function WelcomeDays() {
+  const r = useWelcomeEnds();
+  if (!r) return null;
+  const left = r.days >= 1 ? `${r.days} ${r.days === 1 ? "day" : "days"} left` : "last day";
+  return (
+    <p className="tpa-wdays">
+      <Clock />
+      <span>
+        Welcome offer ends {welcomeEndsDay} · {left}
+      </span>
+    </p>
+  );
+}

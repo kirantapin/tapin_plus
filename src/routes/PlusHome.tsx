@@ -9,7 +9,7 @@ import { weeklyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
-import { WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { WelcomeBar, WelcomeChip, WelcomeDays, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -90,12 +90,14 @@ const FIRST_ORDER = EXAMPLES[0];
 /* WHAT YOU SPEND, WHAT COMES BACK (Sam, 3 Nov 2026: "how much do you spend
    on non-alcohol in blacksburg, and what you can get back for that if you
    just spent it at these places"). A week's food and non-alcoholic drinks,
-   the same bands and the same sum as the walkthrough (savings.ts
-   weeklyBack): each $10 is one more place's $5 a week, up to all five. */
-const SPEND_BANDS = [20, 30, 40, 50] as const;
+   the same sum as the walkthrough (savings.ts weeklyBack): each $10 is one
+   more place's $5 a week, up to all five. $25 / $50 / $75 / $100+ (Sam,
+   3 Nov 2026: "can we make the amounts a bit different"); from $50 a week
+   every place is covered, so the top three read as the most Plus gives. */
+const SPEND_BANDS = [25, 50, 75, 100] as const;
 
 function PaybackCounter() {
-  const [w, setW] = useState<number>(40);
+  const [w, setW] = useState<number>(50);
   const out = useRef<HTMLElement | null>(null);
   const back = weeklyBack(w);
   const pick = (k: number) => {
@@ -110,7 +112,7 @@ function PaybackCounter() {
   return (
     <div className="tpa-s2-calc">
       <p className="tpa-s2-q" id="tpa-s2-q">
-        Food and non&#8209;alcoholic drinks, a&nbsp;week
+        What you spend a week on food and non&#8209;alcoholic drinks
       </p>
       <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
         {SPEND_BANDS.map((k) => (
@@ -122,20 +124,23 @@ function PaybackCounter() {
           </button>
         ))}
       </div>
-      <p className="tpa-s2-out" aria-live="polite">
-        <b ref={out} className="tnum">
-          ${back.monthlyUsd} back
-        </b>
-        <span>a month, if you spend it at these places</span>
+      <div className="tpa-s2-vs" aria-live="polite">
+        <p>
+          <b ref={out} className="tnum tpa-s2-back">
+            ${back.monthlyUsd}
+          </b>
+          <span>back a month</span>
+        </p>
+        <p>
+          <b className="tnum">{FIRST_MONTH}</b>
+          <span>your first month</span>
+        </p>
+      </div>
+      <p className="tpa-s2-note">
+        {back.places === PLACES.length
+          ? `The most Plus gives: $${CREDIT} back a week at all ${PLACES.length} places, on $10+ orders. Then ${MONTHLY}/month.`
+          : `$${CREDIT} back a week at ${back.places === 1 ? "1 place" : `${back.places} places`}, on $10+ orders. Then ${MONTHLY}/month.`}
       </p>
-      <ul className="tpa-s2-places" aria-label={PLACES.map((v) => v.name).join(", ")}>
-        {PLACES.map((v, k) => (
-          <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)} data-on={k < back.places ? "" : undefined}>
-            <img src={v.logo} alt="" decoding="async" />
-          </li>
-        ))}
-      </ul>
-      <p className="tpa-s2-note">A $10+ order at {back.places === 1 ? "one place" : `${back.places} places`} each week. An estimate.</p>
     </div>
   );
 }
@@ -259,7 +264,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     const ease = "cubic-bezier(.22,1,.36,1)";
     const q = (sel: string) => body.querySelector<HTMLElement>(sel);
     q(".tpa-order-in")?.animate?.([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 420, easing: ease });
-    q(".tpa-order-off")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 500, easing: ease, fill: "backwards" });
+    /* The credit drops in from above, onto the order it comes off (Sam,
+       3 Nov 2026: "the your credit should animate in downward"). */
+    q(".tpa-order-off")?.animate?.([{ opacity: 0, transform: "translateY(-12px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 500, easing: ease, fill: "backwards" });
     q(".tpa-swap .was")?.animate?.([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-7px)" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
     q(".tpa-swap .now")?.animate?.([{ opacity: 0, transform: "translateY(9px)" }, { opacity: 1, transform: "none" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
     q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
@@ -493,7 +500,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   };
 
   return (
-    <div className="tpa">
+    <div className="tpa tpa-home">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       <WelcomeBar price={FIRST_MONTH} />
@@ -582,14 +589,18 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </section>
         ) : offer === "2" ? (
           <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
-            <h2 className="tpa-s2-h">One ${MIN_ORDER} order covers your first month.</h2>
+            {/* WHAT YOU'D GET BACK, AGAINST WHAT IT COSTS (Sam, 3 Nov 2026:
+                "I don't really quite get it ... I think it's kind of neat to
+                have that be flexible"). One question, then the two numbers
+                side by side: back a month against the first month's price.
+                The countdown is a quiet line, not the black pill ("I also
+                don't like the way the countdown looks specifically on this
+                card"). */}
+            <h2 className="tpa-s2-h">See what you’d get back</h2>
             <PaybackCounter />
-            <p className="tpa-offer-then">
-              {FIRST_MONTH} your first month, then {MONTHLY}/month.
-            </p>
-            <WelcomeChip />
             {joinCta("hero")}
             {tryCta}
+            <WelcomeDays />
             {lockMore}
           </section>
         ) : offer === "3" ? (

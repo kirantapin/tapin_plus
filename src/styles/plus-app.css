@@ -1091,30 +1091,55 @@ html[data-surface="tpa"] body {
   margin-top: 14px;
 }
 .tpa-s3 .tpa-offer-then,
-/* The places the spend covers, lit as the bands climb: one more $10, one
-   more place's $5 a week. */
-.tpa-s2-places {
+/* Back a month against the first month, side by side. */
+.tpa-s2-vs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.tpa-s2-vs p {
+  display: grid;
+  gap: 2px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.tpa-s2-vs b {
+  display: block;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 38px;
+  letter-spacing: -0.03em;
+}
+.tpa-s2-vs .tpa-s2-back {
+  color: #1f8a4c;
+}
+.tpa-s2-vs span {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+.tpa-wdays {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
 }
-.tpa-s2-places li {
-  opacity: 0.32;
-  transition: opacity 0.25s var(--ease);
-}
-.tpa-s2-places li[data-on] {
-  opacity: 1;
+.tpa-wdays .tpa-clock {
+  width: 15px;
+  height: 15px;
 }
 .tpa-s2-note {
   margin-top: 8px;
   font-size: 14px;
   line-height: 18px;
   color: var(--muted);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tpa-s2-places li {
-    transition: none;
-  }
 }
 .tpa-s2 .tpa-offer-then {
   margin-top: 12px;
@@ -1880,4 +1905,312 @@ html[data-surface="tpa"] .hs-scene .tk-earned b {
 }
 html[data-surface="tpa"] .hs-scene .spot-earned {
   font-weight: 600;
+}
+
+/* ══ THE HOME PAGE ON A DESK (Sam, 3 Nov 2026: "a pass for desktop ...
+   structurally, it should look different") ══════════════════════════════
+   From 1024 the page is a storefront, not a stretched phone: a wide
+   collage band across the top, then two columns. The left column is the
+   story (how it works, the promise, the places, what you get, questions);
+   the right column is the offer, held in view as the page scrolls, so Join
+   is always beside what is being read. The floating dock goes: the offer
+   column does its job. The places become one row of five; what you get
+   becomes two by two. Members keeps the single column (.tpa-home only). */
+@media (min-width: 1024px) {
+  .tpa-home {
+    --column: 1180px;
+    --gutter: 0px;
+    padding-bottom: 48px;
+  }
+  .tpa-home .tpa-band {
+    width: calc(100% - 64px);
+    max-width: 1180px;
+    height: 440px;
+    margin: 8px auto 0;
+    border-radius: 24px;
+  }
+  .tpa-home .tpa-band-art {
+    object-position: 50% 32%;
+  }
+  .tpa-home .tpa-band-top {
+    left: 28px;
+    right: 28px;
+    top: 24px;
+  }
+  .tpa-home .tpa-band-title {
+    left: 40px;
+    right: 40px;
+    bottom: 40px;
+  }
+  .tpa-home .tpa-band-title h1 {
+    max-width: 15ch;
+    font-size: 60px;
+    line-height: 62px;
+    letter-spacing: -0.035em;
+  }
+  .tpa-home .tpa-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    column-gap: 32px;
+    row-gap: 0;
+    width: calc(100% - 64px);
+    max-width: 1180px;
+    margin: 32px auto 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+  }
+  .tpa-home .tpa-sheet > * {
+    grid-column: 1;
+    min-width: 0;
+  }
+  .tpa-home .tpa-sheet > :first-child {
+    margin-top: 0;
+  }
+  /* The offer column: placed beside the story and held in view. */
+  .tpa-home .tpa-sheet > [aria-label="Tapin Plus"] {
+    grid-column: 2;
+    grid-row: 1 / span 40;
+    align-self: start;
+    position: sticky;
+    top: 60px;
+    margin: 0;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .tpa-home .tpa-sheet > .tpa-foot {
+    grid-column: 1 / -1;
+  }
+  .tpa-home .tpa-module,
+  .tpa-home .tpa-close {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 16px;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .tpa-home .tpa-h2 {
+    font-size: 26px;
+    line-height: 32px;
+  }
+  .tpa-home .tpa-h2-out {
+    margin: 40px 0 0;
+  }
+  /* How it works: the order card and the walkthrough side by side. */
+  .tpa-home .tpa-sheet > .tpa-module:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-areas: "head head" "card step";
+    column-gap: 20px;
+    align-items: end;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-h2 {
+    grid-area: head;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-carousel {
+    grid-area: card;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
+    grid-area: step;
+    height: auto;
+    min-height: 120px;
+    margin: 0;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 16px;
+    font-size: 17px;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide .tpa-play {
+    width: 22px;
+    height: 22px;
+  }
+  /* The places: one row of five. */
+  .tpa-home .tpa-rail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+    padding: 0;
+  }
+  .tpa-home .tpa-place {
+    height: 220px;
+  }
+  /* What you get: two by two. */
+  .tpa-home .tpa-rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+  .tpa-home .tpa-rows li:nth-child(-n + 2) {
+    box-shadow: none;
+  }
+  .tpa-home .tpa-s1-h,
+  .tpa-home .tpa-s2-h {
+    max-width: none;
+  }
+  .tpa-home .tpa-close {
+    display: none;
+  }
+  .tpa-home .tpa-dock {
+    display: none;
+  }
+  .tpa-home .tpa-foot {
+    margin-top: 32px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .tpa-home .tpa-sheet {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "card" "step";
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
+    min-height: 0;
+    height: 48px;
+    margin-top: 12px;
+    flex-direction: row;
+  }
+}
+
+/* ══ TRY IT ONCE, IN THE APP'S LOOK (Sam, 3 Nov 2026: "the try it once free
+   modal looks a little off") ═══════════════════════════════════════════════
+   shell/TrialModal.tsx keeps its markup and its presale styles
+   (campaign.css); on this page it takes the app's objects. Round logos, the
+   steps as numbered wells at one weight, each try a white row with a black
+   "Try now" pill, and the call to join as the page's black card. */
+html[data-surface="tpa"] .ct {
+  border-radius: 24px 24px 0 0;
+  background: #f0f0f0;
+  color: #141618;
+  font-family: "Gilroy", Arial, sans-serif;
+}
+html[data-surface="tpa"] .ct-head h2 {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: -0.02em;
+}
+html[data-surface="tpa"] .ct-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .ct .collar {
+  padding: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.08);
+}
+html[data-surface="tpa"] .ct .collar img {
+  border-radius: 50%;
+}
+html[data-surface="tpa"] .ct .collar::after {
+  display: none;
+}
+html[data-surface="tpa"] .ct-steps {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .ct-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+}
+html[data-surface="tpa"] .ct-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e5ea;
+  font-weight: 700;
+  font-size: 14px;
+}
+html[data-surface="tpa"] .ct-steps b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+}
+html[data-surface="tpa"] .ct-place-h {
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #141618;
+}
+html[data-surface="tpa"] .ct-place-h .collar {
+  width: 32px;
+  height: 32px;
+}
+html[data-surface="tpa"] .ct .cg-trial {
+  min-height: 56px;
+  padding: 0 8px 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: none;
+  color: #141618;
+}
+html[data-surface="tpa"] .ct .cg-trial b {
+  font-weight: 600;
+  font-size: 16px;
+}
+html[data-surface="tpa"] .ct-do {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #141618;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+html[data-surface="tpa"] .ct-do svg {
+  display: none;
+}
+html[data-surface="tpa"] .ct-once {
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+html[data-surface="tpa"] .ct-more {
+  margin-top: 16px;
+  padding: 20px;
+  border: 0;
+  border-radius: 16px;
+  background: #141414;
+  color: #ffffff;
+  box-shadow: none;
+}
+html[data-surface="tpa"] .ct-more-h {
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 25px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+html[data-surface="tpa"] .ct-more .t-compact,
+html[data-surface="tpa"] .ct-more-p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 20px;
+}
+html[data-surface="tpa"] .ct-more .collar {
+  box-shadow: 0 0 0 2px #141414;
+}
+html[data-surface="tpa"] .ct .ct-go {
+  height: 48px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #141618;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: none;
 }
