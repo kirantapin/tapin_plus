@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -85,7 +85,7 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
 
 /** Ink that reads on a place's brand colour (WCAG relative luminance). The
  *  band's label leans white, as the app's sheets do; `strict` takes whichever
- *  of ink and white contrasts more, for body text on a whole coloured section
+ *  of ink and white contrasts more, for body text on a whole coloured card
  *  (Sweetopia's pink holds white at under 3:1). */
 function inkOn(hex: string, strict = false): string {
   const n = parseInt(hex.replace("#", ""), 16);
@@ -133,9 +133,9 @@ const Play = () => (
    is the Tabs version as picked.
    1 · Plate: the dish leads. The place's colour panel holds a big photo of
      the order, the way the app's item sheet opens on its picture.
-   2 · Colour: the whole section wears the playing place's colour (Sam,
-     3 Nov 2026: "maybe we give the whole container the color"); the tab
-     and the order are one shade deeper, so the tab still runs into it.
+   2 · Colour: Plate's photo, and the whole order card wears the place's
+     colour, tab to total (Sam, 3 Nov 2026: "not the whole card, i meant
+     like the child container").
    3 · Price tag: quiet grey tab and card, no band; what you pay is the
      big number, the menu price struck beside it, the $5 and the next $5 as
      two chips. */
@@ -146,15 +146,7 @@ const orderLook = (): OrderLook => {
   return v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "tabs";
 };
 
-function OrderCard({
-  start = 0,
-  look = "tabs",
-  onPlace,
-}: {
-  start?: number;
-  look?: OrderLook;
-  onPlace?: (brand: string, ink: string) => void;
-}) {
+function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderLook }) {
   const card = useRef<HTMLDivElement | null>(null);
   const lines = useRef<Array<HTMLSpanElement | null>>([]);
   const [inView, setInView] = useState(false);
@@ -203,10 +195,6 @@ function OrderCard({
     q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
   }, [which, still]);
   const ex = EXAMPLES[which] ?? EXAMPLES[0];
-  const brand = ex?.venue.brandColor ?? "";
-  useEffect(() => {
-    if (brand) onPlace?.(brand, inkOn(brand, true));
-  }, [brand, onPlace]);
   if (!ex) return null;
   const points = Math.floor((Math.round(ex.price * 100) * POINTS_PER_DOLLAR) / 100);
   return (
@@ -216,11 +204,10 @@ function OrderCard({
       data-look={look}
       role="group"
       aria-label="Example orders"
-      style={
-        look === "colour"
-          ? undefined
-          : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
-      }
+      style={{
+        ["--brand" as string]: ex.venue.brandColor,
+        ["--brand-ink" as string]: inkOn(ex.venue.brandColor, look === "colour"),
+      }}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -266,7 +253,7 @@ function OrderCard({
             <b>{ex.venue.name}</b>
           </p>
         )}
-        {look === "plate" ? (
+        {look === "plate" || look === "colour" ? (
           <div className="tpa-order-plate" key={`plate-${which}`}>
             <img src={ex.img} alt="" decoding="async" />
           </div>
@@ -298,7 +285,7 @@ function OrderCard({
         ) : (
           <div className="tpa-order-in" key={which}>
             <p className="tpa-order-item">
-              {look === "plate" ? null : <img src={ex.img} alt="" decoding="async" />}
+              {look === "plate" || look === "colour" ? null : <img src={ex.img} alt="" decoding="async" />}
               <span>{ex.label}</span>
               <b className="tnum">{money(ex.price)}</b>
             </p>
@@ -370,8 +357,6 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [look] = useState(orderLook);
-  const [tint, setTint] = useState<{ brand: string; ink: string } | null>(null);
-  const onPlace = useCallback((brand: string, ink: string) => setTint({ brand, ink }), []);
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -425,16 +410,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
             Join on screen the whole way down. */}
-        <section
-          className="tpa-module tpa-how"
-          aria-labelledby="tpa-how"
-          data-look={look}
-          style={tint ? { ["--brand" as string]: tint.brand, ["--brand-ink" as string]: tint.ink } : undefined}
-        >
+        <section className="tpa-module" aria-labelledby="tpa-how">
           <h2 id="tpa-how" className="tpa-h2">
             How it works
           </h2>
-          <OrderCard start={startAt} look={look} onPlace={look === "colour" ? onPlace : undefined} />
+          <OrderCard start={startAt} look={look} />
           <button type="button" className="tpa-step-wide" onClick={openHow}>
             <Play />
             Step through it
