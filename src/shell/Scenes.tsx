@@ -218,7 +218,13 @@ const SHOWCASE: {
       venue: e.venue,
       name: it.name,
       meta: m(it.price),
-      save: money(Math.round(Math.round(it.price * 100) * BENEFIT.percentOff)),
+      /* $10 or more takes the $5 back instead of the 15% (Sam, 3 Nov 2026:
+         "wouldn't anything above $10 be save $5?"): one or the other per
+         order, and on a $10+ dish the $5 is the bigger one. */
+      save:
+        it.price >= 10
+          ? `$${BENEFIT.creditUsd} back`
+          : `Save ${money(Math.round(Math.round(it.price * 100) * BENEFIT.percentOff))}`,
       img: it.img,
     };
   })
@@ -243,7 +249,7 @@ const SHOWCASE: {
       venue: "themilkparlor",
       name: "Cover",
       meta: venue("themilkparlor").name,
-      save: `${Math.round(BENEFIT.percentOff * 100)}%`,
+      save: `Save ${Math.round(BENEFIT.percentOff * 100)}%`,
       img: venue("themilkparlor").hero,
       isPass: true,
     } as never,
@@ -299,7 +305,7 @@ export function SceneValue() {
             {/* The slide's claim, itemised: the headline's figure is made of
                 lines like this one, so it is the strongest line on the tile
                 and the menu price above it is the basis, kept quiet. */}
-            <span className="vs-save tnum">Save {x.save}</span>
+            <span className="vs-save tnum">{x.save}</span>
           </li>
         ))}
       </ul>
@@ -551,7 +557,7 @@ export function SceneMySpot() {
           week's credit came off it instead of the 15%, and it was not lost.
           Points on everything, so those still land. */}
       <p className="spot-earned">
-        <b>+{money(CREDIT_CENTS)} credit</b> added to your account · {BURG_POINTS} points
+        <b>+{money(CREDIT_CENTS)} credit</b> · {BURG_POINTS} points
       </p>
       {/* THE BAR SHOWS WHAT IS LEFT, NOT WHAT IS GONE — a bar is read as how
           much you HAVE — and what is left is the credit's window, draining

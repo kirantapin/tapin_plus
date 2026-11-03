@@ -31,7 +31,7 @@ export function WelcomeBar({ price }: { price: string }) {
 export function WelcomeEnds({ className }: { className?: string }) {
   const r = useWelcomeEnds();
   if (!r) return null;
-  return <p className={className}>Welcome offer ends {welcomeEndsDay}. Join before then.</p>;
+  return <p className={className}>Welcome offer ends {welcomeEndsDay}.</p>;
 }
 
 /** One line in a pill: "Ends November 30 · 27d 07h 50m 11s". */

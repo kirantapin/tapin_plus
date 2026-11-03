@@ -107,6 +107,8 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const initialized = useRef(false);
+  const ready = useRef(false);
+  const early = useRef<Array<[string, Properties, CaptureOptions | undefined]>>([]);
   const globalProps = useRef<Properties>({});
 
   useEffect(() => {
@@ -139,6 +141,20 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
        the distinct_id — so it is registered again below whenever that runs. */
     posthog.register({ restaurant_id: RESTAURANT_ID });
 
+    /* ══ THE FIRST PAGEVIEW WAITED HERE (3 Nov 2026) ══════════════════════
+       Effects run child first, so App's pageview for the page a visit lands
+       on fired before this init and PostHog dropped it: every visit's first
+       page went unrecorded, and a visit that tapped Members showed up as
+       starting on /in. Anything tracked before init is held and sent now. */
+    ready.current = true;
+    early.current.splice(0).forEach(([event, props, options]) => {
+      try {
+        posthog.capture(event, props, options);
+      } catch {
+        console.error("Error capturing event:", event, props);
+      }
+    });
+
     /* ══ META PIXEL, BESIDE IT ════════════════════════════════════════════
        Same gate (`ENABLED`), and the pixel adds "…and an id is configured" of
        its own, so a build without VITE_META_PIXEL_ID makes no request to
@@ -153,7 +169,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
         const merged = { ...globalProps.current, ...props };
         if (LOG_EVENTS) console.log("[track]", event, merged);
         if (!ENABLED) return;
-        try {
+        if (!ready.current) {
+          /* Before init: held, and sent the moment PostHog is up. */
+          if (early.current.length < 50) early.current.push([event, merged, options]);
+        } else try {
           posthog.capture(event, merged, options);
         } catch {
           /* Analytics must never break a page that takes money. */

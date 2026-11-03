@@ -1557,7 +1557,8 @@ html[data-surface="tpa"] body {
 }
 .hs-when {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  margin-top: 6px;
   min-height: 20px;
   font-size: 14px;
   line-height: 18px;
@@ -1577,7 +1578,7 @@ html[data-surface="tpa"] body {
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-  min-height: 32px;
+  min-height: 40px;
 }
 .hs-nav {
   display: flex;
@@ -1862,4 +1863,21 @@ html[data-surface="tpa"] .hs-scene .vs-also {
   font-size: 14px;
   line-height: 18px;
   color: var(--ink-3);
+}
+
+/* Fewer words on the slides (Sam, 3 Nov 2026: "too much text ... a bit of
+   an eye sore"). The order keeps its two figures and loses their captions;
+   the cover slide keeps one chip. */
+html[data-surface="tpa"] .hs-scene .tk-earned span {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene .tk-earned {
+  display: flex;
+  gap: 16px;
+}
+html[data-surface="tpa"] .hs-scene .tk-earned b {
+  font-weight: 600;
+}
+html[data-surface="tpa"] .hs-scene .spot-earned {
+  font-weight: 600;
 }
