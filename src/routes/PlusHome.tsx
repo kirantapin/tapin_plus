@@ -217,7 +217,14 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
       {/* The places first, then their order (Sam, 3 Nov 2026: "these should
           show up above the carousel"). */}
       {EXAMPLES.length > 1 ? (
-        <div className="tpa-tabs">
+        <div
+          className="tpa-tabs"
+          style={{ ["--i" as string]: which, ["--n" as string]: EXAMPLES.length }}
+        >
+          {/* One tab plate that slides to the playing place, rather than each
+              tab lighting up in place (Sam, 3 Nov 2026: "the tab selector
+              should slide"). */}
+          <span className="tpa-tab-plate" aria-hidden="true" />
           {EXAMPLES.map((e, i) => (
             <button
               key={e.venue.id}

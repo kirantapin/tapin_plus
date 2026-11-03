@@ -607,9 +607,27 @@ html[data-surface="tpa"] body {
   flex: 0 0 auto;
 }
 .tpa-tabs {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
   margin-top: 14px;
+}
+/* The plate under the playing tab. It slides on transform alone and takes
+   the next place's colour as it goes, on the ease the page's motion uses;
+   the card's top corner follows it to the edge. */
+.tpa-tab-plate {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / var(--n, 5));
+  border-radius: 12px 12px 0 0;
+  background: var(--brand);
+  transform: translateX(calc(var(--i, 0) * 100%));
+  transition: transform 0.45s var(--ease), background-color 0.35s var(--ease);
+}
+.tpa-tabs button {
+  z-index: 1;
 }
 .tpa-tabs button {
   position: relative;
@@ -622,10 +640,6 @@ html[data-surface="tpa"] body {
   background: none;
   overflow: hidden;
   cursor: pointer;
-  transition: background-color 0.35s var(--ease);
-}
-.tpa-tabs button[data-on] {
-  background: var(--brand);
 }
 .tpa-tab-logo {
   width: 36px;
@@ -656,6 +670,9 @@ html[data-surface="tpa"] body {
 .tpa-tabs button:not([data-on]) .tpa-tab-ring-run {
   stroke: transparent;
 }
+.tpa-order {
+  transition: border-radius 0.3s var(--ease);
+}
 .tpa-order[data-edge="first"] {
   border-top-left-radius: 0;
 }
@@ -684,7 +701,8 @@ html[data-surface="tpa"] body {
   transform: scale(0.98);
 }
 @media (prefers-reduced-motion: reduce) {
-  .tpa-tabs button,
+  .tpa-tab-plate,
+  .tpa-order,
   .tpa-step-wide {
     transition: none;
   }
@@ -749,7 +767,7 @@ html[data-surface="tpa"] body {
 }
 
 /* 3 · Price tag: grey tab into a grey card, what you pay as the hero. */
-.tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] {
+.tpa-carousel[data-look="tag"] .tpa-tab-plate {
   background: var(--ground);
 }
 .tpa-carousel[data-look="tag"] .tpa-tab-ring-run {
