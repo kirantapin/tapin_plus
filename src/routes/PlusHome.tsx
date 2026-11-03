@@ -140,11 +140,15 @@ const Play = () => (
    3 · Price tag: quiet grey tab and card, no band; what you pay is the
      big number, the menu price struck beside it, the $5 and the next $5 as
      two chips. */
-type OrderLook = "tabs" | "plate" | "colour" | "tag";
+/* Grey (Sam, 3 Nov 2026: "i changed my mind about the color here, maybe
+   it's just the same gray background that the 'step through it' button
+   has"): Colour's layout, tab to total, in the button's grey with ink. The
+   default; the coloured version stays at ?hiw=2. */
+type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
 const orderLook = (): OrderLook => {
-  if (typeof window === "undefined") return "colour";
+  if (typeof window === "undefined") return "grey";
   const v = new URLSearchParams(window.location.search).get("hiw");
-  return v === "0" ? "tabs" : v === "1" ? "plate" : v === "3" ? "tag" : "colour";
+  return v === "0" ? "tabs" : v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "grey";
 };
 
 function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderLook }) {
@@ -202,13 +206,15 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     <div
       ref={card}
       className="tpa-carousel"
-      data-look={look}
+      data-look={look === "grey" ? "colour" : look}
+      data-grey={look === "grey" ? "" : undefined}
       role="group"
       aria-label="Example orders"
-      style={{
-        ["--brand" as string]: ex.venue.brandColor,
-        ["--brand-ink" as string]: inkOn(ex.venue.brandColor),
-      }}
+      style={
+        look === "grey"
+          ? { ["--brand" as string]: "var(--well)", ["--brand-ink" as string]: "var(--ink)" }
+          : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
+      }
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -266,7 +272,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
             <b>{ex.venue.name}</b>
           </p>
         )}
-        {look === "plate" || look === "colour" ? (
+        {look === "plate" || look === "colour" || look === "grey" ? (
           <div className="tpa-order-plate" key={`plate-${which}`}>
             <img src={ex.img} alt="" decoding="async" />
           </div>
@@ -298,7 +304,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
         ) : (
           <div className="tpa-order-in" key={which}>
             <p className="tpa-order-item">
-              {look === "plate" || look === "colour" ? null : <img src={ex.img} alt="" decoding="async" />}
+              {look === "plate" || look === "colour" || look === "grey" ? null : (
+                <img src={ex.img} alt="" decoding="async" />
+              )}
               <span>{ex.label}</span>
               <b className="tnum">{money(ex.price)}</b>
             </p>
@@ -629,13 +637,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
+      {/* One full-width button, nothing to read first (Sam, 3 Nov 2026:
+          "we should have a full width button here - college students have an
+          impossibly short attention span"). */}
       <div className="tpa-dock" data-shown="">
-        <p>
-          <b className="tnum">{FIRST_MONTH} first month</b>
-          <span>Then {MONTHLY}/month, locked in</span>
-        </p>
-        <a className="tpa-cta" href={tapinHref()} onClick={go("dock")}>
-          Join
+        <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
+          <span>Join Tapin Plus</span>
+          <span className="tpa-dock-price tnum">{FIRST_MONTH} first month</span>
         </a>
       </div>
     </div>
