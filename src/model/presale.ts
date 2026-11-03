@@ -52,14 +52,37 @@ const TURN = int(rng("tapin-presale-turn"), 9, 11);
 /** "YYYY-MM-DD" in Blacksburg at an instant. */
 const dayOf = (ms: number): string =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(ms));
-/** Blacksburg midnight at the start of a "YYYY-MM-DD", as epoch ms. */
+/** Blacksburg midnight at the start of a "YYYY-MM-DD", as epoch ms.
+ *
+ *  04:00 UTC is midnight in EDT but 11 p.m. the evening before in EST. The
+ *  old step only ever went BACK by the hour it read, so after the clocks fell
+ *  back (1 Nov 2026) 2 November's "midnight" landed on 1 November's. An hour
+ *  read past noon is the evening before, so it steps forward to midnight
+ *  instead. */
 const midnightOf = (day: string): number => {
   const [y, m, d] = day.split("-").map(Number);
   let t = Date.UTC(y, m - 1, d, 4);
-  for (let i = 0; i < 4 && blacksburgClock(t).hour !== 0; i++) t -= blacksburgClock(t).hour * HOUR;
+  for (let i = 0; i < 4; i++) {
+    const h = blacksburgClock(t).hour;
+    if (h === 0) break;
+    t += (h >= 12 ? 24 - h : -h) * HOUR;
+  }
   return t;
 };
-const nextDay = (day: string): string => dayOf(midnightOf(day) + 30 * HOUR);
+/* ══ THE NEXT DAY IS CALENDAR ARITHMETIC (3 Nov 2026) ═════════════════════
+   This was `dayOf(midnightOf(day) + 30 * HOUR)`, which trusted midnightOf.
+   When the clocks fell back on 1 Nov, midnightOf("2026-11-02") came back as
+   1 November's midnight, so the next day of 2 November was 2 November again.
+   salesThrough's loop never reached 3 November, and because FOUNDING_OPEN
+   runs it when content.ts loads, plus.tapin.app froze on load from midnight
+   on 3 Nov. The calendar does not need a time zone to count days. */
+const nextDay = (day: string): string => {
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+};
+/** A ceiling on the walk, so no date bug can freeze the page again: the
+ *  schedule starts in September 2026 and this is years past it. */
+const MAX_DAYS = 2000;
 
 export const NAMES = [
   "Maya", "Jordan", "Ava", "Ethan", "Chloe", "Liam", "Priya", "Noah", "Sofia", "Caleb",
@@ -86,7 +109,7 @@ export function salesThrough(until: number): Sale[] {
   let left = START_LEFT;
   let prev = new Set<string>();
   const last = dayOf(until);
-  for (let day = START_DAY; ; day = nextDay(day)) {
+  for (let day = START_DAY, n = 0; n < MAX_DAYS; day = nextDay(day), n++) {
     let sales = days.get(day);
     if (!sales) {
       const r = rng(`tapin-presale-${day}`);
