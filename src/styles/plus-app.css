@@ -741,35 +741,50 @@ html[data-surface="tpa"] body {
   font-weight: 600;
   font-size: 17px;
 }
-/* 2 · Colour: the whole order in the place's colour, its ink on top. */
-.tpa-carousel[data-look="colour"] .tpa-order {
+/* 2 · Colour: the whole section in the playing place's colour, its ink on
+   top; the tab and the order one shade deeper, so the tab runs into it. */
+.tpa-how[data-look="colour"] {
+  /* One step toward the ink: darker on a light place, lighter on a dark
+     one, so The Burg's and The Milk Parlor's black still shows a tab. */
+  --deep: color-mix(in srgb, var(--brand) 86%, var(--brand-ink));
   background: var(--brand);
   color: var(--brand-ink);
+  box-shadow: none;
   transition: background-color 0.35s var(--ease), color 0.35s var(--ease);
 }
-.tpa-carousel[data-look="colour"] .tpa-order-band {
-  padding-bottom: 2px;
-}
-.tpa-carousel[data-look="colour"] .tpa-order-off {
-  box-shadow: inset 0 1px 0 color-mix(in srgb, currentColor 22%, transparent);
-}
-.tpa-carousel[data-look="colour"] .tpa-order-off b {
+.tpa-how[data-look="colour"] .tpa-tabs button[data-on],
+.tpa-how[data-look="colour"] .tpa-order,
+.tpa-how[data-look="colour"] .tpa-order-band {
+  background: var(--deep);
   color: inherit;
 }
-.tpa-carousel[data-look="colour"] .tpa-order-total {
+.tpa-how[data-look="colour"] .collar {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--brand-ink) 30%, transparent);
+}
+.tpa-how[data-look="colour"] .tpa-order-off {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, currentColor 22%, transparent);
+}
+.tpa-how[data-look="colour"] .tpa-order-off b,
+.tpa-how[data-look="colour"] .tpa-order-earn,
+.tpa-how[data-look="colour"] .tpa-order-earn b {
+  color: inherit;
+}
+.tpa-how[data-look="colour"] .tpa-order-earn {
+  opacity: 0.86;
+}
+.tpa-how[data-look="colour"] .tpa-order-total {
   font-size: 26px;
   line-height: 32px;
 }
-.tpa-carousel[data-look="colour"] .tpa-order-earn,
-.tpa-carousel[data-look="colour"] .tpa-order-earn b {
+.tpa-how[data-look="colour"] .tpa-step-wide {
+  background: color-mix(in srgb, var(--brand-ink) 16%, transparent);
   color: inherit;
 }
-.tpa-carousel[data-look="colour"] .tpa-order-earn {
-  opacity: 0.86;
+.tpa-how[data-look="colour"] .tpa-h2:focus-visible,
+.tpa-how[data-look="colour"] button:focus-visible {
+  outline-color: currentColor;
 }
-.tpa-carousel[data-look="colour"] .tpa-order-item img {
-  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent);
-}
+
 /* 3 · Price tag: grey tab into a grey card, what you pay as the hero. */
 .tpa-carousel[data-look="tag"] .tpa-tabs button[data-on] {
   background: var(--ground);

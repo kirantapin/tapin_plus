@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -83,12 +83,15 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
   return { venue, label: names.join(" + "), price, img: items[0]?.img ?? venue.hero };
 }).filter((e): e is Example => e !== null);
 
-/** Ink that reads on a place's brand colour (WCAG relative luminance). */
-function inkOn(hex: string): string {
+/** Ink that reads on a place's brand colour (WCAG relative luminance). The
+ *  band's label leans white, as the app's sheets do; `strict` takes whichever
+ *  of ink and white contrasts more, for body text on a whole coloured section
+ *  (Sweetopia's pink holds white at under 3:1). */
+function inkOn(hex: string, strict = false): string {
   const n = parseInt(hex.replace("#", ""), 16);
   const ch = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
   const l = 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
-  return l > 0.42 ? "#141618" : "#FFFFFF";
+  return l > (strict ? 0.179 : 0.42) ? "#141618" : "#FFFFFF";
 }
 
 const money = (n: number) => `$${n.toFixed(2)}`;
@@ -130,7 +133,9 @@ const Play = () => (
    is the Tabs version as picked.
    1 · Plate: the dish leads. The place's colour panel holds a big photo of
      the order, the way the app's item sheet opens on its picture.
-   2 · Colour: the whole order wears the place's colour, tab to total.
+   2 · Colour: the whole section wears the playing place's colour (Sam,
+     3 Nov 2026: "maybe we give the whole container the color"); the tab
+     and the order are one shade deeper, so the tab still runs into it.
    3 · Price tag: quiet grey tab and card, no band; what you pay is the
      big number, the menu price struck beside it, the $5 and the next $5 as
      two chips. */
@@ -141,8 +146,15 @@ const orderLook = (): OrderLook => {
   return v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "tabs";
 };
 
-function OrderCard({ start = 0 }: { start?: number }) {
-  const [look] = useState(orderLook);
+function OrderCard({
+  start = 0,
+  look = "tabs",
+  onPlace,
+}: {
+  start?: number;
+  look?: OrderLook;
+  onPlace?: (brand: string, ink: string) => void;
+}) {
   const card = useRef<HTMLDivElement | null>(null);
   const lines = useRef<Array<HTMLSpanElement | null>>([]);
   const [inView, setInView] = useState(false);
@@ -191,6 +203,10 @@ function OrderCard({ start = 0 }: { start?: number }) {
     q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
   }, [which, still]);
   const ex = EXAMPLES[which] ?? EXAMPLES[0];
+  const brand = ex?.venue.brandColor ?? "";
+  useEffect(() => {
+    if (brand) onPlace?.(brand, inkOn(brand, true));
+  }, [brand, onPlace]);
   if (!ex) return null;
   const points = Math.floor((Math.round(ex.price * 100) * POINTS_PER_DOLLAR) / 100);
   return (
@@ -200,7 +216,11 @@ function OrderCard({ start = 0 }: { start?: number }) {
       data-look={look}
       role="group"
       aria-label="Example orders"
-      style={{ ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }}
+      style={
+        look === "colour"
+          ? undefined
+          : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
+      }
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -349,6 +369,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   /* "Try it once for free" (Sam, 3 Nov 2026: "we should have the Try it once
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
+  const [look] = useState(orderLook);
+  const [tint, setTint] = useState<{ brand: string; ink: string } | null>(null);
+  const onPlace = useCallback((brand: string, ink: string) => setTint({ brand, ink }), []);
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -402,11 +425,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
             Join on screen the whole way down. */}
-        <section className="tpa-module" aria-labelledby="tpa-how">
+        <section
+          className="tpa-module tpa-how"
+          aria-labelledby="tpa-how"
+          data-look={look}
+          style={tint ? { ["--brand" as string]: tint.brand, ["--brand-ink" as string]: tint.ink } : undefined}
+        >
           <h2 id="tpa-how" className="tpa-h2">
             How it works
           </h2>
-          <OrderCard start={startAt} />
+          <OrderCard start={startAt} look={look} onPlace={look === "colour" ? onPlace : undefined} />
           <button type="button" className="tpa-step-wide" onClick={openHow}>
             <Play />
             Step through it
