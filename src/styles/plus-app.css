@@ -1881,3 +1881,169 @@ html[data-surface="tpa"] .hs-scene .tk-earned b {
 html[data-surface="tpa"] .hs-scene .spot-earned {
   font-weight: 600;
 }
+
+/* ══ THE HOME PAGE ON A DESK (Sam, 3 Nov 2026: "a pass for desktop ...
+   structurally, it should look different") ══════════════════════════════
+   From 1024 the page is a storefront, not a stretched phone: a wide
+   collage band across the top, then two columns. The left column is the
+   story (how it works, the promise, the places, what you get, questions);
+   the right column is the offer, held in view as the page scrolls, so Join
+   is always beside what is being read. The floating dock goes: the offer
+   column does its job. The places become one row of five; what you get
+   becomes two by two. Members keeps the single column (.tpa-home only). */
+@media (min-width: 1024px) {
+  .tpa-home {
+    --column: 1180px;
+    --gutter: 0px;
+    padding-bottom: 48px;
+  }
+  .tpa-home .tpa-band {
+    width: calc(100% - 64px);
+    max-width: 1180px;
+    height: 440px;
+    margin: 8px auto 0;
+    border-radius: 24px;
+  }
+  .tpa-home .tpa-band-art {
+    object-position: 50% 32%;
+  }
+  .tpa-home .tpa-band-top {
+    left: 28px;
+    right: 28px;
+    top: 24px;
+  }
+  .tpa-home .tpa-band-title {
+    left: 40px;
+    right: 40px;
+    bottom: 40px;
+  }
+  .tpa-home .tpa-band-title h1 {
+    max-width: 15ch;
+    font-size: 60px;
+    line-height: 62px;
+    letter-spacing: -0.035em;
+  }
+  .tpa-home .tpa-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    column-gap: 32px;
+    row-gap: 0;
+    width: calc(100% - 64px);
+    max-width: 1180px;
+    margin: 32px auto 0;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+  }
+  .tpa-home .tpa-sheet > * {
+    grid-column: 1;
+    min-width: 0;
+  }
+  .tpa-home .tpa-sheet > :first-child {
+    margin-top: 0;
+  }
+  /* The offer column: placed beside the story and held in view. */
+  .tpa-home .tpa-sheet > [aria-label="Tapin Plus"] {
+    grid-column: 2;
+    grid-row: 1 / span 40;
+    align-self: start;
+    position: sticky;
+    top: 60px;
+    margin: 0;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .tpa-home .tpa-sheet > .tpa-foot {
+    grid-column: 1 / -1;
+  }
+  .tpa-home .tpa-module,
+  .tpa-home .tpa-close {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 16px;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  .tpa-home .tpa-h2 {
+    font-size: 26px;
+    line-height: 32px;
+  }
+  .tpa-home .tpa-h2-out {
+    margin: 40px 0 0;
+  }
+  /* How it works: the order card and the walkthrough side by side. */
+  .tpa-home .tpa-sheet > .tpa-module:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-areas: "head head" "card step";
+    column-gap: 20px;
+    align-items: end;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-h2 {
+    grid-area: head;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-carousel {
+    grid-area: card;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
+    grid-area: step;
+    height: auto;
+    min-height: 120px;
+    margin: 0;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 16px;
+    font-size: 17px;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide .tpa-play {
+    width: 22px;
+    height: 22px;
+  }
+  /* The places: one row of five. */
+  .tpa-home .tpa-rail {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+    padding: 0;
+  }
+  .tpa-home .tpa-place {
+    height: 220px;
+  }
+  /* What you get: two by two. */
+  .tpa-home .tpa-rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+  .tpa-home .tpa-rows li:nth-child(-n + 2) {
+    box-shadow: none;
+  }
+  .tpa-home .tpa-s1-h,
+  .tpa-home .tpa-s2-h {
+    max-width: none;
+  }
+  .tpa-home .tpa-close {
+    display: none;
+  }
+  .tpa-home .tpa-dock {
+    display: none;
+  }
+  .tpa-home .tpa-foot {
+    margin-top: 32px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1180px) {
+  .tpa-home .tpa-sheet {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "card" "step";
+  }
+  .tpa-home .tpa-sheet > .tpa-module:first-child > .tpa-step-wide {
+    min-height: 0;
+    height: 48px;
+    margin-top: 12px;
+    flex-direction: row;
+  }
+}

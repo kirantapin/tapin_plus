@@ -495,7 +495,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   };
 
   return (
-    <div className="tpa">
+    <div className="tpa tpa-home">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       <WelcomeBar price={FIRST_MONTH} />
