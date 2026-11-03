@@ -29,6 +29,8 @@ import { useTrialLink } from "../shell/useTrialLink";
    sign-up with the ad's tags (tapinHref). Every figure is the app's. */
 
 const FIRST_MONTH = "$3.99";
+/** The first month's price as a number, for the payback sums. */
+const FIRST_MONTH_USD = 3.99;
 const MONTHLY = "$7.99";
 const CREDIT = 5;
 const MIN_ORDER = 10;
@@ -82,6 +84,50 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
   if (price < MIN_ORDER) return null;
   return { venue, label: names.join(" + "), price, img: items[0]?.img ?? venue.hero };
 }).filter((e): e is Example => e !== null);
+
+/** The Sticker's first order: the first place's example, a real dish. */
+const FIRST_ORDER = EXAMPLES[0];
+
+/** $10+ orders a month the Counter offers. One $5 per place each week, so a
+ *  month holds at most 20 (5 places x 4 weeks). */
+const COUNTS = [1, 4, 10, 20] as const;
+
+function PaybackCounter() {
+  const [n, setN] = useState<number>(1);
+  const out = useRef<HTMLElement | null>(null);
+  const ahead = n * CREDIT - FIRST_MONTH_USD;
+  const pick = (k: number) => {
+    setN(k);
+    if (!reducedMotion()) {
+      out.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+        duration: 320,
+        easing: "cubic-bezier(.22,1,.36,1)",
+      });
+    }
+  };
+  return (
+    <div className="tpa-s2-calc">
+      <p className="tpa-s2-q" id="tpa-s2-q">
+        ${MIN_ORDER}+ orders this month
+      </p>
+      <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
+        {COUNTS.map((k) => (
+          <button key={k} type="button" role="radio" aria-checked={n === k} data-on={n === k ? "" : undefined} onClick={() => pick(k)}>
+            <span className="tnum">{k}</span>
+          </button>
+        ))}
+      </div>
+      <p className="tpa-s2-out" aria-live="polite">
+        <b ref={out} className="tnum">
+          +{money(ahead)}
+        </b>
+        <span>
+          {money(n * CREDIT)} back, less your {FIRST_MONTH} first month
+        </span>
+      </p>
+    </div>
+  );
+}
 
 /** Ink that reads on a place's brand colour (WCAG relative luminance). White
  *  wherever it holds about 2:1, as the app's sheets do (Sam, 3 Nov 2026:
@@ -140,11 +186,23 @@ const Play = () => (
    3 · Price tag: quiet grey tab and card, no band; what you pay is the
      big number, the menu price struck beside it, the $5 and the next $5 as
      two chips. */
-type OrderLook = "tabs" | "plate" | "colour" | "tag";
+/* Grey (Sam, 3 Nov 2026: "i changed my mind about the color here, maybe
+   it's just the same gray background that the 'step through it' button
+   has"): Colour's layout, tab to total, in the button's grey with ink. The
+   default; the coloured version stays at ?hiw=2. */
+/* Counter is the offer (Sam, 3 Nov 2026, picked from the three). Sticker
+   and Poster stay previewable at ?offer=1|3, the plain price at ?offer=0. */
+type OfferLook = "shipped" | "1" | "2" | "3";
+const offerLook = (): OfferLook => {
+  if (typeof window === "undefined") return "2";
+  const v = new URLSearchParams(window.location.search).get("offer");
+  return v === "0" ? "shipped" : v === "1" || v === "3" ? v : "2";
+};
+type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
 const orderLook = (): OrderLook => {
-  if (typeof window === "undefined") return "colour";
+  if (typeof window === "undefined") return "grey";
   const v = new URLSearchParams(window.location.search).get("hiw");
-  return v === "0" ? "tabs" : v === "1" ? "plate" : v === "3" ? "tag" : "colour";
+  return v === "0" ? "tabs" : v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "grey";
 };
 
 function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderLook }) {
@@ -202,13 +260,15 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     <div
       ref={card}
       className="tpa-carousel"
-      data-look={look}
+      data-look={look === "grey" ? "colour" : look}
+      data-grey={look === "grey" ? "" : undefined}
       role="group"
       aria-label="Example orders"
-      style={{
-        ["--brand" as string]: ex.venue.brandColor,
-        ["--brand-ink" as string]: inkOn(ex.venue.brandColor),
-      }}
+      style={
+        look === "grey"
+          ? { ["--brand" as string]: "var(--well)", ["--brand-ink" as string]: "var(--ink)" }
+          : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
+      }
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -217,7 +277,14 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
       {/* The places first, then their order (Sam, 3 Nov 2026: "these should
           show up above the carousel"). */}
       {EXAMPLES.length > 1 ? (
-        <div className="tpa-tabs">
+        <div
+          className="tpa-tabs"
+          style={{ ["--i" as string]: which, ["--n" as string]: EXAMPLES.length }}
+        >
+          {/* One tab plate that slides to the playing place, rather than each
+              tab lighting up in place (Sam, 3 Nov 2026: "the tab selector
+              should slide"). */}
+          <span className="tpa-tab-plate" aria-hidden="true" />
           {EXAMPLES.map((e, i) => (
             <button
               key={e.venue.id}
@@ -259,7 +326,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
             <b>{ex.venue.name}</b>
           </p>
         )}
-        {look === "plate" || look === "colour" ? (
+        {look === "plate" || look === "colour" || look === "grey" ? (
           <div className="tpa-order-plate" key={`plate-${which}`}>
             <img src={ex.img} alt="" decoding="async" />
           </div>
@@ -291,7 +358,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
         ) : (
           <div className="tpa-order-in" key={which}>
             <p className="tpa-order-item">
-              {look === "plate" || look === "colour" ? null : <img src={ex.img} alt="" decoding="async" />}
+              {look === "plate" || look === "colour" || look === "grey" ? null : (
+                <img src={ex.img} alt="" decoding="async" />
+              )}
               <span>{ex.label}</span>
               <b className="tnum">{money(ex.price)}</b>
             </p>
@@ -380,6 +449,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       Try it once for free
     </button>
   );
+  const [offer] = useState(offerLook);
+  const lockMore = (
+    <details className="tpa-more">
+      <summary>
+        Your {MONTHLY} is locked in
+        <Chevron />
+      </summary>
+      <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
+    </details>
+  );
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -448,6 +527,87 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             here. Make it way simpler, and if you have to nest that's fine"):
             the price, the clock, Join and Try. Where it works is the tabs
             above; the price lock folds away under one line. */}
+        {/* THE PAYBACK, A NEW DESIGN, THREE VERSIONS (Sam, 3 Nov 2026: "I
+            think we need a new design entirely"). Each one leads with
+            something to look at, not a stack of sentences. Preview with
+            ?offer=1|2|3; without it the offer is as shipped. The $5 is credit
+            toward the next order, so each says it is earned "back", and the
+            payback is claimed of the first month only.
+            1 · Sticker: the first order, a real dish at its menu price, with a
+              +$5 paper sticker on it beside the $3.99 month it covers.
+            2 · Counter: tap how many $10+ orders this month and see what you
+              are ahead after the $3.99; one $5 per place each week, so 20 is
+              the most a month holds.
+            3 · Poster: the collage band with the line set over it, the way
+              the page's own header is, and the offer under it. */}
+        {offer === "1" ? (
+          <section className="tpa-module tpa-offer tpa-s1" aria-label="Tapin Plus">
+            <h2 className="tpa-s1-h">Your first ${MIN_ORDER} order covers&nbsp;it.</h2>
+            <div className="tpa-s1-art">
+              <figure className="tpa-s1-order">
+                <img src={FIRST_ORDER.img} alt="" decoding="async" />
+                <figcaption>
+                  <span>{FIRST_ORDER.label}</span>
+                  <span className="tnum">{money(FIRST_ORDER.price)}</span>
+                </figcaption>
+                <span className="tpa-s1-sticker" aria-label={`$${CREDIT} back`}>
+                  <b className="tnum">+${CREDIT}</b>
+                  <small>back</small>
+                </span>
+              </figure>
+              <p className="tpa-s1-tag">
+                <span>covers</span>
+                <b className="tnum">{FIRST_MONTH}</b>
+                <span>your first month</span>
+              </p>
+            </div>
+            <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            {lockMore}
+          </section>
+        ) : offer === "2" ? (
+          <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
+            <h2 className="tpa-s2-h">One ${MIN_ORDER} order covers your first month.</h2>
+            <PaybackCounter />
+            <p className="tpa-offer-then">
+              {FIRST_MONTH} your first month, then {MONTHLY}/month.
+            </p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            {lockMore}
+          </section>
+        ) : offer === "3" ? (
+          <section className="tpa-s3" aria-label="Tapin Plus">
+            <div className="tpa-s3-art">
+              <img className="tpa-s3-collage" src={COLLAGE} alt="" decoding="async" />
+              <img className="tpa-s3-mark" src={PAPER_MARK} alt="" width="72" height="57" decoding="async" />
+              <h2 className="tpa-s3-h">Your first ${MIN_ORDER} order covers the&nbsp;month.</h2>
+            </div>
+            <div className="tpa-s3-body">
+              <p className="tpa-s3-sum" aria-label={`$${CREDIT} back on your first order is more than ${FIRST_MONTH} for your first month`}>
+                <span aria-hidden="true">
+                  <b className="tnum">${CREDIT} back</b>
+                  <small>on your first order</small>
+                </span>
+                <span className="tpa-s3-gt" aria-hidden="true">
+                  &gt;
+                </span>
+                <span aria-hidden="true">
+                  <b className="tnum">{FIRST_MONTH}</b>
+                  <small>your first month</small>
+                </span>
+              </p>
+              <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+              <WelcomeChip />
+              {joinCta("hero")}
+              {tryCta}
+              {lockMore}
+            </div>
+          </section>
+        ) : (
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
           <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
           <p className="tpa-offer-price">
@@ -455,17 +615,25 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <span>your first month</span>
           </p>
           <p className="tpa-offer-then">Then {MONTHLY}/month</p>
+          {/* The payback, in one order (Sam, 3 Nov 2026, from "your first $10
+              order covers the month"). The $5 is credit toward the next order,
+              so it "earns $5 back" rather than paying for anything, and it is
+              said of the first month only: at $7.99 it takes two orders. */}
+          <p className="tpa-payback">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="currentColor" />
+              <path d="m7.6 12.3 3 3 5.8-6.1" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>
+              Your first ${MIN_ORDER} order earns ${CREDIT} back. That’s more than your first month.
+            </span>
+          </p>
           <WelcomeChip />
           {joinCta("hero")}
           {tryCta}
-          <details className="tpa-more">
-            <summary>
-              Your {MONTHLY} is locked in
-              <Chevron />
-            </summary>
-            <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
-          </details>
+          {lockMore}
         </section>
+        )}
 
         {/* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show
             the plus promise guarantee - every month is refundable"). The
@@ -609,13 +777,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
+      {/* One full-width button, nothing to read first (Sam, 3 Nov 2026:
+          "we should have a full width button here - college students have an
+          impossibly short attention span"). */}
       <div className="tpa-dock" data-shown="">
-        <p>
-          <b className="tnum">{FIRST_MONTH} first month</b>
-          <span>Then {MONTHLY}/month, locked in</span>
-        </p>
-        <a className="tpa-cta" href={tapinHref()} onClick={go("dock")}>
-          Join
+        <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
+          <span>Join Tapin Plus</span>
+          <span className="tpa-dock-price tnum">{FIRST_MONTH} first month</span>
         </a>
       </div>
     </div>
