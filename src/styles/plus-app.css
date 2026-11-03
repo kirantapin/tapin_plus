@@ -2047,3 +2047,145 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
     flex-direction: row;
   }
 }
+
+/* ══ TRY IT ONCE, IN THE APP'S LOOK (Sam, 3 Nov 2026: "the try it once free
+   modal looks a little off") ═══════════════════════════════════════════════
+   shell/TrialModal.tsx keeps its markup and its presale styles
+   (campaign.css); on this page it takes the app's objects. Round logos, the
+   steps as numbered wells at one weight, each try a white row with a black
+   "Try now" pill, and the call to join as the page's black card. */
+html[data-surface="tpa"] .ct {
+  border-radius: 24px 24px 0 0;
+  background: #f0f0f0;
+  color: #141618;
+  font-family: "Gilroy", Arial, sans-serif;
+}
+html[data-surface="tpa"] .ct-head h2 {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: -0.02em;
+}
+html[data-surface="tpa"] .ct-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .ct .collar {
+  padding: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.08);
+}
+html[data-surface="tpa"] .ct .collar img {
+  border-radius: 50%;
+}
+html[data-surface="tpa"] .ct .collar::after {
+  display: none;
+}
+html[data-surface="tpa"] .ct-steps {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .ct-steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+}
+html[data-surface="tpa"] .ct-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e5ea;
+  font-weight: 700;
+  font-size: 14px;
+}
+html[data-surface="tpa"] .ct-steps b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+}
+html[data-surface="tpa"] .ct-place-h {
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #141618;
+}
+html[data-surface="tpa"] .ct-place-h .collar {
+  width: 32px;
+  height: 32px;
+}
+html[data-surface="tpa"] .ct .cg-trial {
+  min-height: 56px;
+  padding: 0 8px 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: none;
+  color: #141618;
+}
+html[data-surface="tpa"] .ct .cg-trial b {
+  font-weight: 600;
+  font-size: 16px;
+}
+html[data-surface="tpa"] .ct-do {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #141618;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+html[data-surface="tpa"] .ct-do svg {
+  display: none;
+}
+html[data-surface="tpa"] .ct-once {
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+html[data-surface="tpa"] .ct-more {
+  margin-top: 16px;
+  padding: 20px;
+  border: 0;
+  border-radius: 16px;
+  background: #141414;
+  color: #ffffff;
+  box-shadow: none;
+}
+html[data-surface="tpa"] .ct-more-h {
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 25px;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+html[data-surface="tpa"] .ct-more .t-compact,
+html[data-surface="tpa"] .ct-more-p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 20px;
+}
+html[data-surface="tpa"] .ct-more .collar {
+  box-shadow: 0 0 0 2px #141414;
+}
+html[data-surface="tpa"] .ct .ct-go {
+  height: 48px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #141618;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: none;
+}
