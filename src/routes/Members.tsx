@@ -1,5 +1,5 @@
-import { useLayoutEffect } from "react";
-import { Link } from "react-router-dom";
+import { useLayoutEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 
 /* ══ MEMBERS, IN THE APP'S LOOK (Sam, 3 Nov 2026: "redirect + rebuild") ═════
@@ -13,21 +13,38 @@ const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const COLLAGE = asset("/collage/blacksburg.webp");
 const TAPIN_HOME = "https://www.tapin.app/discovery?zone=blacksburg";
 
+const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const ease = "cubic-bezier(.22,1,.36,1)";
+
 export default function Members() {
+  const page = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
+    window.scrollTo(0, 0);
+    /* The page slides in from the right, as a pushed screen does in the app
+       (Sam, 3 Nov 2026: "there should be a page slide transition for
+       clicking on members"), and back out the same way. */
+    if (!still()) page.current?.animate?.([{ transform: "translateX(100%)" }, { transform: "none" }], { duration: 420, easing: ease });
     return () => {
       delete root.dataset.surface;
     };
   }, []);
+  const back = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = page.current;
+    if (!el || still() || typeof el.animate !== "function" || e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    const run = el.animate([{ transform: "none" }, { transform: "translateX(100%)" }], { duration: 280, easing: "ease-in", fill: "forwards" });
+    run.onfinish = () => navigate("/");
+  };
 
   return (
-    <div className="tpa tpa-members">
+    <div ref={page} className="tpa tpa-members">
       <header className="tpa-band">
         <img className="tpa-band-art" src={COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
-          <Link className="tpa-glass tpa-signin" to="/">
+          <Link className="tpa-glass tpa-signin" to="/" onClick={back}>
             <svg className="tpa-back" viewBox="0 0 24 24" aria-hidden="true">
               <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

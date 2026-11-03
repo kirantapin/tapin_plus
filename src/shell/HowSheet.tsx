@@ -31,10 +31,17 @@ const HEADS: Record<string, string> = {
   spend: "What do you spend in a week in Blacksburg?",
 };
 
-/** The 3 Nov facts over the old copy, by slide id. */
+/** One short line a slide, by slide id (Sam, 3 Nov 2026: "there's just
+ *  too much text on some of these slides"). The rules in full live in the
+ *  page's What you get, questions and fine print. */
 const LINES: Record<string, string> = {
-  order: "Or pay full price on $10+ of food or non-alcoholic drinks and get $5 credit added to your account. Points on everything.",
-  entry: "They earn points, and the 15% reaches them, once a day.",
+  spend: "Coffee, lunch, dinner.",
+  order: "Or pay full price on $10+ and get $5 back.",
+  myspot: "Order now, pick it up later.",
+  offers: "From each place, for members.",
+  entry: "Points, and 15% off once a day.",
+  points: "Spend them where you earned them.",
+  redeem: "Show your phone, or it goes to the kitchen.",
 };
 
 export default function HowSheet({
@@ -201,9 +208,6 @@ export default function HowSheet({
                 {slide.tag ? <span className="hs-tag">{slide.tag}</span> : null}
               </h2>
               <p className="hs-line">{LINES[slide.id] ?? slide.line}</p>
-              {"footnote" in slide && slide.footnote ? (
-                <p className="hs-fine">The $5 back is earned on food and non-alcoholic drinks. Credit and 15% off don’t go toward alcohol.</p>
-              ) : null}
             </>
           )}
         </div>
@@ -211,18 +215,10 @@ export default function HowSheet({
         <div className="hs-foot">
           {last ? (
             <div>
-              <p className="hs-price">
-                <b>$3.99 your first month</b>, then $7.99/month, locked in for as long as you’re a member.
-              </p>
+              <p className="hs-price">$3.99 your first month, then $7.99.</p>
               <WelcomeEnds className="hs-ends" />
             </div>
-          ) : (
-            <p className="hs-when">
-              <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>
-                Skip to the price
-              </button>
-            </p>
-          )}
+          ) : null}
           <div className="hs-nav">
             {i > 0 ? (
               <button
@@ -249,6 +245,14 @@ export default function HowSheet({
               </button>
             )}
           </div>
+          {/* Under the button, not over it (Sam, 3 Nov 2026). */}
+          {last ? null : (
+            <p className="hs-when">
+              <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>
+                Skip to the price
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>,
