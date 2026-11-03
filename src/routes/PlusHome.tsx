@@ -5,6 +5,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
+import { weeklyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
@@ -29,8 +30,6 @@ import { useTrialLink } from "../shell/useTrialLink";
    sign-up with the ad's tags (tapinHref). Every figure is the app's. */
 
 const FIRST_MONTH = "$3.99";
-/** The first month's price as a number, for the payback sums. */
-const FIRST_MONTH_USD = 3.99;
 const MONTHLY = "$7.99";
 const CREDIT = 5;
 const MIN_ORDER = 10;
@@ -88,16 +87,19 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
 /** The Sticker's first order: the first place's example, a real dish. */
 const FIRST_ORDER = EXAMPLES[0];
 
-/** $10+ orders a month the Counter offers. One $5 per place each week, so a
- *  month holds at most 20 (5 places x 4 weeks). */
-const COUNTS = [1, 4, 10, 20] as const;
+/* WHAT YOU SPEND, WHAT COMES BACK (Sam, 3 Nov 2026: "how much do you spend
+   on non-alcohol in blacksburg, and what you can get back for that if you
+   just spent it at these places"). A week's food and non-alcoholic drinks,
+   the same bands and the same sum as the walkthrough (savings.ts
+   weeklyBack): each $10 is one more place's $5 a week, up to all five. */
+const SPEND_BANDS = [20, 30, 40, 50] as const;
 
 function PaybackCounter() {
-  const [n, setN] = useState<number>(1);
+  const [w, setW] = useState<number>(40);
   const out = useRef<HTMLElement | null>(null);
-  const ahead = n * CREDIT - FIRST_MONTH_USD;
+  const back = weeklyBack(w);
   const pick = (k: number) => {
-    setN(k);
+    setW(k);
     if (!reducedMotion()) {
       out.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
         duration: 320,
@@ -108,23 +110,32 @@ function PaybackCounter() {
   return (
     <div className="tpa-s2-calc">
       <p className="tpa-s2-q" id="tpa-s2-q">
-        ${MIN_ORDER}+ orders this month
+        Food and non&#8209;alcoholic drinks, a&nbsp;week
       </p>
       <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
-        {COUNTS.map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={n === k} data-on={n === k ? "" : undefined} onClick={() => pick(k)}>
-            <span className="tnum">{k}</span>
+        {SPEND_BANDS.map((k) => (
+          <button key={k} type="button" role="radio" aria-checked={w === k} data-on={w === k ? "" : undefined} onClick={() => pick(k)}>
+            <span className="tnum">
+              ${k}
+              {k === SPEND_BANDS[SPEND_BANDS.length - 1] ? "+" : ""}
+            </span>
           </button>
         ))}
       </div>
       <p className="tpa-s2-out" aria-live="polite">
         <b ref={out} className="tnum">
-          +{money(ahead)}
+          ${back.monthlyUsd} back
         </b>
-        <span>
-          {money(n * CREDIT)} back, less your {FIRST_MONTH} first month
-        </span>
+        <span>a month, if you spend it at these places</span>
       </p>
+      <ul className="tpa-s2-places" aria-label={PLACES.map((v) => v.name).join(", ")}>
+        {PLACES.map((v, k) => (
+          <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)} data-on={k < back.places ? "" : undefined}>
+            <img src={v.logo} alt="" decoding="async" />
+          </li>
+        ))}
+      </ul>
+      <p className="tpa-s2-note">A $10+ order at {back.places === 1 ? "one place" : `${back.places} places`} each week. An estimate.</p>
     </div>
   );
 }
@@ -326,7 +337,9 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
             <b>{ex.venue.name}</b>
           </p>
         )}
-        {look === "plate" || look === "colour" || look === "grey" ? (
+        {/* Grey keeps the dish beside its name, not a strip across the card
+            (Sam, 3 Nov 2026: "this image takes up a lot of real estate"). */}
+        {look === "plate" || look === "colour" ? (
           <div className="tpa-order-plate" key={`plate-${which}`}>
             <img src={ex.img} alt="" decoding="async" />
           </div>
@@ -358,7 +371,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
         ) : (
           <div className="tpa-order-in" key={which}>
             <p className="tpa-order-item">
-              {look === "plate" || look === "colour" || look === "grey" ? null : (
+              {look === "plate" || look === "colour" ? null : (
                 <img src={ex.img} alt="" decoding="async" />
               )}
               <span>{ex.label}</span>
