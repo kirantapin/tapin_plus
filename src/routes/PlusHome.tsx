@@ -1,11 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
+import { monthlyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
@@ -160,17 +160,45 @@ function PaybackCounter() {
           </button>
         ))}
       </div>
+      {/* Short, with the working folded away (Sam, 3 Nov 2026: "a lot of
+          text ... a little accordion ... that would show you what that number
+          is coming from"). */}
       <p className="tpa-s2-lib" aria-live="polite">
         <span>
-          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month on food and drinks at
-          Plus places, and get about <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back a
-          month.
+          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month, get about{" "}
+          <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back.
         </span>
       </p>
-      <p className="tpa-s2-note">
-        About {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week of ${TYPICAL_ORDER_USD}: ${CREDIT} back on
-        each $10+ order, once a week at each place, and 15% off the rest. An estimate.
-      </p>
+      <details className="tpa-more tpa-s2-how">
+        <summary>
+          How we got ${back.monthlyUsd}
+          <Chevron />
+        </summary>
+        <ul className="tpa-s2-rows">
+          <li>
+            <span>
+              {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week, about ${back.orderUsd} each
+            </span>
+          </li>
+          <li>
+            <span>
+              ${CREDIT} back on {back.creditOrdersPerWeek} a week
+            </span>
+            <b className="tnum">${back.creditUsdMonth}</b>
+          </li>
+          {back.percentOrdersPerWeek > 0 ? (
+            <li>
+              <span>15% off the other {back.percentOrdersPerWeek}</span>
+              <b className="tnum">${back.percentUsdMonth}</b>
+            </li>
+          ) : null}
+          <li className="tpa-s2-sum">
+            <span>A month, about</span>
+            <b className="tnum">${back.monthlyUsd}</b>
+          </li>
+        </ul>
+        <p className="tpa-s2-fine">At Plus places, on food and non-alcoholic drinks. $5 is once a week at each place. An estimate.</p>
+      </details>
     </div>
   );
 }
@@ -547,6 +575,43 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
     </details>
   );
+  /* To Members and back, a fade with a very slight zoom (Sam, 3 Nov 2026:
+     "a smooth fade. And like a zoom out / zoom in very subtle"): this page
+     eases back a touch as it fades, Members arrives a touch large and
+     settles (routes/Members.tsx), and coming back reverses it. The band and
+     the sheet move, not the page's root, so the pinned bar and the dock are
+     never held inside a transform. */
+  const navigate = useNavigate();
+  const location = useLocation();
+  const bandRef = useRef<HTMLElement | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
+  const settle = (to: boolean, duration: number, easing: string, onDone?: () => void) => {
+    const parts = [bandRef.current, sheetRef.current].filter((n): n is HTMLElement => !!n);
+    const frames = [
+      { opacity: 1, transform: "none" },
+      { opacity: 0, transform: "scale(0.98)" },
+    ];
+    let left = parts.length;
+    parts.forEach((el) => {
+      const run = el.animate(to ? frames : [...frames].reverse(), { duration, easing, fill: to ? "forwards" : "none" });
+      run.onfinish = () => {
+        left -= 1;
+        if (left === 0) onDone?.();
+      };
+    });
+  };
+  const toMembers = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (reducedMotion() || e.metaKey || e.ctrlKey || typeof bandRef.current?.animate !== "function") return;
+    e.preventDefault();
+    settle(true, 200, "ease-in", () => navigate("/in"));
+  };
+  useLayoutEffect(() => {
+    const from = (location.state as { from?: string } | null)?.from;
+    if (from === "members" && !reducedMotion() && typeof bandRef.current?.animate === "function") {
+      settle(false, 340, "cubic-bezier(.22,1,.36,1)");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -572,7 +637,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       <WelcomeBar price={FIRST_MONTH} />
-      <header className="tpa-band">
+      <header ref={bandRef} className="tpa-band">
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
           <span className="tpa-glass tpa-badge">
@@ -580,22 +645,29 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             {/* The app's pill (Sam, 3 Nov 2026: "plus blacksburg"). */}
             Plus Blacksburg
           </span>
-          <Link className="tpa-glass tpa-signin" to="/in">
+          <Link className="tpa-glass tpa-signin" to="/in" onClick={toMembers}>
             Members
           </Link>
         </div>
         <div className="tpa-band-title">
           {/* Sam, 3 Nov 2026: "header copy should be something like '$5 back
               at every place you already go in blacksburg'". */}
-          <h1>
-            {place
-              ? `$${CREDIT} back every week at ${place.name}`
-              : `$${CREDIT} back at every place you already go in Blacksburg`}
-          </h1>
+          <div>
+            <h1>
+              {place
+                ? `$${CREDIT} back every week at ${place.name}`
+                : `$${CREDIT} back at every place you already go in Blacksburg`}
+            </h1>
+            {/* Social proof, at the top (Sam, 3 Nov 2026). Plus members, by
+                Sam's count: "let's just say over 500 ... we're just below
+                1,000, I think. I have to check." Raise it only once the real
+                count is past the new figure. */}
+            <p className="tpa-proof">Join over 500 Virginia Tech students on Tapin Plus</p>
+          </div>
         </div>
       </header>
 
-      <main className="tpa-sheet">
+      <main ref={sheetRef} className="tpa-sheet">
         {/* The order earning its $5 comes first, right under the band (Sam,
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
@@ -667,7 +739,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <h2 className="tpa-h2">See what you’d get back</h2>
             <PaybackCounter />
             <p className="tpa-offer-then">
-              Plus is {FIRST_MONTH} your first month, then {MONTHLY}/month.
+              {FIRST_MONTH} your first month, then {MONTHLY}.
             </p>
             <WelcomeDays />
             {joinCta("hero")}
@@ -872,24 +944,24 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
-      {/* Two buttons, nothing to read first (Sam, 3 Nov 2026: "join tapin
-          plus, and 'see how much I'd save' buttons"). The second scrolls to
-          the sentence that works it out. */}
+      {/* Join on top, See how much I'd save under it (Sam, 3 Nov 2026:
+          "those buttons should be stacked on top of one another"). The second
+          opens the walkthrough, which starts on what you spend and ends on
+          what you'd get back ("trigger the how this works modal instead"). */}
       <div className="tpa-dock" data-shown="">
+        <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
+          Join Tapin Plus
+        </a>
         <button
           type="button"
           className="tpa-dock-save"
           onClick={() => {
-            const target = document.querySelector<HTMLElement>(".tpa-s2-calc") ?? document.querySelector<HTMLElement>(".tpa-offer");
-            target?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
+            setHow(true);
             track("plus_save_opened", { where: "dock" });
           }}
         >
           See how much I’d save
         </button>
-        <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
-          Join Tapin Plus
-        </a>
       </div>
     </div>
   );
