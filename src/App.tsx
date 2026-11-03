@@ -4,14 +4,13 @@ import Shell from "./shell/Shell";
 import ReserveLayer from "./shell/ReserveLayer";
 import Arrival from "./shell/Arrival";
 import { useEventTracking } from "./context/event_tracking_context";
-import Pitch from "./routes/Pitch";
 import Simple from "./routes/Simple";
-import How from "./routes/How";
-import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
-import Membership from "./routes/Membership";
 import { EARLY_ACCESS_CLOSED } from "./model/closed";
 import PlusHome from "./routes/PlusHome";
+import Members from "./routes/Members";
+import { asset } from "./asset";
+import { campaignHeroShot } from "./model/campaign";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -33,6 +32,16 @@ import PlusHome from "./routes/PlusHome";
 function HomeLink() {
   const { search } = useLocation();
   return <Navigate to={{ pathname: "/", search }} replace />;
+}
+/** The old landing pages and the full-page walkthrough, since the 3 Nov 2026
+ *  redesign: /pitch and /welcome go home, /how goes home with the
+ *  walkthrough open, every parameter kept (Sam: "redirect + rebuild"). */
+function ToHome({ how = false }: { how?: boolean }) {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  if (how) params.set("how", "1");
+  const rest = params.toString();
+  return <Navigate to={{ pathname: "/", search: rest ? `?${rest}` : "" }} replace />;
 }
 function TryLink() {
   const { search } = useLocation();
@@ -76,9 +85,9 @@ export default function App() {
      arrival would play over it. */
   /* Not on / since the 3 Nov 2026 redesign: the home page opens on its
      own collage band, and the arrival would play over it. */
-  const [arrive] = useState(
-    () => location.pathname === "/welcome" && !new URLSearchParams(location.search).has("try"),
-  );
+  /* /welcome now redirects home (3 Nov 2026), so nothing plays the arrival;
+     it stays wired for the day a page wants it again. */
+  const [arrive] = useState(() => false);
   const layered = isReserve;
   const background = (location.state as { background?: Location } | null)?.background;
   const under: Location | string = layered ? (background ?? "/") : location;
@@ -98,6 +107,8 @@ export default function App() {
         {/* THE HOME PAGE IN THE APP'S OWN LOOK (Sam, 3 Nov 2026). Outside
             the shell: it paints the app's light ground edge to edge. */}
         <Route path="/" element={<PlusHome />} />
+        <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
+        <Route path="/in" element={<Members />} />
         <Route element={<Shell layered={layered} />}>
           {/* THE HOME PAGE IS THE 5TH-GRADE PAGE (Sam, 30 Sep 2026: "it should
               replace plus.tapin.app, not be plus.tapin.app/simple"; §88). The
@@ -105,25 +116,25 @@ export default function App() {
               comes here. */}
           {/* The page before the 3 Nov redesign, kept for comparison. */}
           <Route path="/classic" element={<Simple />} />
-          <Route path="/pitch" element={<Pitch />} />
+          <Route path="/pitch" element={<ToHome />} />
           <Route path="/simple" element={<HomeLink />} />
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
-          <Route path="/welcome" element={<Pitch invite="welcomeweek" />} />
-          <Route path="/how" element={<How />} />
+          <Route path="/welcome" element={<ToHome />} />
+          <Route path="/how" element={<ToHome how />} />
           {/* ══ THE CAMPAIGN SPLASH ══════════════════════════════════════
               One venue, for one Meta advert. Sam, 20 Sep 2026: "Should be a
               separate URL, like plus.tapin.app/blacksburg/coffeeholics." The
               app is served under BASE_URL "/blacksburg/", so this route IS
               that path, and vercel.json's "/blacksburg/:path*" rewrite
               already hands it to index.html. The host is a DNS matter. */}
-          <Route path="/coffeeholics" element={<Coffeeholics />} />
+
           <Route
             path="/reserve"
             element={EARLY_ACCESS_CLOSED ? <Navigate to="/" replace /> : <Reserve />}
           />
           {/* /in — the membership after it has been bought. PRODUCT.md names
               this route as "sign-in and the receipt". */}
-          <Route path="/in" element={<Membership />} />
+
           {/* THE PREVIEW'S OLD ADDRESSES. /app and everything under it were
               real routes until 20 Sep 2026, so they are in browser histories,
               in shared links and in anyone's muscle memory. Left unhandled

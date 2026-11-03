@@ -7,6 +7,8 @@ import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
+import TrialModal from "../shell/TrialModal";
+import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -112,11 +114,11 @@ const COLLAGE = asset("/collage/blacksburg.webp");
 const HOLD_MS = 4500;
 const RING = 2 * Math.PI * 21;
 
-function OrderCard() {
+function OrderCard({ start = 0 }: { start?: number }) {
   const card = useRef<HTMLDivElement | null>(null);
   const rings = useRef<Array<SVGCircleElement | null>>([]);
   const [inView, setInView] = useState(false);
-  const [which, setWhich] = useState(0);
+  const [which, setWhich] = useState(start);
   const [paused, setPaused] = useState(false);
   const still = reducedMotion();
   useEffect(() => {
@@ -274,12 +276,23 @@ const Chevron = () => (
   </svg>
 );
 
-export default function PlusHome() {
+/* ══ ONE PLACE'S PAGE (Sam, 3 Nov 2026: "redirect + rebuild") ════════════════
+   /coffeeholics is the same page about one place: its own photograph in the
+   band, its name in the headline, its order first in the carousel, and the
+   try-it-once window (which already leads with Coffeeholics). Everything
+   else, the offer, the promise, the places and Join, is the home page's. */
+export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
+  const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
+  const startAt = place ? Math.max(0, EXAMPLES.findIndex((e) => e.venue.id === place.id)) : 0;
   const { track } = useEventTracking();
   const heroJoin = useRef<HTMLAnchorElement | null>(null);
   const closeJoin = useRef<HTMLAnchorElement | null>(null);
   const [dock, setDock] = useState(false);
-  const [how, setHow] = useState(false);
+  /* /how lands here with ?how and the walkthrough open. */
+  const [how, setHow] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("how"));
+  /* "Try it once for free" (Sam, 3 Nov 2026: "we should have the Try it once
+     for free option"). The ads' /try links land here with the window open. */
+  const [trial, setTrial] = useTrialLink();
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -312,7 +325,7 @@ export default function PlusHome() {
   return (
     <div className="tpa">
       <header className="tpa-band">
-        <img className="tpa-band-art" src={COLLAGE} alt="" decoding="async" />
+        <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
           <span className="tpa-glass tpa-badge">
             <FlatMark className="tpa-badge-mark" />
@@ -323,8 +336,13 @@ export default function PlusHome() {
           </Link>
         </div>
         <div className="tpa-band-title">
-          <h1>${CREDIT} back at every Plus place, every week</h1>
-          <span>Blacksburg</span>
+          {/* Sam, 3 Nov 2026: "header copy should be something like '$5 back
+              at every place you already go in blacksburg'". */}
+          <h1>
+            {place
+              ? `$${CREDIT} back every week at ${place.name}`
+              : `$${CREDIT} back at every place you already go in Blacksburg`}
+          </h1>
         </div>
       </header>
 
@@ -349,21 +367,7 @@ export default function PlusHome() {
               Step through it
             </button>
           </div>
-          <ol className="tpa-figs">
-            <li>
-              <b className="tnum">{FIRST_MONTH}</b>
-              <span>to join, first month</span>
-            </li>
-            <li>
-              <b className="tnum">${MIN_ORDER}+</b>
-              <span>of food or non-alcoholic drinks</span>
-            </li>
-            <li>
-              <b className="tnum">${CREDIT} back</b>
-              <span>every week, at each place</span>
-            </li>
-          </ol>
-          <OrderCard />
+          <OrderCard start={startAt} />
         </section>
 
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
@@ -387,6 +391,16 @@ export default function PlusHome() {
           <a ref={heroJoin} className="tpa-cta" href={tapinHref()} onClick={go("hero")}>
             Join Tapin Plus
           </a>
+          <button
+            type="button"
+            className="tpa-try"
+            onClick={() => {
+              setTrial(true);
+              track("plus_try_opened", { where: "offer" });
+            }}
+          >
+            Try it once for free
+          </button>
           <p className="tpa-rises">The price goes up for new members as more places join. Yours stays at {MONTHLY}.</p>
         </section>
 
@@ -507,6 +521,7 @@ export default function PlusHome() {
         </footer>
       </main>
 
+      {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
       {how ? <HowSheet onClose={() => setHow(false)} joinHref={tapinHref()} onJoin={go("how_sheet")} /> : null}
 
       <div className="tpa-dock" data-shown={dock ? "" : undefined} aria-hidden={!dock}>

@@ -26,12 +26,12 @@ const money = (n: number) => `$${n.toFixed(2)}`;
    the spend part becomes the button that turns the deck back to the question.
    One source, so the spoken sentence and the printed one cannot drift. */
 type HeadPart = string | { spend: string };
-const valueHead = (spend: number, steadyUsd: number): HeadPart[] => [
+export const valueHead = (spend: number, steadyUsd: number): HeadPart[] => [
   "Based on ",
   { spend: wholeUsd(spend) },
   ` spend a month, you'd save about ${money(steadyUsd)} a month`,
 ];
-const headText = (parts: HeadPart[]) =>
+export const headText = (parts: HeadPart[]) =>
   parts.map((p) => (typeof p === "string" ? p : p.spend)).join("");
 
 /**
@@ -56,7 +56,7 @@ const headText = (parts: HeadPart[]) =>
  *
  * Both cut scenes stay in Scenes.tsx, built and one line from returning.
  */
-function buildSlides(spend: number) {
+export function buildSlides(spend: number) {
   const s = illustrate(spend);
   return [
     {
