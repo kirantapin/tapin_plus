@@ -29,8 +29,8 @@ import { useTrialLink } from "../shell/useTrialLink";
    sign-up with the ad's tags (tapinHref). Every figure is the app's. */
 
 const FIRST_MONTH = "$3.99";
-/** What one first $10+ order's $5 back leaves over the first month. */
-const AHEAD = (5 - 3.99).toFixed(2);
+/** The first month's price as a number, for the payback sums. */
+const FIRST_MONTH_USD = 3.99;
 const MONTHLY = "$7.99";
 const CREDIT = 5;
 const MIN_ORDER = 10;
@@ -84,6 +84,50 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
   if (price < MIN_ORDER) return null;
   return { venue, label: names.join(" + "), price, img: items[0]?.img ?? venue.hero };
 }).filter((e): e is Example => e !== null);
+
+/** The Sticker's first order: the first place's example, a real dish. */
+const FIRST_ORDER = EXAMPLES[0];
+
+/** $10+ orders a month the Counter offers. One $5 per place each week, so a
+ *  month holds at most 20 (5 places x 4 weeks). */
+const COUNTS = [1, 4, 10, 20] as const;
+
+function PaybackCounter() {
+  const [n, setN] = useState<number>(1);
+  const out = useRef<HTMLElement | null>(null);
+  const ahead = n * CREDIT - FIRST_MONTH_USD;
+  const pick = (k: number) => {
+    setN(k);
+    if (!reducedMotion()) {
+      out.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+        duration: 320,
+        easing: "cubic-bezier(.22,1,.36,1)",
+      });
+    }
+  };
+  return (
+    <div className="tpa-s2-calc">
+      <p className="tpa-s2-q" id="tpa-s2-q">
+        ${MIN_ORDER}+ orders this month
+      </p>
+      <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
+        {COUNTS.map((k) => (
+          <button key={k} type="button" role="radio" aria-checked={n === k} data-on={n === k ? "" : undefined} onClick={() => pick(k)}>
+            <span className="tnum">{k}</span>
+          </button>
+        ))}
+      </div>
+      <p className="tpa-s2-out" aria-live="polite">
+        <b ref={out} className="tnum">
+          +{money(ahead)}
+        </b>
+        <span>
+          {money(n * CREDIT)} back, less your {FIRST_MONTH} first month
+        </span>
+      </p>
+    </div>
+  );
+}
 
 /** Ink that reads on a place's brand colour (WCAG relative luminance). White
  *  wherever it holds about 2:1, as the app's sheets do (Sam, 3 Nov 2026:
@@ -146,11 +190,11 @@ const Play = () => (
    it's just the same gray background that the 'step through it' button
    has"): Colour's layout, tab to total, in the button's grey with ink. The
    default; the coloured version stays at ?hiw=2. */
-type OfferLook = "shipped" | "a" | "b" | "c";
+type OfferLook = "shipped" | "1" | "2" | "3";
 const offerLook = (): OfferLook => {
   if (typeof window === "undefined") return "shipped";
   const v = new URLSearchParams(window.location.search).get("offer");
-  return v === "a" || v === "b" || v === "c" ? v : "shipped";
+  return v === "1" || v === "2" || v === "3" ? v : "shipped";
 };
 type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
 const orderLook = (): OrderLook => {
@@ -481,43 +525,38 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             here. Make it way simpler, and if you have to nest that's fine"):
             the price, the clock, Join and Try. Where it works is the tabs
             above; the price lock folds away under one line. */}
-        {/* THE PAYBACK AS THE HERO, THREE VERSIONS (Sam, 3 Nov 2026: "wouldn't
-            we want 'first $10 order covers it' as the hero? ... 3 versions").
-            Preview with ?offer=a|b|c; without it the offer is as shipped.
-            The $5 is credit toward the next order, so every version says it
-            "earns $5 back" somewhere near the claim, and it is said of the
-            first month only.
-            A · Headline: the sentence at display size, the price under it.
-            B · Sum: $5 back against $3.99, and what's left over.
-            C · Ledger: the first order and the first month as two lines of
-              one account, ending in what you're ahead. */}
-        {offer === "a" ? (
-          <section className="tpa-module tpa-offer tpa-pa" aria-label="Tapin Plus">
-            <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
-            <h2 className="tpa-pa-h">Your first ${MIN_ORDER} order covers the month.</h2>
-            <p className="tpa-pa-sub">
-              It earns ${CREDIT} back. Plus is {FIRST_MONTH} your first month, then {MONTHLY}.
-            </p>
-            <WelcomeChip />
-            {joinCta("hero")}
-            {tryCta}
-            {lockMore}
-          </section>
-        ) : offer === "b" ? (
-          <section className="tpa-module tpa-offer tpa-pb" aria-label="Tapin Plus">
-            <h2 className="tpa-pb-h">One ${MIN_ORDER} order covers your first month</h2>
-            <div className="tpa-pb-sum" role="group" aria-label={`$${CREDIT} back on your first $${MIN_ORDER} order, less ${FIRST_MONTH} for your first month, leaves you $${AHEAD} ahead`}>
-              <p aria-hidden="true">
-                <b className="tnum">${CREDIT}</b>
-                <span>back on your first ${MIN_ORDER} order</span>
-              </p>
-              <p aria-hidden="true">
-                <b className="tnum">&minus;{FIRST_MONTH}</b>
-                <span>your first month of Plus</span>
-              </p>
-              <p className="tpa-pb-total" aria-hidden="true">
-                <b className="tnum">+${AHEAD}</b>
-                <span>ahead, on one order</span>
+        {/* THE PAYBACK, A NEW DESIGN, THREE VERSIONS (Sam, 3 Nov 2026: "I
+            think we need a new design entirely"). Each one leads with
+            something to look at, not a stack of sentences. Preview with
+            ?offer=1|2|3; without it the offer is as shipped. The $5 is credit
+            toward the next order, so each says it is earned "back", and the
+            payback is claimed of the first month only.
+            1 · Sticker: the first order, a real dish at its menu price, with a
+              +$5 paper sticker on it beside the $3.99 month it covers.
+            2 · Counter: tap how many $10+ orders this month and see what you
+              are ahead after the $3.99; one $5 per place each week, so 20 is
+              the most a month holds.
+            3 · Poster: the collage band with the line set over it, the way
+              the page's own header is, and the offer under it. */}
+        {offer === "1" ? (
+          <section className="tpa-module tpa-offer tpa-s1" aria-label="Tapin Plus">
+            <h2 className="tpa-s1-h">Your first ${MIN_ORDER} order covers&nbsp;it.</h2>
+            <div className="tpa-s1-art">
+              <figure className="tpa-s1-order">
+                <img src={FIRST_ORDER.img} alt="" decoding="async" />
+                <figcaption>
+                  <span>{FIRST_ORDER.label}</span>
+                  <span className="tnum">{money(FIRST_ORDER.price)}</span>
+                </figcaption>
+                <span className="tpa-s1-sticker" aria-label={`$${CREDIT} back`}>
+                  <b className="tnum">+${CREDIT}</b>
+                  <small>back</small>
+                </span>
+              </figure>
+              <p className="tpa-s1-tag">
+                <span>covers</span>
+                <b className="tnum">{FIRST_MONTH}</b>
+                <span>your first month</span>
               </p>
             </div>
             <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
@@ -526,33 +565,45 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             {tryCta}
             {lockMore}
           </section>
-        ) : offer === "c" ? (
-          <section className="tpa-module tpa-offer tpa-pc" aria-label="Tapin Plus">
-            <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
-            <h2 className="tpa-pc-h">
-              Covered
-              <br />
-              by one order.
-            </h2>
-            <ul className="tpa-pc-ledger">
-              <li>
-                <span>Your first ${MIN_ORDER} order earns</span>
-                <b className="tnum tpa-pc-gain">+${CREDIT}.00</b>
-              </li>
-              <li>
-                <span>Your first month of Plus</span>
-                <b className="tnum">&minus;{FIRST_MONTH}</b>
-              </li>
-              <li className="tpa-pc-total">
-                <span>You’re ahead</span>
-                <b className="tnum">+${AHEAD}</b>
-              </li>
-            </ul>
-            <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+        ) : offer === "2" ? (
+          <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
+            <h2 className="tpa-s2-h">One ${MIN_ORDER} order covers your first month.</h2>
+            <PaybackCounter />
+            <p className="tpa-offer-then">
+              {FIRST_MONTH} your first month, then {MONTHLY}/month.
+            </p>
             <WelcomeChip />
             {joinCta("hero")}
             {tryCta}
             {lockMore}
+          </section>
+        ) : offer === "3" ? (
+          <section className="tpa-s3" aria-label="Tapin Plus">
+            <div className="tpa-s3-art">
+              <img className="tpa-s3-collage" src={COLLAGE} alt="" decoding="async" />
+              <img className="tpa-s3-mark" src={PAPER_MARK} alt="" width="72" height="57" decoding="async" />
+              <h2 className="tpa-s3-h">Your first ${MIN_ORDER} order covers the&nbsp;month.</h2>
+            </div>
+            <div className="tpa-s3-body">
+              <p className="tpa-s3-sum" aria-label={`$${CREDIT} back on your first order is more than ${FIRST_MONTH} for your first month`}>
+                <span aria-hidden="true">
+                  <b className="tnum">${CREDIT} back</b>
+                  <small>on your first order</small>
+                </span>
+                <span className="tpa-s3-gt" aria-hidden="true">
+                  &gt;
+                </span>
+                <span aria-hidden="true">
+                  <b className="tnum">{FIRST_MONTH}</b>
+                  <small>your first month</small>
+                </span>
+              </p>
+              <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
+              <WelcomeChip />
+              {joinCta("hero")}
+              {tryCta}
+              {lockMore}
+            </div>
           </section>
         ) : (
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
