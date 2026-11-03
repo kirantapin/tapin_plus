@@ -136,13 +136,6 @@ function PaybackCounter() {
           <span>your first month</span>
         </p>
       </div>
-      <ul className="tpa-s2-places" aria-label={`$${CREDIT} back a week at ${back.places} of ${PLACES.length} places`}>
-        {PLACES.map((v, k) => (
-          <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)} data-on={k < back.places ? "" : undefined}>
-            <img src={v.logo} alt="" decoding="async" />
-          </li>
-        ))}
-      </ul>
       <p className="tpa-s2-note">
         {back.places === PLACES.length
           ? `The most Plus gives: $${CREDIT} back a week at all ${PLACES.length} places, on $10+ orders. Then ${MONTHLY}/month.`

@@ -1135,30 +1135,11 @@ html[data-surface="tpa"] body {
   width: 15px;
   height: 15px;
 }
-/* The places the spend covers, lit as the bands climb: one more $10, one
-   more place's $5 a week. */
-.tpa-s2-places {
-  display: flex;
-  gap: 6px;
-  margin-top: 12px;
-}
-.tpa-s2-places li {
-  opacity: 0.32;
-  transition: opacity 0.25s var(--ease);
-}
-.tpa-s2-places li[data-on] {
-  opacity: 1;
-}
 .tpa-s2-note {
   margin-top: 8px;
   font-size: 14px;
   line-height: 18px;
   color: var(--muted);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tpa-s2-places li {
-    transition: none;
-  }
 }
 .tpa-s2 .tpa-offer-then {
   margin-top: 12px;
