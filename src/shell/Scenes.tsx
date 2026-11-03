@@ -120,7 +120,7 @@ export interface SceneProps {
 /* A WEEK, NOT A MONTH (Sam, 3 Nov 2026: "if I spend $50 a week…"). $10 a
    step, so each band is one more place's $5 a week (savings.ts weeklyBack);
    $50 covers all five. */
-const BANDS = [20, 30, 40, 50];
+const BANDS = [50, 100, 200, 300];
 
 /**
  * 0 — What do you spend?
@@ -166,7 +166,7 @@ function SpendBands({ spend, setSpend, label }: SceneProps & { label: string }) 
           </b>
           {/* 13px, not 12. 12 is under the documented secondary floor and this
               is a phrase, not a tracked micro-label. */}
-          <span>a week</span>
+          <span>a month</span>
         </button>
       ))}
     </div>
@@ -178,7 +178,7 @@ export function SceneSpend({ spend, setSpend }: SceneProps) {
     <SpendBands
       spend={spend}
       setSpend={setSpend}
-      label="What you spend in a week around Blacksburg"
+      label="What you spend in a month around Blacksburg"
     />
   );
 }

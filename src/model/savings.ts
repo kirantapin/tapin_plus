@@ -240,3 +240,35 @@ export function weeklyBack(weeklySpendUsd: number): WeeklyBack {
   return { weeklySpendUsd, places, monthlyUsd, condition };
 }
 
+/* ══ WHAT A MONTH'S SPEND GETS BACK, ORDER BY ORDER (Sam, 3 Nov 2026) ═══════════
+   "where do you get $100 back from spending $50 ... if someone spends X
+   amount on food every week, or X amount on coffee, instead of where they
+   usually go they go to the spots on plus" — and "it'd be a month and a
+   month". So a MONTH's spend in, a month's back out, worked the way the
+   rules work: the spend becomes orders of about $12; each order takes the
+   better benefit, $5 back on a $10+ order where that place hasn't given its
+   $5 this week (5 places, so up to 5 a week), otherwise 15% off (once a
+   day, so up to 7 a week). Orders are taken as spread across the places. */
+export const TYPICAL_ORDER_USD = 12;
+
+export interface MonthlyBack {
+  monthlySpendUsd: number;
+  /** Orders a week the spend makes. */
+  ordersPerWeek: number;
+  /** Back a month, whole dollars. */
+  monthlyUsd: number;
+}
+export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
+  const weekly = monthlySpendUsd / WEEKS_PER_MONTH;
+  const orders = weekly > 0 ? Math.max(1, Math.round(weekly / TYPICAL_ORDER_USD)) : 0;
+  const order = weekly / Math.max(1, orders);
+  const credits = order >= 10 ? Math.min(orders, BENEFIT.plusPlaces) : 0;
+  const pctOrders = Math.min(orders - credits, 7);
+  const weekBack = credits * BENEFIT.creditUsd + pctOrders * order * BENEFIT.percentOff;
+  return {
+    monthlySpendUsd,
+    ordersPerWeek: orders,
+    monthlyUsd: Math.round(weekBack * WEEKS_PER_MONTH),
+  };
+}
+

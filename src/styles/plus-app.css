@@ -1042,9 +1042,6 @@ html[data-surface="tpa"] body {
   border-radius: 14px;
   background: var(--well);
 }
-.tpa-s2-q {
-  font-weight: 600;
-}
 .tpa-s2-picks {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1091,34 +1088,29 @@ html[data-surface="tpa"] body {
   margin-top: 14px;
 }
 .tpa-s3 .tpa-offer-then,
-/* Back a month against the first month, side by side. */
-.tpa-s2-vs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 14px;
+/* The mad lib: the picked spend and the back a month inside one sentence. */
+.tpa-s2-lib {
+  margin-top: 16px;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 30px;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
 }
-.tpa-s2-vs p {
-  display: grid;
-  gap: 2px;
-  padding: 14px;
-  border-radius: 12px;
-  background: #ffffff;
-}
-.tpa-s2-vs b {
+.tpa-s2-lib span {
   display: block;
-  font-weight: 700;
-  font-size: 34px;
-  line-height: 38px;
-  letter-spacing: -0.03em;
 }
-.tpa-s2-vs .tpa-s2-back {
+.tpa-s2-blank {
+  padding: 0 2px;
+  border-bottom: 2.5px solid var(--ink);
+  font-weight: 700;
+}
+.tpa-s2-lib .tpa-s2-back {
+  font-weight: 700;
   color: #1f8a4c;
 }
-.tpa-s2-vs span {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--muted);
+.tpa-s2 .tpa-offer-then {
+  margin-top: 14px;
 }
 .tpa-wdays {
   display: flex;
@@ -2213,4 +2205,37 @@ html[data-surface="tpa"] .ct .ct-go {
   font-weight: 600;
   font-size: 16px;
   box-shadow: none;
+}
+
+/* The next place to join: a blank disc with a question mark in the tab row,
+   and a card that says Plus is growing and the price holds. */
+.tpa-mystery {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.28);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+}
+.tpa-tabs button[data-on] .tpa-mystery {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.tpa-next {
+  padding: 18px 16px 20px;
+}
+.tpa-next-h {
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 27px;
+  letter-spacing: -0.02em;
+}
+.tpa-next-p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 22px;
+  text-wrap: pretty;
 }

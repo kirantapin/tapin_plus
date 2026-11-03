@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SCENES } from "./Scenes";
-import { weeklyBack } from "../model/savings";
+import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
 import { buildSlides } from "../routes/How";
 import { asset } from "../asset";
 import { WelcomeEnds } from "./WelcomeOffer";
@@ -28,7 +28,7 @@ const money = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`
 
 /** The spend question is asked by the week now (Sam, 3 Nov 2026). */
 const HEADS: Record<string, string> = {
-  spend: "What do you spend in a week in Blacksburg?",
+  spend: "What do you spend in a month on food and drinks?",
 };
 
 /** One short line a slide, by slide id (Sam, 3 Nov 2026: "there's just
@@ -53,11 +53,11 @@ export default function HowSheet({
   joinHref: string;
   onJoin: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
-  /* What you spend in a week, and the $5 a week at each place it covers
-     (Sam, 3 Nov 2026: "$50 a week … $100 back"). */
-  const [spend, setSpend] = useState(50);
+  /* A month's spend, and a month back (Sam, 3 Nov 2026: "a month and a
+     month"), worked order by order (savings.ts monthlyBack). */
+  const [spend, setSpend] = useState(200);
   const slides = useMemo(() => buildSlides(spend), [spend]);
-  const s = weeklyBack(spend);
+  const s = monthlyBack(spend);
   const [i, setI] = useState(0);
   const [auto, setAuto] = useState(!still());
   const dir = useRef(1);
@@ -189,17 +189,17 @@ export default function HowSheet({
                 {slide.id === "value" ? (
                   <>
                     Spend{" "}
-                    <button type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`$${spend} a week, change what you spend`}>
+                    <button type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`$${spend} a month, change what you spend`}>
                       ${spend}
-                      {spend >= 50 ? "+" : ""}
+                      {spend >= 300 ? "+" : ""}
                     </button>{" "}
-                    a week, get about {money(s.monthlyUsd)} back a month
+                    a month, get about {money(s.monthlyUsd)} back
                   </>
                 ) : (
                   `About ${money(s.monthlyUsd)} back a month`
                 )}
               </h2>
-              <p className="hs-line">{s.condition}</p>
+              <p className="hs-line">At Plus places, about ${TYPICAL_ORDER_USD} an order. An estimate.</p>
             </>
           ) : (
             <>

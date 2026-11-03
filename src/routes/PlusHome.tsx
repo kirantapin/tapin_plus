@@ -5,7 +5,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { weeklyBack } from "../model/savings";
+import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
@@ -87,23 +87,23 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
 /** The Sticker's first order: the first place's example, a real dish. */
 const FIRST_ORDER = EXAMPLES[0];
 
-/* WHAT YOU SPEND, WHAT COMES BACK (Sam, 3 Nov 2026: "how much do you spend
-   on non-alcohol in blacksburg, and what you can get back for that if you
-   just spent it at these places"). A week's food and non-alcoholic drinks,
-   the same sum as the walkthrough (savings.ts weeklyBack): each $10 is one
-   more place's $5 a week, up to all five. $25 / $50 / $75 / $100+ (Sam,
-   3 Nov 2026: "can we make the amounts a bit different"); from $50 a week
-   every place is covered, so the top three read as the most Plus gives. */
-const SPEND_BANDS = [25, 50, 75, 100] as const;
+/* WHAT YOU SPEND, WHAT COMES BACK, AS ONE SENTENCE (Sam, 3 Nov 2026: "a mad
+   lib style, when i select the amount i spend in a month i think it should
+   populate in the sentence", and "a month and a month, not a week and a
+   month"). Pick a month's spend; it drops into the sentence, and the back a
+   month beside it comes from the same order-by-order sum as the
+   walkthrough (savings.ts monthlyBack). */
+const SPEND_BANDS = [50, 100, 200, 300] as const;
 
 function PaybackCounter() {
-  const [w, setW] = useState<number>(50);
-  const out = useRef<HTMLElement | null>(null);
-  const back = weeklyBack(w);
+  const [m, setM] = useState<number>(200);
+  const said = useRef<HTMLSpanElement | null>(null);
+  const back = monthlyBack(m);
+  const top = m === SPEND_BANDS[SPEND_BANDS.length - 1];
   const pick = (k: number) => {
-    setW(k);
+    setM(k);
     if (!reducedMotion()) {
-      out.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+      said.current?.animate?.([{ transform: "translateY(8px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
         duration: 320,
         easing: "cubic-bezier(.22,1,.36,1)",
       });
@@ -111,12 +111,9 @@ function PaybackCounter() {
   };
   return (
     <div className="tpa-s2-calc">
-      <p className="tpa-s2-q" id="tpa-s2-q">
-        What you spend a week on food and non&#8209;alcoholic drinks
-      </p>
-      <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
+      <div className="tpa-s2-picks" role="radiogroup" aria-label="What you spend a month on food and drinks">
         {SPEND_BANDS.map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={w === k} data-on={w === k ? "" : undefined} onClick={() => pick(k)}>
+          <button key={k} type="button" role="radio" aria-checked={m === k} data-on={m === k ? "" : undefined} onClick={() => pick(k)}>
             <span className="tnum">
               ${k}
               {k === SPEND_BANDS[SPEND_BANDS.length - 1] ? "+" : ""}
@@ -124,22 +121,20 @@ function PaybackCounter() {
           </button>
         ))}
       </div>
-      <div className="tpa-s2-vs" aria-live="polite">
-        <p>
-          <b ref={out} className="tnum tpa-s2-back">
-            ${back.monthlyUsd}
-          </b>
-          <span>back a month</span>
-        </p>
-        <p>
-          <b className="tnum">{FIRST_MONTH}</b>
-          <span>your first month</span>
-        </p>
-      </div>
+      <p className="tpa-s2-lib" aria-live="polite">
+        <span ref={said}>
+          Spend{" "}
+          <b className="tnum tpa-s2-blank">
+            ${m}
+            {top ? "+" : ""}
+          </b>{" "}
+          a month on food and drinks at Plus places, and get about{" "}
+          <b className="tnum tpa-s2-back">${back.monthlyUsd}</b> back a month.
+        </span>
+      </p>
       <p className="tpa-s2-note">
-        {back.places === PLACES.length
-          ? `The most Plus gives: $${CREDIT} back a week at all ${PLACES.length} places, on $10+ orders. Then ${MONTHLY}/month.`
-          : `$${CREDIT} back a week at ${back.places === 1 ? "1 place" : `${back.places} places`}, on $10+ orders. Then ${MONTHLY}/month.`}
+        About {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week of ${TYPICAL_ORDER_USD}: ${CREDIT} back on
+        each $10+ order, once a week at each place, and 15% off the rest. An estimate.
       </p>
     </div>
   );
@@ -178,6 +173,8 @@ const COLLAGE = asset("/collage/blacksburg.webp");
 /** Each place's order holds this long; a ring round its logo counts it down. */
 const HOLD_MS = 4500;
 const RING = 2 * Math.PI * 22;
+/** The places' tabs and the next place's. */
+const TABS = EXAMPLES.length + 1;
 
 const Play = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-play">
@@ -245,7 +242,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     if (!ring || still || EXAMPLES.length < 2 || typeof ring.animate !== "function") return;
     const run = ring.animate([{ strokeDashoffset: RING }, { strokeDashoffset: 0 }], { duration: HOLD_MS, easing: "linear", fill: "forwards" });
     if (!inView || paused) run.pause();
-    run.onfinish = () => setWhich((n) => (n + 1) % EXAMPLES.length);
+    run.onfinish = () => setWhich((n) => (n + 1) % TABS);
     return () => {
       run.onfinish = null;
       run.cancel();
@@ -271,7 +268,11 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
     q(".tpa-swap .now")?.animate?.([{ opacity: 0, transform: "translateY(9px)" }, { opacity: 1, transform: "none" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
     q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
   }, [which, still]);
-  const ex = EXAMPLES[which] ?? EXAMPLES[0];
+  /* The last tab is the next place to join (Sam, 3 Nov 2026: "a mystery
+     logo on the far right to show that as we add new spots the plus member
+     rates are locked in"). */
+  const mystery = which === EXAMPLES.length;
+  const ex = EXAMPLES[mystery ? 0 : which] ?? EXAMPLES[0];
   if (!ex) return null;
   const points = Math.floor((Math.round(ex.price * 100) * POINTS_PER_DOLLAR) / 100);
   return (
@@ -297,7 +298,7 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
       {EXAMPLES.length > 1 ? (
         <div
           className="tpa-tabs"
-          style={{ ["--i" as string]: which, ["--n" as string]: EXAMPLES.length }}
+          style={{ ["--i" as string]: which, ["--n" as string]: TABS }}
         >
           {/* One tab plate that slides to the playing place, rather than each
               tab lighting up in place (Sam, 3 Nov 2026: "the tab selector
@@ -331,13 +332,46 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
               </span>
             </button>
           ))}
+          <button
+            type="button"
+            aria-label="The next place to join Plus"
+            aria-pressed={mystery}
+            data-on={mystery ? "" : undefined}
+            onClick={() => setWhich(EXAMPLES.length)}
+          >
+            <svg className="tpa-tab-ring" viewBox="0 0 48 48" aria-hidden="true">
+              <circle className="tpa-tab-ring-track" cx="24" cy="24" r="22" />
+              <circle
+                ref={(n) => {
+                  rings.current[EXAMPLES.length] = n;
+                }}
+                className="tpa-tab-ring-run"
+                cx="24"
+                cy="24"
+                r="22"
+                strokeDasharray={RING}
+                strokeDashoffset={mystery && still ? 0 : RING}
+              />
+            </svg>
+            <span className="tpa-tab-logo tpa-mystery" aria-hidden="true">
+              ?
+            </span>
+          </button>
         </div>
       ) : null}
       <div
         className="tpa-order"
-        data-edge={which === 0 ? "first" : which === EXAMPLES.length - 1 ? "last" : undefined}
+        data-edge={which === 0 ? "first" : which === TABS - 1 ? "last" : undefined}
       >
-        {look === "tag" ? null : (
+        {mystery ? (
+          <div className="tpa-order-in tpa-next" key="next">
+            <p className="tpa-next-h">More places are joining Plus</p>
+            <p className="tpa-next-p">
+              Every new place is yours too, at no extra cost. Your {MONTHLY} a month stays locked in as they join.
+            </p>
+          </div>
+        ) : null}
+        {mystery || look === "tag" ? null : (
           /* The name only: the tab above already shows the logo (Sam, 3 Nov
              2026: "showing the logos twice is a bit unnecessary"). */
           <p className="tpa-order-band">
@@ -346,12 +380,12 @@ function OrderCard({ start = 0, look = "tabs" }: { start?: number; look?: OrderL
         )}
         {/* Grey keeps the dish beside its name, not a strip across the card
             (Sam, 3 Nov 2026: "this image takes up a lot of real estate"). */}
-        {look === "plate" || look === "colour" ? (
+        {!mystery && (look === "plate" || look === "colour") ? (
           <div className="tpa-order-plate" key={`plate-${which}`}>
             <img src={ex.img} alt="" decoding="async" />
           </div>
         ) : null}
-        {look === "tag" ? (
+        {mystery ? null : look === "tag" ? (
           <div className="tpa-order-in tpa-ptag" key={which}>
             <p className="tpa-ptag-item">
               <img src={ex.img} alt="" decoding="async" />
@@ -596,8 +630,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 The countdown is a quiet line, not the black pill ("I also
                 don't like the way the countdown looks specifically on this
                 card"). */}
-            <h2 className="tpa-s2-h">See what you’d get back</h2>
+            <h2 className="tpa-h2">See what you’d get back</h2>
             <PaybackCounter />
+            <p className="tpa-offer-then">
+              Plus is {FIRST_MONTH} your first month, then {MONTHLY}/month.
+            </p>
             {joinCta("hero")}
             {tryCta}
             <WelcomeDays />
