@@ -1085,7 +1085,10 @@ html[data-surface="tpa"] body {
 .hs-layer *::after {
   box-sizing: border-box;
 }
-.hs-layer :where(p, h2, ol, ul) {
+/* Zero specificity: at .hs-layer's weight this reset outranked every
+   scene's own spacing (.tk-item, .tk-rule…) and packed the slides' rows
+   edge to edge. */
+:where(.hs-layer) :where(p, h2, ol, ul) {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1395,4 +1398,86 @@ html[data-surface="tpa"] [data-lit] {
 }
 .tpa-signin {
   gap: 2px;
+}
+
+/* ── The walkthrough's scenes in the app's look (Sam, 3 Nov 2026: "this
+   needs polish, all of these slides do") ─────────────────────────────────
+   The scenes keep how.css's layout and motion; here they take the page's
+   objects. Logos are the app's round discs, every card is one white plate
+   with a hairline (no border-plus-shadow), the order slides lose the label
+   that repeated their own state, and the cover charge is a photograph with
+   a glass label rather than a ticket stub (no ticket cards, 21 Oct). */
+html[data-surface="tpa"] .hs-scene .collar {
+  padding: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair-lit);
+}
+html[data-surface="tpa"] .hs-scene .collar img {
+  border-radius: 50%;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .hs-scene .collar::after {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene :is(.ticket, .offer, .pass) {
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--hair), 0 2px 8px rgba(20, 22, 24, 0.06);
+}
+html[data-surface="tpa"] .hs-scene .spot-label {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene .tk-item img {
+  border-radius: 10px;
+  box-shadow: none;
+}
+html[data-surface="tpa"] .hs-scene .pass {
+  min-height: 240px;
+  padding: 16px;
+  background: #141414;
+}
+html[data-surface="tpa"] .hs-scene .pass::before {
+  display: none;
+}
+html[data-surface="tpa"] .hs-scene :is(.pass-shot, .pass-veil) {
+  left: 0;
+  width: 100%;
+}
+html[data-surface="tpa"] .hs-scene .pass-shot {
+  filter: none;
+}
+html[data-surface="tpa"] .hs-scene .pass-veil {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.72) 100%);
+}
+html[data-surface="tpa"] .hs-scene .pass-kind {
+  top: 12px;
+  left: 12px;
+  width: auto;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  writing-mode: horizontal-tb;
+  transform: none;
+  background: rgba(20, 20, 20, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+html[data-surface="tpa"] .hs-scene .pass-mark {
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+}
+html[data-surface="tpa"] .hs-scene .dock {
+  padding: 7px 14px;
+  border: 0;
+  background: #ffffff;
+  color: #141618;
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
