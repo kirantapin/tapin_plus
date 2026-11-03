@@ -838,13 +838,23 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
-      {/* One full-width button, nothing to read first (Sam, 3 Nov 2026:
-          "we should have a full width button here - college students have an
-          impossibly short attention span"). */}
+      {/* Two buttons, nothing to read first (Sam, 3 Nov 2026: "join tapin
+          plus, and 'see how much I'd save' buttons"). The second scrolls to
+          the sentence that works it out. */}
       <div className="tpa-dock" data-shown="">
+        <button
+          type="button"
+          className="tpa-dock-save"
+          onClick={() => {
+            const target = document.querySelector<HTMLElement>(".tpa-s2-calc") ?? document.querySelector<HTMLElement>(".tpa-offer");
+            target?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
+            track("plus_save_opened", { where: "dock" });
+          }}
+        >
+          See how much I’d save
+        </button>
         <a className="tpa-cta tpa-dock-cta" href={tapinHref()} onClick={go("dock")}>
-          <span>Join Tapin Plus</span>
-          <span className="tpa-dock-price tnum">{FIRST_MONTH} first month</span>
+          Join Tapin Plus
         </a>
       </div>
     </div>
