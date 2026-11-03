@@ -257,6 +257,15 @@ export interface MonthlyBack {
   ordersPerWeek: number;
   /** Back a month, whole dollars. */
   monthlyUsd: number;
+  /** The typical order the sum assumes. */
+  orderUsd: number;
+  /** $10+ orders a week that earn the $5 (one per place, up to 5). */
+  creditOrdersPerWeek: number;
+  /** The rest of the week's orders, which take 15% off (once a day). */
+  percentOrdersPerWeek: number;
+  /** The $5s a month, and the 15% a month, whole dollars. */
+  creditUsdMonth: number;
+  percentUsdMonth: number;
 }
 export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
   const weekly = monthlySpendUsd / WEEKS_PER_MONTH;
@@ -264,11 +273,18 @@ export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
   const order = weekly / Math.max(1, orders);
   const credits = order >= 10 ? Math.min(orders, BENEFIT.plusPlaces) : 0;
   const pctOrders = Math.min(orders - credits, 7);
-  const weekBack = credits * BENEFIT.creditUsd + pctOrders * order * BENEFIT.percentOff;
+  const creditMonth = credits * BENEFIT.creditUsd * WEEKS_PER_MONTH;
+  const percentMonth = Math.round(pctOrders * order * BENEFIT.percentOff * WEEKS_PER_MONTH);
   return {
     monthlySpendUsd,
     ordersPerWeek: orders,
-    monthlyUsd: Math.round(weekBack * WEEKS_PER_MONTH),
+    monthlyUsd: creditMonth + percentMonth,
+    /* Floored, so a $12.50 order reads "about $12", as the card says. */
+    orderUsd: Math.floor(order),
+    creditOrdersPerWeek: credits,
+    percentOrdersPerWeek: pctOrders,
+    creditUsdMonth: creditMonth,
+    percentUsdMonth: percentMonth,
   };
 }
 

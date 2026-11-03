@@ -58,7 +58,7 @@ export function WelcomeDays() {
     <p className="tpa-wdays">
       <Clock />
       <span>
-        Welcome offer ends {welcomeEndsDay} · {left}
+        Offer ends {welcomeEndsDay} · {left}
       </span>
     </p>
   );

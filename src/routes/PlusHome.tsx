@@ -5,7 +5,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
+import { monthlyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
@@ -160,17 +160,45 @@ function PaybackCounter() {
           </button>
         ))}
       </div>
+      {/* Short, with the working folded away (Sam, 3 Nov 2026: "a lot of
+          text ... a little accordion ... that would show you what that number
+          is coming from"). */}
       <p className="tpa-s2-lib" aria-live="polite">
         <span>
-          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month on food and drinks at
-          Plus places, and get about <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back a
-          month.
+          Spend <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month, get about{" "}
+          <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back.
         </span>
       </p>
-      <p className="tpa-s2-note">
-        About {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week of ${TYPICAL_ORDER_USD}: ${CREDIT} back on
-        each $10+ order, once a week at each place, and 15% off the rest. An estimate.
-      </p>
+      <details className="tpa-more tpa-s2-how">
+        <summary>
+          How we got ${back.monthlyUsd}
+          <Chevron />
+        </summary>
+        <ul className="tpa-s2-rows">
+          <li>
+            <span>
+              {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week, about ${back.orderUsd} each
+            </span>
+          </li>
+          <li>
+            <span>
+              ${CREDIT} back on {back.creditOrdersPerWeek} a week
+            </span>
+            <b className="tnum">${back.creditUsdMonth}</b>
+          </li>
+          {back.percentOrdersPerWeek > 0 ? (
+            <li>
+              <span>15% off the other {back.percentOrdersPerWeek}</span>
+              <b className="tnum">${back.percentUsdMonth}</b>
+            </li>
+          ) : null}
+          <li className="tpa-s2-sum">
+            <span>A month, about</span>
+            <b className="tnum">${back.monthlyUsd}</b>
+          </li>
+        </ul>
+        <p className="tpa-s2-fine">At Plus places, on food and non-alcoholic drinks. $5 is once a week at each place. An estimate.</p>
+      </details>
     </div>
   );
 }
@@ -711,7 +739,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <h2 className="tpa-h2">See what you’d get back</h2>
             <PaybackCounter />
             <p className="tpa-offer-then">
-              Plus is {FIRST_MONTH} your first month, then {MONTHLY}/month.
+              {FIRST_MONTH} your first month, then {MONTHLY}.
             </p>
             <WelcomeDays />
             {joinCta("hero")}
