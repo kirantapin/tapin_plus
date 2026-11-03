@@ -1091,6 +1091,50 @@ html[data-surface="tpa"] body {
   margin-top: 14px;
 }
 .tpa-s3 .tpa-offer-then,
+/* Back a month against the first month, side by side. */
+.tpa-s2-vs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.tpa-s2-vs p {
+  display: grid;
+  gap: 2px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+.tpa-s2-vs b {
+  display: block;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 38px;
+  letter-spacing: -0.03em;
+}
+.tpa-s2-vs .tpa-s2-back {
+  color: #1f8a4c;
+}
+.tpa-s2-vs span {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+.tpa-wdays {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.tpa-wdays .tpa-clock {
+  width: 15px;
+  height: 15px;
+}
 /* The places the spend covers, lit as the bands climb: one more $10, one
    more place's $5 a week. */
 .tpa-s2-places {

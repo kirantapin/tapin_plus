@@ -9,7 +9,7 @@ import { weeklyBack } from "../model/savings";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
-import { WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { WelcomeBar, WelcomeChip, WelcomeDays, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -110,7 +110,7 @@ function PaybackCounter() {
   return (
     <div className="tpa-s2-calc">
       <p className="tpa-s2-q" id="tpa-s2-q">
-        Food and non&#8209;alcoholic drinks, a&nbsp;week
+        What you spend a week on food and non&#8209;alcoholic drinks
       </p>
       <div className="tpa-s2-picks" role="radiogroup" aria-labelledby="tpa-s2-q">
         {SPEND_BANDS.map((k) => (
@@ -122,20 +122,28 @@ function PaybackCounter() {
           </button>
         ))}
       </div>
-      <p className="tpa-s2-out" aria-live="polite">
-        <b ref={out} className="tnum">
-          ${back.monthlyUsd} back
-        </b>
-        <span>a month, if you spend it at these places</span>
-      </p>
-      <ul className="tpa-s2-places" aria-label={PLACES.map((v) => v.name).join(", ")}>
+      <div className="tpa-s2-vs" aria-live="polite">
+        <p>
+          <b ref={out} className="tnum tpa-s2-back">
+            ${back.monthlyUsd}
+          </b>
+          <span>back a month</span>
+        </p>
+        <p>
+          <b className="tnum">{FIRST_MONTH}</b>
+          <span>your first month</span>
+        </p>
+      </div>
+      <ul className="tpa-s2-places" aria-label={`$${CREDIT} back a week at ${back.places} of ${PLACES.length} places`}>
         {PLACES.map((v, k) => (
           <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)} data-on={k < back.places ? "" : undefined}>
             <img src={v.logo} alt="" decoding="async" />
           </li>
         ))}
       </ul>
-      <p className="tpa-s2-note">A $10+ order at {back.places === 1 ? "one place" : `${back.places} places`} each week. An estimate.</p>
+      <p className="tpa-s2-note">
+        ${CREDIT} back a week at {back.places === 1 ? "1 place" : `${back.places} places`}, on $10+ orders. Then {MONTHLY}/month.
+      </p>
     </div>
   );
 }
@@ -584,14 +592,18 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </section>
         ) : offer === "2" ? (
           <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
-            <h2 className="tpa-s2-h">One ${MIN_ORDER} order covers your first month.</h2>
+            {/* WHAT YOU'D GET BACK, AGAINST WHAT IT COSTS (Sam, 3 Nov 2026:
+                "I don't really quite get it ... I think it's kind of neat to
+                have that be flexible"). One question, then the two numbers
+                side by side: back a month against the first month's price.
+                The countdown is a quiet line, not the black pill ("I also
+                don't like the way the countdown looks specifically on this
+                card"). */}
+            <h2 className="tpa-s2-h">See what you’d get back</h2>
             <PaybackCounter />
-            <p className="tpa-offer-then">
-              {FIRST_MONTH} your first month, then {MONTHLY}/month.
-            </p>
-            <WelcomeChip />
             {joinCta("hero")}
             {tryCta}
+            <WelcomeDays />
             {lockMore}
           </section>
         ) : offer === "3" ? (
