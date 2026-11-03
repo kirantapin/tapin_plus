@@ -23,10 +23,11 @@ export default function Members() {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
     window.scrollTo(0, 0);
-    /* The page slides in from the right, as a pushed screen does in the app
-       (Sam, 3 Nov 2026: "there should be a page slide transition for
-       clicking on members"), and back out the same way. */
-    if (!still()) page.current?.animate?.([{ transform: "translateX(100%)" }, { transform: "none" }], { duration: 420, easing: ease });
+    /* A fade with a very slight settle, not a slide (Sam, 3 Nov 2026: "more
+       of like a smooth fade. And like a zoom out / zoom in very subtle"): the
+       page arrives a touch large and eases to size, and leaves the same way
+       (PlusHome does the other half). */
+    if (!still()) page.current?.animate?.([{ opacity: 0, transform: "scale(1.02)" }, { opacity: 1, transform: "none" }], { duration: 340, easing: ease });
     return () => {
       delete root.dataset.surface;
     };
@@ -35,8 +36,8 @@ export default function Members() {
     const el = page.current;
     if (!el || still() || typeof el.animate !== "function" || e.metaKey || e.ctrlKey) return;
     e.preventDefault();
-    const run = el.animate([{ transform: "none" }, { transform: "translateX(100%)" }], { duration: 280, easing: "ease-in", fill: "forwards" });
-    run.onfinish = () => navigate("/");
+    const run = el.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(1.02)" }], { duration: 200, easing: "ease-in", fill: "forwards" });
+    run.onfinish = () => navigate("/", { state: { from: "members" } });
   };
 
   return (
