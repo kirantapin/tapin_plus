@@ -1,4 +1,4 @@
-import { shortClock, spokenClock, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
+import { WELCOME_ENDS_MS, shortClock, spokenClock, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
 
 /* ══ THE WELCOME OFFER'S CLOCK, THREE PLACES (Sam, 3 Nov 2026) ═════════════════
    model/deadline.ts holds the date. The bar pinned over the page, the four
@@ -57,4 +57,42 @@ export function WelcomeEnds({ className }: { className?: string }) {
   const r = useWelcomeEnds();
   if (!r) return null;
   return <p className={className}>Welcome offer ends {welcomeEndsDay}. Join before then.</p>;
+}
+
+/** One line in a pill: "Ends November 30 · 27d 07h 50m 11s". */
+export function WelcomeChip() {
+  const r = useWelcomeEnds();
+  if (!r) return null;
+  return (
+    <p className="tpa-wchip" role="timer" aria-label={`Welcome offer ends in ${spokenClock(r)}`}>
+      <Clock />
+      <span aria-hidden="true">
+        Ends {welcomeEndsDay} · <span className="tnum">{shortClock(r)}</span>
+      </span>
+    </p>
+  );
+}
+
+/* The welcome offer runs through November: from the start of 1 November,
+   Blacksburg time (EDT, UTC−4 until 2am that morning), to the end of the 30th. */
+const NOVEMBER_STARTS_MS = Date.UTC(2026, 10, 1, 4, 0, 0);
+
+/** November as a bar that empties toward the 30th, the days left beside it. */
+export function WelcomeMonth() {
+  const r = useWelcomeEnds();
+  if (!r) return null;
+  const total = WELCOME_ENDS_MS - NOVEMBER_STARTS_MS;
+  const left = ((r.days * 24 + r.hours) * 60 + r.minutes) * 60_000 + r.seconds * 1000;
+  const share = Math.max(0, Math.min(1, left / total));
+  return (
+    <div className="tpa-wmonth" role="timer" aria-label={`Welcome offer ends ${welcomeEndsDay}, in ${spokenClock(r)}`}>
+      <p aria-hidden="true">
+        <b>Offer ends {welcomeEndsDay}</b>
+        <span className="tnum">{shortClock(r)}</span>
+      </p>
+      <span className="tpa-wmonth-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${share})` }} />
+      </span>
+    </div>
+  );
 }

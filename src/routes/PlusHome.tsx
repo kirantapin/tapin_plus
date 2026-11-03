@@ -8,7 +8,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { tapinHref } from "../model/closed";
 import HowSheet from "../shell/HowSheet";
 import TrialModal from "../shell/TrialModal";
-import { WelcomeBar, WelcomeCells, WelcomeEnds } from "../shell/WelcomeOffer";
+import { WelcomeBar, WelcomeCells, WelcomeChip, WelcomeEnds, WelcomeMonth } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -140,6 +140,12 @@ const Play = () => (
      big number, the menu price struck beside it, the $5 and the next $5 as
      two chips. */
 type OrderLook = "tabs" | "plate" | "colour" | "tag";
+type OfferLook = "shipped" | "price" | "black" | "month";
+const offerLook = (): OfferLook => {
+  if (typeof window === "undefined") return "shipped";
+  const v = new URLSearchParams(window.location.search).get("offer");
+  return v === "1" ? "price" : v === "2" ? "black" : v === "3" ? "month" : "shipped";
+};
 const orderLook = (): OrderLook => {
   if (typeof window === "undefined") return "tabs";
   const v = new URLSearchParams(window.location.search).get("hiw");
@@ -357,6 +363,24 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [look] = useState(orderLook);
+  const [offer] = useState(offerLook);
+  const joinCta = (where: string, white = false) => (
+    <a className={`tpa-cta${white ? " tpa-cta-white" : ""}`} href={tapinHref()} onClick={go(where)}>
+      Join Tapin Plus
+    </a>
+  );
+  const tryCta = (
+    <button
+      type="button"
+      className="tpa-try"
+      onClick={() => {
+        setTrial(true);
+        track("plus_try_opened", { where: "offer" });
+      }}
+    >
+      Try it once for free
+    </button>
+  );
   const openHow = () => {
     setHow(true);
     track("plus_how_opened", { where: "how" });
@@ -421,6 +445,92 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </button>
         </section>
 
+        {/* THE OFFER, THREE VERSIONS (Sam, 3 Nov 2026: "3 /impeccable
+            redesigns" of this section). Preview with ?offer=1|2|3; without it
+            the offer is as shipped.
+            1 · Price first: $3.99 at display size leads, the clock as one
+              pill under it, Join; where it works follows the buttons.
+            2 · Black card: the app's black feature card, the paper mark big,
+              the clock in dark wells, a white Join.
+            3 · November: the collage across the top with the mark sitting on
+              its edge, and November as a bar that empties toward the 30th. */}
+        {offer === "price" ? (
+          <section className="tpa-module tpa-offer tpa-o1" aria-label="Tapin Plus">
+            <img className="tpa-o1-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
+            <p className="tpa-o1-price">
+              <b className="tnum">{FIRST_MONTH}</b>
+              <span>your first month</span>
+            </p>
+            <p className="tpa-o1-then">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
+            <WelcomeChip />
+            {joinCta("hero")}
+            {tryCta}
+            <div className="tpa-o1-where">
+              <ul className="tpa-marks" aria-label={PLACES.map((v) => v.name).join(", ")}>
+                {PLACES.map((v) => (
+                  <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)}>
+                    <img src={v.logo} alt="" decoding="async" />
+                  </li>
+                ))}
+              </ul>
+              <p>
+                ${CREDIT} back at {PLACES.length} places on ${MIN_ORDER}+ orders, or {PERCENT}% off once&nbsp;a&nbsp;day.
+              </p>
+            </div>
+            <p className="tpa-rises">The price goes up for new members as more places join. Yours stays at {MONTHLY}.</p>
+          </section>
+        ) : offer === "black" ? (
+          <section className="tpa-o2" aria-label="Tapin Plus">
+            <img className="tpa-o2-mark" src={PAPER_MARK} alt="" width="132" height="104" decoding="async" />
+            <p className="tpa-o2-lead">
+              ${CREDIT} back at {PLACES.length} places in Blacksburg, on ${MIN_ORDER}+ orders. Or {PERCENT}% off, once&nbsp;a&nbsp;day.
+            </p>
+            <ul className="tpa-marks" aria-label={PLACES.map((v) => v.name).join(", ")}>
+              {PLACES.map((v) => (
+                <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)}>
+                  <img src={v.logo} alt="" decoding="async" />
+                </li>
+              ))}
+            </ul>
+            <div className="tpa-o2-price">
+              <WelcomeCells />
+              <p className="tpa-price-h">
+                <b className="tnum">{FIRST_MONTH}</b> your first month
+              </p>
+              <p className="tpa-price-then">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
+            </div>
+            {joinCta("hero", true)}
+            {tryCta}
+            <p className="tpa-rises">The price goes up for new members as more places join. Yours stays at {MONTHLY}.</p>
+          </section>
+        ) : offer === "month" ? (
+          <section className="tpa-module tpa-offer tpa-o3" aria-label="Tapin Plus">
+            <div className="tpa-o3-art">
+              <img className="tpa-o3-collage" src={COLLAGE} alt="" decoding="async" />
+              <img className="tpa-o3-mark" src={PAPER_MARK} alt="" width="96" height="76" decoding="async" />
+            </div>
+            <p className="tpa-lead">
+              At {PLACES.length} places in Blacksburg, on ${MIN_ORDER}+ orders. Or {PERCENT}% off your order, once&nbsp;a&nbsp;day.
+            </p>
+            <ul className="tpa-marks" aria-label={PLACES.map((v) => v.name).join(", ")}>
+              {PLACES.map((v) => (
+                <li key={v.id} className="collar tpa-logo" data-field={logoField(v.id)}>
+                  <img src={v.logo} alt="" decoding="async" />
+                </li>
+              ))}
+            </ul>
+            <WelcomeMonth />
+            <p className="tpa-o3-price">
+              <span>
+                <b className="tnum">{FIRST_MONTH}</b> first month
+              </span>
+              <span>then {MONTHLY}/month, locked in</span>
+            </p>
+            {joinCta("hero")}
+            {tryCta}
+            <p className="tpa-rises">The price goes up for new members as more places join. Yours stays at {MONTHLY}.</p>
+          </section>
+        ) : (
         <section className="tpa-module tpa-offer" aria-label="Tapin Plus">
           <img className="tpa-paper" src={PAPER_MARK} alt="" width="120" height="95" decoding="async" />
           <p className="tpa-lead">
@@ -440,21 +550,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             </p>
             <p className="tpa-price-then">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
           </div>
-          <a className="tpa-cta" href={tapinHref()} onClick={go("hero")}>
-            Join Tapin Plus
-          </a>
-          <button
-            type="button"
-            className="tpa-try"
-            onClick={() => {
-              setTrial(true);
-              track("plus_try_opened", { where: "offer" });
-            }}
-          >
-            Try it once for free
-          </button>
+          {joinCta("hero")}
+          {tryCta}
           <p className="tpa-rises">The price goes up for new members as more places join. Yours stays at {MONTHLY}.</p>
         </section>
+        )}
 
         {/* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show
             the plus promise guarantee - every month is refundable"). The

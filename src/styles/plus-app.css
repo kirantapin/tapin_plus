@@ -865,6 +865,201 @@ html[data-surface="tpa"] body {
   color: var(--muted);
 }
 
+/* ── The offer, three versions (PlusHome offerLook, ?offer=1|2|3) ───────── */
+/* The clock as one pill, and November as a bar (shell/WelcomeOffer.tsx). */
+.tpa-wchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpa-wmonth {
+  margin-top: 18px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpa-wmonth p {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpa-wmonth b {
+  font-weight: 600;
+}
+.tpa-wmonth p span {
+  white-space: nowrap;
+  color: var(--muted);
+  font-weight: 600;
+}
+.tpa-wmonth-bar {
+  display: block;
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--well);
+  overflow: hidden;
+}
+.tpa-wmonth-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transform-origin: left center;
+}
+/* 1 · Price first. */
+.tpa-o1 {
+  position: relative;
+  padding-top: 22px;
+}
+.tpa-o1-mark {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+  width: 76px;
+  height: auto;
+}
+.tpa-o1-price {
+  display: grid;
+  gap: 2px;
+}
+.tpa-o1-price b {
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 56px;
+  letter-spacing: -0.035em;
+}
+.tpa-o1-price span {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpa-o1-then {
+  margin-top: 6px;
+  max-width: 34ch;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpa-o1-where {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpa-o1-where .tpa-marks {
+  margin: 0;
+}
+.tpa-o1-where p {
+  font-weight: 600;
+  text-wrap: pretty;
+}
+/* 2 · Black card: the app's black feature card. */
+.tpa-o2 {
+  margin: 12px var(--gutter) 0;
+  padding: 20px 16px 18px;
+  border-radius: 16px;
+  background: #141414;
+  color: #ffffff;
+}
+.tpa-o2-mark {
+  display: block;
+  width: 132px;
+  height: auto;
+  margin: 0 0 14px -6px;
+}
+.tpa-o2-lead {
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+.tpa-o2 .tpa-marks {
+  margin-top: 14px;
+}
+.tpa-o2 .collar {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+.tpa-o2-price {
+  margin-top: 18px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.tpa-o2 .tpa-wcells-h,
+.tpa-o2 .tpa-wcells-row small,
+.tpa-o2 .tpa-price-then {
+  color: rgba(255, 255, 255, 0.7);
+}
+.tpa-o2 .tpa-wcells-row span {
+  background: rgba(255, 255, 255, 0.1);
+}
+.tpa-o2 .tpa-try {
+  background: transparent;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3);
+}
+.tpa-o2 .tpa-rises {
+  color: #ffffff;
+}
+.tpa-o2 :where(a, button):focus-visible {
+  outline-color: #ffffff;
+}
+/* 3 · November: the collage across the top, the mark on its edge. */
+.tpa-o3 {
+  padding-top: 0;
+  overflow: hidden;
+}
+.tpa-o3-art {
+  position: relative;
+  margin: 0 -16px 46px;
+  height: 120px;
+}
+.tpa-o3-collage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 38%;
+}
+.tpa-o3-mark {
+  position: absolute;
+  left: 10px;
+  bottom: -40px;
+  width: 96px;
+  height: auto;
+}
+.tpa-o3-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 14px;
+}
+.tpa-o3-price span:first-child {
+  font-weight: 600;
+  font-size: 17px;
+}
+.tpa-o3-price b {
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  margin-right: 4px;
+}
+.tpa-o3-price span:last-child {
+  color: var(--muted);
+}
+
 /* The welcome offer's clock (shell/WelcomeOffer.tsx). The bar is ink over
    the whole width, pinned; the cells are wells, the app's #E5E5EA. */
 .tpa-wbar {
@@ -1347,6 +1542,7 @@ html[data-surface="tpa"] body {
   font-weight: 600;
   font-size: 16px;
   color: #141618;
+  text-decoration: none;
   cursor: pointer;
 }
 
