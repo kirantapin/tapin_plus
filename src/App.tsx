@@ -11,6 +11,7 @@ import Coffeeholics from "./routes/Coffeeholics";
 import Reserve from "./routes/Reserve";
 import Membership from "./routes/Membership";
 import { EARLY_ACCESS_CLOSED } from "./model/closed";
+import PlusHome from "./routes/PlusHome";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -73,10 +74,10 @@ export default function App() {
      to the landing page from the deck. See shell/Arrival.tsx. */
   /* Not under an ad's try link (§66): the window is what it came for, and the
      arrival would play over it. */
+  /* Not on / since the 3 Nov 2026 redesign: the home page opens on its
+     own collage band, and the arrival would play over it. */
   const [arrive] = useState(
-    () =>
-      (location.pathname === "/" || location.pathname === "/welcome") &&
-      !new URLSearchParams(location.search).has("try"),
+    () => location.pathname === "/welcome" && !new URLSearchParams(location.search).has("try"),
   );
   const layered = isReserve;
   const background = (location.state as { background?: Location } | null)?.background;
@@ -94,12 +95,16 @@ export default function App() {
   return (
     <>
       <Routes location={under}>
+        {/* THE HOME PAGE IN THE APP'S OWN LOOK (Sam, 3 Nov 2026). Outside
+            the shell: it paints the app's light ground edge to edge. */}
+        <Route path="/" element={<PlusHome />} />
         <Route element={<Shell layered={layered} />}>
           {/* THE HOME PAGE IS THE 5TH-GRADE PAGE (Sam, 30 Sep 2026: "it should
               replace plus.tapin.app, not be plus.tapin.app/simple"; §88). The
               pitch it replaced stays at /pitch, and /simple, already shared,
               comes here. */}
-          <Route path="/" element={<Simple />} />
+          {/* The page before the 3 Nov redesign, kept for comparison. */}
+          <Route path="/classic" element={<Simple />} />
           <Route path="/pitch" element={<Pitch />} />
           <Route path="/simple" element={<HomeLink />} />
           {/* The Welcome Week text's link — the pitch, as an invitation. model/invite.ts */}
