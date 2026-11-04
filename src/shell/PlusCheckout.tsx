@@ -8,7 +8,6 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { sendCode, verifyCode } from "./authEnv";
-import { asset } from "../asset";
 import { MEMBERS_SHORT } from "../model/proof";
 import { PlusSeats } from "./PlusSeats";
 
@@ -95,9 +94,13 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
     <div className="pck-layer" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="pck-sheet" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
         <div className="pck-top">
-          <img className="pck-mark" src={asset("/brand/plus-paper-mark.svg")} alt="" width="44" height="35" decoding="async" />
+          {/* The title and the town as a chip, no mark (Sam, 3 Nov 2026: "remove
+              the tapin logo here, and make it 'Join Tapin Plus' 'blacksburg' in
+              a chip"). */}
           <div className="pck-head">
-            <h2 id="pck-title" className="pck-title">Join Tapin Plus</h2>
+            <h2 id="pck-title" className="pck-title">
+              Join Tapin Plus <span className="pck-town">Blacksburg</span>
+            </h2>
             <p className="pck-price tnum">
               {usd(price?.first)} your first month, then {usd(price?.monthly)}
             </p>
