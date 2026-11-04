@@ -2720,3 +2720,12 @@ html[data-surface="tpa"] .ct .ct-go {
   width: 52px;
   border-radius: 14px;
 }
+
+/* The scene's root object enters once, with the step change (HowSheet's art
+   transition), not again through its own CSS entrance. Two transforms on
+   the same card (that slide and how.css's dropIn/riseIn, delayed 200ms)
+   made it jump (Sam, 3 Nov 2026: "this card seems to do a bit of a jolt").
+   The rows inside keep their own beats. */
+html[data-surface="tpa"] .hs-scene > * {
+  animation: none;
+}
