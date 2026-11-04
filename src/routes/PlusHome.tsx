@@ -323,12 +323,14 @@ const orderLook = (): OrderLook => {
    B · Open row: no plate at all, the logos spaced out with room to breathe,
      the countdown ring alone marks the playing one; the card sits apart.
    C · Roomy tabs: today's tab joined to the card, at full size again (56px
-     tabs, 36px logos), with more air above and below. */
+     tabs, 36px logos), with more air above and below.
+   A is the default (Sam, 3 Nov 2026: "I like option A"); the others, and the
+   old joined tab (?tabs=0), stay previewable. */
 type TabsLook = "shipped" | "a" | "b" | "c";
 const tabsLook = (): TabsLook => {
-  if (typeof window === "undefined") return "shipped";
+  if (typeof window === "undefined") return "a";
   const v = new URLSearchParams(window.location.search).get("tabs");
-  return v === "a" || v === "b" || v === "c" ? v : "shipped";
+  return v === "0" ? "shipped" : v === "b" || v === "c" ? v : "a";
 };
 
 function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look?: OrderLook; monthly: string }) {

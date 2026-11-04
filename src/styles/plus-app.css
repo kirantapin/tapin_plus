@@ -2543,3 +2543,27 @@ html[data-surface="tpa"] .ct .ct-go {
     transition: none;
   }
 }
+
+/* The walkthrough as a story on a phone (Sam, 3 Nov 2026: "should be full
+   width and height with a slight margin on the sides"): the sheet fills the
+   screen, 8px in from each edge and clear of the notch and home bar, the way
+   a story does. From 720 wide it stays a centred card. */
+@media (max-width: 719px) {
+  .hs-layer {
+    align-items: stretch;
+    padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 8px);
+  }
+  .hs-sheet {
+    max-width: none;
+    height: auto;
+    margin: 0;
+    border-radius: 28px;
+    padding-bottom: 16px;
+  }
+}
+/* The next-place card keeps its own air: the phone rule for the order rows
+   (padding 0 14px 14px) was taking its top padding away, pressing the
+   heading against the card's edge. */
+.tpa-order-in.tpa-next {
+  padding: 18px 16px 20px;
+}
