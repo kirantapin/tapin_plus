@@ -12,13 +12,22 @@ import { covers, venueCovers } from "../model/content";
    the foot. A sheet from the bottom on a phone, a card in the middle on a
    computer, like the rest of the page's pop-ups. */
 
-export type PlacePopupPlace = { id: string; name: string; kind: string; photo: string };
+export type PlacePopupPlace = {
+  id: string;
+  name: string;
+  kind: string;
+  photo: string;
+  /** The card's box on screen, for the photo's flight. */
+  from?: { x: number; y: number; w: number; h: number };
+};
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePopupPlace; onClose: () => void; onJoin: () => void }) {
   const layer = useRef<HTMLDivElement | null>(null);
   const sheet = useRef<HTMLDivElement | null>(null);
+  const photo = useRef<HTMLDivElement | null>(null);
+  const body = useRef<HTMLDivElement | null>(null);
   const closing = useRef(false);
   const sells = covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
 
@@ -41,23 +50,71 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     sheet.current?.focus();
+    /* OPENING (Sam, 4 Nov 2026: "an /impeccable animation when clicked"):
+       the card's photo lifts off the card and flies to the top of the
+       pop-up, growing and rounding as it goes, while the sheet fades in
+       around it and its words rise a beat behind. It's a copy of the photo
+       on a fixed layer (object-fit: cover, so it never stretches); the
+       pop-up's own photo shows the moment it lands. Without a card box (or
+       with reduced motion) the sheet simply rises. */
+    let ghost: HTMLImageElement | null = null;
+    const ease = "cubic-bezier(.22,1,.36,1)";
+    const ph = photo.current;
+    const from = place.from;
     if (!still()) {
       layer.current?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
-      sheet.current?.animate?.([{ transform: "translateY(32px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 340, easing: "cubic-bezier(.22,1,.36,1)" });
+      if (from && ph && typeof ph.animate === "function") {
+        const to = ph.getBoundingClientRect();
+        ghost = document.createElement("img");
+        ghost.src = place.photo;
+        ghost.alt = "";
+        ghost.className = "pp-ghost";
+        document.body.appendChild(ghost);
+        ph.style.opacity = "0";
+        const box = (r: { x: number; y: number; w: number; h: number }, radius: number) => ({
+          left: `${r.x}px`,
+          top: `${r.y}px`,
+          width: `${r.w}px`,
+          height: `${r.h}px`,
+          borderRadius: `${radius}px`,
+        });
+        const flight = ghost.animate(
+          [box(from, 16), box({ x: to.left, y: to.top, w: to.width, h: to.height }, 22)],
+          { duration: 460, easing: ease, fill: "forwards" },
+        );
+        const g = ghost;
+        flight.onfinish = () => {
+          ph.style.opacity = "";
+          g.remove();
+        };
+        sheet.current?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
+        body.current?.animate?.([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], {
+          duration: 360,
+          delay: 140,
+          easing: ease,
+          fill: "backwards",
+        });
+      } else {
+        sheet.current?.animate?.([{ transform: "translateY(32px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 340, easing: ease });
+      }
     }
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
+      ghost?.remove();
+      if (ph) ph.style.opacity = "";
       opener?.focus?.();
     };
-  }, [close]);
+    // Once, when it opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return createPortal(
     <div ref={layer} className="pp-layer" onClick={(e) => e.target === e.currentTarget && close()}>
       <div ref={sheet} className="pp-sheet" role="dialog" aria-modal="true" aria-labelledby="pp-name" tabIndex={-1}>
-        <div className="pp-photo">
+        <div ref={photo} className="pp-photo">
           <img src={place.photo} alt="" decoding="async" />
           <button type="button" className="pp-x" aria-label="Close" onClick={() => close()}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -65,7 +122,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
             </svg>
           </button>
         </div>
-        <div className="pp-body">
+        <div ref={body} className="pp-body">
           <h2 id="pp-name" className="pp-name">
             {place.name}
             <span>{place.kind}</span>

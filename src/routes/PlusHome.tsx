@@ -902,8 +902,17 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                   type="button"
                   className="tpa-place-open"
                   aria-label={`What Plus gets you at ${v.name}`}
-                  onClick={() => {
-                    setPlaceOpen({ id: v.id, name: v.name, kind: KIND[v.id] ?? v.category, photo: photoFor(v) });
+                  onClick={(e) => {
+                    /* Where the card is, so the photo can fly from it into
+                       the pop-up (shell/PlacePopup.tsx). */
+                    const r = e.currentTarget.getBoundingClientRect();
+                    setPlaceOpen({
+                      id: v.id,
+                      name: v.name,
+                      kind: KIND[v.id] ?? v.category,
+                      photo: photoFor(v),
+                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                    });
                     track("plus_place_opened", { place: v.id });
                   }}
                 >
