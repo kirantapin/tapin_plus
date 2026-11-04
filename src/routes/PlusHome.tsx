@@ -865,10 +865,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               </>
             ) : (
               <>
-                <h1>Your first ${MIN_ORDER} order pays for the month</h1>
+                {/* Pays for itself (Sam, 4 Nov 2026): the first month is
+                    $3.99 and the first $10 order gives $5 back. One short line
+                    under it, as hero "a" learned; the Promise is its own card
+                    below, as for "a". */}
+                <h1>Your first ${MIN_ORDER} order pays for your first month</h1>
                 <p className="tpa-hero-sub">
-                  ${CREDIT} back every week at {PLACES.map((p) => p.name).join(", ").replace(/, ([^,]*)$/, " and $1")}.{" "}
-                  {FIRST_MONTH} your first month. Save more than you pay, or your money back.
+                  ${CREDIT} back every week at {PLACES.length} Blacksburg spots.
                 </p>
               </>
             )}
@@ -882,7 +885,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       <main ref={sheetRef} className="tpa-sheet">
         {/* Hero A's guarantee, in its own card above How it works (Sam,
             4 Nov 2026). The control keeps it further down, as it was. */}
-        {hero === "a" ? promiseTop : null}
+        {(hero === "a" || hero === "b") && !place ? promiseTop : null}
         {/* The order earning its $5 comes first, right under the band (Sam,
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps

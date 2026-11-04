@@ -2,14 +2,15 @@
    fine, as long as it's the same link pointing to the page") ═══════════════
    One link, plus.tapin.app, and each visitor is given one hero the first time
    and keeps it (localStorage), half and half:
-     "a" · Named: "$5 back every week at 5 Blacksburg spots" and one line,
-           "Save more than you pay, or your money back." (Grok's audit; the
-           list of names and the price line went on 4 Nov, Sam: "there's so
-           much text now").
+     "b" · Pays for itself: "Your first $10 order pays for your first month"
+           and "$5 back every week at 5 Blacksburg spots" (Sam, 4 Nov 2026:
+           "swap in the pays-for-itself hero"; "the membership pays for
+           itself immediately").
      "0" · Control: the hero as it was, "$5 back at every place you already go
            in Blacksburg".
-   "b" (Payoff: "Your first $10 order pays for the month") is in the build but
-   not in the draw; ?hero=a|b|0 shows any of them and is not stored.
+   "a" (Named: "$5 back every week at 5 Blacksburg spots") ran 4 Nov and is out
+   of the draw; ?hero=a|b|0 shows any of them and is not stored. The key moved
+   to v2 on the swap, so everyone is drawn again between "b" and "0".
 
    Every PostHog event carries the variant (context/event_tracking_context.tsx
    registers it), as `hero_variant` and as `$feature/plus-hero`, the property
@@ -19,8 +20,8 @@
 export type HeroVariant = "a" | "b" | "0";
 
 export const HERO_TEST = "plus-hero";
-const KEY = "tp_hero_v1";
-const DRAW: HeroVariant[] = ["a", "0"];
+const KEY = "tp_hero_v2";
+const DRAW: HeroVariant[] = ["b", "0"];
 
 let cached: HeroVariant | null = null;
 
@@ -31,7 +32,7 @@ export function heroVariant(): HeroVariant {
   if (asked === "a" || asked === "b" || asked === "0") return (cached = asked);
   try {
     const kept = window.localStorage.getItem(KEY);
-    if (kept === "a" || kept === "0") return (cached = kept);
+    if (kept === "b" || kept === "0") return (cached = kept);
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
