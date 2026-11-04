@@ -12,10 +12,12 @@ export function usePlusSeats(): number {
   return left;
 }
 
-/** "91 of 100 spots left at $7.99", a bar of what's gone, and the next price. */
+/** "91 of 100 spots left at $7.99", a bar of what's left, and the next price.
+ *  The bar shows the spots still open and drains as they go (Sam, 3 Nov
+ *  2026: "can we invert this?"). */
 export function PlusSeats({ monthly, className, then = true }: { monthly: string; className?: string; then?: boolean }) {
   const left = usePlusSeats();
-  const taken = (PLUS_SEAT_CAP - left) / PLUS_SEAT_CAP;
+  const open = left / PLUS_SEAT_CAP;
   return (
     <div className={`plus-seats ${className ?? ""}`}>
       <p className="plus-seats-line">
@@ -23,7 +25,7 @@ export function PlusSeats({ monthly, className, then = true }: { monthly: string
         {then ? <span>{PLUS_NEXT_PRICE} after</span> : null}
       </p>
       <span className="plus-seats-bar" aria-hidden="true">
-        <i style={{ transform: `scaleX(${taken})` }} />
+        <i style={{ transform: `scaleX(${open})` }} />
       </span>
     </div>
   );
