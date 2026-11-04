@@ -262,7 +262,7 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
             <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
             <span>Text me Tapin offers (optional)</span>
           </label>
-          <p className="pck-fine">We’ll text a code and membership updates. Msg &amp; data rates may apply.</p>
+          <p className="pck-fine">Your number is your membership: we text a code now and the app link after. Msg &amp; data rates may apply.</p>
           <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
             {busy ? "Sending…" : "Send code"}
           </button>
@@ -313,12 +313,14 @@ const renewsOn = (price: PlusPrice) =>
 /** The header's price: the welcome line, unless the server says today's
  *  charge is something else (a returning member pays the full month). */
 function priceLine(price: PlusPrice | null, dueCents: number | null) {
-  const welcome = `${usd(price?.first)} your first month, then ${usd(price?.monthly)}`;
+  /* It says it renews, from the first step (the UX audit's one failed
+     journey, 4 Nov 2026: "never says the membership renews"). */
+  const welcome = `${usd(price?.first)} your first month, then ${usd(price?.monthly)}/mo until you cancel`;
   if (!price || dueCents === null) return welcome;
   const today = dueCents / 100;
   if (today === price.first) return welcome;
-  if (today === price.monthly) return `${usd(price.monthly)} a ${price.period}`;
-  return `${usd(today)} today, then ${usd(price.monthly)} a ${price.period}`;
+  if (today === price.monthly) return `${usd(price.monthly)} a ${price.period} until you cancel`;
+  return `${usd(today)} today, then ${usd(price.monthly)}/mo until you cancel`;
 }
 
 function Review({

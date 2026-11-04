@@ -383,7 +383,7 @@ button.tpa-cta {
   font-weight: 600;
 }
 .tpa-order-off b {
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-order-total {
   display: flex;
@@ -799,7 +799,7 @@ button.tpa-cta {
   height: 56px;
 }
 .tpa-carousel[data-grey] .tpa-order-off b {
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-carousel[data-grey] .tpa-order-earn {
   opacity: 1;
@@ -895,7 +895,7 @@ button.tpa-cta {
   font-size: 14px;
 }
 .tpa-ptag-off {
-  background: #0F8A5F;
+  background: #0B7A53;
   color: #ffffff;
 }
 .tpa-ptag-pts {
@@ -963,7 +963,7 @@ button.tpa-cta {
   width: 20px;
   height: 20px;
   margin-top: 0.5px;
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 /* The payback, a new design, three versions (PlusHome offerLook). */
 /* 1 · Sticker: the dish, a paper +$5 on it, the month it covers. */
@@ -1019,7 +1019,7 @@ button.tpa-cta {
   width: 78px;
   height: 78px;
   border-radius: 50%;
-  background: #0F8A5F;
+  background: #0B7A53;
   color: #ffffff;
   box-shadow: 0 0 0 4px #ffffff, 0 6px 14px rgba(20, 22, 24, 0.22);
   transform: rotate(-10deg);
@@ -1092,7 +1092,7 @@ button.tpa-cta {
   font-size: 44px;
   line-height: 48px;
   letter-spacing: -0.035em;
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-s2-out span {
   color: var(--muted);
@@ -1136,7 +1136,7 @@ button.tpa-cta {
   font-weight: 600;
 }
 .tpa-s2-rows .tpa-s2-sum b {
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-s2-fine {
   padding: 8px 0 2px;
@@ -1163,7 +1163,7 @@ button.tpa-cta {
 }
 .tpa-s2-lib .tpa-s2-back {
   font-weight: 700;
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-s2 .tpa-offer-then {
   margin-top: 16px;
@@ -1270,7 +1270,7 @@ button.tpa-cta {
   color: var(--muted);
 }
 .tpa-s3-sum span:first-child b {
-  color: #0F8A5F;
+  color: #0B7A53;
 }
 .tpa-s3-gt {
   font-size: 24px;
@@ -1802,7 +1802,7 @@ html[data-surface="tpa"] [data-lit] {
   --hair-lit: rgba(20, 22, 24, 0.14);
   --maroon: #141618;
   --on-maroon: #ffffff;
-  --gain: #0F8A5F;
+  --gain: #0B7A53;
 }
 
 
@@ -2320,14 +2320,14 @@ html[data-surface="tpa"] .ct .ct-go {
   height: 10px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #0F8A5F;
+  background: #0B7A53;
   box-shadow: 0 0 0 2px #ffffff;
 }
 .tpa-proof-dot i {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: #0F8A5F;
+  background: #0B7A53;
   opacity: 0;
 }
 @media (min-width: 1024px) {
@@ -2748,14 +2748,14 @@ html[data-surface="tpa"] .hs-scene > * {
   font-weight: 600;
   font-size: 14px;
   line-height: 18px;
-  color: #0f8a5f;
+  color: #0B7A53;
 }
 .tpa-member-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #0f8a5f;
-  box-shadow: 0 0 0 4px rgba(15, 138, 95, 0.14);
+  background: #0B7A53;
+  box-shadow: 0 0 0 4px rgba(11, 122, 83, 0.14);
 }
 .tpa-member .gta {
   margin-top: 4px;
@@ -2927,7 +2927,7 @@ html[data-surface="tpa"] .hs-scene > * {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #0f8a5f;
+  background: #0B7A53;
   color: #ffffff;
 }
 .tpa-promise-seal svg {
@@ -3228,7 +3228,7 @@ html[data-surface="tpa"] .hs-scene > * {
   height: 18px;
 }
 .pp-ico-money {
-  background: #0f8a5f;
+  background: #0B7A53;
   color: #ffffff;
   font-weight: 700;
   font-size: 13px;
@@ -3262,4 +3262,28 @@ html[data-surface="tpa"] .hs-scene > * {
 }
 .coming li {
   align-content: start;
+}
+/* The photo's shade sits over the card; taps go through it to the button
+   (Sam, 4 Nov 2026: the place pop-ups didn't open). */
+.tpa-place::after {
+  pointer-events: none;
+}
+
+/* ══ UX AUDIT FIXES (4 Nov 2026) ══════════════════════════════════════════
+   The dock covered the fine print and links at the very end of the page:
+   the page now ends with room for it. Money green is #0B7A53 (AA for small
+   text on white and on the grey cards). */
+.tpa-home .tpa-foot {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-foot {
+    padding-bottom: 40px;
+  }
+}
+/* The countdown on one line on the narrowest phones too. */
+@media (max-width: 370px) {
+  .tpa-wbar {
+    font-size: 13px;
+  }
 }

@@ -22,7 +22,8 @@ export function PlusSeats({ monthly, className, then = true }: { monthly: string
     <div className={`plus-seats ${className ?? ""}`}>
       <p className="plus-seats-line">
         <b className="tnum">{plusSeatLine(left, monthly)}</b>
-        {then ? <span>{PLUS_NEXT_PRICE} after</span> : null}
+        {/* After what (UX audit, 4 Nov 2026: "$9.99 after" didn't say). */}
+        {then ? <span>{PLUS_NEXT_PRICE} when they’re gone</span> : null}
       </p>
       <span className="plus-seats-bar" aria-hidden="true">
         <i style={{ transform: `scaleX(${open})` }} />

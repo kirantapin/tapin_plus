@@ -115,7 +115,7 @@ export default function TrialModal({
      was only ever in them — the ticket — because that is the part nobody
      expects and the only reason this list is longer than one line. */
   const steps = [
-    { k: "open", h: "Open the shop on TapIn" },
+    { k: "open", h: "Open the shop on Tapin" },
     { k: "order", h: "Order what you want" },
     { k: "collect", h: "It goes straight to the counter as a ticket" },
   ];
