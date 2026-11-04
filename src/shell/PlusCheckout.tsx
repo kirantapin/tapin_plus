@@ -334,6 +334,15 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
         </span>
         <b>{look === "c" ? "Money back" : "Money back if you don’t save"}</b>
       </li>
+      {/* Sam, 4 Nov 2026: "as we add more places the price doesn't go up for
+          existing subscribers, but it does for new members. Pays to get in
+          early". */}
+      <li>
+        <span className="pck-ico" aria-hidden="true">
+          <LockGlyph />
+        </span>
+        <b>{look === "c" ? "Price locked" : "Your price stays as more places join"}</b>
+      </li>
     </ul>
   );
   const seats = <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />;
@@ -711,6 +720,15 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
    the app (shell/GetTheApp.tsx): the card to download it, and the same place
    for managing the membership (Sam, 3 Nov 2026: "a link to manage their
    membership on the tapin plus confirmation page"). */
+
+function LockGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <rect x="5.5" y="10.5" width="13" height="10" rx="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function ShieldGlyph() {
   return (

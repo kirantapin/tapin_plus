@@ -905,3 +905,22 @@
   outline: none;
   box-shadow: none;
 }
+/* The promises under the sign-up field read as promises, not footnotes
+   (Sam, 4 Nov 2026: "can we make these bullets a bit bolder?"). */
+.pck-offer-quiet b {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink);
+}
+.pck-offer-quiet .pck-ico {
+  width: 26px;
+  height: 26px;
+}
+.pck-offer-quiet .pck-ico svg {
+  width: 15px;
+  height: 15px;
+}
+.pck-offer-quiet .pck-ico-money {
+  font-size: 11px;
+}

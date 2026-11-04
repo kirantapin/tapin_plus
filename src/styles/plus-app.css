@@ -3644,3 +3644,24 @@ html[data-surface="tpa"] .hs-scene > * {
     padding: 12px 16px;
   }
 }
+
+/* View FAQ, under Step through it (Sam, 4 Nov 2026): a quiet text button,
+   a full 44px target. The questions' section takes focus without a ring. */
+.tpa-faq-jump {
+  display: block;
+  min-height: 44px;
+  margin: 4px auto -6px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+section[aria-labelledby="tpa-faq"]:focus {
+  outline: none;
+}
