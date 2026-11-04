@@ -608,7 +608,8 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
             location"). One quiet row of words. */}
         {mystery ? null : (
           <p className="tpa-order-also" key={`also-${which}`}>
-            <span>Also here</span>
+            {/* "Works on", not "Also here" (Sam, 4 Nov 2026). */}
+            <span>Works on</span>
             {covers
               .filter((c) => (venueCovers[ex.venue.id] ?? []).includes(c.id))
               .map((c) => (
@@ -647,7 +648,9 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   },
   {
     q: "Will my price go up?",
-    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member. For new members it goes up to ${PLUS_NEXT_PRICE} once these 100 spots are gone.`,
+    /* Places joining is the other reason the price rises, and only for people
+       who join later (Sam, 4 Nov 2026: "pays to get in early"). */
+    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and to ${PLUS_NEXT_PRICE} once these 100 spots are gone. It pays to get in early.`,
   },
   { q: "Can I cancel?", a: "Anytime." },
 ];
@@ -696,6 +699,17 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const { subscribed } = useAuth();
   /* ?member previews this on local dev only (stripped from builds). */
   const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
+  /* View FAQ: a smooth scroll to the questions, landing them a little below
+     the countdown bar, and focus there so a keyboard follows. */
+  const faqRef = useRef<HTMLElement | null>(null);
+  const toFaq = () => {
+    const el = faqRef.current;
+    if (!el) return;
+    track("plus_faq_jump", {});
+    const top = el.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top, behavior: reducedMotion() ? "auto" : "smooth" });
+    el.focus({ preventScroll: true });
+  };
   const getApp = (where: string, white = false, extra = "") => (
     <a
       className={`tpa-cta${white ? " tpa-cta-white" : ""}${extra}`}
@@ -781,7 +795,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         Your {MONTHLY} is locked in
         <Chevron />
       </summary>
-      <p>It goes up to {PLUS_NEXT_PRICE} for new members once these 100 spots are gone. Yours never does while you’re a member.</p>
+      <p>
+        It goes up for new members as more places join, and to {PLUS_NEXT_PRICE} once these 100 spots are gone. Yours never
+        does while you’re a member, so it pays to get in early.
+      </p>
     </details>
   );
   /* To Members and back, a fade with a very slight zoom (Sam, 3 Nov 2026:
@@ -907,6 +924,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <button type="button" className="tpa-step-wide" onClick={openHow}>
             <Play />
             Step through it
+          </button>
+          {/* Straight to the questions (Sam, 4 Nov 2026: "there should be a
+              view FAQ button right below the 'step through it' button"). A
+              quiet text button, so Step through it stays the one action here. */}
+          <button type="button" className="tpa-faq-jump" onClick={toFaq}>
+            View FAQ
           </button>
         </section>
 
@@ -1152,7 +1175,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </ul>
         </section>
 
-        <section className="tpa-module" aria-labelledby="tpa-faq">
+        <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
