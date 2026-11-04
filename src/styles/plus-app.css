@@ -2453,3 +2453,93 @@ html[data-surface="tpa"] .ct .ct-go {
     margin-top: 8px;
   }
 }
+
+/* ── The place tabs, three versions (PlusHome tabsLook, ?tabs=a|b|c) ──── */
+/* A · Segmented: a grey track, a white pill that slides under the logo. */
+.tpa-carousel[data-tabs="a"] .tpa-tabs {
+  height: auto;
+  margin: 14px 0 12px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--well);
+}
+.tpa-carousel[data-tabs="a"] .tpa-tabs button {
+  height: 48px;
+  border-radius: 999px;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-plate {
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--n, 6));
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(20, 22, 24, 0.12);
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-ring {
+  width: 40px;
+  height: 40px;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-logo {
+  width: 32px;
+  height: 32px;
+}
+.tpa-carousel[data-tabs="a"] .tpa-order,
+.tpa-carousel[data-tabs="b"] .tpa-order {
+  border-radius: 14px !important;
+}
+/* B · Open row: no plate, more room, the ring alone marks the one playing. */
+.tpa-carousel[data-tabs="b"] .tpa-tabs {
+  margin: 16px 0 14px;
+}
+.tpa-carousel[data-tabs="b"] .tpa-tab-plate {
+  display: none;
+}
+.tpa-carousel[data-tabs="b"] .tpa-tabs button {
+  height: 52px;
+  border-radius: 50%;
+}
+.tpa-carousel[data-tabs="b"] .tpa-tab-ring {
+  width: 50px;
+  height: 50px;
+}
+.tpa-carousel[data-tabs="b"] .tpa-tab-logo {
+  width: 38px;
+  height: 38px;
+  transition: transform 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+.tpa-carousel[data-tabs="b"] .tpa-tabs button:not([data-on]) .tpa-tab-logo {
+  transform: scale(0.88);
+}
+.tpa-carousel[data-tabs="b"] .tpa-tab-ring-run {
+  stroke: var(--ink);
+}
+.tpa-carousel[data-tabs="b"] .tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: var(--well);
+}
+/* C · Roomy tabs: today's joined tab at full size, with air around it. */
+.tpa-carousel[data-tabs="c"] .tpa-tabs {
+  margin-top: 18px;
+}
+.tpa-carousel[data-tabs="c"] .tpa-tabs button {
+  height: 60px;
+}
+.tpa-carousel[data-tabs="c"] .tpa-tab-ring {
+  width: 48px;
+  height: 48px;
+}
+.tpa-carousel[data-tabs="c"] .tpa-tab-logo {
+  width: 38px;
+  height: 38px;
+}
+.tpa-carousel[data-tabs="c"] .tpa-order-band {
+  padding: 16px 16px 6px;
+}
+.tpa-carousel[data-tabs="c"] .tpa-order-in {
+  padding: 0 16px 16px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-carousel[data-tabs="b"] .tpa-tab-logo {
+    transition: none;
+  }
+}

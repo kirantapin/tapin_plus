@@ -315,6 +315,21 @@ const orderLook = (): OrderLook => {
   const v = new URLSearchParams(window.location.search).get("hiw");
   return v === "0" ? "tabs" : v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "grey";
 };
+/* THE PLACE TABS, THREE VERSIONS (Sam, 3 Nov 2026: "now it looks too tight.
+   I think we need to revisit the how it works section - specifically the
+   tabs"). Preview with ?tabs=a|b|c; without it the tabs are as shipped.
+   A · Segmented: the logos sit in one grey track, and the playing one rides
+     a white pill that slides, iOS-style; the order card sits apart below.
+   B · Open row: no plate at all, the logos spaced out with room to breathe,
+     the countdown ring alone marks the playing one; the card sits apart.
+   C · Roomy tabs: today's tab joined to the card, at full size again (56px
+     tabs, 36px logos), with more air above and below. */
+type TabsLook = "shipped" | "a" | "b" | "c";
+const tabsLook = (): TabsLook => {
+  if (typeof window === "undefined") return "shipped";
+  const v = new URLSearchParams(window.location.search).get("tabs");
+  return v === "a" || v === "b" || v === "c" ? v : "shipped";
+};
 
 function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look?: OrderLook; monthly: string }) {
   const card = useRef<HTMLDivElement | null>(null);
@@ -377,6 +392,7 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
     <div
       ref={card}
       className="tpa-carousel"
+      data-tabs={tabsLook()}
       data-look={look === "grey" ? "colour" : look}
       data-grey={look === "grey" ? "" : undefined}
       role="group"
