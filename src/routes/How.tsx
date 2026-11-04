@@ -90,6 +90,20 @@ export function buildSlides(spend: number) {
       next: "Show me how",
     },
     {
+      /* The places joining next, and the price locked in (Sam, 4 Nov 2026:
+         "mention in one of these slides ... adding other merchants and the
+         price going up but not for those who lock it in right now"). Third,
+         straight after what you'd save (Sam, 4 Nov 2026: "I just want people
+         to know that more places are joining, sooner. Maybe creates a bit of
+         urgency"). */
+      id: "growing",
+      headline: "More places are joining",
+      line: "As places join, the price goes up for people who join later. Yours stays $7.99.",
+      tag: null,
+      hold: false,
+      dwellMs: 6000,
+    },
+    {
       id: "order",
       headline: "Order in the app, save 15% now",
       /* "In the app" is the only place in the whole build that says WHERE the
@@ -207,17 +221,6 @@ export function buildSlides(spend: number) {
       tag: null,
       hold: false,
       dwellMs: 7000,
-    },
-    {
-      /* The places joining next, and the price locked in (Sam, 4 Nov 2026:
-         "mention in one of these slides ... adding other merchants and the
-         price going up but not for those who lock it in right now"). */
-      id: "growing",
-      headline: "More places are joining",
-      line: "Plus costs more for new members as they do. Join now and yours stays $7.99.",
-      tag: null,
-      hold: false,
-      dwellMs: 6000,
     },
     {
       id: "close",
