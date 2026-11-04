@@ -184,6 +184,7 @@ export const covers = [
  * guessed one.
  */
 export const venueCovers: Record<string, string[]> = {
+  /* Coffeeholics and The Burg first (Sam, 4 Nov 2026). */
   /* Events too. Sam, 20 Sep 2026: "for coffeeholics this also applies for
      events too" — it was food and drinks only, from his first pass, which
      named the other three venues for events and not this one. */
@@ -191,7 +192,8 @@ export const venueCovers: Record<string, string[]> = {
   theburg: ["food", "drinks", "tickets"],
   themilkparlor: ["food", "drinks", "cover", "tickets", "lineskip"],
   olaika: ["food", "drinks", "tickets"],
-  sweetopia: ["food", "drinks"],
+  /* Events too (Sam, 4 Nov 2026: "food and bev and events for all"). */
+  sweetopia: ["food", "drinks", "tickets"],
   italianospizza: ["food", "drinks"],
 };
 

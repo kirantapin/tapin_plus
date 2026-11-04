@@ -209,6 +209,17 @@ export function buildSlides(spend: number) {
       dwellMs: 7000,
     },
     {
+      /* The places joining next, and the price locked in (Sam, 4 Nov 2026:
+         "mention in one of these slides ... adding other merchants and the
+         price going up but not for those who lock it in right now"). */
+      id: "growing",
+      headline: "More places are joining",
+      line: "Plus costs more for new members as they do. Join now and yours stays $7.99.",
+      tag: null,
+      hold: false,
+      dwellMs: 6000,
+    },
+    {
       id: "close",
       /* Computed from what she picked on slide one. Never typed. Rendered
          through .scene-head.is-figure rather than as its own treatment — see

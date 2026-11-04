@@ -44,6 +44,7 @@ const LINES: Record<string, string> = {
   entry: "Points, and 15% off once a day.",
   points: "Spend them where you earned them.",
   redeem: "Show your phone, or it goes to the kitchen.",
+  growing: "Plus costs more for new members as they join. Yours stays $7.99.",
 };
 
 export default function HowSheet({
