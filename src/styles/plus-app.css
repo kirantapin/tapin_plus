@@ -2842,3 +2842,13 @@ html[data-surface="tpa"] .hs-scene > * {
   text-decoration-color: rgba(20, 22, 24, 0.28);
   text-underline-offset: 3px;
 }
+
+/* The next-place card keeps its air in the grey look too (Sam, 3 Nov 2026:
+   "spacing issue with the text on this one again"). The grey look's own row
+   rule (.tpa-carousel[data-grey] .tpa-order-in, padding 0 16px 16px) came
+   later and outranked the fix above, pressing the heading to the top edge;
+   this one names both, so it wins wherever the card is shown. */
+.tpa-carousel .tpa-order-in.tpa-next,
+.tpa-carousel[data-grey] .tpa-order-in.tpa-next {
+  padding: 18px 16px 20px;
+}
