@@ -2729,3 +2729,61 @@ html[data-surface="tpa"] .ct .ct-go {
 html[data-surface="tpa"] .hs-scene > * {
   animation: none;
 }
+
+/* ══ A SIGNED-IN MEMBER (Sam, 3 Nov 2026) ══════════════════════════════════
+   The offer module becomes the member's: a green "Plus is on", the heading,
+   and the app card on the page's grey well. */
+.tpa-member {
+  display: grid;
+  gap: 12px;
+}
+.tpa-member .tpa-h2 {
+  margin: 0;
+}
+.tpa-member-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: #0f8a5f;
+}
+.tpa-member-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0f8a5f;
+  box-shadow: 0 0 0 4px rgba(15, 138, 95, 0.14);
+}
+.tpa-member .gta {
+  margin-top: 4px;
+  background: #f5f5f7;
+}
+.tpa-member .gta-qr {
+  background: #ffffff;
+}
+/* In the desktop rail (400px) the QR code sits under the button, beside its
+   caption, so the button keeps its full width. */
+@media (min-width: 1024px) {
+  .tpa-member .gta[data-device="desktop"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tpa-member .gta-qr {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px 10px 10px;
+  }
+  .tpa-member .gta-qr img {
+    width: 88px;
+    height: 88px;
+  }
+  .tpa-member .gta-qr figcaption {
+    font-size: 14px;
+    line-height: 18px;
+    white-space: normal;
+  }
+}

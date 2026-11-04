@@ -241,50 +241,46 @@ export function weeklyBack(weeklySpendUsd: number): WeeklyBack {
 }
 
 /* ══ WHAT A MONTH'S SPEND GETS BACK, ORDER BY ORDER (Sam, 3 Nov 2026) ═══════════
-   "where do you get $100 back from spending $50 ... if someone spends X
-   amount on food every week, or X amount on coffee, instead of where they
-   usually go they go to the spots on plus" — and "it'd be a month and a
-   month". So a MONTH's spend in, a month's back out, worked the way the
-   rules work: the spend becomes orders of about $12; each order takes the
-   better benefit, $5 back on a $10+ order where that place hasn't given its
-   $5 this week (5 places, so up to 5 a week), otherwise 15% off (once a
-   day, so up to 7 a week). Orders are taken as spread across the places. */
-export const TYPICAL_ORDER_USD = 12;
+   "let's say $10 per order, here, that's $5 back. So $100 a month would give
+   me $50 back." So a month's spend becomes $10 orders, counted by the month
+   ("a month and a month"). Each order takes one benefit: $5 back while a
+   place still has its $5 to give that week (5 places x 4 weeks, so up to 20
+   a month), otherwise 15% off (once a day, so up to 30 a month). */
+export const TYPICAL_ORDER_USD = 10;
+const MAX_CREDITS_A_MONTH = BENEFIT.plusPlaces * WEEKS_PER_MONTH;
+const DAYS_A_MONTH = 30;
 
 export interface MonthlyBack {
   monthlySpendUsd: number;
-  /** Orders a week the spend makes. */
-  ordersPerWeek: number;
+  /** $10 orders a month the spend makes. */
+  ordersPerMonth: number;
   /** Back a month, whole dollars. */
   monthlyUsd: number;
-  /** The typical order the sum assumes. */
+  /** The order size the sum assumes. */
   orderUsd: number;
-  /** $10+ orders a week that earn the $5 (one per place, up to 5). */
-  creditOrdersPerWeek: number;
-  /** The rest of the week's orders, which take 15% off (once a day). */
-  percentOrdersPerWeek: number;
+  /** Orders a month that earn the $5 (once a week at each place, up to 20). */
+  creditOrders: number;
+  /** The orders past that, which take 15% off (once a day). */
+  percentOrders: number;
   /** The $5s a month, and the 15% a month, whole dollars. */
   creditUsdMonth: number;
   percentUsdMonth: number;
 }
+
 export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
-  const weekly = monthlySpendUsd / WEEKS_PER_MONTH;
-  const orders = weekly > 0 ? Math.max(1, Math.round(weekly / TYPICAL_ORDER_USD)) : 0;
-  const order = weekly / Math.max(1, orders);
-  const credits = order >= 10 ? Math.min(orders, BENEFIT.plusPlaces) : 0;
-  const pctOrders = Math.min(orders - credits, 7);
-  const creditMonth = credits * BENEFIT.creditUsd * WEEKS_PER_MONTH;
-  const percentMonth = Math.round(pctOrders * order * BENEFIT.percentOff * WEEKS_PER_MONTH);
+  const orders = Math.floor(monthlySpendUsd / TYPICAL_ORDER_USD);
+  const credits = Math.min(orders, MAX_CREDITS_A_MONTH);
+  const pctOrders = Math.min(orders - credits, DAYS_A_MONTH);
+  const creditMonth = credits * BENEFIT.creditUsd;
+  const percentMonth = Math.round(pctOrders * TYPICAL_ORDER_USD * BENEFIT.percentOff);
   return {
     monthlySpendUsd,
-    ordersPerWeek: orders,
+    ordersPerMonth: orders,
     monthlyUsd: creditMonth + percentMonth,
-    /* Floored, so a $12.50 order reads "about $12", as the card says. */
-    orderUsd: Math.floor(order),
-    creditOrdersPerWeek: credits,
-    percentOrdersPerWeek: pctOrders,
+    orderUsd: TYPICAL_ORDER_USD,
+    creditOrders: credits,
+    percentOrders: pctOrders,
     creditUsdMonth: creditMonth,
     percentUsdMonth: percentMonth,
   };
 }
-

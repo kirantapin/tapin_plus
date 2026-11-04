@@ -12,6 +12,8 @@ import { PlusSeats } from "../shell/PlusSeats";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
+import { AppCard, appHref, device } from "../shell/GetTheApp";
+import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
 import { WelcomeBar, WelcomeChip, WelcomeDays, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
@@ -214,18 +216,18 @@ function PaybackCounter() {
         <ul className="tpa-s2-rows">
           <li>
             <span>
-              {back.ordersPerWeek} {back.ordersPerWeek === 1 ? "order" : "orders"} a week, about ${back.orderUsd} each
+              {back.ordersPerMonth} {back.ordersPerMonth === 1 ? "order" : "orders"} a month, about ${back.orderUsd} each
             </span>
           </li>
           <li>
             <span>
-              ${CREDIT} back on {back.creditOrdersPerWeek} a week
+              ${CREDIT} back on {back.creditOrders === back.ordersPerMonth && back.creditOrders > 1 ? `all ${back.creditOrders}` : back.creditOrders}
             </span>
             <b className="tnum">${back.creditUsdMonth}</b>
           </li>
-          {back.percentOrdersPerWeek > 0 ? (
+          {back.percentOrders > 0 ? (
             <li>
-              <span>15% off the other {back.percentOrdersPerWeek}</span>
+              <span>15% off the other {back.percentOrders}</span>
               <b className="tnum">${back.percentUsdMonth}</b>
             </li>
           ) : null}
@@ -272,6 +274,8 @@ const COLLAGE = asset("/collage/blacksburg.webp");
 
 /** Each place's order holds this long; a ring round its logo counts it down. */
 const HOLD_MS = 4500;
+/** How long a tapped place stays put before the cycle carries on (Sam, 3 Nov 2026). */
+const TAP_HOLD_MS = 5000;
 const RING = 2 * Math.PI * 22;
 /** The places' tabs and the next place's. */
 const TABS = EXAMPLES.length + 1;
@@ -340,7 +344,23 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
   const rings = useRef<Array<SVGCircleElement | null>>([]);
   const [inView, setInView] = useState(false);
   const [which, setWhich] = useState(start);
-  const [paused, setPaused] = useState(false);
+  /* The cycle never stops on its own: hovering or touching the card does
+     nothing to it (Sam, 3 Nov 2026: "the auto cycle shouldn't stop until I
+     click on one of these, and then when I click it stops for 5 seconds and
+     then resumes if I don't click on it again"). A tap shows that place and
+     holds it TAP_HOLD_MS; another tap starts the hold again. */
+  const [held, setHeld] = useState(false);
+  const [taps, setTaps] = useState(0);
+  const pick = (n: number) => {
+    setWhich(n);
+    setHeld(true);
+    setTaps((t) => t + 1);
+  };
+  useEffect(() => {
+    if (!held) return;
+    const t = window.setTimeout(() => setHeld(false), TAP_HOLD_MS);
+    return () => window.clearTimeout(t);
+  }, [held, taps]);
   const still = reducedMotion();
   useEffect(() => {
     const el = card.current;
@@ -351,20 +371,20 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
   }, []);
   /* The playing tab's ring fills over HOLD_MS, and its end moves the card
      on: one clock for what you see and what happens. A pointer or focus on
-     the card holds it (the ring stops where it is); tapping a tab shows that
-     place and starts its ring from empty. Reduced motion: a full ring, no
+     the card does nothing to it; tapping a tab shows that place, its ring
+     empty and still for TAP_HOLD_MS, then filling as usual. Reduced motion: a full ring, no
      advance, the tabs still switch. */
   useEffect(() => {
     const ring = rings.current[which];
     if (!ring || still || EXAMPLES.length < 2 || typeof ring.animate !== "function") return;
     const run = ring.animate([{ strokeDashoffset: RING }, { strokeDashoffset: 0 }], { duration: HOLD_MS, easing: "linear", fill: "forwards" });
-    if (!inView || paused) run.pause();
+    if (!inView || held) run.pause();
     run.onfinish = () => setWhich((n) => (n + 1) % TABS);
     return () => {
       run.onfinish = null;
       run.cancel();
     };
-  }, [which, inView, paused, still]);
+  }, [which, inView, held, still]);
   /* THE ORIGINAL PAGE'S BEAT (Sam, 3 Nov 2026: "I like the old way the
      numbers animated here on the original plus.tapin.app page"), its timings
      from how.css: the order lands; at 500ms the credit row comes in; at
@@ -406,10 +426,6 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
           ? { ["--brand" as string]: "var(--well)", ["--brand-ink" as string]: "var(--ink)" }
           : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
       }
-      onPointerEnter={() => setPaused(true)}
-      onPointerLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
     >
       {/* The places first, then their order (Sam, 3 Nov 2026: "these should
           show up above the carousel"). */}
@@ -429,7 +445,7 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
               aria-label={`Show an order at ${e.venue.name}`}
               aria-pressed={i === which}
               data-on={i === which ? "" : undefined}
-              onClick={() => setWhich(i)}
+              onClick={() => pick(i)}
             >
               <svg className="tpa-tab-ring" viewBox="0 0 48 48" aria-hidden="true">
                 <circle className="tpa-tab-ring-track" cx="24" cy="24" r="22" />
@@ -455,7 +471,7 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
             aria-label="The next place to join Plus"
             aria-pressed={mystery}
             data-on={mystery ? "" : undefined}
-            onClick={() => setWhich(EXAMPLES.length)}
+            onClick={() => pick(EXAMPLES.length)}
           >
             <svg className="tpa-tab-ring" viewBox="0 0 48 48" aria-hidden="true">
               <circle className="tpa-tab-ring-track" cx="24" cy="24" r="22" />
@@ -610,11 +626,32 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     track("plus_join_clicked", { where });
     openPlusCheckout(where);
   };
-  const joinCta = (where: string, white = false) => (
-    <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={() => join(where)}>
-      Join Tapin Plus
-    </button>
+  /* Signed in and already a member (Sam, 3 Nov 2026: "If someone is already
+     signed in on this page, and they have the membership, the CTA should be
+     to download the app"): every Join becomes Get the app, the offer becomes
+     the app card, and the welcome clock goes, as there is nothing to buy. */
+  const { subscribed } = useAuth();
+  /* ?member previews this on local dev only (stripped from builds). */
+  const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
+  const getApp = (where: string, white = false, extra = "") => (
+    <a
+      className={`tpa-cta${white ? " tpa-cta-white" : ""}${extra}`}
+      href={appHref()}
+      target={device() === "desktop" ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      onClick={() => track("plus_get_app_clicked", { where, device: device() })}
+    >
+      Get the Tapin app
+    </a>
   );
+  const joinCta = (where: string, white = false) =>
+    member ? (
+      getApp(where, white)
+    ) : (
+      <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={() => join(where)}>
+        Join Tapin Plus
+      </button>
+    );
   const tryCta = (
     <button
       type="button"
@@ -691,7 +728,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     <div className="tpa tpa-home">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
-      <WelcomeBar price={FIRST_MONTH} />
+      {member ? null : <WelcomeBar price={FIRST_MONTH} />}
       <header ref={bandRef} className="tpa-band">
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
@@ -779,6 +816,17 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             {joinCta("hero")}
             {tryCta}
             {lockMore}
+          </section>
+        ) : member ? (
+          <section className="tpa-module tpa-offer tpa-member" aria-label="Tapin Plus">
+            <p className="tpa-member-kicker">
+              <span className="tpa-member-dot" aria-hidden="true" />
+              Plus is on
+            </p>
+            <h2 className="tpa-h2">
+              You’re a Plus member
+            </h2>
+            <AppCard where="home_member" line="Your $5 back, 15% off and points are in the app. Sign in with the number you joined with." />
           </section>
         ) : offer === "2" ? (
           <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
@@ -969,9 +1017,18 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         <section className="tpa-close" aria-label="Join Tapin Plus">
           <img className="tpa-close-paper" src={PAPER_MARK} alt="" width="96" height="76" decoding="async" loading="lazy" />
-          <h2 className="tpa-close-h">{FIRST_MONTH} your first month</h2>
-          <p className="tpa-close-line">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
-          <WelcomeEnds className="tpa-close-ends" />
+          {member ? (
+            <>
+              <h2 className="tpa-close-h">Your Plus is in the app</h2>
+              <p className="tpa-close-line">Order, see your credit and manage your membership there.</p>
+            </>
+          ) : (
+            <>
+              <h2 className="tpa-close-h">{FIRST_MONTH} your first month</h2>
+              <p className="tpa-close-line">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
+              <WelcomeEnds className="tpa-close-ends" />
+            </>
+          )}
           {joinCta("close", true)}
         </section>
 
@@ -1010,9 +1067,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           used Step through it, and Join), so it went (Sam: "if the see how
           much I save button isn't getting click throughs maybe we hide it"). */}
       <div className="tpa-dock" data-shown="">
-        <button type="button" className="tpa-cta tpa-dock-cta" onClick={() => join("dock")}>
-          Join Tapin Plus
-        </button>
+        {member ? (
+          getApp("dock", false, " tpa-dock-cta")
+        ) : (
+          <button type="button" className="tpa-cta tpa-dock-cta" onClick={() => join("dock")}>
+            Join Tapin Plus
+          </button>
+        )}
       </div>
     </div>
   );
