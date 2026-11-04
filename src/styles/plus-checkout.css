@@ -675,3 +675,67 @@
   text-decoration-color: rgba(20, 22, 24, 0.3);
   text-underline-offset: 3px;
 }
+
+/* ══ THE FIRST SCREEN, QUIETER (Sam, 4 Nov 2026: "isn't this pretty busy
+   right now? /impeccable polish") ═════════════════════════════════════════
+   The three promises lose their white plate and rules and sit on the sheet
+   as a plain list, so the field is the one white thing to look at. The
+   spots-left line is the only line between them. */
+.pck-offer {
+  gap: 10px;
+  padding: 2px 0 4px;
+  border-radius: 0;
+  background: none;
+}
+.pck-offer li {
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 12px;
+  padding: 0;
+}
+.pck-offer li + li {
+  box-shadow: none;
+}
+.pck-offer b {
+  font-size: 15px;
+  line-height: 20px;
+}
+.pck-offer .pck-ico {
+  width: 26px;
+  height: 26px;
+  background: #ffffff;
+}
+.pck-offer .pck-ico svg {
+  width: 15px;
+  height: 15px;
+}
+.pck-offer .pck-ico-money {
+  background: #0B7A53;
+  font-size: 11px;
+}
+.pck-layer .pck-seats {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+}
+.pck-check,
+.pck-fine {
+  font-size: 13px;
+  line-height: 17px;
+}
+.pck-layer .pck-seats .plus-seats-bar,
+.pck-layer .pck-seats .plus-seats-bar i {
+  height: 4px;
+}
+.pck-layer .pck-seats .plus-seats-line {
+  font-size: 14px;
+}
+/* On a narrow phone the next price drops under the count rather than
+   breaking the count in two. */
+.pck-layer .pck-seats .plus-seats-line {
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+.pck-layer .pck-seats .plus-seats-line b {
+  white-space: nowrap;
+}

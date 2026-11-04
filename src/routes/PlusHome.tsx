@@ -631,7 +631,10 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   },
   {
     q: "What does it work on?",
-    a: `The $${CREDIT} back is earned on food and non-alcoholic drinks. Your credit and the ${PERCENT}% go toward anything but alcohol.`,
+    /* Names what the credit buys besides food (Sam, 4 Nov 2026: "shouldn't
+       we update this to include events, cover, lineskips"). Earning stays
+       food and non-alcoholic drinks (the 3 Nov rule). */
+    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets, plus cover and line skips at The Milk Parlor. Not on alcohol. You earn the $${CREDIT} back on food and non-alcoholic drinks.`,
   },
   {
     q: "Will my price go up?",

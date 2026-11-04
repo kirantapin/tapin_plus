@@ -9,7 +9,6 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { sendCode, verifyCode } from "./authEnv";
-import { MEMBERS_SHORT } from "../model/proof";
 import { PlusSeats } from "./PlusSeats";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
@@ -258,11 +257,10 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
               <b>Money back if you don’t save</b>
             </li>
           </ul>
+          {/* The proof line ("Over 500 Virginia Tech students are in") is
+              the page's to say; here it was a fifth thing before the field
+              (Sam, 4 Nov 2026: "isn't this pretty busy right now?"). */}
           <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
-          <p className="pck-proof">
-            <span aria-hidden="true" />
-            {MEMBERS_SHORT}
-          </p>
           </>
           )}
           <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
@@ -289,7 +287,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
                 <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
                 <span>Text me Tapin offers (optional)</span>
               </label>
-              <p className="pck-fine">Your number is your membership: we text a code now and the app link after. Msg &amp; data rates may apply.</p>
+              <p className="pck-fine">We text a code now and the app link after. Msg &amp; data rates may apply.</p>
             </>
           )}
           <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>

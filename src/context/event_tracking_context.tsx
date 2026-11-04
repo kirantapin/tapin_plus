@@ -16,6 +16,7 @@ import {
 } from "../constants";
 import { load as loadMetaPixel, mirror as mirrorToMetaPixel } from "./meta_pixel";
 import { heroTestProps } from "../model/heroTest";
+import { internalProps } from "../model/internal";
 
 /**
  * POSTHOG, PORTED FROM THE MERCHANT APP (`~/tapin/src/context/event_tracking_context.tsx`).
@@ -163,6 +164,13 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
     posthog.register({ restaurant_id: RESTAURANT_ID });
     /* The hero test's variant on every event (model/heroTest.ts). */
     posthog.register(heroTestProps());
+    /* Our own devices, marked with ?internal (model/internal.ts): on every
+       event, and on the person, so their past events filter out too. */
+    const internal = internalProps();
+    if (internal.is_internal) {
+      posthog.register(internal);
+      posthog.setPersonProperties({ is_internal: true });
+    } else posthog.unregister("is_internal");
 
     /* ══ THE FIRST PAGEVIEW WAITED HERE (3 Nov 2026) ══════════════════════
        Effects run child first, so App's pageview for the page a visit lands
@@ -227,6 +235,7 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
           posthog.reset();
           posthog.register({ restaurant_id: RESTAURANT_ID });
           posthog.register(heroTestProps());
+          posthog.register(internalProps());
         } catch {
           console.error("Error resetting PostHog");
         }
