@@ -3287,3 +3287,63 @@ html[data-surface="tpa"] .hs-scene > * {
     font-size: 13px;
   }
 }
+
+/* The open mark on each place card (Sam, 4 Nov 2026): the Plus pill's glass,
+   a round 32px, top right. */
+.tpa-place-more {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  right: 10px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+.tpa-place-more svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ══ THE PLACE CARD, TAPPED (Sam, 4 Nov 2026) ════════════════════════════
+   The open mark is the Plus pill's twin: same 28px height, same glass. On a
+   press the card gives a little and the arrow leans out toward where it's
+   going; then the photo flies into the pop-up (shell/PlacePopup.tsx). */
+.tpa-place-more {
+  width: 28px;
+  height: 28px;
+}
+.tpa-place-more svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tpa-place-open {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tpa-place-open:active {
+  transform: scale(0.97);
+}
+.tpa-place-open:active .tpa-place-more svg {
+  transform: translate(1.5px, -1.5px);
+}
+@media (hover: hover) {
+  .tpa-place-open:hover .tpa-place-more svg {
+    transform: translate(1.5px, -1.5px);
+  }
+}
+.pp-ghost {
+  position: fixed;
+  z-index: 111;
+  object-fit: cover;
+  pointer-events: none;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-place-open,
+  .tpa-place-more svg {
+    transition: none;
+  }
+  .tpa-place-open:active {
+    transform: none;
+  }
+}
