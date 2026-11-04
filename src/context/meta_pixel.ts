@@ -99,26 +99,29 @@ const MIRRORED: Record<
   {
     name: StandardEvent;
     props?: (p: Record<string, unknown>) => Record<string, unknown>;
+    /** Meta's dedup key, for an event the server also sends. */
+    eventId?: (p: Record<string, unknown>) => string | undefined;
   }
 > = {
   $pageview: { name: "PageView" },
 
-  /* The checkout sheet opening — the last step before money. shell/PlusCheckout.tsx. */
-  checkout_opened: { name: "InitiateCheckout" },
-
-  /* The subscription, paid. `amount_cents` is the signed cart's total. */
-  purchase: {
-    name: "Purchase",
+  /* InitiateCheckout is the pay step showing, with its price, not the sheet
+     opening (Grok's audit, 3 Nov 2026): the sheet opens before anyone has
+     typed a number, so every curious tap counted as a checkout. */
+  plus_pay_shown: {
+    name: "InitiateCheckout",
     props: (p) => ({
       value:
         typeof p.amount_cents === "number" ? p.amount_cents / 100 : undefined,
       currency: "USD",
-      content_type: "product",
-      content_ids: ["tapin_plus_membership"],
     }),
   },
 
-  /* The same purchase, as a subscription's first payment (the app sends both). */
+  /* A Plus signup is a Subscribe, and only that. It no longer also sends
+     Purchase: on this pixel Purchase means a food order (Grok's audit, 3 Nov
+     2026), and a signup counted as both doubled it. PostHog still records
+     `purchase`. The order id goes as the eventID, so the server's Subscribe
+     for the same order can be matched to this one and counted once. */
   subscription_purchase: {
     name: "Subscribe",
     props: (p) => ({
@@ -126,6 +129,7 @@ const MIRRORED: Record<
         typeof p.amount_cents === "number" ? p.amount_cents / 100 : undefined,
       currency: "USD",
     }),
+    eventId: (p) => (typeof p.order_id === "string" && p.order_id ? p.order_id : undefined),
   },
 };
 
@@ -143,7 +147,10 @@ export function mirror(event: string, props: Record<string, unknown>): void {
   if (!window.fbq) return;
 
   try {
-    window.fbq("track", rule.name, rule.props ? rule.props(props) : undefined);
+    const data = rule.props ? rule.props(props) : undefined;
+    const eventID = rule.eventId?.(props);
+    if (eventID) window.fbq("track", rule.name, data, { eventID });
+    else window.fbq("track", rule.name, data);
   } catch {
     console.error("Meta Pixel failed to send:", event);
   }

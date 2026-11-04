@@ -135,6 +135,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
       api_host: POSTHOG_HOST,
       /* Manual, because this is an SPA — see the note above. */
       capture_pageview: false,
+      /* Time on page and scroll depth (Grok's audit, 3 Nov 2026). PostHog's
+         default ties $pageleave to capture_pageview, which is off here, so
+         no visit ever recorded how far it scrolled or how long it stayed. */
+      capture_pageleave: true,
 
       autocapture: true,
 
