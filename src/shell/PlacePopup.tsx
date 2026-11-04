@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { covers, venueCovers } from "../model/content";
+import { slideAway } from "./sheetMotion";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
    these merchant cards, there should be a small merchant pop up for each that
@@ -41,12 +42,9 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
     (then?: () => void) => {
       if (closing.current) return;
       const done = () => (then ? then() : onClose());
-      const el = sheet.current;
-      if (!el || still() || typeof el.animate !== "function") return done();
       closing.current = true;
-      layer.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: "ease-in", fill: "forwards" });
-      const run = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(20px)", opacity: 0 }], { duration: 190, easing: "ease-in", fill: "forwards" });
-      run.onfinish = done;
+      /* Down and away, like every pop-up (sheetMotion.ts). */
+      slideAway(sheet.current, layer.current, done);
     },
     [onClose],
   );
