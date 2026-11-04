@@ -2852,3 +2852,63 @@ html[data-surface="tpa"] .hs-scene > * {
 .tpa-carousel[data-grey] .tpa-order-in.tpa-next {
   padding: 18px 16px 20px;
 }
+
+/* ══ THE HERO TEST (model/heroTest.ts; 4 Nov 2026) ═══════════════════════
+   Hero A and B name the places and say the price and the Promise under the
+   headline. The band grows to hold them instead of running into the top
+   badges. */
+.tpa-hero-places {
+  margin: 10px 0 0;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+  color: #ffffff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+  text-wrap: balance;
+}
+.tpa-hero-sub {
+  max-width: 34ch;
+  margin: 8px 0 0;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+  text-wrap: pretty;
+}
+.tpa-hero-places + .tpa-hero-sub {
+  margin-top: 4px;
+}
+.tpa-band[data-hero] {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: auto;
+  min-height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
+  padding: calc(env(safe-area-inset-top) + 76px) 0 32px;
+}
+.tpa-band[data-hero] .tpa-band-title {
+  position: relative;
+  inset: auto;
+  margin: 0 var(--gutter);
+}
+@media (max-width: 1023px) {
+  .tpa-band[data-hero] .tpa-band-title h1 {
+    font-size: 32px;
+    line-height: 36px;
+  }
+}
+@media (min-width: 1024px) {
+  .tpa-hero-places,
+  .tpa-hero-sub {
+    font-size: 17px;
+    line-height: 23px;
+    max-width: 46ch;
+  }
+  .tpa-band[data-hero] {
+    padding-bottom: 28px;
+  }
+  .tpa-band[data-hero] .tpa-band-title {
+    margin: 0 24px;
+  }
+}

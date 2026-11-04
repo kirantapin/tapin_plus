@@ -12,6 +12,7 @@ import { PlusSeats } from "../shell/PlusSeats";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
+import { heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
@@ -619,6 +620,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [look] = useState(orderLook);
+  /* The hero A/B test (model/heroTest.ts). */
+  const [hero] = useState(heroVariant);
   const price = usePlusPrice();
   const FIRST_MONTH = usd(price?.first);
   const MONTHLY = usd(price?.monthly);
@@ -729,7 +732,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       {member ? null : <WelcomeBar price={FIRST_MONTH} />}
-      <header ref={bandRef} className="tpa-band">
+      <header ref={bandRef} className="tpa-band" data-hero={place || hero === "0" ? undefined : hero}>
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
           <span className="tpa-glass tpa-badge">
@@ -745,11 +748,33 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           {/* Sam, 3 Nov 2026: "header copy should be something like '$5 back
               at every place you already go in blacksburg'". */}
           <div>
-            <h1>
-              {place
-                ? `$${CREDIT} back every week at ${place.name}`
-                : `$${CREDIT} back at every place you already go in Blacksburg`}
-            </h1>
+            {/* The hero test (model/heroTest.ts): "0" is the hero as it was;
+                "a" names the places and says the price and the Promise
+                (Grok's audit, 3 Nov 2026); "b" leads with the payoff. A
+                place's own page keeps its own. */}
+            {place || hero === "0" ? (
+              <h1>
+                {place
+                  ? `$${CREDIT} back every week at ${place.name}`
+                  : `$${CREDIT} back at every place you already go in Blacksburg`}
+              </h1>
+            ) : hero === "a" ? (
+              <>
+                <h1>${CREDIT} back every week at {PLACES.length} Blacksburg spots</h1>
+                <p className="tpa-hero-places">{PLACES.map((p) => p.name).join(" · ")}</p>
+                <p className="tpa-hero-sub">
+                  Or 15% off once a day. {FIRST_MONTH} your first month. Save more than you pay, or your money back.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1>Your first ${MIN_ORDER} order pays for the month</h1>
+                <p className="tpa-hero-sub">
+                  ${CREDIT} back every week at {PLACES.map((p) => p.name).join(", ").replace(/, ([^,]*)$/, " and $1")}.{" "}
+                  {FIRST_MONTH} your first month. Save more than you pay, or your money back.
+                </p>
+              </>
+            )}
             {/* Social proof, at the top (Sam, 3 Nov 2026); the count lives in
                 model/proof.ts. */}
             <SocialProof text={MEMBERS_LINE} />

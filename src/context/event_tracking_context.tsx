@@ -15,6 +15,7 @@ import {
   RESTAURANT_ID,
 } from "../constants";
 import { load as loadMetaPixel, mirror as mirrorToMetaPixel } from "./meta_pixel";
+import { heroTestProps } from "../model/heroTest";
 
 /**
  * POSTHOG, PORTED FROM THE MERCHANT APP (`~/tapin/src/context/event_tracking_context.tsx`).
@@ -160,6 +161,8 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
        `posthog.reset()` on sign-out, which clears super properties along with
        the distinct_id — so it is registered again below whenever that runs. */
     posthog.register({ restaurant_id: RESTAURANT_ID });
+    /* The hero test's variant on every event (model/heroTest.ts). */
+    posthog.register(heroTestProps());
 
     /* ══ THE FIRST PAGEVIEW WAITED HERE (3 Nov 2026) ══════════════════════
        Effects run child first, so App's pageview for the page a visit lands
@@ -223,6 +226,7 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
              be put back or every event after a sign-out loses it. */
           posthog.reset();
           posthog.register({ restaurant_id: RESTAURANT_ID });
+          posthog.register(heroTestProps());
         } catch {
           console.error("Error resetting PostHog");
         }
