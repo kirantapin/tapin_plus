@@ -76,10 +76,25 @@ export default function HowSheet({
     [slides.length],
   );
 
+  /* Closing: the sheet drops and fades and the dim behind it fades with it,
+     both held at their end (fill: forwards) until the sheet unmounts. Without
+     the hold the sheet snapped back to full for a frame before it went, and
+     the dim vanished in one step (Sam, 3 Nov 2026: "this pop up does a weird
+     flashing thing when I close out of it"). A second tap while closing does
+     nothing. */
+  const layer = useRef<HTMLDivElement | null>(null);
+  const closing = useRef(false);
   const close = useCallback(() => {
+    if (closing.current) return;
     const el = sheet.current;
     if (!el || still() || typeof el.animate !== "function") return onClose();
-    const run = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(24px)", opacity: 0 }], { duration: 200, easing: "ease-in" });
+    closing.current = true;
+    layer.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 190, easing: "ease-in", fill: "forwards" });
+    const run = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(24px)", opacity: 0 }], {
+      duration: 200,
+      easing: "ease-in",
+      fill: "forwards",
+    });
     run.onfinish = onClose;
   }, [onClose]);
 
@@ -88,7 +103,10 @@ export default function HowSheet({
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     sheet.current?.focus();
-    if (!still()) sheet.current?.animate?.([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: ease });
+    if (!still()) {
+      layer.current?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
+      sheet.current?.animate?.([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: ease });
+    }
     return () => {
       document.body.style.overflow = prev;
       opener?.focus?.();
@@ -159,7 +177,7 @@ export default function HowSheet({
   const nextLabel = ("next" in slide && slide.next) || "Next";
 
   return createPortal(
-    <div className="hs-layer" onClick={(e) => e.target === e.currentTarget && close()}>
+    <div ref={layer} className="hs-layer" onClick={(e) => e.target === e.currentTarget && close()}>
       <div ref={sheet} className="hs-sheet" role="dialog" aria-modal="true" aria-label="How Tapin Plus works" tabIndex={-1}>
         <div className="hs-top">
           <ol className="hs-bars" aria-label={`Step ${i + 1} of ${slides.length}`}>
