@@ -186,7 +186,7 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
               <b>Money back if you don’t save</b>
             </li>
           </ul>
-          <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" then={false} />
+          <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
           <p className="pck-proof">
             <span aria-hidden="true" />
             {MEMBERS_SHORT}
