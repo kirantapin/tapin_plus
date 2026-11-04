@@ -2620,3 +2620,68 @@ html[data-surface="tpa"] .ct .ct-go {
   background: #141618;
   transform-origin: left center;
 }
+
+/* ── How it works, polished (Sam, 3 Nov 2026) ─────────────────────────────
+   One quiet tone per layer: a light track for the places, a lighter card for
+   the order, and Step through it as a white outlined button rather than a
+   third grey block. The playing logo keeps one ring (the countdown in ink),
+   not a grey track ring as well; every logo, the "?" included, wears the
+   same hairline. The place name reads as a name, not a shouting label. */
+.tpa-carousel[data-tabs="a"] .tpa-tabs {
+  background: #ececf0;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-plate {
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.1), 0 0 0 0.5px rgba(20, 22, 24, 0.06);
+}
+.tpa-carousel[data-tabs="a"] .tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: transparent;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-ring circle {
+  stroke-width: 2;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-ring-run {
+  stroke: #141618;
+}
+.tpa-mystery,
+.tpa-tabs button[data-on] .tpa-mystery {
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.14);
+  font-size: 16px;
+}
+.tpa-carousel[data-grey] .tpa-order {
+  background: #f5f5f7;
+}
+.tpa-carousel[data-grey] .tpa-order-band {
+  padding: 14px 16px 2px;
+  background: transparent;
+}
+.tpa-carousel[data-grey] .tpa-order-band b {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+.tpa-carousel[data-grey] .tpa-order-in {
+  padding: 0 16px 16px;
+}
+.tpa-carousel[data-grey] .tpa-order-item {
+  padding-top: 10px;
+  gap: 14px;
+}
+.tpa-carousel[data-grey] .tpa-order-item span {
+  font-weight: 600;
+}
+.tpa-carousel[data-grey] .tpa-order-off {
+  margin-top: 14px;
+  padding-top: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.tpa-carousel[data-grey] .tpa-order-total {
+  margin-top: 6px;
+}
+.tpa-step-wide {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.14);
+}

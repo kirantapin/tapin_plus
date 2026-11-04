@@ -93,7 +93,7 @@ export default function Members() {
               </span>
               <span>
                 <b>The Plus Promise</b>
-                <span>Save what you spend on Plus, or your money back. Ask for a refund and it’s auto-approved.</span>
+                <span>Save more than Plus costs each month, or get your money back. Ask for a refund and it’s auto-approved.</span>
               </span>
             </li>
           </ul>

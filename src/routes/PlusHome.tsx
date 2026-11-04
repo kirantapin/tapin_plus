@@ -875,7 +875,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 <b id="tpa-promise" className="tpa-promise-h">
                   The Plus Promise
                 </b>
-                <span className="tpa-promise-line">Save what you spend, or your money back.</span>
+                <span className="tpa-promise-line">Save more than Plus costs, or get your money back.</span>
               </span>
               <Chevron />
             </summary>
