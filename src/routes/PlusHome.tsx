@@ -86,8 +86,8 @@ const ORDERS: Record<string, readonly string[]> = {
 };
 /* At The Milk Parlor the example is a line skip with the credit on it (Sam,
    4 Nov 2026: "at the milk parlor, maybe we show a line skip in the cart
-   discounted with the credit someone has"). The price is a stand-in until
-   the real one is in the menu data: CHECK WITH SAM. */
+   discounted with the credit someone has"). $10, confirmed by Sam the same
+   day. */
 const SKIP: Record<string, { label: string; price: number }> = {
   themilkparlor: { label: "Line skip", price: 10 },
 };

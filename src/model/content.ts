@@ -192,7 +192,8 @@ export const venueCovers: Record<string, string[]> = {
   theburg: ["food", "drinks", "tickets"],
   themilkparlor: ["food", "drinks", "cover", "tickets", "lineskip"],
   olaika: ["food", "drinks", "tickets"],
-  /* Events too (Sam, 4 Nov 2026: "food and bev and events for all"). */
+  /* Events too (Sam, 4 Nov 2026: "food and bev and events for all"; "they
+     do, occasionally but they do"). */
   sweetopia: ["food", "drinks", "tickets"],
   italianospizza: ["food", "drinks"],
 };

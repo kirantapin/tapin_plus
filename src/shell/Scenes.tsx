@@ -40,9 +40,6 @@ import { POINTS_PER_DOLLAR, CREDIT_CENTS, money } from "../model/order";
 import { venues, logoField, offers, heroIsBright } from "../model/content";
 import { ComingTiles } from "./Coming";
 
-/** The five Plus places on plus.tapin.app. */
-const PLUS_IDS = new Set(["coffeeholicsva", "theburg", "themilkparlor", "olaika", "sweetopia"]);
-
 /**
  * The receipt's basket, resolved from the real menu rather than typed.
  *
@@ -615,9 +612,8 @@ export function SceneOffers() {
      one the deck's story adds to an order; the second states its status. */
   return (
     <div className="offers">
-      {/* Only the five Plus places' offers: Italiano's isn't one, and the
-          audit's walkthrough judge stopped on it (4 Nov 2026). */}
-      {offers.filter((o) => PLUS_IDS.has(o.venueId)).map((o, k) => (
+      {/* Italiano's stays (Sam, 4 Nov 2026: "you can keep it"). */}
+      {offers.map((o, k) => (
         <div className="offer" key={o.id}>
           <p className="offer-who">
             <Mark id={o.venueId} />
