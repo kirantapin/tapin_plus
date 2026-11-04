@@ -434,3 +434,14 @@
   }
 }
 
+/* One focus ring on the phone and code fields: the plate's inset ring. The
+   sheet's general focus outline was drawing a second box around the input
+   inside it (Sam, 3 Nov 2026: "I don't like the way this looks when I select
+   it"). */
+.pck-field input:focus-visible {
+  outline: none;
+}
+.pck-field:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
