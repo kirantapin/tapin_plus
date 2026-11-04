@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react";
+import { slideAway } from "./sheetMotion";
 import { createPortal } from "react-dom";
 import { campaignTrialPlaces, campaignVenue } from "../model/campaign";
 import { logoField, venues } from "../model/content";
@@ -77,14 +78,13 @@ export default function TrialModal({
   const tried = new Set(campaignTrialPlaces.map((p) => p.venueId));
   const others = venues.filter((o) => o.id !== campaignVenue?.id && !tried.has(o.id) && o.plus);
 
+  /* Down and away, like every pop-up (sheetMotion.ts); `closing` only
+     stops taps during the exit now, the motion is the shared one. */
+  const scrim = useRef<HTMLDivElement>(null);
   const close = () => {
     if (closing) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      onClose();
-      return;
-    }
     setClosing(true);
-    window.setTimeout(onClose, 200);
+    slideAway(panel.current, scrim.current, onClose);
   };
 
   useEffect(() => {
@@ -123,8 +123,8 @@ export default function TrialModal({
   /* On <body>: the campaign page's panels are transformed surfaces, and a
      fixed scrim inside a transformed ancestor is clipped to that ancestor. */
   return createPortal(
-    <div className={`ct-root${closing ? " is-closing" : ""}`} onClick={close}>
-      <div className="ct-scrim" aria-hidden="true" />
+    <div className="ct-root" style={closing ? { pointerEvents: "none" } : undefined} onClick={close}>
+      <div ref={scrim} className="ct-scrim" aria-hidden="true" />
       <div
         className="ct"
         data-lit={lit ? "" : undefined}

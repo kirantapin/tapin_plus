@@ -10,6 +10,7 @@ import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from 
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { sendCode, verifyCode } from "./authEnv";
 import { PlusSeats } from "./PlusSeats";
+import { slideAway } from "./sheetMotion";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
    Join on any page opens this: openPlusCheckout("where"). It's mounted once
@@ -69,6 +70,14 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   const [dueCents, setDueCents] = useState<number | null>(null);
   const [signInStage, setSignInStage] = useState<"phone" | "code">("phone");
   const sheet = useRef<HTMLDivElement | null>(null);
+  const layer = useRef<HTMLDivElement | null>(null);
+  /* Leaves the way it came: down off the screen on a phone (sheetMotion.ts). */
+  const leaving = useRef(false);
+  const close = useCallback(() => {
+    if (leaving.current) return;
+    leaving.current = true;
+    slideAway(sheet.current, layer.current, onClose);
+  }, [onClose]);
 
   useEffect(() => {
     track(signInOnly ? "plus_signin_opened" : "checkout_opened", { where });
@@ -77,7 +86,7 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
     document.body.style.overflow = "hidden";
     sheet.current?.focus();
     if (!still()) sheet.current?.animate?.([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
@@ -91,8 +100,8 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   const signedIn = !!userSession && !!accessToken;
   /* Signing in only: once the code is right there's nothing more to do here. */
   useEffect(() => {
-    if (signInOnly && signedIn) onClose();
-  }, [signInOnly, signedIn, onClose]);
+    if (signInOnly && signedIn) close();
+  }, [signInOnly, signedIn, close]);
   /* Local dev only (stripped from builds): ?pckpreview=done shows the screen
      after paying, without signing in or paying. */
   const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
@@ -127,7 +136,7 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   }, [done]);
 
   return createPortal(
-    <div className="pck-layer" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div ref={layer} className="pck-layer" onClick={(e) => e.target === e.currentTarget && close()}>
       <div className="pck-sheet" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
         <div className="pck-top">
           {/* The title and the town as a chip, no mark (Sam, 3 Nov 2026: "remove
@@ -164,7 +173,7 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
               </p>
             </div>
           )}
-          <button type="button" className="pck-x" aria-label="Close" onClick={onClose}>
+          <button type="button" className="pck-x" aria-label="Close" onClick={close}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
             </svg>
@@ -186,144 +195,307 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   );
 }
 
+/* ══ THE SIGN-UP STEP, THREE WAYS (Sam, 4 Nov 2026: "can you do 3
+   /impeccable variations for this before publishing anything") ════════════
+   ?pckv=a|b|c|0 picks one on localhost, ?pckstage=code opens on the code
+   screen with a sample number (nothing is sent). Production is "b", the
+   pick (below).
+     a · Sharpened: today's layout, and the three things the best phone
+         sign-ins do: the number formats as you type, the code goes in by
+         itself at six digits (or when iOS fills it), and a resend unlocks
+         after 30 seconds.
+     b · Field first: the field and the button lead, so they sit above the
+         keyboard; the promises follow as one quiet panel with the spots.
+     c · One question: a big centred number, the promises as three chips,
+         and the code as six boxes. */
+type SignInLook = "0" | "a" | "b" | "c";
+const devParam = (k: string) =>
+  import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get(k) : null;
+/* PICKED (Sam, 4 Nov 2026: "let's do these two"): B's phone step, the
+   field and button first, with C's six code boxes. That is "b" now; the
+   others stay previewable on localhost (?pckv=a|c, and 0 for the old step). */
+const signInLook = (): SignInLook => {
+  const v = devParam("pckv");
+  return v === "a" || v === "c" || v === "0" ? v : "b";
+};
+
+/** "(540) 555-0123", built up as the digits arrive. */
+const formatPhone = (d: string) =>
+  d.length < 4 ? d : d.length < 7 ? `(${d.slice(0, 3)}) ${d.slice(3)}` : `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+
+const RESEND_S = 30;
+
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
 function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code") => void; plain?: boolean }) {
   const price = usePlusPrice();
   const { track } = useEventTracking();
-  const [digits, setDigits] = useState("");
+  const look = signInLook();
+  const better = look !== "0";
+  const previewCode = devParam("pckstage") === "code";
+  const [digits, setDigits] = useState(previewCode ? "5405550123" : "");
   const [optIn, setOptIn] = useState(false);
   const [code, setCode] = useState("");
-  const [stage, setStage] = useState<"phone" | "code">("phone");
+  const [stage, setStage] = useState<"phone" | "code">(previewCode ? "code" : "phone");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [wait, setWait] = useState(previewCode ? RESEND_S : 0);
   const phone = `+1${digits}`;
   useEffect(() => onStage(stage), [stage, onStage]);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
+  /* The resend clock: counts down while the code screen is up. */
+  useEffect(() => {
+    if (stage !== "code" || wait <= 0) return;
+    const t = window.setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [stage, wait]);
+
+  const send = async () => {
+    const err = await sendCode(phone);
+    if (err) {
+      track("plus_phone_failed", { error: err });
+      setError(err);
+      return false;
+    }
+    return true;
+  };
+
+  /* A ref, not the busy state: a typed sixth digit and a Messages fill can
+     land in the same tick, and the state would let both through. */
+  const verifying = useRef(false);
+  const verify = async (value: string) => {
+    if (verifying.current || previewCode) return;
+    verifying.current = true;
     setBusy(true);
     setError(null);
-    if (stage === "phone") {
-      const err = await sendCode(phone);
-      setBusy(false);
-      if (err) {
-        track("plus_phone_failed", { error: err });
-        return setError(err);
-      }
-      /* Each step of the sheet, so a drop-off shows where it happened
-         (Grok's audit, 3 Nov 2026). */
-      track("plus_phone_submitted", { opt_in: optIn, sign_in_only: plain });
-      setStage("code");
-      return;
-    }
     // On success the session lands in auth_context and the sheet moves on.
-    const err = await verifyCode(phone, code, undefined, optIn);
+    const err = await verifyCode(phone, value, undefined, optIn);
+    verifying.current = false;
     setBusy(false);
     if (err) {
       track("plus_code_failed", { error: err });
       setError(err);
-    } else track("plus_code_verified", {});
+    } else track("plus_code_verified", { auto: better });
   };
 
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy) return;
+    if (stage === "phone") {
+      if (previewCode) return;
+      setBusy(true);
+      setError(null);
+      const ok = await send();
+      setBusy(false);
+      if (!ok) return;
+      /* Each step of the sheet, so a drop-off shows where it happened
+         (Grok's audit, 3 Nov 2026). */
+      track("plus_phone_submitted", { opt_in: optIn, sign_in_only: plain, look });
+      setWait(RESEND_S);
+      setStage("code");
+      return;
+    }
+    await verify(code);
+  };
+
+  const onCode = (raw: string) => {
+    const next = raw.replace(/\D/g, "").slice(0, 6);
+    setCode(next);
+    /* The sixth digit sends it, typed or filled from Messages. */
+    if (better && next.length === 6) void verify(next);
+  };
+
+  const resend = async () => {
+    if (wait > 0 || busy || previewCode) return;
+    setBusy(true);
+    setError(null);
+    const ok = await send();
+    setBusy(false);
+    if (ok) {
+      track("plus_code_resent", {});
+      setWait(RESEND_S);
+    }
+  };
+
+  const offer = (
+    <ul className={`pck-offer${look === "b" ? " pck-offer-quiet" : ""}${look === "c" ? " pck-offer-chips" : ""}`}>
+      <li>
+        <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
+        <b>{look === "c" ? "$5 back weekly" : "$5 back every week, every place"}</b>
+      </li>
+      <li>
+        <span className="pck-ico" aria-hidden="true">
+          <PhoneGlyph />
+        </span>
+        <b>{look === "c" ? "Use it today" : "Use it today: app link by text"}</b>
+      </li>
+      <li>
+        <span className="pck-ico" aria-hidden="true">
+          <ShieldGlyph />
+        </span>
+        <b>{look === "c" ? "Money back" : "Money back if you don’t save"}</b>
+      </li>
+    </ul>
+  );
+  const seats = <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />;
+  const field = (
+    <>
+      <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
+      <div className={`pck-field${look === "c" ? " pck-field-big" : ""}`}>
+        <span className="pck-cc">+1</span>
+        <input
+          id="pck-phone"
+          type="tel"
+          inputMode="numeric"
+          autoComplete="tel-national"
+          placeholder="(540) 555-0123"
+          value={better ? formatPhone(digits) : digits}
+          onChange={(e) => setDigits(e.target.value.replace(/\D/g, "").replace(/^1/, "").slice(0, 10))}
+          autoFocus
+        />
+      </div>
+    </>
+  );
+  const consent = plain ? (
+    <p className="pck-fine">We’ll text you a code. Msg &amp; data rates may apply.</p>
+  ) : (
+    <>
+      {/* Marketing texts are optional and unticked: consent to them can't be
+          a condition of buying (TCPA). */}
+      <label className="pck-check">
+        <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
+        <span>Text me Tapin offers (optional)</span>
+      </label>
+      <p className="pck-fine">We text a code now and the app link after. Msg &amp; data rates may apply.</p>
+    </>
+  );
+  const sendBtn = (
+    <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
+      {busy ? "Sending…" : better ? "Continue" : "Send code"}
+    </button>
+  );
+
   return (
-    <form className="pck-body" onSubmit={submit}>
+    <form className={`pck-body pck-look-${look}`} onSubmit={submit}>
       {stage === "phone" ? (
-        <>
-          {/* THE OFFER, IN HORMOZI'S ORDER (Sam, 3 Nov 2026: "use the Alex
-              hormozi advice ... are we listing the guarantee ... students need
-              to know they get a link to download the app and start using tapin
-              plus right after"). What you get, how soon, why it's safe, and who
-              else is in, before anything is asked of them. */}
-          {/* One short line each (Sam, 3 Nov 2026: "this modal has a lot of
-              text again"). */}
-          {plain ? null : (
+        plain ? (
           <>
-          <ul className="pck-offer">
-            <li>
-              <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
-              <b>$5 back every week, every place</b>
-            </li>
-            <li>
-              <span className="pck-ico" aria-hidden="true">
-                <PhoneGlyph />
-              </span>
-              <b>Use it today: app link by text</b>
-            </li>
-            <li>
-              <span className="pck-ico" aria-hidden="true">
-                <ShieldGlyph />
-              </span>
-              <b>Money back if you don’t save</b>
-            </li>
-          </ul>
-          {/* The proof line ("Over 500 Virginia Tech students are in") is
-              the page's to say; here it was a fifth thing before the field
-              (Sam, 4 Nov 2026: "isn't this pretty busy right now?"). */}
-          <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
+            {field}
+            {consent}
+            {sendBtn}
           </>
-          )}
-          <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
-          <div className="pck-field">
-            <span className="pck-cc">+1</span>
-            <input
-              id="pck-phone"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel-national"
-              placeholder="(540) 555-0123"
-              value={digits}
-              onChange={(e) => setDigits(e.target.value.replace(/\D/g, "").replace(/^1/, "").slice(0, 10))}
-              autoFocus
-            />
-          </div>
-          {/* Marketing texts are optional and unticked: consent to them can't
-              be a condition of buying (TCPA). */}
-          {plain ? (
-            <p className="pck-fine">We’ll text you a code. Msg &amp; data rates may apply.</p>
-          ) : (
-            <>
-              <label className="pck-check">
-                <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
-                <span>Text me Tapin offers (optional)</span>
-              </label>
-              <p className="pck-fine">We text a code now and the app link after. Msg &amp; data rates may apply.</p>
-            </>
-          )}
-          <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
-            {busy ? "Sending…" : "Send code"}
-          </button>
-        </>
+        ) : look === "b" ? (
+          <>
+            {/* B · the ask first, so the field and button sit above the
+                keyboard; what you get follows as one quiet panel. */}
+            {field}
+            {sendBtn}
+            {consent}
+            <div className="pck-why">
+              {offer}
+              {seats}
+            </div>
+          </>
+        ) : look === "c" ? (
+          <>
+            {/* C · one question, asked big. */}
+            {offer}
+            <p className="pck-ask">What’s your number?</p>
+            {field}
+            {consent}
+            {sendBtn}
+            {seats}
+          </>
+        ) : (
+          <>
+            {/* THE OFFER, IN HORMOZI'S ORDER (Sam, 3 Nov 2026), one short line
+                each; the proof line is the page's to say. */}
+            {offer}
+            {seats}
+            {field}
+            {consent}
+            {sendBtn}
+          </>
+        )
       ) : (
         <>
           <p className="pck-lede">
-            We sent a 6-digit code to +1 {digits}.{plain ? "" : " Then it’s one tap with Apple Pay or Google Pay."}
+            {better ? (
+              <>
+                Enter the code we texted to <b className="tnum">+1 {formatPhone(digits)}</b>
+              </>
+            ) : (
+              <>
+                We sent a 6-digit code to +1 {digits}.{plain ? "" : " Then it’s one tap with Apple Pay or Google Pay."}
+              </>
+            )}
           </p>
-          <label className="pck-label" htmlFor="pck-code">Code</label>
-          <div className="pck-field">
-            <input
-              id="pck-code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              autoFocus
-            />
-          </div>
+          {look === "c" || look === "b" ? (
+            /* Six boxes over one real field, so Messages can still fill it. */
+            <div className="pck-otp">
+              <input
+                id="pck-code"
+                aria-label="6-digit code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => onCode(e.target.value)}
+                autoFocus
+              />
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i} className="pck-otp-box tnum" data-on={i === code.length ? "" : undefined} aria-hidden="true">
+                  {code[i] ?? ""}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <>
+              <label className="pck-label" htmlFor="pck-code">Code</label>
+              <div className="pck-field">
+                <input
+                  id="pck-code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder={better ? "6 digits" : undefined}
+                  value={code}
+                  onChange={(e) => onCode(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </>
+          )}
           <button type="submit" className="pck-cta" disabled={code.length < 6 || busy}>
-            {busy ? "Checking…" : "Continue"}
+            {busy ? "Checking…" : better ? "Verify" : "Continue"}
           </button>
-          <button
-            type="button"
-            className="pck-link"
-            onClick={() => {
-              setStage("phone");
-              setCode("");
-              setError(null);
-            }}
-          >
-            Use a different number
-          </button>
+          {better ? (
+            <p className="pck-code-links">
+              <button type="button" className="pck-link" disabled={wait > 0 || busy} onClick={resend}>
+                {wait > 0 ? `Resend code in ${wait}s` : "Resend code"}
+              </button>
+              <button
+                type="button"
+                className="pck-link"
+                onClick={() => {
+                  setStage("phone");
+                  setCode("");
+                  setError(null);
+                }}
+              >
+                Change number
+              </button>
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="pck-link"
+              onClick={() => {
+                setStage("phone");
+                setCode("");
+                setError(null);
+              }}
+            >
+              Use a different number
+            </button>
+          )}
         </>
       )}
       {error ? <p className="pck-error" role="alert">{error}</p> : null}
@@ -342,12 +514,15 @@ const renewsOn = (price: PlusPrice) =>
 function priceLine(price: PlusPrice | null, dueCents: number | null) {
   /* It says it renews, from the first step (the UX audit's one failed
      journey, 4 Nov 2026: "never says the membership renews"). */
-  const welcome = `${usd(price?.first)} your first month, then ${usd(price?.monthly)}/mo until you cancel`;
+  /* "renews at" says it renews in two words, where "then $7.99/mo until you
+     cancel" took a second line and left "cancel" alone on it (Sam, 4 Nov
+     2026: "/impeccable polish"). The pay step keeps the full terms. */
+  const welcome = `${usd(price?.first)} first month, renews at ${usd(price?.monthly)}/mo`;
   if (!price || dueCents === null) return welcome;
   const today = dueCents / 100;
   if (today === price.first) return welcome;
-  if (today === price.monthly) return `${usd(price.monthly)} a ${price.period} until you cancel`;
-  return `${usd(today)} today, then ${usd(price.monthly)}/mo until you cancel`;
+  if (today === price.monthly) return `${usd(price.monthly)}/mo, renews monthly`;
+  return `${usd(today)} today, renews at ${usd(price.monthly)}/mo`;
 }
 
 function Review({

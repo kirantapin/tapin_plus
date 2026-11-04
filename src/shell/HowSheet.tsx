@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { slideAway } from "./sheetMotion";
 import { createPortal } from "react-dom";
 import { SCENES } from "./Scenes";
 import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
@@ -89,16 +90,9 @@ export default function HowSheet({
   const closing = useRef(false);
   const close = useCallback(() => {
     if (closing.current) return;
-    const el = sheet.current;
-    if (!el || still() || typeof el.animate !== "function") return onClose();
     closing.current = true;
-    layer.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 190, easing: "ease-in", fill: "forwards" });
-    const run = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(24px)", opacity: 0 }], {
-      duration: 200,
-      easing: "ease-in",
-      fill: "forwards",
-    });
-    run.onfinish = onClose;
+    /* Down and away, like every pop-up (sheetMotion.ts). */
+    slideAway(sheet.current, layer.current, onClose);
   }, [onClose]);
 
   useEffect(() => {
