@@ -2761,29 +2761,84 @@ html[data-surface="tpa"] .hs-scene > * {
   margin-top: 4px;
   background: #f5f5f7;
 }
-.tpa-member .gta-qr {
+.tpa-member .gta-scan {
   background: #ffffff;
 }
-/* In the desktop rail (400px) the QR code sits under the button, beside its
-   caption, so the button keeps its full width. */
-@media (min-width: 1024px) {
-  .tpa-member .gta[data-device="desktop"] {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .tpa-member .gta-qr {
-    grid-template-columns: auto minmax(0, 1fr);
-    justify-items: start;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 14px 10px 10px;
-  }
-  .tpa-member .gta-qr img {
-    width: 88px;
-    height: 88px;
-  }
-  .tpa-member .gta-qr figcaption {
-    font-size: 14px;
-    line-height: 18px;
-    white-space: normal;
-  }
+
+/* ══ THE BUY BLOCK, DISTILLED (Sam, 3 Nov 2026: "a lot is going on here") ══
+   Was: a price sentence, a seats line, a bar, a clock line and two full
+   buttons, five weights of text stacked. Now one unit set off by a hairline
+   from the calculator above: the first month's figure big on the left and
+   the monthly quietly on the right, the spots bar thin with its words small
+   beneath, then Join, then Try as a text button (a second action, not a
+   second Join). */
+.tpa-buy {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(20, 22, 24, 0.08);
+}
+.tpa-buy-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  color: rgba(20, 22, 24, 0.72);
+}
+.tpa-buy-price b {
+  margin-right: 4px;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  color: #141618;
+}
+.tpa-buy-then {
+  flex: 0 0 auto;
+  font-size: 15px;
+  color: rgba(20, 22, 24, 0.56);
+}
+/* The bar first, its words under it, small and in one tone. */
+.tpa-buy .tpa-buy-seats {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  margin: 0;
+}
+.tpa-buy-seats .plus-seats-bar {
+  height: 4px;
+}
+.tpa-buy-seats .plus-seats-line {
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpa-buy-seats .plus-seats-line b {
+  font-weight: 600;
+  color: #141618;
+}
+.tpa-buy-seats .plus-seats-line span {
+  font-weight: 500;
+  color: rgba(20, 22, 24, 0.56);
+}
+.tpa-buy + .tpa-cta {
+  margin-top: 18px;
+}
+/* Try, as the second action: text, not a second full-size button. */
+.tpa-s2 .tpa-cta + .tpa-try {
+  width: auto;
+  height: 44px;
+  margin: 4px auto 0;
+  padding: 0 12px;
+  background: none;
+  box-shadow: none;
+  font-size: 15px;
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 22, 24, 0.28);
+  text-underline-offset: 3px;
 }

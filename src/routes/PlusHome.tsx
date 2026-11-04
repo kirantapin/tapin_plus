@@ -15,7 +15,7 @@ import { openPlusCheckout } from "../shell/PlusCheckout";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { WelcomeBar, WelcomeChip, WelcomeDays, WelcomeEnds } from "../shell/WelcomeOffer";
+import { WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -839,12 +839,21 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 card"). */}
             <h2 className="tpa-h2">See what you’d get back</h2>
             <PaybackCounter />
-            <p className="tpa-offer-then">
-              {FIRST_MONTH} your first month, then {MONTHLY}.
-            </p>
-            {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026). */}
-            <PlusSeats monthly={MONTHLY} />
-            <WelcomeDays />
+            {/* ONE PRICE, ONE BAR, ONE ACTION (Sam, 3 Nov 2026: "a lot is going
+                on here"). The price on one line, big figure first; the spots
+                bar thin, its words small under it; Join; Try as a quiet
+                second. The "offer ends" line went: the black bar pinned to
+                the top of the page already counts down to November 30. */}
+            <div className="tpa-buy">
+              <p className="tpa-buy-price">
+                <span>
+                  <b className="tnum">{FIRST_MONTH}</b> first month
+                </span>
+                <span className="tpa-buy-then tnum">then {MONTHLY}/mo</span>
+              </p>
+              {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026). */}
+              <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
+            </div>
             {joinCta("hero")}
             {tryCta}
             {lockMore}
