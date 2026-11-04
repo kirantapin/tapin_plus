@@ -161,38 +161,31 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
               to know they get a link to download the app and start using tapin
               plus right after"). What you get, how soon, why it's safe, and who
               else is in, before anything is asked of them. */}
+          {/* One short line each (Sam, 3 Nov 2026: "this modal has a lot of
+              text again"). */}
           <ul className="pck-offer">
             <li>
               <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
-              <span>
-                <b>$5 back at every Plus place</b>
-                <small>Every week, on $10+ orders. Or 15% off.</small>
-              </span>
+              <b>$5 back every week, every place</b>
             </li>
             <li>
               <span className="pck-ico" aria-hidden="true">
                 <PhoneGlyph />
               </span>
-              <span>
-                <b>Use it today</b>
-                <small>Get the app link by text, right away.</small>
-              </span>
+              <b>Use it today: app link by text</b>
             </li>
             <li>
               <span className="pck-ico" aria-hidden="true">
                 <ShieldGlyph />
               </span>
-              <span>
-                <b>The Plus Promise</b>
-                <small>Save what you spend, or money back.</small>
-              </span>
+              <b>Money back if you don’t save</b>
             </li>
           </ul>
           <p className="pck-proof">
             <span aria-hidden="true" />
             {MEMBERS_SHORT}
           </p>
-          <label className="pck-label" htmlFor="pck-phone">Phone number</label>
+          <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
           <div className="pck-field">
             <span className="pck-cc">+1</span>
             <input
@@ -210,11 +203,9 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
               be a condition of buying (TCPA). */}
           <label className="pck-check">
             <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
-            <span>Text me Tapin offers and news (optional).</span>
+            <span>Text me Tapin offers (optional)</span>
           </label>
-          <p className="pck-fine">
-            We’ll text you a code to sign in, and messages about your membership. Message and data rates may apply.
-          </p>
+          <p className="pck-fine">We’ll text a code and membership updates. Msg &amp; data rates may apply.</p>
           <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
             {busy ? "Sending…" : "Send code"}
           </button>
@@ -308,34 +299,29 @@ function Review({
           <span className="tnum">{`${usd(price.monthly)} every ${price.period}, from ${renewsOn(price)}`}</span>
         </li>
       </ul>
+      {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
+          download the tapin app after they subscribe". One line each, above
+          the consent, so the terms stay right by the button that charges. */}
+      <ul className="pck-offer pck-offer-tight">
+        <li>
+          <span className="pck-ico" aria-hidden="true">
+            <PhoneGlyph />
+          </span>
+          <b>Use it today: app link by text</b>
+        </li>
+        <li>
+          <span className="pck-ico" aria-hidden="true">
+            <ShieldGlyph />
+          </span>
+          <b>Money back if you don’t save</b>
+        </li>
+      </ul>
       <p className="pck-consent">
         {`By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
         <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
         {" · "}
         <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Privacy</a>
       </p>
-      {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
-          download the tapin app after they subscribe". */}
-      <ul className="pck-offer pck-offer-tight">
-        <li>
-          <span className="pck-ico" aria-hidden="true">
-            <PhoneGlyph />
-          </span>
-          <span>
-            <b>Use it today</b>
-            <small>Get the app link by text, right away.</small>
-          </span>
-        </li>
-        <li>
-          <span className="pck-ico" aria-hidden="true">
-            <ShieldGlyph />
-          </span>
-          <span>
-            <b>The Plus Promise</b>
-            <small>Save what you spend, or money back.</small>
-          </span>
-        </li>
-      </ul>
       <Elements
         key={cart.dueTodayCents}
         stripe={stripePromise}
