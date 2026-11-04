@@ -7,6 +7,8 @@ import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { monthlyBack } from "../model/savings";
 import { MEMBERS_LINE } from "../model/proof";
+import { PLUS_NEXT_PRICE } from "../model/seats";
+import { PlusSeats } from "../shell/PlusSeats";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
@@ -569,7 +571,7 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   },
   {
     q: "Will my price go up?",
-    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member. The price goes up for new members as more places join.`,
+    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member. For new members it goes up to ${PLUS_NEXT_PRICE} once these 100 spots are gone.`,
   },
   { q: "Can I cancel?", a: "Anytime." },
 ];
@@ -632,7 +634,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         Your {MONTHLY} is locked in
         <Chevron />
       </summary>
-      <p>The price goes up for new members as more places join. Yours never does while you’re a member.</p>
+      <p>It goes up to {PLUS_NEXT_PRICE} for new members once these 100 spots are gone. Yours never does while you’re a member.</p>
     </details>
   );
   /* To Members and back, a fade with a very slight zoom (Sam, 3 Nov 2026:
@@ -792,6 +794,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <p className="tpa-offer-then">
               {FIRST_MONTH} your first month, then {MONTHLY}.
             </p>
+            {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026). */}
+            <PlusSeats monthly={MONTHLY} />
             <WelcomeDays />
             {joinCta("hero")}
             {tryCta}

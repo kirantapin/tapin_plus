@@ -109,3 +109,74 @@ export const seatLine = (now: Date = new Date()): string => {
   if (left === 0) return `${foundingTierName} spots are gone`;
   return `${left} of ${SEAT_CAP} ${foundingTierName} spots left`;
 };
+
+/* ══ THE NEXT 100 AT $7.99 (Sam, 3 Nov 2026) ═════════════════════════════════
+   "make it seem as though this is a limited time offer. The price for the
+   next 100 people is $7.99 then it goes up to $9.99 once we sell through
+   that. You can show 91 seats out of 100, and that should decrease 6-12 seats
+   every day throughout the day."
+
+   An invented count, by Sam's decision, like the presale's before it. It is
+   the same for everyone at the same moment: worked from the clock, not
+   stored. It starts at 91 at 9pm Eastern on 3 November; each Eastern day
+   loses 6 to 12 (the number seeded by the day), one at a time at seeded
+   moments between 9am and 1am. It floors at PLUS_FLOOR and never reaches
+   zero: a sold-out claim would have to change the price, and the price only
+   changes by hand, in the app. At about 9 a day it reaches the floor around
+   13 November; Sam decides what happens then. */
+export const PLUS_SEAT_CAP = 100;
+export const PLUS_NEXT_PRICE = "$9.99";
+const PLUS_START_MS = Date.UTC(2026, 10, 4, 2, 0, 0); // 3 Nov, 9pm EST
+const PLUS_START_LEFT = 91;
+const PLUS_FLOOR = 3;
+const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
+/* Midnight Eastern (EST, UTC-5) on 3 November: day 0. */
+const DAY0_MS = Date.UTC(2026, 10, 3, 5, 0, 0);
+
+/** A small seeded generator: the same day always draws the same numbers. */
+const seeded = (seed: number) => {
+  let a = (seed * 2654435761) >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+/** The moments a day's seats go, from 9am to 1am Eastern, earliest first. */
+const dropsOn = (day: number): number[] => {
+  const rand = seeded(day + 1103);
+  const count = 6 + Math.floor(rand() * 7);
+  const start = DAY0_MS + day * DAY_MS + 9 * HOUR_MS;
+  return Array.from({ length: count }, () => start + rand() * 16 * HOUR_MS).sort((x, y) => x - y);
+};
+
+/** Dev only: `?plusseats=N` shows a chosen count. */
+const plusOverride = (): number | null => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return null;
+  const raw = new URLSearchParams(window.location.search).get("plusseats");
+  if (raw === null) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.min(PLUS_SEAT_CAP, Math.max(PLUS_FLOOR, Math.round(n))) : null;
+};
+
+/** Spots left at the $7.99 rate at a moment. */
+export function plusSeatsLeft(now: number = Date.now()): number {
+  const forced = plusOverride();
+  if (forced !== null) return forced;
+  if (now <= PLUS_START_MS) return PLUS_START_LEFT;
+  let gone = 0;
+  const lastDay = Math.floor((now - DAY0_MS) / DAY_MS) + 1;
+  for (let day = 0; day <= lastDay; day++) {
+    for (const at of dropsOn(day)) if (at > PLUS_START_MS && at <= now) gone++;
+  }
+  return Math.max(PLUS_FLOOR, PLUS_START_LEFT - gone);
+}
+
+/** "91 of 100 spots left at $7.99". */
+export const plusSeatLine = (left: number, monthly: string): string =>
+  `${left} of ${PLUS_SEAT_CAP} spots left at ${monthly}`;
+

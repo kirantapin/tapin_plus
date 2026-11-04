@@ -108,10 +108,34 @@ export default function HowSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [close, go, i]);
 
-  /* Each step slides in from the side it came from. */
+  /* A step changes like a story's page, not a slide of the whole sheet
+     (Sam, 3 Nov 2026: "the animation on these when I click next seems a bit
+     weird"). The grey stage stays where it is; only what's on it moves: the
+     art eases in from the side you're heading (right going forward, left
+     going back) with a touch of scale, and the headline and line rise in a
+     beat behind it. Short and calm, so tapping through quickly never queues
+     motion up. The scenes' own entrances in how.css then play inside the
+     still stage. */
   useEffect(() => {
-    if (still()) return;
-    body.current?.animate?.([{ transform: `translateX(${dir.current * 28}px)`, opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 340, easing: ease });
+    const root = body.current;
+    if (!root || still()) return;
+    const art = root.querySelector<HTMLElement>(".hs-scene > *");
+    const words = [...root.querySelectorAll<HTMLElement>(".hs-head, .hs-line")];
+    art?.animate?.(
+      [
+        { transform: `translateX(${dir.current * 18}px) scale(0.985)`, opacity: 0 },
+        { transform: "none", opacity: 1 },
+      ],
+      { duration: 280, easing: ease },
+    );
+    words.forEach((el, k) =>
+      el.animate?.([{ transform: "translateY(6px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+        duration: 240,
+        delay: 50 + k * 40,
+        easing: ease,
+        fill: "backwards",
+      }),
+    );
   }, [i]);
 
   /* The current bar fills over the step's dwell; when it is full the deck

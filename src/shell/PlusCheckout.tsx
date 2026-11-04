@@ -10,6 +10,7 @@ import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plu
 import { sendCode, verifyCode } from "./authEnv";
 import { asset } from "../asset";
 import { MEMBERS_SHORT } from "../model/proof";
+import { PlusSeats } from "./PlusSeats";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
    Join on any page opens this: openPlusCheckout("where"). It's mounted once
@@ -125,6 +126,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
 
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
 function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
+  const price = usePlusPrice();
   const [digits, setDigits] = useState("");
   const [optIn, setOptIn] = useState(false);
   const [code, setCode] = useState("");
@@ -181,6 +183,7 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
               <b>Money back if you don’t save</b>
             </li>
           </ul>
+          <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" then={false} />
           <p className="pck-proof">
             <span aria-hidden="true" />
             {MEMBERS_SHORT}

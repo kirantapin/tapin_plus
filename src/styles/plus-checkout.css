@@ -445,3 +445,10 @@
   box-shadow: inset 0 0 0 2px var(--ink);
 }
 
+
+.pck-layer .plus-seats {
+  margin-top: 0;
+}
+.pck-layer .plus-seats-bar {
+  background: #ffffff;
+}
