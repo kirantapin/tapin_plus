@@ -3287,3 +3287,19 @@ html[data-surface="tpa"] .hs-scene > * {
     font-size: 13px;
   }
 }
+
+/* The open mark on each place card (Sam, 4 Nov 2026): the Plus pill's glass,
+   a round 32px, top right. */
+.tpa-place-more {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  right: 10px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+.tpa-place-more svg {
+  width: 16px;
+  height: 16px;
+}

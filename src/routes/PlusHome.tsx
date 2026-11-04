@@ -886,6 +886,50 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </button>
         </section>
 
+        {/* The places' photos straight after How it works (Sam, 4 Nov 2026:
+            "should we have the every plus place higher?"): on a phone they
+            top the second screen, under the example order. Not above the
+            Promise card, which would push How it works off the first. */}
+        <section className="tpa-places" aria-labelledby="tpa-every">
+          <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
+            Every Plus place
+          </h2>
+          <ul className="tpa-rail">
+            {PLACES.map((v) => (
+              <li key={v.id} className="tpa-place">
+                {/* A tap opens what Plus does there (Sam, 4 Nov 2026). */}
+                <button
+                  type="button"
+                  className="tpa-place-open"
+                  aria-label={`What Plus gets you at ${v.name}`}
+                  onClick={() => {
+                    setPlaceOpen({ id: v.id, name: v.name, kind: KIND[v.id] ?? v.category, photo: photoFor(v) });
+                    track("plus_place_opened", { place: v.id });
+                  }}
+                >
+                  <img className="tpa-place-photo" src={photoFor(v)} alt="" decoding="async" loading="lazy" />
+                  <span className="tpa-glass tpa-tag">
+                    <FlatMark className="tpa-tag-mark" />
+                    Plus
+                  </span>
+                  {/* Says the card opens (Sam, 4 Nov 2026: "a small icon in
+                      the top right of these to indicate they can be
+                      pressed"). */}
+                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="tpa-place-name">
+                    <b>{v.name}</b>
+                    <small>{KIND[v.id] ?? v.category}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {/* THE OFFER, SIMPLE (Sam, 3 Nov 2026: "there's far too much text
             here. Make it way simpler, and if you have to nest that's fine"):
             the price, the clock, Join and Try. Where it works is the tabs
@@ -1029,37 +1073,6 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         {hero === "a" ? null : promise}
 
-        <section className="tpa-places" aria-labelledby="tpa-every">
-          <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
-            Every Plus place
-          </h2>
-          <ul className="tpa-rail">
-            {PLACES.map((v) => (
-              <li key={v.id} className="tpa-place">
-                {/* A tap opens what Plus does there (Sam, 4 Nov 2026). */}
-                <button
-                  type="button"
-                  className="tpa-place-open"
-                  aria-label={`What Plus gets you at ${v.name}`}
-                  onClick={() => {
-                    setPlaceOpen({ id: v.id, name: v.name, kind: KIND[v.id] ?? v.category, photo: photoFor(v) });
-                    track("plus_place_opened", { place: v.id });
-                  }}
-                >
-                  <img className="tpa-place-photo" src={photoFor(v)} alt="" decoding="async" loading="lazy" />
-                  <span className="tpa-glass tpa-tag">
-                    <FlatMark className="tpa-tag-mark" />
-                    Plus
-                  </span>
-                  <span className="tpa-place-name">
-                    <b>{v.name}</b>
-                    <small>{KIND[v.id] ?? v.category}</small>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <section className="tpa-module" aria-labelledby="tpa-get">
           <h2 id="tpa-get" className="tpa-h2">
