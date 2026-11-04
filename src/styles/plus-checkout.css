@@ -313,7 +313,7 @@
   color: var(--ink);
 }
 .pck-ico-money {
-  background: #1f8a4c;
+  background: #0F8A5F;
   color: #ffffff;
   font-weight: 700;
   font-size: 12px;
@@ -335,8 +335,8 @@
   height: 8px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #34c759;
-  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.24);
+  background: #0F8A5F;
+  box-shadow: 0 0 0 3px rgba(15, 138, 95, 0.18);
 }
 .pck-body {
   gap: 12px;
@@ -420,7 +420,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #1f8a4c;
+  background: #0F8A5F;
   color: #ffffff;
 }
 .pck-done {

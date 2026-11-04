@@ -381,7 +381,7 @@ button.tpa-cta {
   font-weight: 600;
 }
 .tpa-order-off b {
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-order-total {
   display: flex;
@@ -797,7 +797,7 @@ button.tpa-cta {
   height: 56px;
 }
 .tpa-carousel[data-grey] .tpa-order-off b {
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-carousel[data-grey] .tpa-order-earn {
   opacity: 1;
@@ -893,7 +893,7 @@ button.tpa-cta {
   font-size: 14px;
 }
 .tpa-ptag-off {
-  background: #1f8a4c;
+  background: #0F8A5F;
   color: #ffffff;
 }
 .tpa-ptag-pts {
@@ -961,7 +961,7 @@ button.tpa-cta {
   width: 20px;
   height: 20px;
   margin-top: 0.5px;
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 /* The payback, a new design, three versions (PlusHome offerLook). */
 /* 1 · Sticker: the dish, a paper +$5 on it, the month it covers. */
@@ -1017,7 +1017,7 @@ button.tpa-cta {
   width: 78px;
   height: 78px;
   border-radius: 50%;
-  background: #1f8a4c;
+  background: #0F8A5F;
   color: #ffffff;
   box-shadow: 0 0 0 4px #ffffff, 0 6px 14px rgba(20, 22, 24, 0.22);
   transform: rotate(-10deg);
@@ -1090,7 +1090,7 @@ button.tpa-cta {
   font-size: 44px;
   line-height: 48px;
   letter-spacing: -0.035em;
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-s2-out span {
   color: var(--muted);
@@ -1134,7 +1134,7 @@ button.tpa-cta {
   font-weight: 600;
 }
 .tpa-s2-rows .tpa-s2-sum b {
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-s2-fine {
   padding: 8px 0 2px;
@@ -1161,7 +1161,7 @@ button.tpa-cta {
 }
 .tpa-s2-lib .tpa-s2-back {
   font-weight: 700;
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-s2 .tpa-offer-then {
   margin-top: 16px;
@@ -1268,7 +1268,7 @@ button.tpa-cta {
   color: var(--muted);
 }
 .tpa-s3-sum span:first-child b {
-  color: #1f8a4c;
+  color: #0F8A5F;
 }
 .tpa-s3-gt {
   font-size: 24px;
@@ -1800,7 +1800,7 @@ html[data-surface="tpa"] [data-lit] {
   --hair-lit: rgba(20, 22, 24, 0.14);
   --maroon: #141618;
   --on-maroon: #ffffff;
-  --gain: #1f8a4c;
+  --gain: #0F8A5F;
 }
 
 
@@ -2314,18 +2314,18 @@ html[data-surface="tpa"] .ct .ct-go {
 }
 .tpa-proof-dot {
   position: relative;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #34c759;
-  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.28);
+  background: #0F8A5F;
+  box-shadow: 0 0 0 2px #ffffff;
 }
 .tpa-proof-dot i {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: #34c759;
+  background: #0F8A5F;
   opacity: 0;
 }
 @media (min-width: 1024px) {
@@ -2338,5 +2338,118 @@ html[data-surface="tpa"] .ct .ct-go {
   .tpa-proof {
     font-size: 13px;
     gap: 7px;
+  }
+}
+
+
+/* ── Mobile rhythm (Sam, 3 Nov 2026: "the spacing feels a bit weird") ───── */
+.tpa-module {
+  margin-top: 16px;
+  padding: 20px;
+}
+.tpa-sheet > .tpa-module:first-child {
+  margin-top: 4px;
+}
+.tpa-offer {
+  padding-top: 20px;
+}
+.tpa-module > .tpa-h2 + * {
+  margin-top: 14px;
+}
+.tpa-h2-out {
+  margin: 36px var(--gutter) 0;
+}
+.tpa-rail {
+  margin-top: 14px;
+}
+.tpa-close {
+  margin-top: 16px;
+  padding: 24px 20px 20px;
+}
+.tpa-foot {
+  margin-top: 28px;
+}
+.tpa-s2-calc {
+  padding: 16px;
+}
+.tpa-s2-lib {
+  margin-top: 18px;
+}
+.tpa-s2 .tpa-offer-then {
+  margin-top: 18px;
+}
+.tpa-cta + .tpa-try {
+  margin-top: 10px;
+}
+.tpa-step-wide {
+  margin-top: 14px;
+}
+
+/* How it works in the first screen on a phone (Sam, 3 Nov 2026: "it gets
+   cut off before the fold"). The band gives up 40px of sky, the tabs sit a
+   little lower, and the order card's rows tighten, so the whole card and
+   Step through it clear the docked buttons on a 390x844 phone. */
+@media (max-width: 1023px) {
+  .tpa-band {
+    height: calc(env(safe-area-inset-top) + clamp(232px, 64vw, 280px));
+  }
+  .tpa-band-title {
+    bottom: 32px;
+  }
+  .tpa-tabs {
+    margin-top: 12px;
+  }
+  .tpa-tabs button {
+    height: 52px;
+  }
+  .tpa-tab-ring {
+    width: 42px;
+    height: 42px;
+  }
+  .tpa-tab-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .tpa-order-band {
+    min-height: 0;
+    padding: 12px 14px 4px;
+  }
+  .tpa-order-in {
+    padding: 0 14px 14px;
+  }
+  .tpa-order-item {
+    padding-top: 10px;
+  }
+  .tpa-carousel[data-grey] .tpa-order-item img {
+    width: 48px;
+    height: 48px;
+  }
+  .tpa-order-off {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .tpa-order-total {
+    margin-top: 4px;
+  }
+  .tpa-step-wide {
+    height: 44px;
+    margin-top: 12px;
+  }
+}
+/* Short phones (an SE, 667 tall): a shorter band and headline, so the card
+   still mostly sits above the docked buttons. */
+@media (max-width: 1023px) and (max-height: 720px) {
+  .tpa-band {
+    height: calc(env(safe-area-inset-top) + 196px);
+  }
+  .tpa-band-title {
+    bottom: 26px;
+  }
+  .tpa-band-title h1 {
+    font-size: 26px;
+    line-height: 30px;
+  }
+  .tpa-proof {
+    margin-top: 8px;
   }
 }
