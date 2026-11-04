@@ -13,6 +13,7 @@ import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
 import AccountLine from "../shell/AccountLine";
+import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { ComingTiles } from "../shell/Coming";
 import { heroVariant } from "../model/heroTest";
@@ -488,6 +489,11 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
               <span className="collar tpa-tab-logo" data-field={logoField(e.venue.id)}>
                 <img src={e.venue.logo} alt="" decoding="async" />
               </span>
+              {/* The name beside the logo, on a computer only (the tabs
+                  stand as a list there). */}
+              <span className="tpa-tab-name" aria-hidden="true">
+                {e.venue.name}
+              </span>
             </button>
           ))}
           <button
@@ -513,6 +519,9 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
             </svg>
             <span className="tpa-tab-logo tpa-mystery" aria-hidden="true">
               ?
+            </span>
+            <span className="tpa-tab-name" aria-hidden="true">
+              More joining
             </span>
           </button>
         </div>
@@ -870,9 +879,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                     under it, as hero "a" learned; the Promise is its own card
                     below, as for "a". */}
                 <h1>Your first ${MIN_ORDER} order pays for your first month</h1>
-                <p className="tpa-hero-sub">
-                  ${CREDIT} back every week at {PLACES.length} Blacksburg spots.
-                </p>
+                {/* No sub-line (Sam, 4 Nov 2026: "okay maybe we just remove
+                    it", after a plain line and a chip both read as too much).
+                    How it works, right below, shows the $5 back. */}
               </>
             )}
             {/* Social proof, at the top (Sam, 3 Nov 2026); the count lives in
@@ -1001,7 +1010,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         ) : member ? (
           <section className="tpa-module tpa-offer tpa-member" aria-label="Tapin Plus">
             <p className="tpa-member-kicker">
-              <span className="tpa-member-dot" aria-hidden="true" />
+              <MemberDot />
               Plus is on
             </p>
             <h2 className="tpa-h2">

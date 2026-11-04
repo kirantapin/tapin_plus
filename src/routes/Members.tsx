@@ -2,6 +2,9 @@ import { useLayoutEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import AccountLine from "../shell/AccountLine";
+import { AppCard } from "../shell/GetTheApp";
+import MemberDot from "../shell/MemberDot";
+import { useAuth } from "../context/auth_context";
 
 /* ══ MEMBERS, IN THE APP'S LOOK (Sam, 3 Nov 2026: "redirect + rebuild") ═════
    /in was the presale's receipt: a "Your name / Early-ish Bird / Halloween
@@ -20,6 +23,9 @@ const ease = "cubic-bezier(.22,1,.36,1)";
 export default function Members() {
   const page = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const { subscribed } = useAuth();
+  /* A signed-in member sees their status; ?member previews it, local dev only. */
+  const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
@@ -59,24 +65,48 @@ export default function Members() {
       </header>
 
       <main className="tpa-sheet">
-        <section className="tpa-module tpa-offer" aria-label="Your membership">
+        {/* Who you are with Plus: a member's live status, or the note for
+            early-access buyers. Then the app, which is where Plus is used
+            (Sam, 4 Nov 2026: "should include the same get the tapin app
+            callout"); on a computer the two sit side by side, the app card
+            held in view as the home page's offer is. */}
+        <section className="tpa-module tpa-offer tpa-members-status" aria-label="Your membership">
           <img className="tpa-paper" src={PAPER_MARK} alt="" width="112" height="89" decoding="async" />
-          {/* Early-access memberships bought here are not in the app yet (Sam,
-              3 Nov 2026, after talking to Kiran), so this page promises
-              nothing about where they show up: it says they are on file and
-              who to ask. */}
-          <p className="tpa-lead">Joined early access? You’re on file.</p>
-          <p className="tpa-price-then">
-            Your membership is saved with us. Every Plus place takes orders on Tapin. For anything about your plan,
-            your credit or a refund, email support@tapin.app and a person will sort it out.
-          </p>
-          {/* Sam, 3 Nov 2026: "the CTA would be to download the tapin app or go
-              to www.tapin.app". www.tapin.app until the App Store link exists. */}
-          <a className="tpa-cta" href={TAPIN_HOME}>
-            Go to www.tapin.app
-          </a>
-          <a className="tpa-try" href="mailto:support@tapin.app">
+          {member ? (
+            <>
+              <p className="tpa-member-kicker">
+                <MemberDot />
+                Plus is on
+              </p>
+              <h2 className="tpa-h2">You’re a Plus member</h2>
+              <p className="tpa-price-then">
+                For anything about your plan, your credit or a refund, email support@tapin.app and a person will sort
+                it out.
+              </p>
+            </>
+          ) : (
+            <>
+              {/* Early-access memberships bought here are not in the app yet
+                  (Sam, 3 Nov 2026, after talking to Kiran), so this page
+                  promises nothing about where they show up: it says they are
+                  on file and who to ask. */}
+              <p className="tpa-lead">Joined early access? You’re on file.</p>
+              <p className="tpa-price-then">
+                Your membership is saved with us. Every Plus place takes orders on Tapin. For anything about your plan,
+                your credit or a refund, email support@tapin.app and a person will sort it out.
+              </p>
+            </>
+          )}
+          <a className="tpa-try tpa-members-mail" href="mailto:support@tapin.app">
             Email support@tapin.app
+          </a>
+        </section>
+
+        <section className="tpa-module tpa-members-app" aria-label="Get the Tapin app">
+          <AppCard where="members" line="Your $5 back, 15% off and points are in the app. Sign in with the number you joined with." />
+          {/* www.tapin.app stays, quieter: the app card leads now. */}
+          <a className="tpa-members-web" href={TAPIN_HOME}>
+            Or order on www.tapin.app
           </a>
         </section>
 
