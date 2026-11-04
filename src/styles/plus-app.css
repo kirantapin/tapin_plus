@@ -3347,3 +3347,39 @@ html[data-surface="tpa"] .hs-scene > * {
     transform: none;
   }
 }
+
+/* ══ SIGN IN / SIGN OUT IN THE FOOTER (Sam, 4 Nov 2026) ═════════════════════
+   shell/AccountLine.tsx. One line above the legal links: the words muted,
+   the action in the links' weight, a full 44px target. */
+.tpa-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 8px;
+  margin-top: 12px;
+}
+.tpa-account button {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink, inherit);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.tpa-account button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+/* The Burg's line under its example order (PlusHome OrderCard). */
+.tpa-order-note {
+  margin: -4px 0 0;
+  padding: 0 16px 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  text-wrap: pretty;
+}

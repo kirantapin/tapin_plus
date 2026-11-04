@@ -12,6 +12,7 @@ import { PlusSeats } from "../shell/PlusSeats";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
+import AccountLine from "../shell/AccountLine";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { ComingTiles } from "../shell/Coming";
 import { heroVariant } from "../model/heroTest";
@@ -606,6 +607,14 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
               ))}
           </p>
         )}
+        {/* The Burg is a bar, so say what its drinks get (Sam, 4 Nov 2026:
+            "People probably thought they could earn credit from alcohol ...
+            can we specify that for the burg"). */}
+        {ex.venue.id === "theburg" ? (
+          <p className="tpa-order-note" key={`note-${which}`}>
+            At The Burg, your $5 and 15% go on the food, not on alcohol.
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -1166,6 +1175,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             15% off or $5 credit, one per order; credit you’ve earned works with the 15%. Credit and 15% off don’t go toward
             alcohol. Cancel anytime.
           </p>
+          <AccountLine where="home_foot" />
           <p className="tpa-links">
             {LEGAL.map((l) => (
               <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer">
