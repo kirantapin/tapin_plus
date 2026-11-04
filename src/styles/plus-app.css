@@ -93,9 +93,9 @@ html[data-surface="tpa"] body {
      over the tower and the sun (Sam, 3 Nov 2026: "a slight gradient there
      behind the text specifically"). */
   background:
-    radial-gradient(ellipse 95% 70% at 0% 100%, rgba(0, 0, 0, 0.62) 0, rgba(0, 0, 0, 0.36) 45%, rgba(0, 0, 0, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 0% 100%, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.48) 45%, rgba(0, 0, 0, 0) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) calc(env(safe-area-inset-top) + 80px)),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.4) 38%, rgba(0, 0, 0, 0) 66%);
+    linear-gradient(0deg, rgba(0, 0, 0, 0.78) 0, rgba(0, 0, 0, 0.5) 42%, rgba(0, 0, 0, 0) 78%);
 }
 .tpa-band-top {
   position: absolute;
@@ -152,7 +152,9 @@ html[data-surface="tpa"] body {
   font-size: 30px;
   line-height: 34px;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+  /* Stronger shade and shadow (Sam, 3 Nov 2026: "is the gradient behind
+     the text strong enough"): the top line sat on the bright tower. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 18px rgba(0, 0, 0, 0.45);
   max-width: 15ch;
   text-wrap: balance;
 }
@@ -2619,4 +2621,102 @@ html[data-surface="tpa"] .ct .ct-go {
   border-radius: inherit;
   background: #141618;
   transform-origin: left center;
+}
+
+/* ── How it works, polished (Sam, 3 Nov 2026) ─────────────────────────────
+   One quiet tone per layer: a light track for the places, a lighter card for
+   the order, and Step through it as a white outlined button rather than a
+   third grey block. The playing logo keeps one ring (the countdown in ink),
+   not a grey track ring as well; every logo, the "?" included, wears the
+   same hairline. The place name reads as a name, not a shouting label. */
+.tpa-carousel[data-tabs="a"] .tpa-tabs {
+  background: #ececf0;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-plate {
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.1), 0 0 0 0.5px rgba(20, 22, 24, 0.06);
+}
+.tpa-carousel[data-tabs="a"] .tpa-tabs button[data-on] .tpa-tab-ring-track {
+  stroke: transparent;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-ring circle {
+  stroke-width: 2;
+}
+.tpa-carousel[data-tabs="a"] .tpa-tab-ring-run {
+  stroke: #141618;
+}
+.tpa-mystery,
+.tpa-tabs button[data-on] .tpa-mystery {
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.14);
+  font-size: 16px;
+}
+.tpa-carousel[data-grey] .tpa-order {
+  background: #f5f5f7;
+}
+.tpa-carousel[data-grey] .tpa-order-band {
+  padding: 14px 16px 2px;
+  background: transparent;
+}
+.tpa-carousel[data-grey] .tpa-order-band b {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+.tpa-carousel[data-grey] .tpa-order-in {
+  padding: 0 16px 16px;
+}
+.tpa-carousel[data-grey] .tpa-order-item {
+  padding-top: 10px;
+  gap: 14px;
+}
+.tpa-carousel[data-grey] .tpa-order-item span {
+  font-weight: 600;
+}
+.tpa-carousel[data-grey] .tpa-order-off {
+  margin-top: 14px;
+  padding-top: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.tpa-carousel[data-grey] .tpa-order-total {
+  margin-top: 6px;
+}
+.tpa-step-wide {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.14);
+}
+
+/* The value slide fills the full-height story (Sam, 3 Nov 2026: "can we
+   fill the space a bit better"): square photos on a phone with room for
+   them; short phones keep the wide strip so nothing scrolls. */
+@media (max-width: 719px) and (min-height: 760px) {
+  html[data-surface="tpa"] .hs-scene .vs-shot {
+    aspect-ratio: 1;
+    margin-bottom: 8px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-grid {
+    row-gap: 20px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-mark {
+    width: 32px;
+    height: 32px;
+  }
+}
+/* On a desk the headline is taller than the shade's reach: a soft wash from
+   the left carries it up behind the first line. */
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band::after {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0.32) 32%, rgba(0, 0, 0, 0) 58%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0) 90px),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0, rgba(0, 0, 0, 0.25) 45%, rgba(0, 0, 0, 0) 75%);
+  }
+}
+/* Back matches the next button's corners (Sam, 3 Nov 2026: "can these have
+   the same edge rounding? ... less rounded"). */
+.hs-back {
+  width: 52px;
+  border-radius: 14px;
 }
