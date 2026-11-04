@@ -30,6 +30,11 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
   const body = useRef<HTMLDivElement | null>(null);
   const closing = useRef(false);
   const sells = covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
+  /* The Burg is a bar, so its rows say plainly that the $5 and 15% skip
+     alcohol (Sam, 4 Nov 2026), and don't advertise points on drinks: Virginia
+     bars ads for "anything of value conditioned on the purchase of alcoholic
+     beverages" (3VAC5-20-10 C 8; research 4 Nov 2026). */
+  const bar = place.id === "theburg";
 
   const close = useCallback(
     (then?: () => void) => {
@@ -141,7 +146,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
               </span>
               <span>
                 <b>$5 back a week, or 15% off a day</b>
-                <span>On anything but alcohol</span>
+                <span>{bar ? "On the food and non-alcoholic drinks. Not on alcohol." : "On anything but alcohol"}</span>
               </span>
             </li>
             <li>
@@ -152,7 +157,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
               </span>
               <span>
                 <b>Points on everything</b>
-                <span>Drinks included. Trade them for free food.</span>
+                <span>{bar ? "Trade them for free food." : "Drinks included. Trade them for free food."}</span>
               </span>
             </li>
           </ul>

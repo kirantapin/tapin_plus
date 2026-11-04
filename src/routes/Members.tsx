@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
+import AccountLine from "../shell/AccountLine";
 
 /* ══ MEMBERS, IN THE APP'S LOOK (Sam, 3 Nov 2026: "redirect + rebuild") ═════
    /in was the presale's receipt: a "Your name / Early-ish Bird / Halloween
@@ -100,6 +101,7 @@ export default function Members() {
         </section>
 
         <footer className="tpa-foot">
+          <AccountLine where="members_foot" />
           <p className="tpa-links">
             <a href="https://go.tapin.app/terms-and-conditions" target="_blank" rel="noopener noreferrer">
               Terms

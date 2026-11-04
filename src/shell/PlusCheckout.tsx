@@ -23,9 +23,10 @@ import { PlusSeats } from "./PlusSeats";
    Then done. In the app's look, as the home page is (plus-app.css). */
 
 /* ── The one open sheet, as a tiny store ─────────────────────────────────── */
-let openFrom: string | null = null;
+type Open = { where: string; mode: "join" | "signin" };
+let openFrom: Open | null = null;
 const listeners = new Set<() => void>();
-const set = (next: string | null) => {
+const set = (next: Open | null) => {
   openFrom = next;
   listeners.forEach((l) => l());
 };
@@ -35,12 +36,19 @@ const subscribe = (l: () => void) => {
 };
 
 /** Opens the checkout. `where` is which Join was tapped, for tracking. */
-export const openPlusCheckout = (where: string) => set(where);
+export const openPlusCheckout = (where: string) => set({ where, mode: "join" });
+
+/** Opens the same sheet to sign in only: the number, the code, then it
+ *  closes (Sam, 4 Nov 2026: "there needs to be a sign in and sign out option
+ *  on this page"). A member's page then shows Get the app. */
+export const openPlusSignIn = (where: string) => set({ where, mode: "signin" });
 
 /** Mounted once near the root. */
 export function PlusCheckoutMount() {
-  const where = useSyncExternalStore(subscribe, () => openFrom);
-  return where ? <PlusCheckoutSheet key={where} where={where} onClose={() => set(null)} /> : null;
+  const open = useSyncExternalStore(subscribe, () => openFrom);
+  return open ? (
+    <PlusCheckoutSheet key={`${open.mode}-${open.where}`} where={open.where} signInOnly={open.mode === "signin"} onClose={() => set(null)} />
+  ) : null;
 }
 
 /* ── The sheet ───────────────────────────────────────────────────────────── */
@@ -49,7 +57,7 @@ const still = () => typeof window !== "undefined" && window.matchMedia("(prefers
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 
-function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => void }) {
+function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: string; signInOnly?: boolean; onClose: () => void }) {
   const { userSession, accessToken, subscribed } = useAuth();
   const { track } = useEventTracking();
   const price = usePlusPrice();
@@ -64,7 +72,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   const sheet = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    track("checkout_opened", { where });
+    track(signInOnly ? "plus_signin_opened" : "checkout_opened", { where });
     const opener = document.activeElement as HTMLElement | null;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -82,6 +90,10 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   }, []);
 
   const signedIn = !!userSession && !!accessToken;
+  /* Signing in only: once the code is right there's nothing more to do here. */
+  useEffect(() => {
+    if (signInOnly && signedIn) onClose();
+  }, [signInOnly, signedIn, onClose]);
   /* Local dev only (stripped from builds): ?pckpreview=done shows the screen
      after paying, without signing in or paying. */
   const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
@@ -91,7 +103,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
     ) : userSession === undefined ? null : paid ? (
       <Done texted />
     ) : !signedIn ? (
-      <SignIn onStage={setSignInStage} />
+      <SignIn onStage={setSignInStage} plain={signInOnly} />
     ) : subscribed === true ? (
       <Done />
     ) : (
@@ -136,6 +148,13 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
                 <p className="pck-price">Your Tapin Plus membership is active.</p>
               </div>
             </div>
+          ) : signInOnly ? (
+            <div className="pck-head">
+              <h2 id="pck-title" className="pck-title">
+                Sign in
+              </h2>
+              <p className="pck-price">With the number you joined with.</p>
+            </div>
           ) : (
             <div className="pck-head">
               <h2 id="pck-title" className="pck-title">
@@ -152,7 +171,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
             </svg>
           </button>
         </div>
-        {step < 4 ? (
+        {step < 4 && !signInOnly ? (
           <ol className="pck-steps" aria-label={`Step ${step} of 3`}>
             {["Phone", "Code", "Pay"].map((label, k) => (
               <li key={label} data-on={k + 1 <= step ? "" : undefined} aria-current={k + 1 === step ? "step" : undefined}>
@@ -169,7 +188,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
 }
 
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
-function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
+function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code") => void; plain?: boolean }) {
   const price = usePlusPrice();
   const { track } = useEventTracking();
   const [digits, setDigits] = useState("");
@@ -195,7 +214,7 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
       }
       /* Each step of the sheet, so a drop-off shows where it happened
          (Grok's audit, 3 Nov 2026). */
-      track("plus_phone_submitted", { opt_in: optIn });
+      track("plus_phone_submitted", { opt_in: optIn, sign_in_only: plain });
       setStage("code");
       return;
     }
@@ -219,6 +238,8 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
               else is in, before anything is asked of them. */}
           {/* One short line each (Sam, 3 Nov 2026: "this modal has a lot of
               text again"). */}
+          {plain ? null : (
+          <>
           <ul className="pck-offer">
             <li>
               <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
@@ -242,6 +263,8 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
             <span aria-hidden="true" />
             {MEMBERS_SHORT}
           </p>
+          </>
+          )}
           <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
           <div className="pck-field">
             <span className="pck-cc">+1</span>
@@ -258,11 +281,17 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
           </div>
           {/* Marketing texts are optional and unticked: consent to them can't
               be a condition of buying (TCPA). */}
-          <label className="pck-check">
-            <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
-            <span>Text me Tapin offers (optional)</span>
-          </label>
-          <p className="pck-fine">Your number is your membership: we text a code now and the app link after. Msg &amp; data rates may apply.</p>
+          {plain ? (
+            <p className="pck-fine">We’ll text you a code. Msg &amp; data rates may apply.</p>
+          ) : (
+            <>
+              <label className="pck-check">
+                <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
+                <span>Text me Tapin offers (optional)</span>
+              </label>
+              <p className="pck-fine">Your number is your membership: we text a code now and the app link after. Msg &amp; data rates may apply.</p>
+            </>
+          )}
           <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
             {busy ? "Sending…" : "Send code"}
           </button>
@@ -270,7 +299,7 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
       ) : (
         <>
           <p className="pck-lede">
-            We sent a 6-digit code to +1 {digits}. Then it’s one tap with Apple Pay or Google Pay.
+            We sent a 6-digit code to +1 {digits}.{plain ? "" : " Then it’s one tap with Apple Pay or Google Pay."}
           </p>
           <label className="pck-label" htmlFor="pck-code">Code</label>
           <div className="pck-field">
