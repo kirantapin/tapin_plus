@@ -20,7 +20,7 @@ export function PlusSeats({ monthly, className, then = true }: { monthly: string
     <div className={`plus-seats ${className ?? ""}`}>
       <p className="plus-seats-line">
         <b className="tnum">{plusSeatLine(left, monthly)}</b>
-        {then ? <span>Then {PLUS_NEXT_PRICE}</span> : null}
+        {then ? <span>{PLUS_NEXT_PRICE} after</span> : null}
       </p>
       <span className="plus-seats-bar" aria-hidden="true">
         <i style={{ transform: `scaleX(${taken})` }} />
