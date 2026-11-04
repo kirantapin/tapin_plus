@@ -4,6 +4,7 @@ import { Elements, ExpressCheckoutElement, useElements, useStripe } from "@strip
 import { loadStripe, type StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { useAuth } from "../context/auth_context";
+import { AppCard, appHref } from "./GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
@@ -53,6 +54,12 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   const { track } = useEventTracking();
   const price = usePlusPrice();
   const [paid, setPaid] = useState<string | null>(null);
+  /* What the server says is due today, once the pay step has asked. Someone
+     who has had Plus before pays the full month, with no welcome price, so
+     the header follows the server and stops promising the first month (Sam,
+     3 Nov 2026: "if im trying to purchase this again, after having cancelled,
+     it shouldn't say $3.99 for first month"). */
+  const [dueCents, setDueCents] = useState<number | null>(null);
   const [signInStage, setSignInStage] = useState<"phone" | "code">("phone");
   const sheet = useRef<HTMLDivElement | null>(null);
 
@@ -75,15 +82,20 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   }, []);
 
   const signedIn = !!userSession && !!accessToken;
+  /* Local dev only (stripped from builds): ?pckpreview=done shows the screen
+     after paying, without signing in or paying. */
+  const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
   const body =
-    userSession === undefined ? null : paid ? (
+    preview === "done" ? (
+      <Done title="You’re in" line="Your Tapin Plus membership is active." texted />
+    ) : userSession === undefined ? null : paid ? (
       <Done title="You’re in" line="Your Tapin Plus membership is active." texted />
     ) : !signedIn ? (
       <SignIn onStage={setSignInStage} />
     ) : subscribed === true ? (
       <Done title="You’re already a member" line="There’s nothing to pay. Your membership is active." />
     ) : (
-      <Review accessToken={accessToken} price={price} onPaid={setPaid} />
+      <Review accessToken={accessToken} price={price} onPaid={setPaid} onDue={setDueCents} />
     );
   /* Three short steps, shown as three bars, so the way to the end is in
      view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
@@ -102,7 +114,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
               Join Tapin Plus <span className="pck-town">Blacksburg</span>
             </h2>
             <p className="pck-price tnum">
-              {usd(price?.first)} your first month, then {usd(price?.monthly)}
+              {priceLine(price, dueCents)}
             </p>
           </div>
           <button type="button" className="pck-x" aria-label="Close" onClick={onClose}>
@@ -259,14 +271,27 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
 const renewsOn = (price: PlusPrice) =>
   nextBillingDate(price.billing).toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
+/** The header's price: the welcome line, unless the server says today's
+ *  charge is something else (a returning member pays the full month). */
+function priceLine(price: PlusPrice | null, dueCents: number | null) {
+  const welcome = `${usd(price?.first)} your first month, then ${usd(price?.monthly)}`;
+  if (!price || dueCents === null) return welcome;
+  const today = dueCents / 100;
+  if (today === price.first) return welcome;
+  if (today === price.monthly) return `${usd(price.monthly)} a ${price.period}`;
+  return `${usd(today)} today, then ${usd(price.monthly)} a ${price.period}`;
+}
+
 function Review({
   accessToken,
   price,
   onPaid,
+  onDue,
 }: {
   accessToken: string;
   price: PlusPrice | null;
   onPaid: (orderId: string) => void;
+  onDue?: (cents: number) => void;
 }) {
   const [cart, setCart] = useState<PlusCart | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -276,7 +301,11 @@ function Review({
     setCart(null);
     setError(null);
     buildPlusCart(accessToken)
-      .then((c) => live && setCart(c))
+      .then((c) => {
+        if (!live) return;
+        setCart(c);
+        onDue?.(c.dueTodayCents);
+      })
       .catch((e: Error) => live && setError(e.message));
     return () => {
       live = false;
@@ -417,12 +446,10 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
 }
 
 /* ── After ───────────────────────────────────────────────────────────────── */
-/* Where the membership is used: the app (/in is Early Access's page). */
-const TAPIN_APP = "https://www.tapin.app/discovery?zone=blacksburg";
-
-/* Where a member manages Plus (Sam, 3 Nov 2026: "a link to manage their
+/* Plus is used and managed in the Tapin app, so the end of the checkout is
+   the app (shell/GetTheApp.tsx): the card to download it, and the same place
+   for managing the membership (Sam, 3 Nov 2026: "a link to manage their
    membership on the tapin plus confirmation page"). */
-const MANAGE_URL = TAPIN_APP;
 
 function ShieldGlyph() {
   return (
@@ -445,24 +472,28 @@ function PhoneGlyph() {
 function Done({ title, line, texted = false }: { title: string; line: string; texted?: boolean }) {
   return (
     <div className="pck-body pck-done-body" role="status">
-      <span className="pck-tick" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="28" height="28">
-          <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </span>
-      <p className="pck-done">{title}</p>
-      <p className="pck-lede">{line}</p>
+      <div className="pck-done-head">
+        <span className="pck-tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26">
+            <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <div>
+          <p className="pck-done">{title}</p>
+          <p className="pck-lede">{line}</p>
+        </div>
+      </div>
+      {/* The one thing left to do (Sam, 3 Nov 2026: "right after someone
+          pays, the modal would have a card for them to download"). */}
+      <AppCard where={texted ? "checkout_paid" : "checkout_member"} line="Sign in with this same number. Your $5 back and 15% off are waiting." enter />
       {texted ? (
-        <p className="pck-text">
+        <p className="pck-text-quiet">
           <PhoneGlyph />
-          <span>We’ve texted you a link to get the Tapin app.</span>
+          <span>We’ve texted you the link too.</span>
         </p>
       ) : null}
-      <a className="pck-cta" href={TAPIN_APP}>
-        Open Tapin
-      </a>
-      <a className="pck-cta pck-cta-quiet" href={MANAGE_URL}>
-        Manage your membership
+      <a className="pck-manage" href={appHref()} target="_blank" rel="noopener noreferrer">
+        Manage your membership in the app
       </a>
     </div>
   );

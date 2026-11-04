@@ -101,6 +101,22 @@ export function useEventTracking(): Events {
 }
 
 const ENABLED = IN_PRODUCTION;
+
+/* ══ THE RECORDER COMES WITH THE PAGE (3 Nov 2026) ══════════════════════════
+   Most ad visits that PostHog showed as a pageview and no recording were
+   short: PostHog fetched its recorder from its own CDN only after init and
+   its remote config, and a visit of a few seconds ended before it arrived
+   (Sam: "any idea why we aren't able to see session recordings for a lot of
+   people"). posthog-recorder is the self-contained build: it registers
+   rrweb and initSessionRecording on window.__PosthogExtensions__, and when
+   both are there PostHog starts recording without fetching anything. It is
+   its own chunk, fetched from this site as the app starts (in parallel with
+   the first render, not in front of it), so the page's first paint does not
+   wait for its ~66 KB. If it loses the race, PostHog falls back to its CDN
+   as before. Production only, like everything else here. */
+if (ENABLED) {
+  void import("posthog-js/dist/posthog-recorder").catch(() => {});
+}
 const LOG_EVENTS = !IN_PRODUCTION;
 
 export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
