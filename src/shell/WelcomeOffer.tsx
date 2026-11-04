@@ -18,12 +18,15 @@ export function WelcomeBar({ price }: { price: string }) {
   const r = useWelcomeEnds();
   if (!r) return null;
   return (
-    <div className="tpa-wbar" role="timer" aria-label={`${price} first month ends in ${spokenClock(r)}`}>
+    /* It's the offer that ends, not your first month (UX audit, 4 Nov 2026:
+       "can be misread as 'your first month ends'"). An aside, so the bar is in
+       a landmark. */
+    <aside className="tpa-wbar" role="timer" aria-label={`${price} first month offer ends in ${spokenClock(r)}`}>
       <Clock />
       <span aria-hidden="true">
-        {price} first month ends in <span className="tnum">{shortClock(r)}</span>
+        {price} first month · offer ends in <span className="tnum">{shortClock(r)}</span>
       </span>
-    </div>
+    </aside>
   );
 }
 

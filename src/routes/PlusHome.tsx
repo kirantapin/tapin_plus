@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { logoField, venues } from "../model/content";
+import { covers, logoField, venueCovers, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { monthlyBack } from "../model/savings";
@@ -12,6 +12,8 @@ import { PlusSeats } from "../shell/PlusSeats";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
+import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
+import { ComingTiles } from "../shell/Coming";
 import { heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
@@ -43,7 +45,9 @@ const PERCENT = 15;
 
 /** The five places Plus covers in the app (PLUS_STANDING_LIST), coffee and
  *  dessert first (2 Nov ad rule: never lead with The Burg or The Milk Parlor). */
-const ORDER = ["coffeeholicsva", "sweetopia", "olaika", "themilkparlor", "theburg"] as const;
+/* Coffeeholics and The Burg first, wherever the places are listed (Sam,
+   4 Nov 2026: "since those are the two biggest"). */
+const ORDER = ["coffeeholicsva", "theburg", "themilkparlor", "olaika", "sweetopia"] as const;
 const PLACES = ORDER.map((id) => venues.find((v) => v.id === id)).filter(
   (v): v is (typeof venues)[number] => v !== undefined,
 );
@@ -80,6 +84,13 @@ const ORDERS: Record<string, readonly string[]> = {
   themilkparlor: ["Munchie Sampler"],
   theburg: ["Ceviche — Peru"],
 };
+/* At The Milk Parlor the example is a line skip with the credit on it (Sam,
+   4 Nov 2026: "at the milk parlor, maybe we show a line skip in the cart
+   discounted with the credit someone has"). $10, confirmed by Sam the same
+   day. */
+const SKIP: Record<string, { label: string; price: number }> = {
+  themilkparlor: { label: "Line skip", price: 10 },
+};
 const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
   const names = ORDERS[venue.id];
   if (!names) return null;
@@ -87,6 +98,8 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
   if (items.some((i) => !i)) return null;
   const price = items.reduce((s, i) => s + (i?.price ?? 0), 0);
   if (price < MIN_ORDER) return null;
+  const skip = SKIP[venue.id];
+  if (skip) return { venue, label: skip.label, price: skip.price, img: venue.hero };
   return { venue, label: names.join(" + "), price, img: items[0]?.img ?? venue.hero };
 }).filter((e): e is Example => e !== null);
 
@@ -509,9 +522,12 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
       >
         {mystery ? (
           <div className="tpa-order-in tpa-next" key="next">
-            <p className="tpa-next-h">More places are joining Plus</p>
+            {/* The kinds of place joining next, and the lock-in (Sam, 4 Nov
+                2026). */}
+            <p className="tpa-next-h">More places are joining</p>
+            <ComingTiles />
             <p className="tpa-next-p">
-              Every new place is yours too, at no extra cost. Your {monthly} a month stays locked in as they join.
+              Plus costs more for new members as they join. Join now and yours stays {monthly}.
             </p>
           </div>
         ) : null}
@@ -577,6 +593,19 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
                 +N points" line was clutter (Sam, 3 Nov 2026). */}
           </div>
         )}
+        {/* What else it works on at this place (Sam, 4 Nov 2026: "a simple
+            design showing what else this works on at the currently selected
+            location"). One quiet row of words. */}
+        {mystery ? null : (
+          <p className="tpa-order-also" key={`also-${which}`}>
+            <span>Also here</span>
+            {covers
+              .filter((c) => (venueCovers[ex.venue.id] ?? []).includes(c.id))
+              .map((c) => (
+                <b key={c.id}>{c.label}</b>
+              ))}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -629,6 +658,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [look] = useState(orderLook);
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
   const price = usePlusPrice();
@@ -1006,15 +1036,26 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <ul className="tpa-rail">
             {PLACES.map((v) => (
               <li key={v.id} className="tpa-place">
-                <img className="tpa-place-photo" src={photoFor(v)} alt="" decoding="async" loading="lazy" />
-                <span className="tpa-glass tpa-tag">
-                  <FlatMark className="tpa-tag-mark" />
-                  Plus
-                </span>
-                <span className="tpa-place-name">
-                  <b>{v.name}</b>
-                  <small>{KIND[v.id] ?? v.category}</small>
-                </span>
+                {/* A tap opens what Plus does there (Sam, 4 Nov 2026). */}
+                <button
+                  type="button"
+                  className="tpa-place-open"
+                  aria-label={`What Plus gets you at ${v.name}`}
+                  onClick={() => {
+                    setPlaceOpen({ id: v.id, name: v.name, kind: KIND[v.id] ?? v.category, photo: photoFor(v) });
+                    track("plus_place_opened", { place: v.id });
+                  }}
+                >
+                  <img className="tpa-place-photo" src={photoFor(v)} alt="" decoding="async" loading="lazy" />
+                  <span className="tpa-glass tpa-tag">
+                    <FlatMark className="tpa-tag-mark" />
+                    Plus
+                  </span>
+                  <span className="tpa-place-name">
+                    <b>{v.name}</b>
+                    <small>{KIND[v.id] ?? v.category}</small>
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
@@ -1115,6 +1156,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </main>
 
       {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
+      {placeOpen ? (
+        <PlacePopup
+          place={placeOpen}
+          onClose={() => setPlaceOpen(null)}
+          onJoin={() => {
+            setPlaceOpen(null);
+            join("place_popup");
+          }}
+        />
+      ) : null}
       {how ? (
         <HowSheet
           onClose={() => setHow(false)}

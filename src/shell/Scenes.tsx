@@ -38,6 +38,7 @@ import { itemNamed } from "../model/menu";
 import { BENEFIT } from "../model/savings";
 import { POINTS_PER_DOLLAR, CREDIT_CENTS, money } from "../model/order";
 import { venues, logoField, offers, heroIsBright } from "../model/content";
+import { ComingTiles } from "./Coming";
 
 /**
  * The receipt's basket, resolved from the real menu rather than typed.
@@ -611,6 +612,7 @@ export function SceneOffers() {
      one the deck's story adds to an order; the second states its status. */
   return (
     <div className="offers">
+      {/* Italiano's stays (Sam, 4 Nov 2026: "you can keep it"). */}
       {offers.map((o, k) => (
         <div className="offer" key={o.id}>
           <p className="offer-who">
@@ -1137,7 +1139,17 @@ export function SceneClose() {
   );
 }
 
+/** The places joining next, as tiles (shell/Coming.tsx). */
+function SceneGrowing() {
+  return (
+    <div className="growing-scene">
+      <ComingTiles className="coming-lit" />
+    </div>
+  );
+}
+
 export const SCENES: Record<string, (p: SceneProps) => JSX.Element> = {
+  growing: SceneGrowing,
   spend: SceneSpend,
   value: SceneValue,
   order: SceneOrder,
