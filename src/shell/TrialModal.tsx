@@ -5,6 +5,23 @@ import { logoField, venues } from "../model/content";
 import { usd, usePlusPrice } from "../model/plus";
 import { openPlusCheckout } from "./PlusCheckout";
 
+/** The ad's tags (utm_*, fbclid) carried onto a Try link, so a visit that
+ *  goes on to Tapin keeps its ad (Grok's audit, 3 Nov 2026: the Try links
+ *  dropped them). The link's own parameters stay. */
+function withAdTags(href: string): string {
+  if (typeof window === "undefined") return href;
+  try {
+    const here = new URLSearchParams(window.location.search);
+    const url = new URL(href);
+    here.forEach((v, k) => {
+      if ((k.startsWith("utm_") || k === "fbclid") && !url.searchParams.has(k)) url.searchParams.set(k, v);
+    });
+    return url.toString();
+  } catch {
+    return href;
+  }
+}
+
 /**
  * HOW TO TRY IT FREE — the campaign page's one modal.
  *
@@ -171,7 +188,7 @@ export default function TrialModal({
                   <li key={t.id}>
                     <a
                       className="action action-ghost cg-trial"
-                      href={t.href}
+                      href={withAdTags(t.href)}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

@@ -171,6 +171,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
 function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
   const price = usePlusPrice();
+  const { track } = useEventTracking();
   const [digits, setDigits] = useState("");
   const [optIn, setOptIn] = useState(false);
   const [code, setCode] = useState("");
@@ -188,14 +189,23 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
     if (stage === "phone") {
       const err = await sendCode(phone);
       setBusy(false);
-      if (err) return setError(err);
+      if (err) {
+        track("plus_phone_failed", { error: err });
+        return setError(err);
+      }
+      /* Each step of the sheet, so a drop-off shows where it happened
+         (Grok's audit, 3 Nov 2026). */
+      track("plus_phone_submitted", { opt_in: optIn });
       setStage("code");
       return;
     }
     // On success the session lands in auth_context and the sheet moves on.
     const err = await verifyCode(phone, code, undefined, optIn);
     setBusy(false);
-    if (err) setError(err);
+    if (err) {
+      track("plus_code_failed", { error: err });
+      setError(err);
+    } else track("plus_code_verified", {});
   };
 
   return (
@@ -325,6 +335,15 @@ function Review({
   const [cart, setCart] = useState<PlusCart | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const { track } = useEventTracking();
+  /* The pay step on screen with its price: InitiateCheckout for Meta
+     (context/meta_pixel.ts). Once per price. */
+  const shownFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (!cart || !price || shownFor.current === cart.dueTodayCents) return;
+    shownFor.current = cart.dueTodayCents;
+    track("plus_pay_shown", { amount_cents: cart.dueTodayCents });
+  }, [cart, price, track]);
   useEffect(() => {
     let live = true;
     setCart(null);
@@ -440,6 +459,7 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
       if (confirmError) throw new Error(confirmError.message);
       const { orderId } = await submitPlusOrder(fresh, accessToken, clientSecret);
       const props = { order_id: orderId, amount_cents: fresh.dueTodayCents };
+      // PostHog keeps `purchase`; Meta gets only Subscribe (context/meta_pixel.ts).
       track("purchase", props);
       track("subscription_purchase", props);
       // Paid first, so the sheet says "You're in", not "already a member".
@@ -464,7 +484,15 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
           buttonTheme: { applePay: "black", googlePay: "black" },
         }}
         // No wallet on this device: the element renders nothing, so say why.
-        onReady={({ availablePaymentMethods }) => setNoWallet(!availablePaymentMethods)}
+        onReady={({ availablePaymentMethods }) => {
+          setNoWallet(!availablePaymentMethods);
+          /* Whether a wallet showed, and where (Grok's audit, 3 Nov 2026:
+             Apple Pay is usually missing inside Instagram's browser). */
+          track(availablePaymentMethods ? "plus_wallet_ready" : "plus_wallet_unavailable", {
+            in_app_browser: typeof navigator !== "undefined" && /Instagram|FBAN|FBAV|FB_IAB/i.test(navigator.userAgent),
+            ...(availablePaymentMethods ?? {}),
+          });
+        }}
         onClick={(event) => event.resolve()}
         onConfirm={onConfirm}
       />
