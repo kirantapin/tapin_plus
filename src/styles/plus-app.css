@@ -93,9 +93,9 @@ html[data-surface="tpa"] body {
      over the tower and the sun (Sam, 3 Nov 2026: "a slight gradient there
      behind the text specifically"). */
   background:
-    radial-gradient(ellipse 95% 70% at 0% 100%, rgba(0, 0, 0, 0.62) 0, rgba(0, 0, 0, 0.36) 45%, rgba(0, 0, 0, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 0% 100%, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.48) 45%, rgba(0, 0, 0, 0) 100%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) calc(env(safe-area-inset-top) + 80px)),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0.4) 38%, rgba(0, 0, 0, 0) 66%);
+    linear-gradient(0deg, rgba(0, 0, 0, 0.78) 0, rgba(0, 0, 0, 0.5) 42%, rgba(0, 0, 0, 0) 78%);
 }
 .tpa-band-top {
   position: absolute;
@@ -152,7 +152,9 @@ html[data-surface="tpa"] body {
   font-size: 30px;
   line-height: 34px;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
+  /* Stronger shade and shadow (Sam, 3 Nov 2026: "is the gradient behind
+     the text strong enough"): the top line sat on the bright tower. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 18px rgba(0, 0, 0, 0.45);
   max-width: 15ch;
   text-wrap: balance;
 }
@@ -2701,4 +2703,20 @@ html[data-surface="tpa"] .ct .ct-go {
     width: 32px;
     height: 32px;
   }
+}
+/* On a desk the headline is taller than the shade's reach: a soft wash from
+   the left carries it up behind the first line. */
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band::after {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0.32) 32%, rgba(0, 0, 0, 0) 58%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0) 90px),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0, rgba(0, 0, 0, 0.25) 45%, rgba(0, 0, 0, 0) 75%);
+  }
+}
+/* Back matches the next button's corners (Sam, 3 Nov 2026: "can these have
+   the same edge rounding? ... less rounded"). */
+.hs-back {
+  width: 52px;
+  border-radius: 14px;
 }
