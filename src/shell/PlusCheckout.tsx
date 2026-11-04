@@ -8,6 +8,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { sendCode, verifyCode } from "./authEnv";
+import { asset } from "../asset";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
    Join on any page opens this: openPlusCheckout("where"). It's mounted once
@@ -51,6 +52,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   const { track } = useEventTracking();
   const price = usePlusPrice();
   const [paid, setPaid] = useState<string | null>(null);
+  const [signInStage, setSignInStage] = useState<"phone" | "code">("phone");
   const sheet = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -71,21 +73,27 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const signedIn = !!userSession && !!accessToken;
   const body =
     userSession === undefined ? null : paid ? (
-      <Done title="You’re in." line="Your Tapin Plus membership is active. Use it in the Tapin app at every Plus place." />
-    ) : !userSession || !accessToken ? (
-      <SignIn />
+      <Done title="You’re in" line="Your Tapin Plus membership is active." texted />
+    ) : !signedIn ? (
+      <SignIn onStage={setSignInStage} />
     ) : subscribed === true ? (
-      <Done title="You’re already a member." line="There’s nothing to pay. Your membership is active." />
+      <Done title="You’re already a member" line="There’s nothing to pay. Your membership is active." />
     ) : (
       <Review accessToken={accessToken} price={price} onPaid={setPaid} />
     );
+  /* Three short steps, shown as three bars, so the way to the end is in
+     view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
+     design). */
+  const step = paid || subscribed === true ? 4 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
 
   return createPortal(
     <div className="pck-layer" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="pck-sheet" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
         <div className="pck-top">
+          <img className="pck-mark" src={asset("/brand/plus-paper-mark.svg")} alt="" width="40" height="32" decoding="async" />
           <h2 id="pck-title" className="pck-title">Join Tapin Plus</h2>
           <button type="button" className="pck-x" aria-label="Close" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -93,6 +101,16 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
             </svg>
           </button>
         </div>
+        {step < 4 ? (
+          <ol className="pck-steps" aria-label={`Step ${step} of 3`}>
+            {["Phone", "Code", "Pay"].map((label, k) => (
+              <li key={label} data-on={k + 1 <= step ? "" : undefined}>
+                <span aria-hidden="true" />
+                {label}
+              </li>
+            ))}
+          </ol>
+        ) : null}
         {body}
       </div>
     </div>,
@@ -101,7 +119,7 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
 }
 
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
-function SignIn() {
+function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
   const [digits, setDigits] = useState("");
   const [optIn, setOptIn] = useState(false);
   const [code, setCode] = useState("");
@@ -109,6 +127,7 @@ function SignIn() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const phone = `+1${digits}`;
+  useEffect(() => onStage(stage), [stage, onStage]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +151,7 @@ function SignIn() {
     <form className="pck-body" onSubmit={submit}>
       {stage === "phone" ? (
         <>
-          <p className="pck-lede">Sign in with your phone number. Your membership goes on your Tapin account.</p>
+          <p className="pck-lede">Your membership goes on your Tapin account.</p>
           <label className="pck-label" htmlFor="pck-phone">Phone number</label>
           <div className="pck-field">
             <span className="pck-cc">+1</span>
@@ -162,7 +181,7 @@ function SignIn() {
         </>
       ) : (
         <>
-          <p className="pck-lede">Enter the 6-digit code we sent to +1 {digits}.</p>
+          <p className="pck-lede">We sent a 6-digit code to +1 {digits}.</p>
           <label className="pck-label" htmlFor="pck-code">Code</label>
           <div className="pck-field">
             <input
@@ -252,6 +271,12 @@ function Review({
         <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
         {" · "}
         <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Privacy</a>
+      </p>
+      {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
+          download the tapin app after they subscribe". */}
+      <p className="pck-text">
+        <PhoneGlyph />
+        <span>After you join, we’ll text you a link to get the Tapin app.</span>
       </p>
       <Elements
         key={cart.dueTodayCents}
@@ -345,13 +370,40 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
 /* Where the membership is used: the app (/in is Early Access's page). */
 const TAPIN_APP = "https://www.tapin.app/discovery?zone=blacksburg";
 
-function Done({ title, line }: { title: string; line: string }) {
+/* Where a member manages Plus (Sam, 3 Nov 2026: "a link to manage their
+   membership on the tapin plus confirmation page"). */
+const MANAGE_URL = TAPIN_APP;
+
+function PhoneGlyph() {
   return (
-    <div className="pck-body" role="status">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <rect x="7" y="3" width="10" height="18" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10.5 17.5h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Done({ title, line, texted = false }: { title: string; line: string; texted?: boolean }) {
+  return (
+    <div className="pck-body pck-done-body" role="status">
+      <span className="pck-tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28">
+          <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
       <p className="pck-done">{title}</p>
       <p className="pck-lede">{line}</p>
+      {texted ? (
+        <p className="pck-text">
+          <PhoneGlyph />
+          <span>We’ve texted you a link to get the Tapin app.</span>
+        </p>
+      ) : null}
       <a className="pck-cta" href={TAPIN_APP}>
         Open Tapin
+      </a>
+      <a className="pck-cta pck-cta-quiet" href={MANAGE_URL}>
+        Manage your membership
       </a>
     </div>
   );
