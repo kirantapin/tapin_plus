@@ -87,20 +87,33 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
   const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
   const body =
     preview === "done" ? (
-      <Done title="You’re in" line="Your Tapin Plus membership is active." texted />
+      <Done texted />
     ) : userSession === undefined ? null : paid ? (
-      <Done title="You’re in" line="Your Tapin Plus membership is active." texted />
+      <Done texted />
     ) : !signedIn ? (
       <SignIn onStage={setSignInStage} />
     ) : subscribed === true ? (
-      <Done title="You’re already a member" line="There’s nothing to pay. Your membership is active." />
+      <Done />
     ) : (
       <Review accessToken={accessToken} price={price} onPaid={setPaid} onDue={setDueCents} />
     );
   /* Three short steps, shown as three bars, so the way to the end is in
      view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
      design). */
-  const step = paid || subscribed === true ? 4 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
+  const done = preview === "done" || !!paid || subscribed === true;
+  const step = done ? 4 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
+  /* Once joined, the header is the moment: a tick that draws itself and
+     "You're in" (or, for someone who already was, "You're a member"), in
+     place of "Join Tapin Plus" and a price that no longer applies (Sam, 3 Nov
+     2026: polish the post-purchase screen). */
+  const doneTitle = paid || preview === "done" ? "You’re in" : "You’re a member";
+  const tick = useRef<SVGPathElement | null>(null);
+  useEffect(() => {
+    const p = tick.current;
+    if (!done || !p || still() || typeof p.animate !== "function") return;
+    p.animate([{ strokeDashoffset: 20 }, { strokeDashoffset: 0 }], { duration: 420, delay: 120, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" });
+    (p.closest(".pck-tick") as HTMLElement | null)?.animate([{ transform: "scale(.6)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.34,1.56,.64,1)" });
+  }, [done]);
 
   return createPortal(
     <div className="pck-layer" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -109,14 +122,30 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
           {/* The title and the town as a chip, no mark (Sam, 3 Nov 2026: "remove
               the tapin logo here, and make it 'Join Tapin Plus' 'blacksburg' in
               a chip"). */}
-          <div className="pck-head">
-            <h2 id="pck-title" className="pck-title">
-              Join Tapin Plus <span className="pck-town">Blacksburg</span>
-            </h2>
-            <p className="pck-price tnum">
-              {priceLine(price, dueCents)}
-            </p>
-          </div>
+          {done ? (
+            <div className="pck-head pck-head-done">
+              <span className="pck-tick" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path ref={tick} d="m6.5 12.5 3.6 3.6 7.4-7.6" pathLength={20} strokeDasharray={20} fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <h2 id="pck-title" className="pck-title">
+                  {doneTitle}
+                </h2>
+                <p className="pck-price">Your Tapin Plus membership is active.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="pck-head">
+              <h2 id="pck-title" className="pck-title">
+                Join Tapin Plus <span className="pck-town">Blacksburg</span>
+              </h2>
+              <p className="pck-price tnum">
+                {priceLine(price, dueCents)}
+              </p>
+            </div>
+          )}
           <button type="button" className="pck-x" aria-label="Close" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
@@ -469,29 +498,17 @@ function PhoneGlyph() {
   );
 }
 
-function Done({ title, line, texted = false }: { title: string; line: string; texted?: boolean }) {
+function Done({ texted = false }: { texted?: boolean }) {
   return (
     <div className="pck-body pck-done-body" role="status">
-      <div className="pck-done-head">
-        <span className="pck-tick" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="26" height="26">
-            <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <div>
-          <p className="pck-done">{title}</p>
-          <p className="pck-lede">{line}</p>
-        </div>
-      </div>
       {/* The one thing left to do (Sam, 3 Nov 2026: "right after someone
           pays, the modal would have a card for them to download"). */}
-      <AppCard where={texted ? "checkout_paid" : "checkout_member"} line="Sign in with this same number. Your $5 back and 15% off are waiting." enter />
-      {texted ? (
-        <p className="pck-text-quiet">
-          <PhoneGlyph />
-          <span>We’ve texted you the link too.</span>
-        </p>
-      ) : null}
+      <AppCard
+        where={texted ? "checkout_paid" : "checkout_member"}
+        line="Sign in with this same number. Your $5 back and 15% off are waiting."
+        note={texted ? "We’ve also texted you the link." : undefined}
+        enter
+      />
       <a className="pck-manage" href={appHref()} target="_blank" rel="noopener noreferrer">
         Manage your membership in the app
       </a>

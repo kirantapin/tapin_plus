@@ -43,9 +43,21 @@ function AppleGlyph() {
   );
 }
 
-/** The card: the app's icon and name, one line on what's in it, the button
- *  (and on a computer, the QR code to scan). `where` labels the tap. */
-export function AppCard({ where, line, enter = false }: { where: string; line: string; enter?: boolean }) {
+function PhoneGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <rect x="7" y="3" width="10" height="18" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10.5 17.5h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** The card: the app's icon and name, one line on what's in it, then the
+ *  way to get it for this device. A phone gets the button. A computer gets
+ *  the QR code as the main act (the phone is where Plus is used), with the
+ *  App Store as a plain link beside it. `note` is a footnote inside the
+ *  card; `where` labels the tap. */
+export function AppCard({ where, line, note, enter = false }: { where: string; line: string; note?: string; enter?: boolean }) {
   const { track } = useEventTracking();
   const d = device();
   const card = useRef<HTMLDivElement | null>(null);
@@ -58,33 +70,41 @@ export function AppCard({ where, line, enter = false }: { where: string; line: s
     el.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 420, delay: 260, easing: ease, fill: "backwards" });
     el.querySelector(".gta-icon")?.animate([{ transform: "scale(.82)" }, { transform: "none" }], { duration: 520, delay: 300, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" });
   }, [enter]);
+  const tap = () => track("plus_get_app_clicked", { where, device: d });
   return (
     <div ref={card} className="gta" data-device={d}>
-      <div className="gta-main">
-        <div className="gta-id">
-          <img className="gta-icon" src={ICON} alt="" width="56" height="56" decoding="async" />
-          <p className="gta-name">
-            <b>Tapin</b>
-            <span>{d === "android" ? "On the web for Android" : "Free on the App Store"}</span>
-          </p>
+      <div className="gta-id">
+        <img className="gta-icon" src={ICON} alt="" width="56" height="56" decoding="async" />
+        <p className="gta-name">
+          <b>Tapin</b>
+          <span>{d === "android" ? "On the web for Android" : "Free on the App Store"}</span>
+        </p>
+      </div>
+      <p className="gta-line">{line}</p>
+      {d === "desktop" ? (
+        <div className="gta-scan">
+          <img className="gta-qr" src={QR} alt="QR code for Tapin on the App Store" width="96" height="96" decoding="async" />
+          <div className="gta-scan-words">
+            <p>Scan with your iPhone’s camera to get the app</p>
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={tap}>
+              Or open the App Store
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </div>
         </div>
-        <p className="gta-line">{line}</p>
-        <a
-          className="gta-cta"
-          href={appHref(d)}
-          target={d === "desktop" ? "_blank" : undefined}
-          rel="noopener noreferrer"
-          onClick={() => track("plus_get_app_clicked", { where, device: d })}
-        >
+      ) : (
+        <a className="gta-cta" href={appHref(d)} rel="noopener noreferrer" onClick={tap}>
           {d === "android" ? null : <AppleGlyph />}
           {d === "android" ? "Open Tapin" : "Get the app"}
         </a>
-      </div>
-      {d === "desktop" ? (
-        <figure className="gta-qr">
-          <img src={QR} alt="QR code for Tapin on the App Store" width="104" height="104" decoding="async" />
-          <figcaption>Scan with your iPhone</figcaption>
-        </figure>
+      )}
+      {note ? (
+        <p className="gta-note">
+          <PhoneGlyph />
+          {note}
+        </p>
       ) : null}
     </div>
   );

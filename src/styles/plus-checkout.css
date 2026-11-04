@@ -496,31 +496,27 @@
 
 /* ══ GET THE APP (shell/GetTheApp.tsx; Sam, 3 Nov 2026) ═════════════════════
    One white plate: the app's real icon and name, one line on what's inside,
-   the black button. On a computer the QR code stands beside it, so the phone
-   that will use Plus can scan it. Used at the end of the checkout and as the
-   member's card on the home page, so it carries its own colours. */
+   then the way to get it. A phone gets the black button. A computer gets the
+   QR code, set in a grey well with its instruction and the App Store as a
+   plain link beside it, because the phone is where Plus is used. Used at the
+   end of the checkout and as the member's card on the home page, so it
+   carries its own colours. */
 .gta {
   display: grid;
-  gap: 16px;
-  padding: 16px;
+  gap: 14px;
+  padding: 18px;
   border-radius: 20px;
   background: #ffffff;
   color: #141618;
   font-family: "Gilroy", Arial, sans-serif;
 }
-.gta[data-device="desktop"] {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-}
-.gta-main {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
+.gta p {
+  margin: 0;
 }
 .gta-id {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .gta-icon {
   flex: 0 0 auto;
@@ -532,7 +528,6 @@
 .gta-name {
   display: grid;
   gap: 2px;
-  margin: 0;
 }
 .gta-name b {
   font-weight: 600;
@@ -547,7 +542,6 @@
   color: rgba(20, 22, 24, 0.56);
 }
 .gta-line {
-  margin: 0;
   font-weight: 500;
   font-size: 15px;
   line-height: 20px;
@@ -559,7 +553,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 50px;
+  height: 52px;
   border-radius: 14px;
   background: #141618;
   color: #ffffff;
@@ -575,66 +569,99 @@
 .gta-cta:active {
   transform: scale(0.98);
 }
-.gta-cta:focus-visible {
+.gta a:focus-visible {
   outline: 2px solid #141618;
   outline-offset: 2px;
 }
-.gta-qr {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  margin: 0;
-  padding: 10px 10px 8px;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.1);
-}
-.gta-qr img {
-  display: block;
-  width: 104px;
-  height: 104px;
-}
-.gta-qr figcaption {
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 15px;
-  color: rgba(20, 22, 24, 0.56);
-  white-space: nowrap;
-}
-
-/* The checkout's last screen: the tick and the words side by side, the app
-   card the biggest thing on it, the text and the manage link quiet under. */
-.pck-done-head {
+/* A computer: the code in a well, its words beside it. */
+.gta-scan {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f2f2f4;
 }
-.pck-done-head .pck-tick {
+.gta-qr {
   flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
+  display: block;
+  width: 96px;
+  height: 96px;
+  padding: 8px;
+  box-sizing: content-box;
+  border-radius: 10px;
+  background: #ffffff;
 }
-.pck-done-head .pck-done {
-  font-size: 24px;
-  line-height: 28px;
+.gta-scan-words {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
 }
-.pck-done-head .pck-lede {
-  margin-top: 2px;
+.gta-scan-words p {
+  font-weight: 600;
   font-size: 15px;
   line-height: 20px;
-  color: var(--muted);
+  text-wrap: balance;
 }
-.pck-text-quiet {
+.gta-scan-words a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  min-height: 24px;
+  color: rgba(20, 22, 24, 0.62);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  text-decoration: none;
+}
+.gta-scan-words a:hover {
+  color: #141618;
+}
+/* The footnote, inside the card under its action. */
+.gta-note {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 14px;
-  line-height: 18px;
+  margin-top: -2px !important;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(20, 22, 24, 0.56);
+}
+
+/* The checkout's last screen. The header carries the moment: a green tick
+   that draws itself beside "You're in", and the plan underneath. Then the
+   app card, then one quiet link. No step bars, no price. */
+.pck-head-done {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pck-head-done .pck-tick {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+}
+.pck-head-done .pck-title {
+  font-size: 24px;
+  line-height: 28px;
+}
+.pck-head-done .pck-price {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
   color: var(--muted);
 }
-.pck-text-quiet svg {
-  width: 16px;
-  height: 16px;
+.pck-head-done .pck-town {
+  margin: 0;
+}
+.pck-done-body {
+  gap: 10px;
+  padding-top: 18px;
 }
 .pck-manage {
   align-self: center;
