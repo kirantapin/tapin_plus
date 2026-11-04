@@ -28,6 +28,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
   const sheet = useRef<HTMLDivElement | null>(null);
   const photo = useRef<HTMLDivElement | null>(null);
   const body = useRef<HTMLDivElement | null>(null);
+  const xBtn = useRef<HTMLButtonElement | null>(null);
   const closing = useRef(false);
   const sells = covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
   /* The Burg is a bar, so its rows say plainly that the $5 and 15% skip
@@ -91,6 +92,10 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
         flight.onfinish = () => {
           ph.style.opacity = "";
           g.remove();
+          /* The close button fades in once the photo has landed, not all at
+             once with it (Sam, 4 Nov 2026: "the X button just appears so
+             abruptly"). */
+          xBtn.current?.animate?.([{ opacity: 0, transform: "scale(.9)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: ease, fill: "backwards" });
         };
         sheet.current?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
         body.current?.animate?.([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], {
@@ -121,7 +126,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
       <div ref={sheet} className="pp-sheet" role="dialog" aria-modal="true" aria-labelledby="pp-name" tabIndex={-1}>
         <div ref={photo} className="pp-photo">
           <img src={place.photo} alt="" decoding="async" />
-          <button type="button" className="pp-x" aria-label="Close" onClick={() => close()}>
+          <button ref={xBtn} type="button" className="pp-x" aria-label="Close" onClick={() => close()}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
             </svg>
