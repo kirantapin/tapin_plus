@@ -2581,3 +2581,42 @@ html[data-surface="tpa"] .ct .ct-go {
     padding-bottom: 24px;
   }
 }
+
+
+/* The next-100 count (shell/PlusSeats.tsx): one line and a thin bar of the
+   spots already gone, in ink; the next price muted beside it. */
+.plus-seats {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+.plus-seats-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.plus-seats-line b {
+  font-weight: 600;
+}
+.plus-seats-line span {
+  flex: 0 0 auto;
+  font-weight: 600;
+  color: rgba(20, 22, 24, 0.62);
+}
+.plus-seats-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e5ea;
+  overflow: hidden;
+}
+.plus-seats-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #141618;
+  transform-origin: left center;
+}
