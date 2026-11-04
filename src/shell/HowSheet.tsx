@@ -28,14 +28,16 @@ const money = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`
 
 /** The spend question is asked by the week now (Sam, 3 Nov 2026). */
 const HEADS: Record<string, string> = {
-  spend: "What do you spend in a month on food and drinks?",
+  /* Sam, 3 Nov 2026: "in blacksburg here, include event tickets and
+     cover/lineskip". */
+  spend: "What do you spend in a month in Blacksburg?",
 };
 
 /** One short line a slide, by slide id (Sam, 3 Nov 2026: "there's just
  *  too much text on some of these slides"). The rules in full live in the
  *  page's What you get, questions and fine print. */
 const LINES: Record<string, string> = {
-  spend: "Coffee, lunch, dinner.",
+  spend: "Food, drinks, event tickets, cover and line skips.",
   order: "Or pay full price on $10+ and get $5 back.",
   myspot: "Order now, pick it up later.",
   offers: "From each place, for members.",
