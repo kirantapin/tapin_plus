@@ -2912,3 +2912,52 @@ html[data-surface="tpa"] .hs-scene > * {
     margin: 0 24px;
   }
 }
+
+/* ══ HERO A'S PROMISE CARD (Sam, 4 Nov 2026) ═════════════════════════════
+   The guarantee in its own card, first on the sheet: a green seal, one
+   line in ink, one quieter. Compact, so How it works stays close behind. */
+.tpa-promise-top {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.tpa-promise-seal {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0f8a5f;
+  color: #ffffff;
+}
+.tpa-promise-seal svg {
+  width: 22px;
+  height: 22px;
+}
+.tpa-promise-top .tpa-promise-h {
+  font-size: 16px;
+  line-height: 21px;
+  text-wrap: balance;
+}
+.tpa-promise-top .tpa-promise-line {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpa-promise-top {
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+.tpa-promise-top .tpa-promise-h {
+  text-wrap: pretty;
+}
+.tpa-promise-copy {
+  display: grid;
+  margin: 0;
+}
+.tpa-promise-copy .tpa-promise-line {
+  margin-top: 2px;
+  font-weight: 500;
+  color: var(--muted);
+}

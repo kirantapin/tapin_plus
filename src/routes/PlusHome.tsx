@@ -257,6 +257,15 @@ const money = (n: number) => `$${n.toFixed(2)}`;
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="m8.8 12.2 2.2 2.2 4.4-4.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** The flat four-piece mark, for small places on photographs (the app's
  *  TapInGlyph, white on the glass). The paper mark is for the big moments. */
 function FlatMark({ className }: { className?: string }) {
@@ -668,6 +677,53 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     </button>
   );
   const [offer] = useState(offerLook);
+  /* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show the
+     plus promise guarantee - every month is refundable"). The app's own line
+     and the month-by-month check the presale terms carried. A refund is asked
+     for and auto-approved, never automatic. */
+  const promise = (
+    <section className="tpa-module tpa-promise" aria-labelledby="tpa-promise">
+      <span className="tpa-well tpa-promise-icon" aria-hidden="true">
+        <ShieldIcon />
+      </span>
+      <details className="tpa-more tpa-promise-more-d">
+        <summary>
+          <span>
+            <b id="tpa-promise" className="tpa-promise-h">
+              The Plus Promise
+            </b>
+            <span className="tpa-promise-line">Save more than Plus costs, or get your money back.</span>
+          </span>
+          <Chevron />
+        </summary>
+        <p>
+          Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it’s
+          auto-approved.
+        </p>
+      </details>
+    </section>
+  );
+  /* The same promise as hero A's first card (Sam, 4 Nov 2026: "save more
+     than the membership, or your money back automatically - it'd be auto
+     approved"). Said as "auto-approved": the refund is asked for, then
+     approved without a review, so "automatically" alone would promise
+     money nobody asked for. One line and a quieter one; the month-by-month
+     rule folds away. */
+  const promiseTop = (
+    <section className="tpa-module tpa-promise tpa-promise-top" aria-labelledby="tpa-promise-top">
+      <span className="tpa-promise-seal" aria-hidden="true">
+        <ShieldIcon />
+      </span>
+      {/* No fold: the two lines are the whole of it, and the column keeps the
+          width the chevron took, so the promise sits on two lines. */}
+      <p className="tpa-promise-copy">
+        <b id="tpa-promise-top" className="tpa-promise-h">
+          Save more than the membership, or your money back
+        </b>
+        <span className="tpa-promise-line">Refunds are auto-approved.</span>
+      </p>
+    </section>
+  );
   const lockMore = (
     <details className="tpa-more">
       <summary>
@@ -760,11 +816,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               </h1>
             ) : hero === "a" ? (
               <>
+                {/* The headline alone (Sam, 4 Nov 2026: "there's so much text
+                    now"; "still busy, maybe it belongs in it's own container
+                    above 'how it works'"). The Promise is that container. */}
                 <h1>${CREDIT} back every week at {PLACES.length} Blacksburg spots</h1>
-                <p className="tpa-hero-places">{PLACES.map((p) => p.name).join(" · ")}</p>
-                <p className="tpa-hero-sub">
-                  Or 15% off once a day. {FIRST_MONTH} your first month. Save more than you pay, or your money back.
-                </p>
               </>
             ) : (
               <>
@@ -783,6 +838,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </header>
 
       <main ref={sheetRef} className="tpa-sheet">
+        {/* Hero A's guarantee, in its own card above How it works (Sam,
+            4 Nov 2026). The control keeps it further down, as it was. */}
+        {hero === "a" ? promiseTop : null}
         {/* The order earning its $5 comes first, right under the band (Sam,
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
@@ -939,34 +997,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         </section>
         )}
 
-        {/* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show
-            the plus promise guarantee - every month is refundable"). The
-            app's own line (plus_facts.ts PLUS_PROMISE), and the month-by-month
-            check the presale terms carried. A refund is asked for and
-            auto-approved, never automatic. */}
-        <section className="tpa-module tpa-promise" aria-labelledby="tpa-promise">
-          <span className="tpa-well tpa-promise-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="m8.8 12.2 2.2 2.2 4.4-4.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-          <details className="tpa-more tpa-promise-more-d">
-            <summary>
-              <span>
-                <b id="tpa-promise" className="tpa-promise-h">
-                  The Plus Promise
-                </b>
-                <span className="tpa-promise-line">Save more than Plus costs, or get your money back.</span>
-              </span>
-              <Chevron />
-            </summary>
-            <p>
-              Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it’s
-              auto-approved.
-            </p>
-          </details>
-        </section>
+        {hero === "a" ? null : promise}
 
         <section className="tpa-places" aria-labelledby="tpa-every">
           <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
