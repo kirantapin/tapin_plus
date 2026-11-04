@@ -3565,6 +3565,7 @@ html[data-surface="tpa"] .hs-scene > * {
     height: 52px;
     padding: 0 12px 0 8px;
     border-radius: 14px;
+    font-family: inherit;
     text-align: left;
   }
   .tpa-home .tpa-carousel[data-tabs="a"] .tpa-tabs button > .tpa-tab-ring,
@@ -3575,6 +3576,9 @@ html[data-surface="tpa"] .hs-scene > * {
   .tpa-home .tpa-carousel[data-tabs="a"] .tpa-tab-name {
     display: block;
     grid-area: 1 / 2;
+    /* A button sets the system font; the names take the page's (Sam,
+       4 Nov 2026: "these are in the wrong font on desktop"). */
+    font-family: inherit;
     overflow: hidden;
     font-weight: 600;
     font-size: 15px;
