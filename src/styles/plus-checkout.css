@@ -236,34 +236,107 @@
 .pck-x {
   background: #ffffff;
 }
+.pck-head {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.pck-price {
+  margin-top: 2px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+/* Three bars, no labels: how short the way is, at a glance. */
 .pck-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
-  margin: 14px 0 0;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 .pck-steps li {
-  display: grid;
-  gap: 6px;
-  font-weight: 600;
-  font-size: 12px;
-  line-height: 14px;
-  color: var(--muted);
-}
-.pck-steps li span {
-  display: block;
   height: 4px;
   border-radius: 999px;
   background: rgba(20, 22, 24, 0.12);
   transition: background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .pck-steps li[data-on] {
+  background: var(--ink);
+}
+.pck-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* What you get, how soon, why it's safe: one white plate, three rows. */
+.pck-offer {
+  display: grid;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.pck-offer li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+.pck-offer li + li {
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.pck-offer b {
+  display: block;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+.pck-offer small {
+  display: block;
+  margin-top: 1px;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.pck-ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f0f0f0;
   color: var(--ink);
 }
-.pck-steps li[data-on] span {
-  background: var(--ink);
+.pck-ico-money {
+  background: #1f8a4c;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+}
+.pck-offer-tight li {
+  padding: 8px 0;
+}
+.pck-proof {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -2px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.pck-proof span {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #34c759;
+  box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.24);
 }
 .pck-body {
   gap: 12px;
@@ -358,7 +431,7 @@
   letter-spacing: -0.02em;
 }
 @media (prefers-reduced-motion: reduce) {
-  .pck-steps li span {
+  .pck-steps li {
     transition: none;
   }
 }

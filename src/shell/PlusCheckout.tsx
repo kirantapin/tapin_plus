@@ -9,6 +9,7 @@ import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from 
 import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { sendCode, verifyCode } from "./authEnv";
 import { asset } from "../asset";
+import { MEMBERS_SHORT } from "../model/proof";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
    Join on any page opens this: openPlusCheckout("where"). It's mounted once
@@ -93,8 +94,13 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
     <div className="pck-layer" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="pck-sheet" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
         <div className="pck-top">
-          <img className="pck-mark" src={asset("/brand/plus-paper-mark.svg")} alt="" width="40" height="32" decoding="async" />
-          <h2 id="pck-title" className="pck-title">Join Tapin Plus</h2>
+          <img className="pck-mark" src={asset("/brand/plus-paper-mark.svg")} alt="" width="44" height="35" decoding="async" />
+          <div className="pck-head">
+            <h2 id="pck-title" className="pck-title">Join Tapin Plus</h2>
+            <p className="pck-price tnum">
+              {usd(price?.first)} your first month, then {usd(price?.monthly)}
+            </p>
+          </div>
           <button type="button" className="pck-x" aria-label="Close" onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
@@ -104,9 +110,8 @@ function PlusCheckoutSheet({ where, onClose }: { where: string; onClose: () => v
         {step < 4 ? (
           <ol className="pck-steps" aria-label={`Step ${step} of 3`}>
             {["Phone", "Code", "Pay"].map((label, k) => (
-              <li key={label} data-on={k + 1 <= step ? "" : undefined}>
-                <span aria-hidden="true" />
-                {label}
+              <li key={label} data-on={k + 1 <= step ? "" : undefined} aria-current={k + 1 === step ? "step" : undefined}>
+                <span className="pck-sr">{label}</span>
               </li>
             ))}
           </ol>
@@ -151,7 +156,42 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
     <form className="pck-body" onSubmit={submit}>
       {stage === "phone" ? (
         <>
-          <p className="pck-lede">Your membership goes on your Tapin account.</p>
+          {/* THE OFFER, IN HORMOZI'S ORDER (Sam, 3 Nov 2026: "use the Alex
+              hormozi advice ... are we listing the guarantee ... students need
+              to know they get a link to download the app and start using tapin
+              plus right after"). What you get, how soon, why it's safe, and who
+              else is in, before anything is asked of them. */}
+          <ul className="pck-offer">
+            <li>
+              <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
+              <span>
+                <b>$5 back at every Plus place</b>
+                <small>Every week, on $10+ orders. Or 15% off.</small>
+              </span>
+            </li>
+            <li>
+              <span className="pck-ico" aria-hidden="true">
+                <PhoneGlyph />
+              </span>
+              <span>
+                <b>Use it today</b>
+                <small>Get the app link by text, right away.</small>
+              </span>
+            </li>
+            <li>
+              <span className="pck-ico" aria-hidden="true">
+                <ShieldGlyph />
+              </span>
+              <span>
+                <b>The Plus Promise</b>
+                <small>Save what you spend, or money back.</small>
+              </span>
+            </li>
+          </ul>
+          <p className="pck-proof">
+            <span aria-hidden="true" />
+            {MEMBERS_SHORT}
+          </p>
           <label className="pck-label" htmlFor="pck-phone">Phone number</label>
           <div className="pck-field">
             <span className="pck-cc">+1</span>
@@ -181,7 +221,9 @@ function SignIn({ onStage }: { onStage: (stage: "phone" | "code") => void }) {
         </>
       ) : (
         <>
-          <p className="pck-lede">We sent a 6-digit code to +1 {digits}.</p>
+          <p className="pck-lede">
+            We sent a 6-digit code to +1 {digits}. Then it’s one tap with Apple Pay or Google Pay.
+          </p>
           <label className="pck-label" htmlFor="pck-code">Code</label>
           <div className="pck-field">
             <input
@@ -274,10 +316,26 @@ function Review({
       </p>
       {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
           download the tapin app after they subscribe". */}
-      <p className="pck-text">
-        <PhoneGlyph />
-        <span>After you join, we’ll text you a link to get the Tapin app.</span>
-      </p>
+      <ul className="pck-offer pck-offer-tight">
+        <li>
+          <span className="pck-ico" aria-hidden="true">
+            <PhoneGlyph />
+          </span>
+          <span>
+            <b>Use it today</b>
+            <small>Get the app link by text, right away.</small>
+          </span>
+        </li>
+        <li>
+          <span className="pck-ico" aria-hidden="true">
+            <ShieldGlyph />
+          </span>
+          <span>
+            <b>The Plus Promise</b>
+            <small>Save what you spend, or money back.</small>
+          </span>
+        </li>
+      </ul>
       <Elements
         key={cart.dueTodayCents}
         stripe={stripePromise}
@@ -373,6 +431,15 @@ const TAPIN_APP = "https://www.tapin.app/discovery?zone=blacksburg";
 /* Where a member manages Plus (Sam, 3 Nov 2026: "a link to manage their
    membership on the tapin plus confirmation page"). */
 const MANAGE_URL = TAPIN_APP;
+
+function ShieldGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="m8.8 12.2 2.2 2.2 4.4-4.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function PhoneGlyph() {
   return (
