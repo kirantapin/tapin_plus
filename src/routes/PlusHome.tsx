@@ -6,6 +6,7 @@ import { logoField, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { monthlyBack } from "../model/savings";
+import { MEMBERS_LINE } from "../model/proof";
 import { usd, usePlusPrice } from "../model/plus";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout } from "../shell/PlusCheckout";
@@ -692,11 +693,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 ? `$${CREDIT} back every week at ${place.name}`
                 : `$${CREDIT} back at every place you already go in Blacksburg`}
             </h1>
-            {/* Social proof, at the top (Sam, 3 Nov 2026). Plus members, by
-                Sam's count: "let's just say over 500 ... we're just below
-                1,000, I think. I have to check." Raise it only once the real
-                count is past the new figure. */}
-            <SocialProof text="Join over 500 Virginia Tech students on Tapin Plus" />
+            {/* Social proof, at the top (Sam, 3 Nov 2026); the count lives in
+                model/proof.ts. */}
+            <SocialProof text={MEMBERS_LINE} />
           </div>
         </div>
       </header>
