@@ -209,6 +209,9 @@ export const venueCovers: Record<string, string[]> = {
    buying drinks is the inducement the Virginia caution (§10) is about. */
 /** What the credit and the 15% are spent on. */
 export const spendScope = "anything but alcohol";
+/** The Plus places that serve alcohol, where the alcohol rule is said out
+ *  loud (Sam, 4 Nov 2026: "maybe not just the burg right?"). */
+export const BAR_IDS: ReadonlySet<string> = new Set(["theburg", "themilkparlor", "olaika"]);
 /** The earning sentence: any $10+ order, whatever is on it. */
 export const earnLine = `Every $${Math.round(BENEFIT.creditMinUsd)}+ order earns your $${BENEFIT.creditUsd} credit, whatever you order.`;
 /** The spending sentence, with the mixed order Sam named. */
