@@ -2,8 +2,10 @@
    fine, as long as it's the same link pointing to the page") ═══════════════
    One link, plus.tapin.app, and each visitor is given one hero the first time
    and keeps it (localStorage), half and half:
-     "a" · Named: "$5 back every week at 5 Blacksburg spots", the five places
-           named, then 15% / the first month / the Promise (Grok's audit).
+     "a" · Named: "$5 back every week at 5 Blacksburg spots" and one line,
+           "Save more than you pay, or your money back." (Grok's audit; the
+           list of names and the price line went on 4 Nov, Sam: "there's so
+           much text now").
      "0" · Control: the hero as it was, "$5 back at every place you already go
            in Blacksburg".
    "b" (Payoff: "Your first $10 order pays for the month") is in the build but
