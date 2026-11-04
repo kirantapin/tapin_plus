@@ -33,7 +33,7 @@ html[data-surface="tpa"] body {
   font-size: 15px;
   line-height: 20px;
   -webkit-font-smoothing: antialiased;
-  padding-bottom: calc(150px + env(safe-area-inset-bottom));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 .tpa *,
 .tpa *::before,
@@ -2566,4 +2566,18 @@ html[data-surface="tpa"] .ct .ct-go {
    heading against the card's edge. */
 .tpa-order-in.tpa-next {
   padding: 18px 16px 20px;
+}
+
+/* Try it once, centred on a wide screen: round on all four corners and with
+   room under the black card. The phone rule above (24px top corners only,
+   for a sheet rising from the bottom) was outranking the centred card's own
+   radius, so on a desktop its bottom edge sat square under the Join card. */
+@media (min-width: 640px) {
+  html[data-surface="tpa"] .ct {
+    border-radius: 24px;
+    border: 0;
+  }
+  html[data-surface="tpa"] .ct-body {
+    padding-bottom: 24px;
+  }
 }

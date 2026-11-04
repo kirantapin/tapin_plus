@@ -1001,23 +1001,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
       {/* The docked Join is always on screen (Sam, 3 Nov 2026: "the sticky
           CTA should always show"). */}
-      {/* Join on top, See how much I'd save under it (Sam, 3 Nov 2026:
-          "those buttons should be stacked on top of one another"). The second
-          opens the walkthrough, which starts on what you spend and ends on
-          what you'd get back ("trigger the how this works modal instead"). */}
+      {/* Join alone again. See how much I'd save sat under it for a few
+          hours on 3 Nov 2026; real visitors from the ads never tapped it (they
+          used Step through it, and Join), so it went (Sam: "if the see how
+          much I save button isn't getting click throughs maybe we hide it"). */}
       <div className="tpa-dock" data-shown="">
         <button type="button" className="tpa-cta tpa-dock-cta" onClick={() => join("dock")}>
           Join Tapin Plus
-        </button>
-        <button
-          type="button"
-          className="tpa-dock-save"
-          onClick={() => {
-            setHow(true);
-            track("plus_save_opened", { where: "dock" });
-          }}
-        >
-          See how much I’d save
         </button>
       </div>
     </div>
