@@ -631,9 +631,21 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
 }
 
 const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
+  /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
+     support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
+     cancelled; stacking 1). Cancel is in the app, refunds by email (Sam,
+     same day). */
   {
-    q: "What if I barely go out?",
-    a: "Ask for a refund. Every month counts on its own: if Plus saved you less than you paid that month, your refund is auto-approved.",
+    q: "How do I cancel and get a refund?",
+    a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
+  },
+  {
+    q: "Is The Burg included? How does credit work there?",
+    a: `Yes. Order on Tapin at The Burg and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on food and non-alcoholic drinks there, not on alcohol.`,
+  },
+  {
+    q: "Does credit stack? Can I earn credit on an order where I use it?",
+    a: `Yes to both. Credit you haven’t spent adds up, and an order where you use credit still earns new $${CREDIT} back, as long as it’s $${MIN_ORDER} or more.`,
   },
   {
     q: "How often can I use it?",
@@ -652,7 +664,6 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
        who join later (Sam, 4 Nov 2026: "pays to get in early"). */
     a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and to ${PLUS_NEXT_PRICE} once these 100 spots are gone. It pays to get in early.`,
   },
-  { q: "Can I cancel?", a: "Anytime." },
 ];
 
 const LEGAL = [
