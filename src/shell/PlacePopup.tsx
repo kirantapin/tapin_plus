@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { covers, venueCovers } from "../model/content";
+import { BAR_IDS, covers, venueCovers } from "../model/content";
 import { slideAway } from "./sheetMotion";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
@@ -32,11 +32,11 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
   const xBtn = useRef<HTMLButtonElement | null>(null);
   const closing = useRef(false);
   const sells = covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
-  /* The Burg is a bar, so its rows say plainly that the $5 and 15% skip
-     alcohol (Sam, 4 Nov 2026), and don't advertise points on drinks: Virginia
-     bars ads for "anything of value conditioned on the purchase of alcoholic
-     beverages" (3VAC5-20-10 C 8; research 4 Nov 2026). */
-  const bar = place.id === "theburg";
+  /* At the bars (The Burg, The Milk Parlor, Olaika) the rows say plainly that
+     the $5 and 15% skip alcohol (Sam, 4 Nov 2026), and don't advertise points
+     on drinks: Virginia bars ads for "anything of value conditioned on the
+     purchase of alcoholic beverages" (3VAC5-20-10 C 8; research 4 Nov 2026). */
+  const bar = BAR_IDS.has(place.id);
 
   const close = useCallback(
     (then?: () => void) => {
@@ -149,7 +149,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
               </span>
               <span>
                 <b>$5 back a week, or 15% off a day</b>
-                <span>{bar ? "On the food and non-alcoholic drinks. Not on alcohol." : "On anything but alcohol"}</span>
+                <span>On anything but alcohol</span>
               </span>
             </li>
             <li>

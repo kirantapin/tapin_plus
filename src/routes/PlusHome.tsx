@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { covers, logoField, venueCovers, venues } from "../model/content";
+import { BAR_IDS, covers, logoField, venueCovers, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { monthlyBack } from "../model/savings";
@@ -617,12 +617,12 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
               ))}
           </p>
         )}
-        {/* The Burg is a bar, so say what its drinks get (Sam, 4 Nov 2026:
-            "People probably thought they could earn credit from alcohol ...
-            can we specify that for the burg"). */}
-        {ex.venue.id === "theburg" ? (
+        {/* At a bar, say what its drinks get (Sam, 4 Nov 2026: "People
+            probably thought they could earn credit from alcohol", then
+            "maybe not just the burg right?"). */}
+        {BAR_IDS.has(ex.venue.id) ? (
           <p className="tpa-order-note" key={`note-${which}`}>
-            At The Burg, your $5 and 15% go on the food, not on alcohol.
+            At {ex.venue.name}, your $5 and 15% go on anything but alcohol.
           </p>
         ) : null}
       </div>
@@ -640,8 +640,9 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
   },
   {
-    q: "Is The Burg included? How does credit work there?",
-    a: `Yes. Order on Tapin at The Burg and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on food and non-alcoholic drinks there, not on alcohol.`,
+    /* The rule is the same at every bar, not just The Burg (Sam, 4 Nov 2026). */
+    q: "Are the bars included? How does credit work there?",
+    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on anything but alcohol.`,
   },
   {
     q: "Does credit stack? Can I earn credit on an order where I use it?",
@@ -656,7 +657,7 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     /* Names what the credit buys besides food (Sam, 4 Nov 2026: "shouldn't
        we update this to include events, cover, lineskips"). Earning stays
        food and non-alcoholic drinks (the 3 Nov rule). */
-    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets, plus cover and line skips at The Milk Parlor. Not on alcohol. You earn the $${CREDIT} back on food and non-alcoholic drinks.`,
+    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets at every Plus place, plus cover and line skips at select places. Not on alcohol. You earn the $${CREDIT} back on food and non-alcoholic drinks.`,
   },
   {
     q: "Will my price go up?",
