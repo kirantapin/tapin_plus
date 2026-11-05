@@ -68,21 +68,24 @@ export default function InviteHero({
   invite,
   free,
   line,
-  value,
+  h1,
+  strip,
 }: {
   invite: Invite;
   free: boolean;
   line: string;
-  /** What Plus gives, for someone who has never heard of it (Sam, 5 Nov
-   *  2026: "these are likely cold leads"). */
-  value: string;
+  /** The headline and the strip, from the headline test (model/wwHeroTest.ts). */
+  h1: string;
+  strip: string;
 }) {
   return (
     <>
       <Sticker invite={invite} />
-      <h1 className="tpa-ww-h1">{value}</h1>
+      <h1 className="tpa-ww-h1">{h1}</h1>
+      {/* The strip speaks of the free month, so it says the price line
+          instead when the month isn't free. */}
       <p className="tpa-ww-label">
-        <Strip seed={7}>{free ? "First month free" : line}</Strip>
+        <Strip seed={7}>{free ? strip : line}</Strip>
       </p>
     </>
   );

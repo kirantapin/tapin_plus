@@ -17,11 +17,36 @@
    PostHog's experiment and breakdown views read. Compare Join clicks, step
    events and subscriptions per variant. */
 
-export type HeroVariant = "a" | "b" | "0";
+/* ══ ROUND 3 (Sam, 5 Nov 2026: the running test "isn't very compelling.
+   It's not what someone should see first") ══════════════════════════════════
+   Three new headlines, each a different idea, so the test says which one
+   moves a student:
+     "m" · What it is: "A membership to all your favorite Blacksburg spots"
+           (Sam's line).
+     "s" · What it's worth: "The average member saves $60 a month" (Sam:
+           "just say average member"; a rough figure for now, our own
+           estimate at $100 a month in $10 orders, $50 in credit and about
+           $10 in points; replace it with the real average once there is a
+           month of members).
+     "p" · How it works, at one place: "Spend $10 at Coffeeholics, get $5
+           back weekly" (from drafted candidates; the place most students
+           already know).
+   The key moved to v3, so everyone is drawn again among the three. "a",
+   "b" and "0" stay previewable with ?hero=. */
+export type HeroVariant = "a" | "b" | "0" | "m" | "s" | "p";
+
+/** The new round's headlines. */
+export const HERO_LINES: Partial<Record<HeroVariant, string>> = {
+  m: "A membership to all your favorite Blacksburg spots",
+  s: "The average member saves $60 a month",
+  p: "Spend $10 at Coffeeholics, get $5 back weekly",
+};
 
 export const HERO_TEST = "plus-hero";
-const KEY = "tp_hero_v2";
-const DRAW: HeroVariant[] = ["b", "0"];
+const KEY = "tp_hero_v3";
+const DRAW: HeroVariant[] = ["m", "s", "p"];
+const ALL: HeroVariant[] = ["a", "b", "0", "m", "s", "p"];
+const isVariant = (v: string | null): v is HeroVariant => !!v && (ALL as string[]).includes(v);
 
 let cached: HeroVariant | null = null;
 
@@ -29,14 +54,14 @@ export function heroVariant(): HeroVariant {
   if (cached) return cached;
   if (typeof window === "undefined") return "0";
   const asked = new URLSearchParams(window.location.search).get("hero");
-  if (asked === "a" || asked === "b" || asked === "0") return (cached = asked);
+  if (isVariant(asked)) return (cached = asked);
   try {
     const kept = window.localStorage.getItem(KEY);
-    if (kept === "b" || kept === "0") return (cached = kept);
+    if (kept === "m" || kept === "s" || kept === "p") return (cached = kept);
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
-  const drawn = DRAW[Math.floor(Math.random() * DRAW.length)] ?? "0";
+  const drawn = DRAW[Math.floor(Math.random() * DRAW.length)] ?? "m";
   try {
     window.localStorage.setItem(KEY, drawn);
   } catch {

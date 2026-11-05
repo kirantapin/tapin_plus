@@ -12,13 +12,14 @@ import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
+import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { ComingTiles } from "../shell/Coming";
-import { heroVariant } from "../model/heroTest";
+import { HERO_LINES, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
@@ -787,6 +788,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     </a>
   );
   const joinLabel = invite && free ? "Try Plus for free" : "Join Tapin Plus";
+  /* The Welcome Week headline test (model/wwHeroTest.ts): drawn only once
+     the invitation applies, so nobody else is put in it, and every event of
+     the session carries the variant from then on. */
+  const wwHero = invite ? WW_HEROES[wwHeroVariant()] : null;
+  const { registerForSession } = useEventTracking();
+  useEffect(() => {
+    if (invite) registerForSession(wwHeroProps());
+  }, [invite, registerForSession]);
   const joinCta = (where: string, white = false) =>
     member ? (
       getApp(where, white)
@@ -964,7 +973,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 invite={invite}
                 free={free}
                 line={`${firstMonthLine(price)} of Tapin Plus`}
-                value={`$${CREDIT} back every week at ${PLACES.length} Blacksburg spots`}
+                h1={wwHero?.h1 ?? `$${CREDIT} back every week at ${PLACES.length} Blacksburg spots`}
+                strip={wwHero?.strip ?? "First month free"}
               />
             ) : place || hero === "0" ? (
               <h1>
@@ -972,6 +982,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                   ? `$${CREDIT} back every week at ${place.name}`
                   : `$${CREDIT} back at every place you already go in Blacksburg`}
               </h1>
+            ) : HERO_LINES[hero] ? (
+              /* Round 3 of the hero test (model/heroTest.ts). */
+              <h1>{HERO_LINES[hero]}</h1>
             ) : hero === "a" ? (
               <>
                 {/* The headline alone (Sam, 4 Nov 2026: "there's so much text
@@ -1003,7 +1016,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       <main ref={sheetRef} className="tpa-sheet">
         {/* Hero A's guarantee, in its own card above How it works (Sam,
             4 Nov 2026). The control keeps it further down, as it was. */}
-        {(hero === "a" || hero === "b") && !place && !invite ? promiseTop : null}
+        {hero !== "0" && !place && !invite ? promiseTop : null}
         {/* The order earning its $5 comes first, right under the band (Sam,
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
