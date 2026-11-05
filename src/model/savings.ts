@@ -265,6 +265,10 @@ export interface MonthlyBack {
   /** The $5s a month, and the 15% a month, whole dollars. */
   creditUsdMonth: number;
   percentUsdMonth: number;
+  /** Points a month (10 for every dollar), and what they're worth in
+   *  rewards, whole dollars (about $1 per 100, Sam, 5 Nov 2026). */
+  pointsMonth: number;
+  pointsUsdMonth: number;
 }
 
 export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
@@ -273,10 +277,17 @@ export function monthlyBack(monthlySpendUsd: number): MonthlyBack {
   const pctOrders = Math.min(orders - credits, DAYS_A_MONTH);
   const creditMonth = credits * BENEFIT.creditUsd;
   const percentMonth = Math.round(pctOrders * TYPICAL_ORDER_USD * BENEFIT.percentOff);
+  /* Points in the sum too (Sam, 5 Nov 2026: "the breakdown should also
+     include points, and average value per 100 points is around $1. 10 points
+     per dollar spent"): on every dollar of the month's orders. */
+  const points = orders * TYPICAL_ORDER_USD * BENEFIT.pointsPerDollar;
+  const pointsMonth = Math.round(points * BENEFIT.pointValueUsd);
   return {
     monthlySpendUsd,
     ordersPerMonth: orders,
-    monthlyUsd: creditMonth + percentMonth,
+    monthlyUsd: creditMonth + percentMonth + pointsMonth,
+    pointsMonth: points,
+    pointsUsdMonth: pointsMonth,
     orderUsd: TYPICAL_ORDER_USD,
     creditOrders: credits,
     percentOrders: pctOrders,

@@ -331,7 +331,7 @@ export function SceneValue() {
         ))}
       </ul>
       {/* The categories the extraction cannot illustrate. Named, not drawn. */}
-      <p className="vs-also">Tickets, line skips and merch too. 100 points is about $1 to $2 in rewards.</p>
+      <p className="vs-also">Tickets, line skips and merch too. 100 points is about $1 in rewards.</p>
 
       {/* ══ THE BASIS AND THE WAY BACK TO THE QUESTION LIVE IN THE HEADLINE ═══
           Sam, 13 Sep 2026: "we should say, based on your spend of X amount per
@@ -717,16 +717,11 @@ const EARNS = [
   return { ...e, name: it.name, price: it.price, points: Math.floor((Math.round(it.price * 100) * POINTS_PER_DOLLAR) / 100) };
 });
 const EARNED_TOTAL = EARNS.reduce((n, e) => n + e.points, 0);
-/* WHAT POINTS ARE WORTH, AS SAM PUTS IT (5 Nov 2026: "points are worth
-   roughly $1-2 per 100 points"). A range, for the page only; the savings
-   model keeps its own 1c a point (model/savings.ts). */
-const POINT_USD_LOW = 0.01;
-const POINT_USD_HIGH = 0.02;
-const worthLine = (points: number) => {
-  const lo = Math.max(1, Math.floor(points * POINT_USD_LOW));
-  const hi = Math.max(lo + 1, Math.round(points * POINT_USD_HIGH));
-  return `Worth about $${lo} to $${hi} in rewards`;
-};
+/* WHAT POINTS ARE WORTH (Sam, 5 Nov 2026: "average value per 100 points is
+   around $1"; earlier the same day, "$1-2"). The savings model's 1c a point
+   (model/savings.ts), so this slide and the breakdown agree. */
+const worthLine = (points: number) =>
+  `Worth about $${Math.max(1, Math.round(points * BENEFIT.pointValueUsd))} in rewards`;
 
 /**
  * 5 — Points. Earned everywhere, spent on nearly everything.

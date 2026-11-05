@@ -3696,21 +3696,6 @@ html[data-surface="tpa"] .one-worth {
   height: 22px;
   border-radius: 50%;
 }
-.tpa-invite-chip {
-  gap: 8px;
-  width: max-content;
-  height: 36px;
-  margin: 0 0 12px;
-  padding: 0 14px 0 5px;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 18px;
-}
-.tpa-invite-chip img {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-}
 .tpa-invite-offer {
   display: flex;
   align-items: center;
@@ -3746,4 +3731,68 @@ html[data-surface="tpa"] .one-worth {
   font-size: 14px;
   line-height: 18px;
   color: rgba(20, 22, 24, 0.62);
+}
+
+/* ══ THE WELCOME WEEK HEADLINE: A · STICKER (shell/InviteHero.tsx) ════════
+   The collage's own materials (the collage skill's look.md): cream paper
+   #ECE5D5 with ink type, the white deckle rim #F7F3EA behind it, and
+   Gilroy 600 on paper. Flat: no glass, no gradient, no glow. */
+.tpa-ww .tpa-ww-h1 {
+  font-weight: 600;
+}
+/* `.tpa-band-title span` (the old proof line's rule) sizes every span in
+   the band: these pieces take the headline's own size back. */
+.tpa-ww .tpa-ww-strip,
+.tpa-ww .tpa-ww-paper {
+  flex: none;
+  font-size: inherit;
+  line-height: inherit;
+  text-shadow: none;
+}
+.tpa-ww-strip {
+  display: inline-block;
+  margin-left: 0.04em;
+  padding: 3px 4px;
+  background: #f7f3ea;
+  vertical-align: baseline;
+  rotate: -2.5deg;
+}
+.tpa-ww-paper {
+  display: block;
+  padding: 0.02em 0.42em 0.06em;
+  background: #ece5d5;
+  color: #141618;
+  white-space: nowrap;
+}
+/* The mark on the photo's corner, above the headline. */
+.tpa-ww .tpa-ww-sticker {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 14px);
+  flex: none;
+  display: block;
+  width: 84px;
+  height: 84px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #f7f3ea;
+  rotate: -9deg;
+  /* A paper sticker's shadow: offset down, soft. */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.38));
+}
+.tpa-ww-sticker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww .tpa-ww-sticker {
+    bottom: calc(100% + 20px);
+    width: 128px;
+    height: 128px;
+  }
+  .tpa-home .tpa-ww-strip {
+    padding: 4px 6px;
+  }
 }
