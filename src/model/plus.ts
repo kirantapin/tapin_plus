@@ -117,10 +117,23 @@ const devPrice = (): PlusPrice | null => {
   if (!import.meta.env.DEV || typeof window === "undefined") return null;
   const q = new URLSearchParams(window.location.search);
   const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null };
-  if (q.has("wwpreview")) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
+  if (q.has("wwpreview") || q.get("l") === WELCOME_WEEK_LINK_ID) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
   return null;
 };
+
+/* Local dev only: with no Plus bundle in the local database the price never
+   loads and every figure reads "$–" (Sam, 5 Nov 2026, from localhost). There
+   the welcome offer's sample figures stand in, so the page reads as it does
+   live; a production build never gets here. */
+const devFallback = (): PlusPrice => ({
+  monthly: 7.99,
+  first: 3.99,
+  period: "month",
+  billing: { interval: "month", interval_count: 1 },
+  linkId: null,
+  linkEnds: null,
+});
 
 async function fetchPrice(): Promise<PlusPrice> {
   const preview = devPrice();
@@ -159,6 +172,10 @@ async function fetchPrice(): Promise<PlusPrice> {
 let pricePromise: Promise<PlusPrice> | null = null;
 const loadPrice = () =>
   (pricePromise ??= fetchPrice().catch((e) => {
+    if (import.meta.env.DEV) {
+      console.warn("Plus price unavailable locally; showing sample figures", e);
+      return devFallback();
+    }
     pricePromise = null;
     throw e;
   }));

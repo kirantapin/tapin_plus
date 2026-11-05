@@ -2048,8 +2048,11 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
     padding: 24px;
     border-radius: 20px;
   }
+  /* The foot stays in the story's column: across both, the held offer card
+     slid over its fine print at the end of the page (Sam, 5 Nov 2026:
+     "issue with text under the container on the far right?"). */
   .tpa-home .tpa-sheet > .tpa-foot {
-    grid-column: 1 / -1;
+    grid-column: 1;
   }
   .tpa-home .tpa-module,
   .tpa-home .tpa-close {
