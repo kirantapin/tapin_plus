@@ -8,6 +8,7 @@ import PlusHome from "./routes/PlusHome";
 import Members from "./routes/Members";
 import { asset } from "./asset";
 import { campaignHeroShot } from "./model/campaign";
+import { loadPlusLink } from "./model/link";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -60,10 +61,15 @@ export default function App() {
      PATHNAME ONLY, deliberately. `/reserve` opens as a layer over the page
      beneath and carries `state.background`; keying on the whole location would
      fire a second view when nothing but that state changed. */
-  const { track } = useEventTracking();
+  const { track, registerForSession } = useEventTracking();
   useEffect(() => {
     track("$pageview", { $current_url: window.location.href, path: location.pathname });
   }, [location.pathname, track]);
+  /* A promo link's id on every event of the session, as the app's link_id
+     (model/link.ts), so each audience's funnel reads on its own. */
+  useEffect(() => {
+    void loadPlusLink().then((link) => link && registerForSession({ link_id: link.linkId }));
+  }, [registerForSession]);
   /* THE APP PREVIEW IS GONE (Sam, 20 Sep 2026). Tapping a merchant opens that
      merchant's benefits over the page and points at their LIVE TapIn ordering
      page instead — shell/VenuePopup.tsx. The preview mocked a product that does

@@ -1,7 +1,7 @@
 /* ══ THE PLUS CHECKOUT, AGAINST THE REAL BUNDLE (3 Nov 2026) ══════════════════
    The app's own steps, as plain calls (it has a cart class; this needs one
-   item): tapin_verify_order builds and signs a cart holding Plus, the welcome
-   offer applied if this user can have it; create_intent makes the payment
+   item): tapin_verify_order builds and signs a cart holding Plus, a promo link's
+   offer or the welcome offer applied if this user can have it; create_intent makes the payment
    for exactly that cart; the wallet confirms it; submit_order records the
    purchase and the subscription. What's charged is the signed cart's total,
    never a figure on the page. Mirrors the app's use_plus_checkout.ts and
@@ -9,6 +9,7 @@
 
 import { supabase } from "../supabase";
 import { TAPIN_ID, fetchPlusBundle, welcomeOfferId } from "./plus";
+import { loadPlusLink } from "./link";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
@@ -22,6 +23,8 @@ export interface PlusCart {
   dueTodayCents: number;
   /** TapIn's Stripe account (the platform's own). */
   accountId: string;
+  /** The promo link whose offer the cart holds, for the order's attribution. */
+  linkId: string | null;
 }
 
 /** The backend's own message where it gave one (already a member, an offer
@@ -39,7 +42,7 @@ async function messageOf(error: unknown): Promise<string> {
 }
 
 type VerifyRequest =
-  | { type: "add_policy"; content: { policy_id: string; bundle_id: null; userPreferences: null; link_id: null } }
+  | { type: "add_policy"; content: { policy_id: string; bundle_id: null; userPreferences: null; link_id: string | null } }
   | { type: "add_item"; content: { id: string } };
 
 /** One tapin_verify_order call on an empty cart: the signed cart, or the
@@ -47,7 +50,7 @@ type VerifyRequest =
 async function verify(
   accessToken: string,
   request: VerifyRequest,
-): Promise<{ cart: Omit<PlusCart, "dueTodayCents" | "accountId"> } | { error: string }> {
+): Promise<{ cart: Omit<PlusCart, "dueTodayCents" | "accountId" | "linkId"> } | { error: string }> {
   const { data, error } = await supabase.functions.invoke("tapin_verify_order", {
     body: {
       cart: [],
@@ -73,12 +76,14 @@ async function verify(
   };
 }
 
-/** A signed cart holding Plus for whoever `accessToken` belongs to: with the
- *  welcome offer, or at full price when the offer is refused (used before,
- *  ended, or not in this environment). Throws with a message to show. */
+/** A signed cart holding Plus for whoever `accessToken` belongs to: with a
+ *  promo link's offer (model/link.ts), else the welcome offer, else at full
+ *  price when each is refused (used before, ended, or not in this
+ *  environment). Throws with a message to show. */
 export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
-  const [plus, tapIn] = await Promise.all([
+  const [plus, link, tapIn] = await Promise.all([
     fetchPlusBundle(),
+    loadPlusLink(),
     supabase
       .from("restaurants")
       .select("payment_account_id")
@@ -89,12 +94,14 @@ export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
         return data;
       }),
   ]);
-  const offered = welcomeOfferId
-    ? await verify(accessToken, {
-        type: "add_policy",
-        content: { policy_id: welcomeOfferId, bundle_id: null, userPreferences: null, link_id: null },
-      })
-    : null;
+  const offer = (policyId: string, linkId: string | null) =>
+    verify(accessToken, {
+      type: "add_policy",
+      content: { policy_id: policyId, bundle_id: null, userPreferences: null, link_id: linkId },
+    });
+  const linked = link ? await offer(link.policyId, link.linkId) : null;
+  const offered =
+    linked && "cart" in linked ? linked : welcomeOfferId ? await offer(welcomeOfferId, null) : null;
   const built =
     offered && "cart" in offered
       ? offered
@@ -104,6 +111,7 @@ export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
     ...built.cart,
     dueTodayCents: Math.round(built.cart.cartResults.totalPrice * 100),
     accountId: tapIn.payment_account_id,
+    linkId: built === linked ? link!.linkId : null,
   };
 }
 
@@ -159,7 +167,8 @@ export async function submitPlusOrder(
         additionalOrderData: {},
       },
       sendToKitchen: false,
-      sessionVars,
+      // The link whose offer was bought, as the app's link_id.
+      sessionVars: { ...sessionVars, ...(cart.linkId && { link_id: cart.linkId }) },
     },
   });
   if (error || !data || data.error || !data.order_id) {

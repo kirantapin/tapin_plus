@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import { environment, supabase } from "../supabase";
+import { loadPlusLink } from "./link";
 
 export const TAPIN_ID = "tapin";
 
@@ -44,7 +45,8 @@ interface OfferPolicy {
 export interface PlusPrice {
   /** Every period after the first. */
   monthly: number;
-  /** The first period: the welcome offer's price, or `monthly` without one. */
+  /** The first period: a promo link's offer or the welcome offer's price, or
+   *  `monthly` without one. */
   first: number;
   /** "month", "2 weeks". */
   period: string;
@@ -101,7 +103,7 @@ export async function fetchPlusBundle(): Promise<PlusBundle> {
 }
 
 async function fetchPrice(): Promise<PlusPrice> {
-  const [plus, offer] = await Promise.all([
+  const [plus, offer, link] = await Promise.all([
     fetchPlusBundle(),
     welcomeOfferId
       ? supabase
@@ -115,10 +117,13 @@ async function fetchPrice(): Promise<PlusPrice> {
             return data ?? null;
           })
       : Promise.resolve(null),
+    loadPlusLink(),
   ]);
   return {
     monthly: plus.price,
-    first: offerPrice(offer, plus) ?? plus.price,
+    // A promo link's offer in place of the welcome offer, as the checkout
+    // tries it first (model/link.ts).
+    first: offerPrice(link?.policy ?? null, plus) ?? offerPrice(offer, plus) ?? plus.price,
     period: periodOf(plus),
     billing: plus.billing,
   };
