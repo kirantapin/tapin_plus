@@ -1367,10 +1367,21 @@
   vertical-align: middle;
 }
 
-/* The preview stand-in is a button now (local dev only). */
-button.pck-wallet-preview {
-  width: 100%;
-  border: 0;
-  font-family: inherit;
+/* The preview stand-in can be tapped (local dev only). */
+.pck-wallet-preview[role="button"] {
   cursor: pointer;
+}
+
+/* The invitation's clock under the charge rows on the pay step. */
+.pck-layer .pck-seats.pck-pay-clock {
+  margin-top: 0;
+  /* Set in to the rows' own text above it. */
+  padding: 0 16px;
+  border-top: 0;
+}
+
+/* Cancel anytime, a red disc with a white X (Sam, 5 Nov 2026). */
+.pck-layer .pck-offer .pck-ico.pck-ico-cancel {
+  background: #d14245;
+  color: #ffffff;
 }

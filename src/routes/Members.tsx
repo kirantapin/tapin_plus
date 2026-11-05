@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import AccountLine from "../shell/AccountLine";
-import { AppCard } from "../shell/GetTheApp";
+import { AppCard, appHref, device } from "../shell/GetTheApp";
+import { useEventTracking } from "../context/event_tracking_context";
 import MemberDot from "../shell/MemberDot";
 import { useAuth } from "../context/auth_context";
 
@@ -24,6 +25,7 @@ export default function Members() {
   const page = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { subscribed } = useAuth();
+  const { track } = useEventTracking();
   /* A signed-in member sees their status; ?member previews it, local dev only. */
   const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
   useLayoutEffect(() => {
@@ -97,9 +99,22 @@ export default function Members() {
               </p>
             </>
           )}
+          <div className="tpa-members-acts">
           <a className="tpa-try tpa-members-mail" href="mailto:support@tapin.app">
             Email support@tapin.app
           </a>
+          {/* The app as the second way on (Sam, 5 Nov 2026: "add 'download
+              the app' as a second button here"). */}
+          <a
+            className="tpa-try tpa-members-mail tpa-members-dl"
+            href={appHref()}
+            target={device() === "desktop" ? "_blank" : undefined}
+            rel="noopener noreferrer"
+            onClick={() => track("plus_get_app_clicked", { where: "members_status", device: device() })}
+          >
+            Download the app
+          </a>
+          </div>
         </section>
 
         <section className="tpa-module tpa-members-app" aria-label="Get the Tapin app">
