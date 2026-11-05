@@ -1366,3 +1366,11 @@
   border-radius: 50%;
   vertical-align: middle;
 }
+
+/* The preview stand-in is a button now (local dev only). */
+button.pck-wallet-preview {
+  width: 100%;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}

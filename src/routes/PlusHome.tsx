@@ -11,6 +11,7 @@ import { PLUS_NEXT_PRICE } from "../model/seats";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
+import InviteHero from "../shell/InviteHero";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
 import AccountLine from "../shell/AccountLine";
@@ -248,12 +249,18 @@ function PaybackCounter() {
               <b className="tnum">${back.percentUsdMonth}</b>
             </li>
           ) : null}
+          {back.pointsMonth > 0 ? (
+            <li>
+              <span>{back.pointsMonth.toLocaleString("en-US")} points, about $1 per 100</span>
+              <b className="tnum">${back.pointsUsdMonth}</b>
+            </li>
+          ) : null}
           <li className="tpa-s2-sum">
             <span>A month, about</span>
             <b className="tnum">${back.monthlyUsd}</b>
           </li>
         </ul>
-        <p className="tpa-s2-fine">At Plus places, on food and non-alcoholic drinks. $5 is once a week at each place. An estimate.</p>
+        <p className="tpa-s2-fine">At Plus places. $5 back and 15% off on food and non-alcoholic drinks, $5 once a week at each place; 10 points on every dollar. An estimate.</p>
       </details>
     </div>
   );
@@ -911,17 +918,22 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       )}
       <header ref={bandRef} className="tpa-band" data-hero={place || invite || hero === "0" ? undefined : hero}>
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
-        <div className="tpa-band-top">
-          <span className="tpa-glass tpa-badge">
-            <FlatMark className="tpa-badge-mark" />
-            {/* The app's pill (Sam, 3 Nov 2026: "plus blacksburg"). */}
-            Plus Blacksburg
-          </span>
-          <Link className="tpa-glass tpa-signin" to="/in" onClick={toMembers}>
-            Members
-          </Link>
-        </div>
-        <div className="tpa-band-title">
+        {/* A Welcome Week student is here for the offer: no town badge, no
+            Members (Sam, 5 Nov 2026: "not sure if for the welcome week kids it
+            makes sense"). Sign in stays in the foot for anyone who needs it. */}
+        {invite ? null : (
+          <div className="tpa-band-top">
+            <span className="tpa-glass tpa-badge">
+              <FlatMark className="tpa-badge-mark" />
+              {/* The app's pill (Sam, 3 Nov 2026: "plus blacksburg"). */}
+              Plus Blacksburg
+            </span>
+            <Link className="tpa-glass tpa-signin" to="/in" onClick={toMembers}>
+              Members
+            </Link>
+          </div>
+        )}
+        <div className={`tpa-band-title${invite && !place ? " tpa-ww" : ""}`}>
           {/* Sam, 3 Nov 2026: "header copy should be something like '$5 back
               at every place you already go in blacksburg'". */}
           <div>
@@ -930,15 +942,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 (Grok's audit, 3 Nov 2026); "b" leads with the payoff. A
                 place's own page keeps its own. */}
             {invite && !place ? (
-              <>
-                {/* The invitation, then what it gets you (Sam, 5 Nov 2026:
-                    "the welcome week logo somewhere, tied to the offer"). */}
-                <p className="tpa-glass tpa-invite-chip">
-                  <img src={invite.logo} alt="" width="26" height="26" />
-                  {invite.who} exclusive
-                </p>
-                <h1>{free ? "Your first month of Tapin Plus is free" : `${firstMonthLine(price)} of Tapin Plus`}</h1>
-              </>
+              /* The invitation, then what it gets you (Sam, 5 Nov 2026:
+                 "the welcome week logo somewhere, tied to the offer"), as a
+                 sticker and a paper strip (shell/InviteHero.tsx). */
+              <InviteHero invite={invite} free={free} line={`${firstMonthLine(price)} of Tapin Plus`} />
             ) : place || hero === "0" ? (
               <h1>
                 {place

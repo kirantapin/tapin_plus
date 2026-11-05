@@ -285,10 +285,12 @@ function PlusCheckoutSheet({
      after paying, without signing in or paying. */
   const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
   const body =
-    preview === "done" ? (
+    preview === "done" || (preview === "pay" && paid) ? (
       <Done texted />
     ) : preview === "pay" ? (
-      <Review accessToken="" price={price ?? PREVIEW_PRICE} onPaid={() => {}} preview />
+      /* The stand-in Pay goes on to the done screen, so the preview walks
+         through (nothing is charged: no cart, no wallet). */
+      <Review accessToken="" price={price ?? PREVIEW_PRICE} onPaid={setPaid} preview />
     ) : userSession === undefined ? null : paid ? (
       <Done texted />
     ) : !signedIn || signInOnly ? (
@@ -888,9 +890,9 @@ function Review({
         </span>
       </p>
       {preview ? (
-        <div className="pck-wallet-preview" aria-hidden="true">
+        <button type="button" className="pck-wallet-preview" onClick={() => onPaid("preview")}>
            Pay
-        </div>
+        </button>
       ) : (
       <Elements
         key={cart.dueTodayCents}
