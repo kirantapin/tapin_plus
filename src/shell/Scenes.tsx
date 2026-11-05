@@ -303,30 +303,35 @@ const SHOWCASE: {
 export function SceneValue() {
   return (
     <div className="value-scene">
-      <ul className="vs-grid">
+      {/* ROWS, NOT TILES (Sam, 5 Nov 2026: "/impeccable redesign this so
+          that I don't have to scroll on this pop up"). The 2x2 of wide
+          photos with four lines under each ran past the frame on a phone.
+          Each order is one row now, read left to right like a receipt line:
+          the dish with its place's mark on it, what it is and costs, and
+          what it gets you, the $5 in the money green and the points under
+          it. Four rows sit inside the frame with room to spare. */}
+      <ul className="vs-rows">
         {SHOWCASE.map((x) => (
           <li key={x.venue}>
-            <span className={`vs-shot${x.isPass ? " is-pass" : ""}`}>
+            <span className={`vs-thumb${x.isPass ? " is-pass" : ""}`}>
               {x.img ? (
                 <img
                   src={x.img}
                   alt=""
                   decoding="async"
-                  /* Measured, not judged by eye — the same flag the mosaic and
-                     the venue cards read. A menu photograph is never bright
-                     enough to need it; a merchant's brand card is. */
                   data-bright={heroIsBright(x.venue) ? "true" : undefined}
                 />
               ) : null}
               <Mark id={x.venue} className="vs-mark" />
             </span>
-            <b>{x.name}</b>
-            <span className="vs-price tnum">{x.meta}</span>
-            {/* The slide's claim, itemised: the headline's figure is made of
-                lines like this one, so it is the strongest line on the tile
-                and the menu price above it is the basis, kept quiet. */}
-            <span className="vs-save tnum">{x.save}</span>
-            <span className="vs-pts tnum">{x.points}</span>
+            <span className="vs-what">
+              <b>{x.name}</b>
+              <span className="vs-price tnum">{x.meta}</span>
+            </span>
+            <span className="vs-gets">
+              <span className="vs-save tnum">{x.save}</span>
+              <span className="vs-pts tnum">{x.points}</span>
+            </span>
           </li>
         ))}
       </ul>

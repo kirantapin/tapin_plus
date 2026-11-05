@@ -568,6 +568,15 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
         <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
         <b>{look === "c" ? "$5 back weekly" : "$5 back every week, every place"}</b>
       </li>
+      {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
+          anytime", moved here from the page ("it'd be one of these"), right under
+          the $5 ("cancel anytime should be right below $5 back"). */}
+      <li>
+        <span className="pck-ico pck-ico-cancel" aria-hidden="true">
+          <XGlyph />
+        </span>
+        <b>{look === "c" ? "Cancel anytime" : "Cancel anytime in one tap"}</b>
+      </li>
       <li>
         <span className="pck-ico" aria-hidden="true">
           <PhoneGlyph />
@@ -588,14 +597,6 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
           <LockGlyph />
         </span>
         <b>{look === "c" ? "Price locked" : "Your price stays as more places join"}</b>
-      </li>
-      {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
-          anytime", moved here from the page ("it'd be one of these"). */}
-      <li>
-        <span className="pck-ico pck-ico-cancel" aria-hidden="true">
-          <XGlyph />
-        </span>
-        <b>{look === "c" ? "Cancel anytime" : "Cancel anytime in one tap"}</b>
       </li>
     </ul>
   );
@@ -885,6 +886,12 @@ function Review({
           the consent, so the terms stay right by the button that charges. */}
       <ul className="pck-offer pck-offer-tight">
         <li>
+          <span className="pck-ico pck-ico-cancel" aria-hidden="true">
+            <XGlyph />
+          </span>
+          <b>Cancel anytime in one tap</b>
+        </li>
+        <li>
           <span className="pck-ico" aria-hidden="true">
             <PhoneGlyph />
           </span>
@@ -903,12 +910,6 @@ function Review({
             <LockGlyph />
           </span>
           <b>{`${usd(price.monthly)} locked for life, even as places join`}</b>
-        </li>
-        <li>
-          <span className="pck-ico pck-ico-cancel" aria-hidden="true">
-            <XGlyph />
-          </span>
-          <b>Cancel anytime in one tap</b>
         </li>
       </ul>
       <p className="pck-consent">

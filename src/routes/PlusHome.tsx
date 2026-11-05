@@ -786,12 +786,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       Get the Tapin app
     </a>
   );
+  const joinLabel = invite && free ? "Try Plus for free" : "Join Tapin Plus";
   const joinCta = (where: string, white = false) =>
     member ? (
       getApp(where, white)
     ) : (
       <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={(e) => join(where, e.currentTarget)}>
-        Join Tapin Plus
+        {joinLabel}
       </button>
     );
   const tryCta = invite ? null : (
@@ -1301,7 +1302,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           ))}
         </section>
 
-        <section className="tpa-close" aria-label="Join Tapin Plus">
+        <section className="tpa-close" aria-label={joinLabel}>
           <img className="tpa-close-paper" src={PAPER_MARK} alt="" width="96" height="76" decoding="async" loading="lazy" />
           {member ? (
             <>
@@ -1371,7 +1372,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           getApp("dock", false, " tpa-dock-cta")
         ) : (
           <button type="button" className="tpa-cta tpa-dock-cta" onClick={(e) => join("dock", e.currentTarget)}>
-            Join Tapin Plus
+            {joinLabel}
           </button>
         )}
       </div>

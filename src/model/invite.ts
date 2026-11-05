@@ -35,8 +35,10 @@ export interface Invite {
   id: "welcomeweek";
   logo: string;
   alt: string;
-  /** Who it's for, short: "VT Welcome Week". */
+  /** Who it's for: "VT Welcome Week". */
   who: string;
+  /** Shorter, beside its own mark (the mark says VT): "Welcome Week". */
+  short: string;
   /** When the offer ends for this audience, and from when, so a bar can
    *  drain between them; null for no end. Past it the page is the ordinary
    *  one again (inviteFor). */
@@ -51,6 +53,7 @@ const WELCOME_WEEK: Invite = {
   logo: asset("/brand/vt-welcome-week.webp"),
   alt: "VT Welcome Week",
   who: "VT Welcome Week",
+  short: "Welcome Week",
   /* "a countdown until sunday, that's when we'll end the free first month
      for welcome week members" (Sam, 5 Nov 2026): the end of Sunday 8
      November, Blacksburg time (EST, UTC-5). From the policy's making, 5 Nov

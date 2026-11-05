@@ -7,7 +7,7 @@ import { SCENES } from "./Scenes";
 import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
 import { buildSlides } from "../routes/How";
 import { asset } from "../asset";
-import { WelcomeEnds } from "./WelcomeOffer";
+import { WelcomeEnds, useJoinLabel } from "./WelcomeOffer";
 import { firstThen, usePlusPrice } from "../model/plus";
 
 /* ══ HOW IT WORKS, THE OLD WALKTHROUGH IN THE APP'S LOOK (Sam, 3 Nov 2026) ══
@@ -62,6 +62,7 @@ export default function HowSheet({
      month"), worked order by order (savings.ts monthlyBack). */
   const [spend, setSpend] = useState(200);
   const price = usePlusPrice();
+  const joinLabel = useJoinLabel();
   const slides = useMemo(() => buildSlides(spend), [spend]);
   const s = monthlyBack(spend);
   const [i, setI] = useState(0);
@@ -279,7 +280,7 @@ export default function HowSheet({
             ) : null}
             {last ? (
               <button type="button" className="hs-next" onClick={onJoin}>
-                Join Tapin Plus
+                {joinLabel}
               </button>
             ) : (
               <button type="button" className="hs-next" onClick={() => go(i + 1)}>
