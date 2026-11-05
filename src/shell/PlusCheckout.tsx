@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Elements, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
@@ -7,10 +7,12 @@ import { useAuth } from "../context/auth_context";
 import { AppCard, appHref } from "./GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
-import { nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
+import { firstMonthLine, nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
+import { inviteFor } from "../model/invite";
 import { sendCode, verifyCode } from "./authEnv";
 import { PlusSeats } from "./PlusSeats";
-import { slideAway } from "./sheetMotion";
+import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, reducedMotion, settle, type IslandOrigin, type IslandParts } from "./island";
+import { lockScroll } from "./scrollLock";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
    Join on any page opens this: openPlusCheckout("where"). It's mounted once
@@ -23,7 +25,9 @@ import { slideAway } from "./sheetMotion";
    Then done. In the app's look, as the home page is (plus-app.css). */
 
 /* ── The one open sheet, as a tiny store ─────────────────────────────────── */
-type Open = { where: string; mode: "join" | "signin" };
+/* `from`: the Join that was tapped. `opener`: what had focus, to go back to.
+   `over`: another pop-up's backdrop is up and hands over to this one. */
+type Open = { where: string; mode: "join" | "signin"; from?: HTMLElement | null; opener?: HTMLElement | null; over?: boolean };
 let openFrom: Open | null = null;
 const listeners = new Set<() => void>();
 const set = (next: Open | null) => {
@@ -35,19 +39,62 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 
-/** Opens the checkout. `where` is which Join was tapped, for tracking. */
-export const openPlusCheckout = (where: string) => set({ where, mode: "join" });
+const focused = () => (typeof document !== "undefined" && document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null);
+
+/* A pop-up that hands over to the checkout (a place, the walkthrough) gives
+   it the element its own focus would have gone back to, so closing the
+   checkout lands there on a computer, where there's no bottom bar. */
+let handedOver: HTMLElement | null = null;
+
+/* Whether the last thing the person did was tap or click (not type), so
+   focus that goes back after a close can skip the keyboard ring. */
+let pointerLast = false;
+if (typeof document !== "undefined") {
+  document.addEventListener("pointerdown", () => (pointerLast = true), true);
+  document.addEventListener("keydown", () => (pointerLast = false), true);
+}
+const quietFocus = (el: HTMLElement) => {
+  el.setAttribute("data-quiet-focus", "");
+  const off = () => {
+    el.removeAttribute("data-quiet-focus");
+    el.removeEventListener("blur", off);
+    document.removeEventListener("keydown", off, true);
+  };
+  el.addEventListener("blur", off);
+  document.addEventListener("keydown", off, true);
+};
+export const handOverFocus = (el: HTMLElement | null) => {
+  handedOver = el;
+};
+
+/** Whether the checkout is open, so things behind it can stop moving (the
+ *  How it works carousel repainted the page every frame under the scrim). */
+export const usePlusCheckoutOpen = () => useSyncExternalStore(subscribe, () => openFrom) !== null;
+
+/** Opens the checkout. `where` is which Join was tapped, for tracking; `from`
+ *  is the button itself (the island grows out of the bar that holds it, or
+ *  out of it; shell/island.ts). `over`: called from inside another pop-up. */
+export const openPlusCheckout = (where: string, from?: HTMLElement | null, opts?: { over?: boolean }) =>
+  set({ where, mode: "join", from, opener: focused() ?? from ?? null, over: !!opts?.over });
 
 /** Opens the same sheet to sign in only: the number, the code, then it
  *  closes (Sam, 4 Nov 2026: "there needs to be a sign in and sign out option
  *  on this page"). A member's page then shows Get the app. */
-export const openPlusSignIn = (where: string) => set({ where, mode: "signin" });
+export const openPlusSignIn = (where: string) => set({ where, mode: "signin", opener: focused() });
 
 /** Mounted once near the root. */
 export function PlusCheckoutMount() {
   const open = useSyncExternalStore(subscribe, () => openFrom);
   return open ? (
-    <PlusCheckoutSheet key={`${open.mode}-${open.where}`} where={open.where} signInOnly={open.mode === "signin"} onClose={() => set(null)} />
+    <PlusCheckoutSheet
+      key={`${open.mode}-${open.where}`}
+      where={open.where}
+      from={open.from}
+      opener={open.opener}
+      over={open.over}
+      signInOnly={open.mode === "signin"}
+      onClose={() => set(null)}
+    />
   ) : null;
 }
 
@@ -57,10 +104,25 @@ const still = () => typeof window !== "undefined" && window.matchMedia("(prefers
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 
-function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: string; signInOnly?: boolean; onClose: () => void }) {
+function PlusCheckoutSheet({
+  where,
+  from,
+  opener,
+  over = false,
+  signInOnly = false,
+  onClose,
+}: {
+  where: string;
+  from?: HTMLElement | null;
+  opener?: HTMLElement | null;
+  over?: boolean;
+  signInOnly?: boolean;
+  onClose: () => void;
+}) {
   const { userSession, accessToken, subscribed } = useAuth();
   const { track } = useEventTracking();
   const price = usePlusPrice();
+  const invite = inviteFor(price);
   const [paid, setPaid] = useState<string | null>(null);
   /* What the server says is due today, once the pay step has asked. Someone
      who has had Plus before pays the full month, with no welcome price, so
@@ -69,29 +131,146 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
      it shouldn't say $3.99 for first month"). */
   const [dueCents, setDueCents] = useState<number | null>(null);
   const [signInStage, setSignInStage] = useState<"phone" | "code">("phone");
+  /* The island (shell/island.ts): one black container that grows out of the
+     Join button that was tapped and shrinks back into it. */
   const sheet = useRef<HTMLDivElement | null>(null);
+  const inner = useRef<HTMLDivElement | null>(null);
+  const label = useRef<HTMLSpanElement | null>(null);
+  const scrim = useRef<HTMLDivElement | null>(null);
   const layer = useRef<HTMLDivElement | null>(null);
-  /* Leaves the way it came: down off the screen on a phone (sheetMotion.ts). */
+  const parts = (): IslandParts | null =>
+    sheet.current && inner.current && label.current && scrim.current
+      ? { island: sheet.current, inner: inner.current, label: label.current, scrim: scrim.current }
+      : null;
+  const stopTracking = useRef<(() => void) | null>(null);
+  /* What it grows out of, picked once as it opens (the bar on a phone), so
+     it closes back into the same place even if the page changes meanwhile
+     (after paying, Join becomes Get the app). */
+  const origin = useRef<IslandOrigin | null>(null);
+  const keyboard = useRef<{ stop: () => void; clear: () => void } | null>(null);
   const leaving = useRef(false);
   const close = useCallback(() => {
     if (leaving.current) return;
     leaving.current = true;
-    slideAway(sheet.current, layer.current, onClose);
+    const p = parts();
+    if (!p) return onClose();
+    /* Hold the layer where it is and let the keyboard go now, so it drops
+       while the island travels to the bar instead of moving it mid-flight. */
+    keyboard.current?.stop();
+    const a = document.activeElement as HTMLElement | null;
+    if (a && sheet.current?.contains(a)) a.blur();
+    /* The bar comes back under the container just before it lands, its
+       shadow fading in, so the swap itself changes nothing on screen. */
+    let shown = false;
+    const reveal = () => {
+      const plate = origin.current?.plate;
+      if (!plate || shown) return;
+      shown = true;
+      plate.getAnimations().forEach((x) => x.cancel());
+      plate.style.visibility = "";
+      const to = getComputedStyle(plate).boxShadow;
+      const layers = (to.match(/rgba?\(/g) ?? []).length;
+      if (to && to !== "none" && layers && !reducedMotion())
+        plate.animate?.([{ boxShadow: Array(layers).fill("rgba(20, 22, 24, 0) 0px 0px 0px 0px").join(", ") }, { boxShadow: to }], { duration: 220, easing: "ease-out" });
+    };
+    /* Close first, from the height on screen; then stop watching it. */
+    islandClose(
+      p,
+      origin.current,
+      () => {
+        reveal();
+        onClose();
+      },
+      reveal,
+    );
+    stopTracking.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
+
+  /* Before the first paint, so nothing flashes: lock the page (first, so a
+     scrollbar going away can't move anything after it's measured), pick the
+     origin, grow out of it, and hide it while open. */
+  useLayoutEffect(() => {
+    const unlock = lockScroll();
+    const o = islandOrigin(from);
+    origin.current = o;
+    const p = parts();
+    if (p) {
+      islandOpen(p, o, over);
+      stopTracking.current = islandTrackHeight(p);
+    }
+    keyboard.current = layer.current ? islandAvoidKeyboard(layer.current) : null;
+    /* The plate steps aside: its shadow fades first (the island has none,
+       so it would vanish in one frame), then it hides under the island. */
+    if (o) {
+      const shadow = getComputedStyle(o.plate).boxShadow;
+      const layers = (shadow.match(/rgba?\(/g) ?? []).length;
+      if (!reducedMotion() && shadow !== "none" && layers && o.plate.animate) {
+        const off = Array(layers).fill("rgba(20, 22, 24, 0) 0px 0px 0px 0px").join(", ");
+        o.plate.animate([{ boxShadow: shadow }, { boxShadow: off }], { duration: 160, easing: "ease-out", fill: "forwards" }).onfinish = () => {
+          o.plate.style.visibility = "hidden";
+        };
+      } else o.plate.style.visibility = "hidden";
+    }
+    return () => {
+      /* Leaves things as they were however it ends (and lets React's dev
+         double mount start again from rest). */
+      stopTracking.current?.();
+      keyboard.current?.stop();
+      keyboard.current?.clear();
+      if (p) settle(p);
+      if (o) {
+        o.plate.getAnimations().forEach((x) => x.cancel());
+        o.plate.style.visibility = "";
+      }
+      unlock();
+    };
+    // Once, when it opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     track(signInOnly ? "plus_signin_opened" : "checkout_opened", { where });
-    const opener = document.activeElement as HTMLElement | null;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    sheet.current?.focus();
-    if (!still()) sheet.current?.animate?.([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    /* The field first (it also autofocuses), else the dialog. */
+    const node = sheet.current;
+    if (node && !node.contains(document.activeElement))
+      (node.querySelector<HTMLElement>("#pck-phone, #pck-code") ?? node).focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return close();
+      const box = sheet.current;
+      if (e.key !== "Tab" || !box) return;
+      /* Tab stays inside the dialog (the iframe is the wallet button). */
+      const els = Array.from(box.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([disabled]), iframe")).filter(
+        (el) => el.getClientRects().length > 0 && !el.closest('[aria-hidden="true"]'),
+      );
+      if (!els.length) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      const at = document.activeElement;
+      if (e.shiftKey && (at === first || at === box)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (at === last || !box.contains(at))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
-      opener?.focus?.();
+      /* React's dev double mount runs this with the sheet still on the page:
+         leave the field's focus alone then. */
+      if (node?.isConnected) return;
+      /* Back to what opened it, if it's still there (Safari doesn't focus a
+         tapped button, so the Join itself is the fallback; a pop-up that
+         handed over says where its own focus would have gone). */
+      const o = origin.current;
+      const back = [opener, from, o?.button, o?.plate.querySelector<HTMLElement>("a, button"), handedOver].find((el) => el && el.isConnected && el !== document.body);
+      handedOver = null;
+      back?.focus?.({ preventScroll: true });
+      /* Closed by a tap or click: focus goes back, but without the keyboard
+         ring popping onto Join as it lands. */
+      if (back && pointerLast) quietFocus(back);
     };
     // Once, when it opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,9 +287,12 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   const body =
     preview === "done" ? (
       <Done texted />
+    ) : preview === "pay" ? (
+      <Review accessToken="" price={price ?? PREVIEW_PRICE} onPaid={() => {}} preview />
     ) : userSession === undefined ? null : paid ? (
       <Done texted />
-    ) : !signedIn ? (
+    ) : !signedIn || signInOnly ? (
+      /* Signing in only stays on this screen while it closes itself. */
       <SignIn onStage={setSignInStage} plain={signInOnly} />
     ) : subscribed === true ? (
       <Done />
@@ -120,14 +302,19 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   /* Three short steps, shown as three bars, so the way to the end is in
      view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
      design). */
-  const done = preview === "done" || !!paid || subscribed === true;
-  const step = done ? 4 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
+  /* Signing in only never turns into the member screen as it closes. */
+  const done = !signInOnly && (preview === "done" || !!paid || subscribed === true);
+  const step = done ? 4 : preview === "pay" ? 3 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
   /* Once joined, the header is the moment: a tick that draws itself and
      "You're in" (or, for someone who already was, "You're a member"), in
      place of "Join Tapin Plus" and a price that no longer applies (Sam, 3 Nov
      2026: polish the post-purchase screen). */
   const doneTitle = paid || preview === "done" ? "You’re in" : "You’re a member";
   const tick = useRef<SVGPathElement | null>(null);
+  /* "You're in" gets focus, so a screen reader says it. */
+  useEffect(() => {
+    if (done) document.getElementById("pck-title")?.focus({ preventScroll: true });
+  }, [done]);
   useEffect(() => {
     const p = tick.current;
     if (!done || !p || still() || typeof p.animate !== "function") return;
@@ -136,8 +323,13 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
   }, [done]);
 
   return createPortal(
-    <div ref={layer} className="pck-layer" onClick={(e) => e.target === e.currentTarget && close()}>
-      <div className="pck-sheet" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
+    <div className="pck-layer" ref={layer}>
+      {/* Darker once the island is open (Sam, 4 Nov 2026). A tap here closes. */}
+      <div ref={scrim} className="pck-scrim" aria-hidden="true" onClick={close} />
+      <div className="pck-sheet pck-island" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="pck-title" tabIndex={-1}>
+        {/* A stand-in for the Join button, carried as it grows and back as it shrinks. */}
+        <span ref={label} className="pck-island-label" aria-hidden="true" />
+        <div ref={inner} className="pck-island-inner">
         <div className="pck-top">
           {/* The title and the town as a chip, no mark (Sam, 3 Nov 2026: "remove
               the tapin logo here, and make it 'Join Tapin Plus' 'blacksburg' in
@@ -150,7 +342,7 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
                 </svg>
               </span>
               <div>
-                <h2 id="pck-title" className="pck-title">
+                <h2 id="pck-title" className="pck-title" tabIndex={-1}>
                   {doneTitle}
                 </h2>
                 <p className="pck-price">Your Tapin Plus membership is active.</p>
@@ -169,6 +361,11 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
                 Join Tapin Plus <span className="pck-town">Blacksburg</span>
               </h2>
               <p className="pck-price tnum">
+                {/* A promo link's audience mark beside its price (model/invite.ts),
+                    while that price is the one due. */}
+                {invite && (dueCents === null || dueCents / 100 === price?.first) ? (
+                  <img className="pck-invite" src={invite.logo} alt={invite.alt} width="20" height="20" />
+                ) : null}
                 {priceLine(price, dueCents)}
               </p>
             </div>
@@ -189,6 +386,7 @@ function PlusCheckoutSheet({ where, signInOnly = false, onClose }: { where: stri
           </ol>
         ) : null}
         {body}
+        </div>
       </div>
     </div>,
     document.body,
@@ -237,7 +435,46 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   const [code, setCode] = useState("");
   const [stage, setStage] = useState<"phone" | "code">(previewCode ? "code" : "phone");
   const [busy, setBusy] = useState(false);
+  /* Continue (or Verify) tapped before the number (or code) is complete:
+     the field glows red for a second and takes the cursor (Sam, 4 Nov 2026:
+     "the phone number form field should have outer red glow for just a
+     second"). So the button stays tappable when incomplete, only looking
+     dimmed (aria-disabled), and is truly disabled only while sending. */
+  const phoneBox = useRef<HTMLDivElement | null>(null);
+  const codeBox = useRef<HTMLDivElement | null>(null);
+  const nudge = (box: HTMLElement | null) => {
+    if (!box) return;
+    box.querySelector("input")?.focus({ preventScroll: true });
+    /* On a short screen the field can sit under the pinned button; bring it
+       up (scroll-padding-bottom keeps it clear of the button). */
+    box.scrollIntoView?.({ block: "nearest" });
+    const targets = box.classList.contains("pck-otp") ? Array.from(box.querySelectorAll<HTMLElement>(".pck-otp-box")) : [box];
+    const ring = "inset 0 0 0 2px rgba(209, 66, 69, 1)";
+    /* Six boxes 8px apart: a 3px halo each keeps the gaps open. */
+    const halo = targets.length > 1 ? 3 : 5;
+    const off = "inset 0 0 0 2px rgba(209, 66, 69, 0), 0 0 0 0 rgba(209, 66, 69, 0)";
+    targets.forEach((el) => {
+      el.getAnimations().forEach((a) => a.cancel());
+      el.animate?.(
+        reducedMotion()
+          ? [{ boxShadow: `${ring}, 0 0 0 ${Math.min(halo, 4)}px rgba(209, 66, 69, 0.22)` }, { boxShadow: `${ring}, 0 0 0 ${Math.min(halo, 4)}px rgba(209, 66, 69, 0.22)` }]
+          : [
+              { boxShadow: off, offset: 0 },
+              { boxShadow: `${ring}, 0 0 0 ${halo}px rgba(209, 66, 69, 0.26)`, offset: 0.15 },
+              { boxShadow: `${ring}, 0 0 0 ${halo}px rgba(209, 66, 69, 0.26)`, offset: 0.65 },
+              { boxShadow: off, offset: 1 },
+            ],
+        { duration: 1000, easing: "ease-out" },
+      );
+    });
+  };
   const [error, setError] = useState<string | null>(null);
+  /* An error shows between the field and the button; on a short screen that
+     can be under the pinned button, so bring it into view. */
+  const errorLine = useRef<HTMLParagraphElement | null>(null);
+  useEffect(() => {
+    if (error) errorLine.current?.scrollIntoView?.({ block: "nearest" });
+  }, [error]);
   const [wait, setWait] = useState(previewCode ? RESEND_S : 0);
   const phone = `+1${digits}`;
   useEffect(() => onStage(stage), [stage, onStage]);
@@ -274,6 +511,9 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     if (err) {
       track("plus_code_failed", { error: err });
       setError(err);
+      /* Start the next try clean, and show it on the boxes. */
+      setCode("");
+      nudge(codeBox.current);
     } else track("plus_code_verified", { auto: better });
   };
 
@@ -281,6 +521,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     e.preventDefault();
     if (busy) return;
     if (stage === "phone") {
+      if (digits.length !== 10) return nudge(phoneBox.current);
       if (previewCode) return;
       setBusy(true);
       setError(null);
@@ -294,12 +535,14 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
       setStage("code");
       return;
     }
+    if (code.length < 6) return nudge(codeBox.current);
     await verify(code);
   };
 
   const onCode = (raw: string) => {
     const next = raw.replace(/\D/g, "").slice(0, 6);
     setCode(next);
+    if (error) setError(null);
     /* The sixth digit sends it, typed or filled from Messages. */
     if (better && next.length === 6) void verify(next);
   };
@@ -349,7 +592,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   const field = (
     <>
       <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
-      <div className={`pck-field${look === "c" ? " pck-field-big" : ""}`}>
+      <div ref={phoneBox} className={`pck-field${look === "c" ? " pck-field-big" : ""}`}>
         <span className="pck-cc">+1</span>
         <input
           id="pck-phone"
@@ -378,7 +621,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     </>
   );
   const sendBtn = (
-    <button type="submit" className="pck-cta" disabled={digits.length !== 10 || busy}>
+    <button type="submit" className="pck-cta" disabled={busy} aria-disabled={digits.length !== 10 || undefined}>
       {busy ? "Sending…" : better ? "Continue" : "Send code"}
     </button>
   );
@@ -388,21 +631,24 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
       {stage === "phone" ? (
         plain ? (
           <>
-            {field}
+            {/* The number right above the button, as on the join step. */}
             {consent}
+            {field}
             {sendBtn}
           </>
         ) : look === "b" ? (
           <>
-            {/* B · the ask first, so the field and button sit above the
-                keyboard; what you get follows as one quiet panel. */}
-            {field}
-            {sendBtn}
-            {consent}
+            {/* B, in the island (Sam, 4 Nov 2026: "the button can stay in the
+                same place, the copy just changes" and "put the phone number
+                entry right above it"): what you get first, then the opt-in,
+                then the number, and Continue last, where Join was. */}
             <div className="pck-why">
               {offer}
               {seats}
             </div>
+            {consent}
+            {field}
+            {sendBtn}
           </>
         ) : look === "c" ? (
           <>
@@ -438,43 +684,6 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
               </>
             )}
           </p>
-          {look === "c" || look === "b" ? (
-            /* Six boxes over one real field, so Messages can still fill it. */
-            <div className="pck-otp">
-              <input
-                id="pck-code"
-                aria-label="6-digit code"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={code}
-                onChange={(e) => onCode(e.target.value)}
-                autoFocus
-              />
-              {Array.from({ length: 6 }, (_, i) => (
-                <span key={i} className="pck-otp-box tnum" data-on={i === code.length ? "" : undefined} aria-hidden="true">
-                  {code[i] ?? ""}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <>
-              <label className="pck-label" htmlFor="pck-code">Code</label>
-              <div className="pck-field">
-                <input
-                  id="pck-code"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder={better ? "6 digits" : undefined}
-                  value={code}
-                  onChange={(e) => onCode(e.target.value)}
-                  autoFocus
-                />
-              </div>
-            </>
-          )}
-          <button type="submit" className="pck-cta" disabled={code.length < 6 || busy}>
-            {busy ? "Checking…" : better ? "Verify" : "Continue"}
-          </button>
           {better ? (
             <p className="pck-code-links">
               <button type="button" className="pck-link" disabled={wait > 0 || busy} onClick={resend}>
@@ -505,9 +714,52 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
               Use a different number
             </button>
           )}
+          {/* The code boxes sit right above Verify, where Join was (Sam, 4 Nov
+              2026: "same with the 2FA"); resend and change number above them. */}
+          {look === "c" || look === "b" ? (
+            /* Six boxes over one real field, so Messages can still fill it. */
+            <div ref={codeBox} className="pck-otp">
+              <input
+                id="pck-code"
+                aria-label="6-digit code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => onCode(e.target.value)}
+                autoFocus
+              />
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i} className="pck-otp-box tnum" data-on={i === code.length ? "" : undefined} aria-hidden="true">
+                  {code[i] ?? ""}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <>
+              <label className="pck-label" htmlFor="pck-code">Code</label>
+              <div ref={codeBox} className="pck-field">
+                <input
+                  id="pck-code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder={better ? "6 digits" : undefined}
+                  value={code}
+                  onChange={(e) => onCode(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </>
+          )}
+          <button type="submit" className="pck-cta" disabled={busy} aria-disabled={code.length < 6 || undefined}>
+            {busy ? "Checking…" : better ? "Verify" : "Continue"}
+          </button>
         </>
       )}
-      {error ? <p className="pck-error" role="alert">{error}</p> : null}
+      {error ? (
+        <p ref={errorLine} className="pck-error" role="alert">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -516,7 +768,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
 
 /** "December 3": when a period from now renews. */
 const renewsOn = (price: PlusPrice) =>
-  nextBillingDate(price.billing).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+  nextBillingDate(price.billing).toLocaleDateString("en-US", { month: "long", day: "numeric" }).replace(" ", "\u00a0");
 
 /** The header's price: the welcome line, unless the server says today's
  *  charge is something else (a returning member pays the full month). */
@@ -526,7 +778,7 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
   /* "renews at" says it renews in two words, where "then $7.99/mo until you
      cancel" took a second line and left "cancel" alone on it (Sam, 4 Nov
      2026: "/impeccable polish"). The pay step keeps the full terms. */
-  const welcome = `${usd(price?.first)} first month, renews at ${usd(price?.monthly)}/mo`;
+  const welcome = `${firstMonthLine(price)}, renews at ${usd(price?.monthly)}/mo`;
   if (!price || dueCents === null) return welcome;
   const today = dueCents / 100;
   if (today === price.first) return welcome;
@@ -534,18 +786,27 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
   return `${usd(today)} today, renews at ${usd(price.monthly)}/mo`;
 }
 
+/* Local dev only (?pckpreview=pay): the pay step with sample numbers and a
+   stand-in for the wallet button, without signing in or building a cart. */
+const PREVIEW_PRICE: PlusPrice = { monthly: 7.99, first: 3.99, period: "month", billing: { interval: "month", interval_count: 1 } as PlusPrice["billing"], linkId: null, linkEnds: null };
+const PREVIEW_CART: PlusCart = { cart: [], dealEffect: null, cartResults: { totalPrice: 3.99 }, token: "", dueTodayCents: 399, accountId: "", linkId: null };
+
 function Review({
   accessToken,
   price,
   onPaid,
   onDue,
+  preview = false,
 }: {
   accessToken: string;
   price: PlusPrice | null;
   onPaid: (orderId: string) => void;
   onDue?: (cents: number) => void;
+  preview?: boolean;
 }) {
-  const [cart, setCart] = useState<PlusCart | null>(null);
+  const [built, setCart] = useState<PlusCart | null>(null);
+  /* The preview's cart follows the preview price, so ?wwpreview shows $0. */
+  const cart = preview ? { ...PREVIEW_CART, dueTodayCents: Math.round((price?.first ?? 3.99) * 100) } : built;
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const { track } = useEventTracking();
@@ -553,11 +814,12 @@ function Review({
      (context/meta_pixel.ts). Once per price. */
   const shownFor = useRef<number | null>(null);
   useEffect(() => {
-    if (!cart || !price || shownFor.current === cart.dueTodayCents) return;
+    if (preview || !cart || !price || shownFor.current === cart.dueTodayCents) return;
     shownFor.current = cart.dueTodayCents;
     track("plus_pay_shown", { amount_cents: cart.dueTodayCents });
   }, [cart, price, track]);
   useEffect(() => {
+    if (preview) return;
     let live = true;
     setCart(null);
     setError(null);
@@ -613,11 +875,23 @@ function Review({
         </li>
       </ul>
       <p className="pck-consent">
-        {`By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
-        <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
-        {" · "}
-        <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Privacy</a>
+        {today === 0
+          ? /* A free first period (a promo link's, 5 Nov 2026): nothing is
+               charged today, so the terms say when the first charge comes and
+               how to stop it before then, beside the button that starts it. */
+            `By joining, you agree that your first ${price.period} is free and nothing is charged today, then ${usd(price.monthly)} every ${price.period} automatically from ${renewsOn(price)} until you cancel. Cancel anytime in the Tapin app before ${renewsOn(price)} and you won’t be charged. `
+          : `By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
+        <span className="pck-legal">
+          <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
+          {" · "}
+          <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Privacy</a>
+        </span>
       </p>
+      {preview ? (
+        <div className="pck-wallet-preview" aria-hidden="true">
+           Pay
+        </div>
+      ) : (
       <Elements
         key={cart.dueTodayCents}
         stripe={stripePromise}
@@ -632,6 +906,7 @@ function Review({
       >
         <Wallet cart={cart} accessToken={accessToken} onPaid={onPaid} />
       </Elements>
+      )}
     </div>
   );
 }
@@ -693,7 +968,7 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
         options={{
           paymentMethods: { applePay: "always", googlePay: "always", link: "never", amazonPay: "never", klarna: "never", paypal: "never" },
           layout: { maxColumns: 1, maxRows: 2 },
-          buttonHeight: 48,
+          buttonHeight: 52,
           buttonTheme: { applePay: "black", googlePay: "black" },
         }}
         // No wallet on this device: the element renders nothing, so say why.
@@ -755,7 +1030,7 @@ function Done({ texted = false }: { texted?: boolean }) {
           pays, the modal would have a card for them to download"). */}
       <AppCard
         where={texted ? "checkout_paid" : "checkout_member"}
-        line="Sign in with this same number. Your $5 back and 15% off are waiting."
+        line={"Sign in with this same number. Your $5\u00a0back and 15%\u00a0off are waiting."}
         note={texted ? "We’ve also texted you the link." : undefined}
         enter
       />

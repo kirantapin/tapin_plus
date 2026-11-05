@@ -924,3 +924,445 @@
 .pck-offer-quiet .pck-ico-money {
   font-size: 11px;
 }
+
+
+/* ══ THE JOIN ISLAND (shell/island.ts; Sam, 4 Nov 2026: "almost like a
+   dynamic island. The background should be darker when ... morphed to its
+   expanded state", then "can we make the background white? ... the parent
+   container that holds the 'join tapin plus' button is the one that does the
+   expanding") ══════════════════════════════════════════════════════════════
+   The old sheet is retired: the checkout is the bottom bar's white plate,
+   grown. The layer still places it (bottom of a phone, middle of a computer);
+   the scrim is its own element so it fades in darker than before; the island
+   clips its contents and scrolls them inside when they run tall. On white,
+   the plates inside become one light grey so they still read as plates. */
+.pck-layer {
+  background: none;
+}
+.pck-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 7, 8, 0.7);
+  -webkit-tap-highlight-color: transparent;
+}
+.pck-island {
+  --surface: #f2f2f4;
+  position: relative;
+  z-index: 1;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 32px;
+  background: #ffffff;
+  /* No shadow: a clip-path clips its own element's shadow, so one would pop
+     on and off at the ends of the motion; the dark scrim does the job. */
+  box-shadow: none;
+  /* Its own paint and layout, so the clip animating never touches the page. */
+  contain: layout paint;
+}
+.pck-island-inner {
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 16px;
+}
+/* The stand-in for the Join button (placed and dressed by island.ts). */
+.pck-island-label {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .pck-layer {
+    padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+  }
+  /* As wide as the bottom bar where both show (640–1023px), so the first
+     frame is the bar exactly. */
+  .pck-island {
+    max-width: 456px;
+    padding: 0;
+    border-radius: 28px;
+  }
+  .pck-island-inner {
+    max-height: calc(100dvh - 48px);
+    padding: 22px;
+  }
+}
+.pck-island .pck-x {
+  background: var(--surface);
+}
+.pck-island .pck-field,
+.pck-island .pck-otp-box,
+.pck-island .pck-rows,
+.pck-island .pck-text,
+.pck-island .pck-offer-chips li {
+  background: var(--surface);
+  box-shadow: none;
+}
+.pck-island .pck-field:focus-within,
+.pck-island .pck-otp:focus-within .pck-otp-box[data-on] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.pck-island .pck-town {
+  background: var(--surface);
+  box-shadow: none;
+}
+.pck-island .pck-why {
+  background: var(--surface);
+}
+/* Icon discs: grey on the white island, white where they sit on a grey plate. */
+.pck-island .pck-offer .pck-ico {
+  background: var(--surface);
+}
+.pck-island .pck-why .pck-ico,
+.pck-island .pck-offer-chips .pck-ico {
+  background: #ffffff;
+}
+.pck-island .pck-offer .pck-ico-money,
+.pck-island .pck-offer-quiet .pck-ico-money {
+  background: #0B7A53;
+}
+.pck-island .plus-seats-bar,
+.pck-island.pck-island .pck-seats .plus-seats-bar {
+  background: #e5e5ea;
+}
+
+/* ══ THE BUTTON STAYS WHERE JOIN WAS (Sam, 4 Nov 2026: "I think the button
+   can stay in the same place, the copy just changes", then "maybe we put the
+   phone number entry right above it, same with the 2FA") ══════════════════
+   On a phone the island lines up with the bottom bar it grows from (same
+   sides, same bottom, same corners at the bottom), and each step's main
+   button sits where Join sat: 8px in from the island's edges, 52px tall, the
+   bar's type. It stays put while the island grows, so only its words change.
+   The number or the code boxes sit right above it. When the contents run
+   taller than the screen, the button stays pinned and the rest scrolls. */
+@media (max-width: 639.98px) {
+  .pck-island {
+    margin: 0 12px 12px;
+    max-width: 456px;
+    border-radius: 28px 28px 20px 20px;
+  }
+  .pck-island-inner {
+    padding: 18px 16px 8px;
+  }
+  .pck-island form.pck-body > .pck-cta[type="submit"] {
+    position: sticky;
+    bottom: 0;
+    order: 3;
+    height: 52px;
+    margin: 4px -8px 0;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    /* A white surround, so contents scrolling under it stop clean. */
+    box-shadow: 0 0 0 8px #ffffff;
+  }
+  /* A message about the number reads between it and the button. */
+  .pck-island form.pck-body > .pck-error {
+    order: 2;
+  }
+}
+/* On a phone, clear of the home indicator; while the keyboard is up the
+   layer is pinned to the part of the screen it leaves (island.ts sets its
+   top and height, --pck-vvh and data-kb), the indicator is under the
+   keyboard, and the island is never taller than the room left. */
+@media (max-width: 639.98px) {
+  .pck-layer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pck-layer[data-kb] {
+    padding-bottom: 0;
+  }
+  .pck-island,
+  .pck-island-inner {
+    max-height: calc(var(--pck-vvh, 100dvh) - 24px - env(safe-area-inset-bottom));
+  }
+  .pck-layer[data-kb] .pck-island,
+  .pck-layer[data-kb] .pck-island-inner {
+    max-height: calc(var(--pck-vvh, 100dvh) - 24px);
+  }
+}
+/* The app card after joining: a grey plate on the white island, its QR well
+   white inside it. */
+.pck-island .gta {
+  background: var(--surface);
+}
+.pck-island .gta-scan {
+  background: #ffffff;
+}
+/* The resend countdown ticks without the row re-wrapping (or the island
+   changing height) each second. */
+.pck-code-links {
+  flex-wrap: wrap;
+}
+.pck-code-links .pck-link {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Continue and Verify look dimmed until the number or code is complete, but
+   still take the tap, which makes the field glow red (PlusCheckout.tsx
+   nudge). */
+.pck-cta[aria-disabled="true"] {
+  opacity: 0.4;
+}
+.pck-island .pck-cta[aria-disabled="true"] {
+  cursor: pointer;
+}
+
+/* Local dev only: where the wallet button sits in ?pckpreview=pay. */
+.pck-wallet-preview {
+  display: grid;
+  place-items: center;
+  height: 48px;
+  border-radius: 14px;
+  background: #000000;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 17px;
+}
+
+/* ══ POLISH, EACH SCREEN (Sam, 4 Nov 2026: "can you /impeccable polish each
+   of the slides in the join tapin plus modal?") ════════════════════════════
+   From a measured pass per screen at 320–1440 wide. */
+
+/* Every step: the close button keeps its circle (it squashed to an oval
+   when a title wrapped), with a 44px hit area around the 36px disc. */
+.pck-x {
+  flex: 0 0 auto;
+}
+.pck-island .pck-x {
+  position: relative;
+}
+.pck-island .pck-x::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+}
+/* Press and hover: the buttons answer the finger and the pointer. */
+.pck-island .pck-cta,
+.pck-island .pck-x {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pck-island .pck-cta:active:not(:disabled),
+.pck-island .pck-x:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) {
+  .pck-island .pck-cta:not(:disabled):not([aria-disabled="true"]):hover {
+    background: #2a2c2f;
+  }
+  .pck-island .pck-x:hover {
+    background: #e5e5ea;
+  }
+  .pck-island .pck-manage:hover {
+    text-decoration-color: currentColor;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pck-island .pck-cta,
+  .pck-island .pck-x {
+    transition: none;
+  }
+}
+.pck-island .pck-title:focus {
+  outline: none;
+}
+.pck-island .pck-fine {
+  text-wrap: pretty;
+}
+/* On a short phone the contents scroll under the pinned button; keep a
+   focused field clear of it. */
+@media (max-width: 639.98px) {
+  .pck-island-inner {
+    scroll-padding-bottom: 76px;
+  }
+}
+
+/* Step 1 · the number. "+1" at the number's size and baseline; the hint
+   placeholder readable on the grey field; the opt-in a drawn checkbox like
+   the rest of the controls, with a full-height hit area. */
+.pck-island .pck-cc {
+  font-size: 18px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.pck-island .pck-field input::placeholder {
+  color: rgba(20, 22, 24, 0.5);
+}
+.pck-island .pck-check {
+  position: relative;
+}
+.pck-island .pck-check::before {
+  content: "";
+  position: absolute;
+  inset: -13px 0;
+}
+.pck-island .pck-check input {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: -1px 0 0;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.5);
+  cursor: pointer;
+}
+.pck-island .pck-check input:checked {
+  background: #141618 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6.5 12.5 3.6 3.6 7.4-7.6' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat;
+  box-shadow: none;
+}
+
+/* Step 2 · the code. Resend on the lede's left edge, Change number on the
+   boxes' right edge, one row down to 320px, nothing moving as the countdown
+   shortens, 44px targets. */
+.pck-island .pck-code-links {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin-block: -2px;
+}
+.pck-island .pck-code-links .pck-link {
+  min-height: 44px;
+  padding-inline: 0;
+}
+
+/* Step 3 · pay. The renewal price reads $7.99, not $799; Terms · Privacy
+   stay together; the "Then" value wraps evenly; even 16px gaps; the
+   wallet's slot is held so it arriving doesn't resize the island, and the
+   wait shows the receipt plate's outline. On a phone the wallet button is
+   the same rectangle as Join and Verify. */
+.pck-island .pck-consent {
+  font-variant-numeric: tabular-nums;
+}
+.pck-island .pck-legal {
+  white-space: nowrap;
+}
+.pck-island .pck-consent a {
+  position: relative;
+  text-underline-offset: 2px;
+}
+.pck-island .pck-consent a::after {
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+.pck-island .pck-consent a:hover {
+  text-decoration-thickness: 2px;
+}
+.pck-island .pck-rows span {
+  text-wrap: balance;
+}
+.pck-island .pck-offer-tight {
+  padding: 4px 0;
+}
+.pck-island .pck-pay {
+  min-height: 52px;
+}
+.pck-island .pck-wait {
+  min-height: 340px;
+}
+.pck-island .pck-wait::before {
+  content: "";
+  display: block;
+  height: 116px;
+  border-radius: 16px;
+  background: var(--surface);
+}
+.pck-wallet-preview {
+  height: 52px;
+}
+@media (max-width: 639.98px) {
+  .pck-island .pck-body > .pck-pay,
+  .pck-island .pck-body > .pck-wallet-preview {
+    margin: 4px -8px 0;
+  }
+  .pck-island .pck-pay > p {
+    padding: 0 8px;
+  }
+}
+
+/* Step 4 · done. The app card's small grey lines pass contrast on the grey
+   card; Manage gets a 44px target. */
+.pck-island .gta-name span,
+.pck-island .gta-note {
+  color: var(--muted);
+}
+.pck-island .pck-manage {
+  min-height: 44px;
+}
+
+/* ══ ROUND TWO OF THE RE-TEST (4 Nov 2026) ════════════════════════════════
+   The step's button stays on the island's bottom edge even while the island
+   holds one height during the motion (the contents may be shorter): the
+   scroller is a column and the button takes up any slack above it. */
+.pck-island-inner {
+  display: flex;
+  flex-direction: column;
+}
+.pck-island-inner > .pck-body {
+  flex: 1 0 auto;
+}
+/* While incomplete or sending, the pinned button is a flat grey, not ink at
+   40%, so contents scrolling under it never show through it or its cover. */
+.pck-island form.pck-body > .pck-cta[type="submit"]:disabled,
+.pck-island form.pck-body > .pck-cta[type="submit"][aria-disabled="true"] {
+  opacity: 1;
+  background: #a1a2a3;
+  color: #ffffff;
+}
+@media (max-width: 1023.98px) {
+  .pck-island form.pck-body > .pck-cta[type="submit"] {
+    margin-top: auto;
+  }
+}
+/* 640–1023px: the bottom bar is still the origin, so the step's button sits
+   where its Join maps (8px from the island's sides and bottom), as on a
+   phone, and only the words change. */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .pck-island-inner {
+    padding-bottom: 8px;
+  }
+  .pck-island form.pck-body > .pck-cta[type="submit"] {
+    order: 3;
+    height: 52px;
+    margin: auto -14px 0;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+  }
+  .pck-island form.pck-body > .pck-error {
+    order: 2;
+  }
+  .pck-island .pck-body > .pck-pay,
+  .pck-island .pck-body > .pck-wallet-preview {
+    margin: 4px -14px 0;
+  }
+}
+
+/* Focus that comes back to Join after a tap closes the checkout: no ring
+   (it shows again the moment a key is pressed). */
+[data-quiet-focus]:focus-visible {
+  outline: none !important;
+}
+
+/* A promo link's audience mark beside its price (model/invite.ts). */
+.pck-invite {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: -3px 6px 0 0;
+  border-radius: 50%;
+  vertical-align: middle;
+}

@@ -3665,3 +3665,85 @@ html[data-surface="tpa"] .hs-scene > * {
 section[aria-labelledby="tpa-faq"]:focus {
   outline: none;
 }
+
+/* The points under the $5 (Sam, 5 Nov 2026: "showcase the $5 back and the
+   points added"): the same size, a step quieter than the money. */
+html[data-surface="tpa"] .hs-scene .vs-pts {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* What the balance is worth, under it (Sam, 5 Nov 2026). */
+html[data-surface="tpa"] .one-worth {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* ══ A PROMO LINK'S AUDIENCE (5 Nov 2026, model/invite.ts) ══════════════════
+   The Welcome Week mark goes where the offer is said: in the pinned bar, on
+   the photograph above the headline, beside the price, and in the checkout's
+   header. The mark is a round badge; it keeps its own colours (it is their
+   logo, not ours to tint) and sits on flat ink or white, never on a card of
+   its own. */
+.tpa-wbar-logo {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.tpa-invite-chip {
+  gap: 8px;
+  width: max-content;
+  height: 36px;
+  margin: 0 0 12px;
+  padding: 0 14px 0 5px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpa-invite-chip img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.tpa-invite-offer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tpa-invite-logo {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+.tpa-invite-offer p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+}
+.tpa-invite-offer small {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpa-invite-offer b {
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  color: #141618;
+}
+.tpa-invite-offer span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}

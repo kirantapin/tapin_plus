@@ -9,9 +9,10 @@ import { monthlyBack } from "../model/savings";
 import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE } from "../model/seats";
 import { PlusSeats } from "../shell/PlusSeats";
-import { usd, usePlusPrice } from "../model/plus";
+import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
+import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import HowSheet from "../shell/HowSheet";
-import { openPlusCheckout } from "../shell/PlusCheckout";
+import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
@@ -20,7 +21,7 @@ import { heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -387,6 +388,9 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
     return () => window.clearTimeout(t);
   }, [held, taps]);
   const still = reducedMotion();
+  /* Paused behind the checkout: its ring repainted the page every frame
+     under the scrim and made the checkout's close stutter. */
+  const covered = usePlusCheckoutOpen();
   useEffect(() => {
     const el = card.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -403,13 +407,13 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
     const ring = rings.current[which];
     if (!ring || still || EXAMPLES.length < 2 || typeof ring.animate !== "function") return;
     const run = ring.animate([{ strokeDashoffset: RING }, { strokeDashoffset: 0 }], { duration: HOLD_MS, easing: "linear", fill: "forwards" });
-    if (!inView || held) run.pause();
+    if (!inView || held || covered) run.pause();
     run.onfinish = () => setWhich((n) => (n + 1) % TABS);
     return () => {
       run.onfinish = null;
       run.cancel();
     };
-  }, [which, inView, held, still]);
+  }, [which, inView, held, still, covered]);
   /* THE ORIGINAL PAGE'S BEAT (Sam, 3 Nov 2026: "I like the old way the
      numbers animated here on the original plus.tapin.app page"), its timings
      from how.css: the order lands; at 500ms the credit row comes in; at
@@ -630,6 +634,21 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
   );
 }
 
+/* A free month's own questions, first (5 Nov 2026): whether the free month
+   charges anything, and who it's for. Said from the checkout's terms. */
+const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
+  {
+    q: "Will I be charged for the free month?",
+    a: `No. Your first month is free, so nothing is charged when you join. A month later, Plus renews at ${MONTHLY} a month, unless you cancel in the Tapin app before then.`,
+  },
+  {
+    /* How it was given out, not a limit: the link works for whoever holds
+       it (model/link.ts checks the link, not the person). */
+    q: "Who gets the free month?",
+    a: `It came with the link we sent students from ${invite.who}. Join through this link and your first month is free.`,
+  },
+];
+
 const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
      support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
@@ -642,7 +661,7 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   {
     /* The rule is the same at every bar, not just The Burg (Sam, 4 Nov 2026). */
     q: "Are the bars included? How does credit work there?",
-    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on anything but alcohol.`,
+    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
   },
   {
     q: "Does credit stack? Can I earn credit on an order where I use it?",
@@ -697,12 +716,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
-  const price = usePlusPrice();
-  const FIRST_MONTH = usd(price?.first);
+  const { price, failed: priceFailed } = usePlusPriceLoad();
+  const FIRST_MONTH = firstFigure(price);
   const MONTHLY = usd(price?.monthly);
-  const join = (where: string) => {
+  /* `from` is the button tapped, which grows into the checkout. */
+  /* `from` is the button tapped; `over`, a Join inside another pop-up. */
+  const join = (where: string, from?: HTMLElement | null, over = false) => {
     track("plus_join_clicked", { where });
-    openPlusCheckout(where);
+    openPlusCheckout(where, from, { over });
   };
   /* Signed in and already a member (Sam, 3 Nov 2026: "If someone is already
      signed in on this page, and they have the membership, the CTA should be
@@ -711,6 +732,22 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const { subscribed } = useAuth();
   /* ?member previews this on local dev only (stripped from builds). */
   const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
+  /* A PROMO LINK'S PAGE (5 Nov 2026). Kiran's ?l=<link id> (model/link.ts)
+     prices the first month; a link with an audience also dresses the page
+     for it (model/invite.ts): the Welcome Week link's free month wears the
+     Welcome Week mark beside the offer. From the address until the price is
+     in, so the first paint has it; then only if that link's offer is the one
+     that applied, so an ended link shows the ordinary page. */
+  /* The guess from the address holds only while the price is loading: if
+     it fails, nothing says free (the checkout couldn't give it either). */
+  const [guess] = useState(inviteExpected);
+  const expected = priceFailed ? null : guess;
+  /* Members see their own page, never an offer to join. */
+  const invite = member ? null : price ? inviteFor(price) : expected;
+  const free = price ? price.first === 0 : !!expected;
+  /* Any link's offer, with or without a look: the November 30 clock is the
+     welcome offer's, not the link's. */
+  const linked = price ? !!price.linkId : !!expected;
   /* View FAQ: a smooth scroll to the questions, landing them a little below
      the countdown bar, and focus there so a keyboard follows. */
   const faqRef = useRef<HTMLElement | null>(null);
@@ -737,11 +774,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     member ? (
       getApp(where, white)
     ) : (
-      <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={() => join(where)}>
+      <button type="button" className={`tpa-cta${white ? " tpa-cta-white" : ""}`} onClick={(e) => join(where, e.currentTarget)}>
         Join Tapin Plus
       </button>
     );
-  const tryCta = (
+  const tryCta = invite ? null : (
     <button
       type="button"
       className="tpa-try"
@@ -867,8 +904,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     <div className="tpa tpa-home">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
-      {member ? null : <WelcomeBar price={FIRST_MONTH} />}
-      <header ref={bandRef} className="tpa-band" data-hero={place || hero === "0" ? undefined : hero}>
+      {member ? null : linked ? (
+        <LinkBar line={free ? "First month free" : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? null} />
+      ) : (
+        <WelcomeBar price={FIRST_MONTH} />
+      )}
+      <header ref={bandRef} className="tpa-band" data-hero={place || invite || hero === "0" ? undefined : hero}>
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
           <span className="tpa-glass tpa-badge">
@@ -888,7 +929,17 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 "a" names the places and says the price and the Promise
                 (Grok's audit, 3 Nov 2026); "b" leads with the payoff. A
                 place's own page keeps its own. */}
-            {place || hero === "0" ? (
+            {invite && !place ? (
+              <>
+                {/* The invitation, then what it gets you (Sam, 5 Nov 2026:
+                    "the welcome week logo somewhere, tied to the offer"). */}
+                <p className="tpa-glass tpa-invite-chip">
+                  <img src={invite.logo} alt="" width="26" height="26" />
+                  {invite.who} exclusive
+                </p>
+                <h1>{free ? "Your first month of Tapin Plus is free" : `${firstMonthLine(price)} of Tapin Plus`}</h1>
+              </>
+            ) : place || hero === "0" ? (
               <h1>
                 {place
                   ? `$${CREDIT} back every week at ${place.name}`
@@ -923,7 +974,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       <main ref={sheetRef} className="tpa-sheet">
         {/* Hero A's guarantee, in its own card above How it works (Sam,
             4 Nov 2026). The control keeps it further down, as it was. */}
-        {(hero === "a" || hero === "b") && !place ? promiseTop : null}
+        {(hero === "a" || hero === "b") && !place && !invite ? promiseTop : null}
         {/* The order earning its $5 comes first, right under the band (Sam,
             3 Nov 2026: "I feel like this interactive animation should show
             up at the top"); the offer and Join follow, and the dock keeps
@@ -1037,7 +1088,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               </p>
             </div>
             <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
-            <WelcomeChip />
+            {linked ? null : <WelcomeChip />}
             {joinCta("hero")}
             {tryCta}
             {lockMore}
@@ -1070,12 +1121,26 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 second. The "offer ends" line went: the black bar pinned to
                 the top of the page already counts down to November 30. */}
             <div className="tpa-buy">
+              {invite ? (
+                /* The mark beside the price it unlocks: the offer is the
+                   invitation's, so they sit as one line, not a badge stuck
+                   on the page. */
+                <div className="tpa-invite-offer">
+                  <img className="tpa-invite-logo" src={invite.logo} alt={invite.alt} width="64" height="64" decoding="async" />
+                  <p>
+                    <small>{invite.who} exclusive</small>
+                    <b>{free ? "First month free" : firstMonthLine(price)}</b>
+                    <span className="tnum">Then {MONTHLY}/mo. Cancel anytime in the app.</span>
+                  </p>
+                </div>
+              ) : (
               <p className="tpa-buy-price">
                 <span>
                   <b className="tnum">{FIRST_MONTH}</b> first month
                 </span>
                 <span className="tpa-buy-then tnum">then {MONTHLY}/mo</span>
               </p>
+              )}
               {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026). */}
               <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
             </div>
@@ -1105,7 +1170,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 </span>
               </p>
               <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
-              <WelcomeChip />
+              {linked ? null : <WelcomeChip />}
               {joinCta("hero")}
               {tryCta}
               {lockMore}
@@ -1116,7 +1181,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
           <p className="tpa-offer-price">
             <b className="tnum">{FIRST_MONTH}</b>
-            <span>your first month</span>
+            <span>{free ? "first month" : "your first month"}</span>
           </p>
           <p className="tpa-offer-then">Then {MONTHLY}/month</p>
           {/* The payback, in one order (Sam, 3 Nov 2026, from "your first $10
@@ -1132,14 +1197,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               Your first ${MIN_ORDER} order earns ${CREDIT} back. That’s more than your first month.
             </span>
           </p>
-          <WelcomeChip />
+          {linked ? null : <WelcomeChip />}
           {joinCta("hero")}
           {tryCta}
           {lockMore}
         </section>
         )}
 
-        {hero === "a" ? null : promise}
+        {hero === "a" && !invite ? null : promise}
 
 
         <section className="tpa-module" aria-labelledby="tpa-get">
@@ -1191,7 +1256,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
-          {faqFor(MONTHLY).map((f) => (
+          {[...(invite ? inviteFaq(invite, MONTHLY) : []), ...faqFor(MONTHLY)].map((f) => (
             <details key={f.q} className="tpa-qa">
               <summary>
                 <span>{f.q}</span>
@@ -1211,9 +1276,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{FIRST_MONTH} your first month</h2>
-              <p className="tpa-close-line">Then {MONTHLY}/month, locked in for as long as you’re a member.</p>
-              <WelcomeEnds className="tpa-close-ends" />
+              <h2 className="tpa-close-h">{free ? "Your first month free" : `${FIRST_MONTH} your first month`}</h2>
+              <p className="tpa-close-line">
+                {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
+              </p>
+              {linked ? null : <WelcomeEnds className="tpa-close-ends" />}
             </>
           )}
           {joinCta("close", true)}
@@ -1244,7 +1311,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           onClose={() => setPlaceOpen(null)}
           onJoin={() => {
             setPlaceOpen(null);
-            join("place_popup");
+            join("place_popup", null, true);
           }}
         />
       ) : null}
@@ -1253,7 +1320,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           onClose={() => setHow(false)}
           onJoin={() => {
             setHow(false);
-            join("how_sheet");
+            join("how_sheet", null, true);
           }}
         />
       ) : null}
@@ -1264,11 +1331,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           hours on 3 Nov 2026; real visitors from the ads never tapped it (they
           used Step through it, and Join), so it went (Sam: "if the see how
           much I save button isn't getting click throughs maybe we hide it"). */}
-      <div className="tpa-dock" data-shown="">
+      <div className="tpa-dock" data-shown="" data-island-origin="">
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
         ) : (
-          <button type="button" className="tpa-cta tpa-dock-cta" onClick={() => join("dock")}>
+          <button type="button" className="tpa-cta tpa-dock-cta" onClick={(e) => join("dock", e.currentTarget)}>
             Join Tapin Plus
           </button>
         )}

@@ -1,3 +1,4 @@
+import { lockScroll } from "./scrollLock";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { CoverIcon, NavIcon } from "./Icons";
@@ -91,11 +92,10 @@ export default function VenuePopup({ venue, onClose }: { venue: Venue; onClose: 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previous;
+      unlock();
       window.removeEventListener("keydown", onKey);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

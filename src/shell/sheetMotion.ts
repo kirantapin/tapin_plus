@@ -40,3 +40,4 @@ export function slideAway(sheet: HTMLElement | null, layer: HTMLElement | null, 
   /* Belt and braces: a hidden tab can stall the animation's end. */
   window.setTimeout(finish, duration + 120);
 }
+
