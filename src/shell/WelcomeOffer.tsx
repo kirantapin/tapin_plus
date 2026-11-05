@@ -77,11 +77,13 @@ export function WelcomeDays() {
 export function LinkBar({ line, invite, ends }: { line: string; invite: Invite | null; ends: string | null }) {
   const r = useEndsAt(ends ? Date.parse(ends) : null);
   const label = `${invite ? `${invite.who} exclusive: ` : ""}${line}${r ? `, ends in ${spokenClock(r)}` : ""}`;
+  /* With a clock the line is long for a phone: the mark says whose it is. */
+  const who = invite && !r ? `${invite.who} exclusive · ` : "";
   return (
     <aside className={`tpa-wbar${invite ? " tpa-wbar-invite" : ""}`} aria-label={label}>
       {invite ? <img className="tpa-wbar-logo" src={invite.logo} alt="" width="22" height="22" /> : <Clock />}
       <span aria-hidden="true">
-        {invite ? `${invite.who} exclusive · ` : ""}
+        {who}
         {line}
         {r ? (
           <>
@@ -91,5 +93,32 @@ export function LinkBar({ line, invite, ends }: { line: string; invite: Invite |
         ) : null}
       </span>
     </aside>
+  );
+}
+
+/* ══ AN INVITATION'S CLOCK, IN THE OFFER (Sam, 5 Nov 2026) ════════════════════
+   "a countdown until sunday": in the slot the spots bar holds on the
+   ordinary page, the same shape: the bar drains from when the offer went out
+   to when it ends, the words under it. Nothing once it has ended. */
+export function InviteClock({ invite, className }: { invite: Invite; className?: string }) {
+  const end = invite.ends ? Date.parse(invite.ends) : null;
+  const r = useEndsAt(end);
+  if (!r || end === null) return null;
+  const span = end - Date.parse(invite.from);
+  const left = span > 0 ? Math.max(0, Math.min(1, (end - Date.now()) / span)) : 0;
+  return (
+    <div
+      className={`plus-seats tpa-invite-clock ${className ?? ""}`}
+      role="timer"
+      aria-label={`The free first month ends ${invite.endsLabel}, in ${spokenClock(r)}`}
+    >
+      <p className="plus-seats-line" aria-hidden="true">
+        <b>Free month ends {invite.endsLabel}</b>
+        <span className="tnum">{shortClock(r)}</span>
+      </p>
+      <span className="plus-seats-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${left})` }} />
+      </span>
+    </div>
   );
 }

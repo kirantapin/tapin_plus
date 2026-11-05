@@ -22,7 +22,7 @@ import { heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { InviteClock, LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -249,9 +249,10 @@ function PaybackCounter() {
               <b className="tnum">${back.percentUsdMonth}</b>
             </li>
           ) : null}
+          {/* Points count in what you get back (Sam, 5 Nov 2026). */}
           {back.pointsMonth > 0 ? (
             <li>
-              <span>{back.pointsMonth.toLocaleString("en-US")} points, about $1 per 100</span>
+              <span>{back.pointsMonth.toLocaleString("en-US")} points in rewards</span>
               <b className="tnum">${back.pointsUsdMonth}</b>
             </li>
           ) : null}
@@ -260,7 +261,7 @@ function PaybackCounter() {
             <b className="tnum">${back.monthlyUsd}</b>
           </li>
         </ul>
-        <p className="tpa-s2-fine">At Plus places. $5 back and 15% off on food and non-alcoholic drinks, $5 once a week at each place; 10 points on every dollar. An estimate.</p>
+        <p className="tpa-s2-fine">At Plus places. $5 back and 15% off on food and non-alcoholic drinks, $5 once a week at each place. 10 points for every dollar, about $1 per 100. An estimate.</p>
       </details>
     </div>
   );
@@ -610,8 +611,13 @@ function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look
                 <b className="now tnum">{money(ex.price - CREDIT)}</b>
               </span>
             </p>
-            {/* The order ends on what you pay: the "+$5 back for next week ·
-                +N points" line was clutter (Sam, 3 Nov 2026). */}
+            {/* The points it earns, last, a beat after the price drops (Sam,
+                5 Nov 2026: points "should be included in the carousel"; the
+                "+$5 back for next week" half stays out, as clutter, 3 Nov). */}
+            <p className="tpa-order-earn tpa-order-pts">
+              <span>Points earned</span>
+              <b className="tnum">+{points}</b>
+            </p>
           </div>
         )}
         {/* What else it works on at this place (Sam, 4 Nov 2026: "a simple
@@ -652,7 +658,7 @@ const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; 
     /* How it was given out, not a limit: the link works for whoever holds
        it (model/link.ts checks the link, not the person). */
     q: "Who gets the free month?",
-    a: `It came with the link we sent students from ${invite.who}. Join through this link and your first month is free.`,
+    a: `It came with the link we sent students from ${invite.who}. Join through this link${invite.ends ? ` by ${invite.endsLabel}` : ""} and your first month is free.`,
   },
 ];
 
@@ -912,7 +918,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       {member ? null : linked ? (
-        <LinkBar line={free ? "First month free" : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? null} />
+        <LinkBar line={free ? "First month free" : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
         <WelcomeBar price={FIRST_MONTH} />
       )}
@@ -1148,8 +1154,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 <span className="tpa-buy-then tnum">then {MONTHLY}/mo</span>
               </p>
               )}
-              {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026). */}
-              <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
+              {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026); an
+                  invitation with an end counts down to it instead (Sam,
+                  5 Nov 2026: "a countdown until sunday"). */}
+              {invite?.ends ? (
+                <InviteClock invite={invite} className="tpa-buy-seats" />
+              ) : (
+                <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
+              )}
             </div>
             {joinCta("hero")}
             {tryCta}
@@ -1287,6 +1299,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               <p className="tpa-close-line">
                 {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
               </p>
+              {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
               {linked ? null : <WelcomeEnds className="tpa-close-ends" />}
             </>
           )}
