@@ -1139,7 +1139,9 @@ button.tpa-cta {
   color: #0B7A53;
 }
 .tpa-s2-fine {
-  padding: 8px 0 2px;
+  /* Under the card, set in to its text (Sam, 5 Nov 2026: "spacing a bit
+     off here?"). */
+  padding: 12px 12px 2px;
   font-size: 13px;
   line-height: 18px;
   color: var(--muted);
@@ -3795,4 +3797,12 @@ html[data-surface="tpa"] .one-worth {
   .tpa-home .tpa-ww-strip {
     padding: 4px 6px;
   }
+}
+
+/* The points an order earns, under what you pay (Sam, 5 Nov 2026). */
+.tpa-order-pts {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
 }
