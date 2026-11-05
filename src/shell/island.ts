@@ -204,6 +204,12 @@ const opening = new WeakMap<HTMLElement, Animation>();
 export function islandOpen(p: IslandParts, o: IslandOrigin | null, over = false) {
   settle(p);
   hold(p, null);
+  /* The open sheet keeps the corners of what it grew from (Sam, 5 Nov 2026:
+     "can the parent container keep the same corner radius that the
+     collapsed 'join tapin plus' button has?", then "I don't like how it
+     changes"): the clip opens and closes at one radius, never re-rounding. */
+  const corner = o?.plate.isConnected ? parseFloat(getComputedStyle(o.plate).borderTopLeftRadius) : NaN;
+  if (corner > 0) p.island.style.borderRadius = `${corner}px`;
   if (reducedMotion()) return;
   const rect = p.island.getBoundingClientRect();
   /* Frozen while it opens (islandTrackHeight eases to any change after). */

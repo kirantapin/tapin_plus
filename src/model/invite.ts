@@ -42,7 +42,7 @@ export interface Invite {
    *  one again (inviteFor). */
   ends: string | null;
   from: string;
-  /** The end as the copy says it: "Sunday night". */
+  /** The end as the copy says it: "Sunday, Nov 8". */
   endsLabel: string;
 }
 
@@ -58,7 +58,7 @@ const WELCOME_WEEK: Invite = {
      the checkout stops giving the month when the page stops offering it. */
   ends: "2026-11-09T05:00:00Z",
   from: "2026-11-05T19:35:00Z",
-  endsLabel: "Sunday night",
+  endsLabel: "Sunday, Nov\u00a08",
 };
 
 /** Whether an invitation's offer is still on. */

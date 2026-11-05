@@ -68,9 +68,12 @@ const KIND: Record<string, string> = {
 
 const itemAt = (venueId: string, name: string) => itemsFor(venueId).find((i) => i.name === name);
 
-/** The Burg's own hero is two people holding bottles; a dish of theirs
- *  stands in, as it does in the app (no alcohol in the imagery). */
-const photoFor = (v: Place) => (v.id === "theburg" ? itemAt("theburg", "Ceviche — Peru")?.img ?? v.hero : v.hero);
+/** The Burg's own hero is two people holding bottles: in its place, the
+ *  same photo with their empanadas and flautas in their hands instead, made
+ *  with GPT Image (4 Nov 2026; Sam, 5 Nov: the ceviche "looks really ugly").
+ *  No alcohol in the imagery. */
+const BURG_PHOTO = asset("/places/theburg-food.webp");
+const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.hero);
 
 /* ══ ORDERS THAT EARN IT, ONE AT EACH PLACE ═════════════════════════════════
    Real items at their menu prices, each at or over $10, all food (the $5 is
@@ -918,7 +921,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       {member ? null : linked ? (
-        <LinkBar line={free ? "First month free" : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
+        <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
         <WelcomeBar price={FIRST_MONTH} />
       )}

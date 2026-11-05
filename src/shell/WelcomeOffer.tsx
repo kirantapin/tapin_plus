@@ -110,10 +110,11 @@ export function InviteClock({ invite, className }: { invite: Invite; className?:
     <div
       className={`plus-seats tpa-invite-clock ${className ?? ""}`}
       role="timer"
-      aria-label={`The free first month ends ${invite.endsLabel}, in ${spokenClock(r)}`}
+      aria-label={`The free first month offer ends ${invite.endsLabel}, in ${spokenClock(r)}`}
     >
       <p className="plus-seats-line" aria-hidden="true">
-        <b>Free month ends {invite.endsLabel}</b>
+        {/* "First month free" is right above it: the line says when the offer ends. */}
+        <b>Offer ends {invite.endsLabel}</b>
         <span className="tnum">{shortClock(r)}</span>
       </p>
       <span className="plus-seats-bar" aria-hidden="true">
