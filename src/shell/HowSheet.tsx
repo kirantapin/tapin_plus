@@ -1,3 +1,5 @@
+import { handOverFocus } from "./PlusCheckout";
+import { lockScroll, modalOpen } from "./scrollLock";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { slideAway } from "./sheetMotion";
 import { createPortal } from "react-dom";
@@ -6,6 +8,7 @@ import { TYPICAL_ORDER_USD, monthlyBack } from "../model/savings";
 import { buildSlides } from "../routes/How";
 import { asset } from "../asset";
 import { WelcomeEnds } from "./WelcomeOffer";
+import { firstThen, usePlusPrice } from "../model/plus";
 
 /* ══ HOW IT WORKS, THE OLD WALKTHROUGH IN THE APP'S LOOK (Sam, 3 Nov 2026) ══
    "I like the new 'how it works' modal - but i feel like it got rid of a lot
@@ -58,6 +61,7 @@ export default function HowSheet({
   /* A month's spend, and a month back (Sam, 3 Nov 2026: "a month and a
      month"), worked order by order (savings.ts monthlyBack). */
   const [spend, setSpend] = useState(200);
+  const price = usePlusPrice();
   const slides = useMemo(() => buildSlides(spend), [spend]);
   const s = monthlyBack(spend);
   const [i, setI] = useState(0);
@@ -97,16 +101,16 @@ export default function HowSheet({
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
     sheet.current?.focus();
     if (!still()) {
       layer.current?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
       sheet.current?.animate?.([{ transform: "translateY(40px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: ease });
     }
     return () => {
-      document.body.style.overflow = prev;
-      opener?.focus?.();
+      unlock();
+      if (!modalOpen()) opener?.focus?.();
+      else handOverFocus(opener);
     };
   }, []);
 
@@ -252,8 +256,9 @@ export default function HowSheet({
         <div className="hs-foot">
           {last ? (
             <div>
-              <p className="hs-price">$3.99 your first month, then $7.99.</p>
-              <WelcomeEnds className="hs-ends" />
+              {/* From the price, so a promo link's free month says so (5 Nov 2026). */}
+              <p className="hs-price">{firstThen(price)}</p>
+              {price?.linkId ? null : <WelcomeEnds className="hs-ends" />}
             </div>
           ) : null}
           <div className="hs-nav">

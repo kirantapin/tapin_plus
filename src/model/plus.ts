@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { environment, supabase } from "../supabase";
 import { loadPlusLink } from "./link";
+import { WELCOME_WEEK_LINK_ID } from "./invite";
 
 export const TAPIN_ID = "tapin";
 
@@ -51,6 +52,12 @@ export interface PlusPrice {
   /** "month", "2 weeks". */
   period: string;
   billing: PlusBundle["billing"];
+  /** The promo link whose offer set `first` (model/link.ts), or null when the
+   *  welcome offer or the full price did. The page dresses for its audience
+   *  by it (model/invite.ts). */
+  linkId: string | null;
+  /** When that link's offer ends, or null for no end. */
+  linkEnds: string | null;
 }
 
 /** One billing period on from `from`, placed the way Stripe places it: a
@@ -102,7 +109,22 @@ export async function fetchPlusBundle(): Promise<PlusBundle> {
   return data;
 }
 
+/* Local dev only (stripped from builds): the local database has no Plus
+   bundle, so the price never loads there. ?pricepreview shows the welcome
+   offer's figures and ?wwpreview a Welcome Week link's free month
+   (model/invite.ts), to see each page without the live database. */
+const devPrice = (): PlusPrice | null => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return null;
+  const q = new URLSearchParams(window.location.search);
+  const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null };
+  if (q.has("wwpreview")) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
+  if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
+  return null;
+};
+
 async function fetchPrice(): Promise<PlusPrice> {
+  const preview = devPrice();
+  if (preview) return preview;
   const [plus, offer, link] = await Promise.all([
     fetchPlusBundle(),
     welcomeOfferId
@@ -119,13 +141,16 @@ async function fetchPrice(): Promise<PlusPrice> {
       : Promise.resolve(null),
     loadPlusLink(),
   ]);
+  // A promo link's offer in place of the welcome offer, as the checkout
+  // tries it first (model/link.ts).
+  const linked = offerPrice(link?.policy ?? null, plus);
   return {
     monthly: plus.price,
-    // A promo link's offer in place of the welcome offer, as the checkout
-    // tries it first (model/link.ts).
-    first: offerPrice(link?.policy ?? null, plus) ?? offerPrice(offer, plus) ?? plus.price,
+    first: linked ?? offerPrice(offer, plus) ?? plus.price,
     period: periodOf(plus),
     billing: plus.billing,
+    linkId: linked !== null && link ? link.linkId : null,
+    linkEnds: linked !== null && link ? link.policy.end_time : null,
   };
 }
 
@@ -138,20 +163,44 @@ const loadPrice = () =>
     throw e;
   }));
 
-/** Plus's price, or null while it loads (or if it couldn't be read). */
-export function usePlusPrice(): PlusPrice | null {
-  const [price, setPrice] = useState<PlusPrice | null>(null);
+/** Plus's price, or null while it loads; `failed` once it couldn't be read,
+ *  so a page that guessed an offer from its address can stop guessing. */
+export function usePlusPriceLoad(): { price: PlusPrice | null; failed: boolean } {
+  const [state, setState] = useState<{ price: PlusPrice | null; failed: boolean }>({ price: null, failed: false });
   useEffect(() => {
     let live = true;
     loadPrice()
-      .then((p) => live && setPrice(p))
-      .catch((e) => console.error("Loading the Plus price failed", e));
+      .then((p) => live && setState({ price: p, failed: false }))
+      .catch((e) => {
+        console.error("Loading the Plus price failed", e);
+        if (live) setState({ price: null, failed: true });
+      });
     return () => {
       live = false;
     };
   }, []);
-  return price;
+  return state;
 }
+
+/** Plus's price, or null while it loads (or if it couldn't be read). */
+export function usePlusPrice(): PlusPrice | null {
+  return usePlusPriceLoad().price;
+}
+
+/** The first month as a figure: "Free" for a free one (a promo link's,
+ *  5 Nov 2026), else "$3.99". "$0" read as a price nobody would quote. */
+export const firstFigure = (price: PlusPrice | null): string => (price?.first === 0 ? "Free" : usd(price?.first));
+
+/** "Your first month free, then $7.99." or "$3.99 your first month, then
+ *  $7.99." */
+export const firstThen = (price: PlusPrice | null): string =>
+  price?.first === 0
+    ? `Your first month free, then ${usd(price.monthly)}.`
+    : `${usd(price?.first)} your first month, then ${usd(price?.monthly)}.`;
+
+/** "Free first month" or "$3.99 first month". */
+export const firstMonthLine = (price: PlusPrice | null): string =>
+  price?.first === 0 ? "Free first month" : `${usd(price?.first)} first month`;
 
 /** "$7.99", "$5", "$0". Placeholder "$–" while the price loads. */
 export const usd = (n: number | undefined) =>

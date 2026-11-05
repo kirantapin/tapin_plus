@@ -1,4 +1,5 @@
-import { shortClock, spokenClock, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
+import { shortClock, spokenClock, useEndsAt, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
+import type { Invite } from "../model/invite";
 
 /* ══ THE WELCOME OFFER'S CLOCK, THREE PLACES (Sam, 3 Nov 2026) ═════════════════
    model/deadline.ts holds the date. The bar pinned over the page, a pill in
@@ -64,5 +65,31 @@ export function WelcomeDays() {
         Offer ends {welcomeEndsDay} · {left}
       </span>
     </p>
+  );
+}
+
+/* ══ A PROMO LINK'S BAR (5 Nov 2026) ═══════════════════════════════════════════
+   When a link's offer prices the first month (model/link.ts), the welcome
+   offer's November 30 clock is someone else's deadline. The bar says the
+   link's offer instead, with its audience's mark when it has one
+   (model/invite.ts, Sam: "the welcome week logo somewhere, tied to the
+   offer"), and counts down only if that offer has an end. */
+export function LinkBar({ line, invite, ends }: { line: string; invite: Invite | null; ends: string | null }) {
+  const r = useEndsAt(ends ? Date.parse(ends) : null);
+  const label = `${invite ? `${invite.who} exclusive: ` : ""}${line}${r ? `, ends in ${spokenClock(r)}` : ""}`;
+  return (
+    <aside className={`tpa-wbar${invite ? " tpa-wbar-invite" : ""}`} aria-label={label}>
+      {invite ? <img className="tpa-wbar-logo" src={invite.logo} alt="" width="22" height="22" /> : <Clock />}
+      <span aria-hidden="true">
+        {invite ? `${invite.who} exclusive · ` : ""}
+        {line}
+        {r ? (
+          <>
+            {" · ends in "}
+            <span className="tnum">{shortClock(r)}</span>
+          </>
+        ) : null}
+      </span>
+    </aside>
   );
 }

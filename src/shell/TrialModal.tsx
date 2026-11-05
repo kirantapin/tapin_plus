@@ -1,9 +1,10 @@
+import { lockScroll } from "./scrollLock";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { slideAway } from "./sheetMotion";
 import { createPortal } from "react-dom";
 import { campaignTrialPlaces, campaignVenue } from "../model/campaign";
 import { logoField, venues } from "../model/content";
-import { usd, usePlusPrice } from "../model/plus";
+import { firstThen, usePlusPrice } from "../model/plus";
 import { openPlusCheckout } from "./PlusCheckout";
 
 /** The ad's tags (utm_*, fbclid) carried onto a Try link, so a visit that
@@ -81,8 +82,12 @@ export default function TrialModal({
   /* Down and away, like every pop-up (sheetMotion.ts); `closing` only
      stops taps during the exit now, the motion is the shared one. */
   const scrim = useRef<HTMLDivElement>(null);
+  /* A ref, so the Escape listener (set once) sees it too: a second Escape
+     mid-exit used to restart the slide from the top. */
+  const closingRef = useRef(false);
   const close = () => {
-    if (closing) return;
+    if (closing || closingRef.current) return;
+    closingRef.current = true;
     setClosing(true);
     slideAway(panel.current, scrim.current, onClose);
   };
@@ -92,11 +97,10 @@ export default function TrialModal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = previous;
+      unlock();
       window.removeEventListener("keydown", onKey);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -291,14 +295,14 @@ export default function TrialModal({
             ) : null}
             {/* The window closes on Plus's offer, from the bundle (model/plus.ts). */}
             <p className="t-compact ct-more-p">
-              {`${usd(price?.first)} your first month, then ${usd(price?.monthly)}.`}
+              {firstThen(price)}
             </p>
             <button
               type="button"
               className="action ct-go"
               onClick={() => {
                 onClose();
-                openPlusCheckout("trial");
+                openPlusCheckout("trial", null, { over: true });
               }}
             >
               Join Tapin Plus

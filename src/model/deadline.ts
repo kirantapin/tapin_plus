@@ -64,6 +64,12 @@ export function useWelcomeEnds(): Remaining | null {
   return useCountdown(welcomeAt());
 }
 
+/** Time left to any end, or null with no end or once it has passed (a
+ *  promo link's offer, model/link.ts). */
+export function useEndsAt(end: number | null): Remaining | null {
+  return useCountdown(end ?? 0);
+}
+
 function useCountdown(end: number): Remaining | null {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
