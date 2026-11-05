@@ -1,3 +1,4 @@
+import { useJoinLabel } from "./WelcomeOffer";
 import { handOverFocus } from "./PlusCheckout";
 import { lockScroll, modalOpen } from "./scrollLock";
 import { useCallback, useEffect, useRef } from "react";
@@ -27,6 +28,7 @@ export type PlacePopupPlace = {
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePopupPlace; onClose: () => void; onJoin: () => void }) {
+  const joinLabel = useJoinLabel();
   const layer = useRef<HTMLDivElement | null>(null);
   const sheet = useRef<HTMLDivElement | null>(null);
   const photo = useRef<HTMLDivElement | null>(null);
@@ -168,7 +170,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
             </li>
           </ul>
           <button type="button" className="pp-cta" onClick={onJoin}>
-            Join Tapin Plus
+            {joinLabel}
           </button>
         </div>
       </div>

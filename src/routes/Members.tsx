@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import AccountLine from "../shell/AccountLine";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
+import { OfferBar } from "../shell/WelcomeOffer";
 import { useEventTracking } from "../context/event_tracking_context";
 import MemberDot from "../shell/MemberDot";
 import { useAuth } from "../context/auth_context";
@@ -51,6 +52,8 @@ export default function Members() {
 
   return (
     <div ref={page} className="tpa tpa-members">
+      {/* The offer's clock, as on home, for anyone not yet a member. */}
+      {member ? null : <OfferBar />}
       <header className="tpa-band">
         <img className="tpa-band-art" src={COLLAGE} alt="" decoding="async" />
         <div className="tpa-band-top">
