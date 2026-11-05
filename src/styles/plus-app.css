@@ -2901,7 +2901,10 @@ html[data-surface="tpa"] .hs-scene > * {
   justify-content: flex-end;
   height: auto;
   min-height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
-  padding: calc(env(safe-area-inset-top) + 76px) 0 32px;
+  /* More air between the pills and the headline (Sam, 5 Nov 2026: "isn't
+     this a bit cramped now? can we give the header text slightly more space
+     above it"): 76 to 100. */
+  padding: calc(env(safe-area-inset-top) + 100px) 0 32px;
 }
 .tpa-band[data-hero] .tpa-band-title {
   position: relative;
