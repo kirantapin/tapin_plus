@@ -60,19 +60,30 @@ function Sticker({ invite }: { invite: Invite }) {
 }
 
 /** The headline block for an invitation: what sits above the social proof. */
-export default function InviteHero({ invite, free, line }: { invite: Invite; free: boolean; line: string }) {
+/* VALUE FIRST (Sam, 5 Nov 2026: picked "2" of two calmer headers, after
+   "this is still a bit too busy though no?"). For someone who has never
+   heard of Plus: what it gives as the headline, "First month free" on the
+   collage's cream strip under it, the sticker above. No student count. */
+export default function InviteHero({
+  invite,
+  free,
+  line,
+  value,
+}: {
+  invite: Invite;
+  free: boolean;
+  line: string;
+  /** What Plus gives, for someone who has never heard of it (Sam, 5 Nov
+   *  2026: "these are likely cold leads"). */
+  value: string;
+}) {
   return (
     <>
       <Sticker invite={invite} />
-      <h1 className="tpa-ww-h1">
-        {free ? (
-          <>
-            Your first month of Tapin Plus is <Strip seed={7}>free</Strip>
-          </>
-        ) : (
-          line
-        )}
-      </h1>
+      <h1 className="tpa-ww-h1">{value}</h1>
+      <p className="tpa-ww-label">
+        <Strip seed={7}>{free ? "First month free" : line}</Strip>
+      </p>
     </>
   );
 }

@@ -11,6 +11,7 @@ import { firstMonthLine, nextBillingDate, usd, usePlusPrice, type PlusPrice } fr
 import { inviteFor } from "../model/invite";
 import { sendCode, verifyCode } from "./authEnv";
 import { PlusSeats } from "./PlusSeats";
+import { InviteClock } from "./WelcomeOffer";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, reducedMotion, settle, type IslandOrigin, type IslandParts } from "./island";
 import { lockScroll } from "./scrollLock";
 
@@ -588,9 +589,25 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
         </span>
         <b>{look === "c" ? "Price locked" : "Your price stays as more places join"}</b>
       </li>
+      {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
+          anytime", moved here from the page ("it'd be one of these"). */}
+      <li>
+        <span className="pck-ico pck-ico-cancel" aria-hidden="true">
+          <XGlyph />
+        </span>
+        <b>{look === "c" ? "Cancel anytime" : "Cancel anytime in one tap"}</b>
+      </li>
     </ul>
   );
-  const seats = <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />;
+  /* An invitation with an end counts down to it in the spots bar's place
+     (Sam, 5 Nov 2026: "we should show a countdown for this offer right? on
+     the checkout modal"). */
+  const invite = inviteFor(price);
+  const seats = invite?.ends ? (
+    <InviteClock invite={invite} className="pck-seats" />
+  ) : (
+    <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
+  );
   const field = (
     <>
       <label className="pck-sr" htmlFor="pck-phone">Phone number</label>
@@ -847,6 +864,9 @@ function Review({
   if (!cart || !price) return <div className="pck-body pck-wait" aria-busy="true" />;
 
   const today = cart.dueTodayCents / 100;
+  /* The invitation's clock under the charge rows, while its free month is
+     the one being given. */
+  const invite = inviteFor(price);
   return (
     <div className="pck-body">
       <ul className="pck-rows">
@@ -859,6 +879,7 @@ function Review({
           <span className="tnum">{`${usd(price.monthly)} every ${price.period}, from ${renewsOn(price)}`}</span>
         </li>
       </ul>
+      {invite?.ends && today === price.first ? <InviteClock invite={invite} className="pck-seats pck-pay-clock" /> : null}
       {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
           download the tapin app after they subscribe". One line each, above
           the consent, so the terms stay right by the button that charges. */}
@@ -875,6 +896,20 @@ function Review({
           </span>
           <b>Money back if you don’t save</b>
         </li>
+        {/* Sam, 5 Nov 2026: "should also show in the bullets, rate is locked
+            for life, even as more spots join". */}
+        <li>
+          <span className="pck-ico" aria-hidden="true">
+            <LockGlyph />
+          </span>
+          <b>{`${usd(price.monthly)} locked for life, even as places join`}</b>
+        </li>
+        <li>
+          <span className="pck-ico pck-ico-cancel" aria-hidden="true">
+            <XGlyph />
+          </span>
+          <b>Cancel anytime in one tap</b>
+        </li>
       </ul>
       <p className="pck-consent">
         {today === 0
@@ -890,9 +925,17 @@ function Review({
         </span>
       </p>
       {preview ? (
-        <button type="button" className="pck-wallet-preview" onClick={() => onPaid("preview")}>
+        /* A block, not a <button>, so it stretches the way the real wallet
+           does (the island's negative margins widen it to where Join was). */
+        <div
+          className="pck-wallet-preview"
+          role="button"
+          tabIndex={0}
+          onClick={() => onPaid("preview")}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onPaid("preview")}
+        >
            Pay
-        </button>
+        </div>
       ) : (
       <Elements
         key={cart.dueTodayCents}
@@ -997,6 +1040,14 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
    the app (shell/GetTheApp.tsx): the card to download it, and the same place
    for managing the membership (Sam, 3 Nov 2026: "a link to manage their
    membership on the tapin plus confirmation page"). */
+
+function XGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path d="M7.5 7.5l9 9M16.5 7.5l-9 9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function LockGlyph() {
   return (

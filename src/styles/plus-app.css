@@ -3809,3 +3809,78 @@ html[data-surface="tpa"] .one-worth {
   gap: 12px;
   margin-top: 8px;
 }
+
+/* Email support and Download the app (Sam, 5 Nov 2026: "add 'download the
+   app' as a second button here"): stacked on a phone, side by side on a
+   computer. */
+.tpa-members-acts {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.tpa-members-acts .tpa-members-mail {
+  margin-top: 0;
+}
+@media (min-width: 1024px) {
+  .tpa-members .tpa-members-acts {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* The Welcome Week band grows with its headline and the savings line under
+   it, as the hero test's bands do, with room above for the sticker. */
+.tpa-band[data-invite] {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: auto;
+  min-height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
+  padding: calc(env(safe-area-inset-top) + 112px) 0 34px;
+}
+.tpa-band[data-invite] .tpa-band-title {
+  position: relative;
+  inset: auto;
+  margin: 0 var(--gutter);
+}
+.tpa-ww .tpa-ww-sub {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #ffffff;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band[data-invite] {
+    padding: 150px 0 40px;
+  }
+  .tpa-home .tpa-band[data-invite] .tpa-band-title {
+    margin: 0 40px;
+  }
+  .tpa-ww .tpa-ww-sub {
+    margin-top: 14px;
+    font-size: 19px;
+    line-height: 26px;
+  }
+}
+
+/* The Welcome Week savings line on one line on a computer. */
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww .tpa-ww-sub {
+    max-width: 60ch;
+  }
+}
+
+/* "First month free" on its own cream strip under the headline, the
+   collage's label (InviteHero). */
+.tpa-ww-label {
+  margin: 12px 0 0;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 30px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww-label {
+    margin-top: 16px;
+    font-size: 34px;
+    line-height: 42px;
+  }
+}

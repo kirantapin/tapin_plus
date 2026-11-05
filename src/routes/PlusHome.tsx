@@ -925,7 +925,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       ) : (
         <WelcomeBar price={FIRST_MONTH} />
       )}
-      <header ref={bandRef} className="tpa-band" data-hero={place || invite || hero === "0" ? undefined : hero}>
+      <header
+        ref={bandRef}
+        className="tpa-band"
+        data-hero={place || invite || hero === "0" ? undefined : hero}
+        data-invite={invite && !place ? "" : undefined}
+      >
         <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         {/* A Welcome Week student is here for the offer: no town badge, no
             Members (Sam, 5 Nov 2026: "not sure if for the welcome week kids it
@@ -954,7 +959,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               /* The invitation, then what it gets you (Sam, 5 Nov 2026:
                  "the welcome week logo somewhere, tied to the offer"), as a
                  sticker and a paper strip (shell/InviteHero.tsx). */
-              <InviteHero invite={invite} free={free} line={`${firstMonthLine(price)} of Tapin Plus`} />
+              <InviteHero
+                invite={invite}
+                free={free}
+                line={`${firstMonthLine(price)} of Tapin Plus`}
+                value={`$${CREDIT} back every week at ${PLACES.length} Blacksburg spots`}
+              />
             ) : place || hero === "0" ? (
               <h1>
                 {place
@@ -982,7 +992,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             )}
             {/* Social proof, at the top (Sam, 3 Nov 2026); the count lives in
                 model/proof.ts. */}
-            <SocialProof text={MEMBERS_LINE} />
+            {/* Not under the invitation's header: one thing fewer there
+                (Sam, 5 Nov 2026: "still a bit too busy"). */}
+            {invite && !place ? null : <SocialProof text={MEMBERS_LINE} />}
           </div>
         </div>
       </header>
