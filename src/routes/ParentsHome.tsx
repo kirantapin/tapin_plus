@@ -448,7 +448,10 @@ export default function ParentsHome() {
   }, [token, track]);
 
   const asked = ask.state === "ok" ? ask : null;
-  const cta = asked ? `Cover ${asked.name}’s Plus` : "Sign up my student";
+  /* The gift before the ask (Sam, 6 Nov 2026: "the CTA should be "build
+     their care package" or something like that. Instead of going right for
+     the ask"): every button here opens the checkout on the care package. */
+  const cta = asked ? `Build ${asked.name}’s care package` : "Build their care package";
   /* The button that was tapped: the checkout grows out of it (or out of the
      dock's plate while that is on screen) and shrinks back into it. */
   const [from, setFrom] = useState<HTMLElement | null>(null);
@@ -677,11 +680,16 @@ export default function ParentsHome() {
             className="tpa-cta tpp-cta"
             onClick={(e) => signUp("hero", e.currentTarget)}
           >
+            <Glyph d={GLYPHS.mail} className="tpp-cta-glyph" />
             {cta}
           </button>
+          {/* What happens first, then the price, quieter (Sam, 6 Nov 2026:
+              the callout "makes the ask a bit too early"). */}
           <p className="tpp-under tnum">
-            Just their phone number. {FIRST} the first month, then {MONTHLY}
-            /month. Cancel anytime.
+            <b>Start with a note. Their number and payment come last.</b>
+            <span>
+              {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
+            </span>
           </p>
         </section>
 
@@ -927,9 +935,7 @@ export default function ParentsHome() {
           className="tpa-cta tpa-dock-cta"
           onClick={(e) => signUp("dock", e.currentTarget)}
         >
-          {/* "Send Tapin Plus" (Sam, 6 Nov 2026), as the gift band's button
-              says; an ask link's names the student. */}
-          {asked ? cta : "Send Tapin Plus"}
+          {cta}
           <DockArrow />
         </button>
       </div>

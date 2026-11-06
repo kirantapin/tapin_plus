@@ -68,7 +68,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           a text, tap it, and open their Plus like a present.
         </p>
         <button ref={send} type="button" className="tpg-env-cta" onClick={(e) => onSend(e.currentTarget)}>
-          Send Tapin Plus
+          Build their care package
         </button>
         <button type="button" className="tpg-env-link" onClick={() => setPreviewing(true)}>
           See what they’ll see
