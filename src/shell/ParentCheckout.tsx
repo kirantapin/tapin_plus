@@ -14,8 +14,9 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
-import { FROM_MAX, NOTE_MAX, SCENES, giftWho, type SceneId } from "../model/gift";
+import { FROM_MAX, NOTE_MAX, SCENE_GROUPS, type SceneId } from "../model/gift";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
+import { clearGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
@@ -157,7 +158,13 @@ function Sheet({
   const mock = parentMock();
 
   const [step, setStep] = useState<Step>(() => (charged ? "pay" : ask ? "you" : "student"));
-  const [student, setStudent] = useState("");
+  /* The student's name, note, sign-off, background and photo are the gift
+     draft (model/giftDraft.ts), shared with the preview on /parents, so what
+     a parent typed there is here already (Sam, 6 Nov 2026: "so they don't
+     have to do it twice"). */
+  const draft = useGiftDraft();
+  const student = draft.to;
+  const setStudent = (to: string) => setGiftDraft({ to });
   const [phone, setPhone] = useState("");
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
@@ -169,14 +176,18 @@ function Sheet({
   /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
      signed, both optional; shown on the student's gift page, never in a
      text. Folded away unless they came from the envelope. */
-  const [noteOpen, setNoteOpen] = useState(noteFirst);
-  const [giftNote, setGiftNote] = useState("");
-  const [giftFrom, setGiftFrom] = useState("");
+  const [noteOpen, setNoteOpen] = useState(() => noteFirst || giftDraftTouched());
+  const giftNote = draft.note;
+  const setGiftNote = (note: string) => setGiftDraft({ note });
+  const giftFrom = draft.from;
+  const setGiftFrom = (from: string) => setGiftDraft({ from });
   /* The gift page's background and the parent's photo (Sam, 6 Nov 2026:
      "give moms the option to upload an image and select their own
      background style"). The photo is a small JPEG made on the phone. */
-  const [giftScene, setGiftScene] = useState<SceneId>("maroon");
-  const [giftPhoto, setGiftPhoto] = useState<string | null>(null);
+  const giftScene = draft.scene;
+  const setGiftScene = (scene: SceneId) => setGiftDraft({ scene });
+  const giftPhoto = draft.photo;
+  const setGiftPhoto = (photo: string | null) => setGiftDraft({ photo });
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const photoInput = useRef<HTMLInputElement | null>(null);
@@ -501,6 +512,8 @@ function Sheet({
     if (ask) track("ask_paid", { source });
     setDone(res);
     setStep("done");
+    /* Sent: the next gift starts fresh. */
+    clearGiftDraft();
   };
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
@@ -691,8 +704,13 @@ function Sheet({
                     {/* The background their envelope arrives on. */}
                     <fieldset className="prc-scenes">
                       <legend className="prc-label">Background</legend>
-                      <div className="prc-scene-row" role="radiogroup" aria-label="Background">
-                        {SCENES.map((sc) => (
+                      {/* Everyday, then seasonal (6 Nov 2026); one choice
+                          across both rows (the radios share a name). */}
+                      {SCENE_GROUPS.map((g, gi) => (
+                      <div key={g.label} className="prc-scene-group">
+                      {gi > 0 ? <span className="prc-scene-sub">{g.label}</span> : null}
+                      <div className="prc-scene-row" role="radiogroup" aria-label={g.label}>
+                        {g.scenes.map((sc) => (
                           <label key={sc.id} className="prc-scene">
                             <input
                               type="radio"
@@ -708,6 +726,8 @@ function Sheet({
                           </label>
                         ))}
                       </div>
+                      </div>
+                      ))}
                     </fieldset>
                     <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
                       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -733,18 +753,13 @@ function Sheet({
               )}
               {previewing ? (
                 <GiftPreview
-                  gift={{
-                    to: (ask ? ask.student_first_name : student.trim()) || null,
-                    from: giftWho(giftFrom, name),
-                    note: giftNote.trim() || null,
-                    masked: ask ? ask.masked_phone : maskDigits(phoneD),
-                    scene: giftScene,
-                    photo: giftPhoto,
-                  }}
+                  /* The gift draft is the checkout's own fields, so what
+                     they change in the preview is what they send. */
+                  fixedTo={ask ? ask.student_first_name : null}
+                  parentName={name}
+                  masked={ask ? ask.masked_phone : maskDigits(phoneD)}
                   onClose={() => setPreviewing(false)}
-                  /* The background they cycle to is the one they send. */
-                  onScene={setGiftScene}
-                  cta={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
+                  action={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
                 />
               ) : null}
               {formError ? (

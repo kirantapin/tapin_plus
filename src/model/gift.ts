@@ -54,6 +54,18 @@ export const SCENES = [
   { id: "lunch", name: "Lunch", line: "On me" },
   { id: "sunburst", name: "Sunburst", line: "Hooray" },
   { id: "leaves", name: "Fall leaves", line: "Autumn" },
+  /* Seasonal (Sam, 6 Nov 2026: "can we also add channukah and christmas,
+     along with a general "holiday" backgrounds - these would be in a
+     "seasonal" category"). */
+  { id: "hanukkah", name: "Hanukkah", line: "Happy Hanukkah", group: "seasonal" },
+  { id: "christmas", name: "Christmas", line: "Merry Christmas", group: "seasonal" },
+  { id: "holiday", name: "Holiday", line: "Happy holidays", group: "seasonal" },
+] as const;
+
+/** The everyday backgrounds, and the seasonal ones, for the pickers. */
+export const SCENE_GROUPS = [
+  { label: "Background", scenes: SCENES.filter((e) => !("group" in e)) },
+  { label: "Seasonal", scenes: SCENES.filter((e) => "group" in e && e.group === "seasonal") },
 ] as const;
 export type SceneId = (typeof SCENES)[number]["id"];
 

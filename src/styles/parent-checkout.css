@@ -712,3 +712,18 @@ fieldset.prc-module {
     width: min(100%, 400px);
   }
 }
+
+/* The seasonal backgrounds' row, under the everyday ones (6 Nov 2026). */
+.prc-scene-group {
+  display: grid;
+  gap: 8px;
+}
+.prc-scene-group + .prc-scene-group {
+  margin-top: 12px;
+}
+.prc-scene-sub {
+  font-size: 13px;
+  line-height: 17px;
+  font-weight: 600;
+  color: var(--muted);
+}

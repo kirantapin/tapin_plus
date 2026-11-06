@@ -76,12 +76,12 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       </div>
       {previewing ? (
         <GiftPreview
-          gift={{ ...SAMPLE_GIFT, photo: SAMPLE_PHOTO_SRC }}
-          backLabel="Close"
-          photoChoice={SAMPLE_PHOTO_SRC}
+          sample
           onClose={() => setPreviewing(false)}
-          cta={{
-            label: "Sign up my student",
+          /* "Send Tapin Plus" (Sam, 6 Nov 2026): what they made here opens
+             in the checkout already filled in (model/giftDraft.ts). */
+          action={{
+            label: "Send Tapin Plus",
             onClick: () => {
               setPreviewing(false);
               if (send.current) onSend(send.current);
