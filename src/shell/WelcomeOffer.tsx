@@ -1,4 +1,8 @@
-import { shortClock, spokenClock, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
+import { shortClock, spokenClock, useEndsAt, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
+import { inviteFor, type Invite } from "../model/invite";
+import { firstFigure, firstMonthLine, usePlusPrice, usePlusPriceLoad } from "../model/plus";
+import { inviteExpected } from "../model/invite";
+import { useState } from "react";
 
 /* ══ THE WELCOME OFFER'S CLOCK, THREE PLACES (Sam, 3 Nov 2026) ═════════════════
    model/deadline.ts holds the date. The bar pinned over the page, a pill in
@@ -64,5 +68,87 @@ export function WelcomeDays() {
         Offer ends {welcomeEndsDay} · {left}
       </span>
     </p>
+  );
+}
+
+/* ══ A PROMO LINK'S BAR (5 Nov 2026) ═══════════════════════════════════════════
+   When a link's offer prices the first month (model/link.ts), the welcome
+   offer's November 30 clock is someone else's deadline. The bar says the
+   link's offer instead, with its audience's mark when it has one
+   (model/invite.ts, Sam: "the welcome week logo somewhere, tied to the
+   offer"), and counts down only if that offer has an end. */
+export function LinkBar({ line, invite, ends }: { line: string; invite: Invite | null; ends: string | null }) {
+  const r = useEndsAt(ends ? Date.parse(ends) : null);
+  const label = `${invite ? `${invite.who} exclusive: ` : ""}${line}${r ? `, ends in ${spokenClock(r)}` : ""}`;
+  /* Whose offer it is, always (Sam, 5 Nov 2026: "need to make sure people
+     know this is a welcome week exclusive"); with a clock the short name
+     beside the mark, and the strip under the headline says what it is. */
+  const who = invite ? `${r ? invite.short : invite.who} exclusive${r ? "" : " · "}` : "";
+  return (
+    <aside className={`tpa-wbar${invite ? " tpa-wbar-invite" : ""}`} aria-label={label}>
+      {invite ? <img className="tpa-wbar-logo" src={invite.logo} alt="" width="22" height="22" /> : <Clock />}
+      <span aria-hidden="true">
+        {who}
+        {invite && r ? null : line}
+        {r ? (
+          <>
+            {" · ends in "}
+            <span className="tnum">{shortClock(r)}</span>
+          </>
+        ) : null}
+      </span>
+    </aside>
+  );
+}
+
+/* ══ AN INVITATION'S CLOCK, IN THE OFFER (Sam, 5 Nov 2026) ════════════════════
+   "a countdown until sunday": in the slot the spots bar holds on the
+   ordinary page, the same shape: the bar drains from when the offer went out
+   to when it ends, the words under it. Nothing once it has ended. */
+export function InviteClock({ invite, className }: { invite: Invite; className?: string }) {
+  const end = invite.ends ? Date.parse(invite.ends) : null;
+  const r = useEndsAt(end);
+  if (!r || end === null) return null;
+  const span = end - Date.parse(invite.from);
+  const left = span > 0 ? Math.max(0, Math.min(1, (end - Date.now()) / span)) : 0;
+  return (
+    <div
+      className={`plus-seats tpa-invite-clock ${className ?? ""}`}
+      role="timer"
+      aria-label={`The free first month offer ends ${invite.endsLabel}, in ${spokenClock(r)}`}
+    >
+      <p className="plus-seats-line" aria-hidden="true">
+        {/* "First month free" is right above it: the line says when the offer ends. */}
+        <b>Offer ends {invite.endsLabel}</b>
+        <span className="tnum">{shortClock(r)}</span>
+      </p>
+      <span className="plus-seats-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${left})` }} />
+      </span>
+    </div>
+  );
+}
+
+/** What Join says (Sam, 5 Nov 2026: on the Welcome Week link "the CTA would
+ *  be 'try plus for free'"): "Try Plus for free" while an invitation's free
+ *  month is what joining gets, else "Join Tapin Plus". */
+export function useJoinLabel(): string {
+  const price = usePlusPrice();
+  return inviteFor(price) && price?.first === 0 ? "Try Plus for free" : "Join Tapin Plus";
+}
+
+/** The pinned offer bar for a page other than home (Sam, 5 Nov 2026: "the
+ *  countdown banner should still show on the member page"): the same bar
+ *  home shows, a link's own or the welcome offer's clock. */
+export function OfferBar() {
+  const { price, failed } = usePlusPriceLoad();
+  const [guess] = useState(inviteExpected);
+  const invite = price ? inviteFor(price) : failed ? null : guess;
+  const free = price ? price.first === 0 : !!guess && !failed;
+  const linked = price ? !!price.linkId : !!guess && !failed;
+  return linked ? (
+    <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
+  ) : (
+    <WelcomeBar price={firstFigure(price)} />
   );
 }

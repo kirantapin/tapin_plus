@@ -13,7 +13,10 @@
 import { supabase } from "../supabase";
 import { TAPIN_ID, type DiscountDuration } from "./plus";
 
-const KEY = "tp_plus_link_v1";
+/** Exported for model/invite.ts, which reads the kept link's id before the
+ *  price is in. */
+export const PLUS_LINK_KEY = "tp_plus_link_v1";
+const KEY = PLUS_LINK_KEY;
 
 export interface PlusLink {
   linkId: string;

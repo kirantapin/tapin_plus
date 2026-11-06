@@ -206,27 +206,42 @@ const SHOWCASE: {
    *  a dollar saving on a cover charge nobody has priced would be an invented
    *  price at a real venue. */
   save: string;
+  /** The points the order earns, or the rate where it has no price. */
+  points: string;
   img?: string;
   isPass?: boolean;
 }[] = [
-  { venue: "coffeeholicsva", item: "Cappuccino" },
-  { venue: "olaika", item: "Classic Pepperoni" },
-  { venue: "sweetopia", item: "Brookie" },
+  /* EVERY TILE EARNS THE $5 AND SHOWS ITS POINTS (Sam, 5 Nov 2026: "these
+     need to be more compelling, we should showcase the $5 back and the points
+     added (10 per dollar) for each of these, across various types of products
+     like you currently have"). The $5 comes on a $10+ order, and a cappuccino
+     or a Brookie alone is under $10, so each tile is a real order that gets
+     there: the drink with a sandwich, the pizza, two Brookies. Real items at
+     their menu prices, the photo the first one's. */
+  { venue: "coffeeholicsva", items: ["Cappuccino", "California Club"] },
+  { venue: "olaika", items: ["Classic Pepperoni"] },
+  { venue: "sweetopia", items: ["Brookie", "Brookie"] },
 ]
   .map((e) => {
-    const it = itemNamed(e.venue, e.item);
+    const its = e.items.map((name) => itemNamed(e.venue, name));
+    const cents = its.reduce((n, it) => n + Math.round(it.price * 100), 0);
+    const name =
+      its.length === 2 && its[0].name === its[1].name
+        ? `2 ${its[0].name}s`
+        : its.map((it) => it.name).join(" + ");
     return {
       venue: e.venue,
-      name: it.name,
-      meta: m(it.price),
-      /* $10 or more takes the $5 back instead of the 15% (Sam, 3 Nov 2026:
-         "wouldn't anything above $10 be save $5?"): one or the other per
-         order, and on a $10+ dish the $5 is the bigger one. */
+      name,
+      meta: m(cents / 100),
+      /* $10 or more takes the $5 back instead of the 15% (Sam, 3 Nov 2026). */
       save:
-        it.price >= 10
+        cents >= BENEFIT.creditMinUsd * 100
           ? `$${BENEFIT.creditUsd} back`
-          : `Save ${money(Math.round(Math.round(it.price * 100) * BENEFIT.percentOff))}`,
-      img: it.img,
+          : `Save ${money(Math.round(cents * BENEFIT.percentOff))}`,
+      /* Floored, as the order's own rule is (model/order.ts): never a point
+         more than the order earns. */
+      points: `+${Math.floor((cents * POINTS_PER_DOLLAR) / 100)} points`,
+      img: its[0].img,
     };
   })
   .concat([
@@ -250,7 +265,11 @@ const SHOWCASE: {
       venue: "themilkparlor",
       name: "Cover",
       meta: venue("themilkparlor").name,
+      /* The $5 is earned on food and non-alcoholic drinks, so cover saves
+         the 15% (spent there, never earned there), and earns points at the
+         rate: no cover price is in the data to make a figure of. */
       save: `Save ${Math.round(BENEFIT.percentOff * 100)}%`,
+      points: `${POINTS_PER_DOLLAR} points per $1`,
       img: venue("themilkparlor").hero,
       isPass: true,
     } as never,
@@ -284,34 +303,40 @@ const SHOWCASE: {
 export function SceneValue() {
   return (
     <div className="value-scene">
-      <ul className="vs-grid">
+      {/* ROWS, NOT TILES (Sam, 5 Nov 2026: "/impeccable redesign this so
+          that I don't have to scroll on this pop up"). The 2x2 of wide
+          photos with four lines under each ran past the frame on a phone.
+          Each order is one row now, read left to right like a receipt line:
+          the dish with its place's mark on it, what it is and costs, and
+          what it gets you, the $5 in the money green and the points under
+          it. Four rows sit inside the frame with room to spare. */}
+      <ul className="vs-rows">
         {SHOWCASE.map((x) => (
           <li key={x.venue}>
-            <span className={`vs-shot${x.isPass ? " is-pass" : ""}`}>
+            <span className={`vs-thumb${x.isPass ? " is-pass" : ""}`}>
               {x.img ? (
                 <img
                   src={x.img}
                   alt=""
                   decoding="async"
-                  /* Measured, not judged by eye — the same flag the mosaic and
-                     the venue cards read. A menu photograph is never bright
-                     enough to need it; a merchant's brand card is. */
                   data-bright={heroIsBright(x.venue) ? "true" : undefined}
                 />
               ) : null}
               <Mark id={x.venue} className="vs-mark" />
             </span>
-            <b>{x.name}</b>
-            <span className="vs-price tnum">{x.meta}</span>
-            {/* The slide's claim, itemised: the headline's figure is made of
-                lines like this one, so it is the strongest line on the tile
-                and the menu price above it is the basis, kept quiet. */}
-            <span className="vs-save tnum">{x.save}</span>
+            <span className="vs-what">
+              <b>{x.name}</b>
+              <span className="vs-price tnum">{x.meta}</span>
+            </span>
+            <span className="vs-gets">
+              <span className="vs-save tnum">{x.save}</span>
+              <span className="vs-pts tnum">{x.points}</span>
+            </span>
           </li>
         ))}
       </ul>
       {/* The categories the extraction cannot illustrate. Named, not drawn. */}
-      <p className="vs-also">Tickets, line skips and merch too.</p>
+      <p className="vs-also">Tickets, line skips and merch too. 100 points is about $1 in rewards.</p>
 
       {/* ══ THE BASIS AND THE WAY BACK TO THE QUESTION LIVE IN THE HEADLINE ═══
           Sam, 13 Sep 2026: "we should say, based on your spend of X amount per
@@ -694,9 +719,14 @@ const EARNS = [
   { venue: "themilkparlor", item: "Chicken Tender Basket" },
 ].map((e) => {
   const it = itemNamed(e.venue, e.item);
-  return { ...e, name: it.name, price: it.price, points: Math.round(it.price * POINTS_PER_DOLLAR) };
+  return { ...e, name: it.name, price: it.price, points: Math.floor((Math.round(it.price * 100) * POINTS_PER_DOLLAR) / 100) };
 });
 const EARNED_TOTAL = EARNS.reduce((n, e) => n + e.points, 0);
+/* WHAT POINTS ARE WORTH (Sam, 5 Nov 2026: "average value per 100 points is
+   around $1"; earlier the same day, "$1-2"). The savings model's 1c a point
+   (model/savings.ts), so this slide and the breakdown agree. */
+const worthLine = (points: number) =>
+  `Worth about $${Math.max(1, Math.round(points * BENEFIT.pointValueUsd))} in rewards`;
 
 /**
  * 5 — Points. Earned everywhere, spent on nearly everything.
@@ -779,6 +809,7 @@ export function ScenePoints() {
           <span>Yours to spend</span>
           <b className="tnum">{EARNED_TOTAL} points</b>
         </p>
+        <p className="one-worth tnum">{worthLine(EARNED_TOTAL)}</p>
       </div>
 
       {/* ══ THE UNBUILT HALF, AS A PLATE RATHER THAN A CAPTION ═══════════════

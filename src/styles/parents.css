@@ -1,0 +1,770 @@
+/* parents: the parents flow (docs/parents/API.md). */
+
+/* ══ THE PARENTS' LANDING PAGE (routes/ParentsHome.tsx), SECOND BUILD ════════
+   The student page's own objects (plus-app.css): the root is .tpa .tpa-home,
+   so the band, the sheet, the modules, the order card, the rail, the
+   questions, the close, the dock and the desk layout (band on top, story
+   left, the offer card held on the right) are the student page's rules as
+   they are. This file only adds what the parent page has and the student
+   page doesn't, all under .tpp. No gradients beyond the photographs' own
+   shades, no new keyframes (motion is the Web Animations API).
+   Fourth pass (5 Nov 2026): every idea a picture first, its sentence one tap
+   under it (the folds), so the rows, the table and the ticks became tiles,
+   bars, a three-step row and glyph rows. Nothing here is smaller than 13px. */
+
+.tpp {
+  --money: #0b7a53;
+}
+/* The foot already keeps room for the dock (.tpa-home .tpa-foot), so the
+   root's own bottom padding would leave a blank screen under it. */
+.tpa.tpp {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── The band: the photograph, the call-out pill and the headline ───────── */
+/* A parent and their student, not the collage: taller than the student
+   band on a phone so the faces sit clear between the pill and the
+   headline, each photograph framed by its own object-position (PHOTOS in
+   ParentsHome.tsx). The band's own shade (plus-app.css .tpa-band::after)
+   stays: the white headline reads on it. */
+.tpp .tpp-band .tpa-band-art {
+  object-position: var(--photo-pos, 50% 22%);
+}
+.tpp .tpa-band.tpp-band {
+  min-height: calc(env(safe-area-inset-top) + clamp(340px, 98vw, 420px));
+}
+.tpp .tpa-badge {
+  max-width: 100%;
+  white-space: nowrap;
+}
+.tpp .tpa-band-title h1 {
+  max-width: 15ch;
+  text-wrap: balance;
+}
+/* A headline's second piece ("Make it cost less.") holds together on a
+   line of its own. The student rule
+   `.tpa-band-title span` (the old proof line) sizes every span in the band,
+   so this piece takes the headline's own type back. */
+.tpp .tpa-band-title .tpp-nowrap {
+  flex: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-shadow: inherit;
+  display: block;
+  white-space: nowrap;
+}
+
+/* ── The offer card: the pitch, the price, the button ───────────────────── */
+/* The paper mark heads the card on a computer only; on a phone the band
+   right above it already carries the colour, and the button stays high. */
+.tpp-offer-mark {
+  display: none;
+}
+.tpp .tpp-offer {
+  padding: 20px;
+}
+.tpp .tpp-cta {
+  height: 52px;
+  margin-top: 14px;
+}
+.tpp-under {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* An "Ask a parent" link: who asked, and only the masked number. */
+.tpp-ask {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: -4px -4px 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ground);
+}
+.tpp-ask p {
+  display: grid;
+  gap: 2px;
+}
+.tpp-ask b {
+  font-weight: 600;
+  text-wrap: balance;
+}
+.tpp-ask span:not(.tpa-well) {
+  color: var(--muted);
+}
+.tpp-ask .tpa-well {
+  background: #ffffff;
+}
+.tpp-ask-plain {
+  display: block;
+  font-weight: 500;
+}
+
+/* ── Modules: one heading weight with the student page's 600 type ───────── */
+.tpp .tpa-h2 {
+  font-weight: 600;
+}
+
+/* The order card's track sits a step under the heading. */
+.tpp-order .tpa-tabs {
+  margin-top: 14px;
+}
+
+/* One plain line on the well, its figure in money green. */
+.tpp-math {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ground);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 21px;
+  text-wrap: pretty;
+}
+.tpp-math b {
+  font-weight: 600;
+  color: var(--money);
+}
+
+/* ── The places: the student rail, food photographs, the place's logo ──── */
+/* A sharper shade under the names (Sam, 6 Nov 2026: "the gradient behind the
+   text can be a bit sharper ... it's pretty dull right now"): darker where
+   the words sit and gone sooner, so the top of the photograph stays clear. */
+.tpp .tpa-place::after {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.82) 0, rgba(0, 0, 0, 0.64) 24%, rgba(0, 0, 0, 0.2) 44%, rgba(0, 0, 0, 0) 58%);
+}
+.tpp-place-logo {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+}
+.tpp .tpp-place-logo {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.tpp-place-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tpp-more {
+  margin: 10px var(--gutter) 0;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+/* Words for a screen reader where the picture says it to the eye. */
+.tpp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.tpp-glyph {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+/* ── The proof line under the headline (the student band's own) ────────── */
+.tpp-proof .tpa-proof {
+  margin-top: 12px;
+}
+
+/* ── The offer card: the same lunch without and with Plus, its two facts ─
+   (Sam's pick, 6 Nov 2026: "Without / with"). Two wells side by side, the
+   Plus one in a pale money green, the $5 on the seam between them. */
+.tpp-vs-pair {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+.tpp-vs-col {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px 16px 16px;
+  border-radius: 14px;
+  background: var(--ground);
+}
+.tpp-vs-col span {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.tpp-vs-col b {
+  font-weight: 600;
+  font-size: 52px;
+  line-height: 56px;
+  letter-spacing: -0.03em;
+  color: var(--muted);
+}
+.tpp-vs-col[data-plus] {
+  background: #e3f1ea;
+}
+.tpp-vs-col[data-plus] span,
+.tpp-vs-col[data-plus] b {
+  color: var(--money);
+}
+.tpp-vs-chip {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--money);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 0 0 4px #ffffff;
+}
+.tpp-vs-label {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+  text-align: center;
+}
+.tpp-vs-label small {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+/* The $60's note in the offer card itself, so on a phone it's on the same
+   screen as the figure (review, 6 Nov 2026). */
+.tpp-vs .tpp-note {
+  margin-top: 8px;
+}
+.tpp-facts {
+  margin-top: 14px;
+}
+.tpp-facts li {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 0;
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpp-facts b {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.tpp-facts li > span {
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* ── A fold: a picture and a few words, the sentence one tap under ───────── */
+.tpp .tpp-sure-row summary {
+  cursor: pointer;
+  list-style: none;
+}
+.tpp .tpp-sure-row summary::-webkit-details-marker {
+  display: none;
+}
+.tpp .tpp-sure-row summary > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.tpp .tpp-sure-row[open] summary > svg {
+  transform: rotate(180deg);
+}
+.tpp .tpp-sure-row p {
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.tpp-note {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* ── What they get: swipe cards (Sam's pick, 6 Nov 2026) ────────────────────
+   One benefit a card, the $60 first on ink; the rail runs to the module's
+   edges, and the dots follow it. */
+.tpp-cards {
+  margin: 14px -20px 0;
+}
+.tpp-cards-rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 20px 4px;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 20px;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.tpp-cards-rail::-webkit-scrollbar {
+  display: none;
+}
+.tpp-card {
+  flex: 0 0 72%;
+  display: grid;
+  grid-template-rows: 72px auto 1fr;
+  gap: 8px;
+  min-height: 196px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--ground);
+  scroll-snap-align: start;
+}
+.tpp-card[data-ink] {
+  background: var(--ink);
+  color: #ffffff;
+}
+.tpp-card-art {
+  display: flex;
+  align-items: center;
+}
+.tpp-card-fig {
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 60px;
+  letter-spacing: -0.03em;
+}
+.tpp [data-money] {
+  color: var(--money);
+}
+.tpp-card-glyph {
+  width: 44px;
+  height: 44px;
+}
+.tpp-card-label {
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 23px;
+  text-wrap: balance;
+}
+.tpp-card[data-ink] .tpp-card-label {
+  color: rgba(255, 255, 255, 0.86);
+}
+.tpp-card p {
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpp-cards-dots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 6px;
+}
+.tpp-cards-dots button {
+  position: relative;
+  width: 20px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tpp-cards-dots button::after {
+  content: "";
+  position: absolute;
+  inset: 9px 7px;
+  border-radius: 3px;
+  background: rgba(20, 22, 24, 0.18);
+  transition: background-color 0.2s var(--ease), inset 0.2s var(--ease);
+}
+.tpp-cards-dots button[data-on]::after {
+  inset: 9px 3px;
+  background: var(--ink);
+}
+/* The five logos side by side, not overlapped, so none is cropped. */
+.tpp-logorow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tpp .tpp-logorow .collar {
+  display: block;
+  width: var(--s, 28px);
+  height: var(--s, 28px);
+  overflow: hidden;
+}
+.tpp-logorow img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── What a lunch costs: four columns to one scale (Sam's pick) ─────────── */
+.tpp-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+.tpp-cols li {
+  display: grid;
+  grid-template-rows: 176px auto;
+  gap: 10px;
+}
+.tpp-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+.tpp-col b {
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  white-space: nowrap;
+}
+.tpp-col-fill {
+  height: calc((176px - 26px) * var(--f, 1));
+  border-radius: 10px 10px 4px 4px;
+  background: #d1d1d6;
+  transform-origin: bottom center;
+}
+.tpp-cols [data-kind="plus"] .tpp-col-fill {
+  background: var(--money);
+}
+.tpp-cols [data-kind="plus"] b {
+  color: var(--money);
+}
+/* 15% off: the saving's own green, flat and pale. */
+.tpp-cols [data-kind="off"] .tpp-col-fill {
+  background: #c6e2d6;
+}
+.tpp-col-label {
+  font-size: 13px;
+  line-height: 17px;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--muted);
+}
+.tpp-cols [data-kind="plus"] .tpp-col-label {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tpp-cols sup {
+  margin-left: 1px;
+  font-size: 0.68em;
+  line-height: 0;
+  color: var(--muted);
+}
+.tpp-keep {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--ground);
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpp-keep b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tpp .tpp-sources {
+  margin-top: 4px;
+}
+.tpp .tpp-sources summary {
+  font-size: 14px;
+  color: var(--muted);
+}
+.tpp-notes {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 4px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.tpp .tpp-notes p {
+  padding: 0;
+}
+
+/* ── How it works for you: a timeline (Sam's pick, 6 Nov 2026) ───────────
+   Three steps down the page, when each happens, the approved line under. */
+.tpp-line {
+  display: grid;
+  margin-top: 16px;
+}
+.tpp-line li {
+  position: relative;
+  padding-bottom: 20px;
+}
+.tpp-line li:last-child {
+  padding-bottom: 0;
+}
+/* From the bottom of one icon to the top of the next, so closed steps read
+   as one line. */
+.tpp-line li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 48px;
+  bottom: 0;
+  left: 23px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(20, 22, 24, 0.12);
+}
+.tpp-line-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--well);
+}
+.tpp-line-icon .tpp-glyph {
+  width: 22px;
+  height: 22px;
+}
+.tpp-line li:last-child .tpp-line-icon {
+  background: var(--money);
+  color: #ffffff;
+}
+.tpp-line summary {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 18px;
+  gap: 14px;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tpp-line summary::-webkit-details-marker {
+  display: none;
+}
+.tpp-line-head {
+  display: grid;
+  gap: 2px;
+}
+.tpp-line summary > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.tpp-line-step[open] summary > svg {
+  transform: rotate(180deg);
+}
+.tpp-line small {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--muted);
+}
+.tpp-line b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.tpp .tpp-line p {
+  margin-top: 4px;
+  padding-left: 62px;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+
+/* ── No surprises: a glyph in a well, a few words, the line under ───────── */
+.tpp-sure {
+  margin-top: 8px;
+}
+.tpp-sure-row + .tpp-sure-row {
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.tpp-sure-row summary {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 18px;
+  gap: 12px;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 0;
+}
+.tpp-sure-row .tpp-fold-lead {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--well);
+}
+.tpp-sure-row .tpp-fold-label {
+  font-weight: 600;
+  text-wrap: pretty;
+}
+.tpp-sure-row p {
+  padding: 0 30px 14px 48px;
+}
+
+.tpp-faq-sub {
+  margin-top: 2px;
+  color: var(--muted);
+}
+.tpp .tpa-qa p a {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tpp .tpp-close .tpa-cta {
+  margin-top: 18px;
+}
+.tpp-foot a[href^="mailto"] {
+  text-underline-offset: 3px;
+}
+
+.tpp-dock[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpp .tpp-sure-row summary > svg,
+  .tpp-line summary > svg,
+  .tpp-cards-dots button::after {
+    transition: none;
+  }
+}
+
+/* ── A phone ───────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* The student foot keeps 96px for its dock, but here the dock hides at the
+     close card, which is always in view at the page's end: no blank strip. */
+  .tpp .tpa-foot {
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── A computer: the student desk layout, plus the parent's own pieces ─── */
+@media (min-width: 1024px) {
+  .tpp .tpa-band-title h1 {
+    max-width: 26ch;
+  }
+  .tpp .tpp-band .tpa-band-art {
+    object-position: var(--photo-pos-desk, 50% 24%);
+  }
+  .tpp .tpa-badge {
+    height: 40px;
+    padding: 0 16px 0 14px;
+    font-size: 15px;
+  }
+  .tpp .tpp-proof .tpa-proof {
+    margin-top: 16px;
+  }
+  .tpp .tpp-offer {
+    padding: 28px;
+  }
+  .tpp-offer-mark {
+    display: block;
+    width: 76px;
+    height: auto;
+    margin: 0 0 16px -4px;
+  }
+  /* The story column's first card lines up with the offer card's top (the
+     phone rhythm's first-child 4px would otherwise drop the offer card). */
+  .tpp .tpa-sheet > .tpp-offer,
+  .tpp .tpa-sheet > .tpp-offer + .tpa-module {
+    margin-top: 0;
+  }
+  .tpp-vs-col b {
+    font-size: 60px;
+    line-height: 64px;
+  }
+  /* The offer card's copy of the $60 note is for phones; on a computer the
+     note under the swipe cards is on the same screen. */
+  .tpp-vs .tpp-note {
+    display: none;
+  }
+  /* The module's desk padding is 24px (.tpa-home .tpa-module). */
+  .tpp-cards {
+    margin: 18px -24px 0;
+  }
+  .tpp-cards-rail {
+    padding: 0 24px 4px;
+    scroll-padding: 0 24px;
+  }
+  .tpp-card {
+    flex-basis: 236px;
+  }
+  .tpp-cols {
+    gap: 16px;
+  }
+  .tpp-cols li {
+    grid-template-rows: 220px auto;
+  }
+  .tpp-col-fill {
+    height: calc((220px - 26px) * var(--f, 1));
+  }
+  .tpp-col-label {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .tpp .tpa-place-name small {
+    font-size: 13px;
+    line-height: 17px;
+  }
+  .tpp-more {
+    margin: 12px 0 0;
+  }
+  .tpp .tpp-dock {
+    display: none;
+  }
+}
+@media (max-width: 374px) {
+  .tpp .tpa-band-title h1 {
+    font-size: 26px;
+    line-height: 30px;
+  }
+  .tpp .tpa-badge {
+    font-size: 13px;
+  }
+  .tpp-vs-col b {
+    font-size: 44px;
+    line-height: 48px;
+  }
+}

@@ -241,6 +241,7 @@ html[data-surface="tpa"] body {
 
 /* Buttons (.sh-order): ink, 14px radius; white on the black card. */
 .tpa-cta {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1139,7 +1140,9 @@ button.tpa-cta {
   color: #0B7A53;
 }
 .tpa-s2-fine {
-  padding: 8px 0 2px;
+  /* Under the card, set in to its text (Sam, 5 Nov 2026: "spacing a bit
+     off here?"). */
+  padding: 12px 12px 2px;
   font-size: 13px;
   line-height: 18px;
   color: var(--muted);
@@ -1388,6 +1391,7 @@ button.tpa-cta {
 }
 .tpa .tpa-dock-cta,
 .tpa-dock-save {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2046,8 +2050,11 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
     padding: 24px;
     border-radius: 20px;
   }
+  /* The foot stays in the story's column: across both, the held offer card
+     slid over its fine print at the end of the page (Sam, 5 Nov 2026:
+     "issue with text under the container on the far right?"). */
   .tpa-home .tpa-sheet > .tpa-foot {
-    grid-column: 1 / -1;
+    grid-column: 1;
   }
   .tpa-home .tpa-module,
   .tpa-home .tpa-close {
@@ -2896,7 +2903,10 @@ html[data-surface="tpa"] .hs-scene > * {
   justify-content: flex-end;
   height: auto;
   min-height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
-  padding: calc(env(safe-area-inset-top) + 76px) 0 32px;
+  /* More air between the pills and the headline (Sam, 5 Nov 2026: "isn't
+     this a bit cramped now? can we give the header text slightly more space
+     above it"): 76 to 100. */
+  padding: calc(env(safe-area-inset-top) + 100px) 0 32px;
 }
 .tpa-band[data-hero] .tpa-band-title {
   position: relative;
@@ -3664,4 +3674,327 @@ html[data-surface="tpa"] .hs-scene > * {
 }
 section[aria-labelledby="tpa-faq"]:focus {
   outline: none;
+}
+
+/* The points under the $5 (Sam, 5 Nov 2026: "showcase the $5 back and the
+   points added"): the same size, a step quieter than the money. */
+html[data-surface="tpa"] .hs-scene .vs-pts {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* What the balance is worth, under it (Sam, 5 Nov 2026). */
+html[data-surface="tpa"] .one-worth {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* ══ A PROMO LINK'S AUDIENCE (5 Nov 2026, model/invite.ts) ══════════════════
+   The Welcome Week mark goes where the offer is said: in the pinned bar, on
+   the photograph above the headline, beside the price, and in the checkout's
+   header. The mark is a round badge; it keeps its own colours (it is their
+   logo, not ours to tint) and sits on flat ink or white, never on a card of
+   its own. */
+.tpa-wbar-logo {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.tpa-invite-offer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tpa-invite-logo {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+.tpa-invite-offer p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  min-width: 0;
+}
+.tpa-invite-offer small {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpa-invite-offer b {
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  color: #141618;
+}
+.tpa-invite-offer span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+
+/* ══ THE WELCOME WEEK HEADLINE: A · STICKER (shell/InviteHero.tsx) ════════
+   The collage's own materials (the collage skill's look.md): cream paper
+   #ECE5D5 with ink type, the white deckle rim #F7F3EA behind it, and
+   Gilroy 600 on paper. Flat: no glass, no gradient, no glow. */
+.tpa-ww .tpa-ww-h1 {
+  font-weight: 600;
+}
+/* `.tpa-band-title span` (the old proof line's rule) sizes every span in
+   the band: these pieces take the headline's own size back. */
+.tpa-ww .tpa-ww-strip,
+.tpa-ww .tpa-ww-paper {
+  flex: none;
+  font-size: inherit;
+  line-height: inherit;
+  text-shadow: none;
+}
+.tpa-ww-strip {
+  display: inline-block;
+  margin-left: 0.04em;
+  padding: 3px 4px;
+  background: #f7f3ea;
+  vertical-align: baseline;
+  rotate: -2.5deg;
+}
+.tpa-ww-paper {
+  display: block;
+  padding: 0.02em 0.42em 0.06em;
+  background: #ece5d5;
+  color: #141618;
+  white-space: nowrap;
+}
+/* The mark on the photo's corner, above the headline. */
+.tpa-ww .tpa-ww-sticker {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 14px);
+  flex: none;
+  display: block;
+  width: 84px;
+  height: 84px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #f7f3ea;
+  rotate: -9deg;
+  /* A paper sticker's shadow: offset down, soft. */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.38));
+}
+.tpa-ww-sticker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww .tpa-ww-sticker {
+    bottom: calc(100% + 20px);
+    width: 128px;
+    height: 128px;
+  }
+  .tpa-home .tpa-ww-strip {
+    padding: 4px 6px;
+  }
+}
+
+/* The points an order earns, under what you pay (Sam, 5 Nov 2026). */
+.tpa-order-pts {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Email support and Download the app (Sam, 5 Nov 2026: "add 'download the
+   app' as a second button here"): stacked on a phone, side by side on a
+   computer. */
+.tpa-members-acts {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.tpa-members-acts .tpa-members-mail {
+  margin-top: 0;
+}
+@media (min-width: 1024px) {
+  .tpa-members .tpa-members-acts {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* The Welcome Week band grows with its headline and the savings line under
+   it, as the hero test's bands do, with room above for the sticker. */
+.tpa-band[data-invite] {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: auto;
+  min-height: calc(env(safe-area-inset-top) + clamp(260px, 74vw, 320px));
+  padding: calc(env(safe-area-inset-top) + 112px) 0 34px;
+}
+.tpa-band[data-invite] .tpa-band-title {
+  position: relative;
+  inset: auto;
+  margin: 0 var(--gutter);
+}
+.tpa-ww .tpa-ww-sub {
+  margin-top: 10px;
+  font-weight: 600;
+  color: #ffffff;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band[data-invite] {
+    padding: 150px 0 40px;
+  }
+  .tpa-home .tpa-band[data-invite] .tpa-band-title {
+    margin: 0 40px;
+  }
+  .tpa-ww .tpa-ww-sub {
+    margin-top: 14px;
+    font-size: 19px;
+    line-height: 26px;
+  }
+}
+
+/* The Welcome Week savings line on one line on a computer. */
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww .tpa-ww-sub {
+    max-width: 60ch;
+  }
+}
+
+/* "First month free" on its own cream strip under the headline, the
+   collage's label (InviteHero). */
+.tpa-ww-label {
+  margin: 12px 0 0;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 30px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-ww-label {
+    margin-top: 16px;
+    font-size: 34px;
+    line-height: 42px;
+  }
+}
+
+/* ══ WHAT IT WORKS ON, AS ROWS (Sam, 5 Nov 2026: "redesign this so that I
+   don't have to scroll on this pop up") ════════════════════════════════════
+   One order a row on the scene's grey: a 60px photo with the place's mark
+   on its corner, the order and its price, and on the right the $5 in the
+   money green over the points. White rows on the grey, like the receipt
+   cards elsewhere in the sheet. */
+html[data-surface="tpa"] .hs-scene .vs-rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+html[data-surface="tpa"] .hs-scene .vs-rows li {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+html[data-surface="tpa"] .hs-scene .vs-thumb {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--well);
+}
+html[data-surface="tpa"] .hs-scene .vs-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+}
+html[data-surface="tpa"] .hs-scene .vs-thumb .vs-mark {
+  left: 4px;
+  bottom: 4px;
+  width: 22px;
+  height: 22px;
+}
+html[data-surface="tpa"] .hs-scene .vs-what {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+html[data-surface="tpa"] .hs-scene .vs-what b {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+  color: var(--ink-1);
+  text-wrap: balance;
+}
+html[data-surface="tpa"] .hs-scene .vs-gets {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  text-align: right;
+}
+html[data-surface="tpa"] .hs-scene .vs-rows :is(.vs-price, .vs-save, .vs-pts) {
+  margin: 0;
+  font-size: 14px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+html[data-surface="tpa"] .hs-scene .vs-rows .vs-pts {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+html[data-surface="tpa"] .hs-scene .value-scene {
+  gap: 12px;
+}
+/* Short phones (iPhone SE, 667 tall): smaller photos and tighter rows, so
+   the four still fit without a scroll. */
+@media (max-height: 720px) {
+  html[data-surface="tpa"] .hs-scene .vs-rows {
+    gap: 6px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-rows li {
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 6px 12px 6px 6px;
+    border-radius: 14px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-thumb .vs-mark {
+    width: 18px;
+    height: 18px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-what b {
+    font-size: 14px;
+    line-height: 17px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-rows :is(.vs-price, .vs-save, .vs-pts) {
+    font-size: 13px;
+    line-height: 16px;
+  }
+  html[data-surface="tpa"] .hs-scene .vs-also {
+    font-size: 13px;
+    line-height: 17px;
+  }
 }

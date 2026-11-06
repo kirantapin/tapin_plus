@@ -1,0 +1,494 @@
+/* parent-checkout: the parents flow (docs/parents/API.md).
+   ══ THE PARENT CHECKOUT (shell/ParentCheckout.tsx) ══════════════════════════
+   Portalled to <body>, so it carries its own tokens: the app's light look
+   (plus-app.css .tpa): the #f0f0f0 ground, white rounded modules, ink type in
+   Gilroy 500/600, black actions, money green only on the done tick. Flat: no
+   gradients, no glass. A bottom sheet on a phone, a card in the middle from
+   640px (the width shell/sheetMotion.ts uses for its exits). Motion is the
+   Web Animations API in the component; nothing here animates. */
+.prc-layer {
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --well: #e5e5ea;
+  --hair: rgba(20, 22, 24, 0.08);
+  --line: rgba(20, 22, 24, 0.12);
+  --ground: #f0f0f0;
+  --money: #0b7a53;
+  --bad: #c0392b;
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.prc-layer *,
+.prc-layer *::before,
+.prc-layer *::after {
+  box-sizing: border-box;
+}
+:where(.prc-layer) :where(p, h2, fieldset, legend) {
+  margin: 0;
+  padding: 0;
+}
+:where(.prc-layer) fieldset {
+  border: 0;
+  min-width: 0;
+}
+.prc-layer .tnum {
+  font-variant-numeric: tabular-nums;
+}
+.prc-layer :where(a, button, input):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.prc-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 22, 24, 0.48);
+}
+
+.prc-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 8px 8px;
+  padding: 18px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 28px;
+  background: var(--ground);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  outline: none;
+  scroll-padding-bottom: 80px;
+}
+
+/* ── Header ── */
+.prc-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.prc-head {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 4px;
+}
+.prc-title {
+  font-size: 22px;
+  line-height: 27px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  outline: none;
+}
+.prc-sub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 18px;
+}
+.prc-x {
+  -webkit-tap-highlight-color: transparent;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink);
+  cursor: pointer;
+}
+.prc-x:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.prc-tick {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--money);
+  color: #ffffff;
+}
+
+/* ── Body ── */
+.prc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+}
+.prc-module {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+fieldset.prc-module {
+  display: block;
+}
+.prc-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.prc-legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.prc-legend + .prc-fields {
+  clear: both;
+}
+
+/* ── Fields ── */
+.prc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.prc-label {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 600;
+}
+.prc-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.prc-box:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.prc-field[data-bad] .prc-box {
+  box-shadow: inset 0 0 0 2px var(--bad);
+}
+.prc-box input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  /* 16px or more, so iOS doesn't zoom into the field. */
+  font-size: 17px;
+  color: var(--ink);
+}
+.prc-box input::placeholder {
+  color: rgba(20, 22, 24, 0.36);
+}
+.prc-box input:focus-visible {
+  outline: none;
+}
+.prc-ok {
+  flex: none;
+  display: flex;
+  color: var(--money);
+}
+.prc-help {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 17px;
+}
+.prc-field-error,
+.prc-error {
+  color: var(--bad);
+  font-size: 14px;
+  line-height: 18px;
+}
+.prc-error {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+/* ── From an Ask a parent link ── */
+.prc-covering {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.prc-covering-dot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--well);
+  font-weight: 600;
+  font-size: 16px;
+}
+.prc-covering b {
+  font-weight: 600;
+}
+.prc-covering .tnum {
+  color: var(--muted);
+}
+
+/* ── The charge ── */
+.prc-rows {
+  gap: 0;
+  padding: 4px 16px;
+}
+.prc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+.prc-row + .prc-row {
+  box-shadow: inset 0 1px 0 var(--hair);
+}
+.prc-row span {
+  color: var(--muted);
+}
+.prc-row b {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.prc-edit {
+  align-self: flex-start;
+  margin: 0 0 10px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.prc-edit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.prc-pay {
+  position: relative;
+  gap: 8px;
+  min-height: 120px;
+}
+.prc-pay-wait {
+  position: absolute;
+  inset: 16px;
+  border-radius: 14px;
+  background: var(--ground);
+}
+.prc-terms {
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+.prc-legal a {
+  color: var(--ink);
+  text-underline-offset: 2px;
+}
+
+/* ?parentmock's stand-in for the Payment Element (local dev only). */
+.prc-mock-tag {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--well);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+.prc-mock-field {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  margin-top: -2px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: rgba(20, 22, 24, 0.36);
+  font-size: 17px;
+}
+.prc-mock-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.prc-mock-pair > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── The button ── */
+.prc-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.prc-cta:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.prc-cta:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Done ── */
+.prc-top:has(.prc-tick) .prc-head {
+  padding-top: 6px;
+}
+.prc-done p {
+  font-size: 16px;
+  line-height: 22px;
+}
+
+/* On a phone the button stays in reach at the foot of a long form. */
+@media (max-width: 639.98px) {
+  .prc-body > .prc-cta {
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 0 0 8px var(--ground);
+  }
+}
+
+/* ── From 640px: a card in the middle ── */
+@media (min-width: 640px) {
+  .prc-layer {
+    align-items: center;
+    padding: 24px;
+  }
+  .prc-sheet {
+    max-width: 460px;
+    max-height: calc(100dvh - 48px);
+    margin: 0;
+    padding: 22px;
+  }
+}
+
+/* The steps (Sam, 5 Nov 2026: the student and you on separate steps): bars
+   across the top of the form, as the Plus checkout shows its steps. */
+.prc-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+}
+.prc-steps li {
+  flex: 1 1 0;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(20, 22, 24, 0.12);
+}
+.prc-steps li[data-on] {
+  background: #141618;
+}
+.prc-back {
+  align-self: flex-start;
+  font-weight: 600;
+}
+
+/* ══ THE EXPANDING CONTAINER (Sam, 6 Nov 2026: "would we not be able to use
+   the same expanding and collapsing parent container animation we use here
+   on the main tapin plus.tapin.app?") ══════════════════════════════════════
+   The student checkout's island (plus-checkout.css .pck-island), for the
+   parent sheet: the sheet is the white plate behind "Sign up my student",
+   grown (shell/island.ts). The layer still places it; the scrim is the
+   island's darker one; the sheet clips its contents and they scroll inside
+   when they run tall. The sheet keeps its light ground once open (the
+   component eases it from the plate's white). */
+.prc-scrim {
+  position: fixed;
+  background: rgba(6, 7, 8, 0.7);
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-sheet.prc-island {
+  z-index: 1;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  /* No shadow: a clip-path clips its own element's shadow, so one would pop
+     on and off at the ends of the motion; the dark scrim does the job. */
+  box-shadow: none;
+  contain: layout paint;
+}
+.prc-island-inner {
+  max-height: calc(var(--pck-vvh, 100dvh) - 24px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 16px calc(16px + env(safe-area-inset-bottom));
+  scroll-padding-bottom: 80px;
+}
+.prc-layer[data-kb] .prc-island-inner {
+  padding-bottom: 16px;
+}
+/* The stand-in for the tapped button (placed and dressed by island.ts). */
+.prc-island-label {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 640px) {
+  .prc-sheet.prc-island {
+    padding: 0;
+  }
+  .prc-island-inner {
+    max-height: calc(var(--pck-vvh, 100dvh) - 48px);
+    padding: 22px;
+  }
+}
+/* With the keyboard up the home indicator is covered, so its gap goes (as
+   in the student checkout). */
+@media (max-width: 639.98px) {
+  .prc-layer[data-kb] .prc-island-inner {
+    max-height: calc(var(--pck-vvh, 100dvh) - 24px);
+  }
+}

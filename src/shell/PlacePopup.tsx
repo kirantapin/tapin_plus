@@ -1,3 +1,6 @@
+import { useJoinLabel } from "./WelcomeOffer";
+import { handOverFocus } from "./PlusCheckout";
+import { lockScroll, modalOpen } from "./scrollLock";
 import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { BAR_IDS, covers, venueCovers } from "../model/content";
@@ -25,6 +28,7 @@ export type PlacePopupPlace = {
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePopupPlace; onClose: () => void; onJoin: () => void }) {
+  const joinLabel = useJoinLabel();
   const layer = useRef<HTMLDivElement | null>(null);
   const sheet = useRef<HTMLDivElement | null>(null);
   const photo = useRef<HTMLDivElement | null>(null);
@@ -51,8 +55,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockScroll();
     sheet.current?.focus();
     /* OPENING (Sam, 4 Nov 2026: "an /impeccable animation when clicked"):
        the card's photo lifts off the card and flies to the top of the
@@ -109,11 +112,13 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      unlock();
       window.removeEventListener("keydown", onKey);
       ghost?.remove();
       if (ph) ph.style.opacity = "";
-      opener?.focus?.();
+      /* Not when the checkout has just taken over from here. */
+      if (!modalOpen()) opener?.focus?.();
+      else handOverFocus(opener);
     };
     // Once, when it opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,8 +169,8 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
               </span>
             </li>
           </ul>
-          <button type="button" className="pp-cta" onClick={() => close(onJoin)}>
-            Join Tapin Plus
+          <button type="button" className="pp-cta" onClick={onJoin}>
+            {joinLabel}
           </button>
         </div>
       </div>
