@@ -736,3 +736,50 @@ fieldset.prc-module {
     gap: 0 28px;
   }
 }
+
+/* ══ EMBEDDED (Sam, 6 Nov 2026: "one continuous flow") ══════════════════════
+   Steps 2 to 4 inside the builder's panel (routes/GiftPage.tsx): the
+   sheet's own tokens and resets, no island; the panel scrolls it. */
+.prc-embedded {
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --well: #e5e5ea;
+  --hair: rgba(20, 22, 24, 0.08);
+  --line: rgba(20, 22, 24, 0.12);
+  --ground: #f0f0f0;
+  --money: #0b7a53;
+  --bad: #c0392b;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--ground);
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.prc-embedded-inner {
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+}
+.prc-embedded *,
+.prc-embedded *::before,
+.prc-embedded *::after {
+  box-sizing: border-box;
+}
+:where(.prc-embedded) :where(p, h2, fieldset, legend) {
+  margin: 0;
+  padding: 0;
+}
+:where(.prc-embedded) fieldset {
+  border: 0;
+  min-width: 0;
+}
+.prc-embedded .tnum {
+  font-variant-numeric: tabular-nums;
+}
+.prc-embedded :where(a, button, input):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

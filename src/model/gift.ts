@@ -62,11 +62,15 @@ export const SCENES = [
   { id: "holiday", name: "Holiday", line: "Happy holidays", group: "seasonal" },
 ] as const;
 
-/** The everyday backgrounds, and the seasonal ones, for the pickers. */
-export const SCENE_GROUPS = [
+/** The pickers' groups: the seasonal ones first, marked limited time (Sam,
+ *  6 Nov 2026: "seasonal should show up above the regular ones (also
+ *  include "limited time")"), then the everyday ones. */
+export const SCENE_GROUPS: ReadonlyArray<{ label: string; tag?: string; scenes: ReadonlyArray<(typeof SCENES)[number]> }> = [
+  { label: "Seasonal", tag: "Limited time", scenes: SCENES.filter((e) => "group" in e && e.group === "seasonal") },
   { label: "Background", scenes: SCENES.filter((e) => !("group" in e)) },
-  { label: "Seasonal", scenes: SCENES.filter((e) => "group" in e && e.group === "seasonal") },
-] as const;
+];
+/** Every background in the pickers' order, for cycling through them. */
+export const SCENE_ORDER = SCENE_GROUPS.flatMap((g) => g.scenes);
 export type SceneId = (typeof SCENES)[number]["id"];
 
 export const isScene = (v: unknown): v is SceneId => SCENES.some((e) => e.id === v);

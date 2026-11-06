@@ -1569,3 +1569,178 @@ button.tpg-env-link {
   color: var(--muted);
 }
 
+
+/* ══ THE BUILDER (step 1 of the purchase; Sam, 6 Nov 2026: "the preview we
+   already have is the first step", "should also be configurable on
+   mobile", and "a white card behind the left column that fills up the
+   space, and then a preview in the middle of the left column with phone
+   dimensions") ══════════════════════════════════════════════════════════════
+   A computer: two white cards side by side, the student's page as a phone
+   in the middle of the left one (or filling it, as a computer), the panel
+   on the right with its title, the four step bars, the fields and Continue.
+   A phone: the page is the screen and the panel is a drawer at its foot,
+   closed to its title and two buttons, open to the fields. The page's own
+   dock is the student's, so it isn't shown while building. */
+@media (min-width: 1024px) {
+  .gft-preview-left {
+    padding: 24px;
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+  }
+  .gft-preview-frame {
+    --frame-h: min(844px, calc(100vh - 96px));
+    width: min(390px, 100%);
+    box-shadow: 0 16px 48px rgba(20, 22, 24, 0.22), 0 0 0 1px rgba(20, 22, 24, 0.06);
+  }
+  .gft-preview[data-device="computer"] .gft-preview-left {
+    padding: 0;
+  }
+  .gft-preview[data-device="computer"] .gft-preview-frame {
+    box-shadow: none;
+  }
+  .gft-preview-panel {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+}
+.gft-preview[data-builder] .gft-dock {
+  display: none;
+}
+.gft-pp-head {
+  display: grid;
+  gap: 6px;
+  padding: 20px 20px 4px;
+}
+.gft-pp-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.gft-pp-steps li {
+  flex: 1 1 0;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(20, 22, 24, 0.12);
+}
+.gft-pp-steps li[data-on] {
+  background: #141618;
+}
+.gft-pp-title {
+  font: 600 22px/27px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+.gft-pp-sub {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.gft-pp-field[data-error] input {
+  box-shadow: inset 0 0 0 2px #b42318;
+}
+.gft-pp-more {
+  height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #f0f0f0;
+  color: #141618;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.gft-pp-more:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+
+/* The drawer (a phone). */
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer] {
+    position: fixed;
+    z-index: 70;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    max-height: 84svh;
+    border-radius: 22px 22px 0 0;
+    background: #ffffff;
+    color: #141618;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
+  }
+  .gft-preview-panel[data-drawer]:not([data-open]) .gft-pp-body {
+    display: none;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-head {
+    padding: 14px 20px 2px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-title {
+    font-size: 19px;
+    line-height: 24px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-body {
+    padding: 16px 20px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-foot {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-cta {
+    flex: 1 1 auto;
+  }
+  /* The page scrolls clear of the closed drawer. */
+  .gft-preview[data-builder] .gft-preview-scroll {
+    padding-bottom: 170px;
+  }
+}
+
+/* "Limited time" on the seasonal group (6 Nov 2026). */
+.gft-pp-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gft-pp-tag {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fdecd9;
+  color: #9a4a0c;
+  font: 600 11px/14px "Gilroy", Arial, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+/* The panel's headings and lines carry no browser margins; the grid's gaps
+   do the spacing. */
+.gft-pp-title,
+.gft-pp-sub,
+.gft-pp-h,
+.gft-pp-error {
+  margin: 0;
+}
+@media (max-width: 1023.98px) {
+  /* Closed, the drawer is its steps, title and two buttons; the page centres
+     in the space above it, so "Open it" stays clear. */
+  .gft-preview-panel[data-drawer]:not([data-open]) .gft-pp-sub {
+    display: none;
+  }
+  .gft-preview[data-builder] .gft,
+  .gft-preview[data-builder] .gft-a-band {
+    min-height: calc(100svh - 150px);
+  }
+}
+
+/* Steps 2 to 4 in the panel (one continuous flow): the embedded checkout
+   fills it and scrolls; on a phone the drawer opens tall for it. */
+.gft-preview-panel[data-stage="next"] {
+  grid-template-rows: minmax(0, 1fr);
+}
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer][data-stage="next"] {
+    max-height: 90svh;
+    overflow: hidden;
+  }
+}
