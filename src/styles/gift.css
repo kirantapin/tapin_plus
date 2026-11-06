@@ -300,24 +300,25 @@ a.gft-open {
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: 50% 0;
 }
+/* The seal: the paper Plus mark on a white disc, a sticker's shadow. */
 .gft-a-seal {
   position: absolute;
   z-index: 5;
   left: 50%;
-  top: calc(226px * 0.62 - 30px);
+  top: calc(226px * 0.62 - 35px);
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  margin-left: -28px;
+  width: 70px;
+  height: 70px;
+  margin-left: -35px;
   border-radius: 50%;
-  background: var(--orange);
-  color: #fff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(60, 40, 10, 0.08), 0 6px 14px rgba(60, 40, 10, 0.32);
 }
-.gft-a-seal svg {
-  width: 30px;
-  height: 30px;
+.gft-a-seal img {
+  display: block;
+  width: 52px;
+  height: auto;
 }
 .gft-a-letter {
   position: absolute;
@@ -443,20 +444,20 @@ a.gft-open {
   position: absolute;
   z-index: 5;
   left: 50%;
-  top: calc(146px * 0.62 - 20px);
+  top: calc(146px * 0.62 - 25px);
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
+  width: 50px;
+  height: 50px;
+  margin-left: -25px;
   border-radius: 50%;
-  background: var(--orange);
-  color: #fff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(60, 40, 10, 0.08), 0 4px 10px rgba(60, 40, 10, 0.32);
 }
-.tpg-env-seal svg {
-  width: 22px;
-  height: 22px;
+.tpg-env-seal img {
+  display: block;
+  width: 37px;
+  height: auto;
 }
 .tpg-env-letter {
   position: absolute;

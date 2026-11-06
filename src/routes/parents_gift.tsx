@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SAMPLE_GIFT } from "../model/gift";
-import { FlatMark, reducedMotion } from "./parents_kit";
+import { asset } from "../asset";
+import { reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
    The parents page says a parent can send Plus with a note, and that their
@@ -12,6 +13,7 @@ import { FlatMark, reducedMotion } from "./parents_kit";
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SAMPLE = "/gift/sample";
+const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 
 /** Once, the first time `el` is mostly on screen. */
 function useSeenOnce(el: React.RefObject<HTMLElement | null>, threshold = 0.45) {
@@ -81,7 +83,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           <i className="tpg-env-pocket" />
           <span ref={flap} className="tpg-env-flap" />
           <span ref={seal} className="tpg-env-seal">
-            <FlatMark />
+            <img src={PAPER_MARK} alt="" width="32" height="25" />
           </span>
         </span>
       </div>

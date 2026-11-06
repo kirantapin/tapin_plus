@@ -7,7 +7,7 @@ import { previewGift, thanksHref, type Gift } from "../model/gift";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { appHref } from "../shell/GetTheApp";
-import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
+import { CREDIT, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -164,8 +164,10 @@ function Envelope({ flap, seal }: { flap?: React.Ref<HTMLSpanElement>; seal?: Re
       <span className="gft-a-back" />
       <span className="gft-a-pocket" />
       <span ref={flap} className="gft-a-flap" />
+      {/* The seal is the paper Plus mark on a white disc (Sam, 6 Nov
+          2026: "can we use the other tapin plus icon for this?"). */}
       <span ref={seal} className="gft-a-seal">
-        <FlatMark />
+        <img src={PAPER_MARK} alt="" width="44" height="35" />
       </span>
     </>
   );
