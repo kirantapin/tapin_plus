@@ -800,7 +800,14 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
   /* "renews at" says it renews in two words, where "then $7.99/mo until you
      cancel" took a second line and left "cancel" alone on it (Sam, 4 Nov
      2026: "/impeccable polish"). The pay step keeps the full terms. */
-  const welcome = `${firstMonthLine(price)}, renews at ${usd(price?.monthly)}/mo`;
+  /* An offer that lasts (a promo link's): its price for its months, or for
+     good. Otherwise the first month's line. */
+  const welcome =
+    price?.firstFor === "forever"
+      ? `${usd(price.first)}/mo, renews monthly`
+      : price?.firstFor && price.firstFor.periods > 1
+        ? `${usd(price.first)}/mo for ${price.firstFor.periods} months, then ${usd(price.monthly)}/mo`
+        : `${firstMonthLine(price)}, renews at ${usd(price?.monthly)}/mo`;
   if (!price || dueCents === null) return welcome;
   const today = dueCents / 100;
   if (today === price.first) return welcome;
@@ -810,8 +817,8 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
 
 /* Local dev only (?pckpreview=pay): the pay step with sample numbers and a
    stand-in for the wallet button, without signing in or building a cart. */
-const PREVIEW_PRICE: PlusPrice = { monthly: 7.99, first: 3.99, period: "month", billing: { interval: "month", interval_count: 1 } as PlusPrice["billing"], linkId: null, linkEnds: null };
-const PREVIEW_CART: PlusCart = { cart: [], dealEffect: null, cartResults: { totalPrice: 3.99 }, token: "", dueTodayCents: 399, accountId: "", linkId: null };
+const PREVIEW_PRICE: PlusPrice = { monthly: 7.99, first: 3.99, firstFor: null, period: "month", billing: { interval: "month", interval_count: 1 } as PlusPrice["billing"], linkId: null, linkEnds: null };
+const PREVIEW_CART: PlusCart = { cart: [], dealEffect: null, cartResults: { totalPrice: 3.99 }, token: "", dueTodayCents: 399, accountId: "", linkId: null, discountDuration: null };
 
 function Review({
   accessToken,
@@ -867,6 +874,18 @@ function Review({
   if (!cart || !price) return <div className="pck-body pck-wait" aria-busy="true" />;
 
   const today = cart.dueTodayCents / 100;
+  /* The cart's deal decides what renews at: today's price for its months
+     (or for good), then the full one. A first-month deal renews at full. */
+  const lasts = cart.discountDuration;
+  const months = lasts && lasts !== "forever" ? lasts.periods : 1;
+  const lasting = lasts === "forever" || months > 1;
+  const { period } = price;
+  const thenRow =
+    lasts === "forever"
+      ? `${usd(today)} every ${period}, from ${renewsOn(price)}`
+      : months > 1
+        ? `${usd(today)} a ${period} for ${months - 1} more, then ${usd(price.monthly)}`
+        : `${usd(price.monthly)} every ${period}, from ${renewsOn(price)}`;
   /* The invitation's clock under the charge rows, while its free month is
      the one being given. */
   const invite = inviteFor(price);
@@ -879,7 +898,7 @@ function Review({
         </li>
         <li>
           <b>Then</b>
-          <span className="tnum">{`${usd(price.monthly)} every ${price.period}, from ${renewsOn(price)}`}</span>
+          <span className="tnum">{thenRow}</span>
         </li>
       </ul>
       {invite?.ends && today === price.first ? <InviteClock invite={invite} className="pck-seats pck-pay-clock" /> : null}
@@ -915,12 +934,20 @@ function Review({
         </li>
       </ul>
       <p className="pck-consent">
-        {today === 0
-          ? /* A free first period (a promo link's, 5 Nov 2026): nothing is
-               charged today, so the terms say when the first charge comes and
-               how to stop it before then, beside the button that starts it. */
-            `By joining, you agree that your first ${price.period} is free and nothing is charged today, then ${usd(price.monthly)} every ${price.period} automatically from ${renewsOn(price)} until you cancel. Cancel anytime in the Tapin app before ${renewsOn(price)} and you won’t be charged. `
-          : `By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
+        {lasting
+          ? /* A deal that lasts: today's price for its months (or for good),
+               then the full one. */
+            `By joining, you agree to ${
+              lasts === "forever"
+                ? `pay ${usd(today)} today, then ${usd(today)} every ${period}`
+                : `pay ${usd(today)} today and each ${period} for your first ${months} ${period}s, then ${usd(price.monthly)} every ${period}`
+            } automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `
+          : today === 0
+            ? /* A free first period (a promo link's, 5 Nov 2026): nothing is
+                 charged today, so the terms say when the first charge comes and
+                 how to stop it before then, beside the button that starts it. */
+              `By joining, you agree that your first ${price.period} is free and nothing is charged today, then ${usd(price.monthly)} every ${price.period} automatically from ${renewsOn(price)} until you cancel. Cancel anytime in the Tapin app before ${renewsOn(price)} and you won’t be charged. `
+            : `By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
         <span className="pck-legal">
           <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
           {" · "}

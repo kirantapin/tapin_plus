@@ -8,7 +8,7 @@
    utils/purchase.ts. */
 
 import { supabase } from "../supabase";
-import { TAPIN_ID, fetchPlusBundle, welcomeOfferId } from "./plus";
+import { TAPIN_ID, fetchPlusBundle, welcomeOfferId, type DiscountDuration } from "./plus";
 import { loadPlusLink } from "./link";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
@@ -25,6 +25,9 @@ export interface PlusCart {
   accountId: string;
   /** The promo link whose offer the cart holds, for the order's attribution. */
   linkId: string | null;
+  /** How long the cart's deal lasts (its added item's), so the terms shown
+   *  are the ones charged: renewals at today's price until it ends. */
+  discountDuration: DiscountDuration;
 }
 
 /** The backend's own message where it gave one (already a member, an offer
@@ -50,7 +53,9 @@ type VerifyRequest =
 async function verify(
   accessToken: string,
   request: VerifyRequest,
-): Promise<{ cart: Omit<PlusCart, "dueTodayCents" | "accountId" | "linkId"> } | { error: string }> {
+): Promise<
+  { cart: Omit<PlusCart, "dueTodayCents" | "accountId" | "linkId" | "discountDuration"> } | { error: string }
+> {
   const { data, error } = await supabase.functions.invoke("tapin_verify_order", {
     body: {
       cart: [],
@@ -112,6 +117,9 @@ export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
     dueTodayCents: Math.round(built.cart.cartResults.totalPrice * 100),
     accountId: tapIn.payment_account_id,
     linkId: built === linked ? link!.linkId : null,
+    discountDuration:
+      (built.cart.dealEffect as { addedItems?: { details?: { discountDuration?: DiscountDuration } }[] })
+        ?.addedItems?.[0]?.details?.discountDuration ?? null,
   };
 }
 

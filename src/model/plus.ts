@@ -30,6 +30,10 @@ export interface PlusBundle {
   billing: { interval: "day" | "week" | "month"; interval_count: number };
 }
 
+/** How long an offer's discount lasts: the first N months, or every one.
+ *  Null: the first month only. The backend's DiscountDuration. */
+export type DiscountDuration = { periods: number } | "forever" | null;
+
 interface OfferPolicy {
   end_time: string | null;
   definition: {
@@ -38,6 +42,7 @@ interface OfferPolicy {
       free?: boolean;
       percentDiscount?: number;
       fixedDiscount?: number;
+      discountDuration?: DiscountDuration;
     };
   };
 }
@@ -49,6 +54,8 @@ export interface PlusPrice {
   /** The first period: a promo link's offer or the welcome offer's price, or
    *  `monthly` without one. */
   first: number;
+  /** How long `first` lasts: the offer's duration (null, the first month). */
+  firstFor: DiscountDuration;
   /** "month", "2 weeks". */
   period: string;
   billing: PlusBundle["billing"];
@@ -116,7 +123,7 @@ export async function fetchPlusBundle(): Promise<PlusBundle> {
 const devPrice = (): PlusPrice | null => {
   if (!import.meta.env.DEV || typeof window === "undefined") return null;
   const q = new URLSearchParams(window.location.search);
-  const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null };
+  const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null, firstFor: null };
   if (q.has("wwpreview") || q.get("l") === WELCOME_WEEK_LINK_ID) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
   return null;
@@ -129,6 +136,7 @@ const devPrice = (): PlusPrice | null => {
 const devFallback = (): PlusPrice => ({
   monthly: 7.99,
   first: 3.99,
+  firstFor: null,
   period: "month",
   billing: { interval: "month", interval_count: 1 },
   linkId: null,
@@ -160,6 +168,9 @@ async function fetchPrice(): Promise<PlusPrice> {
   return {
     monthly: plus.price,
     first: linked ?? offerPrice(offer, plus) ?? plus.price,
+    firstFor: linked !== null && link
+      ? link.policy.definition.action.discountDuration ?? null
+      : null,
     period: periodOf(plus),
     billing: plus.billing,
     linkId: linked !== null && link ? link.linkId : null,

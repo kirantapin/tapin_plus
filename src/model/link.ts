@@ -11,7 +11,7 @@
    whatever was kept. */
 
 import { supabase } from "../supabase";
-import { TAPIN_ID } from "./plus";
+import { TAPIN_ID, type DiscountDuration } from "./plus";
 
 /** Exported for model/invite.ts, which reads the kept link's id before the
  *  price is in. */
@@ -25,7 +25,15 @@ export interface PlusLink {
   policy: {
     policy_id: string;
     end_time: string | null;
-    definition: { action: { type: string; free?: boolean; percentDiscount?: number; fixedDiscount?: number } };
+    definition: {
+      action: {
+        type: string;
+        free?: boolean;
+        percentDiscount?: number;
+        fixedDiscount?: number;
+        discountDuration?: DiscountDuration;
+      };
+    };
   };
 }
 
