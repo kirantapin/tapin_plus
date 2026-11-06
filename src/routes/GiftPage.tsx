@@ -24,6 +24,7 @@ import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
+import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
 import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
@@ -742,7 +743,8 @@ export function Letter({
             ) : (
               <>
                 {to ? `${to}, ` : ""}
-                {gift.from} sent you <span className="gft-nowrap">something</span>
+                {/* "Your parent" mid-sentence is "your parent". */}
+                {to && gift.from === "Your parent" ? "your parent" : gift.from} sent you <span className="gft-nowrap">something</span>
               </>
             )}
           </span>
@@ -903,6 +905,7 @@ export function GiftPreview({
   masked,
   builder = false,
   next,
+  startNext = false,
 }: {
   onClose: () => void;
   /** The parent's button: "Send Tapin Plus" on /parents, "Back to checkout"
@@ -929,9 +932,15 @@ export function GiftPreview({
    *  checkout, embedded. `back` returns to the care package; `close` shuts
    *  the whole thing. */
   next?: (back: () => void, close: () => void) => React.ReactNode;
+  /** Open on the next steps (a charged checkout that only needs confirming). */
+  startNext?: boolean;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
-  const [stage, setStage] = useState<"gift" | "next">("gift");
+  const [stage, setStage] = useState<"gift" | "next">(startNext && next ? "next" : "gift");
+  /* Once visited, the next steps stay mounted (hidden while they're back on
+     the care package), so what they typed there is still there (review,
+     6 Nov 2026). */
+  const [visited, setVisited] = useState(startNext && !!next);
   const [drawer, setDrawer] = useState(false);
   const [nameErr, setNameErr] = useState(false);
   const nameInput = useRef<HTMLInputElement | null>(null);
@@ -947,15 +956,19 @@ export function GiftPreview({
     });
   }, [drawer]);
   const d = useGiftDraft();
-  const [samplePhoto, setSamplePhoto] = useState(sample);
+  /* The builder shows exactly what will be sent (review, 6 Nov 2026: a
+     sample standing in for an empty field looked like their gift, and
+     wasn't sent); the sample is only the fields' placeholders. */
+  const showSample = sample && !builder;
+  const [samplePhoto, setSamplePhoto] = useState(showSample);
   const scene = d.scene;
   const gift: Gift = {
-    to: fixedTo ?? (d.to.trim() || (sample ? SAMPLE_GIFT.to : null)),
-    from: d.from.trim() || !sample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
-    note: d.note.trim() || (sample ? SAMPLE_GIFT.note : null),
+    to: fixedTo ?? (d.to.trim() || (showSample ? SAMPLE_GIFT.to : null)),
+    from: d.from.trim() || !showSample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
+    note: d.note.trim() || (showSample ? SAMPLE_GIFT.note : null),
     masked: masked ?? SAMPLE_GIFT.masked,
     scene,
-    photo: d.photo ?? (sample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
+    photo: d.photo ?? (showSample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
   };
 
   /* Every background, one after another: the arrows (a phone) or the grid
@@ -1041,6 +1054,10 @@ export function GiftPreview({
   };
 
   useEffect(() => {
+    const unlock = lockScroll();
+    return unlock;
+  }, []);
+  useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
     back.current?.focus({ preventScroll: true });
     const key = (e: KeyboardEvent) => {
@@ -1083,6 +1100,7 @@ export function GiftPreview({
       return;
     }
     if (next) {
+      setVisited(true);
       setStage("next");
       return;
     }
@@ -1142,7 +1160,11 @@ export function GiftPreview({
             </svg>
             {backLabel}
           </button>
-          <div className="gft-preview-scroll gft-wrap" style={scaled}>
+          <div
+            className="gft-preview-scroll gft-wrap"
+            style={scaled}
+            {...(!wide && builder && (drawer || stage === "next") ? { inert: "" } : {})}
+          >
             <Letter gift={gift} sample preview cta={pageCta} />
           </div>
         </div>
@@ -1155,9 +1177,12 @@ export function GiftPreview({
           data-open={wide || drawer || stage === "next" ? "" : undefined}
           data-stage={stage}
         >
-          {stage === "next" && next ? (
-            next(toGift, onClose)
-          ) : (
+          {visited && next ? (
+            <div className="gft-pp-next" hidden={stage !== "next"}>
+              {next(toGift, onClose)}
+            </div>
+          ) : null}
+          {stage === "next" ? null : (
           <>
           {builder ? (
             <div className="gft-pp-head">
@@ -1242,7 +1267,7 @@ export function GiftPreview({
                       </svg>
                       {photoBusy ? "One moment…" : "Add your photo"}
                     </button>
-                    {sample ? (
+                    {showSample ? (
                       <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
                         {[true, false].map((on) => (
                           <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>

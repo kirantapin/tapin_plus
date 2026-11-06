@@ -10,7 +10,7 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { logoField } from "../model/content";
 import { captureUtm, lookupAskLink } from "../model/parents";
-import ParentCheckout from "../shell/ParentCheckout";
+import ParentCheckout, { hasChargedParentCheckout } from "../shell/ParentCheckout";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import {
@@ -950,6 +950,7 @@ export default function ParentsHome() {
           masked={asked ? asked.masked : undefined}
           onClose={() => setBuilding(false)}
           action={{ label: "Continue", onClick: () => {} }}
+          startNext={hasChargedParentCheckout()}
           next={(back, close) => (
             <ParentCheckout
               embedded

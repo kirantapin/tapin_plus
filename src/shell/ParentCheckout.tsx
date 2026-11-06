@@ -147,6 +147,9 @@ type Step = "gift" | "student" | "you" | "pay" | "done";
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
 let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
+/** A card already charged whose checkout still needs confirming: the
+ *  builder goes straight to it (its gift went with the charge). */
+export const hasChargedParentCheckout = () => charged !== null;
 type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
 function Sheet({
@@ -625,8 +628,8 @@ function Sheet({
             </form>
           ) : step === "pay" && started ? (
             <div className="prc-body">
-              <ol className="prc-steps" aria-label={`Step ${ask ? 2 : 3} of ${ask ? 2 : 3}`}>
-                {(ask ? ["you", "pay"] : ["student", "you", "pay"]).map((k) => (
+              <ol className="prc-steps" aria-label={`Step ${STEPS.length} of ${STEPS.length}`}>
+                {STEPS.map((k) => (
                   <li key={k} data-on="" />
                 ))}
               </ol>

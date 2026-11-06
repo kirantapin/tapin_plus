@@ -1744,3 +1744,11 @@ button.tpg-env-link {
     overflow: hidden;
   }
 }
+
+.gft-pp-next {
+  display: grid;
+  min-height: 0;
+}
+.gft-pp-next[hidden] {
+  display: none;
+}
