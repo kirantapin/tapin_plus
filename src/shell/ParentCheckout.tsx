@@ -14,7 +14,7 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
-import { FROM_MAX, NOTE_MAX, SCENES, type SceneId } from "../model/gift";
+import { FROM_MAX, NOTE_MAX, SCENES, giftWho, type SceneId } from "../model/gift";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
@@ -343,6 +343,8 @@ function Sheet({
     const first = wide() ? node.querySelector<HTMLElement>("input") : null;
     (first ?? node).focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
+      /* The gift preview over the sheet owns the keys while it's open. */
+      if (document.querySelector(".gft-preview")) return;
       if (e.key === "Escape") {
         e.preventDefault();
         return close();
@@ -401,7 +403,7 @@ function Sheet({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
+    if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
     const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
@@ -440,7 +442,9 @@ function Sheet({
         utm: keptUtm(),
       });
       setStarted(res);
-      setSentNote(!!giftNoteSent);
+      /* A gift goes out with a note or a photo (API.md: an ask link's
+         student is texted their gift link when there is either). */
+      setSentNote(!!giftNoteSent || (noteOpen && !!giftPhoto));
       setStep("pay");
     } catch (err) {
       setFormError((err as Error).message || "Something went wrong. Please try again.");
@@ -481,7 +485,9 @@ function Sheet({
   return createPortal(
     <div className="prc-layer" ref={layer}>
       <div ref={scrim} className="prc-scrim" aria-hidden="true" onClick={close} />
-      <div className="prc-sheet prc-island" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
+      {/* ph-no-capture: the names, the note and the photo are a family's
+          own, so session replay and autocapture skip the whole sheet. */}
+      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
         {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
         <span ref={label} className="prc-island-label" aria-hidden="true" />
         <div ref={inner} className="prc-island-inner">
@@ -657,7 +663,7 @@ function Sheet({
                         ))}
                       </div>
                     </fieldset>
-                    <button type="button" className="prc-preview" onClick={() => setPreviewing(true)}>
+                    <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
                       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                         <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
                       </svg>
@@ -682,7 +688,7 @@ function Sheet({
                 <GiftPreview
                   gift={{
                     to: (ask ? ask.student_first_name : student.trim()) || null,
-                    from: giftFrom.trim() || name.trim().split(/\s+/)[0] || "Mom",
+                    from: giftWho(giftFrom, name),
                     note: giftNote.trim() || null,
                     masked: ask ? ask.masked_phone : maskDigits(phoneD),
                     scene: giftScene,
@@ -696,7 +702,7 @@ function Sheet({
                   {formError}
                 </p>
               ) : null}
-              <button type="submit" className="prc-cta" data-island-cta="" disabled={busy}>
+              <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
                 {busy ? "One moment…" : formError ? "Try again" : step === "student" ? "Continue" : "Continue to payment"}
               </button>
             </form>

@@ -4,7 +4,6 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import {
-  CANDIDATE_SCENES,
   isScene,
   previewGift,
   SAMPLE_PHOTO,
@@ -39,6 +38,23 @@ import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./p
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+/* Each background's own drift (gift.css .gft-scene-pat): one tile's travel
+   per loop, so it never seams; scenery breathes instead; the sunburst turns.
+   Slow enough to notice only when you look. Maroon is a plain field: still. */
+const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alternate?: boolean }>> = {
+  picnic: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-36px, -36px)" }], ms: 7000 },
+  night: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 0)" }], ms: 60000 },
+  confetti: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 180px)" }], ms: 14000 },
+  airmail: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-32px, 0)" }], ms: 4000 },
+  sunrise: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.04)" }], ms: 6000, alternate: true },
+  ridge: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.03)" }], ms: 7000, alternate: true },
+  hearts: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 16000 },
+  flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
+  lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
+  sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
+  leaves: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 220px)" }], ms: 26000 },
+};
 const GIFT_KEY = "tp_gift_v1";
 const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
 
@@ -231,6 +247,77 @@ function Envelope({
   );
 }
 
+type Go = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => Animation | undefined;
+
+/** The care package's first beats, shared by the gift page and the parents
+ *  page's envelope so they open the same way: the twine draws in to the
+ *  knot under the seal (0–420ms), the seal is pulled up and off (380–960ms),
+ *  and the flap folds back, darkening as it turns edge-on to the light and
+ *  showing its shaded inside (460–960ms). The card's rise follows at 880. */
+function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, flap: HTMLElement | null) {
+  const twineH = extra?.querySelector<HTMLElement>(".gft-a-twine-h");
+  const twineV = extra?.querySelector<HTMLElement>(".gft-a-twine-v");
+  if (twineH) twineH.style.transformOrigin = "50% 50%";
+  if (twineV) twineV.style.transformOrigin = "50% 62%";
+  go(twineH, [{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], { duration: 420, easing: "cubic-bezier(.6,0,.2,1)" });
+  go(twineV, [{ transform: "scaleY(1)" }, { transform: "scaleY(0)" }], { duration: 420, easing: "cubic-bezier(.6,0,.2,1)" });
+  go(seal, [
+    { transform: "none", opacity: 1 },
+    { transform: "translateY(5px) scale(.96)", opacity: 1, offset: 0.16 },
+    { transform: "translateY(-150px) rotate(-10deg)", opacity: 0 },
+  ], { duration: 580, delay: 380, easing: "cubic-bezier(.45,0,.3,1)" });
+  go(flap, [
+    { transform: "rotateX(0deg)", zIndex: 4, backgroundColor: "var(--env-flap)" },
+    { transform: "rotateX(90deg)", zIndex: 4, backgroundColor: "var(--env-edge)", offset: 0.5 },
+    { transform: "rotateX(90deg)", zIndex: 1, backgroundColor: "var(--env-edge)", offset: 0.501 },
+    { transform: "rotateX(180deg)", zIndex: 1, backgroundColor: "var(--env-inside)" },
+  ], { duration: 500, delay: 460, easing: "cubic-bezier(.4,0,.2,1)" });
+}
+
+/* ══ THE CARE PACKAGE, AS A PICTURE (the parents page's callout) ═══════════
+   The gift page's own envelope and opening, played once when it scrolls
+   into view (`play`), so a parent sees exactly what their student will. It
+   stops with the card almost all the way out, its foot still tucked in the
+   pocket, so the whole note reads. Reduced motion: shown already open. */
+export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> }) {
+  const seal = useRef<HTMLSpanElement | null>(null);
+  const flap = useRef<HTMLSpanElement | null>(null);
+  const extra = useRef<HTMLSpanElement | null>(null);
+  const letter = useRef<HTMLDivElement | null>(null);
+  const runs = useRef<Animation[]>([]);
+  useEffect(() => () => runs.current.forEach((a) => a.cancel()), []);
+  useEffect(() => {
+    const el = letter.current;
+    if (!play || !el) return;
+    const quick = reducedMotion();
+    const go: Go = (node, kf, o) => {
+      const a = node?.animate?.(kf, { fill: "both", easing: EASE, ...o, ...(quick ? { duration: 0, delay: 0 } : {}) });
+      if (a) runs.current.push(a);
+      return a;
+    };
+    unwrap(go, extra.current, seal.current, flap.current);
+    /* Out until only its foot (14px) is left in the pocket. */
+    const lift = el.offsetHeight + 12 - 14;
+    go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 760, delay: 880 });
+  }, [play]);
+  return (
+    <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
+      <div className="gft-a-stage">
+        <div className="gft-a-shell">
+          <Envelope flap={flap} seal={seal} extra={extra} />
+        </div>
+        <div ref={letter} className="gft-a-letter">
+          <div className="gft-a-head">
+            <span>For {gift.to ?? "you"}</span>
+          </div>
+          {gift.note ? <p className="gft-a-note">{gift.note}</p> : null}
+          <p className="gft-a-sig">{gift.from}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** The children of `host` rise in one after another (visible by default;
  *  this only plays when motion is allowed). */
 function useRiseIn(host: React.RefObject<HTMLElement | null>, on: boolean, delay = 0) {
@@ -353,10 +440,62 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
     return a;
   };
 
+  /* ── The background, alive (Sam, 6 Nov 2026): a slow drift of its own,
+     paused while the page is hidden or the band is off screen, and a swell
+     when the card comes out (the drift speeds up, then eases back). */
+  const scene = useRef<HTMLDivElement | null>(null);
+  const pat = useRef<HTMLDivElement | null>(null);
+  const drift = useRef<Animation | null>(null);
+  useEffect(() => {
+    const m = SCENE_MOTION[gift.scene];
+    const el = pat.current;
+    if (!m || !el || still || typeof el.animate !== "function") return;
+    const a = el.animate(m.kf, {
+      duration: m.ms,
+      iterations: Infinity,
+      easing: m.alternate ? "ease-in-out" : "linear",
+      direction: m.alternate ? "alternate" : "normal",
+    });
+    drift.current = a;
+    let onScreen = true;
+    const sync = () => (onScreen && !document.hidden ? a.play() : a.pause());
+    document.addEventListener("visibilitychange", sync);
+    const io =
+      typeof IntersectionObserver !== "undefined" && scene.current
+        ? new IntersectionObserver(([e]) => {
+            onScreen = e.isIntersecting;
+            sync();
+          })
+        : null;
+    if (io && scene.current) io.observe(scene.current);
+    return () => {
+      a.cancel();
+      drift.current = null;
+      document.removeEventListener("visibilitychange", sync);
+      io?.disconnect();
+    };
+  }, [gift.scene, still]);
+  const bloom = () => {
+    go(scene.current, [
+      { transform: "scale(1)" },
+      { transform: "scale(1.06)", offset: 0.4 },
+      { transform: "scale(1)" },
+    ], { duration: 1800, easing: "cubic-bezier(.3,0,.2,1)", fill: "none" });
+    const a = drift.current;
+    if (!a) return;
+    [[0, 6], [500, 3], [1000, 1.6], [1500, 1]].forEach(([at, rate]) =>
+      window.setTimeout(() => {
+        if (drift.current === a) a.updatePlaybackRate(rate);
+      }, at),
+    );
+  };
+
   /* Focus follows the gift: to the new heading once it's open. */
   const settle = () => title.current?.focus({ preventScroll: true });
+  const started = useRef(false);
   const open = async () => {
-    if (state !== "sealed") return;
+    if (state !== "sealed" || started.current) return;
+    started.current = true;
     if (!preview) track("gift_opened", { sample, has_note: !!gift.note });
     const el = letter.current;
     if (still || !el) {
@@ -364,6 +503,9 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
       settle();
       return;
     }
+    /* Measure the card once its type has landed (Gilroy can arrive late and
+       re-wrap the note): the clip's line is set from this height. */
+    await Promise.race([document.fonts?.ready, new Promise((r) => window.setTimeout(r, 500))]);
     setState("opening");
     /* ── Opening the care package: B · Pull the string, rebuilt as paper.
          1. The heading and the button step aside (nothing crosses them).
@@ -379,29 +521,16 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
        Ease-ins for what leaves, long ease-outs for what arrives. */
     const H = el.offsetHeight;
     const up = Math.round(Math.min(150, H * 0.5));
-    const drop = Math.round(ENV_H * 0.8);
-    const twineH = extra.current?.querySelector<HTMLElement>(".gft-a-twine-h");
-    const twineV = extra.current?.querySelector<HTMLElement>(".gft-a-twine-v");
-    if (twineH) twineH.style.transformOrigin = "50% 50%";
-    if (twineV) twineV.style.transformOrigin = "50% 62%";
-
+    /* Far enough that the pocket passes the card's foot, however long the
+       note: the clip ends at nothing, so nothing pops in at the settle. */
+    const drop = Math.max(Math.round(ENV_H * 0.8), H - (ENV_H - TOP) - up);
     go(button.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: "linear" });
     const titleOut = go(title.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "linear" });
-    go(twineH, [{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }], { duration: 420, easing: "cubic-bezier(.6,0,.2,1)" });
-    go(twineV, [{ transform: "scaleY(1)" }, { transform: "scaleY(0)" }], { duration: 420, easing: "cubic-bezier(.6,0,.2,1)" });
-    go(seal.current, [
-      { transform: "none", opacity: 1 },
-      { transform: "translateY(5px) scale(.96)", opacity: 1, offset: 0.16 },
-      { transform: "translateY(-150px) rotate(-10deg)", opacity: 0 },
-    ], { duration: 580, delay: 380, easing: "cubic-bezier(.45,0,.3,1)" });
-    go(flap.current, [
-      { transform: "rotateX(0deg)", zIndex: 4, backgroundColor: "var(--env-flap)" },
-      { transform: "rotateX(90deg)", zIndex: 4, backgroundColor: "var(--env-edge)", offset: 0.5 },
-      { transform: "rotateX(90deg)", zIndex: 1, backgroundColor: "var(--env-edge)", offset: 0.501 },
-      { transform: "rotateX(180deg)", zIndex: 1, backgroundColor: "var(--env-inside)" },
-    ], { duration: 500, delay: 460, easing: "cubic-bezier(.4,0,.2,1)" });
-    /* The card: up, and the clip's line held on the envelope's foot. */
+    unwrap(go, extra.current, seal.current, flap.current);
+    /* The card: up, and the clip's line held on the envelope's foot. As it
+       starts to come out, the background answers (bloom). */
     const RISE = { duration: 700, delay: 880 };
+    window.setTimeout(bloom, RISE.delay - 120);
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
     const total = DROP.delay + DROP.duration - RISE.delay;
@@ -472,6 +601,9 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
       data-scene={gift.scene}
     >
       <header className="gft-a-band">
+        <div ref={scene} className="gft-scene" aria-hidden="true">
+          <div ref={pat} className="gft-scene-pat" />
+        </div>
         <h1 ref={title} className="gft-h1" tabIndex={-1}>
           {/* The inner span is the paper strip the busier backgrounds
               set the heading on. */}
@@ -509,9 +641,8 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
           <div ref={letter} className="gft-a-letter" aria-hidden={state === "sealed" ? true : undefined}>
             <div className="gft-a-head">
               <span>For {to ?? "you"}</span>
-              {/* The flat Plus mark in ink (Sam, 6 Nov 2026: "I think we can
-                  just use the black tapin plus icon here"). */}
-              <FlatMark />
+              {/* No mark on the card (Sam, 6 Nov 2026: "you can remove the
+                  tapin plus icon from the card too"): it's their letter. */}
             </div>
             {/* The parent's photo, printed at the top of the letter: the
                 first thing that rises out of the envelope. */}
@@ -572,14 +703,6 @@ function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>
   return (
     <div className="gft-pick" role="group" aria-label="Try the designs">
       <div className="gft-pick-row">
-        <span>New</span>
-        {CANDIDATE_SCENES.map((e) => (
-          <button key={e.id} type="button" aria-pressed={gift.scene === e.id} onClick={() => onChange({ scene: e.id as SceneId })}>
-            {e.name}
-          </button>
-        ))}
-      </div>
-      <div className="gft-pick-row">
         <span>Background</span>
         {SCENES.map((e) => (
           <button key={e.id} type="button" aria-pressed={gift.scene === e.id} onClick={() => onChange({ scene: e.id as SceneId })}>
@@ -610,7 +733,22 @@ export function GiftPreview({ gift, onClose }: { gift: Gift; onClose: () => void
       if (e.key === "Escape") {
         e.stopPropagation();
         onClose();
+        return;
       }
+      /* Tab stays inside the preview. */
+      if (e.key !== "Tab") return;
+      const box = document.querySelector<HTMLElement>(".gft-preview");
+      if (!box) return;
+      const els = Array.from(box.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), [tabindex='0']")).filter(
+        (el) => el.getClientRects().length > 0 && el.getAttribute("aria-hidden") !== "true",
+      );
+      if (!els.length) return;
+      const at = document.activeElement as HTMLElement | null;
+      const i = at ? els.indexOf(at) : -1;
+      e.preventDefault();
+      e.stopPropagation();
+      const next = e.shiftKey ? (i <= 0 ? els.length - 1 : i - 1) : i === -1 || i === els.length - 1 ? 0 : i + 1;
+      els[next].focus();
     };
     window.addEventListener("keydown", key, true);
     return () => {

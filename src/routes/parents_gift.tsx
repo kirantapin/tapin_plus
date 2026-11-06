@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { SAMPLE_GIFT } from "../model/gift";
-import { FlatMark, reducedMotion } from "./parents_kit";
+import { EnvelopeDemo } from "./GiftPage";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
    The parents page says a parent can send Plus with a note, and that their
@@ -10,7 +10,6 @@ import { FlatMark, reducedMotion } from "./parents_kit";
    checkout with the note already open (ParentCheckout's `note`); "See what
    they'll see" opens the sample gift page. */
 
-const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SAMPLE = "/gift/sample";
 
 /** Once, the first time `el` is mostly on screen. */
@@ -41,58 +40,15 @@ function useSeenOnce(el: React.RefObject<HTMLElement | null>, threshold = 0.45) 
 export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) {
   const box = useRef<HTMLDivElement | null>(null);
   const seen = useSeenOnce(box, 0.6);
-  const flap = useRef<HTMLSpanElement | null>(null);
-  const seal = useRef<HTMLSpanElement | null>(null);
-  const letter = useRef<HTMLSpanElement | null>(null);
-  const twine = useRef<HTMLSpanElement | null>(null);
-  useEffect(() => {
-    if (!seen) return;
-    const still = reducedMotion();
-    const o = (delay: number, duration: number): KeyframeAnimationOptions => ({
-      delay: still ? 0 : delay,
-      duration: still ? 0 : duration,
-      easing: EASE,
-      fill: "forwards",
-    });
-    /* The gift page's opening, its four beats (GiftPage.tsx): the seal comes
-       off with the twine, the flap folds back, the letter rises. */
-    const away = "cubic-bezier(.5,0,.75,0)";
-    const runs = [
-      seal.current?.animate([{ transform: "none", opacity: 1 }, { transform: "translate(14px, -5px) rotate(14deg)", opacity: 0 }], { ...o(250, 340), easing: away }),
-      twine.current?.animate([{ transform: "none", opacity: 1 }, { transform: "translateX(36px)", opacity: 0 }], { ...o(270, 360), easing: away }),
-      flap.current?.animate(
-        [
-          { transform: "rotateX(0deg)", zIndex: 4 },
-          { transform: "rotateX(90deg)", zIndex: 4, offset: 0.5 },
-          { transform: "rotateX(90deg)", zIndex: 1, offset: 0.501 },
-          { transform: "rotateX(180deg)", zIndex: 1 },
-        ],
-        { ...o(590, 520), easing: "cubic-bezier(.55,0,.25,1)" },
-      ),
-      letter.current?.animate([{ transform: "translateY(0)" }, { transform: "translateY(-46%)" }], o(1070, 680)),
-    ];
-    return () => runs.forEach((r) => r?.cancel());
-  }, [seen]);
   return (
     <section className="tpg tpg-env" aria-labelledby="tpg-env-h">
-      <div ref={box} className="tpg-env-art" aria-hidden="true">
-        <span className="tpg-env-stage">
-          <i className="tpg-env-back" />
-          <span ref={letter} className="tpg-env-letter">
-            <b>For {SAMPLE_GIFT.to}</b>
-            <span>Lunch is on me this semester. So proud of you.</span>
-            <em>{SAMPLE_GIFT.from}</em>
-          </span>
-          <i className="tpg-env-pocket" />
-          <span ref={flap} className="tpg-env-flap" />
-          <span ref={twine} className="tpg-env-twine">
-            <i />
-            <i />
-          </span>
-          <span ref={seal} className="tpg-env-seal">
-            <FlatMark />
-          </span>
-        </span>
+      {/* The gift page's own care package and opening (GiftPage.tsx
+          EnvelopeDemo), so the parent sees what their student will. */}
+      <div ref={box} className="tpg-env-art">
+        <EnvelopeDemo
+          play={seen}
+          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: "Lunch is on me this semester. So proud of you!" }}
+        />
       </div>
       <div className="tpg-env-copy">
         <h2 id="tpg-env-h" className="tpg-env-h">

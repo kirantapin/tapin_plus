@@ -38,25 +38,20 @@ export const SCENES = [
   { id: "picnic", name: "Picnic", line: "Lunch is on me" },
   { id: "night", name: "Night sky", line: "Miss you" },
   { id: "confetti", name: "Confetti", line: "Something to celebrate" },
+  /* Eight of ten designed the same day ("i like all of these"; Notebook and
+     Diner left out). */
+  { id: "airmail", name: "Airmail", line: "All the way from home" },
+  { id: "sunrise", name: "Sunrise", line: "Good morning" },
+  { id: "ridge", name: "Blue Ridge", line: "The mountains" },
+  { id: "hearts", name: "Hearts", line: "Love you" },
+  { id: "flannel", name: "Flannel", line: "Fall" },
+  { id: "lunch", name: "Lunch", line: "On me" },
+  { id: "sunburst", name: "Sunburst", line: "Hooray" },
+  { id: "leaves", name: "Fall leaves", line: "Autumn" },
 ] as const;
-/* Ten more, designed for Sam to choose from (6 Nov 2026); on the sample
-   page's picker only, never in the checkout, until he picks. */
-export const CANDIDATE_SCENES = [
-  { id: "notebook", name: "Notebook" },
-  { id: "airmail", name: "Airmail" },
-  { id: "sunrise", name: "Sunrise" },
-  { id: "ridge", name: "Blue Ridge" },
-  { id: "hearts", name: "Hearts" },
-  { id: "diner", name: "Diner" },
-  { id: "flannel", name: "Flannel" },
-  { id: "lunch", name: "Lunch" },
-  { id: "sunburst", name: "Sunburst" },
-  { id: "leaves", name: "Fall leaves" },
-] as const;
-export type SceneId = (typeof SCENES)[number]["id"] | (typeof CANDIDATE_SCENES)[number]["id"];
+export type SceneId = (typeof SCENES)[number]["id"];
 
-export const isScene = (v: unknown): v is SceneId =>
-  SCENES.some((e) => e.id === v) || CANDIDATE_SCENES.some((e) => e.id === v);
+export const isScene = (v: unknown): v is SceneId => SCENES.some((e) => e.id === v);
 
 export const NOTE_MAX = 240;
 export const FROM_MAX = 24;
@@ -101,3 +96,16 @@ export function previewGift(search: string, photoSrc: string): Gift {
  *  Messages composer on iPhone and Android alike; the student picks who. */
 export const thanksHref = (from: string) =>
   `sms:?&body=${encodeURIComponent(`Thank you for Tapin Plus, ${from}!`)}`;
+
+/** Who the gift is from, by the backend's rule (gift_lookup's and the text's
+ *  {Who}): the sign-off if it's a plain short name (letters, spaces,
+ *  apostrophes, hyphens, periods; no "mom.com"), else the parent's first
+ *  name if that's plainly a name, else "Your parent". The preview uses it so
+ *  the parent sees what the student will. */
+export function giftWho(signOff: string, parentName: string): string {
+  const s = signOff.trim().replace(/\s+/g, " ").replace(/’/g, "'");
+  if (s && s.length <= FROM_MAX && /^[A-Za-z '.-]+$/.test(s) && /[A-Za-z]/.test(s) && !/\.[A-Za-z]{2}/.test(s)) return s;
+  const first = parentName.trim().split(/\s+/)[0]?.replace(/’/g, "'") ?? "";
+  if (first && first.length <= 40 && /^[A-Za-z][A-Za-z'-]*$/.test(first)) return first;
+  return "Your parent";
+}

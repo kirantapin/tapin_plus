@@ -668,10 +668,10 @@
 
 /* ── A phone ───────────────────────────────────────────────────────────── */
 @media (max-width: 1023px) {
-  /* The student foot keeps 96px for its dock, but here the dock hides at the
-     close card, which is always in view at the page's end: no blank strip. */
+  /* The dock is always on (Sam, 6 Nov 2026), so the foot keeps room for it,
+     as the student foot does. */
   .tpp .tpa-foot {
-    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
 }
 

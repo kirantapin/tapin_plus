@@ -50,7 +50,7 @@ parent_subscriptions (
   gift_from text null,                   -- how it's signed ("Mom"), <= 24 chars
   gift_token_hash text unique null,      -- sha256; the student's gift link, replaced on every re-send
   gift_opened_at timestamptz null,       -- first time the gift page opened
-  gift_scene text null,                  -- the gift page's background: maroon | picnic | night | confetti
+  gift_scene text null,                  -- the gift page's background (12: model/gift.ts SCENES)
   gift_photo_path text null,             -- the parent's photo in the private gift-photos bucket
   utm jsonb, reminders_sent int default 0,
   created_at timestamptz, canceled_at timestamptz null,
@@ -79,7 +79,8 @@ req: {
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
   gift_from?: string | null;                            // optional sign-off ("Mom"), <= 24 chars
-  gift_scene?: string | null;                           // optional background: maroon | picnic | night | confetti
+  gift_scene?: string | null;                           // optional background: maroon | picnic | night | confetti |
+                                                        //   airmail | sunrise | ridge | hearts | flannel | lunch | sunburst | leaves
   gift_photo?: string | null;                           // optional photo: "data:image/jpeg;base64,…", <= 1,500,000 chars
   utm?: Record<string, string>;                         // first-touch utm_*, fbclid, referrer
 }
@@ -113,8 +114,9 @@ Verifies the PaymentIntent succeeded for this subscription, then, idempotently:
    Only someone who has just paid can learn this, so it is not a free way to look up
    members. (A student paying for themselves is not "covered": see step 2.)
 4. Texts the student once, with their gift link (Sam, 6 Nov 2026; ask links skip it
-   unless the parent wrote a note: the student asked, but a note is worth the text):
-   `Tapin: {Who} sent you Tapin Plus{ with a note}. Open it: https://plus.tapin.app/gift/{token} Reply STOP to opt out`
+   unless the parent added a note or a photo: the student asked, but a gift is worth the
+   text):
+   `Tapin: {Who} sent you Tapin Plus{ with a note | with a photo}. Open it: https://plus.tapin.app/gift/{token} Reply STOP to opt out`
    `{Who}` is the sign-off if it's a plain short name, else the parent's first name, else
    "Your parent". The note itself is never in a text. Only the token's sha256 is stored,
    and a re-send (`resend`, `change_number`) makes a new link, so the old one stops.

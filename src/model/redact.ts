@@ -9,7 +9,9 @@ export const redactUrl = (u: string): string =>
   u
     .replace(/\/parents\/manage\/[^/?#]+/g, "/parents/manage/:token")
     .replace(/\/gift\/(?!sample(?:[/?#]|$))[^/?#]+/g, "/gift/:token")
-    .replace(/([?&]ask=)[^&#]*/g, "$1:token");
+    .replace(/([?&]ask=)[^&#]*/g, "$1:token")
+    /* A signed Storage link (the gift's photo) carries its key in ?token=. */
+    .replace(/(\/storage\/v1\/object\/sign\/[^?#]*)\?[^#]*/g, "$1?:token");
 
 /** Moves a key out of the address bar, keeping it for this tab so a reload
  *  still works. Returns the key, from the address or from the tab. */

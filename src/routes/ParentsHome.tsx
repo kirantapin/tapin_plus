@@ -452,8 +452,6 @@ export default function ParentsHome() {
      my student sticky CTA should always be visible"), even with the offer
      card's own button in view. On a computer the offer card is held in view
      and the dock is hidden (parents.css). ── */
-  const heroCta = useRef<HTMLButtonElement | null>(null);
-  const closeCta = useRef<HTMLElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
   const dockOn = true;
   useDockPulse(dockRef, dockOn && !open);
@@ -633,7 +631,6 @@ export default function ParentsHome() {
               $3.99, one lunch covers it). */}
           <OfferPrice />
           <button
-            ref={heroCta}
             type="button"
             className="tpa-cta tpp-cta"
             onClick={(e) => signUp("hero", e.currentTarget)}
@@ -830,7 +827,6 @@ export default function ParentsHome() {
         {/* The close: phones only (the desk layout hides it; the offer card
             is beside the reader the whole way down there). */}
         <section
-          ref={closeCta}
           className="tpa-close tpp-close"
           aria-labelledby="tpp-close-h"
         >

@@ -272,12 +272,13 @@ few words when you sign up. They get a text, tap it, and open their Plus like a 
 "Up to 240 characters. They open it like a present when they tap their text. Only they
 get the link.", "Sign it" (placeholder "Mom"), "A photo (optional)" / "Add a photo" /
 "Change" / "Remove", help "Only {Student} sees it, on their gift. We delete it when their
-Plus ends.", and "Background" (Maroon, Picnic, Night sky, Confetti). The fold button
+Plus ends.", and "Background" (Maroon, Picnic, Night sky, Confetti, Airmail, Sunrise, Blue Ridge, Hearts,
+Flannel, Lunch, Sunburst, Fall leaves), "Preview their gift". The fold button
 reads "Add a note or a photo for {Student}"; the section is "For {Student}, from you
 (optional)". Old line, kept for reference:
 "Sign it" (placeholder "Mom"). Done screen: "We’ve texted •••0123 a link to your note."
 
-**The text to the student:** `Tapin: {Who} sent you Tapin Plus{ with a note}. Open it:
+**The text to the student:** `Tapin: {Who} sent you Tapin Plus{ with a note | with a photo}. Open it:
 https://plus.tapin.app/gift/{token} Reply STOP to opt out`
 
 **The gift page** (/gift/{token}):
