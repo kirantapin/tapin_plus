@@ -275,22 +275,12 @@ a.gft-open {
   top: 0;
   bottom: 0;
   z-index: 3;
-  overflow: hidden;
   border-radius: 10px;
   background: var(--env-pocket);
-  /* Solid paper (Sam, 6 Nov 2026: the card "still shows up underneath the
-     envelope"): the front hides the card; it only ever shows above the
-     top edge. The V is a fold now, not a hole: the bottom flap, a shade
-     darker, meeting the side flaps. Its own layer, beside the flap's 3D
-     fold. */
+  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+  /* Its own layer: beside the flap's 3D fold, Chrome can paint the pocket
+     without its clip (a solid oblong, no V) unless it's composited too. */
   transform: translateZ(0);
-}
-.gft-a-pocket::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--env-fold);
-  clip-path: polygon(0 100%, 50% 50%, 100% 100%);
 }
 .gft-a-flap {
   top: 0;
@@ -525,8 +515,6 @@ button.tpg-env-link {
   --env-back: #9c7247;
   --env-pocket: #c39a6b;
   --env-flap: #b48956;
-  /* The bottom flap's fold on the front. */
-  --env-fold: #b68d5e;
   /* The flap edge-on to the light, then its inside, in its own shade. */
   --env-edge: #8a6640;
   --env-inside: #a27a4d;
