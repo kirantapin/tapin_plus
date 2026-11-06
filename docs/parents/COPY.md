@@ -268,7 +268,7 @@ few words when you sign up. They get a text, tap it, and open their Plus like a 
 
 **In the checkout** (the "You" step; open already when they came from the callout):
 "Add a note for {Student}" folds open to "A note for {Student} (optional)", "Your note"
-(240 characters, placeholder "Lunch is on me this semester. So proud of you."), help
+(240 characters, placeholder "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!"), help
 "Up to 240 characters. They open it like a present when they tap their text. Only they
 get the link.", "Sign it" (placeholder "Mom"), "A photo (optional)" / "Add a photo" /
 "Change" / "Remove", help "Only {Student} sees it, on their gift. We delete it when their

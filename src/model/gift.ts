@@ -59,7 +59,7 @@ export const FROM_MAX = 24;
 export const SAMPLE_GIFT: Gift = {
   to: "Maya",
   from: "Mom",
-  note: "Lunch is on me this semester. So proud of you, and I miss you already. Call me Sunday!",
+  note: "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!",
   masked: "•••0123",
   scene: "maroon",
   photo: null,
