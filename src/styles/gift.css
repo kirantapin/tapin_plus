@@ -145,20 +145,6 @@ a.gft-open {
   gap: 14px;
   text-align: center;
 }
-.gft-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 56px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font-weight: 600;
-  font-size: 17px;
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
 .gft-sign {
   max-width: 300px;
   font-size: 15px;
@@ -189,7 +175,6 @@ a.gft-open {
 }
 /* On the light ground under the letter the ring is ink (orange is under
    3:1 on #f0f0f0); orange stays for the maroon band. */
-.gft-cta:focus-visible,
 .gft-thanks:focus-visible {
   outline: 3px solid var(--ink);
   outline-offset: 3px;
@@ -253,7 +238,8 @@ a.gft-open {
   isolation: isolate;
   width: min(340px, 100%);
   height: 226px;
-  perspective: 1100px;
+  /* Flat: the flap folds back without looming over the page. */
+  perspective: 1800px;
   border-radius: 10px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -300,8 +286,7 @@ a.gft-open {
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: 50% 0;
 }
-/* The seal: the flat Plus mark (Sam, 6 Nov 2026), in each envelope's own
-   colours, with a sticker's shadow. */
+/* The seal: the flat Plus mark (Sam, 6 Nov 2026) on maroon wax. */
 .gft-a-seal {
   position: absolute;
   z-index: 6;
@@ -322,7 +307,7 @@ a.gft-open {
   height: 34px;
 }
 
-/* ── What some envelopes add ── */
+/* ── The twine ── */
 .gft-a-extra {
   position: absolute;
   inset: 0;
@@ -331,11 +316,10 @@ a.gft-open {
 }
 .gft-a-extra i {
   position: absolute;
-  display: none;
 }
-/* Care package: twine tied round it, crossing under the seal. */
-.gft-a[data-env="kraft"] .gft-a-twine-h,
-.gft-a[data-env="kraft"] .gft-a-twine-v {
+/* Twine tied round it, crossing under the seal. */
+.gft-a-twine-h,
+.gft-a-twine-v {
   display: block;
   background: #f1e7d0;
   box-shadow: 0 1px 1px rgba(60, 35, 10, 0.35);
@@ -353,17 +337,6 @@ a.gft-open {
   left: calc(50% - 1.5px);
   width: 3px;
   transform-origin: 50% 0;
-}
-/* Airmail: the red and blue border round the front, as the real ones have
-   (the stripe is the object's, not decoration). Left, right and bottom: the
-   top edge is the opening, under the flap. */
-.gft-a[data-env="airmail"] .gft-a-air {
-  display: block;
-  inset: 0;
-  z-index: 0;
-  border-radius: 10px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M0 0H8L40 32H32ZM-32 0H-24L8 32H0Z' fill='%23C8323C'/%3E%3Cpath d='M16 0H24L56 32H48ZM-16 0H-8L24 32H16Z' fill='%232B4C9B'/%3E%3C/svg%3E") 0 0 / 32px 32px;
-  clip-path: polygon(0 0, 9px 0, 9px calc(100% - 9px), calc(100% - 9px) calc(100% - 9px), calc(100% - 9px) 0, 100% 0, 100% 100%, 0 100%);
 }
 .gft-a-letter {
   position: absolute;
@@ -480,19 +453,19 @@ a.gft-open {
   bottom: 0;
   z-index: 1;
   border-radius: 8px;
-  background: #d6cab0;
+  background: #9c7247;
 }
 .tpg-env-pocket {
   bottom: 0;
   z-index: 3;
   border-radius: 8px;
-  background: var(--cream);
+  background: #c39a6b;
   clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
 }
 .tpg-env-flap {
   z-index: 4;
   height: 62%;
-  background: #e2d8c1;
+  background: #b48956;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: 50% 0;
 }
@@ -507,9 +480,33 @@ a.gft-open {
   height: 44px;
   margin-left: -22px;
   border-radius: 50%;
-  background: #e5751f;
-  color: #ffffff;
+  background: #861f41;
+  color: #f1e7d0;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+/* The care package's twine, crossing under the seal. */
+.tpg-env-twine {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.tpg-env-twine i {
+  position: absolute;
+  background: #f1e7d0;
+  box-shadow: 0 1px 1px rgba(60, 35, 10, 0.35);
+}
+.tpg-env-twine i:first-child {
+  left: 0;
+  right: 0;
+  top: calc(62% - 1px);
+  height: 2px;
+}
+.tpg-env-twine i:last-child {
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
 }
 .tpg-env-seal svg {
   width: 24px;
@@ -611,46 +608,13 @@ a.gft-open {
   }
 }
 
-/* ══ THE PARENT'S PICKS: FIVE ENVELOPES ═══════════════════════════════════
-   Each sets the paper (inside, pocket, flap) and the seal's two colours. */
+/* ══ THE CARE PACKAGE: brown kraft, twine, a maroon wax seal ══════════════ */
 .gft-a {
-  --env-back: #d6cab0;
-  --env-pocket: #ece5d5;
-  --env-flap: #e2d8c1;
-  --seal: #e5751f;
-  --seal-ink: #ffffff;
-}
-/* School colors: maroon with an orange flap, a white seal. */
-.gft-a[data-env="school"] {
-  --env-back: #5a1430;
-  --env-pocket: #861f41;
-  --env-flap: #e5751f;
-  --seal: #ffffff;
-  --seal-ink: #861f41;
-}
-/* Care package: brown kraft, a maroon wax seal, twine. */
-.gft-a[data-env="kraft"] {
   --env-back: #9c7247;
   --env-pocket: #c39a6b;
   --env-flap: #b48956;
   --seal: #861f41;
   --seal-ink: #f1e7d0;
-}
-/* Airmail: bright paper, the red and blue border, a navy seal. */
-.gft-a[data-env="airmail"] {
-  --env-back: #dedad0;
-  --env-pocket: #fbfaf6;
-  --env-flap: #f1eee6;
-  --seal: #2b4c9b;
-  --seal-ink: #ffffff;
-}
-/* Midnight: ink black, an orange seal. */
-.gft-a[data-env="midnight"] {
-  --env-back: #050606;
-  --env-pocket: #17191b;
-  --env-flap: #24272b;
-  --seal: #e5751f;
-  --seal-ink: #141618;
 }
 
 /* ══ FIVE BACKGROUNDS ═════════════════════════════════════════════════════
@@ -699,7 +663,7 @@ a.gft-open {
   position: fixed;
   z-index: 50;
   left: 50%;
-  bottom: 10px;
+  top: 10px;
   display: grid;
   gap: 4px;
   width: min(720px, calc(100vw - 16px));
@@ -738,4 +702,37 @@ a.gft-open {
 .gft-pick-row button[aria-pressed="true"] {
   background: #fff;
   color: #141618;
+}
+
+/* ══ THE DOCK: "Claim my gift" ═════════════════════════════════════════════
+   The Plus pages' white plate and black button (plus-app.css .tpa-dock). */
+.gft-dock {
+  position: fixed;
+  z-index: 30;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  max-width: 456px;
+  margin: 0 auto;
+  padding: 8px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(20, 22, 24, 0.18), 0 0 0 0.5px rgba(20, 22, 24, 0.08);
+}
+.gft-dock-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  border-radius: 14px;
+  background: #141618;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-dock-cta:focus-visible {
+  outline: 3px solid #141618;
+  outline-offset: 3px;
 }

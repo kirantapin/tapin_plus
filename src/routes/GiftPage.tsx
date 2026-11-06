@@ -4,20 +4,18 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import {
-  ENVELOPES,
-  isEnvelope,
   isScene,
   previewGift,
   SAMPLE_PHOTO,
   SCENES,
   thanksHref,
-  type EnvelopeId,
   type Gift,
   type SceneId,
 } from "../model/gift";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { appHref } from "../shell/GetTheApp";
+import { useDockPulse } from "../shell/dockPulse";
 import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
@@ -86,7 +84,6 @@ export default function GiftPage() {
               from: g.from,
               note: g.note,
               masked: g.masked_phone,
-              envelope: isEnvelope(g.envelope) ? g.envelope : "classic",
               scene: isScene(g.scene) ? g.scene : "maroon",
               photo: g.photo_url ?? null,
             },
@@ -130,14 +127,13 @@ export default function GiftPage() {
     if (!load.sample) return <Letter gift={load.gift} sample={false} />;
     return (
       <>
-        <Letter key={`${load.gift.envelope}-${load.gift.scene}-${!!load.gift.photo}`} gift={load.gift} sample />
+        <Letter key={`${load.gift.scene}-${!!load.gift.photo}`} gift={load.gift} sample />
         {showPicker ? (
           <Picker
             gift={load.gift}
             onChange={(next) => {
               setLoad({ ...load, gift: { ...load.gift, ...next } });
               const q = new URLSearchParams(window.location.search);
-              q.set("env", next.envelope ?? load.gift.envelope);
               q.set("bg", next.scene ?? load.gift.scene);
               const photo = next.photo !== undefined ? next.photo : load.gift.photo;
               if (photo) q.set("photo", "1");
@@ -206,10 +202,9 @@ export default function GiftPage() {
 
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
-/** The envelope's paper: the inside, the pocket, the flap and the seal,
- *  with what each design adds (the kraft one's twine, the airmail border).
- *  The seal is the flat Plus mark (Sam, 6 Nov 2026: "I think we should just
- *  use the flat tapin plus icon"), in each envelope's own colours. */
+/** The care package: brown kraft (the inside, the pocket, the flap), twine
+ *  tied round it, and a maroon wax seal with the flat Plus mark (Sam, 6 Nov
+ *  2026: "I think we should just use the flat tapin plus icon"). */
 function Envelope({
   flap,
   seal,
@@ -227,7 +222,6 @@ function Envelope({
       <span ref={extra} className="gft-a-extra">
         <i className="gft-a-twine-h" />
         <i className="gft-a-twine-v" />
-        <i className="gft-a-air" />
       </span>
       <span ref={seal} className="gft-a-seal">
         <FlatMark />
@@ -286,16 +280,14 @@ function WhatsIn() {
   );
 }
 
-/** The one thing left to do, and a thank-you home. */
+/** How to claim it, and a thank-you home. The button itself is the dock's
+ *  ("Claim my gift"), always in reach. */
 function Next({ gift, sample }: { gift: Gift; sample: boolean }) {
   const { track } = useEventTracking();
   return (
     <div className="gft-next">
-      <a className="gft-cta" href={appHref()} onClick={() => track("gift_get_app", { sample })}>
-        Get the app
-      </a>
       <p className="gft-sign tnum">
-        Sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
+        Get the app and sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
       </p>
       <a className="gft-thanks" href={thanksHref(gift.from)} onClick={() => track("gift_thanks", { sample })}>
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -351,35 +343,42 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
       return;
     }
     setState("opening");
-    /* The button stays in the layout (only fading), so nothing re-centres. */
-    go(button.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 200 });
+    /* ── The care package opening (Sam, 6 Nov 2026: "I think it's a bit busy
+       right now"), as four beats, one thing moving at a time:
+         1. untie (0–380ms): the heading and the button step aside, and the
+            wax seal comes off with the twine, one gesture, the way you'd
+            pull the bow: everything string-like leaves to the right;
+         2. fold back (340–860ms): the flap folds over on a flat perspective,
+            so it doesn't loom over the page;
+         3. rise (820–1500ms): the letter comes up, slow out;
+         4. settle: the envelope sinks away and the letter takes its place.
+       Linear-ish ease-ins for things leaving, long ease-outs for things
+       arriving; no pops, no overshoot. */
+    const away = "cubic-bezier(.5,0,.75,0)";
+    go(button.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: "linear" });
+    const titleOut = go(title.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "linear" });
     go(seal.current, [
-      { transform: "scale(1)", opacity: 1 },
-      { transform: "scale(1.14)", opacity: 1, offset: 0.35 },
-      { transform: "scale(0.3)", opacity: 0 },
-    ], { duration: 320, easing: "cubic-bezier(.4,0,.2,1)" });
-    /* The twine slips off (a kraft envelope's); nothing on the others. */
+      { transform: "none", opacity: 1 },
+      { transform: "translate(18px, -6px) rotate(14deg)", opacity: 0 },
+    ], { duration: 340, easing: away });
     go(extra.current?.querySelector(".gft-a-twine-h"), [
-      { transform: "scaleX(1)", opacity: 1 },
-      { transform: "scaleX(0)", opacity: 0 },
-    ], { duration: 300, easing: "cubic-bezier(.6,0,.4,1)" });
+      { transform: "none", opacity: 1 },
+      { transform: "translateX(36%)", opacity: 0 },
+    ], { duration: 360, delay: 20, easing: away });
     go(extra.current?.querySelector(".gft-a-twine-v"), [
-      { transform: "scaleY(1)", opacity: 1 },
-      { transform: "scaleY(0)", opacity: 0 },
-    ], { duration: 300, delay: 60, easing: "cubic-bezier(.6,0,.4,1)" });
+      { transform: "none", opacity: 1 },
+      { transform: "translateX(48px)", opacity: 0 },
+    ], { duration: 360, delay: 20, easing: away });
     go(flap.current, [
       { transform: "rotateX(0deg)", zIndex: 4 },
       { transform: "rotateX(90deg)", zIndex: 4, offset: 0.5 },
       { transform: "rotateX(90deg)", zIndex: 1, offset: 0.501 },
       { transform: "rotateX(180deg)", zIndex: 1 },
-    ], { duration: 560, delay: 200, easing: "cubic-bezier(.45,0,.25,1)" });
+    ], { duration: 520, delay: 340, easing: "cubic-bezier(.55,0,.25,1)" });
     const rise = go(letter.current, [
       { transform: "translateY(0)" },
       { transform: "translateY(-62%)" },
-    ], { duration: 680, delay: 640 });
-    /* The rising letter passes over the heading: the heading steps out of
-       its way, and the new one fades in once the letter has settled. */
-    const titleOut = go(title.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 560, easing: "ease-out" });
+    ], { duration: 680, delay: 820, easing: EASE });
     if (rise) await rise.finished.then(() => undefined, () => undefined);
     const el = letter.current;
     if (!el) return;
@@ -401,8 +400,8 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
     ], { duration: 720, fill: "none" });
     const fall = go(shell.current, [
       { transform: `translateY(${dy}px)`, opacity: 1 },
-      { transform: `translateY(${dy + 72}px)`, opacity: 0 },
-    ], { duration: 480, easing: "cubic-bezier(.4,0,1,1)" });
+      { transform: `translateY(${dy + 44}px)`, opacity: 0 },
+    ], { duration: 440, easing: "cubic-bezier(.5,0,.75,0)" });
     settle();
     void (fall ? fall.finished.then(() => undefined, () => undefined) : Promise.resolve()).then(() => setLeaving(false));
     titleOut?.cancel();
@@ -414,12 +413,28 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
 
   const to = gift.to;
   const button = useRef<HTMLButtonElement | null>(null);
+  /* ── The dock (Sam, 6 Nov 2026: "we should have a sticky 'claim my gift'
+     button at the bottom of the page"): once it's open, the one thing to do
+     stays in reach, sliding up as the letter settles, and breathing gently
+     like the Plus pages' dock (shell/dockPulse.ts). */
+  const dock = useRef<HTMLDivElement | null>(null);
+  useDockPulse(dock, state === "open");
+  useLayoutEffect(() => {
+    if (state !== "open" || still || !dock.current) return;
+    const a = dock.current.animate(
+      [
+        { transform: "translateY(calc(100% + 24px))" },
+        { transform: "none" },
+      ],
+      { duration: 560, delay: 520, easing: EASE, fill: "backwards" },
+    );
+    return () => a.cancel();
+  }, [state, still]);
   return (
     <div
       className="gft gft-a ph-no-capture"
       data-state={state}
       data-leaving={leaving ? "" : undefined}
-      data-env={gift.envelope}
       data-scene={gift.scene}
     >
       <header className="gft-a-band">
@@ -498,6 +513,13 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
           <Next gift={gift} sample={sample} />
         </main>
       ) : null}
+      {state === "open" ? (
+        <div ref={dock} className="gft-dock">
+          <a className="gft-dock-cta tpa-dock-cta" href={appHref()} onClick={() => track("gift_claim", { sample })}>
+            Claim my gift
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -508,14 +530,6 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
 function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>) => void }) {
   return (
     <div className="gft-pick" role="group" aria-label="Try the designs">
-      <div className="gft-pick-row">
-        <span>Envelope</span>
-        {ENVELOPES.map((e) => (
-          <button key={e.id} type="button" aria-pressed={gift.envelope === e.id} onClick={() => onChange({ envelope: e.id as EnvelopeId })}>
-            {e.name}
-          </button>
-        ))}
-      </div>
       <div className="gft-pick-row">
         <span>Background</span>
         {SCENES.map((e) => (

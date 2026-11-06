@@ -69,9 +69,8 @@ export type GiftInfo =
       from: string;
       note: string | null;
       masked_phone: string;
-      /** The parent's picks (model/gift.ts ENVELOPES, SCENES); unknown or
-       *  missing ones fall back to the classic envelope on maroon. */
-      envelope?: string | null;
+      /** The parent's background (model/gift.ts SCENES); unknown or
+       *  missing falls back to maroon. */
       scene?: string | null;
       /** A short-lived link to the parent's photo, if they added one. */
       photo_url?: string | null;

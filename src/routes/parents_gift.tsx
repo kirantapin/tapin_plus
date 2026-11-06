@@ -44,6 +44,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
   const flap = useRef<HTMLSpanElement | null>(null);
   const seal = useRef<HTMLSpanElement | null>(null);
   const letter = useRef<HTMLSpanElement | null>(null);
+  const twine = useRef<HTMLSpanElement | null>(null);
   useEffect(() => {
     if (!seen) return;
     const still = reducedMotion();
@@ -53,8 +54,12 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       easing: EASE,
       fill: "forwards",
     });
+    /* The gift page's opening, its four beats (GiftPage.tsx): the seal comes
+       off with the twine, the flap folds back, the letter rises. */
+    const away = "cubic-bezier(.5,0,.75,0)";
     const runs = [
-      seal.current?.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(1.15)", opacity: 1, offset: 0.35 }, { transform: "scale(.3)", opacity: 0 }], o(250, 320)),
+      seal.current?.animate([{ transform: "none", opacity: 1 }, { transform: "translate(14px, -5px) rotate(14deg)", opacity: 0 }], { ...o(250, 340), easing: away }),
+      twine.current?.animate([{ transform: "none", opacity: 1 }, { transform: "translateX(36px)", opacity: 0 }], { ...o(270, 360), easing: away }),
       flap.current?.animate(
         [
           { transform: "rotateX(0deg)", zIndex: 4 },
@@ -62,9 +67,9 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           { transform: "rotateX(90deg)", zIndex: 1, offset: 0.501 },
           { transform: "rotateX(180deg)", zIndex: 1 },
         ],
-        { ...o(420, 560), easing: "cubic-bezier(.45,0,.25,1)" },
+        { ...o(590, 520), easing: "cubic-bezier(.55,0,.25,1)" },
       ),
-      letter.current?.animate([{ transform: "translateY(0)" }, { transform: "translateY(-46%)" }], o(860, 760)),
+      letter.current?.animate([{ transform: "translateY(0)" }, { transform: "translateY(-46%)" }], o(1070, 680)),
     ];
     return () => runs.forEach((r) => r?.cancel());
   }, [seen]);
@@ -80,6 +85,10 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           </span>
           <i className="tpg-env-pocket" />
           <span ref={flap} className="tpg-env-flap" />
+          <span ref={twine} className="tpg-env-twine">
+            <i />
+            <i />
+          </span>
           <span ref={seal} className="tpg-env-seal">
             <FlatMark />
           </span>
