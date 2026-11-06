@@ -63,7 +63,19 @@ export interface AskLinkInfo {
  *  "ended" once it's canceled or refunded. `to` is null when the name typed
  *  isn't plainly a first name. */
 export type GiftInfo =
-  | { state: "ok"; to: string | null; from: string; note: string | null; masked_phone: string }
+  | {
+      state: "ok";
+      to: string | null;
+      from: string;
+      note: string | null;
+      masked_phone: string;
+      /** The parent's picks (model/gift.ts ENVELOPES, SCENES); unknown or
+       *  missing ones fall back to the classic envelope on maroon. */
+      envelope?: string | null;
+      scene?: string | null;
+      /** A short-lived link to the parent's photo, if they added one. */
+      photo_url?: string | null;
+    }
   | { state: "ended"; to: string | null; from: string };
 
 /** Whether Kiran's parents backend (docs/parents/API.md) is deployed. Until it

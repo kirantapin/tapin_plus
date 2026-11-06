@@ -3,11 +3,22 @@ import { flushSync } from "react-dom";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { previewGift, thanksHref, type Gift } from "../model/gift";
+import {
+  ENVELOPES,
+  isEnvelope,
+  isScene,
+  previewGift,
+  SAMPLE_PHOTO,
+  SCENES,
+  thanksHref,
+  type EnvelopeId,
+  type Gift,
+  type SceneId,
+} from "../model/gift";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { appHref } from "../shell/GetTheApp";
-import { CREDIT, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
+import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -31,6 +42,7 @@ import { CREDIT, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const GIFT_KEY = "tp_gift_v1";
+const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
 
 type Load =
   | { state: "loading" }
@@ -46,13 +58,17 @@ export default function GiftPage() {
   const { search } = useLocation();
   const { track } = useEventTracking();
   const isSample = fromPath === "sample";
+  /* The design picker over the sample: local dev, or ?pick anywhere. */
+  const [showPicker] = useState(
+    () => import.meta.env.DEV || (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("pick")),
+  );
   const [token] = useState(() =>
     isSample ? null : takeKey(GIFT_KEY, fromPath ?? null, `/gift${typeof window !== "undefined" ? window.location.search : ""}`),
   );
   const [load, setLoad] = useState<Load>(() => {
-    if (isSample) return { state: "ok", gift: previewGift(search), sample: true };
+    if (isSample) return { state: "ok", gift: previewGift(search, SAMPLE_PHOTO_SRC), sample: true };
     /* Local dev with no key and no mock: the sample, so the page can be seen. */
-    if (!token && import.meta.env.DEV && !parentMock()) return { state: "ok", gift: previewGift(search), sample: true };
+    if (!token && import.meta.env.DEV && !parentMock()) return { state: "ok", gift: previewGift(search, SAMPLE_PHOTO_SRC), sample: true };
     return token ? { state: "loading" } : { state: "missing" };
   });
 
@@ -63,7 +79,19 @@ export default function GiftPage() {
       (g) => {
         if (!live) return;
         if (g.state === "ok") {
-          setLoad({ state: "ok", sample: false, gift: { to: g.to, from: g.from, note: g.note, masked: g.masked_phone } });
+          setLoad({
+            state: "ok",
+            sample: false,
+            gift: {
+              to: g.to,
+              from: g.from,
+              note: g.note,
+              masked: g.masked_phone,
+              envelope: isEnvelope(g.envelope) ? g.envelope : "classic",
+              scene: isScene(g.scene) ? g.scene : "maroon",
+              photo: g.photo_url ?? null,
+            },
+          });
         } else setLoad({ state: "ended", to: g.to, from: g.from });
       },
       (err: unknown) => {
@@ -99,7 +127,29 @@ export default function GiftPage() {
 
   /* ph-no-capture: the note, the names and the masked number are a family's
      own words, so session replay and autocapture skip this page's content. */
-  if (load.state === "ok") return <Letter gift={load.gift} sample={load.sample} />;
+  if (load.state === "ok") {
+    if (!load.sample) return <Letter gift={load.gift} sample={false} />;
+    return (
+      <>
+        <Letter key={`${load.gift.envelope}-${load.gift.scene}-${!!load.gift.photo}`} gift={load.gift} sample />
+        {showPicker ? (
+          <Picker
+            gift={load.gift}
+            onChange={(next) => {
+              setLoad({ ...load, gift: { ...load.gift, ...next } });
+              const q = new URLSearchParams(window.location.search);
+              q.set("env", next.envelope ?? load.gift.envelope);
+              q.set("bg", next.scene ?? load.gift.scene);
+              const photo = next.photo !== undefined ? next.photo : load.gift.photo;
+              if (photo) q.set("photo", "1");
+              else q.delete("photo");
+              window.history.replaceState(window.history.state, "", `${window.location.pathname}?${q.toString()}`);
+            }}
+          />
+        ) : null}
+      </>
+    );
+  }
   return (
     <div className="gft gft-a ph-no-capture" data-state="plain">
       <header className="gft-a-band" aria-busy={load.state === "loading" ? true : undefined}>
@@ -157,17 +207,31 @@ export default function GiftPage() {
 
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
-/** The envelope's paper: the inside, the pocket, the flap and the seal. */
-function Envelope({ flap, seal }: { flap?: React.Ref<HTMLSpanElement>; seal?: React.Ref<HTMLSpanElement> }) {
+/** The envelope's paper: the inside, the pocket, the flap and the seal,
+ *  with what each design adds (the kraft one's twine, the airmail border).
+ *  The seal is the flat Plus mark (Sam, 6 Nov 2026: "I think we should just
+ *  use the flat tapin plus icon"), in each envelope's own colours. */
+function Envelope({
+  flap,
+  seal,
+  extra,
+}: {
+  flap?: React.Ref<HTMLSpanElement>;
+  seal?: React.Ref<HTMLSpanElement>;
+  extra?: React.Ref<HTMLSpanElement>;
+}) {
   return (
     <>
       <span className="gft-a-back" />
       <span className="gft-a-pocket" />
       <span ref={flap} className="gft-a-flap" />
-      {/* The seal is the paper Plus mark on a white disc (Sam, 6 Nov
-          2026: "can we use the other tapin plus icon for this?"). */}
+      <span ref={extra} className="gft-a-extra">
+        <i className="gft-a-twine-h" />
+        <i className="gft-a-twine-v" />
+        <i className="gft-a-air" />
+      </span>
       <span ref={seal} className="gft-a-seal">
-        <img src={PAPER_MARK} alt="" width="44" height="35" />
+        <FlatMark />
       </span>
     </>
   );
@@ -261,6 +325,7 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
   const [leaving, setLeaving] = useState(false);
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
+  const extra = useRef<HTMLSpanElement | null>(null);
   const letter = useRef<HTMLDivElement | null>(null);
   const shell = useRef<HTMLDivElement | null>(null);
   const title = useRef<HTMLHeadingElement | null>(null);
@@ -294,6 +359,15 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
       { transform: "scale(1.14)", opacity: 1, offset: 0.35 },
       { transform: "scale(0.3)", opacity: 0 },
     ], { duration: 320, easing: "cubic-bezier(.4,0,.2,1)" });
+    /* The twine slips off (a kraft envelope's); nothing on the others. */
+    go(extra.current?.querySelector(".gft-a-twine-h"), [
+      { transform: "scaleX(1)", opacity: 1 },
+      { transform: "scaleX(0)", opacity: 0 },
+    ], { duration: 300, easing: "cubic-bezier(.6,0,.4,1)" });
+    go(extra.current?.querySelector(".gft-a-twine-v"), [
+      { transform: "scaleY(1)", opacity: 1 },
+      { transform: "scaleY(0)", opacity: 0 },
+    ], { duration: 300, delay: 60, easing: "cubic-bezier(.6,0,.4,1)" });
     go(flap.current, [
       { transform: "rotateX(0deg)", zIndex: 4 },
       { transform: "rotateX(90deg)", zIndex: 4, offset: 0.5 },
@@ -338,19 +412,29 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
   const to = gift.to;
   const button = useRef<HTMLButtonElement | null>(null);
   return (
-    <div className="gft gft-a ph-no-capture" data-state={state} data-leaving={leaving ? "" : undefined}>
+    <div
+      className="gft gft-a ph-no-capture"
+      data-state={state}
+      data-leaving={leaving ? "" : undefined}
+      data-env={gift.envelope}
+      data-scene={gift.scene}
+    >
       <header className="gft-a-band">
         <h1 ref={title} className="gft-h1" tabIndex={-1}>
-          {state === "open" ? (
-            <>
-              {gift.from} got you <span className="gft-nowrap">Tapin Plus</span>
-            </>
-          ) : (
-            <>
-              {to ? `${to}, ` : ""}
-              {gift.from} sent you <span className="gft-nowrap">something</span>
-            </>
-          )}
+          {/* The inner span is the paper strip the busier backgrounds
+              set the heading on. */}
+          <span className="gft-h1-in">
+            {state === "open" ? (
+              <>
+                {gift.from} got you <span className="gft-nowrap">Tapin Plus</span>
+              </>
+            ) : (
+              <>
+                {to ? `${to}, ` : ""}
+                {gift.from} sent you <span className="gft-nowrap">something</span>
+              </>
+            )}
+          </span>
         </h1>
         <div
           className="gft-a-stage"
@@ -367,7 +451,7 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
         >
           {state === "open" && still ? null : (
             <div ref={shell} className="gft-a-shell" aria-hidden="true">
-              <Envelope flap={flap} seal={seal} />
+              <Envelope flap={flap} seal={seal} extra={extra} />
             </div>
           )}
           <div ref={letter} className="gft-a-letter" aria-hidden={state === "sealed" ? true : undefined}>
@@ -375,6 +459,11 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
               <span>For {to ?? "you"}</span>
               <img src={PAPER_MARK} alt="" width="38" height="30" />
             </div>
+            {/* The parent's photo, printed at the top of the letter: the
+                first thing that rises out of the envelope. */}
+            {gift.photo ? (
+              <img className="gft-a-photo" src={gift.photo} alt={`A photo from ${gift.from}`} decoding="async" />
+            ) : null}
             {gift.note ? (
               <>
                 <p className="gft-a-note">{gift.note}</p>
@@ -404,6 +493,35 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
           <Next gift={gift} sample={sample} />
         </main>
       ) : null}
+    </div>
+  );
+}
+
+/* ══ THE DESIGN PICKER (the sample only: local dev, or ?pick) ══════════════
+   Every envelope on every background, with or without the photo, so Sam can
+   see the set. Each change closes the envelope again. */
+function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>) => void }) {
+  return (
+    <div className="gft-pick" role="group" aria-label="Try the designs">
+      <div className="gft-pick-row">
+        <span>Envelope</span>
+        {ENVELOPES.map((e) => (
+          <button key={e.id} type="button" aria-pressed={gift.envelope === e.id} onClick={() => onChange({ envelope: e.id as EnvelopeId })}>
+            {e.name}
+          </button>
+        ))}
+      </div>
+      <div className="gft-pick-row">
+        <span>Background</span>
+        {SCENES.map((e) => (
+          <button key={e.id} type="button" aria-pressed={gift.scene === e.id} onClick={() => onChange({ scene: e.id as SceneId })}>
+            {e.name}
+          </button>
+        ))}
+        <button type="button" aria-pressed={!!gift.photo} onClick={() => onChange({ photo: gift.photo ? null : SAMPLE_PHOTO_SRC })}>
+          Photo
+        </button>
+      </div>
     </div>
   );
 }

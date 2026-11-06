@@ -19,7 +19,41 @@ export type Gift = {
   note: string | null;
   /** The number Plus is on, masked: "•••0123". */
   masked: string;
+  /** The envelope the parent picked (ENVELOPES). */
+  envelope: EnvelopeId;
+  /** The background the parent picked (SCENES). */
+  scene: SceneId;
+  /** The parent's photo, if they added one: a URL the page can show. */
+  photo: string | null;
 };
+
+/* ══ THE PARENT'S PICKS (Sam, 6 Nov 2026: "how can we give these a bit more
+   personality - like maybe 5 designs for the envelopes and 5 designs for the
+   background that the parents can chose from ... if they could add an image
+   too that'd make it feel super personable") ═══════════════════════════════
+   Each one is a thing from home or from school, so the student recognises
+   who chose it. Flat fills only; a pattern only where the real object has
+   one (a tablecloth's check, an airmail border). */
+export const ENVELOPES = [
+  { id: "classic", name: "Classic", line: "Cream paper, an orange seal" },
+  { id: "school", name: "School colors", line: "Maroon, with an orange flap" },
+  { id: "kraft", name: "Care package", line: "Brown kraft and twine" },
+  { id: "airmail", name: "Airmail", line: "All the way from home" },
+  { id: "midnight", name: "Midnight", line: "Ink black, an orange seal" },
+] as const;
+export type EnvelopeId = (typeof ENVELOPES)[number]["id"];
+
+export const SCENES = [
+  { id: "maroon", name: "Maroon", line: "School colors" },
+  { id: "campus", name: "Campus", line: "Burruss, cut from paper" },
+  { id: "picnic", name: "Picnic", line: "Lunch is on me" },
+  { id: "night", name: "Night sky", line: "Miss you" },
+  { id: "confetti", name: "Confetti", line: "Something to celebrate" },
+] as const;
+export type SceneId = (typeof SCENES)[number]["id"];
+
+export const isEnvelope = (v: unknown): v is EnvelopeId => ENVELOPES.some((e) => e.id === v);
+export const isScene = (v: unknown): v is SceneId => SCENES.some((e) => e.id === v);
 
 export const NOTE_MAX = 240;
 export const FROM_MAX = 24;
@@ -29,12 +63,27 @@ export const SAMPLE_GIFT: Gift = {
   from: "Mom",
   note: "Lunch is on me this semester. So proud of you, and I miss you already. Call me Sunday!",
   masked: "•••0123",
+  envelope: "classic",
+  scene: "maroon",
+  photo: null,
 };
+/** The sample's photo, for "with a photo" previews: the parents page's own
+ *  move-in picture (a parent and their student). */
+export const SAMPLE_PHOTO = "/parents/hero-hug.webp";
 
-/** The sample, with any of ?to= ?from= ?note= swapped in (local dev only). */
-export function previewGift(search: string): Gift {
-  if (!import.meta.env.DEV) return SAMPLE_GIFT;
+/** The sample, with any of ?to= ?from= ?note= swapped in (local dev only),
+ *  and ?env= ?bg= ?photo=1 (any build: they only choose among our own
+ *  designs and our own sample photo, so nothing outside can be put on it). */
+export function previewGift(search: string, photoSrc: string): Gift {
   const q = new URLSearchParams(search);
+  const env = q.get("env");
+  const bg = q.get("bg");
+  const picks = {
+    envelope: isEnvelope(env) ? env : SAMPLE_GIFT.envelope,
+    scene: isScene(bg) ? bg : SAMPLE_GIFT.scene,
+    photo: q.get("photo") === "1" ? photoSrc : null,
+  };
+  if (!import.meta.env.DEV) return { ...SAMPLE_GIFT, ...picks };
   const take = (k: string, fallback: string, max: number) => {
     const v = q.get(k);
     return v === null ? fallback : v.trim().slice(0, max);
@@ -44,6 +93,7 @@ export function previewGift(search: string): Gift {
     from: take("from", SAMPLE_GIFT.from, FROM_MAX) || SAMPLE_GIFT.from,
     note: take("note", SAMPLE_GIFT.note ?? "", NOTE_MAX) || null,
     masked: SAMPLE_GIFT.masked,
+    ...picks,
   };
 }
 
