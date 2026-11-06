@@ -668,3 +668,47 @@ fieldset.prc-module {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
+
+/* ══ THE WIDE YOU STEP (Sam, 6 Nov 2026: "I think on desktop this step in
+   checkout can morph to be wider") ══════════════════════════════════════════
+   On a computer the you step is wider than the others, so the note and the
+   photo sit beside each other instead of one long scroll: your name, email
+   and mobile across one row, then the note and its sign-off on the left and
+   the photo, the backgrounds and the preview on the right. The button stays
+   the width it is on the other steps, at the bottom right where the reading
+   ends. ParentCheckout eases the sheet's width between steps. On a phone the
+   two column wrappers lay nothing out. */
+.prc-note-col {
+  display: contents;
+}
+@media (min-width: 960px) {
+  .prc-sheet[data-wide] {
+    max-width: min(880px, calc(100vw - 48px));
+  }
+  .prc-sheet[data-wide] .prc-module > .prc-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 16px;
+    align-items: start;
+  }
+  .prc-sheet[data-wide] .prc-note > .prc-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 28px;
+  }
+  .prc-sheet[data-wide] .prc-note-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+  /* All twelve backgrounds in view, not a row to scroll sideways. */
+  .prc-sheet[data-wide] .prc-scene-row {
+    flex-wrap: wrap;
+    overflow: visible;
+    row-gap: 10px;
+  }
+  .prc-sheet[data-wide] .prc-body > .prc-cta {
+    align-self: flex-end;
+    width: min(100%, 400px);
+  }
+}

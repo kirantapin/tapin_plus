@@ -371,6 +371,31 @@ function Sheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /* The width between steps (Sam, 6 Nov 2026: "on desktop this step in
+     checkout can morph to be wider"). On a computer the you step is wider
+     than the others (data-wide, parent-checkout.css). The new width is laid
+     out before the paint, then the sheet eases there from the width it had,
+     so the header and the step bars stretch with it while the step's own
+     contents fade in (below). Its height follows as it always does
+     (islandTrackHeight). On a phone every step is the same width, so
+     nothing runs. */
+  const sheetWidth = useRef<number | null>(null);
+  /* Set when the width eases, so the step's contents wait a beat for it. */
+  const morphed = useRef(false);
+  useLayoutEffect(() => {
+    const el = sheet.current;
+    if (!el) return;
+    const was = sheetWidth.current;
+    const now = el.getBoundingClientRect().width;
+    sheetWidth.current = now;
+    morphed.current = false;
+    if (was == null || Math.abs(now - was) < 2 || still() || typeof el.animate !== "function") return;
+    morphed.current = true;
+    /* max-width off while it eases: the narrower step's cap would clamp the
+       wider width it starts from, and it would jump. */
+    el.animate([{ width: `${was}px`, maxWidth: "none" }, { width: `${now}px`, maxWidth: "none" }], { duration: 420, easing: EASE });
+  }, [step]);
+
   /* Each step comes in with a short lift; its heading takes focus so a
      screen reader says where it is. */
   const firstStep = useRef(true);
@@ -383,7 +408,14 @@ function Sheet({
     document.getElementById("prc-title")?.focus({ preventScroll: true });
     const b = body.current;
     if (b && !still() && typeof b.animate === "function")
-      b.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: EASE });
+      b.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], {
+        duration: 260,
+        /* While the width eases, the contents (laid out at the new width)
+           arrive as it lands rather than stretching with it. */
+        delay: morphed.current ? 160 : 0,
+        easing: EASE,
+        fill: "backwards",
+      });
   }, [step]);
 
   /* ── The form ── */
@@ -487,7 +519,10 @@ function Sheet({
       <div ref={scrim} className="prc-scrim" aria-hidden="true" onClick={close} />
       {/* ph-no-capture: the names, the note and the photo are a family's
           own, so session replay and autocapture skip the whole sheet. */}
-      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
+      {/* data-wide: the you step, widest of the steps on a computer (Sam,
+          6 Nov 2026: "on desktop this step in checkout can morph to be
+          wider"); the width eases between steps (the effect above). */}
+      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} data-wide={step === "you" ? "" : undefined} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
         {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
         <span ref={label} className="prc-island-label" aria-hidden="true" />
         <div ref={inner} className="prc-island-inner">
@@ -570,6 +605,10 @@ function Sheet({
                 <fieldset className="prc-module prc-note">
                   <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
                   <div className="prc-fields">
+                    {/* The words and the look: one column on a phone (these
+                        wrappers lay nothing out there), side by side on a
+                        computer's wide step (parent-checkout.css). */}
+                    <div className="prc-note-col">
                     <div className="prc-field">
                       <label className="prc-label prc-label-count" htmlFor="prc-note">
                         Your note
@@ -594,6 +633,8 @@ function Sheet({
                       </p>
                     </div>
                     <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
+                    </div>
+                    <div className="prc-note-col">
                     {/* The photo: printed at the top of their letter. */}
                     <div className="prc-field">
                       <span className="prc-label" id="prc-photo-label">
@@ -669,6 +710,7 @@ function Sheet({
                       </svg>
                       Preview their gift
                     </button>
+                    </div>
                   </div>
                 </fieldset>
               ) : (
