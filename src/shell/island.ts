@@ -181,7 +181,7 @@ const hold = (p: IslandParts, h: number | null) => {
  *  way in, false on the way out. Both rects are read in the island's own,
  *  untransformed frame. */
 function flyLabel(p: IslandParts, toward: boolean, duration: number, easing: string) {
-  const cta = p.inner.querySelector<HTMLElement>("form.pck-body > .pck-cta[type=submit], .pck-pay, .pck-wallet-preview");
+  const cta = p.inner.querySelector<HTMLElement>("form.pck-body > .pck-cta[type=submit], .pck-pay, .pck-wallet-preview, [data-island-cta]");
   if (!cta || cta.getClientRects().length === 0) return;
   const L = p.label.getBoundingClientRect();
   const C = cta.getBoundingClientRect();
@@ -233,7 +233,9 @@ export function islandOpen(p: IslandParts, o: IslandOrigin | null, over = false)
   /* The stand-in sits over the step's own button, in the same place; they
      cross over as the contents arrive, so only the words change. */
   p.label.animate([{ opacity: hasButton ? 1 : 0 }, { opacity: 0 }], { duration: OPEN_MS * 0.36, delay: OPEN_MS * 0.4, easing: "ease-in-out", fill: "both" });
-  if (hasButton) flyLabel(p, true, OPEN_MS * 0.76, EASE_OPEN);
+  /* Over the clip's own time and curve, so the stand-in never runs ahead of
+     the growing edge and gets cut off (review, 6 Nov 2026). */
+  if (hasButton) flyLabel(p, true, OPEN_MS, EASE_OPEN);
   /* Nothing inside takes a tap until it can be seen. */
   p.inner.style.pointerEvents = "none";
   const show = p.inner.animate([{ opacity: 0 }, { opacity: 1 }], { duration: OPEN_MS * 0.36, delay: OPEN_MS * 0.4, easing: "ease-in-out", fill: "backwards" });
@@ -397,7 +399,7 @@ export function islandAvoidKeyboard(layer: HTMLElement): { stop: () => void; cle
     } else clear();
     requestAnimationFrame(() => {
       const a = document.activeElement as HTMLElement | null;
-      if (a && layer.contains(a) && a.matches("input, textarea")) (a.closest<HTMLElement>(".pck-otp, .pck-field") ?? a).scrollIntoView({ block: "nearest" });
+      if (a && layer.contains(a) && a.matches("input, textarea")) (a.closest<HTMLElement>(".pck-otp, .pck-field, .prc-field") ?? a).scrollIntoView({ block: "nearest" });
     });
   };
   vv.addEventListener("resize", update);

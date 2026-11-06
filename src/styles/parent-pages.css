@@ -1,0 +1,326 @@
+/* parent-pages: the parents flow (docs/parents/API.md).
+   The parent's manage page (routes/ParentManage.tsx, .ppm under .tpa) and
+   the "Ask a parent to cover it" link (shell/AskParent.tsx, .askp). The app's
+   light look from plus-app.css: #f0f0f0 ground, white modules, ink, money
+   green, Gilroy at 500-600. No gradients, no keyframes (motion is WAAPI in
+   the components, off with reduced motion). */
+
+/* ══ THE MANAGE PAGE ═════════════════════════════════════════════════════ */
+.ppm {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+.ppm-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 20px) var(--gutter) 4px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+.ppm-mark {
+  display: block;
+  width: 40px;
+  height: auto;
+}
+.ppm-main {
+  max-width: var(--column);
+  margin: 0 auto;
+}
+.tpa .ppm-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.ppm-wait {
+  min-height: 188px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.ppm-h1 {
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 30px;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.ppm-h2 {
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.01em;
+}
+.ppm-line {
+  font-size: 16px;
+  line-height: 22px;
+  text-wrap: pretty;
+}
+.ppm-sub {
+  color: var(--muted);
+}
+.ppm-sub b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* The state: a dot and the sentence. Green only when Plus is on and in
+   use; a hollow ring while it waits; grey once it has ended. */
+.ppm-state {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  font-size: 16px;
+  line-height: 22px;
+  text-wrap: pretty;
+}
+.ppm-state > :first-child {
+  margin-top: 7px;
+}
+.ppm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(20, 22, 24, 0.3);
+}
+.ppm-state-waiting .ppm-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.ppm-state-active {
+  font-weight: 600;
+}
+
+.ppm-acts {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+.tpa .ppm-btn {
+  margin-top: 0;
+}
+.tpa .ppm-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.tpa .ppm-again {
+  margin-top: 6px;
+}
+.ppm-note {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(11, 122, 83, 0.08);
+  color: #0b7a53;
+  font-weight: 600;
+}
+.ppm-error {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* Cancel: a sentence and a quiet text button; the confirm takes its place. */
+.ppm-cancel .ppm-line {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 20px;
+}
+.ppm-quiet {
+  justify-self: start;
+  min-height: 44px;
+  margin: -4px 0 -10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ppm-confirm {
+  display: grid;
+  gap: 10px;
+}
+
+/* Change number: two fields, as on the checkout. */
+.ppm-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ppm-label {
+  margin-top: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.ppm-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.ppm-field:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.ppm-field span {
+  color: var(--muted);
+  font-size: 17px;
+}
+.ppm-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.ppm-field input::placeholder {
+  color: rgba(20, 22, 24, 0.32);
+  font-weight: 500;
+}
+.ppm-form .ppm-acts {
+  margin-top: 8px;
+}
+
+.ppm-foot a {
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* A computer: the same column, a touch roomier. */
+@media (min-width: 1024px) {
+  .ppm {
+    --column: 560px;
+  }
+  .ppm-top {
+    padding-top: 48px;
+  }
+  .tpa .ppm-card {
+    margin-top: 16px;
+    padding: 28px;
+    border-radius: 20px;
+  }
+  .ppm-h1 {
+    font-size: 30px;
+    line-height: 36px;
+  }
+  .ppm-acts {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    justify-content: start;
+  }
+  .tpa .ppm-btn {
+    width: auto;
+    padding: 0 22px;
+  }
+  .tpa .ppm-again {
+    justify-self: start;
+  }
+}
+
+/* ══ ASK A PARENT ════════════════════════════════════════════════════════ */
+.askp {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.askp-btn {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.askp-btn:disabled {
+  cursor: default;
+  text-decoration: none;
+}
+.askp-error {
+  color: #c0392b;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+}
+.askp-panel {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.08);
+  font-size: 14px;
+  line-height: 19px;
+  color: #141618;
+}
+.askp-line {
+  font-weight: 600;
+}
+.askp-url {
+  color: rgba(20, 22, 24, 0.62);
+  overflow-wrap: anywhere;
+  user-select: all;
+  -webkit-user-select: all;
+}
+.askp-acts {
+  display: flex;
+  gap: 8px;
+}
+.askp-act {
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.14);
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  color: #141618;
+  text-decoration: none;
+  cursor: pointer;
+}
+.askp-act:focus-visible,
+.askp-btn:focus-visible {
+  outline: 2px solid #141618;
+  outline-offset: 3px;
+}
+
+/* Where it sits: under the wallet on the pay step; under the two buttons
+   on Members, left-aligned there with the rest of the module. */
+.askp-checkout {
+  margin-top: -4px;
+}
+.askp-members {
+  justify-items: start;
+  margin-top: 2px;
+}
+.askp-members .askp-btn {
+  padding: 0;
+}
+.tpa-members-status .askp-panel {
+  max-width: 420px;
+}

@@ -15,6 +15,7 @@ import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
+import { useDockPulse } from "../shell/dockPulse";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
@@ -768,6 +769,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   /* View FAQ: a smooth scroll to the questions, landing them a little below
      the countdown bar, and focus there so a keyboard follows. */
   const faqRef = useRef<HTMLElement | null>(null);
+  /* The docked Join pulses gently while the checkout is closed (shell/dockPulse.ts). */
+  const dockRef = useRef<HTMLDivElement | null>(null);
+  const checkoutOpen = usePlusCheckoutOpen();
+  useDockPulse(dockRef, !checkoutOpen, member);
   const toFaq = () => {
     const el = faqRef.current;
     if (!el) return;
@@ -1380,7 +1385,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           hours on 3 Nov 2026; real visitors from the ads never tapped it (they
           used Step through it, and Join), so it went (Sam: "if the see how
           much I save button isn't getting click throughs maybe we hide it"). */}
-      <div className="tpa-dock" data-shown="" data-island-origin="">
+      <div ref={dockRef} className="tpa-dock" data-shown="" data-island-origin="">
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
         ) : (

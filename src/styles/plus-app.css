@@ -241,6 +241,7 @@ html[data-surface="tpa"] body {
 
 /* Buttons (.sh-order): ink, 14px radius; white on the black card. */
 .tpa-cta {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1390,6 +1391,7 @@ button.tpa-cta {
 }
 .tpa .tpa-dock-cta,
 .tpa-dock-save {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: center;

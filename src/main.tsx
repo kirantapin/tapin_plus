@@ -25,6 +25,10 @@ import "./styles/arrival.css";
 /* The home page in the app's own look (3 Nov 2026), scoped under .tpa. */
 import "./styles/plus-app.css";
 import "./styles/plus-checkout.css";
+/* The parents flow (Sam, 5 Nov 2026; docs/parents/API.md). */
+import "./styles/parents.css";
+import "./styles/parent-checkout.css";
+import "./styles/parent-pages.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

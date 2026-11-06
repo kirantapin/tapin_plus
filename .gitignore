@@ -9,3 +9,6 @@ dist/
 
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+
+# gh CLI state when HOME pointed here
+.local/
