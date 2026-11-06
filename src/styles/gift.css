@@ -266,16 +266,20 @@ a.gft-open {
   top: 0;
   bottom: 0;
   z-index: 1;
-  border-radius: 10px;
+  /* Square at the top, where the flap hinges (the flap's corners are
+     square too), rounded at the foot: the top corners meet cleanly (Sam,
+     6 Nov 2026: "the edge is a bit off here? It should be smoothed"). */
+  border-radius: 0 0 8px 8px;
   background: var(--env-back);
-  /* The inside is darker toward the opening, under the flap's lip. */
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3), inset 0 18px 16px -12px rgba(50, 28, 6, 0.45);
+  /* One flat inside, the flap's own colour, so the folded-back flap and the
+     inside meet without a step at the top corners. */
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
 }
 .gft-a-pocket {
   top: 0;
   bottom: 0;
   z-index: 3;
-  border-radius: 10px;
+  border-radius: 0 0 8px 8px;
   background: var(--env-pocket);
   clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
   /* Its own layer: beside the flap's 3D fold, Chrome can paint the pocket
@@ -537,7 +541,9 @@ button.tpg-env-link {
 
 /* ══ THE CARE PACKAGE: brown kraft, twine, a maroon wax seal ══════════════ */
 .gft-a {
-  --env-back: #9c7247;
+  /* The inside is the flap's own inside colour, so where the folded-back
+     flap meets it at the top corners they read as one surface. */
+  --env-back: #a27a4d;
   --env-pocket: #c39a6b;
   --env-flap: #b48956;
   /* The flap edge-on to the light, then its inside, in its own shade. */
