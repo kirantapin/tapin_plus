@@ -2,6 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { installDetailsMotion } from "./shell/detailsMotion";
+
+/* Every accordion on the Plus pages opens and closes in motion. */
+installDetailsMotion();
 import { AuthProvider } from "./context/auth_context";
 import { EventTrackingProvider } from "./context/event_tracking_context";
 import "./styles/tokens.css";
