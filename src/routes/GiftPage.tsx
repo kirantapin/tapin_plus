@@ -40,7 +40,6 @@ import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./p
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const GIFT_KEY = "tp_gift_v1";
 const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
 
@@ -378,6 +377,9 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
       { transform: "translateY(0)" },
       { transform: "translateY(-62%)" },
     ], { duration: 680, delay: 640 });
+    /* The rising letter passes over the heading: the heading steps out of
+       its way, and the new one fades in once the letter has settled. */
+    const titleOut = go(title.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 560, easing: "ease-out" });
     if (rise) await rise.finished.then(() => undefined, () => undefined);
     const el = letter.current;
     if (!el) return;
@@ -403,6 +405,7 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
     ], { duration: 480, easing: "cubic-bezier(.4,0,1,1)" });
     settle();
     void (fall ? fall.finished.then(() => undefined, () => undefined) : Promise.resolve()).then(() => setLeaving(false));
+    titleOut?.cancel();
     go(title.current, [
       { opacity: 0, transform: "translateY(8px)" },
       { opacity: 1, transform: "none" },
@@ -457,7 +460,9 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
           <div ref={letter} className="gft-a-letter" aria-hidden={state === "sealed" ? true : undefined}>
             <div className="gft-a-head">
               <span>For {to ?? "you"}</span>
-              <img src={PAPER_MARK} alt="" width="38" height="30" />
+              {/* The flat Plus mark in ink (Sam, 6 Nov 2026: "I think we can
+                  just use the black tapin plus icon here"). */}
+              <FlatMark />
             </div>
             {/* The parent's photo, printed at the top of the letter: the
                 first thing that rises out of the envelope. */}

@@ -406,10 +406,11 @@ a.gft-open {
   line-height: 18px;
   color: var(--muted);
 }
-.gft-a-head img {
+.gft-a-head svg {
   display: block;
-  width: 38px;
-  height: auto;
+  width: 26px;
+  height: 26px;
+  color: var(--ink);
 }
 /* The parent's photo, printed at the top of the letter. */
 .gft-a-photo {
