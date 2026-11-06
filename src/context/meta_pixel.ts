@@ -122,6 +122,13 @@ const MIRRORED: Record<
      2026), and a signup counted as both doubled it. PostHog still records
      `purchase`. The order id goes as the eventID, so the server's Subscribe
      for the same order can be matched to this one and counted once. */
+  /* A parent signing up their student (Sam, 5 Nov 2026; docs/parents/API.md)
+     is a Subscribe too, deduplicated by its checkout id. */
+  parent_purchase: {
+    name: "Subscribe",
+    props: (p) => ({ value: typeof p.value === "number" ? p.value : undefined, currency: "USD" }),
+    eventId: (p) => (typeof p.checkout_id === "string" && p.checkout_id ? `parent_${p.checkout_id}` : undefined),
+  },
   subscription_purchase: {
     name: "Subscribe",
     props: (p) => ({
@@ -140,6 +147,9 @@ const MIRRORED: Record<
 export function mirror(event: string, props: Record<string, unknown>): void {
   const rule = MIRRORED[event];
   if (!rule) return;
+  /* Nothing from a parent's manage page: it is a private page, not a visit
+     an ad drove (its key never reaches the URL Meta sees, model/redact.ts). */
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/parents/manage")) return;
   if (!started) {
     if (early.length < EARLY_MAX) early.push([event, props]);
     return;

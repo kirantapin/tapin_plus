@@ -1,3 +1,4 @@
+import { redactUrl } from "../model/redact";
 import {
   createContext,
   useContext,
@@ -149,6 +150,16 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
         maskAllInputs: true,
       },
       capture_performance: { web_vitals: false },
+      /* A parent's manage link and an Ask a parent link are keys: no URL
+         that carries one is ever sent (model/redact.ts). */
+      before_send: (event) => {
+        if (!event) return event;
+        const p = event.properties as Record<string, unknown> | undefined;
+        if (p)
+          for (const k of ["$current_url", "$pathname", "$referrer", "$initial_current_url", "$initial_pathname", "$initial_referrer", "path"])
+            if (typeof p[k] === "string") p[k] = redactUrl(p[k] as string);
+        return event;
+      },
     });
 
     /* ══ restaurant_id ON EVERY EVENT ══════════════════════════════════════

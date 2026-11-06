@@ -4,6 +4,8 @@ import { Elements, ExpressCheckoutElement, useElements, useStripe } from "@strip
 import { loadStripe, type StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { useAuth } from "../context/auth_context";
+/* The parents flow (5 Nov 2026): "Ask a parent to cover it" on the pay step. */
+import AskParent from "./AskParent";
 import { AppCard, appHref } from "./GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
@@ -953,6 +955,10 @@ function Review({
         <Wallet cart={cart} accessToken={accessToken} onPaid={onPaid} />
       </Elements>
       )}
+      {/* THE PARENTS FLOW (Sam, 5 Nov 2026; docs/parents/API.md): a quiet
+          "Ask a parent to cover it" under the wallet. The pay step is only
+          shown signed in and not yet a member; AskParent checks again. */}
+      <AskParent where="checkout" className="askp-checkout" />
     </div>
   );
 }

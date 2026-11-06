@@ -6,9 +6,12 @@ import { PlusCheckoutMount } from "./shell/PlusCheckout";
 import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
 import Members from "./routes/Members";
+import ParentsHome from "./routes/ParentsHome";
+import ParentManage from "./routes/ParentManage";
 import { asset } from "./asset";
 import { campaignHeroShot } from "./model/campaign";
 import { loadPlusLink } from "./model/link";
+import { redactUrl } from "./model/redact";
 
 /**
  * NO PAGE TRANSITION IS ANIMATED. In the old build a `view-transition-name`
@@ -63,7 +66,8 @@ export default function App() {
      fire a second view when nothing but that state changed. */
   const { track, registerForSession } = useEventTracking();
   useEffect(() => {
-    track("$pageview", { $current_url: window.location.href, path: location.pathname });
+    /* Never a parent's or a student's key (model/redact.ts). */
+    track("$pageview", { $current_url: redactUrl(window.location.href), path: redactUrl(location.pathname) });
   }, [location.pathname, track]);
   /* A promo link's id on every event of the session, as the app's link_id
      (model/link.ts), so each audience's funnel reads on its own. */
@@ -96,6 +100,14 @@ export default function App() {
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
         <Route path="/in" element={<Members />} />
+        {/* THE PARENTS FLOW (Sam, 5 Nov 2026; docs/parents/API.md): the
+            parents' landing page and the parent's manage link. The student
+            just signs in with the number (/in). Outside the shell, in the
+            app's own look. */}
+        <Route path="/parents" element={<ParentsHome />} />
+        <Route path="/parents/manage/:token" element={<ParentManage />} />
+        {/* Where the manage page sits once its key is out of the address. */}
+        <Route path="/parents/manage" element={<ParentManage />} />
         <Route element={<Shell />}>
           {/* The page before the 3 Nov redesign went with the Early Access
               checkout it sold through (3 Nov 2026). */}
