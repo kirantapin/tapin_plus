@@ -617,7 +617,7 @@ a.gft-open {
   --seal-ink: #f1e7d0;
 }
 
-/* ══ FIVE BACKGROUNDS ═════════════════════════════════════════════════════
+/* ══ FOUR BACKGROUNDS ═════════════════════════════════════════════════════
    The band the envelope arrives on. The busy ones (picnic, confetti)
    set the heading on a paper strip, the collage's way, so it always reads. */
 .gft-a[data-scene="picnic"] .gft-a-band,
