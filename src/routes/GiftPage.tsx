@@ -369,8 +369,143 @@ function useRiseIn(host: React.RefObject<HTMLElement | null>, on: boolean, delay
   }, [host, on, delay]);
 }
 
+/* ══ WHAT'S IN IT, THREE WAYS (Sam, 6 Nov 2026: "can we get 3 variations of
+   this section?") ═══════════════════════════════════════════════════════════
+   ?wiv=a | b | c on any gift page (only our own designs, so safe on any
+   build); none is the current list. The facts are the same in all four: a $5
+   credit earned on a $10+ food order, every week at each place, off their
+   next; 15% off instead, once a day; points on everything. */
+type WhatsInVariant = "a" | "b" | "c" | null;
+const whatsInVariant = (): WhatsInVariant => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("wiv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+
+/** A · Figures: the three in big type side by side, then the places named. */
+function WhatsInFigures() {
+  return (
+    <section className="gft-in gft-in-a" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        What’s in it
+      </h2>
+      <ul className="gft-figs">
+        <li>
+          <b className="tnum" data-money="">${CREDIT}</b>
+          <span>credit every week at each place, on a ${MIN_ORDER}+ meal</span>
+        </li>
+        <li>
+          <b className="tnum">{PERCENT}%</b>
+          <span>off instead, once a day</span>
+        </li>
+        <li>
+          <b>
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" fill="currentColor" />
+            </svg>
+            <span className="gft-sr">Points</span>
+          </b>
+          <span>points on everything you order</span>
+        </li>
+      </ul>
+      <ul className="gft-named" aria-label="Where it works">
+        {PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <span>{p.name}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** B · How it works: the credit told through one real order. */
+function WhatsInStory() {
+  const p = PLACES[0];
+  const off = Math.max(0, p.order.price - CREDIT);
+  return (
+    <section className="gft-in gft-in-b" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        How it works
+      </h2>
+      <ol className="gft-steps">
+        <li>
+          <img className="gft-step-img" src={p.order.img} alt="" decoding="async" loading="lazy" />
+          <span>
+            <b>Order a ${MIN_ORDER}+ meal</b>
+            {p.order.label} at {p.name}, <span className="tnum">${p.order.price.toFixed(2)}</span>
+          </span>
+        </li>
+        <li>
+          <i className="gft-step-fig tnum" data-money="">+${CREDIT}</i>
+          <span>
+            <b>${CREDIT} credit lands</b>
+            Once a week at each place
+          </span>
+        </li>
+        <li>
+          <i className="gft-step-fig tnum">${off % 1 ? off.toFixed(2) : off}</i>
+          <span>
+            <b>Next time, ${CREDIT} off</b>
+            The same order, with the credit
+          </span>
+        </li>
+      </ol>
+      <p className="gft-also">
+        Or <b>{PERCENT}% off</b> instead, once a day. <b>Points</b> on everything.
+      </p>
+      <ul className="gft-logos" aria-label="Where it works">
+        {PLACES.map((x) => (
+          <li key={x.id}>
+            <img src={x.logo} alt={x.name} decoding="async" loading="lazy" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** C · Places first: the five, with what they serve, then the three. */
+function WhatsInPlaces() {
+  return (
+    <section className="gft-in gft-in-c" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        Yours at {PLACES.length} places
+      </h2>
+      <ul className="gft-placelist">
+        {PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <span>
+              <b>{p.name}</b>
+              {p.what}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <ul className="gft-chips" aria-label="At each one">
+        <li>
+          <b className="tnum">${CREDIT}</b> credit every week
+        </li>
+        <li>
+          <b className="tnum">{PERCENT}%</b> off once a day
+        </li>
+        <li>
+          <b>Points</b> on everything
+        </li>
+      </ul>
+      <p className="gft-also">The credit comes with a ${MIN_ORDER}+ meal and comes off your next one. The {PERCENT}% is instead of it, whenever that’s better.</p>
+    </section>
+  );
+}
+
 /** What's in Plus: three things, in figures, and the five places. */
 function WhatsIn() {
+  const v = whatsInVariant();
+  if (v === "a") return <WhatsInFigures />;
+  if (v === "b") return <WhatsInStory />;
+  if (v === "c") return <WhatsInPlaces />;
   return (
     <section className="gft-in" aria-labelledby="gft-in-h">
       <h2 id="gft-in-h" className="gft-h2">
