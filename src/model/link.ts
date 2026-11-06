@@ -11,7 +11,7 @@
    whatever was kept. */
 
 import { supabase } from "../supabase";
-import { TAPIN_ID } from "./plus";
+import { TAPIN_ID, type DiscountDuration } from "./plus";
 
 const KEY = "tp_plus_link_v1";
 
@@ -22,7 +22,15 @@ export interface PlusLink {
   policy: {
     policy_id: string;
     end_time: string | null;
-    definition: { action: { type: string; free?: boolean; percentDiscount?: number; fixedDiscount?: number } };
+    definition: {
+      action: {
+        type: string;
+        free?: boolean;
+        percentDiscount?: number;
+        fixedDiscount?: number;
+        discountDuration?: DiscountDuration;
+      };
+    };
   };
 }
 

@@ -29,6 +29,10 @@ export interface PlusBundle {
   billing: { interval: "day" | "week" | "month"; interval_count: number };
 }
 
+/** How long an offer's discount lasts: the first N months, or every one.
+ *  Null: the first month only. The backend's DiscountDuration. */
+export type DiscountDuration = { periods: number } | "forever" | null;
+
 interface OfferPolicy {
   end_time: string | null;
   definition: {
@@ -37,6 +41,7 @@ interface OfferPolicy {
       free?: boolean;
       percentDiscount?: number;
       fixedDiscount?: number;
+      discountDuration?: DiscountDuration;
     };
   };
 }
@@ -48,6 +53,8 @@ export interface PlusPrice {
   /** The first period: a promo link's offer or the welcome offer's price, or
    *  `monthly` without one. */
   first: number;
+  /** How long `first` lasts: the offer's duration (null, the first month). */
+  firstFor: DiscountDuration;
   /** "month", "2 weeks". */
   period: string;
   billing: PlusBundle["billing"];
@@ -119,11 +126,15 @@ async function fetchPrice(): Promise<PlusPrice> {
       : Promise.resolve(null),
     loadPlusLink(),
   ]);
+  // A promo link's offer in place of the welcome offer, as the checkout
+  // tries it first (model/link.ts).
+  const linkFirst = offerPrice(link?.policy ?? null, plus);
   return {
     monthly: plus.price,
-    // A promo link's offer in place of the welcome offer, as the checkout
-    // tries it first (model/link.ts).
-    first: offerPrice(link?.policy ?? null, plus) ?? offerPrice(offer, plus) ?? plus.price,
+    first: linkFirst ?? offerPrice(offer, plus) ?? plus.price,
+    firstFor: linkFirst !== null
+      ? link!.policy.definition.action.discountDuration ?? null
+      : null,
     period: periodOf(plus),
     billing: plus.billing,
   };

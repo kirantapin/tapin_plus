@@ -526,7 +526,14 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
   /* "renews at" says it renews in two words, where "then $7.99/mo until you
      cancel" took a second line and left "cancel" alone on it (Sam, 4 Nov
      2026: "/impeccable polish"). The pay step keeps the full terms. */
-  const welcome = `${usd(price?.first)} first month, renews at ${usd(price?.monthly)}/mo`;
+  /* An offer that lasts (a promo link's): its price for its months, or for
+     good. */
+  const welcome =
+    price?.firstFor === "forever"
+      ? `${usd(price.first)}/mo, renews monthly`
+      : price?.firstFor && price.firstFor.periods > 1
+        ? `${usd(price.first)}/mo for ${price.firstFor.periods} months, then ${usd(price.monthly)}/mo`
+        : `${usd(price?.first)} first month, renews at ${usd(price?.monthly)}/mo`;
   if (!price || dueCents === null) return welcome;
   const today = dueCents / 100;
   if (today === price.first) return welcome;
@@ -583,6 +590,23 @@ function Review({
   if (!cart || !price) return <div className="pck-body pck-wait" aria-busy="true" />;
 
   const today = cart.dueTodayCents / 100;
+  /* The cart's deal decides what renews at: today's price for its months
+     (or for good), then the full one. A first-month deal renews at full. */
+  const lasts = cart.discountDuration;
+  const months = lasts && lasts !== "forever" ? lasts.periods : 1;
+  const { period } = price;
+  const thenRow =
+    lasts === "forever"
+      ? `${usd(today)} every ${period}, from ${renewsOn(price)}`
+      : months > 1
+        ? `${usd(today)} a ${period} for ${months - 1} more, then ${usd(price.monthly)}`
+        : `${usd(price.monthly)} every ${period}, from ${renewsOn(price)}`;
+  const agreeTo =
+    lasts === "forever"
+      ? `pay ${usd(today)} today, then ${usd(today)} every ${period}`
+      : months > 1
+        ? `pay ${usd(today)} today and each ${period} for your first ${months} ${period}s, then ${usd(price.monthly)} every ${period}`
+        : `pay ${usd(today)} today for your first ${period}, then ${usd(price.monthly)} every ${period}`;
   return (
     <div className="pck-body">
       <ul className="pck-rows">
@@ -592,7 +616,7 @@ function Review({
         </li>
         <li>
           <b>Then</b>
-          <span className="tnum">{`${usd(price.monthly)} every ${price.period}, from ${renewsOn(price)}`}</span>
+          <span className="tnum">{thenRow}</span>
         </li>
       </ul>
       {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
@@ -613,7 +637,7 @@ function Review({
         </li>
       </ul>
       <p className="pck-consent">
-        {`By joining, you agree to pay ${usd(today)} today for your first ${price.period}, then ${usd(price.monthly)} every ${price.period} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
+        {`By joining, you agree to ${agreeTo} automatically until you cancel. Cancel anytime in the Tapin app, before ${renewsOn(price)} to avoid the next charge. `}
         <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">Terms</a>
         {" · "}
         <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">Privacy</a>
