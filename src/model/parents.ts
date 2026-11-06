@@ -239,7 +239,7 @@ export async function lookupGift(gift_token: string): Promise<GiftInfo> {
       state: "ok",
       to,
       from,
-      note: s ? (s.gift_note ?? null) : "Lunch is on me this semester. So proud of you, and I miss you already. Call me Sunday!",
+      note: s ? (s.gift_note ?? null) : "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!",
       masked_phone: mask(s?.student_phone ?? "5405550123"),
       scene: s?.gift_scene ?? null,
       photo_url: s?.gift_photo ?? null,

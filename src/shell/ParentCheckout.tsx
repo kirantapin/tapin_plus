@@ -623,7 +623,7 @@ function Sheet({
                           rows={4}
                           maxLength={NOTE_MAX}
                           value={giftNote}
-                          placeholder="Lunch is on me this semester. So proud of you."
+                          placeholder="Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!"
                           onChange={(e) => setGiftNote(e.target.value)}
                           aria-describedby="prc-note-help"
                         />

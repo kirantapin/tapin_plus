@@ -50,7 +50,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       <div ref={box} className="tpg-env-art">
         <EnvelopeDemo
           play={seen}
-          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: "Lunch is on me this semester. So proud of you!" }}
+          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: SAMPLE_GIFT.note }}
         />
       </div>
       <div className="tpg-env-copy">
