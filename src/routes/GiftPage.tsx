@@ -307,10 +307,12 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
     const lift = Math.min(words + 12 + 10, el.offsetHeight - 140);
     const H = el.offsetHeight;
     const cut = (up: number) => `inset(0 0 ${Math.max(0, H - 214 - up)}px 0)`;
+    /* It starts up as the flap passes upright (~710ms), so the opening
+       never shows a still, blank card (Sam, 6 Nov 2026). */
     go(el, [
       { transform: "translateY(0)", clipPath: cut(0) },
       { transform: `translateY(${-lift}px)`, clipPath: cut(lift) },
-    ], { duration: 760, delay: 880 });
+    ], { duration: 820, delay: 680 });
   }, [play]);
   return (
     <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
