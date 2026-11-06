@@ -332,11 +332,12 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
   const ENV_H = 226; /* .gft-a-shell */
   const TOP = 12; /* the letter's top inside the envelope */
   const below = (h: number, up: number, down: number) => Math.max(0, h - (ENV_H - TOP) - up - down);
-  useLayoutEffect(() => {
-    const el = letter.current;
-    if (!el || state !== "sealed") return;
-    el.style.clipPath = `inset(0 0 ${below(el.offsetHeight, 0, 0)}px 0)`;
-  }, [state, gift]);
+  /* At rest the clip is CSS (gift.css: the bottom inset is 100% less the
+     envelope's depth), so it holds whatever the card's height becomes:
+     Gilroy arriving late, or the photo, used to leave a measured clip short
+     and the card's foot showing under the envelope (Sam, 6 Nov 2026). The
+     opening measures the card once, as it starts, and moves the line from
+     there. */
 
   const go = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => {
     const a = el?.animate?.(kf, { fill: "both", easing: EASE, ...o });
@@ -351,7 +352,6 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
     track("gift_opened", { sample, has_note: !!gift.note });
     const el = letter.current;
     if (still || !el) {
-      if (el) el.style.clipPath = "";
       flushSync(() => setState("open"));
       settle();
       return;
@@ -424,7 +424,6 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
        move only (no height, no unrolling). */
     const first = el.getBoundingClientRect();
     el.getAnimations().forEach((a) => a.cancel());
-    el.style.clipPath = "";
     flushSync(() => setState("open"));
     const last = el.getBoundingClientRect();
     go(el, [

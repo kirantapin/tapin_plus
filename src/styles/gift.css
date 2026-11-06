@@ -345,8 +345,10 @@ a.gft-open {
   top: 12px;
   left: 12px;
   right: 12px;
-  /* Its full length from the start; the pocket and a clip (set from the
-     script) hide it until it comes out. */
+  /* Its full length from the start; the pocket and this clip hide it until
+     it comes out. The clip's line is the envelope's foot: 214px is the
+     envelope's 226 less the card's 12 from its top. */
+  clip-path: inset(0 0 max(0px, calc(100% - 214px)) 0);
   padding: 18px 20px 22px;
   border-radius: 6px;
   background: #fff;
@@ -354,6 +356,7 @@ a.gft-open {
   text-align: left;
 }
 .gft-a[data-state="open"] .gft-a-letter {
+  clip-path: none;
   position: relative;
   top: auto;
   left: auto;
