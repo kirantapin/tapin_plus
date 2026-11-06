@@ -238,8 +238,8 @@ a.gft-open {
   isolation: isolate;
   width: min(340px, 100%);
   height: 226px;
-  /* Flat: the flap folds back without looming over the page. */
-  perspective: 1800px;
+  /* No perspective here: the flap carries its own (GiftPage.tsx unwrap), so
+     nothing else in the stage is drawn in 3D. */
   border-radius: 10px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -342,16 +342,42 @@ a.gft-open {
   width: 3px;
   transform-origin: 50% 0;
 }
+/* The sleeve: the envelope's mask for the card. It reaches far above the
+   envelope (the card can rise out of the top) and ends at its foot, overflow
+   hidden, so whatever of the card hangs lower never shows, in every browser
+   (a clip-path on the card was dropped by Chrome beside the flap's 3D
+   fold). Between the envelope's inside and its pocket. */
+.gft-a {
+  --sleeve-pad: 1400px;
+}
+.gft-a-sleeve {
+  position: absolute;
+  z-index: 2;
+  top: calc(-1 * var(--sleeve-pad));
+  left: 0;
+  right: 0;
+  /* A few pixels inside the envelope's foot (the solid paper covers that
+     strip anyway), so no sub-pixel sliver of the card ever shows below. */
+  bottom: 6px;
+  overflow: hidden;
+  /* Its own layer, so the clip holds for the card's layer inside it. */
+  transform: translateZ(0);
+  pointer-events: none;
+}
+.gft-a-sleeve > .gft-a-letter {
+  pointer-events: auto;
+}
+.gft-a[data-state="open"] .gft-a-sleeve {
+  display: contents;
+}
 .gft-a-letter {
   position: absolute;
   z-index: 2;
-  top: 12px;
+  top: calc(var(--sleeve-pad) + 12px);
   left: 12px;
   right: 12px;
-  /* Its full length from the start; the pocket and this clip hide it until
-     it comes out. The clip's line is the envelope's foot: 214px is the
-     envelope's 226 less the card's 12 from its top. */
-  clip-path: inset(0 0 max(0px, calc(100% - 214px)) 0);
+  /* Its full length from the start, held in the sleeve below; placed 12px
+     into the envelope (the sleeve reaches --sleeve-pad above it). */
   padding: 18px 20px 22px;
   border-radius: 6px;
   background: #fff;
@@ -359,7 +385,6 @@ a.gft-open {
   text-align: left;
 }
 .gft-a[data-state="open"] .gft-a-letter {
-  clip-path: none;
   position: relative;
   top: auto;
   left: auto;

@@ -875,3 +875,11 @@
     white-space: normal;
   }
 }
+/* The band's shade on the split photo, softer (Sam, 6 Nov 2026: "can we
+   make the gradient a bit less harsh here"): the same pool behind the
+   headline, lighter and reaching less far up, so the faces stay bright. */
+.tpp .tpa-band.tpp-band::after {
+  background:
+    radial-gradient(ellipse 110% 70% at 0% 100%, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0.28) 45%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0, rgba(0, 0, 0, 0.32) 34%, rgba(0, 0, 0, 0) 62%);
+}

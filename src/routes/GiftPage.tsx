@@ -276,11 +276,14 @@ function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, fla
     { transform: "translateY(5px) scale(.96)", opacity: 1, offset: 0.16 },
     { transform: "translateY(-150px) rotate(-10deg)", opacity: 0 },
   ], { duration: 580, delay: 380, easing: "cubic-bezier(.45,0,.3,1)" });
+  /* The perspective is the flap's own, not the stage's: a perspective on
+     the stage put everything in it in a 3D context, where Chrome stopped
+     honouring the clips that hide the card (its sleeve, the pocket's V). */
   go(flap, [
-    { transform: "rotateX(0deg)", zIndex: 4, backgroundColor: "var(--env-flap)" },
-    { transform: "rotateX(90deg)", zIndex: 4, backgroundColor: "var(--env-edge)", offset: 0.5 },
-    { transform: "rotateX(90deg)", zIndex: 1, backgroundColor: "var(--env-edge)", offset: 0.501 },
-    { transform: "rotateX(180deg)", zIndex: 1, backgroundColor: "var(--env-inside)" },
+    { transform: "perspective(1800px) rotateX(0deg)", zIndex: 4, backgroundColor: "var(--env-flap)" },
+    { transform: "perspective(1800px) rotateX(90deg)", zIndex: 4, backgroundColor: "var(--env-edge)", offset: 0.5 },
+    { transform: "perspective(1800px) rotateX(90deg)", zIndex: 1, backgroundColor: "var(--env-edge)", offset: 0.501 },
+    { transform: "perspective(1800px) rotateX(180deg)", zIndex: 1, backgroundColor: "var(--env-inside)" },
   ], { duration: 500, delay: 460, easing: "cubic-bezier(.4,0,.2,1)" });
 }
 
@@ -314,14 +317,10 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
     const sig = el.querySelector<HTMLElement>(".gft-a-sig");
     const words = sig ? sig.offsetTop + sig.offsetHeight : el.offsetHeight;
     const lift = Math.min(words + 12 + 10, el.offsetHeight - 140);
-    const H = el.offsetHeight;
-    const cut = (up: number) => `inset(0 0 ${Math.max(0, H - 214 - up)}px 0)`;
     /* It starts up as the flap passes upright (~710ms), so the opening
-       never shows a still, blank card (Sam, 6 Nov 2026). */
-    go(el, [
-      { transform: "translateY(0)", clipPath: cut(0) },
-      { transform: `translateY(${-lift}px)`, clipPath: cut(lift) },
-    ], { duration: 820, delay: 680 });
+       never shows a still, blank card (Sam, 6 Nov 2026). The sleeve keeps
+       its foot hidden under the envelope. */
+    go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 820, delay: 680 });
   }, [play]);
   return (
     <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
@@ -329,12 +328,14 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
         <div className="gft-a-shell">
           <Envelope flap={flap} seal={seal} extra={extra} />
         </div>
-        <div ref={letter} className="gft-a-letter">
-          <div className="gft-a-head">
-            <span>For {gift.to ?? "you"}</span>
+        <div className="gft-a-sleeve">
+          <div ref={letter} className="gft-a-letter">
+            <div className="gft-a-head">
+              <span>For {gift.to ?? "you"}</span>
+            </div>
+            {gift.note ? <p className="gft-a-note">{gift.note}</p> : null}
+            <p className="gft-a-sig">{gift.from}</p>
           </div>
-          {gift.note ? <p className="gft-a-note">{gift.note}</p> : null}
-          <p className="gft-a-sig">{gift.from}</p>
         </div>
       </div>
     </div>
@@ -476,6 +477,7 @@ export function Letter({
   const extra = useRef<HTMLSpanElement | null>(null);
   const letter = useRef<HTMLDivElement | null>(null);
   const shell = useRef<HTMLDivElement | null>(null);
+  const sleeve = useRef<HTMLDivElement | null>(null);
   const title = useRef<HTMLHeadingElement | null>(null);
   const after = useRef<HTMLElement | null>(null);
   const runs = useRef<Animation[]>([]);
@@ -485,19 +487,13 @@ export function Letter({
 
   /* ── The letter is a whole card from the start (Sam, 6 Nov 2026: "the
      process of the envelope opening and the card coming out of the
-     envelope feels off"). It sits in the envelope at its full length; the
-     pocket hides it, and a clip hides whatever of it hangs below the
-     envelope's foot. So it never grows or unrolls: it only moves, and the
-     clip's line always stays on the envelope's bottom edge. */
+     envelope feels off"). It sits in the envelope at its full length, in a
+     sleeve whose bottom edge is the envelope's (gift.css .gft-a-sleeve:
+     "the envelope should be masking the card"), so it never grows or
+     unrolls: it only moves, and the sleeve's edge follows the envelope
+     down as it drops. */
   const ENV_H = 226; /* .gft-a-shell */
   const TOP = 12; /* the letter's top inside the envelope */
-  const below = (h: number, up: number, down: number) => Math.max(0, h - (ENV_H - TOP) - up - down);
-  /* At rest the clip is CSS (gift.css: the bottom inset is 100% less the
-     envelope's depth), so it holds whatever the card's height becomes:
-     Gilroy arriving late, or the photo, used to leave a measured clip short
-     and the card's foot showing under the envelope (Sam, 6 Nov 2026). The
-     opening measures the card once, as it starts, and moves the line from
-     there. */
 
   const go = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => {
     const a = el?.animate?.(kf, { fill: "both", easing: EASE, ...o });
@@ -598,14 +594,8 @@ export function Letter({
     window.setTimeout(bloom, RISE.delay - 120);
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
-    const total = DROP.delay + DROP.duration - RISE.delay;
-    const dropAt = (DROP.delay - RISE.delay) / total;
-    const clip = go(el, [
-      { clipPath: `inset(0 0 ${below(H, 0, 0)}px 0)`, easing: EASE },
-      { clipPath: `inset(0 0 ${below(H, up, 0)}px 0)`, offset: RISE.duration / total },
-      { clipPath: `inset(0 0 ${below(H, up, 0)}px 0)`, offset: dropAt, easing: "cubic-bezier(.5,0,.75,0)" },
-      { clipPath: `inset(0 0 ${below(H, up, drop)}px 0)` },
-    ], { duration: total, delay: RISE.delay, easing: "linear" });
+    /* The sleeve's edge goes down with the envelope's foot. */
+    const clip = go(sleeve.current, [{ bottom: "6px" }, { bottom: `${6 - drop}px` }], { ...DROP, easing: "cubic-bezier(.5,0,.75,0)" });
     /* The envelope drops away: each paper by the same distance (the
        `translate` property, so the flap keeps its fold) and its own layer,
        so the pocket passes in front of the card as it goes. */
@@ -703,6 +693,12 @@ export function Letter({
               <Envelope flap={flap} seal={seal} extra={extra} />
             </div>
           )}
+          {/* The sleeve: the envelope masks the card (Sam, 6 Nov 2026: "I
+              think the envelope should be masking the card"). A box whose
+              bottom edge is the envelope's, overflow hidden, so the card
+              only ever shows above it; it follows the envelope down as it
+              drops. Gone (display: contents) once the gift is open. */}
+          <div ref={sleeve} className="gft-a-sleeve">
           <div ref={letter} className="gft-a-letter" aria-hidden={state === "sealed" ? true : undefined}>
             <div className="gft-a-head">
               <span>For {to ?? "you"}</span>
@@ -722,6 +718,7 @@ export function Letter({
             ) : (
               <p className="gft-a-note">{gift.from} signed you up for Tapin Plus.</p>
             )}
+          </div>
           </div>
         </div>
         {state !== "open" ? (
