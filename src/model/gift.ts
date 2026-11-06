@@ -31,11 +31,10 @@ export type Gift = {
    the option to upload an image and select their own background style") ══
    One envelope for everyone, the care package (kraft and twine). The parent
    picks the background, each a thing from home or from school, and can add
-   a photo. Flat fills only; a pattern only where the real object has one (a
+   a photo. (Campus, the Burruss collage, was cut the same day: "too busy".) Flat fills only; a pattern only where the real object has one (a
    tablecloth's check). */
 export const SCENES = [
   { id: "maroon", name: "Maroon", line: "School colors" },
-  { id: "campus", name: "Campus", line: "Burruss, cut from paper" },
   { id: "picnic", name: "Picnic", line: "Lunch is on me" },
   { id: "night", name: "Night sky", line: "Miss you" },
   { id: "confetti", name: "Confetti", line: "Something to celebrate" },
