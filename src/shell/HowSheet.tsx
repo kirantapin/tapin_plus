@@ -228,18 +228,15 @@ export default function HowSheet({
           {isFigure ? (
             <>
               <h2 className="hs-head">
-                {slide.id === "value" ? (
-                  <>
-                    Spend{" "}
-                    <button type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`$${spend} a month, change what you spend`}>
-                      ${spend}
-                      {spend >= 300 ? "+" : ""}
-                    </button>{" "}
-                    a month, get about {money(s.monthlyUsd)} back
-                  </>
-                ) : (
-                  `About ${money(s.monthlyUsd)} back a month`
-                )}
+                {/* The close says whose spend its figure is, as the value
+                    slide does: "Skip to the price" from the first step lands
+                    here with no answer given, on the $200 default (6 Nov 2026). */}
+                Spend{" "}
+                <button type="button" className="hs-spend tnum" onClick={toSpend} aria-label={`$${spend} a month, change what you spend`}>
+                  ${spend}
+                  {spend >= 300 ? "+" : ""}
+                </button>{" "}
+                a month, get about {money(s.monthlyUsd)} back
               </h2>
               <p className="hs-line">At Plus places, about ${TYPICAL_ORDER_USD} an order. An estimate.</p>
             </>
@@ -289,7 +286,8 @@ export default function HowSheet({
             )}
           </div>
           {/* Under the button, not over it (Sam, 3 Nov 2026). */}
-          {last ? null : (
+          {/* Not on the step before the close either, where it is Next. */}
+          {i >= slides.length - 2 ? null : (
             <p className="hs-when">
               <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>
                 Skip to the price

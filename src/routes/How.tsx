@@ -86,8 +86,6 @@ export function buildSlides(spend: number) {
       tag: null,
       hold: false,
       dwellMs: 9000,
-      /* Sam: the button here should be "show me how" and transition onward. */
-      next: "Show me how",
     },
     {
       /* The places joining next, and the price locked in (Sam, 4 Nov 2026:
@@ -102,6 +100,11 @@ export function buildSlides(spend: number) {
       tag: null,
       hold: false,
       dwellMs: 6000,
+      /* "Show me how" (Sam, 13 Sep 2026) sat on the value slide, which led
+         into this one once it moved third, so the button promised the how
+         and opened the price going up (Sam, 6 Nov 2026: "make sure it makes
+         sense logically"). It sits here now, straight before the how. */
+      next: "Show me how",
     },
     {
       id: "order",
