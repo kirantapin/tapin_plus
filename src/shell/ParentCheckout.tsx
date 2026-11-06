@@ -123,6 +123,7 @@ const digitsOf = (raw: string) => {
   return (d.length === 11 && d.startsWith("1") ? d.slice(1) : d).slice(0, 10);
 };
 const maskDigits = (d: string) => `•••${d.slice(-4)}`;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const possessive = (name: string) => `${name}’s`;
 
 /* The student, then you, then the card, one at a time (Sam, 5 Nov 2026:
@@ -134,7 +135,7 @@ type Step = "student" | "you" | "pay" | "done";
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
 let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
-type Field = "student" | "phone" | "confirm" | "name" | "mobile" | "note" | "from";
+type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
 function Sheet({
   ask,
@@ -160,6 +161,10 @@ function Sheet({
   const [phone, setPhone] = useState("");
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
+  /* Kept, never emailed for now (Sam, 6 Nov 2026: "No email at all right
+     now. Although I think it'd make sense to capture their emails
+     regardless"); the parent is texted. */
+  const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
      signed, both optional; shown on the student's gift page, never in a
@@ -429,6 +434,7 @@ function Sheet({
     else if (confirmD !== phoneD) errors.confirm = "These numbers don’t match.";
   }
   if (!name.trim()) errors.name = "Add your name.";
+  if (!EMAIL.test(email.trim())) errors.email = "Enter your email.";
   if (!toE164(digitsOf(mobile))) errors.mobile = "Enter your 10-digit US mobile number.";
   const shown = (f: Field) => (tried ? errors[f] : undefined);
 
@@ -437,7 +443,7 @@ function Sheet({
     if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
-    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "mobile"];
+    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
     const bad = order.find((f) => errors[f]);
     if (bad) {
       document.getElementById(`prc-${bad}`)?.focus();
@@ -464,6 +470,7 @@ function Sheet({
         student_phone: ask ? "" : (toE164(phoneD) as string),
         parent_name: name.trim(),
         parent_phone: toE164(digitsOf(mobile)) as string,
+        parent_email: email.trim(),
         ask_token: ask?.token ?? null,
         gift_note: giftNoteSent,
         gift_from: giftFromSent,
@@ -595,6 +602,7 @@ function Sheet({
                 <legend className="prc-legend">You</legend>
                 <div className="prc-fields">
                 <Input id="name" label="Your name" value={name} onChange={setName} error={shown("name")} autoComplete="name" autoCapitalize="words" maxLength={80} />
+                <Input id="email" label="Your email" value={email} onChange={setEmail} error={shown("email")} autoComplete="email" type="email" inputMode="email" />
                 <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
                 </div>
               </fieldset>
@@ -793,12 +801,12 @@ function Sheet({
                        (API.md), unless there's a note: then they get its link. */
                     <>
                       It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
-                      {sentNote ? " We’ve texted them a link to your gift." : ""} To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
+                      {sentNote ? " We’ve texted them a link to your gift." : ""} We’ll text you a receipt. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
                     </>
                   ) : (
                     <>
                       We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
-                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. We’ll text you a receipt. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
                     </>
                   )}
                 </p>

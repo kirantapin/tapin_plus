@@ -1243,14 +1243,15 @@ button.tpg-env-link {
    print than the gift page's 4:3, so the card stays a card; more room above
    for it to rise into, and a longer letter so its foot still fills the V. */
 .gft-mini .gft-a-photo {
-  aspect-ratio: 2 / 1;
-  margin-bottom: 12px;
+  aspect-ratio: 3 / 1;
+  margin-bottom: 10px;
+  object-position: 50% 30%;
 }
 .gft.gft-mini:has(.gft-a-photo) {
-  padding-top: 296px;
+  padding-top: 254px;
 }
 .gft-mini .gft-a-letter:has(.gft-a-photo) {
-  min-height: 470px;
+  min-height: 430px;
 }
 
 /* ══ THE GIFT PAGE ON A WIDE SCREEN (Sam, 6 Nov 2026: "can we rework this

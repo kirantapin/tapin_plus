@@ -20,8 +20,9 @@ export interface ParentCheckoutStart {
   /** The parent's mobile, E.164: how a payer is known (no email for now,
    *  6 Nov 2026). */
   parent_phone: string;
-  /** Not sent for now; the backend still takes one if it ever is. */
-  parent_email?: string | null;
+  /** Required and kept, but nothing is emailed for now: the parent is
+   *  texted (6 Nov 2026). */
+  parent_email: string;
   ask_token?: string | null;
   /** The gift (Sam, 6 Nov 2026): an optional note for the student, up to
    *  240 characters, and how it's signed ("Mom"), up to 24. Shown on the

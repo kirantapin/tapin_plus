@@ -89,7 +89,7 @@ export default function ParentAccount() {
             Your student cancels in the app
           </h2>
           <p className="ppm-line">
-            They can cancel their Plus in the Tapin app. If they do, your billing stops.
+            They can cancel their Plus in the Tapin app. If they do, your billing stops and we’ll text you.
           </p>
         </section>
         </div>
