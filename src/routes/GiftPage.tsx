@@ -12,6 +12,7 @@ import {
   SAMPLE_GIFT,
   SAMPLE_PHOTO,
   SCENE_GROUPS,
+  SCENE_ORDER,
   SCENES,
   thanksHref,
   type Gift,
@@ -23,6 +24,7 @@ import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
+import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
 import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
@@ -741,7 +743,8 @@ export function Letter({
             ) : (
               <>
                 {to ? `${to}, ` : ""}
-                {gift.from} sent you <span className="gft-nowrap">something</span>
+                {/* "Your parent" mid-sentence is "your parent". */}
+                {to && gift.from === "Your parent" ? "your parent" : gift.from} sent you <span className="gft-nowrap">something</span>
               </>
             )}
           </span>
@@ -900,6 +903,9 @@ export function GiftPreview({
   fixedTo = null,
   parentName = "",
   masked,
+  builder = false,
+  next,
+  startNext = false,
 }: {
   onClose: () => void;
   /** The parent's button: "Send Tapin Plus" on /parents, "Back to checkout"
@@ -915,28 +921,63 @@ export function GiftPreview({
   /** For the sign-off rule (giftWho): their name as typed in the checkout. */
   parentName?: string;
   masked?: string;
+  /** Step 1 of the purchase (Sam, 6 Nov 2026: "the preview we already have
+   *  is the first step. that way we only have one purchase funnel", and
+   *  "should also be configurable on mobile"): the panel says so and counts
+   *  the steps, Continue needs the student's first name, and on a phone the
+   *  panel is a drawer over the page. */
+  builder?: boolean;
+  /** Steps 2 to 4, in this same panel once Continue is pressed (Sam, 6 Nov
+   *  2026: "it'd be one continuous flow"): the parents page passes its
+   *  checkout, embedded. `back` returns to the care package; `close` shuts
+   *  the whole thing. */
+  next?: (back: () => void, close: () => void) => React.ReactNode;
+  /** Open on the next steps (a charged checkout that only needs confirming). */
+  startNext?: boolean;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
+  const [stage, setStage] = useState<"gift" | "next">(startNext && next ? "next" : "gift");
+  /* Once visited, the next steps stay mounted (hidden while they're back on
+     the care package), so what they typed there is still there (review,
+     6 Nov 2026). */
+  const [visited, setVisited] = useState(startNext && !!next);
+  const [drawer, setDrawer] = useState(false);
+  const [nameErr, setNameErr] = useState(false);
+  const nameInput = useRef<HTMLInputElement | null>(null);
+  const body = useRef<HTMLDivElement | null>(null);
   const wide = useWide();
+  const wideRef = useRef(wide);
+  wideRef.current = wide;
+  useEffect(() => {
+    if (!drawer || wideRef.current || reducedMotion()) return;
+    body.current?.animate?.([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], {
+      duration: 260,
+      easing: EASE,
+    });
+  }, [drawer]);
   const d = useGiftDraft();
-  const [samplePhoto, setSamplePhoto] = useState(sample);
+  /* The builder shows exactly what will be sent (review, 6 Nov 2026: a
+     sample standing in for an empty field looked like their gift, and
+     wasn't sent); the sample is only the fields' placeholders. */
+  const showSample = sample && !builder;
+  const [samplePhoto, setSamplePhoto] = useState(showSample);
   const scene = d.scene;
   const gift: Gift = {
-    to: fixedTo ?? (d.to.trim() || (sample ? SAMPLE_GIFT.to : null)),
-    from: d.from.trim() || !sample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
-    note: d.note.trim() || (sample ? SAMPLE_GIFT.note : null),
+    to: fixedTo ?? (d.to.trim() || (showSample ? SAMPLE_GIFT.to : null)),
+    from: d.from.trim() || !showSample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
+    note: d.note.trim() || (showSample ? SAMPLE_GIFT.note : null),
     masked: masked ?? SAMPLE_GIFT.masked,
     scene,
-    photo: d.photo ?? (sample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
+    photo: d.photo ?? (showSample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
   };
 
   /* Every background, one after another: the arrows (a phone) or the grid
      (a computer), or the arrow keys. The letter stays as it is, open or
      closed; only the background changes, faded in. */
-  const sceneAt = SCENES.findIndex((e) => e.id === scene);
+  const sceneAt = SCENE_ORDER.findIndex((e) => e.id === scene);
   const pick = (next: SceneId) => setGiftDraft({ scene: next });
   const cycle = useRef<(step: number) => void>(() => {});
-  cycle.current = (step: number) => pick(SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId);
+  cycle.current = (step: number) => pick(SCENE_ORDER[(sceneAt + step + SCENE_ORDER.length) % SCENE_ORDER.length].id as SceneId);
   const firstScene = useRef(true);
   useEffect(() => {
     if (firstScene.current) {
@@ -1013,6 +1054,10 @@ export function GiftPreview({
   };
 
   useEffect(() => {
+    const unlock = lockScroll();
+    return unlock;
+  }, []);
+  useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
     back.current?.focus({ preventScroll: true });
     const key = (e: KeyboardEvent) => {
@@ -1045,7 +1090,27 @@ export function GiftPreview({
 
   /* On a computer the student's own button is inert (the parent's is in
      the panel); on a phone the page's dock is the parent's button. */
-  const pageCta: DockCta = wide ? { label: "Claim my gift", onClick: () => {} } : action;
+  const pageCta: DockCta = wide || builder ? { label: "Claim my gift", onClick: () => {} } : action;
+  /* Continue: the student's first name is the one thing it needs. */
+  const go = (el: HTMLElement) => {
+    if (builder && !fixedTo && !d.to.trim()) {
+      setNameErr(true);
+      setDrawer(true);
+      requestAnimationFrame(() => nameInput.current?.focus());
+      return;
+    }
+    if (next) {
+      setVisited(true);
+      setStage("next");
+      return;
+    }
+    action.onClick(el);
+  };
+  const toGift = () => {
+    setStage("gift");
+    setDrawer(false);
+  };
+  const stepsTotal = fixedTo ? 3 : 4;
   const scaled: React.CSSProperties | undefined =
     desk && fit
       ? ({
@@ -1058,7 +1123,14 @@ export function GiftPreview({
       : undefined;
 
   return createPortal(
-    <div className="gft-preview" data-device={desk ? "computer" : "phone"} role="dialog" aria-modal="true" aria-label="Preview of their gift">
+    <div
+      className="gft-preview"
+      data-device={desk ? "computer" : "phone"}
+      data-builder={builder ? "" : undefined}
+      role="dialog"
+      aria-modal="true"
+      aria-label={builder ? "Build their care package" : "Preview of their gift"}
+    >
       <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
       <div className="gft-preview-bar">
         <div className="gft-preview-bg" role="group" aria-label="Background">
@@ -1071,7 +1143,7 @@ export function GiftPreview({
             <span className="scene-swatch" data-scene={scene} aria-hidden="true">
               <i className="scene-swatch-env" />
             </span>
-            {SCENES[sceneAt]?.name}
+            {SCENE_ORDER[sceneAt]?.name}
           </span>
           <button type="button" aria-label="Next background" onClick={() => cycle.current(1)}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -1088,27 +1160,65 @@ export function GiftPreview({
             </svg>
             {backLabel}
           </button>
-          <div className="gft-preview-scroll gft-wrap" style={scaled}>
+          <div
+            className="gft-preview-scroll gft-wrap"
+            style={scaled}
+            {...(!wide && builder && (drawer || stage === "next") ? { inert: "" } : {})}
+          >
             <Letter gift={gift} sample preview cta={pageCta} />
           </div>
         </div>
       </div>
-      {wide ? (
-        <aside className="gft-preview-panel" aria-label="Make it theirs">
-          <div className="gft-pp-body">
+      {wide || builder ? (
+        <aside
+          className="gft-preview-panel"
+          aria-label={stage === "next" ? "Checkout" : "Make it theirs"}
+          data-drawer={wide ? undefined : ""}
+          data-open={wide || drawer || stage === "next" ? "" : undefined}
+          data-stage={stage}
+        >
+          {visited && next ? (
+            <div className="gft-pp-next" hidden={stage !== "next"}>
+              {next(toGift, onClose)}
+            </div>
+          ) : null}
+          {stage === "next" ? null : (
+          <>
+          {builder ? (
+            <div className="gft-pp-head">
+              <ol className="gft-pp-steps" aria-label={`Step 1 of ${stepsTotal}`}>
+                {Array.from({ length: stepsTotal }, (_, i) => (
+                  <li key={i} data-on={i === 0 ? "" : undefined} />
+                ))}
+              </ol>
+              <h2 className="gft-pp-title">{fixedTo ? `Build ${fixedTo}’s care package` : "Build their care package"}</h2>
+              <p className="gft-pp-sub">
+                {fixedTo ? "The note and photo are optional. Payment comes next." : "The note and photo are optional. Their number and payment come next."}
+              </p>
+            </div>
+          ) : null}
+          <div ref={body} className="gft-pp-body">
             <div className="gft-pp-group">
-              <h2 className="gft-pp-h">Make it theirs</h2>
+              {builder ? null : <h2 className="gft-pp-h">Make it theirs</h2>}
               {fixedTo ? null : (
-                <label className="gft-pp-field">
-                  <span>Their first name</span>
+                <label className="gft-pp-field" data-error={nameErr && !d.to.trim() ? "" : undefined}>
+                  <span>Your student’s first name</span>
                   <input
+                    ref={nameInput}
                     value={d.to}
+                    aria-invalid={nameErr && !d.to.trim() ? true : undefined}
+                    aria-describedby={nameErr && !d.to.trim() ? "gft-pp-name-err" : undefined}
                     onChange={(e) => setGiftDraft({ to: e.target.value })}
                     placeholder={sample ? SAMPLE_GIFT.to ?? "" : ""}
                     maxLength={40}
                     autoComplete="off"
                     autoCapitalize="words"
                   />
+                  {nameErr && !d.to.trim() ? (
+                    <small id="gft-pp-name-err" className="gft-pp-error" role="alert">
+                      Add your student’s first name.
+                    </small>
+                  ) : null}
                 </label>
               )}
               <label className="gft-pp-field">
@@ -1157,7 +1267,7 @@ export function GiftPreview({
                       </svg>
                       {photoBusy ? "One moment…" : "Add your photo"}
                     </button>
-                    {sample ? (
+                    {showSample ? (
                       <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
                         {[true, false].map((on) => (
                           <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>
@@ -1186,6 +1296,7 @@ export function GiftPreview({
             <div key={g.label} className="gft-pp-group">
               <h2 id={`gft-pp-${g.label}`} className="gft-pp-h">
                 {g.label}
+                {g.tag ? <span className="gft-pp-tag">{g.tag}</span> : null}
               </h2>
               <div className="gft-pp-grid" role="radiogroup" aria-labelledby={`gft-pp-${g.label}`}>
                 {g.scenes.map((sc) => (
@@ -1206,6 +1317,7 @@ export function GiftPreview({
               </div>
             </div>
             ))}
+            {wide ? (
             <div className="gft-pp-group">
               <h2 id="gft-pp-dev" className="gft-pp-h">
                 See it on
@@ -1218,12 +1330,20 @@ export function GiftPreview({
                 ))}
               </div>
             </div>
+            ) : null}
           </div>
           <div className="gft-pp-foot">
-            <button type="button" className="gft-pp-cta" onClick={(e) => action.onClick(e.currentTarget)} disabled={photoBusy}>
+            {wide ? null : (
+              <button type="button" className="gft-pp-more" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
+                {drawer ? "Done" : "Edit note & photo"}
+              </button>
+            )}
+            <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>
               {action.label}
             </button>
           </div>
+          </>
+          )}
         </aside>
       ) : null}
     </div>,

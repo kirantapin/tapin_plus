@@ -14,10 +14,7 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
-import { FROM_MAX, NOTE_MAX, SCENE_GROUPS, type SceneId } from "../model/gift";
-import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
-import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -57,14 +54,20 @@ export default function ParentCheckout({
   onClose,
   ask,
   from = null,
-  note = false,
+  onEditGift,
+  embedded = false,
 }: {
   open: boolean;
   onClose: () => void;
   ask: Ask | null;
   from?: HTMLElement | null;
-  /** Open with the gift note already showing (from the envelope on /parents). */
-  note?: boolean;
+  /** Back to the care package (step 1, the builder on /parents). */
+  onEditGift: () => void;
+  /** Steps 2 to 4 inside the builder's panel (Sam, 6 Nov 2026: "it'd be one
+   *  continuous flow ... I hit continue and then the next screens in this
+   *  modal that overlays the care package view"): no island, no scrim, no
+   *  scroll lock or focus trap of its own; the builder owns those. */
+  embedded?: boolean;
 }) {
   /* Mounted while open and while it leaves; each opening starts clean. */
   const [mounted, setMounted] = useState(open);
@@ -87,7 +90,8 @@ export default function ParentCheckout({
       key={session}
       ask={ask}
       from={from}
-      note={note}
+      onEditGift={onEditGift}
+      embedded={embedded}
       closing={closing}
       onGone={() => {
         setMounted(false);
@@ -130,31 +134,37 @@ const possessive = (name: string) => `${name}’s`;
 /* The student, then you, then the card, one at a time (Sam, 5 Nov 2026:
    "we should have these two at separate steps of the checkout process"). An
    ask link already knows the student, so it starts at "you". */
-/* The gift first (Sam, 6 Nov 2026: "we start by having them fill out the
-   note (which they're allowed to skip if they want) that way we're not
-   asking for them to add phone number and payment until the end after the
-   sunk cost of building their note first"): who it's for and the care
-   package, then their number, then you, then the charge. An ask link knows
-   the student already, so it goes gift, you, pay. */
+/* The gift first (Sam, 6 Nov 2026: "we're not asking for them to add phone
+   number and payment until the end after the sunk cost of building their
+   note first"; then "the preview we already have is the first step. that
+   way we only have one purchase funnel"). Step 1, the care package, is the
+   builder on /parents (routes/GiftPage.tsx GiftPreview); this sheet is steps
+   2 to 4: their number, you, the charge. An ask link knows the student, so
+   it's the care package, you, the charge. */
 type Step = "gift" | "student" | "you" | "pay" | "done";
 
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
 let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
+/** A card already charged whose checkout still needs confirming: the
+ *  builder goes straight to it (its gift went with the charge). */
+export const hasChargedParentCheckout = () => charged !== null;
 type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
 function Sheet({
   ask,
   from,
-  note: noteFirst,
+  onEditGift,
+  embedded,
   closing,
   onGone,
   onClose,
 }: {
   ask: Ask | null;
   from: HTMLElement | null;
-  note: boolean;
+  onEditGift: () => void;
+  embedded: boolean;
   closing: boolean;
   onGone: () => void;
   onClose: () => void;
@@ -163,7 +173,7 @@ function Sheet({
   const source = ask ? "ask_link" : "parent_page";
   const mock = parentMock();
 
-  const [step, setStep] = useState<Step>(() => (charged ? "pay" : "gift"));
+  const [step, setStep] = useState<Step>(() => (charged ? "pay" : ask ? "you" : "student"));
   /* The student's name, note, sign-off, background and photo are the gift
      draft (model/giftDraft.ts), shared with the preview on /parents, so what
      a parent typed there is here already (Sam, 6 Nov 2026: "so they don't
@@ -179,51 +189,20 @@ function Sheet({
      regardless"); the parent is texted. */
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
-  /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
-     signed, both optional; shown on the student's gift page, never in a
-     text. Folded away unless they came from the envelope. */
-  /* The note is its own step now, always open; whatever is filled in goes. */
+  /* The care package as the builder left it (step 1): the note and how it's
+     signed, the background and the photo, all optional; whatever is filled
+     in goes with the checkout. */
   const noteOpen = true;
   const giftNote = draft.note;
-  const setGiftNote = (note: string) => setGiftDraft({ note });
   const giftFrom = draft.from;
-  const setGiftFrom = (from: string) => setGiftDraft({ from });
-  /* The gift page's background and the parent's photo (Sam, 6 Nov 2026:
-     "give moms the option to upload an image and select their own
-     background style"). The photo is a small JPEG made on the phone. */
   const giftScene = draft.scene;
-  const setGiftScene = (scene: SceneId) => setGiftDraft({ scene });
   const giftPhoto = draft.photo;
-  const setGiftPhoto = (photo: string | null) => setGiftDraft({ photo });
-  const [photoBusy, setPhotoBusy] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const photoInput = useRef<HTMLInputElement | null>(null);
-  /* The preview of their gift, over the sheet (routes/GiftPage.tsx). */
-  const [previewing, setPreviewing] = useState(false);
-  const pickPhoto = async (file: File | undefined) => {
-    if (!file) return;
-    setPhotoError(null);
-    setPhotoBusy(true);
-    try {
-      setGiftPhoto(await shrinkPhoto(file));
-    } catch (err) {
-      setPhotoError(err instanceof PhotoError ? err.message : "We couldn’t open that photo. Try another one.");
-    } finally {
-      setPhotoBusy(false);
-      if (photoInput.current) photoInput.current.value = "";
-    }
-  };
+  /* The photo is picked in the builder; nothing here is still loading it. */
+  const photoBusy = false;
   /* Whether a note went to parent_checkout_start: what the done screen says,
      kept across a resumed payment (the fields start empty again then). */
   const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
-  /* From the envelope ("Build their care package" by the note), the cursor
-     starts in the note. */
-  const noteBox = useRef<HTMLTextAreaElement | null>(null);
-  useEffect(() => {
-    if (noteFirst && (ask || student.trim())) noteBox.current?.focus();
-    // On opening only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -260,6 +239,7 @@ function Sheet({
   const GROUND = "#f0f0f0";
 
   const leave = (then: () => void) => {
+    if (embedded) return then();
     if (leaving.current) return;
     leaving.current = true;
     keyboard.current?.stop();
@@ -317,6 +297,7 @@ function Sheet({
      origin, grow out of it, and hide the plate while open. Reduced motion:
      there at once (island.ts). */
   useLayoutEffect(() => {
+    if (embedded) return;
     opener.current = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
     const unlock = lockScroll();
     const o = islandOrigin(from);
@@ -365,6 +346,10 @@ function Sheet({
   useEffect(() => {
     const node = sheet.current;
     if (!node) return;
+    if (embedded) {
+      node.querySelector<HTMLElement>("input")?.focus({ preventScroll: true });
+      return;
+    }
     const first = wide() ? node.querySelector<HTMLElement>("input") : null;
     (first ?? node).focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
@@ -414,6 +399,7 @@ function Sheet({
     const now = el.getBoundingClientRect().width;
     sheetWidth.current = now;
     morphed.current = false;
+    if (embedded) return;
     if (was == null || Math.abs(now - was) < 2 || still() || typeof el.animate !== "function") return;
     morphed.current = true;
     /* max-width off while it eases: the narrower step's cap would clamp the
@@ -463,17 +449,16 @@ function Sheet({
     if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
-    const order: Field[] =
-      step === "gift" ? (ask ? [] : ["student"]) : step === "student" ? ["phone", "confirm"] : ["name", "email", "mobile"];
+    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
     const bad = order.find((f) => errors[f]);
     if (bad) {
       document.getElementById(`prc-${bad}`)?.focus();
       return;
     }
-    if (step === "gift" || step === "student") {
-      /* On to the next; its fields start fresh, without errors showing. */
+    if (step === "student") {
+      /* On to you; your fields start fresh, without errors showing. */
       setTried(false);
-      setStep(step === "gift" && !ask ? "student" : "you");
+      setStep("you");
       return;
     }
     setBusy(true);
@@ -527,7 +512,6 @@ function Sheet({
   };
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
-  const noteFor = (ask ? ask.student_first_name : student.trim()) || "your student";
   const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
   const first = started?.first_cents ?? OFFER.first_cents;
   const monthly = started?.monthly_cents ?? OFFER.monthly_cents;
@@ -544,35 +528,16 @@ function Sheet({
         ? ask
           ? "Pay and turn on their Plus"
           : "Pay and send their text"
-        : step === "gift"
-          ? ask
-            ? `Build ${possessive(ask.student_first_name)} care package`
-            : "Build their care package"
-          : step === "student"
+        : step === "student"
             ? `Where ${student.trim() ? possessive(student.trim()) : "their"} gift goes`
             : "Last, you";
   /* The gift says what comes next; the details steps say the price; the pay
      step's rows and terms say it there. */
-  const sub =
-    step === "gift"
-      ? "The note and photo are optional. Their number and payment come after."
-      : step === "student" || step === "you"
-        ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.`
-        : null;
+  const sub = step === "student" || step === "you" ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.` : null;
   const STEPS: Step[] = ask ? ["gift", "you", "pay"] : ["gift", "student", "you", "pay"];
 
-  return createPortal(
-    <div className="prc-layer" ref={layer}>
-      <div ref={scrim} className="prc-scrim" aria-hidden="true" onClick={close} />
-      {/* ph-no-capture: the names, the note and the photo are a family's
-          own, so session replay and autocapture skip the whole sheet. */}
-      {/* data-wide: the you step, widest of the steps on a computer (Sam,
-          6 Nov 2026: "on desktop this step in checkout can morph to be
-          wider"); the width eases between steps (the effect above). */}
-      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} data-wide={step === "gift" || step === "you" ? "" : undefined} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
-        {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
-        <span ref={label} className="prc-island-label" aria-hidden="true" />
-        <div ref={inner} className="prc-island-inner">
+  const content = (
+    <>
         <div className="prc-top">
           {step === "done" ? <Tick /> : null}
           <div className="prc-head">
@@ -591,159 +556,25 @@ function Sheet({
         </div>
 
         <div ref={body}>
-          {step === "gift" || step === "student" || step === "you" ? (
+          {step === "student" || step === "you" ? (
             <form className="prc-body" onSubmit={submit} noValidate>
               <ol className="prc-steps" aria-label={`Step ${STEPS.indexOf(step) + 1} of ${STEPS.length}`}>
                 {STEPS.map((k, i) => (
                   <li key={k} data-on={i <= STEPS.indexOf(step) ? "" : undefined} />
                 ))}
               </ol>
-              {step === "gift" ? (
+              {step === "student" ? (
                 <>
-                  {ask ? (
-                    <div className="prc-module prc-covering">
-                      <span className="prc-covering-dot" aria-hidden="true">
-                        {ask.student_first_name.slice(0, 1).toUpperCase()}
-                      </span>
-                      <p>
-                        For <b>{ask.student_first_name}</b> <span className="tnum">· {ask.masked_phone}</span>
-                      </p>
-                    </div>
-                  ) : (
-                    <fieldset className="prc-module">
-                      <legend className="prc-legend">Who it’s for</legend>
-                      <div className="prc-fields">
-                        <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
-                      </div>
-                    </fieldset>
-                  )}
-<fieldset className="prc-module prc-note">
-                      <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
-                      <div className="prc-fields">
-                        {/* The words and the look: one column on a phone (these
-                            wrappers lay nothing out there), side by side on a
-                            computer's wide step (parent-checkout.css). */}
-                        <div className="prc-note-col">
-                        <div className="prc-field">
-                          <label className="prc-label prc-label-count" htmlFor="prc-note">
-                            Your note
-                            <small className="tnum" aria-hidden="true">
-                              {giftNote.length}/{NOTE_MAX}
-                            </small>
-                          </label>
-                          <div className="prc-box prc-box-area">
-                            <textarea
-                              ref={noteBox}
-                              id="prc-note"
-                              rows={4}
-                              maxLength={NOTE_MAX}
-                              value={giftNote}
-                              placeholder="Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!"
-                              onChange={(e) => setGiftNote(e.target.value)}
-                              aria-describedby="prc-note-help"
-                            />
-                          </div>
-                          <p id="prc-note-help" className="prc-help">
-                            Up to {NOTE_MAX} characters. They open it like a present when they tap their text. Only they get the link.
-                          </p>
-                        </div>
-                        <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
-                        </div>
-                        <div className="prc-note-col">
-                        {/* The photo: printed at the top of their letter. */}
-                        <div className="prc-field">
-                          <span className="prc-label" id="prc-photo-label">
-                            A photo (optional)
-                          </span>
-                          {giftPhoto ? (
-                            <div className="prc-photo">
-                              <img src={giftPhoto} alt="Your photo" />
-                              <div className="prc-photo-actions">
-                                <button type="button" className="prc-edit" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
-                                  Change
-                                </button>
-                                <button type="button" className="prc-edit" onClick={() => setGiftPhoto(null)} disabled={photoBusy}>
-                                  Remove
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              className="prc-photo-add"
-                              onClick={() => photoInput.current?.click()}
-                              disabled={photoBusy}
-                              aria-describedby="prc-photo-help"
-                            >
-                              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                <path d="M4.5 7.5A1.5 1.5 0 0 1 6 6h2l1.5-2h5L16 6h2a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5v-10ZM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                              </svg>
-                              {photoBusy ? "Getting your photo ready…" : "Add a photo"}
-                            </button>
-                          )}
-                          <input
-                            ref={photoInput}
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            aria-labelledby="prc-photo-label"
-                            onChange={(e) => void pickPhoto(e.target.files?.[0])}
-                          />
-                          {photoError ? (
-                            <p className="prc-field-error" role="alert">
-                              {photoError}
-                            </p>
-                          ) : null}
-                          <p id="prc-photo-help" className="prc-help">
-                            Only {noteFor} sees it, on their gift. We delete it when their Plus ends.
-                          </p>
-                        </div>
-                        {/* The background their envelope arrives on. */}
-                        <fieldset className="prc-scenes">
-                          <legend className="prc-label">Background</legend>
-                          {/* Everyday, then seasonal (6 Nov 2026); one choice
-                              across both rows (the radios share a name). */}
-                          {SCENE_GROUPS.map((g, gi) => (
-                          <div key={g.label} className="prc-scene-group">
-                          {gi > 0 ? <span className="prc-scene-sub">{g.label}</span> : null}
-                          <div className="prc-scene-row" role="radiogroup" aria-label={g.label}>
-                            {g.scenes.map((sc) => (
-                              <label key={sc.id} className="prc-scene">
-                                <input
-                                  type="radio"
-                                  name="prc-scene"
-                                  value={sc.id}
-                                  checked={giftScene === sc.id}
-                                  onChange={() => setGiftScene(sc.id)}
-                                />
-                                <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
-                                  <i className="scene-swatch-env" />
-                                </span>
-                                <span className="prc-scene-name">{sc.name}</span>
-                              </label>
-                            ))}
-                          </div>
-                          </div>
-                          ))}
-                        </fieldset>
-                        <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
-                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                          </svg>
-                          Preview their gift
-                        </button>
-                        </div>
-                      </div>
-                    </fieldset>
-                </>
-              ) : step === "student" ? (
-                <>
-                <button type="button" className="prc-edit prc-back" onClick={() => setStep("gift")} disabled={busy}>
-                  ← For {student.trim() || "your student"}
+                <button type="button" className="prc-edit prc-back" onClick={onEditGift} disabled={busy}>
+                  ← {student.trim() ? `${possessive(student.trim())} care package` : "Their care package"}
                 </button>
                 <fieldset className="prc-module">
                   <legend className="prc-legend">Their number</legend>
                   <div className="prc-fields">
+                  {/* Named in the builder; asked here only if it isn't. */}
+                  {student.trim() && !shown("student") ? null : (
+                    <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
+                  )}
                   <Input
                     id="phone"
                     label="Your student’s mobile number"
@@ -768,8 +599,8 @@ function Sheet({
               ) : (
                 <>
                   {ask ? (
-                    <button type="button" className="prc-edit prc-back" onClick={() => setStep("gift")} disabled={busy}>
-                      ← {ask.student_first_name} · {ask.masked_phone}
+                    <button type="button" className="prc-edit prc-back" onClick={onEditGift} disabled={busy}>
+                      ← {possessive(ask.student_first_name)} care package
                     </button>
                   ) : (
                     <button type="button" className="prc-edit prc-back" onClick={() => setStep("student")} disabled={busy}>
@@ -786,17 +617,6 @@ function Sheet({
               </fieldset>
                 </>
               )}
-              {previewing ? (
-                <GiftPreview
-                  /* The gift draft is the checkout's own fields, so what
-                     they change in the preview is what they send. */
-                  fixedTo={ask ? ask.student_first_name : null}
-                  parentName={name}
-                  masked={ask ? ask.masked_phone : maskDigits(phoneD)}
-                  onClose={() => setPreviewing(false)}
-                  action={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
-                />
-              ) : null}
               {formError ? (
                 <p className="prc-error" role="alert">
                   {formError}
@@ -808,8 +628,8 @@ function Sheet({
             </form>
           ) : step === "pay" && started ? (
             <div className="prc-body">
-              <ol className="prc-steps" aria-label={`Step ${ask ? 2 : 3} of ${ask ? 2 : 3}`}>
-                {(ask ? ["you", "pay"] : ["student", "you", "pay"]).map((k) => (
+              <ol className="prc-steps" aria-label={`Step ${STEPS.length} of ${STEPS.length}`}>
+                {STEPS.map((k) => (
                   <li key={k} data-on="" />
                 ))}
               </ol>
@@ -867,6 +687,29 @@ function Sheet({
             </div>
           ) : null}
         </div>
+    </>
+  );
+  if (embedded)
+    return (
+      <div className="prc-embedded ph-no-capture" ref={sheet} aria-labelledby="prc-title" role="group" tabIndex={-1}>
+        <div ref={inner} className="prc-embedded-inner">
+          {content}
+        </div>
+      </div>
+    );
+  return createPortal(
+    <div className="prc-layer" ref={layer}>
+      <div ref={scrim} className="prc-scrim" aria-hidden="true" onClick={close} />
+      {/* ph-no-capture: the names, the note and the photo are a family's
+          own, so session replay and autocapture skip the whole sheet. */}
+      {/* data-wide: the you step, widest of the steps on a computer (Sam,
+          6 Nov 2026: "on desktop this step in checkout can morph to be
+          wider"); the width eases between steps (the effect above). */}
+      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} data-wide={step === "you" ? "" : undefined} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
+        {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
+        <span ref={label} className="prc-island-label" aria-hidden="true" />
+        <div ref={inner} className="prc-island-inner">
+        {content}
         </div>
       </div>
     </div>,

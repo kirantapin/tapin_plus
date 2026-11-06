@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { SAMPLE_GIFT } from "../model/gift";
-import { EnvelopeDemo, GiftPreview, SAMPLE_PHOTO_SRC } from "./GiftPage";
+import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
    The parents page says a parent can send Plus with a note, and that their
@@ -45,9 +45,8 @@ const ENVELOPE_NOTE = "Thinking of you, my love! Here’s a little treat. Proud 
 export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) {
   const box = useRef<HTMLDivElement | null>(null);
   const seen = useSeenOnce(box, 0.6);
-  /* "See what they'll see": the sample gift in a pop-up (Sam, 6 Nov 2026),
-     whose button signs them up, growing out of this card's own button. */
-  const [previewing, setPreviewing] = useState(false);
+  /* Its button opens the builder (the care package, step 1), as every
+     button on the page does; the builder is the preview now. */
   const send = useRef<HTMLButtonElement | null>(null);
   return (
     <section className="tpg tpg-env" aria-labelledby="tpg-env-h">
@@ -70,25 +69,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
         <button ref={send} type="button" className="tpg-env-cta" onClick={(e) => onSend(e.currentTarget)}>
           Build their care package
         </button>
-        <button type="button" className="tpg-env-link" onClick={() => setPreviewing(true)}>
-          See what they’ll see
-        </button>
       </div>
-      {previewing ? (
-        <GiftPreview
-          sample
-          onClose={() => setPreviewing(false)}
-          /* "Send Tapin Plus" (Sam, 6 Nov 2026): what they made here opens
-             in the checkout already filled in (model/giftDraft.ts). */
-          action={{
-            label: "Send Tapin Plus",
-            onClick: () => {
-              setPreviewing(false);
-              if (send.current) onSend(send.current);
-            },
-          }}
-        />
-      ) : null}
     </section>
   );
 }

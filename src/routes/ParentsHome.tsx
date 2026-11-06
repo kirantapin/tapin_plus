@@ -10,7 +10,7 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { logoField } from "../model/content";
 import { captureUtm, lookupAskLink } from "../model/parents";
-import ParentCheckout from "../shell/ParentCheckout";
+import ParentCheckout, { hasChargedParentCheckout } from "../shell/ParentCheckout";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import {
@@ -31,6 +31,7 @@ import {
 } from "./parents_kit";
 import { BenefitCards, HowTimeline, LunchColumns, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
+import { GiftPreview } from "./GiftPage";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -397,7 +398,6 @@ export default function ParentsHome() {
   const [ask, setAsk] = useState<Ask>(() =>
     token ? { state: "loading", token } : { state: "none" },
   );
-  const [open, setOpen] = useState(false);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -452,17 +452,16 @@ export default function ParentsHome() {
      their care package" or something like that. Instead of going right for
      the ask"): every button here opens the checkout on the care package. */
   const cta = asked ? `Build ${asked.name}’s care package` : "Build their care package";
-  /* The button that was tapped: the checkout grows out of it (or out of the
-     dock's plate while that is on screen) and shrinks back into it. */
-  const [from, setFrom] = useState<HTMLElement | null>(null);
-  /* The gift's note: open in the checkout when they came from the envelope. */
-  const [withNote, setWithNote] = useState(false);
-  const signUp = (where: string, el: HTMLElement, note = false) => {
+  /* One funnel (Sam, 6 Nov 2026: "the preview we already have is the first
+     step. that way we only have one purchase funnel not conflicting ones"):
+     every button opens the builder, and its Continue carries on to their
+     number, you and the charge in the same panel. */
+  const [building, setBuilding] = useState(false);
+  const signUp = (where: string, _el: HTMLElement) => {
     track("parent_signup_clicked", { where, ask: !!asked });
-    setFrom(el);
-    setWithNote(note);
-    setOpen(true);
+    setBuilding(true);
   };
+
 
   /* ── The dock: always on screen on a phone (Sam, 6 Nov 2026: "the sign up
      my student sticky CTA should always be visible"), even with the offer
@@ -470,7 +469,7 @@ export default function ParentsHome() {
      and the dock is hidden (parents.css). ── */
   const dockRef = useRef<HTMLDivElement | null>(null);
   const dockOn = true;
-  useDockPulse(dockRef, dockOn && !open);
+  useDockPulse(dockRef, dockOn && !building);
   const firstDock = useRef(true);
   useEffect(() => {
     const el = dockRef.current;
@@ -695,7 +694,7 @@ export default function ParentsHome() {
 
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
-        <GiftEnvelope onSend={(el) => signUp("gift", el, true)} />
+        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -940,21 +939,37 @@ export default function ParentsHome() {
         </button>
       </div>
 
-      <ParentCheckout
-        open={open}
-        from={from}
-        note={withNote}
-        onClose={() => setOpen(false)}
-        ask={
-          asked
-            ? {
-                token: asked.token,
-                student_first_name: asked.name,
-                masked_phone: asked.masked,
+      {/* One continuous flow (Sam, 6 Nov 2026): the care package, then
+          their number, you and the charge in the same panel (on a phone,
+          the same drawer) over the gift's preview. */}
+      {building ? (
+        <GiftPreview
+          builder
+          sample
+          fixedTo={asked ? asked.name : null}
+          masked={asked ? asked.masked : undefined}
+          onClose={() => setBuilding(false)}
+          action={{ label: "Continue", onClick: () => {} }}
+          startNext={hasChargedParentCheckout()}
+          next={(back, close) => (
+            <ParentCheckout
+              embedded
+              open
+              onEditGift={back}
+              onClose={close}
+              ask={
+                asked
+                  ? {
+                      token: asked.token,
+                      student_first_name: asked.name,
+                      masked_phone: asked.masked,
+                    }
+                  : null
               }
-            : null
-        }
-      />
+            />
+          )}
+        />
+      ) : null}
     </div>
   );
 }
