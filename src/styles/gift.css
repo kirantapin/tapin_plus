@@ -268,7 +268,8 @@ a.gft-open {
   z-index: 1;
   border-radius: 10px;
   background: var(--env-back);
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+  /* The inside is darker toward the opening, under the flap's lip. */
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3), inset 0 18px 16px -12px rgba(50, 28, 6, 0.45);
 }
 .gft-a-pocket {
   top: 0;
@@ -344,8 +345,8 @@ a.gft-open {
   top: 12px;
   left: 12px;
   right: 12px;
-  height: 202px;
-  overflow: hidden;
+  /* Its full length from the start; the pocket and a clip (set from the
+     script) hide it until it comes out. */
   padding: 18px 20px 22px;
   border-radius: 6px;
   background: #fff;
@@ -361,10 +362,6 @@ a.gft-open {
   height: auto;
   margin: 0 12px;
   box-shadow: 0 20px 44px rgba(0, 0, 0, 0.32);
-}
-/* While the envelope falls away, the letter stays behind its pocket. */
-.gft-a[data-state="open"][data-leaving] .gft-a-letter {
-  z-index: 2;
 }
 .gft-h1:focus {
   outline: none;
@@ -613,6 +610,9 @@ a.gft-open {
   --env-back: #9c7247;
   --env-pocket: #c39a6b;
   --env-flap: #b48956;
+  /* The flap edge-on to the light, then its inside, in its own shade. */
+  --env-edge: #8a6640;
+  --env-inside: #a27a4d;
   --seal: #861f41;
   --seal-ink: #f1e7d0;
 }
