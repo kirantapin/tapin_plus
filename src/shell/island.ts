@@ -196,6 +196,9 @@ function flyLabel(p: IslandParts, toward: boolean, duration: number, easing: str
   p.label.animate([{ transform: toward ? "none" : there }, { transform: toward ? there : "none" }], { duration, easing, fill: "both" });
 }
 
+/* The roundest an open sheet's corners get, whatever it grew from. */
+const MAX_CORNER = 28;
+
 /* The open in flight, so the height tracker can wait for it to land. */
 const opening = new WeakMap<HTMLElement, Animation>();
 
@@ -208,7 +211,9 @@ export function islandOpen(p: IslandParts, o: IslandOrigin | null, over = false)
      "can the parent container keep the same corner radius that the
      collapsed 'join tapin plus' button has?", then "I don't like how it
      changes"): the clip opens and closes at one radius, never re-rounding. */
-  const corner = o?.plate.isConnected ? parseFloat(getComputedStyle(o.plate).borderTopLeftRadius) : NaN;
+  /* Capped: a pill's 999px would make the sheet an oval (the envelope's
+     "Send Tapin Plus" on /parents is a pill, 6 Nov 2026). */
+  const corner = o?.plate.isConnected ? Math.min(parseFloat(getComputedStyle(o.plate).borderTopLeftRadius), MAX_CORNER) : NaN;
   if (corner > 0) p.island.style.borderRadius = `${corner}px`;
   if (reducedMotion()) return;
   const rect = p.island.getBoundingClientRect();

@@ -25,6 +25,11 @@ export interface ParentCheckoutStart {
    *  student's gift page (/gift/{token}); the note never goes in a text. */
   gift_note?: string | null;
   gift_from?: string | null;
+  /** The gift page's background (model/gift.ts SCENES ids), and the
+   *  parent's photo as a JPEG data URL (made small on the phone,
+   *  model/giftPhoto.ts; at most 1.5M characters). Both optional. */
+  gift_scene?: string | null;
+  gift_photo?: string | null;
   utm?: Record<string, string>;
 }
 export interface ParentCheckoutStarted {
@@ -119,6 +124,8 @@ type MockState = {
   signed_in?: boolean;
   gift_note?: string | null;
   gift_from?: string | null;
+  gift_scene?: string | null;
+  gift_photo?: string | null;
 };
 const mockGet = (): MockState | null => {
   try {
@@ -145,6 +152,8 @@ export async function startParentCheckout(req: ParentCheckoutStart): Promise<Par
       status: "pending_payment",
       gift_note: req.gift_note ?? null,
       gift_from: req.gift_from ?? null,
+      gift_scene: req.gift_scene ?? null,
+      gift_photo: req.gift_photo ?? null,
     });
     return { checkout_id: "mock", client_secret: "pi_mock_secret_mock", first_cents: 399, monthly_cents: 799 };
   }
@@ -232,6 +241,8 @@ export async function lookupGift(gift_token: string): Promise<GiftInfo> {
       from,
       note: s ? (s.gift_note ?? null) : "Lunch is on me this semester. So proud of you, and I miss you already. Call me Sunday!",
       masked_phone: mask(s?.student_phone ?? "5405550123"),
+      scene: s?.gift_scene ?? null,
+      photo_url: s?.gift_photo ?? null,
     };
   }
   return call("gift_lookup", { gift_token });

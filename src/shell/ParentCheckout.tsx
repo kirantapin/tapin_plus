@@ -14,7 +14,8 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
-import { FROM_MAX, NOTE_MAX } from "../model/gift";
+import { FROM_MAX, NOTE_MAX, SCENES, type SceneId } from "../model/gift";
+import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -165,6 +166,27 @@ function Sheet({
   const [noteOpen, setNoteOpen] = useState(noteFirst);
   const [giftNote, setGiftNote] = useState("");
   const [giftFrom, setGiftFrom] = useState("");
+  /* The gift page's background and the parent's photo (Sam, 6 Nov 2026:
+     "give moms the option to upload an image and select their own
+     background style"). The photo is a small JPEG made on the phone. */
+  const [giftScene, setGiftScene] = useState<SceneId>("maroon");
+  const [giftPhoto, setGiftPhoto] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoInput = useRef<HTMLInputElement | null>(null);
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setPhotoError(null);
+    setPhotoBusy(true);
+    try {
+      setGiftPhoto(await shrinkPhoto(file));
+    } catch (err) {
+      setPhotoError(err instanceof PhotoError ? err.message : "We couldn’t open that photo. Try another one.");
+    } finally {
+      setPhotoBusy(false);
+      if (photoInput.current) photoInput.current.value = "";
+    }
+  };
   /* Whether a note went to parent_checkout_start: what the done screen says,
      kept across a resumed payment (the fields start empty again then). */
   const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
@@ -394,7 +416,12 @@ function Sheet({
     setBusy(true);
     const giftNoteSent = noteOpen && giftNote.trim() ? giftNote.trim() : null;
     const giftFromSent = noteOpen && giftFrom.trim() ? giftFrom.trim().replace(/\s+/g, " ") : null;
-    track("parent_checkout_started", { source, has_note: !!giftNoteSent });
+    track("parent_checkout_started", {
+      source,
+      has_note: !!giftNoteSent,
+      has_photo: noteOpen && !!giftPhoto,
+      gift_scene: noteOpen ? giftScene : null,
+    });
     try {
       const res = await startParentCheckout({
         student_first_name: ask ? ask.student_first_name : student.trim(),
@@ -405,6 +432,8 @@ function Sheet({
         ask_token: ask?.token ?? null,
         gift_note: giftNoteSent,
         gift_from: giftFromSent,
+        gift_scene: noteOpen ? giftScene : null,
+        gift_photo: noteOpen ? giftPhoto : null,
         utm: keptUtm(),
       });
       setStarted(res);
@@ -530,7 +559,7 @@ function Sheet({
               </fieldset>
               {noteOpen ? (
                 <fieldset className="prc-module prc-note">
-                  <legend className="prc-legend">A note for {noteFor} (optional)</legend>
+                  <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
                   <div className="prc-fields">
                     <div className="prc-field">
                       <label className="prc-label prc-label-count" htmlFor="prc-note">
@@ -556,6 +585,75 @@ function Sheet({
                       </p>
                     </div>
                     <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
+                    {/* The photo: printed at the top of their letter. */}
+                    <div className="prc-field">
+                      <span className="prc-label" id="prc-photo-label">
+                        A photo (optional)
+                      </span>
+                      {giftPhoto ? (
+                        <div className="prc-photo">
+                          <img src={giftPhoto} alt="Your photo" />
+                          <div className="prc-photo-actions">
+                            <button type="button" className="prc-edit" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+                              Change
+                            </button>
+                            <button type="button" className="prc-edit" onClick={() => setGiftPhoto(null)} disabled={photoBusy}>
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="prc-photo-add"
+                          onClick={() => photoInput.current?.click()}
+                          disabled={photoBusy}
+                          aria-describedby="prc-photo-help"
+                        >
+                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <path d="M4.5 7.5A1.5 1.5 0 0 1 6 6h2l1.5-2h5L16 6h2a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5v-10ZM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                          </svg>
+                          {photoBusy ? "Getting your photo ready…" : "Add a photo"}
+                        </button>
+                      )}
+                      <input
+                        ref={photoInput}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        aria-labelledby="prc-photo-label"
+                        onChange={(e) => void pickPhoto(e.target.files?.[0])}
+                      />
+                      {photoError ? (
+                        <p className="prc-field-error" role="alert">
+                          {photoError}
+                        </p>
+                      ) : null}
+                      <p id="prc-photo-help" className="prc-help">
+                        Only {noteFor} sees it, on their gift. We delete it when their Plus ends.
+                      </p>
+                    </div>
+                    {/* The background their envelope arrives on. */}
+                    <fieldset className="prc-scenes">
+                      <legend className="prc-label">Background</legend>
+                      <div className="prc-scene-row" role="radiogroup" aria-label="Background">
+                        {SCENES.map((sc) => (
+                          <label key={sc.id} className="prc-scene">
+                            <input
+                              type="radio"
+                              name="prc-scene"
+                              value={sc.id}
+                              checked={giftScene === sc.id}
+                              onChange={() => setGiftScene(sc.id)}
+                            />
+                            <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                              <i className="scene-swatch-env" />
+                            </span>
+                            <span className="prc-scene-name">{sc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
                   </div>
                 </fieldset>
               ) : (
@@ -566,7 +664,7 @@ function Sheet({
                   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                     <path d="M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5ZM3.5 7.5l8.5 6 8.5-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  Add a note for {noteFor}
+                  Add a note or a photo for {noteFor}
                 </button>
               )}
                 </>

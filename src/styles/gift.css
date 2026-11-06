@@ -620,16 +620,20 @@ a.gft-open {
 /* ══ FIVE BACKGROUNDS ═════════════════════════════════════════════════════
    The band the envelope arrives on. The busy ones (campus, picnic, confetti)
    set the heading on a paper strip, the collage's way, so it always reads. */
-.gft-a[data-scene="campus"] .gft-a-band {
+.gft-a[data-scene="campus"] .gft-a-band,
+.scene-swatch[data-scene="campus"] {
   background: #141618 url("/collage/blacksburg.webp") 46% 30% / cover no-repeat;
 }
-.gft-a[data-scene="picnic"] .gft-a-band {
+.gft-a[data-scene="picnic"] .gft-a-band,
+.scene-swatch[data-scene="picnic"] {
   background: #fbf7ee url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23FBF7EE'/%3E%3Crect width='18' height='36' fill='%23C8323C' fill-opacity='.42'/%3E%3Crect width='36' height='18' fill='%23C8323C' fill-opacity='.42'/%3E%3C/svg%3E") 0 0 / 36px 36px;
 }
-.gft-a[data-scene="night"] .gft-a-band {
+.gft-a[data-scene="night"] .gft-a-band,
+.scene-swatch[data-scene="night"] {
   background: #132042 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg fill='%23F7F3EA'%3E%3Cpath d='M30 22l2 6 6 2-6 2-2 6-2-6-6-2 6-2z'/%3E%3Cpath d='M168 58l1.5 4.5 4.5 1.5-4.5 1.5-1.5 4.5-1.5-4.5-4.5-1.5 4.5-1.5z'/%3E%3Cpath d='M92 150l2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5 7-2.5z'/%3E%3Ccircle cx='120' cy='26' r='1.4'/%3E%3Ccircle cx='200' cy='130' r='1.6'/%3E%3Ccircle cx='54' cy='96' r='1.2'/%3E%3Ccircle cx='150' cy='196' r='1.4'/%3E%3Ccircle cx='14' cy='180' r='1.6'/%3E%3Ccircle cx='196' cy='12' r='1'/%3E%3Ccircle cx='78' cy='206' r='1'/%3E%3C/g%3E%3Cpath d='M190 176l1.5 4.5 4.5 1.5-4.5 1.5-1.5 4.5-1.5-4.5-4.5-1.5 4.5-1.5z' fill='%23E5751F'/%3E%3Ccircle cx='120' cy='104' r='1.6' fill='%23E5751F'/%3E%3C/svg%3E") 0 0 / 220px 220px;
 }
-.gft-a[data-scene="confetti"] .gft-a-band {
+.gft-a[data-scene="confetti"] .gft-a-band,
+.scene-swatch[data-scene="confetti"] {
   background: #ece5d5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Crect x='20' y='18' width='14' height='6' fill='%23861F41' transform='rotate(24 27 21)'/%3E%3Crect x='120' y='30' width='12' height='5' fill='%23E5751F' transform='rotate(-32 126 32)'/%3E%3Ccircle cx='78' cy='64' r='4' fill='%23141618'/%3E%3Crect x='150' y='96' width='14' height='6' fill='%23141618' transform='rotate(58 157 99)'/%3E%3Crect x='40' y='120' width='12' height='5' fill='%23E5751F' transform='rotate(12 46 122)'/%3E%3Ccircle cx='112' cy='140' r='4.5' fill='%23861F41'/%3E%3Crect x='88' y='100' width='9' height='9' fill='%23FFFFFF' transform='rotate(20 92 104)'/%3E%3Ccircle cx='164' cy='162' r='3' fill='%23E5751F'/%3E%3Crect x='10' y='76' width='8' height='8' fill='%23861F41' transform='rotate(-15 14 80)'/%3E%3Crect x='62' y='162' width='13' height='5' fill='%23141618' transform='rotate(-48 68 164)'/%3E%3Ccircle cx='150' cy='8' r='3' fill='%23141618'/%3E%3Crect x='104' y='58' width='12' height='5' fill='%23FFFFFF' transform='rotate(70 110 60)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
 }
 .gft-a[data-scene="campus"] .gft-h1-in,
@@ -735,4 +739,45 @@ a.gft-open {
 .gft-dock-cta:focus-visible {
   outline: 3px solid #141618;
   outline-offset: 3px;
+}
+
+/* ══ THE BACKGROUND SWATCHES (the parent checkout's picker) ════════════════
+   Each wears its scene's own background (shared with the band rules above)
+   and a tiny care package, so the parent sees what the student will. */
+.scene-swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #861f41;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.08);
+}
+.scene-swatch[data-scene="campus"] {
+  background-size: cover;
+}
+.scene-swatch[data-scene="picnic"] {
+  background-size: 14px 14px;
+}
+.scene-swatch[data-scene="night"],
+.scene-swatch[data-scene="confetti"] {
+  background-size: 110px 110px;
+}
+.scene-swatch-env {
+  position: relative;
+  width: 30px;
+  height: 20px;
+  border-radius: 2px;
+  background: #c39a6b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.scene-swatch-env::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 62%;
+  background: #b48956;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
