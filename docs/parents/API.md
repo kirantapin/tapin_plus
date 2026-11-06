@@ -75,7 +75,8 @@ For a parent with no account. No auth.
 ```ts
 req: {
   student_first_name: string; student_phone: string;   // E.164 +1XXXXXXXXXX
-  parent_name: string; parent_email: string; parent_phone?: string | null;
+  parent_name: string; parent_phone: string;           // E.164; how a payer is known (6 Nov 2026)
+  parent_email?: string | null;                         // not sent for now: no automated emails yet
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
   gift_from?: string | null;                            // optional sign-off ("Mom"), <= 24 chars
@@ -116,7 +117,7 @@ Verifies the PaymentIntent succeeded for this subscription, then, idempotently:
 4. Texts the student once, with their gift link (Sam, 6 Nov 2026; ask links skip it
    unless the parent added a note or a photo: the student asked, but a gift is worth the
    text):
-   `Tapin: {Who} sent you Tapin Plus{ with a note | with a photo}. Open it: https://plus.tapin.app/gift/{token} Reply STOP to opt out`
+   `Tapin: You have a gift from {Who}. Open it: https://plus.tapin.app/gift/{token} Reply STOP to opt out` (Sam's words, 6 Nov 2026)
    `{Who}` is the sign-off if it's a plain short name, else the parent's first name, else
    "Your parent". The note itself is never in a text. Only the token's sha256 is stored,
    and a re-send (`resend`, `change_number`) makes a new link, so the old one stops.

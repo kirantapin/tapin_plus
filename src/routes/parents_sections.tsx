@@ -134,8 +134,11 @@ export function BenefitCards() {
           {money0(CREDIT)}
         </b>
       ),
-      label: "Off a meal, every week, at each place",
-      line: `A ${money0(LUNCH)} lunch is ${money0(LUNCH - CREDIT)}.`,
+      /* A credit, not money off (Sam, 6 Nov 2026: "this needs to be a $5
+         credit on every meal instead of $5 off - it's $5 off after the
+         credit has been earned"). */
+      label: "In credit on a meal, every week, at each place",
+      line: `Earned on a ${money0(MIN_ORDER)}+ meal, then ${money0(CREDIT)} off their next.`,
     },
     { key: "pct", art: <b className="tpp-card-fig">{PERCENT}%</b>, label: "Off their other orders, once a day", line: "Food and non-alcoholic drinks." },
     { key: "places", art: <LogoRow size={34} />, label: "Places they already go", line: "New Plus places are added at no extra cost." },

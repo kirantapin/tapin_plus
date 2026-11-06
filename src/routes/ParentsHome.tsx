@@ -534,7 +534,7 @@ export default function ParentsHome() {
     },
     {
       q: "Can I see what they order?",
-      a: "No. You’ll get receipts for what you pay, but their orders stay with them.",
+      a: "No. Their orders stay with them.",
     },
     {
       q: "Does it work at bars?",
@@ -831,8 +831,7 @@ export default function ParentsHome() {
               lead={<Glyph d={GLYPHS.phone} />}
               label="They can cancel in the app"
             >
-              They can cancel in the app too. If they do, your billing stops and
-              we’ll email you.
+              They can cancel in the app too. If they do, your billing stops.
             </Fold>
             <Fold
               className="tpp-sure-row"

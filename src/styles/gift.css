@@ -1077,6 +1077,19 @@ button.tpg-env-link {
   margin-top: 8px;
   font-size: 17px;
 }
+/* With a photo (the /parents callout shows one, 6 Nov 2026): a wider, shorter
+   print than the gift page's 4:3, so the card stays a card; more room above
+   for it to rise into, and a longer letter so its foot still fills the V. */
+.gft-mini .gft-a-photo {
+  aspect-ratio: 2 / 1;
+  margin-bottom: 12px;
+}
+.gft.gft-mini:has(.gft-a-photo) {
+  padding-top: 296px;
+}
+.gft-mini .gft-a-letter:has(.gft-a-photo) {
+  min-height: 470px;
+}
 
 /* ══ THE GIFT PAGE ON A WIDE SCREEN (Sam, 6 Nov 2026: "can we rework this
    for desktop?") ═════════════════════════════════════════════════════════

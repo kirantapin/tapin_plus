@@ -36,10 +36,11 @@ function useSeenOnce(el: React.RefObject<HTMLElement | null>, threshold = 0.45) 
   return seen;
 }
 
-/* The envelope's own note: Sam's sample note, cut to its first and last
-   lines (6 Nov 2026: the whole note "might be a bit too long now" for the
-   card in this band). The preview and the sample page show it whole. */
-const ENVELOPE_NOTE = "Thinking of you, my love! Proud of you!";
+/* The envelope's own note: Sam's sample note, cut down (6 Nov 2026: the
+   whole note "might be a bit too long now" for the card in this band, then
+   "i liked how we had slightly longer text here, just not too long"). The
+   preview and the sample page show it whole. */
+const ENVELOPE_NOTE = "Thinking of you, my love! Here’s a little treat. Proud of you!";
 
 export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) {
   const box = useRef<HTMLDivElement | null>(null);
@@ -55,7 +56,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       <div ref={box} className="tpg-env-art">
         <EnvelopeDemo
           play={seen}
-          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: ENVELOPE_NOTE }}
+          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: ENVELOPE_NOTE, photo: SAMPLE_PHOTO_SRC }}
         />
       </div>
       <div className="tpg-env-copy">
@@ -63,8 +64,8 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           Send it with a note
         </h2>
         <p>
-          Write them a few words when you sign up. They get a text, tap it,
-          and open their Plus like a present.
+          Write them a few words and add a photo when you sign up. They get
+          a text, tap it, and open their Plus like a present.
         </p>
         <button ref={send} type="button" className="tpg-env-cta" onClick={(e) => onSend(e.currentTarget)}>
           Send Tapin Plus

@@ -15,7 +15,7 @@ import { FlatMark, GLYPHS, Glyph } from "./parents_kit";
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 const MAIL = `mailto:support@tapin.app?subject=${encodeURIComponent("My student’s Tapin Plus")}&body=${encodeURIComponent(
-  "Hi Tapin,\n\nI’d like to change / cancel my student’s Tapin Plus.\n\nMy name:\nMy student’s first name:\n\nThanks!",
+  "Hi Tapin,\n\nI’d like to change / cancel my student’s Tapin Plus.\n\nMy name:\nMy mobile:\nMy student’s first name:\n\nThanks!",
 )}`;
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -70,7 +70,7 @@ export default function ParentAccount() {
             Email us
           </h2>
           <p className="ppm-line">
-            Write to support@tapin.app from the email you paid with, with your student’s first name, and a person will change or
+            Write to support@tapin.app with your name, the mobile you signed up with and your student’s first name, and a person will change or
             cancel it for you.
           </p>
           <a className="tpa-cta ppa-cta" href={MAIL} onClick={() => track("parent_account_email")}>
@@ -86,7 +86,7 @@ export default function ParentAccount() {
             Your student cancels in the app
           </h2>
           <p className="ppm-line">
-            They can cancel their Plus in the Tapin app. If they do, your billing stops and we’ll email you.
+            They can cancel their Plus in the Tapin app. If they do, your billing stops.
           </p>
         </section>
 

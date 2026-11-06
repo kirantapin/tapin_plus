@@ -292,7 +292,7 @@ function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, fla
    into view (`play`), so a parent sees exactly what their student will. It
    stops with the card almost all the way out, its foot still tucked in the
    pocket, so the whole note reads. Reduced motion: shown already open. */
-export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> }) {
+export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null } }) {
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
   const extra = useRef<HTMLSpanElement | null>(null);
@@ -333,6 +333,9 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
             <div className="gft-a-head">
               <span>For {gift.to ?? "you"}</span>
             </div>
+            {/* A photo, as the gift page prints it (Sam, 6 Nov 2026: "do we
+                want to show here that it comes with an image?"). */}
+            {gift.photo ? <img className="gft-a-photo" src={gift.photo} alt="" decoding="async" /> : null}
             {gift.note ? <p className="gft-a-note">{gift.note}</p> : null}
             <p className="gft-a-sig">{gift.from}</p>
           </div>
