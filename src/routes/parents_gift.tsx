@@ -36,6 +36,11 @@ function useSeenOnce(el: React.RefObject<HTMLElement | null>, threshold = 0.45) 
   return seen;
 }
 
+/* The envelope's own note: Sam's sample note, cut to its first and last
+   lines (6 Nov 2026: the whole note "might be a bit too long now" for the
+   card in this band). The preview and the sample page show it whole. */
+const ENVELOPE_NOTE = "Thinking of you, my love! Proud of you!";
+
 export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) {
   const box = useRef<HTMLDivElement | null>(null);
   const seen = useSeenOnce(box, 0.6);
@@ -50,7 +55,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       <div ref={box} className="tpg-env-art">
         <EnvelopeDemo
           play={seen}
-          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: SAMPLE_GIFT.note }}
+          gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: ENVELOPE_NOTE }}
         />
       </div>
       <div className="tpg-env-copy">
