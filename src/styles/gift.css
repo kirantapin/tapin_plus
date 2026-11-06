@@ -1,0 +1,555 @@
+/* ══ THE GIFT PAGE (routes/GiftPage.tsx) AND THE PARENTS PAGE'S GIFT CALLOUT
+   (routes/parents_gift.tsx): the envelope and the letter, Sam's pick
+   (6 Nov 2026) ════════════════════════════════════════════════════════════
+   The town palette, flat: maroon #861F41, burnt orange #E5751F, the collage's
+   cream paper #ECE5D5 and its rim #F7F3EA, ink #141618. Gilroy 600 at most.
+   No CSS keyframes: every move is the Web Animations API, in the TSX.
+   Loaded after plus-app.css (main.tsx), so its :where() reset can't win. */
+
+.gft {
+  --maroon: #861f41;
+  --orange: #e5751f;
+  --cream: #ece5d5;
+  --rim: #f7f3ea;
+  --ink: #141618;
+  --muted: rgba(20, 22, 24, 0.62);
+  --hair: rgba(20, 22, 24, 0.1);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  min-height: 100svh;
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: 500;
+  color: var(--ink);
+  background: #f0f0f0;
+  -webkit-font-smoothing: antialiased;
+}
+.gft *,
+.gft *::before,
+.gft *::after {
+  box-sizing: border-box;
+}
+.gft :where(h1, h2, p, ul, figure) {
+  margin: 0;
+  padding: 0;
+}
+.gft ul {
+  list-style: none;
+}
+.gft-nowrap {
+  white-space: nowrap;
+}
+.gft-h1 {
+  max-width: 340px;
+  margin: 0 auto;
+  font-weight: 600;
+  font-size: 34px;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+}
+.gft-h2 {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 26px;
+  letter-spacing: -0.01em;
+}
+
+/* The tap that opens it. */
+.gft-open {
+  height: 54px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font: 600 17px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  -webkit-tap-highlight-color: transparent;
+}
+a.gft-open {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.gft-open:active {
+  transform: scale(0.97);
+}
+.gft-open:focus-visible,
+.gft-a-stage:focus-visible,
+.gft-plain-link:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+
+/* ── After it's open: what's in it, then the app ─────────────────────────── */
+.gft-after {
+  display: grid;
+  gap: 28px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 16px 120px;
+}
+.gft-in {
+  padding: 22px 20px 20px;
+  border-radius: 20px;
+  background: #fff;
+}
+.gft-perks {
+  margin-top: 10px;
+}
+.gft-perks li {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-top: 1px solid var(--hair);
+}
+.gft-perks li:first-child {
+  border-top: 0;
+}
+.gft-perks b {
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 22px;
+}
+.gft-perks span {
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.gft-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.gft-logos li {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border-radius: 13px;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.gft-logos img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gft-next {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.gft-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-sign {
+  max-width: 300px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.gft-sign b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.gft-thanks {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.16);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-thanks svg {
+  width: 18px;
+  height: 18px;
+}
+/* On the light ground under the letter the ring is ink (orange is under
+   3:1 on #f0f0f0); orange stays for the maroon band. */
+.gft-cta:focus-visible,
+.gft-thanks:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Words for a screen reader only. */
+.gft-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* An ended gift, or a link that didn't open: the band, a line, a way on. */
+.gft-plain {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 360px;
+  text-align: center;
+}
+.gft-plain-line {
+  font-size: 17px;
+  line-height: 24px;
+  color: rgba(255, 255, 255, 0.86);
+}
+.gft-plain .gft-open {
+  margin-top: 8px;
+}
+.gft-plain-link {
+  padding: 6px 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ══ THE LETTER ═══════════════════════════════════════════════════════════ */
+.gft-a-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  min-height: 100svh;
+  padding: 64px 16px 72px;
+  background: var(--maroon);
+  color: #fff;
+}
+.gft-a[data-state="open"] .gft-a-band {
+  justify-content: flex-start;
+  min-height: 0;
+  gap: 26px;
+  padding: 56px 16px 36px;
+}
+.gft-a-stage {
+  position: relative;
+  isolation: isolate;
+  width: min(340px, 100%);
+  height: 226px;
+  perspective: 1100px;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-a[data-state="open"] .gft-a-stage {
+  height: auto;
+  cursor: default;
+}
+.gft-a-shell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 226px;
+}
+.gft-a-back,
+.gft-a-pocket,
+.gft-a-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.gft-a-back {
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border-radius: 10px;
+  background: #d6cab0;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
+}
+.gft-a-pocket {
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  border-radius: 10px;
+  background: var(--cream);
+  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+}
+.gft-a-flap {
+  top: 0;
+  z-index: 4;
+  height: 62%;
+  background: #e2d8c1;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+}
+.gft-a-seal {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: calc(226px * 0.62 - 30px);
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+.gft-a-seal svg {
+  width: 30px;
+  height: 30px;
+}
+.gft-a-letter {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: 202px;
+  overflow: hidden;
+  padding: 18px 20px 22px;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+.gft-a[data-state="open"] .gft-a-letter {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: 6;
+  height: auto;
+  margin: 0 12px;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.32);
+}
+/* While the envelope falls away, the letter stays behind its pocket. */
+.gft-a[data-state="open"][data-leaving] .gft-a-letter {
+  z-index: 2;
+}
+.gft-h1:focus {
+  outline: none;
+}
+.gft-a-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.gft-a-head img {
+  display: block;
+  width: 38px;
+  height: auto;
+}
+.gft-a-note {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  font-size: 21px;
+  line-height: 29px;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+.gft-a-sig {
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 24px;
+  text-align: right;
+}
+.gft-a-sig::before {
+  content: "— ";
+}
+
+/* ══ THE GIFT CALLOUT ON /parents (routes/parents_gift.tsx) ══════════════ */
+.tpg {
+  --maroon: #861f41;
+  --orange: #e5751f;
+  --cream: #ece5d5;
+}
+.tpg-env {
+  display: grid;
+  gap: 4px;
+  margin: 16px var(--gutter) 0;
+  padding: 28px 20px 24px;
+  border-radius: 16px;
+  background: var(--maroon);
+  color: #fff;
+}
+.tpg-env-art {
+  display: grid;
+  place-items: center;
+  padding-top: 64px;
+}
+.tpg-env-stage {
+  position: relative;
+  isolation: isolate;
+  width: 220px;
+  height: 146px;
+  perspective: 900px;
+}
+.tpg-env-back,
+.tpg-env-pocket,
+.tpg-env-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+.tpg-env-back {
+  bottom: 0;
+  z-index: 1;
+  border-radius: 8px;
+  background: #d6cab0;
+}
+.tpg-env-pocket {
+  bottom: 0;
+  z-index: 3;
+  border-radius: 8px;
+  background: var(--cream);
+  clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+}
+.tpg-env-flap {
+  z-index: 4;
+  height: 62%;
+  background: #e2d8c1;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+}
+.tpg-env-seal {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: calc(146px * 0.62 - 20px);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+.tpg-env-seal svg {
+  width: 22px;
+  height: 22px;
+}
+.tpg-env-letter {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  left: 10px;
+  right: 10px;
+  display: grid;
+  gap: 6px;
+  height: 132px;
+  padding: 12px 14px;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 19px;
+}
+.tpg-env-letter b {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tpg-env-letter em {
+  font-style: normal;
+  font-weight: 600;
+  text-align: right;
+}
+.tpg-env-letter em::before {
+  content: "— ";
+}
+.tpg-env-copy {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  text-align: center;
+}
+.tpa .tpg-env-h {
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: -0.02em;
+}
+.tpa .tpg-env-copy p {
+  max-width: 320px;
+  font-size: 16px;
+  line-height: 22px;
+  color: rgba(255, 255, 255, 0.86);
+}
+.tpg-env-cta {
+  width: 100%;
+  max-width: 340px;
+  height: 52px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font: 600 17px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tpg-env-link {
+  padding: 6px 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tpg-env-cta:focus-visible,
+.tpg-env-link:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+/* Side by side only once the sheet is the desk layout's wide column. */
+@media (min-width: 1024px) {
+  .tpp .tpa-sheet > .tpp-offer + .tpg-env {
+    margin-top: 0;
+  }
+  .tpg-env {
+    border-radius: 20px;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 32px;
+    padding: 28px 32px;
+  }
+  .tpg-env-art {
+    padding: 56px 8px 0;
+  }
+  .tpg-env-copy {
+    justify-items: start;
+    margin-top: 0;
+    text-align: left;
+  }
+}

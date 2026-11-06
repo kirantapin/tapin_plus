@@ -29,6 +29,7 @@ import "./styles/plus-checkout.css";
 import "./styles/parents.css";
 import "./styles/parent-checkout.css";
 import "./styles/parent-pages.css";
+import "./styles/gift.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

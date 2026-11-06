@@ -25,8 +25,10 @@ import {
   GLYPHS,
   SAVES_NOTE,
   Fold,
+  FlatMark,
 } from "./parents_kit";
 import { BenefitCards, HowTimeline, LunchColumns, OfferPrice } from "./parents_sections";
+import { GiftEnvelope } from "./parents_gift";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -69,27 +71,33 @@ const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
 
-/* ══ THE HERO A/B TEST (Sam, 5 Nov 2026: COPY.md "v2 final hero") ════════════
+/* ══ THE HERO A/B TEST: THE GIFT ROUND (Sam, 6 Nov 2026: "I think the copy
+   variants for the header should be focused on this being a gift to their
+   kids") ═══════════════════════════════════════════════════════════════════
    The same pattern as model/heroTest.ts, kept in this file. One link, and
    each visitor is given one headline the first time and keeps it
-   (localStorage), half and half:
-     "a" · film 1's hook: "Does your kid text you for food money?"
-     "b" · the research line: "They're eating out in Blacksburg anyway. Make
-           it cost less."
-   ?ph=a|b shows either one and is not stored. The variant is registered for
-   the session on mount (parent_hero_variant, and $feature/plus-parent-hero
+   (localStorage), a third each:
+     "a" · the care package: "A care package they’ll open every week."
+     "b" · from home: "Lunch is on you. Even from home."
+     "c" · the note: "Send them Tapin Plus, with a note from you."
+   The first round (5 Nov: "Does your kid text you for food money?" against
+   "They’re eating out in Blacksburg anyway. Make it cost less.") is retired;
+   this round has its own key and flag, so its numbers start clean.
+   ?ph=a|b|c shows any one and is not stored. The variant is registered for
+   the session on mount (parent_hero_variant, and $feature/plus-parent-hero-gift
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b";
-const PARENT_HERO_TEST = "plus-parent-hero";
-const PARENT_HERO_KEY = "tp_parent_hero_v1";
+type ParentHero = "a" | "b" | "c";
+const PARENT_HERO_TEST = "plus-parent-hero-gift";
+const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
-  a: ["Does your kid text you for food money?"],
-  b: ["They’re eating out in Blacksburg anyway.", "Make it cost less."],
+  a: ["A care package", "they’ll open every week."],
+  b: ["Lunch is on you.", "Even from home."],
+  c: ["Send them Tapin Plus,", "with a note from you."],
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b";
+  v === "a" || v === "b" || v === "c";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
@@ -103,7 +111,8 @@ function parentHero(): ParentHero {
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
-  const drawn: ParentHero = Math.random() < 0.5 ? "a" : "b";
+  const roll = Math.random();
+  const drawn: ParentHero = roll < 1 / 3 ? "a" : roll < 2 / 3 ? "b" : "c";
   try {
     window.localStorage.setItem(PARENT_HERO_KEY, drawn);
   } catch {
@@ -200,35 +209,6 @@ function Proof() {
         {PROOF_STUDENTS}
       </p>
     </div>
-  );
-}
-
-/** The flat four-piece Plus mark (the app's TapInGlyph). */
-function FlatMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="-0.4790 -1.7502 11.9749 11.9749"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M5.96461 0H8.01572L7.42303 1.69488H5.37196L4.77927 3.38981H2.7282L3.32085 1.69488L3.32891 1.6719L3.32938 1.67159C3.66805 0.746268 4.84127 0 5.96461 0Z"
-      />
-      <path
-        fill="currentColor"
-        d="M10.9325 3.38981L10.3398 5.08473H8.28874L8.88144 3.38981H6.83033L7.42303 1.69488H9.50194L9.50217 1.69519C10.6176 1.70766 11.2571 2.46151 10.9325 3.38981Z"
-      />
-      <path
-        fill="currentColor"
-        d="M5.05231 8.47458H3.0012L3.5939 6.77966H5.64496L6.23766 5.08477H8.28872L7.69607 6.77966L7.68801 6.80268L7.68755 6.80299C7.34889 7.72827 6.17567 8.47458 5.05231 8.47458Z"
-      />
-      <path
-        fill="currentColor"
-        d="M0.0844383 5.08473L0.677134 3.38981H2.7282L2.1355 5.08473H4.18661L3.59392 6.77961H1.51501L1.51478 6.77935C0.399363 6.76688 -0.240155 6.01303 0.0844603 5.08473Z"
-      />
-    </svg>
   );
 }
 
@@ -459,9 +439,12 @@ export default function ParentsHome() {
   /* The button that was tapped: the checkout grows out of it (or out of the
      dock's plate while that is on screen) and shrinks back into it. */
   const [from, setFrom] = useState<HTMLElement | null>(null);
-  const signUp = (where: string, el: HTMLElement) => {
+  /* The gift's note: open in the checkout when they came from the envelope. */
+  const [withNote, setWithNote] = useState(false);
+  const signUp = (where: string, el: HTMLElement, note = false) => {
     track("parent_signup_clicked", { where, ask: !!asked });
     setFrom(el);
+    setWithNote(note);
     setOpen(true);
   };
 
@@ -634,14 +617,8 @@ export default function ParentsHome() {
           className="tpa-module tpa-offer tpp-offer"
           aria-label="Tapin Plus"
         >
-          <img
-            className="tpp-offer-mark"
-            src={PAPER_MARK}
-            alt=""
-            width="76"
-            height="60"
-            decoding="async"
-          />
+          {/* No mark on the offer card (Sam, 6 Nov 2026: "can we remove the
+              tapin logo from this callout"): the price leads. */}
           {ask.state === "ok" ? (
             <div className="tpp-ask" role="status">
               <span className="tpa-well" aria-hidden="true">
@@ -686,6 +663,10 @@ export default function ParentsHome() {
             /month. Cancel anytime.
           </p>
         </section>
+
+        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
+            their student opens. */}
+        <GiftEnvelope onSend={(el) => signUp("gift", el, true)} />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -933,6 +914,7 @@ export default function ParentsHome() {
       <ParentCheckout
         open={open}
         from={from}
+        note={withNote}
         onClose={() => setOpen(false)}
         ask={
           asked

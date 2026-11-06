@@ -14,6 +14,7 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
+import { FROM_MAX, NOTE_MAX } from "../model/gift";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -51,11 +52,14 @@ export default function ParentCheckout({
   onClose,
   ask,
   from = null,
+  note = false,
 }: {
   open: boolean;
   onClose: () => void;
   ask: Ask | null;
   from?: HTMLElement | null;
+  /** Open with the gift note already showing (from the envelope on /parents). */
+  note?: boolean;
 }) {
   /* Mounted while open and while it leaves; each opening starts clean. */
   const [mounted, setMounted] = useState(open);
@@ -78,6 +82,7 @@ export default function ParentCheckout({
       key={session}
       ask={ask}
       from={from}
+      note={note}
       closing={closing}
       onGone={() => {
         setMounted(false);
@@ -125,18 +130,20 @@ type Step = "student" | "you" | "pay" | "done";
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
-let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string } | null = null;
-type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile";
+let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
+type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
 function Sheet({
   ask,
   from,
+  note: noteFirst,
   closing,
   onGone,
   onClose,
 }: {
   ask: Ask | null;
   from: HTMLElement | null;
+  note: boolean;
   closing: boolean;
   onGone: () => void;
   onClose: () => void;
@@ -152,6 +159,21 @@ function Sheet({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
+     signed, both optional; shown on the student's gift page, never in a
+     text. Folded away unless they came from the envelope. */
+  const [noteOpen, setNoteOpen] = useState(noteFirst);
+  const [giftNote, setGiftNote] = useState("");
+  const [giftFrom, setGiftFrom] = useState("");
+  /* Whether a note went to parent_checkout_start: what the done screen says,
+     kept across a resumed payment (the fields start empty again then). */
+  const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
+  /* Opening the note by its button puts the cursor in it. */
+  const noteBox = useRef<HTMLTextAreaElement | null>(null);
+  const noteAsked = useRef(false);
+  useEffect(() => {
+    if (noteOpen && noteAsked.current) noteBox.current?.focus();
+  }, [noteOpen]);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -370,7 +392,9 @@ function Sheet({
       return;
     }
     setBusy(true);
-    track("parent_checkout_started", { source });
+    const giftNoteSent = noteOpen && giftNote.trim() ? giftNote.trim() : null;
+    const giftFromSent = noteOpen && giftFrom.trim() ? giftFrom.trim().replace(/\s+/g, " ") : null;
+    track("parent_checkout_started", { source, has_note: !!giftNoteSent });
     try {
       const res = await startParentCheckout({
         student_first_name: ask ? ask.student_first_name : student.trim(),
@@ -379,9 +403,12 @@ function Sheet({
         parent_email: email.trim(),
         parent_phone: mobile.trim() ? toE164(digitsOf(mobile)) : null,
         ask_token: ask?.token ?? null,
+        gift_note: giftNoteSent,
+        gift_from: giftFromSent,
         utm: keptUtm(),
       });
       setStarted(res);
+      setSentNote(!!giftNoteSent);
       setStep("pay");
     } catch (err) {
       setFormError((err as Error).message || "Something went wrong. Please try again.");
@@ -391,7 +418,7 @@ function Sheet({
   };
 
   const onCharged = (paymentIntent: string) => {
-    if (started) charged = { started, paymentIntent, who: ask ? ask.student_first_name : student.trim(), masked: ask ? ask.masked_phone : maskDigits(phoneD) };
+    if (started) charged = { started, paymentIntent, who: ask ? ask.student_first_name : student.trim(), masked: ask ? ask.masked_phone : maskDigits(phoneD), hasNote: sentNote };
     setPaid(true);
   };
   const onPaid = (res: ParentConfirmed) => {
@@ -404,6 +431,7 @@ function Sheet({
   };
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
+  const noteFor = (ask ? ask.student_first_name : student.trim()) || "them";
   const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
   const first = started?.first_cents ?? OFFER.first_cents;
   const monthly = started?.monthly_cents ?? OFFER.monthly_cents;
@@ -500,6 +528,47 @@ function Sheet({
                 <Input id="mobile" label="Your mobile (optional)" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
                 </div>
               </fieldset>
+              {noteOpen ? (
+                <fieldset className="prc-module prc-note">
+                  <legend className="prc-legend">A note for {noteFor} (optional)</legend>
+                  <div className="prc-fields">
+                    <div className="prc-field">
+                      <label className="prc-label prc-label-count" htmlFor="prc-note">
+                        Your note
+                        <small className="tnum" aria-hidden="true">
+                          {giftNote.length}/{NOTE_MAX}
+                        </small>
+                      </label>
+                      <div className="prc-box prc-box-area">
+                        <textarea
+                          ref={noteBox}
+                          id="prc-note"
+                          rows={4}
+                          maxLength={NOTE_MAX}
+                          value={giftNote}
+                          placeholder="Lunch is on me this semester. So proud of you."
+                          onChange={(e) => setGiftNote(e.target.value)}
+                          aria-describedby="prc-note-help"
+                        />
+                      </div>
+                      <p id="prc-note-help" className="prc-help">
+                        Up to {NOTE_MAX} characters. They open it like a present when they tap their text. Only they get the link.
+                      </p>
+                    </div>
+                    <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
+                  </div>
+                </fieldset>
+              ) : (
+                <button type="button" className="prc-module prc-add-note" onClick={() => {
+                    noteAsked.current = true;
+                    setNoteOpen(true);
+                  }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5ZM3.5 7.5l8.5 6 8.5-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Add a note for {noteFor}
+                </button>
+              )}
                 </>
               )}
               {formError ? (
@@ -552,13 +621,16 @@ function Sheet({
               <div className="prc-module prc-done">
                 <p>
                   {ask ? (
-                    /* An ask link's student is already signed in, and isn't texted (API.md). */
+                    /* An ask link's student is already signed in, and isn't texted
+                       (API.md), unless there's a note: then they get its link. */
                     <>
-                      It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now. Your receipt and a manage or cancel link are in your email.
+                      It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
+                      {sentNote ? " We’ve texted them a link to your note." : ""} Your receipt and a manage or cancel link are in your email.
                     </>
                   ) : (
                     <>
-                      We’ve texted <span className="tnum">{done.masked_phone || masked}</span>. They sign in to Tapin with that number and it’s there. Your receipt and a manage or cancel link are in your email. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+                      We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
+                      {sentNote ? " a link to your note" : ""}. They sign in to Tapin with that number and it’s there. Your receipt and a manage or cancel link are in your email. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
                     </>
                   )}
                 </p>
@@ -591,6 +663,7 @@ function Input({
   autoComplete,
   autoCapitalize,
   maxLength,
+  placeholder,
 }: {
   id: Field;
   label: string;
@@ -605,6 +678,7 @@ function Input({
   autoComplete?: string;
   autoCapitalize?: string;
   maxLength?: number;
+  placeholder?: string;
 }) {
   const fid = `prc-${id}`;
   const described = [help ? `${fid}-help` : null, error ? `${fid}-error` : null].filter(Boolean).join(" ") || undefined;
@@ -622,7 +696,7 @@ function Input({
           autoCapitalize={autoCapitalize}
           autoCorrect="off"
           spellCheck={false}
-          placeholder={tel ? "(540) 555-0123" : undefined}
+          placeholder={tel ? "(540) 555-0123" : placeholder}
           maxLength={maxLength}
           value={value}
           onChange={(e) => onChange(e.target.value)}

@@ -57,11 +57,6 @@
 }
 
 /* ── The offer card: the pitch, the price, the button ───────────────────── */
-/* The paper mark heads the card on a computer only; on a phone the band
-   right above it already carries the colour, and the button stays high. */
-.tpp-offer-mark {
-  display: none;
-}
 .tpp .tpp-offer {
   padding: 20px;
 }
@@ -698,12 +693,6 @@
   }
   .tpp .tpp-offer {
     padding: 28px;
-  }
-  .tpp-offer-mark {
-    display: block;
-    width: 76px;
-    height: auto;
-    margin: 0 0 16px -4px;
   }
   /* The story column's first card lines up with the offer card's top (the
      phone rhythm's first-child 4px would otherwise drop the offer card). */
