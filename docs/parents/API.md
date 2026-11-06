@@ -76,7 +76,7 @@ For a parent with no account. No auth.
 req: {
   student_first_name: string; student_phone: string;   // E.164 +1XXXXXXXXXX
   parent_name: string; parent_phone: string;           // E.164; how a payer is known (6 Nov 2026)
-  parent_email?: string | null;                         // not sent for now: no automated emails yet
+  parent_email: string;                                 // required and kept; nothing is emailed for now (the parent is texted)
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
   gift_from?: string | null;                            // optional sign-off ("Mom"), <= 24 chars

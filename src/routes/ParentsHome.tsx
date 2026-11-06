@@ -831,7 +831,7 @@ export default function ParentsHome() {
               lead={<Glyph d={GLYPHS.phone} />}
               label="They can cancel in the app"
             >
-              They can cancel in the app too. If they do, your billing stops.
+              They can cancel in the app too. If they do, your billing stops and we’ll text you.
             </Fold>
             <Fold
               className="tpp-sure-row"
