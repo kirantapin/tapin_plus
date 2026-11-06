@@ -254,3 +254,55 @@ HERO (film 1's hook)
 CHANGE: "What a lunch costs" goes BELOW the value stack, and its first row reads "A dining
 hall lunch, paid at the door: $17.95" (holiday traffic is mostly first-year parents who
 prepaid the plan: they meet $12 → $7 first; the door price is context, not the lead).
+
+## The gift (Sam, 6 Nov 2026: picked the envelope and the letter)
+
+**Headline test, gift round** (`plus-parent-hero-gift`, a third each; the 5 Nov round is retired):
+- a · "A care package they’ll open every week."
+- b · "Lunch is on you. Even from home."
+- c · "Send them Tapin Plus, with a note from you."
+
+**The callout on /parents** (under the offer card): "Send it with a note" / "Write them a
+few words when you sign up. They get a text, tap it, and open their Plus like a present."
+/ button "Send Tapin Plus" / link "See what they’ll see" (opens /gift/sample).
+
+**In the checkout** (the "You" step; open already when they came from the callout):
+"Add a note for {Student}" folds open to "A note for {Student} (optional)", "Your note"
+(240 characters, placeholder "Lunch is on me this semester. So proud of you."), help
+"Up to 240 characters. They open it like a present when they tap their text. Only they
+get the link.", "Sign it" (placeholder "Mom"), "A photo (optional)" / "Add a photo" /
+"Change" / "Remove", help "Only {Student} sees it, on their gift. We delete it when their
+Plus ends.", and "Background" (Maroon, Picnic, Night sky, Confetti, Airmail, Sunrise, Blue Ridge, Hearts,
+Flannel, Lunch, Sunburst, Fall leaves), "Preview their gift". The fold button
+reads "Add a note or a photo for {Student}"; the section is "For {Student}, from you
+(optional)". Old line, kept for reference:
+"Sign it" (placeholder "Mom"). Done screen: "We’ve texted •••0123 a link to your note."
+
+**The text to the student:** `Tapin: {Who} sent you Tapin Plus{ with a note | with a photo}. Open it:
+https://plus.tapin.app/gift/{token} Reply STOP to opt out`
+
+**The gift page** (/gift/{token}):
+- The envelope is the care package (kraft, twine, a maroon seal with the flat Plus mark),
+  on the parent's background; the parent's photo is printed at the top of the letter.
+- Sealed: "{Student}, {Who} sent you something" / "Open it".
+- The dock once it's open: "Claim my gift" (the app).
+- Open: "{Who} got you Tapin Plus", the letter ("For {Student}", the note, "— {Who}"; with
+  no note: "{Who} signed you up for Tapin Plus."), "What’s in it" ($5 back every week at
+  each place below, on a $10+ food order; 15% off instead, once a day, whenever that’s
+  better; points on everything you order; the five logos), "Get the app", "Sign in with
+  your number, •••0123. Plus is already on it.", "Text {Who} a thank-you".
+- Ended: "{Who}’s gift has ended" / "Tapin Plus isn’t on {Student}’s number anymore. You
+  can still join on your own." / "See Tapin Plus".
+- Didn’t load (offline, busy): "Your gift didn’t load" / "Check your connection and try
+  again." / "Try again".
+- Link didn’t open (gift_lookup’s 404): "We couldn’t open this gift" / "The link may be old. If someone
+  signed you up for Tapin Plus, it’s on your number: sign in with it." / "Get the app" /
+  "Sign in on the web".
+
+## Changing or cancelling (Sam, 6 Nov 2026)
+
+"parents can manage their subscription any time by emailing support@tapin.app - or their
+student can cancel it in the tapin app." On the page: FAQ "How do I cancel?" → "Email
+support@tapin.app any time and we’ll change or cancel it for you. Your student can also
+cancel in the Tapin app, and we’ll let you know if they do."; the assurance row "Change
+or cancel by email"; the checkout's terms and done screen say the same.

@@ -1,57 +1,59 @@
 import { useEffect, type RefObject } from "react";
 
-/* ══ THE DOCK'S PULSE (Sam, 6 Nov 2026: "on all tapin plus pages, the sticky
-   CTA at the bottom, when not expanded, should pulse gently") ═══════════════
-   The docked button breathes: a slight swell and back, then a rest, every
-   three seconds. Transform only (composited), so nothing repaints. It starts
-   a beat after the dock is showing and stops:
-     - while the checkout is open (the plate is hidden under the island, and
-       a running animation there made the close stutter before);
-     - the moment anything on the page is pressed, so the island measures the
-       button at rest (shell/island.ts reads its box to dress its stand-in),
-       and again a beat after if the press opened nothing;
-     - with reduced motion, where it never runs.
+/* ══ THE DOCK'S NUDGE (Sam, 6 Nov 2026: "don't like the pulsing animation
+   here", replacing the 6 Nov swell of the whole button) ════════════════════
+   The docked button holds still. Its arrow (shell/DockArrow.tsx) nudges
+   forward twice, a quiet "this way", only once the visitor has stopped:
+   after a few seconds with no scroll, tap or key. Any of those resets the
+   wait; it nudges at most four times a visit, a little further apart each
+   time, and never with reduced motion or a hidden tab. Only the arrow moves,
+   so the island (shell/island.ts) always measures the button at rest.
    `on`: the dock is showing and nothing has grown out of it. `swap`: changes
-   when the dock's button is replaced (Join becoming Get the app), so the
-   pulse moves to the new one. */
-const FRAMES: Keyframe[] = [
-  { transform: "scale(1)", offset: 0, easing: "cubic-bezier(.45,0,.55,1)" },
-  { transform: "scale(1.035)", offset: 0.16, easing: "cubic-bezier(.45,0,.55,1)" },
-  { transform: "scale(1)", offset: 0.34 },
-  { transform: "scale(1)", offset: 1 },
+   when the dock's button is replaced (Join becoming Get the app). */
+const NUDGE: Keyframe[] = [
+  { transform: "translateX(0)" },
+  { transform: "translateX(5px)", offset: 0.18 },
+  { transform: "translateX(0)", offset: 0.36 },
+  { transform: "translateX(5px)", offset: 0.54 },
+  { transform: "translateX(0)", offset: 0.72 },
+  { transform: "translateX(0)" },
 ];
+const IDLE_MS = 3200;
+const MAX_NUDGES = 4;
 
 export function useDockPulse(dock: RefObject<HTMLElement | null>, on: boolean, swap?: unknown) {
   useEffect(() => {
-    const el = dock.current?.querySelector<HTMLElement>(".tpa-dock-cta");
-    if (!el || !on || typeof el.animate !== "function") return;
+    const arrow = dock.current?.querySelector<HTMLElement>(".tpa-dock-arrow");
+    if (!arrow || !on || typeof arrow.animate !== "function") return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const run = el.animate(FRAMES, { duration: 3000, delay: 1400, iterations: Infinity });
-    /* Still at the moment of any press on the page (the dock's own button or
-       any other Join, which grows out of this same plate), so the island
-       measures it at rest; back again if that press opened nothing (a scroll
-       that started on the button, say). Restarting runs the 1.4s rest first. */
-    const stop = (e: Event) => {
-      const t = e.target as Element | null;
-      if (e.type === "keydown" ? t === el : t?.closest?.("a, button")) run.cancel();
+    let done = 0;
+    let timer = 0;
+    let run: Animation | null = null;
+    const arm = () => {
+      window.clearTimeout(timer);
+      if (done < MAX_NUDGES) timer = window.setTimeout(nudge, IDLE_MS + done * 2000);
     };
-    const resume = () => {
-      window.setTimeout(() => {
-        if (el.isConnected && run.playState !== "running") run.play();
-      }, 0);
+    const nudge = () => {
+      if (document.hidden) return arm();
+      done += 1;
+      run = arrow.animate(NUDGE, { duration: 1100, easing: "cubic-bezier(.4,0,.2,1)" });
+      arm();
     };
-    document.addEventListener("pointerdown", stop, true);
-    document.addEventListener("pointerup", resume, true);
-    document.addEventListener("pointercancel", resume, true);
-    el.addEventListener("keydown", stop);
-    el.addEventListener("keyup", resume);
+    const busy = () => {
+      run?.cancel();
+      arm();
+    };
+    const opts: AddEventListenerOptions = { passive: true, capture: true };
+    window.addEventListener("scroll", busy, opts);
+    window.addEventListener("pointerdown", busy, opts);
+    window.addEventListener("keydown", busy, opts);
+    arm();
     return () => {
-      run.cancel();
-      document.removeEventListener("pointerdown", stop, true);
-      document.removeEventListener("pointerup", resume, true);
-      document.removeEventListener("pointercancel", resume, true);
-      el.removeEventListener("keydown", stop);
-      el.removeEventListener("keyup", resume);
+      window.clearTimeout(timer);
+      run?.cancel();
+      window.removeEventListener("scroll", busy, opts);
+      window.removeEventListener("pointerdown", busy, opts);
+      window.removeEventListener("keydown", busy, opts);
     };
   }, [dock, on, swap]);
 }

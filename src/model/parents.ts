@@ -20,6 +20,16 @@ export interface ParentCheckoutStart {
   parent_email: string;
   parent_phone?: string | null;
   ask_token?: string | null;
+  /** The gift (Sam, 6 Nov 2026): an optional note for the student, up to
+   *  240 characters, and how it's signed ("Mom"), up to 24. Shown on the
+   *  student's gift page (/gift/{token}); the note never goes in a text. */
+  gift_note?: string | null;
+  gift_from?: string | null;
+  /** The gift page's background (model/gift.ts SCENES ids), and the
+   *  parent's photo as a JPEG data URL (made small on the phone,
+   *  model/giftPhoto.ts; at most 1.5M characters). Both optional. */
+  gift_scene?: string | null;
+  gift_photo?: string | null;
   utm?: Record<string, string>;
 }
 export interface ParentCheckoutStarted {
@@ -53,6 +63,24 @@ export interface AskLinkInfo {
   expired: boolean;
   already_covered: boolean;
 }
+
+/** The student's gift page (gift_lookup): "ok" while their Plus is on,
+ *  "ended" once it's canceled or refunded. `to` is null when the name typed
+ *  isn't plainly a first name. */
+export type GiftInfo =
+  | {
+      state: "ok";
+      to: string | null;
+      from: string;
+      note: string | null;
+      masked_phone: string;
+      /** The parent's background (model/gift.ts SCENES); unknown or
+       *  missing falls back to maroon. */
+      scene?: string | null;
+      /** A short-lived link to the parent's photo, if they added one. */
+      photo_url?: string | null;
+    }
+  | { state: "ended"; to: string | null; from: string };
 
 /** Whether Kiran's parents backend (docs/parents/API.md) is deployed. Until it
  *  is, "Ask a parent to cover it" stays off the live student checkout and
@@ -88,7 +116,17 @@ const mask = (phone: string) => `•••${phone.replace(/\D/g, "").slice(-4)}`
 
 /* The mock's memory, for one tab. */
 const MOCK_KEY = "tp_parent_mock_v1";
-type MockState = { student_first_name: string; student_phone: string; parent_name: string; status: ParentStatus; signed_in?: boolean };
+type MockState = {
+  student_first_name: string;
+  student_phone: string;
+  parent_name: string;
+  status: ParentStatus;
+  signed_in?: boolean;
+  gift_note?: string | null;
+  gift_from?: string | null;
+  gift_scene?: string | null;
+  gift_photo?: string | null;
+};
 const mockGet = (): MockState | null => {
   try {
     return JSON.parse(sessionStorage.getItem(MOCK_KEY) || "null");
@@ -107,7 +145,16 @@ const mockSet = (s: MockState) => {
 export async function startParentCheckout(req: ParentCheckoutStart): Promise<ParentCheckoutStarted> {
   if (parentMock()) {
     await wait(500);
-    mockSet({ student_first_name: req.student_first_name || "Alex", student_phone: req.student_phone || "+15405550123", parent_name: req.parent_name, status: "pending_payment" });
+    mockSet({
+      student_first_name: req.student_first_name || "Alex",
+      student_phone: req.student_phone || "+15405550123",
+      parent_name: req.parent_name,
+      status: "pending_payment",
+      gift_note: req.gift_note ?? null,
+      gift_from: req.gift_from ?? null,
+      gift_scene: req.gift_scene ?? null,
+      gift_photo: req.gift_photo ?? null,
+    });
     return { checkout_id: "mock", client_secret: "pi_mock_secret_mock", first_cents: 399, monthly_cents: 799 };
   }
   return call("parent_checkout_start", req as unknown as Record<string, unknown>);
@@ -170,6 +217,35 @@ export async function lookupAskLink(ask_token: string): Promise<AskLinkInfo> {
     return { student_first_name: "Alex", masked_phone: "•••0123", expired: false, already_covered: false };
   }
   return call("ask_link_lookup", { ask_token });
+}
+
+/** gift_lookup's 404 message (API.md): the only failure that means the link
+ *  itself is bad. Anything else (offline, rate-limited) is worth a retry. */
+export const GIFT_NOT_FOUND = "This gift link isn't valid.";
+
+/** The gift page's lookup, by the key in the student's text. With
+ *  ?parentmock it shows what was typed in this tab's mock checkout (or a
+ *  sample), and ?giftended previews an ended gift. */
+export async function lookupGift(gift_token: string): Promise<GiftInfo> {
+  if (parentMock()) {
+    await wait(350);
+    const s = mockGet();
+    const from = s?.gift_from || s?.parent_name.split(/\s+/)[0] || "Mom";
+    const to = s?.student_first_name ?? "Alex";
+    if (new URLSearchParams(window.location.search).has("giftended") || s?.status === "canceled") {
+      return { state: "ended", to, from };
+    }
+    return {
+      state: "ok",
+      to,
+      from,
+      note: s ? (s.gift_note ?? null) : "Lunch is on me this semester. So proud of you, and I miss you already. Call me Sunday!",
+      masked_phone: mask(s?.student_phone ?? "5405550123"),
+      scene: s?.gift_scene ?? null,
+      photo_url: s?.gift_photo ?? null,
+    };
+  }
+  return call("gift_lookup", { gift_token });
 }
 
 /* ── First-touch UTMs, kept from the landing to the checkout ─────────────── */

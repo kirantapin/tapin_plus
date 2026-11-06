@@ -14,6 +14,9 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
+import { FROM_MAX, NOTE_MAX, SCENES, giftWho, type SceneId } from "../model/gift";
+import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
+import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -51,11 +54,14 @@ export default function ParentCheckout({
   onClose,
   ask,
   from = null,
+  note = false,
 }: {
   open: boolean;
   onClose: () => void;
   ask: Ask | null;
   from?: HTMLElement | null;
+  /** Open with the gift note already showing (from the envelope on /parents). */
+  note?: boolean;
 }) {
   /* Mounted while open and while it leaves; each opening starts clean. */
   const [mounted, setMounted] = useState(open);
@@ -78,6 +84,7 @@ export default function ParentCheckout({
       key={session}
       ask={ask}
       from={from}
+      note={note}
       closing={closing}
       onGone={() => {
         setMounted(false);
@@ -125,18 +132,20 @@ type Step = "student" | "you" | "pay" | "done";
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
-let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string } | null = null;
-type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile";
+let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
+type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
 function Sheet({
   ask,
   from,
+  note: noteFirst,
   closing,
   onGone,
   onClose,
 }: {
   ask: Ask | null;
   from: HTMLElement | null;
+  note: boolean;
   closing: boolean;
   onGone: () => void;
   onClose: () => void;
@@ -152,6 +161,44 @@ function Sheet({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
+     signed, both optional; shown on the student's gift page, never in a
+     text. Folded away unless they came from the envelope. */
+  const [noteOpen, setNoteOpen] = useState(noteFirst);
+  const [giftNote, setGiftNote] = useState("");
+  const [giftFrom, setGiftFrom] = useState("");
+  /* The gift page's background and the parent's photo (Sam, 6 Nov 2026:
+     "give moms the option to upload an image and select their own
+     background style"). The photo is a small JPEG made on the phone. */
+  const [giftScene, setGiftScene] = useState<SceneId>("maroon");
+  const [giftPhoto, setGiftPhoto] = useState<string | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoInput = useRef<HTMLInputElement | null>(null);
+  /* The preview of their gift, over the sheet (routes/GiftPage.tsx). */
+  const [previewing, setPreviewing] = useState(false);
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setPhotoError(null);
+    setPhotoBusy(true);
+    try {
+      setGiftPhoto(await shrinkPhoto(file));
+    } catch (err) {
+      setPhotoError(err instanceof PhotoError ? err.message : "We couldn’t open that photo. Try another one.");
+    } finally {
+      setPhotoBusy(false);
+      if (photoInput.current) photoInput.current.value = "";
+    }
+  };
+  /* Whether a note went to parent_checkout_start: what the done screen says,
+     kept across a resumed payment (the fields start empty again then). */
+  const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
+  /* Opening the note by its button puts the cursor in it. */
+  const noteBox = useRef<HTMLTextAreaElement | null>(null);
+  const noteAsked = useRef(false);
+  useEffect(() => {
+    if (noteOpen && noteAsked.current) noteBox.current?.focus();
+  }, [noteOpen]);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -296,6 +343,8 @@ function Sheet({
     const first = wide() ? node.querySelector<HTMLElement>("input") : null;
     (first ?? node).focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
+      /* The gift preview over the sheet owns the keys while it's open. */
+      if (document.querySelector(".gft-preview")) return;
       if (e.key === "Escape") {
         e.preventDefault();
         return close();
@@ -354,7 +403,7 @@ function Sheet({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
+    if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
     const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
@@ -370,7 +419,14 @@ function Sheet({
       return;
     }
     setBusy(true);
-    track("parent_checkout_started", { source });
+    const giftNoteSent = noteOpen && giftNote.trim() ? giftNote.trim() : null;
+    const giftFromSent = noteOpen && giftFrom.trim() ? giftFrom.trim().replace(/\s+/g, " ") : null;
+    track("parent_checkout_started", {
+      source,
+      has_note: !!giftNoteSent,
+      has_photo: noteOpen && !!giftPhoto,
+      gift_scene: noteOpen ? giftScene : null,
+    });
     try {
       const res = await startParentCheckout({
         student_first_name: ask ? ask.student_first_name : student.trim(),
@@ -379,9 +435,16 @@ function Sheet({
         parent_email: email.trim(),
         parent_phone: mobile.trim() ? toE164(digitsOf(mobile)) : null,
         ask_token: ask?.token ?? null,
+        gift_note: giftNoteSent,
+        gift_from: giftFromSent,
+        gift_scene: noteOpen ? giftScene : null,
+        gift_photo: noteOpen ? giftPhoto : null,
         utm: keptUtm(),
       });
       setStarted(res);
+      /* A gift goes out with a note or a photo (API.md: an ask link's
+         student is texted their gift link when there is either). */
+      setSentNote(!!giftNoteSent || (noteOpen && !!giftPhoto));
       setStep("pay");
     } catch (err) {
       setFormError((err as Error).message || "Something went wrong. Please try again.");
@@ -391,7 +454,7 @@ function Sheet({
   };
 
   const onCharged = (paymentIntent: string) => {
-    if (started) charged = { started, paymentIntent, who: ask ? ask.student_first_name : student.trim(), masked: ask ? ask.masked_phone : maskDigits(phoneD) };
+    if (started) charged = { started, paymentIntent, who: ask ? ask.student_first_name : student.trim(), masked: ask ? ask.masked_phone : maskDigits(phoneD), hasNote: sentNote };
     setPaid(true);
   };
   const onPaid = (res: ParentConfirmed) => {
@@ -404,6 +467,7 @@ function Sheet({
   };
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
+  const noteFor = (ask ? ask.student_first_name : student.trim()) || "them";
   const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
   const first = started?.first_cents ?? OFFER.first_cents;
   const monthly = started?.monthly_cents ?? OFFER.monthly_cents;
@@ -421,7 +485,9 @@ function Sheet({
   return createPortal(
     <div className="prc-layer" ref={layer}>
       <div ref={scrim} className="prc-scrim" aria-hidden="true" onClick={close} />
-      <div className="prc-sheet prc-island" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
+      {/* ph-no-capture: the names, the note and the photo are a family's
+          own, so session replay and autocapture skip the whole sheet. */}
+      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
         {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
         <span ref={label} className="prc-island-label" aria-hidden="true" />
         <div ref={inner} className="prc-island-inner">
@@ -500,14 +566,144 @@ function Sheet({
                 <Input id="mobile" label="Your mobile (optional)" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
                 </div>
               </fieldset>
+              {noteOpen ? (
+                <fieldset className="prc-module prc-note">
+                  <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
+                  <div className="prc-fields">
+                    <div className="prc-field">
+                      <label className="prc-label prc-label-count" htmlFor="prc-note">
+                        Your note
+                        <small className="tnum" aria-hidden="true">
+                          {giftNote.length}/{NOTE_MAX}
+                        </small>
+                      </label>
+                      <div className="prc-box prc-box-area">
+                        <textarea
+                          ref={noteBox}
+                          id="prc-note"
+                          rows={4}
+                          maxLength={NOTE_MAX}
+                          value={giftNote}
+                          placeholder="Lunch is on me this semester. So proud of you."
+                          onChange={(e) => setGiftNote(e.target.value)}
+                          aria-describedby="prc-note-help"
+                        />
+                      </div>
+                      <p id="prc-note-help" className="prc-help">
+                        Up to {NOTE_MAX} characters. They open it like a present when they tap their text. Only they get the link.
+                      </p>
+                    </div>
+                    <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
+                    {/* The photo: printed at the top of their letter. */}
+                    <div className="prc-field">
+                      <span className="prc-label" id="prc-photo-label">
+                        A photo (optional)
+                      </span>
+                      {giftPhoto ? (
+                        <div className="prc-photo">
+                          <img src={giftPhoto} alt="Your photo" />
+                          <div className="prc-photo-actions">
+                            <button type="button" className="prc-edit" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+                              Change
+                            </button>
+                            <button type="button" className="prc-edit" onClick={() => setGiftPhoto(null)} disabled={photoBusy}>
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="prc-photo-add"
+                          onClick={() => photoInput.current?.click()}
+                          disabled={photoBusy}
+                          aria-describedby="prc-photo-help"
+                        >
+                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <path d="M4.5 7.5A1.5 1.5 0 0 1 6 6h2l1.5-2h5L16 6h2a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5v-10ZM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                          </svg>
+                          {photoBusy ? "Getting your photo ready…" : "Add a photo"}
+                        </button>
+                      )}
+                      <input
+                        ref={photoInput}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        aria-labelledby="prc-photo-label"
+                        onChange={(e) => void pickPhoto(e.target.files?.[0])}
+                      />
+                      {photoError ? (
+                        <p className="prc-field-error" role="alert">
+                          {photoError}
+                        </p>
+                      ) : null}
+                      <p id="prc-photo-help" className="prc-help">
+                        Only {noteFor} sees it, on their gift. We delete it when their Plus ends.
+                      </p>
+                    </div>
+                    {/* The background their envelope arrives on. */}
+                    <fieldset className="prc-scenes">
+                      <legend className="prc-label">Background</legend>
+                      <div className="prc-scene-row" role="radiogroup" aria-label="Background">
+                        {SCENES.map((sc) => (
+                          <label key={sc.id} className="prc-scene">
+                            <input
+                              type="radio"
+                              name="prc-scene"
+                              value={sc.id}
+                              checked={giftScene === sc.id}
+                              onChange={() => setGiftScene(sc.id)}
+                            />
+                            <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                              <i className="scene-swatch-env" />
+                            </span>
+                            <span className="prc-scene-name">{sc.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
+                      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      </svg>
+                      Preview their gift
+                    </button>
+                  </div>
+                </fieldset>
+              ) : (
+                <button type="button" className="prc-module prc-add-note" onClick={() => {
+                    noteAsked.current = true;
+                    setNoteOpen(true);
+                  }}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5ZM3.5 7.5l8.5 6 8.5-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Add a note or a photo for {noteFor}
+                </button>
+              )}
                 </>
               )}
+              {previewing ? (
+                <GiftPreview
+                  gift={{
+                    to: (ask ? ask.student_first_name : student.trim()) || null,
+                    from: giftWho(giftFrom, name),
+                    note: giftNote.trim() || null,
+                    masked: ask ? ask.masked_phone : maskDigits(phoneD),
+                    scene: giftScene,
+                    photo: giftPhoto,
+                  }}
+                  onClose={() => setPreviewing(false)}
+                  cta={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
+                />
+              ) : null}
               {formError ? (
                 <p className="prc-error" role="alert">
                   {formError}
                 </p>
               ) : null}
-              <button type="submit" className="prc-cta" data-island-cta="" disabled={busy}>
+              <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
                 {busy ? "One moment…" : formError ? "Try again" : step === "student" ? "Continue" : "Continue to payment"}
               </button>
             </form>
@@ -552,13 +748,16 @@ function Sheet({
               <div className="prc-module prc-done">
                 <p>
                   {ask ? (
-                    /* An ask link's student is already signed in, and isn't texted (API.md). */
+                    /* An ask link's student is already signed in, and isn't texted
+                       (API.md), unless there's a note: then they get its link. */
                     <>
-                      It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now. Your receipt and a manage or cancel link are in your email.
+                      It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
+                      {sentNote ? " We’ve texted them a link to your gift." : ""} Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
                     </>
                   ) : (
                     <>
-                      We’ve texted <span className="tnum">{done.masked_phone || masked}</span>. They sign in to Tapin with that number and it’s there. Your receipt and a manage or cancel link are in your email. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+                      We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
+                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
                     </>
                   )}
                 </p>
@@ -591,6 +790,7 @@ function Input({
   autoComplete,
   autoCapitalize,
   maxLength,
+  placeholder,
 }: {
   id: Field;
   label: string;
@@ -605,6 +805,7 @@ function Input({
   autoComplete?: string;
   autoCapitalize?: string;
   maxLength?: number;
+  placeholder?: string;
 }) {
   const fid = `prc-${id}`;
   const described = [help ? `${fid}-help` : null, error ? `${fid}-error` : null].filter(Boolean).join(" ") || undefined;
@@ -622,7 +823,7 @@ function Input({
           autoCapitalize={autoCapitalize}
           autoCorrect="off"
           spellCheck={false}
-          placeholder={tel ? "(540) 555-0123" : undefined}
+          placeholder={tel ? "(540) 555-0123" : placeholder}
           maxLength={maxLength}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -656,7 +857,7 @@ function Input({
 function Terms({ first, monthly }: { first: number; monthly: number }) {
   return (
     <p className="prc-terms tnum">
-      {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime from the link we email you. `}
+      {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime: email support@tapin.app, or your student can cancel in the Tapin app. `}
       <span className="prc-legal">
         <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">
           Terms

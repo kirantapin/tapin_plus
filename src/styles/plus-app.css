@@ -3998,3 +3998,16 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     line-height: 17px;
   }
 }
+
+/* The docked button's arrow (shell/DockArrow.tsx): after the label, and
+   the only part that moves (shell/dockPulse.ts). */
+.tpa-dock-cta .tpa-dock-arrow {
+  flex: none;
+  margin-left: 8px;
+}
+
+/* An accordion closing (shell/detailsMotion.ts) turns its chevron back as the
+   close starts, not when the box has folded. */
+.tpa details[data-closing] > summary svg {
+  transform: none !important;
+}

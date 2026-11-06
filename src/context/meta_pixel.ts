@@ -147,9 +147,10 @@ const MIRRORED: Record<
 export function mirror(event: string, props: Record<string, unknown>): void {
   const rule = MIRRORED[event];
   if (!rule) return;
-  /* Nothing from a parent's manage page: it is a private page, not a visit
-     an ad drove (its key never reaches the URL Meta sees, model/redact.ts). */
-  if (typeof window !== "undefined" && window.location.pathname.startsWith("/parents/manage")) return;
+  /* Nothing from a parent's manage page or a student's gift page: private
+     pages, not visits an ad drove (their keys never reach the URL Meta sees,
+     model/redact.ts). */
+  if (typeof window !== "undefined" && /^\/(parents\/manage|gift)(\/|$)/.test(window.location.pathname)) return;
   if (!started) {
     if (early.length < EARLY_MAX) early.push([event, props]);
     return;

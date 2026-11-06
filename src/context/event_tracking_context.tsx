@@ -148,6 +148,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
       disable_session_recording: false,
       session_recording: {
         maskAllInputs: true,
+        /* Recorded network entries carry URLs, and the page's first entry is
+           the address it loaded with, before takeKey cleans it: a gift,
+           manage or ask link's key would ride along. Redact them all. */
+        maskCapturedNetworkRequestFn: (r) => ({ ...r, name: redactUrl(r.name) }),
       },
       capture_performance: { web_vitals: false },
       /* A parent's manage link and an Ask a parent link are keys: no URL

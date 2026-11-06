@@ -448,7 +448,11 @@ fieldset.prc-module {
 .prc-sheet.prc-island {
   z-index: 1;
   max-height: none;
+  /* clip, not hidden: a hidden box can still be scrolled by the browser when
+     a field inside is brought into view, which slid the whole sheet up
+     inside its own frame (6 Nov 2026). The inner box does the scrolling. */
   overflow: hidden;
+  overflow: clip;
   padding: 0;
   /* No shadow: a clip-path clips its own element's shadow, so one would pop
      on and off at the ends of the motion; the dark scrim does the job. */
@@ -491,4 +495,176 @@ fieldset.prc-module {
   .prc-layer[data-kb] .prc-island-inner {
     max-height: calc(var(--pck-vvh, 100dvh) - 24px);
   }
+}
+
+/* ── The gift note (Sam, 6 Nov 2026): folded into a row until asked for ── */
+.prc-add-note {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-add-note svg {
+  flex: none;
+  color: #861f41;
+}
+.prc-add-note:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.prc-label-count {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.prc-label-count small {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--muted);
+}
+.prc-box-area {
+  height: auto;
+  padding: 12px 14px;
+}
+.prc-box-area textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 96px;
+  border: 0;
+  padding: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  line-height: 23px;
+  color: var(--ink);
+}
+.prc-box-area textarea::placeholder {
+  color: rgba(20, 22, 24, 0.36);
+}
+
+/* ── The photo and the background (Sam, 6 Nov 2026) ── */
+.prc-photo-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ground);
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-photo-add:disabled {
+  color: var(--muted);
+}
+.prc-photo-add:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.prc-photo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.prc-photo img {
+  display: block;
+  width: 112px;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.prc-photo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.prc-scenes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.prc-scenes > legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+.prc-scene-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 3px;
+  margin: -3px;
+  scrollbar-width: none;
+}
+.prc-scene {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-scene input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.prc-scene .scene-swatch {
+  transition: box-shadow 160ms ease-out;
+}
+.prc-scene input:checked + .scene-swatch {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--ink);
+}
+.prc-scene input:focus-visible + .scene-swatch {
+  outline: 2px solid var(--ink);
+  outline-offset: 5px;
+}
+.prc-scene-name {
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.prc-scene input:checked ~ .prc-scene-name {
+  color: var(--ink);
+}
+
+/* ── Preview their gift ── */
+.prc-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #861f41;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-preview:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }

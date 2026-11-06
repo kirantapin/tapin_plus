@@ -1,11 +1,17 @@
 /* ══ KEYS NEVER LEAVE THE PAGE (5 Nov 2026, the parents flow's review) ══════
    A parent's manage link (/parents/manage/{token}) and a student's Ask a
    parent link (?ask={token}) are keys: anyone holding one can cancel or pay.
-   The pages take them out of the address bar as they open (ParentManage,
-   ParentsHome), and everything sent to PostHog passes through this as well,
+   A student's gift link (/gift/{token}) opens their parent's note. The pages
+   take them out of the address bar as they open (ParentManage, ParentsHome,
+   GiftPage), and everything sent to PostHog passes through this as well,
    so no key is stored by a third party. */
 export const redactUrl = (u: string): string =>
-  u.replace(/\/parents\/manage\/[^/?#]+/g, "/parents/manage/:token").replace(/([?&]ask=)[^&#]*/g, "$1:token");
+  u
+    .replace(/\/parents\/manage\/[^/?#]+/g, "/parents/manage/:token")
+    .replace(/\/gift\/(?!sample(?:[/?#]|$))[^/?#]+/g, "/gift/:token")
+    .replace(/([?&]ask=)[^&#]*/g, "$1:token")
+    /* A signed Storage link (the gift's photo) carries its key in ?token=. */
+    .replace(/(\/storage\/v1\/object\/sign\/[^?#]*)\?[^#]*/g, "$1?:token");
 
 /** Moves a key out of the address bar, keeping it for this tab so a reload
  *  still works. Returns the key, from the address or from the tab. */

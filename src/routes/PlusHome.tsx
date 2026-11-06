@@ -16,6 +16,7 @@ import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
 import { useDockPulse } from "../shell/dockPulse";
+import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
@@ -1391,6 +1392,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         ) : (
           <button type="button" className="tpa-cta tpa-dock-cta" onClick={(e) => join("dock", e.currentTarget)}>
             {joinLabel}
+            <DockArrow />
           </button>
         )}
       </div>

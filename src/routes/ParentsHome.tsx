@@ -1,4 +1,5 @@
 import { takeKey } from "../model/redact";
+import { Link } from "react-router-dom";
 import {
   useEffect,
   useLayoutEffect,
@@ -11,6 +12,7 @@ import { logoField } from "../model/content";
 import { captureUtm, lookupAskLink } from "../model/parents";
 import ParentCheckout from "../shell/ParentCheckout";
 import { useDockPulse } from "../shell/dockPulse";
+import { DockArrow } from "../shell/DockArrow";
 import {
   CREDIT,
   MIN_ORDER,
@@ -25,8 +27,10 @@ import {
   GLYPHS,
   SAVES_NOTE,
   Fold,
+  FlatMark,
 } from "./parents_kit";
 import { BenefitCards, HowTimeline, LunchColumns, OfferPrice } from "./parents_sections";
+import { GiftEnvelope } from "./parents_gift";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -69,27 +73,33 @@ const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
 
-/* ══ THE HERO A/B TEST (Sam, 5 Nov 2026: COPY.md "v2 final hero") ════════════
+/* ══ THE HERO A/B TEST: THE GIFT ROUND (Sam, 6 Nov 2026: "I think the copy
+   variants for the header should be focused on this being a gift to their
+   kids") ═══════════════════════════════════════════════════════════════════
    The same pattern as model/heroTest.ts, kept in this file. One link, and
    each visitor is given one headline the first time and keeps it
-   (localStorage), half and half:
-     "a" · film 1's hook: "Does your kid text you for food money?"
-     "b" · the research line: "They're eating out in Blacksburg anyway. Make
-           it cost less."
-   ?ph=a|b shows either one and is not stored. The variant is registered for
-   the session on mount (parent_hero_variant, and $feature/plus-parent-hero
+   (localStorage), a third each:
+     "a" · the care package: "A care package they’ll open every week."
+     "b" · from home: "Lunch is on you. Even from home."
+     "c" · the note: "Send them Tapin Plus, with a note from you."
+   The first round (5 Nov: "Does your kid text you for food money?" against
+   "They’re eating out in Blacksburg anyway. Make it cost less.") is retired;
+   this round has its own key and flag, so its numbers start clean.
+   ?ph=a|b|c shows any one and is not stored. The variant is registered for
+   the session on mount (parent_hero_variant, and $feature/plus-parent-hero-gift
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b";
-const PARENT_HERO_TEST = "plus-parent-hero";
-const PARENT_HERO_KEY = "tp_parent_hero_v1";
+type ParentHero = "a" | "b" | "c";
+const PARENT_HERO_TEST = "plus-parent-hero-gift";
+const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
-  a: ["Does your kid text you for food money?"],
-  b: ["They’re eating out in Blacksburg anyway.", "Make it cost less."],
+  a: ["A care package", "they’ll open every week."],
+  b: ["Lunch is on you.", "Even from home."],
+  c: ["Send them Tapin Plus,", "with a note from you."],
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b";
+  v === "a" || v === "b" || v === "c";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
@@ -103,7 +113,8 @@ function parentHero(): ParentHero {
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
-  const drawn: ParentHero = Math.random() < 0.5 ? "a" : "b";
+  const roll = Math.random();
+  const drawn: ParentHero = roll < 1 / 3 ? "a" : roll < 2 / 3 ? "b" : "c";
   try {
     window.localStorage.setItem(PARENT_HERO_KEY, drawn);
   } catch {
@@ -119,11 +130,22 @@ const parentHeroProps = (v: ParentHero) => ({
 /* ══ THE HERO PHOTOGRAPH ═════════════════════════════════════════════════════
    Parents and their student, framed so the faces clear the pill and the
    headline: `phone` is the object-position up to 1023 wide, `desk` from
-   1024. Move-in day is the default; ?photo=hug|downtown previews the others
-   (any build, nothing stored). */
-type HeroPhoto = "move-in" | "hug" | "downtown";
+   1024. ?photo=move-in|hug|downtown previews the others (any build,
+   nothing stored).
+
+   The default since 6 Nov 2026 is the split (Sam: "the header image would
+   need to lean into this ... a split image of a mom sending this to her
+   kid, and the kid receiving it"): the same mom and daughter as move-in
+   day, her at home sending it, her student on campus opening it, the two
+   halves meeting at a little care package. */
+type HeroPhoto = "split" | "move-in" | "hug" | "downtown";
+const SPLIT = {
+  parent: asset("/parents/hero-split-parent.webp"),
+  student: asset("/parents/hero-split-student.webp"),
+};
 const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
   {
+    split: { src: SPLIT.parent, phone: "", desk: "" },
     "move-in": {
       src: asset("/parents/hero-move-in.webp"),
       phone: "50% 22%",
@@ -141,9 +163,9 @@ const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
     },
   };
 const heroPhoto = (): HeroPhoto => {
-  if (typeof window === "undefined") return "move-in";
+  if (typeof window === "undefined") return "split";
   const p = new URLSearchParams(window.location.search).get("photo");
-  return p === "hug" || p === "downtown" ? p : "move-in";
+  return p === "move-in" || p === "hug" || p === "downtown" ? p : "split";
 };
 
 const LEGAL = [
@@ -200,35 +222,6 @@ function Proof() {
         {PROOF_STUDENTS}
       </p>
     </div>
-  );
-}
-
-/** The flat four-piece Plus mark (the app's TapInGlyph). */
-function FlatMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="-0.4790 -1.7502 11.9749 11.9749"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M5.96461 0H8.01572L7.42303 1.69488H5.37196L4.77927 3.38981H2.7282L3.32085 1.69488L3.32891 1.6719L3.32938 1.67159C3.66805 0.746268 4.84127 0 5.96461 0Z"
-      />
-      <path
-        fill="currentColor"
-        d="M10.9325 3.38981L10.3398 5.08473H8.28874L8.88144 3.38981H6.83033L7.42303 1.69488H9.50194L9.50217 1.69519C10.6176 1.70766 11.2571 2.46151 10.9325 3.38981Z"
-      />
-      <path
-        fill="currentColor"
-        d="M5.05231 8.47458H3.0012L3.5939 6.77966H5.64496L6.23766 5.08477H8.28872L7.69607 6.77966L7.68801 6.80268L7.68755 6.80299C7.34889 7.72827 6.17567 8.47458 5.05231 8.47458Z"
-      />
-      <path
-        fill="currentColor"
-        d="M0.0844383 5.08473L0.677134 3.38981H2.7282L2.1355 5.08473H4.18661L3.59392 6.77961H1.51501L1.51478 6.77935C0.399363 6.76688 -0.240155 6.01303 0.0844603 5.08473Z"
-      />
-    </svg>
   );
 }
 
@@ -459,38 +452,21 @@ export default function ParentsHome() {
   /* The button that was tapped: the checkout grows out of it (or out of the
      dock's plate while that is on screen) and shrinks back into it. */
   const [from, setFrom] = useState<HTMLElement | null>(null);
-  const signUp = (where: string, el: HTMLElement) => {
+  /* The gift's note: open in the checkout when they came from the envelope. */
+  const [withNote, setWithNote] = useState(false);
+  const signUp = (where: string, el: HTMLElement, note = false) => {
     track("parent_signup_clicked", { where, ask: !!asked });
     setFrom(el);
+    setWithNote(note);
     setOpen(true);
   };
 
-  /* ── The dock: on screen once the offer card's button has gone, off again
-     at the closing button, so there is never two of the same button in view.
-     On a computer the offer card is held in view and the dock is hidden. ── */
-  const heroCta = useRef<HTMLButtonElement | null>(null);
-  const closeCta = useRef<HTMLElement | null>(null);
+  /* ── The dock: always on screen on a phone (Sam, 6 Nov 2026: "the sign up
+     my student sticky CTA should always be visible"), even with the offer
+     card's own button in view. On a computer the offer card is held in view
+     and the dock is hidden (parents.css). ── */
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const [dockOn, setDockOn] = useState(false);
-  useEffect(() => {
-    const a = heroCta.current;
-    const b = closeCta.current;
-    if (!a || !b || typeof IntersectionObserver === "undefined") {
-      setDockOn(true);
-      return;
-    }
-    const seen = new Map<Element, boolean>();
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => seen.set(e.target, e.isIntersecting));
-      /* Past the hero's button (above the viewport) and the close not in view. */
-      const heroGone = !seen.get(a) && a.getBoundingClientRect().bottom < 0;
-      setDockOn(heroGone && !seen.get(b));
-    });
-    io.observe(a);
-    io.observe(b);
-    return () => io.disconnect();
-  }, []);
-  /* The dock pulses gently while it's showing and the checkout is closed (shell/dockPulse.ts). */
+  const dockOn = true;
   useDockPulse(dockRef, dockOn && !open);
   const firstDock = useRef(true);
   useEffect(() => {
@@ -578,7 +554,10 @@ export default function ParentsHome() {
     },
     {
       q: "How do I cancel?",
-      a: "Use the “manage or cancel” link in your receipt email. Your student can also cancel in the app, and we’ll let you know if they do.",
+      /* Sam, 6 Nov 2026: "parents can manage their subscription any time by
+         emailing support@tapin.app - or their student can cancel it in the
+         tapin app". */
+      a: "Email support@tapin.app any time and we’ll change or cancel it for you. Your student can also cancel in the Tapin app, and we’ll let you know if they do.",
     },
     {
       q: "Who do I contact with questions?",
@@ -593,22 +572,48 @@ export default function ParentsHome() {
         data-hero="parents"
         data-photo={photo}
       >
-        <img
-          className="tpa-band-art"
-          src={shot.src}
-          alt=""
-          decoding="async"
-          style={{
-            ["--photo-pos" as string]: shot.phone,
-            ["--photo-pos-desk" as string]: shot.desk,
-          }}
-        />
+        {photo === "split" ? (
+          <div className="tpa-band-art tpp-split" aria-hidden="true">
+            <img src={SPLIT.parent} alt="" decoding="async" />
+            <img src={SPLIT.student} alt="" decoding="async" />
+            {/* Where the two halves meet: the care package, on its way. */}
+            <span className="tpp-split-seal">
+              <i className="scene-swatch-env" />
+            </span>
+          </div>
+        ) : (
+          <img
+            className="tpa-band-art"
+            src={shot.src}
+            alt=""
+            decoding="async"
+            style={{
+              ["--photo-pos" as string]: shot.phone,
+              ["--photo-pos-desk" as string]: shot.desk,
+            }}
+          />
+        )}
         <div className="tpa-band-top">
           {/* The call-out: who this page is for, before anything else. */}
-          <span className="tpa-glass tpa-badge">
-            <FlatMark className="tpa-badge-mark" />
+          {/* Paper, not glass, on the parents page (Sam, 6 Nov 2026: "rework
+              this"): the cream of the envelope's seal in the photo, ink type,
+              the Plus mark in maroon; the account button matches it. */}
+          <span className="tpp-label">
+            <FlatMark className="tpp-label-mark" />
             {EYEBROW}
           </span>
+          <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2ZM4.5 20.2c.8-3.6 3.9-5.6 7.5-5.6s6.7 2 7.5 5.6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
         </div>
         <div ref={titleRef} className="tpa-band-title">
           <div>
@@ -634,14 +639,8 @@ export default function ParentsHome() {
           className="tpa-module tpa-offer tpp-offer"
           aria-label="Tapin Plus"
         >
-          <img
-            className="tpp-offer-mark"
-            src={PAPER_MARK}
-            alt=""
-            width="76"
-            height="60"
-            decoding="async"
-          />
+          {/* No mark on the offer card (Sam, 6 Nov 2026: "can we remove the
+              tapin logo from this callout"): the price leads. */}
           {ask.state === "ok" ? (
             <div className="tpp-ask" role="status">
               <span className="tpa-well" aria-hidden="true">
@@ -674,7 +673,6 @@ export default function ParentsHome() {
               $3.99, one lunch covers it). */}
           <OfferPrice />
           <button
-            ref={heroCta}
             type="button"
             className="tpa-cta tpp-cta"
             onClick={(e) => signUp("hero", e.currentTarget)}
@@ -686,6 +684,10 @@ export default function ParentsHome() {
             /month. Cancel anytime.
           </p>
         </section>
+
+        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
+            their student opens. */}
+        <GiftEnvelope onSend={(el) => signUp("gift", el, true)} />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -819,9 +821,10 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.mail} />}
-              label="Cancel anytime from your email"
+              label="Change or cancel by email"
             >
-              You can cancel anytime from the link in your email.
+              Email support@tapin.app any time and we’ll change or cancel it for
+              you.
             </Fold>
             <Fold
               className="tpp-sure-row"
@@ -867,7 +870,6 @@ export default function ParentsHome() {
         {/* The close: phones only (the desk layout hides it; the offer card
             is beside the reader the whole way down there). */}
         <section
-          ref={closeCta}
           className="tpa-close tpp-close"
           aria-labelledby="tpp-close-h"
         >
@@ -927,12 +929,14 @@ export default function ParentsHome() {
           onClick={(e) => signUp("dock", e.currentTarget)}
         >
           {cta}
+          <DockArrow />
         </button>
       </div>
 
       <ParentCheckout
         open={open}
         from={from}
+        note={withNote}
         onClose={() => setOpen(false)}
         ask={
           asked
