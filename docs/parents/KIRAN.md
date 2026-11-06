@@ -7,8 +7,8 @@ in this repo.
 ## What it does
 
 1. A parent opens **plus.tapin.app/parents**, types their student's first name and phone
-   number (twice), then their own name and email, can add **a note** for their student
-   and how it's signed ("Mom"), and pays **$3.99** by card, Apple Pay or Google Pay.
+   number (twice), then their own name and email, can add **a note** for their student,
+   how it's signed ("Mom"), **a photo** and **a background** for the gift page, and pays **$3.99** by card, Apple Pay or Google Pay.
    After that it's **$7.99 a month** on the parent's card.
 2. Plus goes onto **the student's phone number** right away. The student gets one text
    with a link to their gift (**plus.tapin.app/gift/{token}**): an envelope they tap
@@ -48,7 +48,8 @@ site (`PARENTS_BACKEND_LIVE = false` in `src/model/parents.ts`); leave it off.
 
 1. Run `deno check` on the new functions plus `stripe_webhook_handler` and
    `manage_subscription`. It hasn't been run yet.
-2. Apply the migration `20261106000000_parents_flow.sql`.
+2. Apply the migration `20261106000000_parents_flow.sql`. It also creates the private
+   Storage bucket `gift-photos` for the parents' photos.
 3. Set the secrets:
    - `PARENT_WELCOME_POLICY_ID`: production `30371fd5-c174-44c7-8041-28b47f13e9e7`
    - `RESEND_API_KEY`, for the receipt and cancel emails. Verify the sending domain in
@@ -62,7 +63,8 @@ site (`PARENTS_BACKEND_LIVE = false` in `src/model/parents.ts`); leave it off.
    `stripe_webhook_handler` and `manage_subscription`.
 5. Set `app_config.parent_unclaimed_job_url` to the deployed `parent_unclaimed` URL. It
    runs daily: it sends the reminder texts and does the day-14 refund.
-6. Test in the Stripe sandbox with card `4242 4242 4242 4242`: pay with a note, open the
+6. Test in the Stripe sandbox with card `4242 4242 4242 4242`: pay with a note, a photo
+   and a background, open the
    gift link from the student's text, sign in as the student, cancel from the parent's
    email link (the gift link then says it has ended), cancel from the app. The full test
    plan is in `PARENTS_FLOW.md`.

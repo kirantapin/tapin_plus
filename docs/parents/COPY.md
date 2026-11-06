@@ -270,14 +270,21 @@ few words when you sign up. They get a text, tap it, and open their Plus like a 
 "Add a note for {Student}" folds open to "A note for {Student} (optional)", "Your note"
 (240 characters, placeholder "Lunch is on me this semester. So proud of you."), help
 "Up to 240 characters. They open it like a present when they tap their text. Only they
-get the link.", and
+get the link.", "Sign it" (placeholder "Mom"), "A photo (optional)" / "Add a photo" /
+"Change" / "Remove", help "Only {Student} sees it, on their gift. We delete it when their
+Plus ends.", and "Background" (Maroon, Picnic, Night sky, Confetti). The fold button
+reads "Add a note or a photo for {Student}"; the section is "For {Student}, from you
+(optional)". Old line, kept for reference:
 "Sign it" (placeholder "Mom"). Done screen: "We’ve texted •••0123 a link to your note."
 
 **The text to the student:** `Tapin: {Who} sent you Tapin Plus{ with a note}. Open it:
 https://plus.tapin.app/gift/{token} Reply STOP to opt out`
 
 **The gift page** (/gift/{token}):
+- The envelope is the care package (kraft, twine, a maroon seal with the flat Plus mark),
+  on the parent's background; the parent's photo is printed at the top of the letter.
 - Sealed: "{Student}, {Who} sent you something" / "Open it".
+- The dock once it's open: "Claim my gift" (the app).
 - Open: "{Who} got you Tapin Plus", the letter ("For {Student}", the note, "— {Who}"; with
   no note: "{Who} signed you up for Tapin Plus."), "What’s in it" ($5 back every week at
   each place below, on a $10+ food order; 15% off instead, once a day, whenever that’s

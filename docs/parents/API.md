@@ -50,6 +50,8 @@ parent_subscriptions (
   gift_from text null,                   -- how it's signed ("Mom"), <= 24 chars
   gift_token_hash text unique null,      -- sha256; the student's gift link, replaced on every re-send
   gift_opened_at timestamptz null,       -- first time the gift page opened
+  gift_scene text null,                  -- the gift page's background: maroon | picnic | night | confetti
+  gift_photo_path text null,             -- the parent's photo in the private gift-photos bucket
   utm jsonb, reminders_sent int default 0,
   created_at timestamptz, canceled_at timestamptz null,
   cancel_reason text null                -- 'parent','student','unclaimed','duplicate'
@@ -77,6 +79,8 @@ req: {
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
   gift_from?: string | null;                            // optional sign-off ("Mom"), <= 24 chars
+  gift_scene?: string | null;                           // optional background: maroon | picnic | night | confetti
+  gift_photo?: string | null;                           // optional photo: "data:image/jpeg;base64,…", <= 1,500,000 chars
   utm?: Record<string, string>;                         // first-touch utm_*, fbclid, referrer
 }
 res: {
@@ -150,12 +154,15 @@ What the student's gift page (`/gift/{token}`) shows. No auth; the token is the 
 Rate-limited by IP like `ask_link_lookup`.
 ```ts
 req: { gift_token: string }
-res: { state: "ok"; to: string | null; from: string; note: string | null; masked_phone: string }
+res: { state: "ok"; to: string | null; from: string; note: string | null; masked_phone: string;
+        scene: string | null; photo_url: string | null }      // photo_url: signed, 1 hour
    | { state: "ended"; to: string | null; from: string }      // canceled or refunded
 404: { error: "This gift link isn't valid." }
 ```
 `to` is the student's first name if it's plainly a name, else null. `from` is the same
-`{Who}` as the text. Nothing else leaves: no parent name, email or phone, no full
+`{Who}` as the text. The photo is in a private Storage bucket (`gift-photos`), shown only
+through the one-hour signed `photo_url`, and deleted when the gift ends (refund, or the
+end of a canceled Plus) by the daily job. Nothing else leaves: no parent name, email or phone, no full
 number, no ids or prices. The first open sets `gift_opened_at`.
 
 ## Job (pg_cron, daily) — `parent_unclaimed`
