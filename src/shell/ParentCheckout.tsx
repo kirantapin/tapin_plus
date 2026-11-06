@@ -16,6 +16,7 @@ import {
 } from "../model/parents";
 import { FROM_MAX, NOTE_MAX, SCENES, type SceneId } from "../model/gift";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
+import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -174,6 +175,8 @@ function Sheet({
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const photoInput = useRef<HTMLInputElement | null>(null);
+  /* The preview of their gift, over the sheet (routes/GiftPage.tsx). */
+  const [previewing, setPreviewing] = useState(false);
   const pickPhoto = async (file: File | undefined) => {
     if (!file) return;
     setPhotoError(null);
@@ -654,6 +657,12 @@ function Sheet({
                         ))}
                       </div>
                     </fieldset>
+                    <button type="button" className="prc-preview" onClick={() => setPreviewing(true)}>
+                      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      </svg>
+                      Preview their gift
+                    </button>
                   </div>
                 </fieldset>
               ) : (
@@ -669,6 +678,19 @@ function Sheet({
               )}
                 </>
               )}
+              {previewing ? (
+                <GiftPreview
+                  gift={{
+                    to: (ask ? ask.student_first_name : student.trim()) || null,
+                    from: giftFrom.trim() || name.trim().split(/\s+/)[0] || "Mom",
+                    note: giftNote.trim() || null,
+                    masked: ask ? ask.masked_phone : maskDigits(phoneD),
+                    scene: giftScene,
+                    photo: giftPhoto,
+                  }}
+                  onClose={() => setPreviewing(false)}
+                />
+              ) : null}
               {formError ? (
                 <p className="prc-error" role="alert">
                   {formError}

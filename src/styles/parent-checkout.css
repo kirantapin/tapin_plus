@@ -646,3 +646,25 @@ fieldset.prc-module {
 .prc-scene input:checked ~ .prc-scene-name {
   color: var(--ink);
 }
+
+/* ── Preview their gift ── */
+.prc-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  background: #861f41;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-preview:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

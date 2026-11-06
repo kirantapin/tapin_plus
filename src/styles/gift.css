@@ -775,3 +775,36 @@ a.gft-open {
   background: #b48956;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
+
+/* ══ THE PARENT'S PREVIEW (over the checkout) ══════════════════════════════ */
+.gft-preview {
+  position: fixed;
+  z-index: 3000;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #f0f0f0;
+  -webkit-overflow-scrolling: touch;
+}
+.gft-preview-back {
+  position: fixed;
+  z-index: 40;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141618;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+.gft-preview-back:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}

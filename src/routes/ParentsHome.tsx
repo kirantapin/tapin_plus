@@ -448,32 +448,14 @@ export default function ParentsHome() {
     setOpen(true);
   };
 
-  /* ── The dock: on screen once the offer card's button has gone, off again
-     at the closing button, so there is never two of the same button in view.
-     On a computer the offer card is held in view and the dock is hidden. ── */
+  /* ── The dock: always on screen on a phone (Sam, 6 Nov 2026: "the sign up
+     my student sticky CTA should always be visible"), even with the offer
+     card's own button in view. On a computer the offer card is held in view
+     and the dock is hidden (parents.css). ── */
   const heroCta = useRef<HTMLButtonElement | null>(null);
   const closeCta = useRef<HTMLElement | null>(null);
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const [dockOn, setDockOn] = useState(false);
-  useEffect(() => {
-    const a = heroCta.current;
-    const b = closeCta.current;
-    if (!a || !b || typeof IntersectionObserver === "undefined") {
-      setDockOn(true);
-      return;
-    }
-    const seen = new Map<Element, boolean>();
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => seen.set(e.target, e.isIntersecting));
-      /* Past the hero's button (above the viewport) and the close not in view. */
-      const heroGone = !seen.get(a) && a.getBoundingClientRect().bottom < 0;
-      setDockOn(heroGone && !seen.get(b));
-    });
-    io.observe(a);
-    io.observe(b);
-    return () => io.disconnect();
-  }, []);
-  /* The dock pulses gently while it's showing and the checkout is closed (shell/dockPulse.ts). */
+  const dockOn = true;
   useDockPulse(dockRef, dockOn && !open);
   const firstDock = useRef(true);
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -282,14 +282,21 @@ function WhatsIn() {
 
 /** How to claim it, and a thank-you home. The button itself is the dock's
  *  ("Claim my gift"), always in reach. */
-function Next({ gift, sample }: { gift: Gift; sample: boolean }) {
+function Next({ gift, sample, preview = false }: { gift: Gift; sample: boolean; preview?: boolean }) {
   const { track } = useEventTracking();
   return (
     <div className="gft-next">
       <p className="gft-sign tnum">
         Get the app and sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
       </p>
-      <a className="gft-thanks" href={thanksHref(gift.from)} onClick={() => track("gift_thanks", { sample })}>
+      <a
+        className="gft-thanks"
+        href={thanksHref(gift.from)}
+        onClick={(e) => {
+          if (preview) e.preventDefault();
+          else track("gift_thanks", { sample });
+        }}
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M20 11.5c0 4-3.6 7-8 7-1.1 0-2.2-.2-3.1-.5L4 19.5l1.4-3.6C4.5 14.7 4 13.2 4 11.5c0-4 3.6-7 8-7s8 3 8 7Z"
@@ -308,7 +315,7 @@ function Next({ gift, sample }: { gift: Gift; sample: boolean }) {
 /* ══ THE LETTER ═════════════════════════════════════════════════════════════
    One element throughout: the letter is never swapped, only moved (measured
    before and after the envelope lets go of it). */
-function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
+export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: boolean; preview?: boolean }) {
   const { track } = useEventTracking();
   const [state, setState] = useState<"sealed" | "opening" | "open">("sealed");
   const seal = useRef<HTMLSpanElement | null>(null);
@@ -349,7 +356,7 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
   const settle = () => title.current?.focus({ preventScroll: true });
   const open = async () => {
     if (state !== "sealed") return;
-    track("gift_opened", { sample, has_note: !!gift.note });
+    if (!preview) track("gift_opened", { sample, has_note: !!gift.note });
     const el = letter.current;
     if (still || !el) {
       flushSync(() => setState("open"));
@@ -536,12 +543,19 @@ function Letter({ gift, sample }: { gift: Gift; sample: boolean }) {
       {state === "open" ? (
         <main ref={after} className="gft-after">
           <WhatsIn />
-          <Next gift={gift} sample={sample} />
+          <Next gift={gift} sample={sample} preview={preview} />
         </main>
       ) : null}
       {state === "open" ? (
         <div ref={dock} className="gft-dock">
-          <a className="gft-dock-cta tpa-dock-cta" href={appHref()} onClick={() => track("gift_claim", { sample })}>
+          <a
+            className="gft-dock-cta tpa-dock-cta"
+            href={appHref()}
+            onClick={(e) => {
+              if (preview) e.preventDefault();
+              else track("gift_claim", { sample });
+            }}
+          >
             Claim my gift
           </a>
         </div>
@@ -568,5 +582,43 @@ function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>
         </button>
       </div>
     </div>
+  );
+}
+
+/* ══ THE PARENT'S PREVIEW (Sam, 6 Nov 2026: "on the parent's page, can we
+   have a preview of the card they're sending? if parents want to preview it
+   first before sending") ═══════════════════════════════════════════════════
+   The student's gift page, whole, over the checkout, made from what the
+   parent has typed and picked: the same envelope, the same opening, their
+   note, photo and background. Nothing in it does anything (no tracking, no
+   links); "Back to checkout" or Escape closes it. */
+export function GiftPreview({ gift, onClose }: { gift: Gift; onClose: () => void }) {
+  const back = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    const was = document.activeElement as HTMLElement | null;
+    back.current?.focus({ preventScroll: true });
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", key, true);
+    return () => {
+      window.removeEventListener("keydown", key, true);
+      was?.focus?.({ preventScroll: true });
+    };
+  }, [onClose]);
+  return createPortal(
+    <div className="gft-preview" role="dialog" aria-modal="true" aria-label="Preview of their gift">
+      <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back to checkout
+      </button>
+      <Letter gift={gift} sample preview />
+    </div>,
+    document.body,
   );
 }
