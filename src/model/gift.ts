@@ -39,9 +39,24 @@ export const SCENES = [
   { id: "night", name: "Night sky", line: "Miss you" },
   { id: "confetti", name: "Confetti", line: "Something to celebrate" },
 ] as const;
-export type SceneId = (typeof SCENES)[number]["id"];
+/* Ten more, designed for Sam to choose from (6 Nov 2026); on the sample
+   page's picker only, never in the checkout, until he picks. */
+export const CANDIDATE_SCENES = [
+  { id: "notebook", name: "Notebook" },
+  { id: "airmail", name: "Airmail" },
+  { id: "sunrise", name: "Sunrise" },
+  { id: "ridge", name: "Blue Ridge" },
+  { id: "hearts", name: "Hearts" },
+  { id: "diner", name: "Diner" },
+  { id: "flannel", name: "Flannel" },
+  { id: "lunch", name: "Lunch" },
+  { id: "sunburst", name: "Sunburst" },
+  { id: "leaves", name: "Fall leaves" },
+] as const;
+export type SceneId = (typeof SCENES)[number]["id"] | (typeof CANDIDATE_SCENES)[number]["id"];
 
-export const isScene = (v: unknown): v is SceneId => SCENES.some((e) => e.id === v);
+export const isScene = (v: unknown): v is SceneId =>
+  SCENES.some((e) => e.id === v) || CANDIDATE_SCENES.some((e) => e.id === v);
 
 export const NOTE_MAX = 240;
 export const FROM_MAX = 24;

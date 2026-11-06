@@ -4,6 +4,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import {
+  CANDIDATE_SCENES,
   isScene,
   previewGift,
   SAMPLE_PHOTO,
@@ -570,6 +571,14 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
 function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>) => void }) {
   return (
     <div className="gft-pick" role="group" aria-label="Try the designs">
+      <div className="gft-pick-row">
+        <span>New</span>
+        {CANDIDATE_SCENES.map((e) => (
+          <button key={e.id} type="button" aria-pressed={gift.scene === e.id} onClick={() => onChange({ scene: e.id as SceneId })}>
+            {e.name}
+          </button>
+        ))}
+      </div>
       <div className="gft-pick-row">
         <span>Background</span>
         {SCENES.map((e) => (
