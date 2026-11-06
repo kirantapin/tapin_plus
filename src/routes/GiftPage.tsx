@@ -4,17 +4,24 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import {
+  FROM_MAX,
+  giftWho,
   isScene,
+  NOTE_MAX,
   previewGift,
+  SAMPLE_GIFT,
   SAMPLE_PHOTO,
+  SCENE_GROUPS,
   SCENES,
   thanksHref,
   type Gift,
   type SceneId,
 } from "../model/gift";
+import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
-import { appHref } from "../shell/GetTheApp";
+import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
@@ -57,6 +64,10 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
   daisies: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-180px, -180px)" }], ms: 40000 },
   xoxo: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-96px, 0)" }], ms: 9000 },
   smileys: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 22000 },
+  /* Seasonal: the snow falls; the stars rise. */
+  hanukkah: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 26000 },
+  christmas: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 18000 },
+  holiday: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 16000 },
   flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
   lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
   sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
@@ -65,6 +76,7 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
 const GIFT_KEY = "tp_gift_v1";
 const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
 const QR = asset("/brand/tapin-app-qr.svg");
+const APP_ICON = asset("/brand/tapin-app-icon.png");
 export { SAMPLE_PHOTO_SRC };
 
 type Load =
@@ -369,19 +381,11 @@ function useRiseIn(host: React.RefObject<HTMLElement | null>, on: boolean, delay
   }, [host, on, delay]);
 }
 
-/* ══ WHAT'S IN IT, THREE WAYS (Sam, 6 Nov 2026: "can we get 3 variations of
-   this section?") ═══════════════════════════════════════════════════════════
-   ?wiv=a | b | c on any gift page (only our own designs, so safe on any
-   build); none is the current list. The facts are the same in all four: a $5
-   credit earned on a $10+ food order, every week at each place, off their
-   next; 15% off instead, once a day; points on everything. */
-type WhatsInVariant = "a" | "b" | "c" | null;
-const whatsInVariant = (): WhatsInVariant => {
-  if (typeof window === "undefined") return null;
-  const v = new URLSearchParams(window.location.search).get("wiv");
-  return v === "a" || v === "b" || v === "c" ? v : null;
-};
-
+/* ══ WHAT'S IN IT (Sam, 6 Nov 2026: three versions designed, "let's do this
+   option": A · Figures) ══════════════════════════════════════════════════════
+   The three in big type side by side, then the five places named. A $5
+   credit earned on a $10+ meal, every week at each place; 15% off instead,
+   once a day; points on everything. */
 /** A · Figures: the three in big type side by side, then the places named. */
 function WhatsInFigures() {
   return (
@@ -420,120 +424,9 @@ function WhatsInFigures() {
   );
 }
 
-/** B · How it works: the credit told through one real order. */
-function WhatsInStory() {
-  const p = PLACES[0];
-  const off = Math.max(0, p.order.price - CREDIT);
-  return (
-    <section className="gft-in gft-in-b" aria-labelledby="gft-in-h">
-      <h2 id="gft-in-h" className="gft-h2">
-        How it works
-      </h2>
-      <ol className="gft-steps">
-        <li>
-          <img className="gft-step-img" src={p.order.img} alt="" decoding="async" loading="lazy" />
-          <span>
-            <b>Order a ${MIN_ORDER}+ meal</b>
-            {p.order.label} at {p.name}, <span className="tnum">${p.order.price.toFixed(2)}</span>
-          </span>
-        </li>
-        <li>
-          <i className="gft-step-fig tnum" data-money="">+${CREDIT}</i>
-          <span>
-            <b>${CREDIT} credit lands</b>
-            Once a week at each place
-          </span>
-        </li>
-        <li>
-          <i className="gft-step-fig tnum">${off % 1 ? off.toFixed(2) : off}</i>
-          <span>
-            <b>Next time, ${CREDIT} off</b>
-            The same order, with the credit
-          </span>
-        </li>
-      </ol>
-      <p className="gft-also">
-        Or <b>{PERCENT}% off</b> instead, once a day. <b>Points</b> on everything.
-      </p>
-      <ul className="gft-logos" aria-label="Where it works">
-        {PLACES.map((x) => (
-          <li key={x.id}>
-            <img src={x.logo} alt={x.name} decoding="async" loading="lazy" />
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/** C · Places first: the five, with what they serve, then the three. */
-function WhatsInPlaces() {
-  return (
-    <section className="gft-in gft-in-c" aria-labelledby="gft-in-h">
-      <h2 id="gft-in-h" className="gft-h2">
-        Yours at {PLACES.length} places
-      </h2>
-      <ul className="gft-placelist">
-        {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt="" decoding="async" loading="lazy" />
-            <span>
-              <b>{p.name}</b>
-              {p.what}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <ul className="gft-chips" aria-label="At each one">
-        <li>
-          <b className="tnum">${CREDIT}</b> credit every week
-        </li>
-        <li>
-          <b className="tnum">{PERCENT}%</b> off once a day
-        </li>
-        <li>
-          <b>Points</b> on everything
-        </li>
-      </ul>
-      <p className="gft-also">The credit comes with a ${MIN_ORDER}+ meal and comes off your next one. The {PERCENT}% is instead of it, whenever that’s better.</p>
-    </section>
-  );
-}
-
-/** What's in Plus: three things, in figures, and the five places. */
+/** What's in Plus: the three, in figures, and the five places. */
 function WhatsIn() {
-  const v = whatsInVariant();
-  if (v === "a") return <WhatsInFigures />;
-  if (v === "b") return <WhatsInStory />;
-  if (v === "c") return <WhatsInPlaces />;
-  return (
-    <section className="gft-in" aria-labelledby="gft-in-h">
-      <h2 id="gft-in-h" className="gft-h2">
-        What’s in it
-      </h2>
-      <ul className="gft-perks">
-        <li>
-          <b className="tnum">${CREDIT} back</b>
-          <span>every week at each place below, on a ${MIN_ORDER}+ food order</span>
-        </li>
-        <li>
-          <b className="tnum">{PERCENT}% off</b>
-          <span>instead, once a day, whenever that’s better</span>
-        </li>
-        <li>
-          <b>Points</b>
-          <span>on everything you order</span>
-        </li>
-      </ul>
-      <ul className="gft-logos" aria-label="Where it works">
-        {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt={p.name} decoding="async" loading="lazy" />
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
+  return <WhatsInFigures />;
 }
 
 /** How to claim it, and a thank-you home. The button itself is the dock's
@@ -550,25 +443,59 @@ function Next({ gift, sample, preview = false, cta }: { gift: Gift; sample: bool
             {cta.label}
           </button>
         ) : (
-          <>
-            <a
-              className="gft-cta-inline"
-              href={appHref()}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (preview) e.preventDefault();
-                else track("gift_claim", { sample, where: "inline" });
-              }}
-            >
-              Claim my gift
-            </a>
-            <div className="gft-qr">
-              <img src={QR} alt="" width="88" height="88" />
-              <span>Plus is used in the Tapin app. Scan this with your phone to get it.</span>
-            </div>
-          </>
+          <a
+            className="gft-cta-inline"
+            href={appHref()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              if (preview) e.preventDefault();
+              else track("gift_claim", { sample, where: "inline" });
+            }}
+          >
+            Claim my gift
+          </a>
         )}
+        {/* The app (Sam, 6 Nov 2026: rework the QR code section, "should
+            include a link to the app on the app store. And include the tapin
+            app logo"): which app, the QR for the phone in their pocket and
+            the App Store beside it, and the number to sign in with. */}
+        <section className="gft-app" aria-labelledby="gft-app-h">
+          <div className="gft-app-head">
+            <img className="gft-app-icon" src={APP_ICON} alt="" width="52" height="52" />
+            <span>
+              <b id="gft-app-h">Tapin</b>
+              Your Plus lives in the app
+            </span>
+          </div>
+          <div className="gft-app-get">
+            <img className="gft-app-qr" src={QR} alt="QR code for the Tapin app" width="104" height="104" />
+            <div>
+              <p>Scan it with your phone’s camera, or</p>
+              <a
+                className="gft-store"
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (preview) e.preventDefault();
+                  else track("gift_app_store", { sample });
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.65.8-3.33.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.18-1.54 2.67-.39 6.62 1.1 8.79.74 1.06 1.61 2.25 2.75 2.2 1.11-.04 1.52-.71 2.86-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.07 2.66-2.14.85-1.23 1.19-2.43 1.21-2.49-.03-.01-2.32-.89-2.34-3.52ZM14.18 6.15c.6-.74 1.01-1.75.9-2.77-.87.04-1.94.59-2.56 1.32-.56.64-1.05 1.69-.92 2.68.97.08 1.97-.49 2.58-1.23Z"
+                  />
+                </svg>
+                Get it on the App Store
+              </a>
+            </div>
+          </div>
+          <p className="gft-app-sign tnum">
+            Sign in with <b>{gift.masked}</b>. Plus is already on it.
+          </p>
+        </section>
       </div>
       <p className="gft-sign tnum">
         Get the app and sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
@@ -932,83 +859,92 @@ function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>
 }
 
 /* ══ THE PARENT'S PREVIEW (Sam, 6 Nov 2026: "on the parent's page, can we
-   have a preview of the card they're sending? if parents want to preview it
-   first before sending") ═══════════════════════════════════════════════════
-   The student's gift page, whole, over the checkout, made from what the
-   parent has typed and picked: the same envelope, the same opening, their
-   note, photo and background. Nothing in it does anything (no tracking, no
-   links); "Back to checkout" or Escape closes it. */
+   have a preview of the card they're sending?"; then "the grid of background
+   options would show up on the right in a control center", "we should still
+   have desktop preview here as an option ... so the thing fills up the entire
+   page", "the CTA ... would be at the bottom of the right column", and "allow
+   someone to preview their own message, own photo, and sender name") ══════
+   The student's gift page, whole, made from the gift draft (model/
+   giftDraft.ts) that the checkout shares: on /parents the sample fills
+   whatever they haven't written yet; in the checkout it's only theirs.
+
+   A computer: the page fills the screen. The student's page on the left, as
+   a phone or as a computer (the computer one laid out at 1280px and scaled
+   to fit, so its wide layout shows on any screen); on the right a panel to
+   make it theirs (their name, the note, the sign-off, a photo, the
+   background) with the parent's button at its foot. The student's own
+   button in the page does nothing here.
+
+   A phone: the page is the whole screen, the background arrows over its
+   top corner, the parent's button in the page's dock. (The fields are the
+   checkout's own there.) Escape or Close shuts it. */
+const DESK_W = 1280;
+
+function useWide(query = "(min-width: 1024px)") {
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const m = window.matchMedia?.(query);
+    if (!m) return;
+    const on = () => setWide(m.matches);
+    m.addEventListener?.("change", on);
+    return () => m.removeEventListener?.("change", on);
+  }, [query]);
+  return wide;
+}
+
 export function GiftPreview({
-  gift,
   onClose,
-  cta,
-  backLabel = "Back to checkout",
-  onScene,
-  photoChoice,
+  action,
+  backLabel = "Close",
+  sample = false,
+  fixedTo = null,
+  parentName = "",
+  masked,
 }: {
-  gift: Gift;
   onClose: () => void;
-  /** The dock's button in the preview (Sam, 6 Nov 2026: "the CTA would
-   *  still be sign up my student or go back to checkout"). */
-  cta: DockCta;
+  /** The parent's button: "Send Tapin Plus" on /parents, "Back to checkout"
+   *  in the checkout. At the foot of the panel on a computer, in the page's
+   *  dock on a phone. */
+  action: DockCta;
   backLabel?: string;
-  /** Told each background they cycle to, so the checkout's pick follows
-   *  what they're looking at (left out on /parents, where it's the sample). */
-  onScene?: (scene: SceneId) => void;
-  /** A photo the viewer may show or hide (the sample's, on /parents); left
-   *  out in checkout, where the photo is the parent's own choice. */
-  photoChoice?: string | null;
+  /** /parents: the sample fills what they haven't written, and a sample
+   *  photo can be shown. */
+  sample?: boolean;
+  /** An ask link's student, who isn't theirs to rename. */
+  fixedTo?: string | null;
+  /** For the sign-off rule (giftWho): their name as typed in the checkout. */
+  parentName?: string;
+  masked?: string;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
-  const [withPhoto, setWithPhoto] = useState(!!gift.photo);
-  /* Every background, one after another (Sam, 6 Nov 2026: "can we have the
-     ability to cycle through background options so someone can see in real
-     time what each background looks like"): the arrows in the top bar, or
-     the arrow keys. The letter stays as it is, open or closed; only the
-     background changes, faded in. */
-  const [scene, setScene] = useState<SceneId>(gift.scene);
-  const sceneAt = SCENES.findIndex((e) => e.id === scene);
-  const cycle = useRef<(step: number) => void>(() => {});
-  const pick = (next: SceneId) => {
-    setScene(next);
-    onScene?.(next);
+  const wide = useWide();
+  const d = useGiftDraft();
+  const [samplePhoto, setSamplePhoto] = useState(sample);
+  const scene = d.scene;
+  const gift: Gift = {
+    to: fixedTo ?? (d.to.trim() || (sample ? SAMPLE_GIFT.to : null)),
+    from: d.from.trim() || !sample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
+    note: d.note.trim() || (sample ? SAMPLE_GIFT.note : null),
+    masked: masked ?? SAMPLE_GIFT.masked,
+    scene,
+    photo: d.photo ?? (sample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
   };
+
+  /* Every background, one after another: the arrows (a phone) or the grid
+     (a computer), or the arrow keys. The letter stays as it is, open or
+     closed; only the background changes, faded in. */
+  const sceneAt = SCENES.findIndex((e) => e.id === scene);
+  const pick = (next: SceneId) => setGiftDraft({ scene: next });
+  const cycle = useRef<(step: number) => void>(() => {});
   cycle.current = (step: number) => pick(SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId);
-  /* Phone or computer (Sam, 6 Nov 2026: "there should be a desktop version
-     of the preview and a mobile version of the preview, desktop version
-     would be wider"). Phone first: the student opens it from a text. On a
-     computer the frame widens until the page takes its wide layout (it keys
-     on its own width, @container); the frame eases between the two widths
-     and the page fades back in at the new one. Only offered where the
-     screen is wide enough for that layout (CSS hides the switch). */
-  const [device, setDevice] = useState<"phone" | "computer">("phone");
-  const frame = useRef<HTMLDivElement | null>(null);
-  const frameW = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    const el = frame.current;
-    if (!el) return;
-    const was = frameW.current;
-    const now = el.getBoundingClientRect().width;
-    frameW.current = now;
-    if (was == null || Math.abs(now - was) < 2) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || typeof el.animate !== "function") return;
-    const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-    el.animate([{ width: `${was}px` }, { width: `${now}px` }], { duration: 460, easing: ease });
-    el.querySelector<HTMLElement>(".gft-preview-scroll")?.animate(
-      [{ opacity: 0 }, { opacity: 1 }],
-      { duration: 280, delay: 260, easing: "ease-out", fill: "backwards" },
-    );
-  }, [device]);
   const firstScene = useRef(true);
   useEffect(() => {
     if (firstScene.current) {
       firstScene.current = false;
       return;
     }
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    document
-      .querySelector<HTMLElement>(".gft-preview .gft-scene")
-      ?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: "ease-out" });
+    if (reducedMotion()) return;
+    document.querySelector<HTMLElement>(".gft-preview .gft-scene")?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: "ease-out" });
   }, [scene]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -1021,6 +957,61 @@ export function GiftPreview({
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, []);
+
+  /* Phone or computer. The computer view is the page laid out at 1280px
+     and scaled to the frame, so its wide layout shows at any screen size;
+     the frame eases between the two widths and the page fades back in. */
+  const [device, setDevice] = useState<"phone" | "computer">("phone");
+  const desk = wide && device === "computer";
+  const frame = useRef<HTMLDivElement | null>(null);
+  const [fit, setFit] = useState<{ s: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = frame.current;
+    if (!el || !desk) {
+      setFit(null);
+      return;
+    }
+    const measure = () => setFit({ s: el.clientWidth / DESK_W, h: el.clientHeight });
+    measure();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [desk]);
+  const frameW = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const was = frameW.current;
+    const now = el.getBoundingClientRect().width;
+    frameW.current = now;
+    if (was == null || Math.abs(now - was) < 2 || reducedMotion() || typeof el.animate !== "function") return;
+    el.animate([{ width: `${was}px` }, { width: `${now}px` }], { duration: 460, easing: EASE });
+    el.querySelector<HTMLElement>(".gft-preview-scroll")?.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 280,
+      delay: 260,
+      easing: "ease-out",
+      fill: "backwards",
+    });
+  }, [device]);
+
+  /* Their own photo, made small on the device (model/giftPhoto.ts). */
+  const photoInput = useRef<HTMLInputElement | null>(null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setPhotoError(null);
+    setPhotoBusy(true);
+    try {
+      setGiftDraft({ photo: await shrinkPhoto(file) });
+    } catch (err) {
+      setPhotoError(err instanceof PhotoError ? err.message : "We couldn’t open that photo. Try another one.");
+    } finally {
+      setPhotoBusy(false);
+      if (photoInput.current) photoInput.current.value = "";
+    }
+  };
+
   useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
     back.current?.focus({ preventScroll: true });
@@ -1034,9 +1025,9 @@ export function GiftPreview({
       if (e.key !== "Tab") return;
       const box = document.querySelector<HTMLElement>(".gft-preview");
       if (!box) return;
-      const els = Array.from(box.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), [tabindex='0']")).filter(
-        (el) => el.getClientRects().length > 0 && el.getAttribute("aria-hidden") !== "true",
-      );
+      const els = Array.from(
+        box.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([type=file]), textarea, [tabindex='0']"),
+      ).filter((el) => el.getClientRects().length > 0 && el.getAttribute("aria-hidden") !== "true");
       if (!els.length) return;
       const at = document.activeElement as HTMLElement | null;
       const i = at ? els.indexOf(at) : -1;
@@ -1051,14 +1042,24 @@ export function GiftPreview({
       was?.focus?.({ preventScroll: true });
     };
   }, [onClose]);
-  /* A phone-sized pop-up on a computer, the whole screen on a phone; the
-     student's page inside it is laid out as on a phone either way (its
-     wide layout keys on its own width, @container, not the screen's). */
+
+  /* On a computer the student's own button is inert (the parent's is in
+     the panel); on a phone the page's dock is the parent's button. */
+  const pageCta: DockCta = wide ? { label: "Claim my gift", onClick: () => {} } : action;
+  const scaled: React.CSSProperties | undefined =
+    desk && fit
+      ? ({
+          width: `${DESK_W}px`,
+          height: `${fit.h / fit.s}px`,
+          transform: `scale(${fit.s})`,
+          transformOrigin: "0 0",
+          "--frame-h": `${fit.h / fit.s}px`,
+        } as React.CSSProperties)
+      : undefined;
+
   return createPortal(
-    <div className="gft-preview" data-device={device} role="dialog" aria-modal="true" aria-label="Preview of their gift">
+    <div className="gft-preview" data-device={desk ? "computer" : "phone"} role="dialog" aria-modal="true" aria-label="Preview of their gift">
       <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
-      {/* The background arrows: over the frame's top corner on a phone, above
-          it on a tablet. A computer has the panel instead (below). */}
       <div className="gft-preview-bar">
         <div className="gft-preview-bg" role="group" aria-label="Background">
           <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
@@ -1079,72 +1080,152 @@ export function GiftPreview({
           </button>
         </div>
       </div>
-      <div ref={frame} className="gft-preview-frame">
-        <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {backLabel}
-        </button>
-        <div className="gft-preview-scroll gft-wrap">
-          <Letter gift={{ ...gift, scene, photo: withPhoto ? (gift.photo ?? photoChoice ?? null) : null }} sample preview cta={cta} />
+      <div className="gft-preview-left">
+        <div ref={frame} className="gft-preview-frame">
+          <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {backLabel}
+          </button>
+          <div className="gft-preview-scroll gft-wrap" style={scaled}>
+            <Letter gift={gift} sample preview cta={pageCta} />
+          </div>
         </div>
       </div>
-      {/* THE CONTROL PANEL (Sam, 6 Nov 2026: "the grid of background options
-          would show up on the right in a control center where they can
-          configure how it might look"). A computer only: every background
-          at once, the photo on or off where it's the sample's, and phone or
-          computer. In checkout the background picked here is the one sent. */}
-      <aside className="gft-preview-panel" aria-label="How it looks">
-        <div className="gft-pp-group">
-          <h2 id="gft-pp-bg" className="gft-pp-h">
-            Background
-          </h2>
-          <div className="gft-pp-grid" role="radiogroup" aria-labelledby="gft-pp-bg">
-            {SCENES.map((sc) => (
-              <button
-                key={sc.id}
-                type="button"
-                role="radio"
-                aria-checked={scene === sc.id}
-                className="gft-pp-swatch"
-                onClick={() => pick(sc.id as SceneId)}
-              >
-                <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
-                  <i className="scene-swatch-env" />
+      {wide ? (
+        <aside className="gft-preview-panel" aria-label="Make it theirs">
+          <div className="gft-pp-body">
+            <div className="gft-pp-group">
+              <h2 className="gft-pp-h">Make it theirs</h2>
+              {fixedTo ? null : (
+                <label className="gft-pp-field">
+                  <span>Their first name</span>
+                  <input
+                    value={d.to}
+                    onChange={(e) => setGiftDraft({ to: e.target.value })}
+                    placeholder={sample ? SAMPLE_GIFT.to ?? "" : ""}
+                    maxLength={40}
+                    autoComplete="off"
+                    autoCapitalize="words"
+                  />
+                </label>
+              )}
+              <label className="gft-pp-field">
+                <span className="gft-pp-count">
+                  Your note
+                  <small className="tnum" aria-hidden="true">
+                    {d.note.length}/{NOTE_MAX}
+                  </small>
                 </span>
-                <span className="gft-pp-name">{sc.name}</span>
-              </button>
+                <textarea
+                  rows={4}
+                  value={d.note}
+                  onChange={(e) => setGiftDraft({ note: e.target.value })}
+                  placeholder={sample ? SAMPLE_GIFT.note ?? "" : "Thinking of you!"}
+                  maxLength={NOTE_MAX}
+                />
+              </label>
+              <label className="gft-pp-field">
+                <span>Sign it</span>
+                <input
+                  value={d.from}
+                  onChange={(e) => setGiftDraft({ from: e.target.value })}
+                  placeholder="Mom"
+                  maxLength={FROM_MAX}
+                  autoComplete="off"
+                  autoCapitalize="words"
+                />
+              </label>
+              <div className="gft-pp-field">
+                <span>Photo</span>
+                {d.photo ? (
+                  <div className="gft-pp-photo">
+                    <img src={d.photo} alt="Your photo" />
+                    <button type="button" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+                      Change
+                    </button>
+                    <button type="button" onClick={() => setGiftDraft({ photo: null })} disabled={photoBusy}>
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button type="button" className="gft-pp-add" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9ZM12 16a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                      </svg>
+                      {photoBusy ? "One moment…" : "Add your photo"}
+                    </button>
+                    {sample ? (
+                      <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
+                        {[true, false].map((on) => (
+                          <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>
+                            {on ? "Sample photo" : "No photo"}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+                <input
+                  ref={photoInput}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => void pickPhoto(e.target.files?.[0])}
+                />
+                {photoError ? (
+                  <p className="gft-pp-error" role="alert">
+                    {photoError}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            {SCENE_GROUPS.map((g) => (
+            <div key={g.label} className="gft-pp-group">
+              <h2 id={`gft-pp-${g.label}`} className="gft-pp-h">
+                {g.label}
+              </h2>
+              <div className="gft-pp-grid" role="radiogroup" aria-labelledby={`gft-pp-${g.label}`}>
+                {g.scenes.map((sc) => (
+                  <button
+                    key={sc.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={scene === sc.id}
+                    className="gft-pp-swatch"
+                    onClick={() => pick(sc.id as SceneId)}
+                  >
+                    <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                      <i className="scene-swatch-env" />
+                    </span>
+                    <span className="gft-pp-name">{sc.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
             ))}
-          </div>
-        </div>
-        {photoChoice ? (
-          <div className="gft-pp-group">
-            <h2 id="gft-pp-photo" className="gft-pp-h">
-              Photo
-            </h2>
-            <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-photo">
-              {[true, false].map((on) => (
-                <button key={String(on)} type="button" role="radio" aria-checked={withPhoto === on} onClick={() => setWithPhoto(on)}>
-                  {on ? "With a photo" : "No photo"}
-                </button>
-              ))}
+            <div className="gft-pp-group">
+              <h2 id="gft-pp-dev" className="gft-pp-h">
+                See it on
+              </h2>
+              <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-dev">
+                {(["phone", "computer"] as const).map((dv) => (
+                  <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
+                    {dv === "phone" ? "Phone" : "Computer"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        ) : null}
-        <div className="gft-pp-group gft-pp-device">
-          <h2 id="gft-pp-dev" className="gft-pp-h">
-            See it on
-          </h2>
-          <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-dev">
-            {(["phone", "computer"] as const).map((d) => (
-              <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
-                {d === "phone" ? "Phone" : "Computer"}
-              </button>
-            ))}
+          <div className="gft-pp-foot">
+            <button type="button" className="gft-pp-cta" onClick={(e) => action.onClick(e.currentTarget)} disabled={photoBusy}>
+              {action.label}
+            </button>
           </div>
-        </div>
-      </aside>
+        </aside>
+      ) : null}
     </div>,
     document.body,
   );
