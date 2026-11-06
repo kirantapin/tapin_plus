@@ -670,7 +670,7 @@ export default function ParentsHome() {
           {/* The hero's sub (COPY.md v2 final, with Sam's $60, 5 Nov 2026) as a
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
-              $3.99, one lunch covers it). */}
+              $3.99, then $7.99). */}
           <OfferPrice />
           <button
             type="button"

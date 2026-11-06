@@ -78,6 +78,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
         <GiftPreview
           gift={{ ...SAMPLE_GIFT, photo: SAMPLE_PHOTO_SRC }}
           backLabel="Close"
+          photoChoice={SAMPLE_PHOTO_SRC}
           onClose={() => setPreviewing(false)}
           cta={{
             label: "Sign up my student",

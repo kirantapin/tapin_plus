@@ -51,6 +51,12 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
   sunrise: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.04)" }], ms: 6000, alternate: true },
   ridge: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.03)" }], ms: 7000, alternate: true },
   hearts: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 16000 },
+  /* The cute four (6 Nov 2026): sprinkles fall, daisies and smileys float,
+     the kisses slide along. */
+  sprinkles: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 120px)" }], ms: 12000 },
+  daisies: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-180px, -180px)" }], ms: 40000 },
+  xoxo: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-96px, 0)" }], ms: 9000 },
+  smileys: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 22000 },
   flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
   lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
   sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
@@ -803,6 +809,7 @@ export function GiftPreview({
   cta,
   backLabel = "Back to checkout",
   onScene,
+  photoChoice,
 }: {
   gift: Gift;
   onClose: () => void;
@@ -813,8 +820,12 @@ export function GiftPreview({
   /** Told each background they cycle to, so the checkout's pick follows
    *  what they're looking at (left out on /parents, where it's the sample). */
   onScene?: (scene: SceneId) => void;
+  /** A photo the viewer may show or hide (the sample's, on /parents); left
+   *  out in checkout, where the photo is the parent's own choice. */
+  photoChoice?: string | null;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
+  const [withPhoto, setWithPhoto] = useState(!!gift.photo);
   /* Every background, one after another (Sam, 6 Nov 2026: "can we have the
      ability to cycle through background options so someone can see in real
      time what each background looks like"): the arrows in the top bar, or
@@ -823,11 +834,11 @@ export function GiftPreview({
   const [scene, setScene] = useState<SceneId>(gift.scene);
   const sceneAt = SCENES.findIndex((e) => e.id === scene);
   const cycle = useRef<(step: number) => void>(() => {});
-  cycle.current = (step: number) => {
-    const next = SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId;
+  const pick = (next: SceneId) => {
     setScene(next);
     onScene?.(next);
   };
+  cycle.current = (step: number) => pick(SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId);
   /* Phone or computer (Sam, 6 Nov 2026: "there should be a desktop version
      of the preview and a mobile version of the preview, desktop version
      would be wider"). Phone first: the student opens it from a text. On a
@@ -911,7 +922,8 @@ export function GiftPreview({
   return createPortal(
     <div className="gft-preview" data-device={device} role="dialog" aria-modal="true" aria-label="Preview of their gift">
       <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
-      {/* Above the frame on a computer, over its top corner on a phone. */}
+      {/* The background arrows: over the frame's top corner on a phone, above
+          it on a tablet. A computer has the panel instead (below). */}
       <div className="gft-preview-bar">
         <div className="gft-preview-bg" role="group" aria-label="Background">
           <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
@@ -931,13 +943,6 @@ export function GiftPreview({
             </svg>
           </button>
         </div>
-        <div className="gft-preview-device" role="radiogroup" aria-label="See it on">
-          {(["phone", "computer"] as const).map((d) => (
-            <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
-              {d === "phone" ? "Phone" : "Computer"}
-            </button>
-          ))}
-        </div>
       </div>
       <div ref={frame} className="gft-preview-frame">
         <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
@@ -947,9 +952,64 @@ export function GiftPreview({
           {backLabel}
         </button>
         <div className="gft-preview-scroll gft-wrap">
-          <Letter gift={{ ...gift, scene }} sample preview cta={cta} />
+          <Letter gift={{ ...gift, scene, photo: withPhoto ? (gift.photo ?? photoChoice ?? null) : null }} sample preview cta={cta} />
         </div>
       </div>
+      {/* THE CONTROL PANEL (Sam, 6 Nov 2026: "the grid of background options
+          would show up on the right in a control center where they can
+          configure how it might look"). A computer only: every background
+          at once, the photo on or off where it's the sample's, and phone or
+          computer. In checkout the background picked here is the one sent. */}
+      <aside className="gft-preview-panel" aria-label="How it looks">
+        <div className="gft-pp-group">
+          <h2 id="gft-pp-bg" className="gft-pp-h">
+            Background
+          </h2>
+          <div className="gft-pp-grid" role="radiogroup" aria-labelledby="gft-pp-bg">
+            {SCENES.map((sc) => (
+              <button
+                key={sc.id}
+                type="button"
+                role="radio"
+                aria-checked={scene === sc.id}
+                className="gft-pp-swatch"
+                onClick={() => pick(sc.id as SceneId)}
+              >
+                <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                  <i className="scene-swatch-env" />
+                </span>
+                <span className="gft-pp-name">{sc.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {photoChoice ? (
+          <div className="gft-pp-group">
+            <h2 id="gft-pp-photo" className="gft-pp-h">
+              Photo
+            </h2>
+            <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-photo">
+              {[true, false].map((on) => (
+                <button key={String(on)} type="button" role="radio" aria-checked={withPhoto === on} onClick={() => setWithPhoto(on)}>
+                  {on ? "With a photo" : "No photo"}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <div className="gft-pp-group gft-pp-device">
+          <h2 id="gft-pp-dev" className="gft-pp-h">
+            See it on
+          </h2>
+          <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-dev">
+            {(["phone", "computer"] as const).map((d) => (
+              <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
+                {d === "phone" ? "Phone" : "Computer"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
     </div>,
     document.body,
   );
