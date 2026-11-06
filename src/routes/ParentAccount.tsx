@@ -55,13 +55,16 @@ export default function ParentAccount() {
       </header>
 
       <main className="ppm-main">
-        <section className="tpa-module ppm-card" aria-labelledby="ppa-title">
+        <section className="tpa-module ppm-card ppa-intro" aria-labelledby="ppa-title">
           <h1 id="ppa-title" className="ppm-h1">
             Manage your student’s Plus
           </h1>
           <p className="ppm-line">There are two ways to change or cancel it.</p>
         </section>
 
+        {/* The two ways, side by side on a computer: they're alternatives,
+            not steps (parent-pages.css). */}
+        <div className="ppa-ways">
         <section className="tpa-module ppm-card ppa-way" aria-labelledby="ppa-mail">
           <span className="ppa-glyph" aria-hidden="true">
             <Glyph d={GLYPHS.mail} />
@@ -89,6 +92,7 @@ export default function ParentAccount() {
             They can cancel their Plus in the Tapin app. If they do, your billing stops.
           </p>
         </section>
+        </div>
 
         <p className="ppa-note">
           If your student hasn’t signed in within 14 days of signing them up, we cancel it and refund you in full.

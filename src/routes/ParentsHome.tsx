@@ -927,7 +927,9 @@ export default function ParentsHome() {
           className="tpa-cta tpa-dock-cta"
           onClick={(e) => signUp("dock", e.currentTarget)}
         >
-          {cta}
+          {/* "Send Tapin Plus" (Sam, 6 Nov 2026), as the gift band's button
+              says; an ask link's names the student. */}
+          {asked ? cta : "Send Tapin Plus"}
           <DockArrow />
         </button>
       </div>
