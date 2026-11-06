@@ -739,12 +739,128 @@ button.tpg-env-link {
   background: #f0f0f0;
 }
 @media (min-width: 640px) {
+  /* The toolbar above the frame, the frame under it. */
+  .gft-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
   .gft-preview-frame {
-    --frame-h: min(860px, calc(100vh - 48px));
+    --frame-h: min(860px, calc(100vh - 48px - 52px));
     width: 420px;
     height: var(--frame-h);
     border-radius: 24px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ══ THE PREVIEW'S TOOLBAR (Sam, 6 Nov 2026: cycle through the backgrounds
+   "so someone can see in real time what each background looks like", and
+   "a desktop version of the preview and a mobile version") ══════════════════
+   On a phone the preview is the whole screen, so the background arrows sit
+   over its top right corner (Close has the left) and there is no device
+   switch: the phone is the phone view. From 640px the toolbar sits above
+   the frame. From 1024px the Phone | Computer switch joins it: below that
+   the frame can't get wide enough (960px) for the page's wide layout. */
+.gft-preview-bar {
+  position: absolute;
+  z-index: 60;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .gft-preview-bar {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 1;
+  }
+}
+.gft-preview-bg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141618;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+.gft-preview-bg button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-preview-bg button:hover {
+  background: rgba(20, 22, 24, 0.06);
+}
+.gft-preview-bg button:active {
+  transform: scale(0.92);
+}
+.gft-preview-bg-name {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 118px;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.gft-preview-bg-name .scene-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+.gft-preview-bg-name .scene-swatch-env {
+  display: none;
+}
+.gft-preview-device {
+  display: none;
+  gap: 2px;
+  height: 40px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.gft-preview-device button {
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, color 160ms ease-out;
+}
+.gft-preview-device button[aria-checked="true"] {
+  background: #ffffff;
+  color: #141618;
+}
+.gft-preview-bg button:focus-visible,
+.gft-preview-device button:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+@media (min-width: 1024px) {
+  .gft-preview-device {
+    display: inline-flex;
+  }
+  .gft-preview[data-device="computer"] .gft-preview-frame {
+    width: min(1200px, calc(100vw - 48px));
   }
 }
 .gft-preview-scroll {
@@ -892,6 +1008,12 @@ button.tpg-env-link {
 .gft-a[data-scene="ridge"] .gft-scene-pat {
   inset: 0;
   transform-origin: 50% 100%;
+}
+/* Airmail's stripes run along the band's top and bottom edges, so its layer
+   can't overscan up and down like the others (240px each way put both
+   stripes off screen, 6 Nov 2026); it drifts sideways only, by one stripe. */
+.gft-a[data-scene="airmail"] .gft-scene-pat {
+  inset: 0 -64px;
 }
 /* The sunburst turns about the envelope: a square big enough that its
    corners never show. */

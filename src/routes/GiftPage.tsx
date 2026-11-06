@@ -799,6 +799,7 @@ export function GiftPreview({
   onClose,
   cta,
   backLabel = "Back to checkout",
+  onScene,
 }: {
   gift: Gift;
   onClose: () => void;
@@ -806,8 +807,71 @@ export function GiftPreview({
    *  still be sign up my student or go back to checkout"). */
   cta: DockCta;
   backLabel?: string;
+  /** Told each background they cycle to, so the checkout's pick follows
+   *  what they're looking at (left out on /parents, where it's the sample). */
+  onScene?: (scene: SceneId) => void;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
+  /* Every background, one after another (Sam, 6 Nov 2026: "can we have the
+     ability to cycle through background options so someone can see in real
+     time what each background looks like"): the arrows in the top bar, or
+     the arrow keys. The letter stays as it is, open or closed; only the
+     background changes, faded in. */
+  const [scene, setScene] = useState<SceneId>(gift.scene);
+  const sceneAt = SCENES.findIndex((e) => e.id === scene);
+  const cycle = useRef<(step: number) => void>(() => {});
+  cycle.current = (step: number) => {
+    const next = SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId;
+    setScene(next);
+    onScene?.(next);
+  };
+  /* Phone or computer (Sam, 6 Nov 2026: "there should be a desktop version
+     of the preview and a mobile version of the preview, desktop version
+     would be wider"). Phone first: the student opens it from a text. On a
+     computer the frame widens until the page takes its wide layout (it keys
+     on its own width, @container); the frame eases between the two widths
+     and the page fades back in at the new one. Only offered where the
+     screen is wide enough for that layout (CSS hides the switch). */
+  const [device, setDevice] = useState<"phone" | "computer">("phone");
+  const frame = useRef<HTMLDivElement | null>(null);
+  const frameW = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const was = frameW.current;
+    const now = el.getBoundingClientRect().width;
+    frameW.current = now;
+    if (was == null || Math.abs(now - was) < 2) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || typeof el.animate !== "function") return;
+    const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+    el.animate([{ width: `${was}px` }, { width: `${now}px` }], { duration: 460, easing: ease });
+    el.querySelector<HTMLElement>(".gft-preview-scroll")?.animate(
+      [{ opacity: 0 }, { opacity: 1 }],
+      { duration: 280, delay: 260, easing: "ease-out", fill: "backwards" },
+    );
+  }, [device]);
+  const firstScene = useRef(true);
+  useEffect(() => {
+    if (firstScene.current) {
+      firstScene.current = false;
+      return;
+    }
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    document
+      .querySelector<HTMLElement>(".gft-preview .gft-scene")
+      ?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: "ease-out" });
+  }, [scene]);
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault();
+      cycle.current(e.key === "ArrowRight" ? 1 : -1);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
     back.current?.focus({ preventScroll: true });
@@ -842,9 +906,37 @@ export function GiftPreview({
      student's page inside it is laid out as on a phone either way (its
      wide layout keys on its own width, @container, not the screen's). */
   return createPortal(
-    <div className="gft-preview" role="dialog" aria-modal="true" aria-label="Preview of their gift">
+    <div className="gft-preview" data-device={device} role="dialog" aria-modal="true" aria-label="Preview of their gift">
       <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
-      <div className="gft-preview-frame">
+      {/* Above the frame on a computer, over its top corner on a phone. */}
+      <div className="gft-preview-bar">
+        <div className="gft-preview-bg" role="group" aria-label="Background">
+          <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <span className="gft-preview-bg-name" aria-live="polite">
+            <span className="scene-swatch" data-scene={scene} aria-hidden="true">
+              <i className="scene-swatch-env" />
+            </span>
+            {SCENES[sceneAt]?.name}
+          </span>
+          <button type="button" aria-label="Next background" onClick={() => cycle.current(1)}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+        <div className="gft-preview-device" role="radiogroup" aria-label="See it on">
+          {(["phone", "computer"] as const).map((d) => (
+            <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
+              {d === "phone" ? "Phone" : "Computer"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div ref={frame} className="gft-preview-frame">
         <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
             <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -852,7 +944,7 @@ export function GiftPreview({
           {backLabel}
         </button>
         <div className="gft-preview-scroll gft-wrap">
-          <Letter gift={gift} sample preview cta={cta} />
+          <Letter gift={{ ...gift, scene }} sample preview cta={cta} />
         </div>
       </div>
     </div>,

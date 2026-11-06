@@ -737,6 +737,8 @@ function Sheet({
                     photo: giftPhoto,
                   }}
                   onClose={() => setPreviewing(false)}
+                  /* The background they cycle to is the one they send. */
+                  onScene={setGiftScene}
                   cta={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
                 />
               ) : null}
