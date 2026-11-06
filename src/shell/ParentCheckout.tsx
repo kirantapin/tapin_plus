@@ -695,6 +695,7 @@ function Sheet({
                     photo: giftPhoto,
                   }}
                   onClose={() => setPreviewing(false)}
+                  cta={{ label: "Back to checkout", onClick: () => setPreviewing(false) }}
                 />
               ) : null}
               {formError ? (

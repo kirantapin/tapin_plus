@@ -8,6 +8,7 @@ import PlusHome from "./routes/PlusHome";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
 import ParentManage from "./routes/ParentManage";
+import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
 import { campaignHeroShot } from "./model/campaign";
@@ -109,6 +110,8 @@ export default function App() {
         <Route path="/parents/manage/:token" element={<ParentManage />} />
         {/* Where the manage page sits once its key is out of the address. */}
         <Route path="/parents/manage" element={<ParentManage />} />
+        {/* The parents' account button (6 Nov 2026): how to change or cancel. */}
+        <Route path="/parents/account" element={<ParentAccount />} />
         {/* THE GIFT PAGE (Sam, 6 Nov 2026): what a student opens from their
             text when a parent sends Plus with a note (routes/GiftPage.tsx).
             /gift/sample is the sample; /gift is where it sits once its key

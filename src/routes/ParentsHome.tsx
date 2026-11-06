@@ -1,4 +1,5 @@
 import { takeKey } from "../model/redact";
+import { Link } from "react-router-dom";
 import {
   useEffect,
   useLayoutEffect,
@@ -594,10 +595,25 @@ export default function ParentsHome() {
         )}
         <div className="tpa-band-top">
           {/* The call-out: who this page is for, before anything else. */}
-          <span className="tpa-glass tpa-badge">
-            <FlatMark className="tpa-badge-mark" />
+          {/* Paper, not glass, on the parents page (Sam, 6 Nov 2026: "rework
+              this"): the cream of the envelope's seal in the photo, ink type,
+              the Plus mark in maroon; the account button matches it. */}
+          <span className="tpp-label">
+            <FlatMark className="tpp-label-mark" />
             {EYEBROW}
           </span>
+          <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2ZM4.5 20.2c.8-3.6 3.9-5.6 7.5-5.6s6.7 2 7.5 5.6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
         </div>
         <div ref={titleRef} className="tpa-band-title">
           <div>

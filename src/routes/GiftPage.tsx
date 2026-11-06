@@ -58,6 +58,8 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
 };
 const GIFT_KEY = "tp_gift_v1";
 const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
+const QR = asset("/brand/tapin-app-qr.svg");
+export { SAMPLE_PHOTO_SRC };
 
 type Load =
   | { state: "loading" }
@@ -142,10 +144,17 @@ export default function GiftPage() {
   /* ph-no-capture: the note, the names and the masked number are a family's
      own words, so session replay and autocapture skip this page's content. */
   if (load.state === "ok") {
-    if (!load.sample) return <Letter gift={load.gift} sample={false} />;
+    if (!load.sample)
+      return (
+        <div className="gft-wrap">
+          <Letter gift={load.gift} sample={false} />
+        </div>
+      );
     return (
       <>
-        <Letter key={`${load.gift.scene}-${!!load.gift.photo}`} gift={load.gift} sample />
+        <div className="gft-wrap">
+          <Letter key={`${load.gift.scene}-${!!load.gift.photo}`} gift={load.gift} sample />
+        </div>
         {showPicker ? (
           <Picker
             gift={load.gift}
@@ -384,10 +393,38 @@ function WhatsIn() {
 
 /** How to claim it, and a thank-you home. The button itself is the dock's
  *  ("Claim my gift"), always in reach. */
-function Next({ gift, sample, preview = false }: { gift: Gift; sample: boolean; preview?: boolean }) {
+function Next({ gift, sample, preview = false, cta }: { gift: Gift; sample: boolean; preview?: boolean; cta?: DockCta }) {
   const { track } = useEventTracking();
   return (
     <div className="gft-next">
+      {/* On a wide screen there's no dock: the button sits here, with the
+          QR code for the phone the app goes on (gift.css, @container). */}
+      <div className="gft-next-wide">
+        {cta ? (
+          <button type="button" className="gft-cta-inline" onClick={(e) => cta.onClick(e.currentTarget)}>
+            {cta.label}
+          </button>
+        ) : (
+          <>
+            <a
+              className="gft-cta-inline"
+              href={appHref()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (preview) e.preventDefault();
+                else track("gift_claim", { sample, where: "inline" });
+              }}
+            >
+              Claim my gift
+            </a>
+            <div className="gft-qr">
+              <img src={QR} alt="" width="88" height="88" />
+              <span>Plus is used in the Tapin app. Scan this with your phone to get it.</span>
+            </div>
+          </>
+        )}
+      </div>
       <p className="gft-sign tnum">
         Get the app and sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
       </p>
@@ -417,7 +454,21 @@ function Next({ gift, sample, preview = false }: { gift: Gift; sample: boolean; 
 /* ══ THE LETTER ═════════════════════════════════════════════════════════════
    One element throughout: the letter is never swapped, only moved (measured
    before and after the envelope lets go of it). */
-export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: boolean; preview?: boolean }) {
+/** What the dock's button does instead of claiming (the parent's preview:
+ *  "Back to checkout", or "Sign up my student" from the parents page). */
+export type DockCta = { label: string; onClick: (el: HTMLElement) => void };
+
+export function Letter({
+  gift,
+  sample,
+  preview = false,
+  cta,
+}: {
+  gift: Gift;
+  sample: boolean;
+  preview?: boolean;
+  cta?: DockCta;
+}) {
   const { track } = useEventTracking();
   const [state, setState] = useState<"sealed" | "opening" | "open">("sealed");
   const seal = useRef<HTMLSpanElement | null>(null);
@@ -689,22 +740,29 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
       {state === "open" ? (
         <main ref={after} className="gft-after">
           <WhatsIn />
-          <Next gift={gift} sample={sample} preview={preview} />
+          <Next gift={gift} sample={sample} preview={preview} cta={cta} />
         </main>
       ) : null}
       {state === "open" ? (
         <div ref={dock} className="gft-dock">
-          <a
-            className="gft-dock-cta tpa-dock-cta"
-            href={appHref()}
-            onClick={(e) => {
-              if (preview) e.preventDefault();
-              else track("gift_claim", { sample });
-            }}
-          >
-            Claim my gift
-            <DockArrow />
-          </a>
+          {cta ? (
+            <button type="button" className="gft-dock-cta tpa-dock-cta" onClick={(e) => cta.onClick(e.currentTarget)}>
+              {cta.label}
+              <DockArrow />
+            </button>
+          ) : (
+            <a
+              className="gft-dock-cta tpa-dock-cta"
+              href={appHref()}
+              onClick={(e) => {
+                if (preview) e.preventDefault();
+                else track("gift_claim", { sample });
+              }}
+            >
+              Claim my gift
+              <DockArrow />
+            </a>
+          )}
         </div>
       ) : null}
     </div>
@@ -739,7 +797,19 @@ function Picker({ gift, onChange }: { gift: Gift; onChange: (next: Partial<Gift>
    parent has typed and picked: the same envelope, the same opening, their
    note, photo and background. Nothing in it does anything (no tracking, no
    links); "Back to checkout" or Escape closes it. */
-export function GiftPreview({ gift, onClose }: { gift: Gift; onClose: () => void }) {
+export function GiftPreview({
+  gift,
+  onClose,
+  cta,
+  backLabel = "Back to checkout",
+}: {
+  gift: Gift;
+  onClose: () => void;
+  /** The dock's button in the preview (Sam, 6 Nov 2026: "the CTA would
+   *  still be sign up my student or go back to checkout"). */
+  cta: DockCta;
+  backLabel?: string;
+}) {
   const back = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
@@ -771,15 +841,23 @@ export function GiftPreview({ gift, onClose }: { gift: Gift; onClose: () => void
       was?.focus?.({ preventScroll: true });
     };
   }, [onClose]);
+  /* A phone-sized pop-up on a computer, the whole screen on a phone; the
+     student's page inside it is laid out as on a phone either way (its
+     wide layout keys on its own width, @container, not the screen's). */
   return createPortal(
     <div className="gft-preview" role="dialog" aria-modal="true" aria-label="Preview of their gift">
-      <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        Back to checkout
-      </button>
-      <Letter gift={gift} sample preview />
+      <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
+      <div className="gft-preview-frame">
+        <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {backLabel}
+        </button>
+        <div className="gft-preview-scroll gft-wrap">
+          <Letter gift={gift} sample preview cta={cta} />
+        </div>
+      </div>
     </div>,
     document.body,
   );
