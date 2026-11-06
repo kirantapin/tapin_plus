@@ -757,3 +757,53 @@
     line-height: 48px;
   }
 }
+
+/* ══ THE SPLIT HERO (Sam, 6 Nov 2026) ═════════════════════════════════════
+   Mom at home on the left, her student on campus on the right, a cream seam
+   between them and a little care package where they meet, a third of the way
+   down (above the headline, below the pill). */
+.tpp .tpp-band .tpp-split {
+  display: flex;
+  gap: 3px;
+  background: #f7f3ea;
+}
+.tpp-split img {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+}
+.tpp-split img:first-child {
+  object-position: 58% 34%;
+}
+.tpp-split img:nth-child(2) {
+  object-position: 64% 34%;
+}
+.tpp-split-seal {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 38%;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 50%;
+  background: #f7f3ea;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+@media (min-width: 1024px) {
+  .tpp-split img:first-child {
+    object-position: 50% 40%;
+  }
+  .tpp-split img:nth-child(2) {
+    object-position: 58% 38%;
+  }
+  .tpp-split-seal {
+    top: 42%;
+    width: 72px;
+    height: 72px;
+    margin: -36px 0 0 -36px;
+  }
+}

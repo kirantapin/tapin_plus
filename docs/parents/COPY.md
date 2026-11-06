@@ -298,3 +298,11 @@ https://plus.tapin.app/gift/{token} Reply STOP to opt out`
 - Link didn’t open (gift_lookup’s 404): "We couldn’t open this gift" / "The link may be old. If someone
   signed you up for Tapin Plus, it’s on your number: sign in with it." / "Get the app" /
   "Sign in on the web".
+
+## Changing or cancelling (Sam, 6 Nov 2026)
+
+"parents can manage their subscription any time by emailing support@tapin.app - or their
+student can cancel it in the tapin app." On the page: FAQ "How do I cancel?" → "Email
+support@tapin.app any time and we’ll change or cancel it for you. Your student can also
+cancel in the Tapin app, and we’ll let you know if they do."; the assurance row "Change
+or cancel by email"; the checkout's terms and done screen say the same.

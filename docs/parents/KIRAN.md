@@ -19,19 +19,20 @@ in this repo.
 
 ## Who manages it
 
+Sam, 6 Nov 2026: "parents can manage their subscription any time by emailing
+support@tapin.app - or their student can cancel it in the tapin app."
+
 - **The student manages it in the app**, like any Plus. If they cancel in the app, the
   parent's billing stops and the parent gets an email.
-- **The parent gets one thing:** a "manage or cancel" link in their receipt email, which
-  opens plus.tapin.app/parents/manage. It's their card, so they need a way to stop it
-  (auto-renewal rules require that the person who pays can cancel easily).
+- **The parent emails support@tapin.app** to change or cancel; a person does it. The
+  receipt email should say that (not link a manage page). Email is an easy way to cancel
+  for Virginia's auto-renewal rule, as long as support answers promptly.
+- The manage page and `parent_manage` are built and can stay, unlinked, for later.
 
-For this first version we're leaving out: changing the student's number after paying,
-resending the text, and "Ask a parent" links from the student's checkout. To leave
-them out, make `parent_manage` always return `can_change_number: false` and
-`can_resend: false` (and refuse those two actions). It's a small change in
-`parent_manage/index.ts`. The page already hides those buttons when the flags are false,
-so nothing changes on the frontend. "Ask a parent" is already switched off on the live
-site (`PARENTS_BACKEND_LIVE = false` in `src/model/parents.ts`); leave it off.
+For this first version we're also leaving out: changing the student's number after
+paying, resending the text, and "Ask a parent" links from the student's checkout.
+"Ask a parent" is already switched off on the live site (`PARENTS_BACKEND_LIVE = false`
+in `src/model/parents.ts`); leave it off.
 
 ## Where the code is
 

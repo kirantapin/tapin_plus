@@ -751,12 +751,12 @@ function Sheet({
                        (API.md), unless there's a note: then they get its link. */
                     <>
                       It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
-                      {sentNote ? " We’ve texted them a link to your note." : ""} Your receipt and a manage or cancel link are in your email.
+                      {sentNote ? " We’ve texted them a link to your gift." : ""} Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
                     </>
                   ) : (
                     <>
                       We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
-                      {sentNote ? " a link to your note" : ""}. They sign in to Tapin with that number and it’s there. Your receipt and a manage or cancel link are in your email. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
                     </>
                   )}
                 </p>
@@ -856,7 +856,7 @@ function Input({
 function Terms({ first, monthly }: { first: number; monthly: number }) {
   return (
     <p className="prc-terms tnum">
-      {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime from the link we email you. `}
+      {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime: email support@tapin.app, or your student can cancel in the Tapin app. `}
       <span className="prc-legal">
         <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">
           Terms

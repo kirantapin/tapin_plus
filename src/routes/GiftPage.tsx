@@ -16,6 +16,7 @@ import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
+import { DockArrow } from "../shell/DockArrow";
 import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
@@ -296,9 +297,20 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
       return a;
     };
     unwrap(go, extra.current, seal.current, flap.current);
-    /* Out until only its foot (14px) is left in the pocket. */
-    const lift = el.offsetHeight + 12 - 14;
-    go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 760, delay: 880 });
+    /* Peeking (Sam, 6 Nov 2026: "the card should be peeking out here"):
+       up until the words clear the envelope's top edge, while the rest of
+       the card (a letter longer than its words) stays in the pocket and
+       fills the V, so the dark inside never shows. The clip's line rides
+       with it, on the envelope's foot. */
+    const sig = el.querySelector<HTMLElement>(".gft-a-sig");
+    const words = sig ? sig.offsetTop + sig.offsetHeight : el.offsetHeight;
+    const lift = Math.min(words + 12 + 10, el.offsetHeight - 140);
+    const H = el.offsetHeight;
+    const cut = (up: number) => `inset(0 0 ${Math.max(0, H - 214 - up)}px 0)`;
+    go(el, [
+      { transform: "translateY(0)", clipPath: cut(0) },
+      { transform: `translateY(${-lift}px)`, clipPath: cut(lift) },
+    ], { duration: 760, delay: 880 });
   }, [play]);
   return (
     <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
@@ -689,6 +701,7 @@ export function Letter({ gift, sample, preview = false }: { gift: Gift; sample: 
             }}
           >
             Claim my gift
+            <DockArrow />
           </a>
         </div>
       ) : null}

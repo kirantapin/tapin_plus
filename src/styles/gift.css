@@ -278,6 +278,9 @@ a.gft-open {
   border-radius: 10px;
   background: var(--env-pocket);
   clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+  /* Its own layer: beside the flap's 3D fold, Chrome can paint the pocket
+     without its clip (a solid oblong, no V) unless it's composited too. */
+  transform: translateZ(0);
 }
 .gft-a-flap {
   top: 0;
@@ -851,6 +854,10 @@ a.gft-open {
 .gft-mini .gft-a-stage {
   width: 100%;
   cursor: default;
+}
+/* A letter longer than its words: the part left in the pocket fills the V. */
+.gft-mini .gft-a-letter {
+  min-height: 320px;
 }
 .gft-mini .gft-a-note {
   font-size: 18px;

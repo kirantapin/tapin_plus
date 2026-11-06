@@ -283,7 +283,7 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     glyph: GLYPHS.text,
     when: "Next",
     title: "They sign in",
-    line: <>They get one text from Tapin and sign in to Tapin with their own number. Their Plus is already there.</>,
+    line: <>They get one text from Tapin with your gift. They open it and sign in with their own number. Their Plus is already there.</>,
   },
   {
     glyph: GLYPHS.tag,

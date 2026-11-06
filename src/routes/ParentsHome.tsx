@@ -11,6 +11,7 @@ import { logoField } from "../model/content";
 import { captureUtm, lookupAskLink } from "../model/parents";
 import ParentCheckout from "../shell/ParentCheckout";
 import { useDockPulse } from "../shell/dockPulse";
+import { DockArrow } from "../shell/DockArrow";
 import {
   CREDIT,
   MIN_ORDER,
@@ -128,11 +129,22 @@ const parentHeroProps = (v: ParentHero) => ({
 /* ══ THE HERO PHOTOGRAPH ═════════════════════════════════════════════════════
    Parents and their student, framed so the faces clear the pill and the
    headline: `phone` is the object-position up to 1023 wide, `desk` from
-   1024. Move-in day is the default; ?photo=hug|downtown previews the others
-   (any build, nothing stored). */
-type HeroPhoto = "move-in" | "hug" | "downtown";
+   1024. ?photo=move-in|hug|downtown previews the others (any build,
+   nothing stored).
+
+   The default since 6 Nov 2026 is the split (Sam: "the header image would
+   need to lean into this ... a split image of a mom sending this to her
+   kid, and the kid receiving it"): the same mom and daughter as move-in
+   day, her at home sending it, her student on campus opening it, the two
+   halves meeting at a little care package. */
+type HeroPhoto = "split" | "move-in" | "hug" | "downtown";
+const SPLIT = {
+  parent: asset("/parents/hero-split-parent.webp"),
+  student: asset("/parents/hero-split-student.webp"),
+};
 const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
   {
+    split: { src: SPLIT.parent, phone: "", desk: "" },
     "move-in": {
       src: asset("/parents/hero-move-in.webp"),
       phone: "50% 22%",
@@ -150,9 +162,9 @@ const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
     },
   };
 const heroPhoto = (): HeroPhoto => {
-  if (typeof window === "undefined") return "move-in";
+  if (typeof window === "undefined") return "split";
   const p = new URLSearchParams(window.location.search).get("photo");
-  return p === "hug" || p === "downtown" ? p : "move-in";
+  return p === "move-in" || p === "hug" || p === "downtown" ? p : "split";
 };
 
 const LEGAL = [
@@ -541,7 +553,10 @@ export default function ParentsHome() {
     },
     {
       q: "How do I cancel?",
-      a: "Use the “manage or cancel” link in your receipt email. Your student can also cancel in the app, and we’ll let you know if they do.",
+      /* Sam, 6 Nov 2026: "parents can manage their subscription any time by
+         emailing support@tapin.app - or their student can cancel it in the
+         tapin app". */
+      a: "Email support@tapin.app any time and we’ll change or cancel it for you. Your student can also cancel in the Tapin app, and we’ll let you know if they do.",
     },
     {
       q: "Who do I contact with questions?",
@@ -556,16 +571,27 @@ export default function ParentsHome() {
         data-hero="parents"
         data-photo={photo}
       >
-        <img
-          className="tpa-band-art"
-          src={shot.src}
-          alt=""
-          decoding="async"
-          style={{
-            ["--photo-pos" as string]: shot.phone,
-            ["--photo-pos-desk" as string]: shot.desk,
-          }}
-        />
+        {photo === "split" ? (
+          <div className="tpa-band-art tpp-split" aria-hidden="true">
+            <img src={SPLIT.parent} alt="" decoding="async" />
+            <img src={SPLIT.student} alt="" decoding="async" />
+            {/* Where the two halves meet: the care package, on its way. */}
+            <span className="tpp-split-seal">
+              <i className="scene-swatch-env" />
+            </span>
+          </div>
+        ) : (
+          <img
+            className="tpa-band-art"
+            src={shot.src}
+            alt=""
+            decoding="async"
+            style={{
+              ["--photo-pos" as string]: shot.phone,
+              ["--photo-pos-desk" as string]: shot.desk,
+            }}
+          />
+        )}
         <div className="tpa-band-top">
           {/* The call-out: who this page is for, before anything else. */}
           <span className="tpa-glass tpa-badge">
@@ -779,9 +805,10 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.mail} />}
-              label="Cancel anytime from your email"
+              label="Change or cancel by email"
             >
-              You can cancel anytime from the link in your email.
+              Email support@tapin.app any time and we’ll change or cancel it for
+              you.
             </Fold>
             <Fold
               className="tpp-sure-row"
@@ -886,6 +913,7 @@ export default function ParentsHome() {
           onClick={(e) => signUp("dock", e.currentTarget)}
         >
           {cta}
+          <DockArrow />
         </button>
       </div>
 
