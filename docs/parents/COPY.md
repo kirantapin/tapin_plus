@@ -100,7 +100,7 @@ support@tapin.app
 
 ## Form microcopy
 Labels: Your student's first name / Your student's mobile number / Confirm their number /
-Your name / Your email / Your mobile (optional)
+Your name / Your mobile (no email for now, 6 Nov 2026: no automated emails yet; the done screen no longer mentions a receipt)
 Helper text under the number field: We'll text this number once so they can activate.
 They confirm it with a code, so double-check it.
 Above the payment field: You won't be charged until they activate. Then it's $3.99 the
@@ -278,8 +278,7 @@ reads "Add a note or a photo for {Student}"; the section is "For {Student}, from
 (optional)". Old line, kept for reference:
 "Sign it" (placeholder "Mom"). Done screen: "We’ve texted •••0123 a link to your note."
 
-**The text to the student:** `Tapin: {Who} sent you Tapin Plus{ with a note | with a photo}. Open it:
-https://plus.tapin.app/gift/{token} Reply STOP to opt out`
+**The text to the student** (Sam's words, 6 Nov 2026): `Tapin: You have a gift from {Who}. Open it: https://plus.tapin.app/gift/{token} Reply STOP to opt out`
 
 **The gift page** (/gift/{token}):
 - The envelope is the care package (kraft, twine, a maroon seal with the flat Plus mark),

@@ -51,6 +51,12 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
   sunrise: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.04)" }], ms: 6000, alternate: true },
   ridge: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.03)" }], ms: 7000, alternate: true },
   hearts: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 16000 },
+  /* The cute four (6 Nov 2026): sprinkles fall, daisies and smileys float,
+     the kisses slide along. */
+  sprinkles: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 120px)" }], ms: 12000 },
+  daisies: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-180px, -180px)" }], ms: 40000 },
+  xoxo: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-96px, 0)" }], ms: 9000 },
+  smileys: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 22000 },
   flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
   lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
   sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
@@ -292,7 +298,7 @@ function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, fla
    into view (`play`), so a parent sees exactly what their student will. It
    stops with the card almost all the way out, its foot still tucked in the
    pocket, so the whole note reads. Reduced motion: shown already open. */
-export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> }) {
+export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null } }) {
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
   const extra = useRef<HTMLSpanElement | null>(null);
@@ -333,6 +339,9 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
             <div className="gft-a-head">
               <span>For {gift.to ?? "you"}</span>
             </div>
+            {/* A photo, as the gift page prints it (Sam, 6 Nov 2026: "do we
+                want to show here that it comes with an image?"). */}
+            {gift.photo ? <img className="gft-a-photo" src={gift.photo} alt="" decoding="async" /> : null}
             {gift.note ? <p className="gft-a-note">{gift.note}</p> : null}
             <p className="gft-a-sig">{gift.from}</p>
           </div>
@@ -360,8 +369,143 @@ function useRiseIn(host: React.RefObject<HTMLElement | null>, on: boolean, delay
   }, [host, on, delay]);
 }
 
+/* ══ WHAT'S IN IT, THREE WAYS (Sam, 6 Nov 2026: "can we get 3 variations of
+   this section?") ═══════════════════════════════════════════════════════════
+   ?wiv=a | b | c on any gift page (only our own designs, so safe on any
+   build); none is the current list. The facts are the same in all four: a $5
+   credit earned on a $10+ food order, every week at each place, off their
+   next; 15% off instead, once a day; points on everything. */
+type WhatsInVariant = "a" | "b" | "c" | null;
+const whatsInVariant = (): WhatsInVariant => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("wiv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+
+/** A · Figures: the three in big type side by side, then the places named. */
+function WhatsInFigures() {
+  return (
+    <section className="gft-in gft-in-a" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        What’s in it
+      </h2>
+      <ul className="gft-figs">
+        <li>
+          <b className="tnum" data-money="">${CREDIT}</b>
+          <span>credit every week at each place, on a ${MIN_ORDER}+ meal</span>
+        </li>
+        <li>
+          <b className="tnum">{PERCENT}%</b>
+          <span>off instead, once a day</span>
+        </li>
+        <li>
+          <b>
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" fill="currentColor" />
+            </svg>
+            <span className="gft-sr">Points</span>
+          </b>
+          <span>points on everything you order</span>
+        </li>
+      </ul>
+      <ul className="gft-named" aria-label="Where it works">
+        {PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <span>{p.name}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** B · How it works: the credit told through one real order. */
+function WhatsInStory() {
+  const p = PLACES[0];
+  const off = Math.max(0, p.order.price - CREDIT);
+  return (
+    <section className="gft-in gft-in-b" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        How it works
+      </h2>
+      <ol className="gft-steps">
+        <li>
+          <img className="gft-step-img" src={p.order.img} alt="" decoding="async" loading="lazy" />
+          <span>
+            <b>Order a ${MIN_ORDER}+ meal</b>
+            {p.order.label} at {p.name}, <span className="tnum">${p.order.price.toFixed(2)}</span>
+          </span>
+        </li>
+        <li>
+          <i className="gft-step-fig tnum" data-money="">+${CREDIT}</i>
+          <span>
+            <b>${CREDIT} credit lands</b>
+            Once a week at each place
+          </span>
+        </li>
+        <li>
+          <i className="gft-step-fig tnum">${off % 1 ? off.toFixed(2) : off}</i>
+          <span>
+            <b>Next time, ${CREDIT} off</b>
+            The same order, with the credit
+          </span>
+        </li>
+      </ol>
+      <p className="gft-also">
+        Or <b>{PERCENT}% off</b> instead, once a day. <b>Points</b> on everything.
+      </p>
+      <ul className="gft-logos" aria-label="Where it works">
+        {PLACES.map((x) => (
+          <li key={x.id}>
+            <img src={x.logo} alt={x.name} decoding="async" loading="lazy" />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** C · Places first: the five, with what they serve, then the three. */
+function WhatsInPlaces() {
+  return (
+    <section className="gft-in gft-in-c" aria-labelledby="gft-in-h">
+      <h2 id="gft-in-h" className="gft-h2">
+        Yours at {PLACES.length} places
+      </h2>
+      <ul className="gft-placelist">
+        {PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <span>
+              <b>{p.name}</b>
+              {p.what}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <ul className="gft-chips" aria-label="At each one">
+        <li>
+          <b className="tnum">${CREDIT}</b> credit every week
+        </li>
+        <li>
+          <b className="tnum">{PERCENT}%</b> off once a day
+        </li>
+        <li>
+          <b>Points</b> on everything
+        </li>
+      </ul>
+      <p className="gft-also">The credit comes with a ${MIN_ORDER}+ meal and comes off your next one. The {PERCENT}% is instead of it, whenever that’s better.</p>
+    </section>
+  );
+}
+
 /** What's in Plus: three things, in figures, and the five places. */
 function WhatsIn() {
+  const v = whatsInVariant();
+  if (v === "a") return <WhatsInFigures />;
+  if (v === "b") return <WhatsInStory />;
+  if (v === "c") return <WhatsInPlaces />;
   return (
     <section className="gft-in" aria-labelledby="gft-in-h">
       <h2 id="gft-in-h" className="gft-h2">
@@ -800,6 +944,7 @@ export function GiftPreview({
   cta,
   backLabel = "Back to checkout",
   onScene,
+  photoChoice,
 }: {
   gift: Gift;
   onClose: () => void;
@@ -810,8 +955,12 @@ export function GiftPreview({
   /** Told each background they cycle to, so the checkout's pick follows
    *  what they're looking at (left out on /parents, where it's the sample). */
   onScene?: (scene: SceneId) => void;
+  /** A photo the viewer may show or hide (the sample's, on /parents); left
+   *  out in checkout, where the photo is the parent's own choice. */
+  photoChoice?: string | null;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
+  const [withPhoto, setWithPhoto] = useState(!!gift.photo);
   /* Every background, one after another (Sam, 6 Nov 2026: "can we have the
      ability to cycle through background options so someone can see in real
      time what each background looks like"): the arrows in the top bar, or
@@ -820,11 +969,11 @@ export function GiftPreview({
   const [scene, setScene] = useState<SceneId>(gift.scene);
   const sceneAt = SCENES.findIndex((e) => e.id === scene);
   const cycle = useRef<(step: number) => void>(() => {});
-  cycle.current = (step: number) => {
-    const next = SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId;
+  const pick = (next: SceneId) => {
     setScene(next);
     onScene?.(next);
   };
+  cycle.current = (step: number) => pick(SCENES[(sceneAt + step + SCENES.length) % SCENES.length].id as SceneId);
   /* Phone or computer (Sam, 6 Nov 2026: "there should be a desktop version
      of the preview and a mobile version of the preview, desktop version
      would be wider"). Phone first: the student opens it from a text. On a
@@ -908,7 +1057,8 @@ export function GiftPreview({
   return createPortal(
     <div className="gft-preview" data-device={device} role="dialog" aria-modal="true" aria-label="Preview of their gift">
       <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
-      {/* Above the frame on a computer, over its top corner on a phone. */}
+      {/* The background arrows: over the frame's top corner on a phone, above
+          it on a tablet. A computer has the panel instead (below). */}
       <div className="gft-preview-bar">
         <div className="gft-preview-bg" role="group" aria-label="Background">
           <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
@@ -928,13 +1078,6 @@ export function GiftPreview({
             </svg>
           </button>
         </div>
-        <div className="gft-preview-device" role="radiogroup" aria-label="See it on">
-          {(["phone", "computer"] as const).map((d) => (
-            <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
-              {d === "phone" ? "Phone" : "Computer"}
-            </button>
-          ))}
-        </div>
       </div>
       <div ref={frame} className="gft-preview-frame">
         <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
@@ -944,9 +1087,64 @@ export function GiftPreview({
           {backLabel}
         </button>
         <div className="gft-preview-scroll gft-wrap">
-          <Letter gift={{ ...gift, scene }} sample preview cta={cta} />
+          <Letter gift={{ ...gift, scene, photo: withPhoto ? (gift.photo ?? photoChoice ?? null) : null }} sample preview cta={cta} />
         </div>
       </div>
+      {/* THE CONTROL PANEL (Sam, 6 Nov 2026: "the grid of background options
+          would show up on the right in a control center where they can
+          configure how it might look"). A computer only: every background
+          at once, the photo on or off where it's the sample's, and phone or
+          computer. In checkout the background picked here is the one sent. */}
+      <aside className="gft-preview-panel" aria-label="How it looks">
+        <div className="gft-pp-group">
+          <h2 id="gft-pp-bg" className="gft-pp-h">
+            Background
+          </h2>
+          <div className="gft-pp-grid" role="radiogroup" aria-labelledby="gft-pp-bg">
+            {SCENES.map((sc) => (
+              <button
+                key={sc.id}
+                type="button"
+                role="radio"
+                aria-checked={scene === sc.id}
+                className="gft-pp-swatch"
+                onClick={() => pick(sc.id as SceneId)}
+              >
+                <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                  <i className="scene-swatch-env" />
+                </span>
+                <span className="gft-pp-name">{sc.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        {photoChoice ? (
+          <div className="gft-pp-group">
+            <h2 id="gft-pp-photo" className="gft-pp-h">
+              Photo
+            </h2>
+            <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-photo">
+              {[true, false].map((on) => (
+                <button key={String(on)} type="button" role="radio" aria-checked={withPhoto === on} onClick={() => setWithPhoto(on)}>
+                  {on ? "With a photo" : "No photo"}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <div className="gft-pp-group gft-pp-device">
+          <h2 id="gft-pp-dev" className="gft-pp-h">
+            See it on
+          </h2>
+          <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-dev">
+            {(["phone", "computer"] as const).map((d) => (
+              <button key={d} type="button" role="radio" aria-checked={device === d} onClick={() => setDevice(d)}>
+                {d === "phone" ? "Phone" : "Computer"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
     </div>,
     document.body,
   );

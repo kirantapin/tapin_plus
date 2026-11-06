@@ -534,7 +534,7 @@ export default function ParentsHome() {
     },
     {
       q: "Can I see what they order?",
-      a: "No. You’ll get receipts for what you pay, but their orders stay with them.",
+      a: "No. Their orders stay with them.",
     },
     {
       q: "Does it work at bars?",
@@ -670,7 +670,7 @@ export default function ParentsHome() {
           {/* The hero's sub (COPY.md v2 final, with Sam's $60, 5 Nov 2026) as a
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
-              $3.99, one lunch covers it). */}
+              $3.99, then $7.99). */}
           <OfferPrice />
           <button
             type="button"
@@ -831,8 +831,7 @@ export default function ParentsHome() {
               lead={<Glyph d={GLYPHS.phone} />}
               label="They can cancel in the app"
             >
-              They can cancel in the app too. If they do, your billing stops and
-              we’ll email you.
+              They can cancel in the app too. If they do, your billing stops.
             </Fold>
             <Fold
               className="tpp-sure-row"
@@ -928,7 +927,9 @@ export default function ParentsHome() {
           className="tpa-cta tpa-dock-cta"
           onClick={(e) => signUp("dock", e.currentTarget)}
         >
-          {cta}
+          {/* "Send Tapin Plus" (Sam, 6 Nov 2026), as the gift band's button
+              says; an ask link's names the student. */}
+          {asked ? cta : "Send Tapin Plus"}
           <DockArrow />
         </button>
       </div>

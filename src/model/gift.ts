@@ -44,6 +44,12 @@ export const SCENES = [
   { id: "sunrise", name: "Sunrise", line: "Good morning" },
   { id: "ridge", name: "Blue Ridge", line: "The mountains" },
   { id: "hearts", name: "Hearts", line: "Love you" },
+  /* Four cute ones (Sam, 6 Nov 2026: "can we get a little cute with some of
+     these background options?"). */
+  { id: "sprinkles", name: "Sprinkles", line: "A little treat" },
+  { id: "daisies", name: "Daisies", line: "Sunshine" },
+  { id: "xoxo", name: "XOXO", line: "Hugs and kisses" },
+  { id: "smileys", name: "Smileys", line: "Hang in there" },
   { id: "flannel", name: "Flannel", line: "Fall" },
   { id: "lunch", name: "Lunch", line: "On me" },
   { id: "sunburst", name: "Sunburst", line: "Hooray" },

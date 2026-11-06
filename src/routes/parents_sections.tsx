@@ -104,13 +104,15 @@ export function OfferPrice() {
         <li>
           <b aria-hidden="true">${SAVES}</b>
           <span>
-            <span className="tpp-sr">The average member saves an estimated ${SAVES} a month.</span>
-            <span aria-hidden="true">saved a month by the average member*</span>
+            {/* For the parent: what it saves their student (Sam, 6 Nov 2026:
+                "they don't necessarily care" that one lunch covers it). */}
+            <span className="tpp-sr">Your student saves an estimated ${SAVES} a month, on average.</span>
+            <span aria-hidden="true">saved a month, on average, for your student*</span>
           </span>
         </li>
         <li>
           <b>{FIRST}</b>
-          <span>First month, and one lunch covers it</span>
+          <span>the first month, then {MONTHLY}</span>
         </li>
       </ul>
       <p className="tpp-note">{SAVES_NOTE}</p>
@@ -134,8 +136,11 @@ export function BenefitCards() {
           {money0(CREDIT)}
         </b>
       ),
-      label: "Off a meal, every week, at each place",
-      line: `A ${money0(LUNCH)} lunch is ${money0(LUNCH - CREDIT)}.`,
+      /* A credit, not money off (Sam, 6 Nov 2026: "this needs to be a $5
+         credit on every meal instead of $5 off - it's $5 off after the
+         credit has been earned"). */
+      label: "In credit on a meal, every week, at each place",
+      line: `Earned on a ${money0(MIN_ORDER)}+ meal, then ${money0(CREDIT)} off their next.`,
     },
     { key: "pct", art: <b className="tpp-card-fig">{PERCENT}%</b>, label: "Off their other orders, once a day", line: "Food and non-alcoholic drinks." },
     { key: "places", art: <LogoRow size={34} />, label: "Places they already go", line: "New Plus places are added at no extra cost." },
@@ -146,7 +151,9 @@ export function BenefitCards() {
       label: "On their number right away",
       line: "You pay, they sign in with their number, and it’s there.",
     },
-    { key: "first", art: <b className="tpp-card-fig">{FIRST}</b>, label: "One lunch covers the first month", line: `After that, two lunches a month cover ${MONTHLY}.` },
+    /* What it costs against what it saves (Sam, 6 Nov 2026: "$7.99 saves an
+       average of $60 a month for your kiddo"), not how many lunches cover it. */
+    { key: "first", art: <b className="tpp-card-fig">{MONTHLY}</b>, label: `A month, and it saves your student about $${SAVES} a month*`, line: `The first month is ${FIRST}.` },
   ];
   /* One dot per place the rail can stop, not per card: on a computer three
      cards show at once, so the last few cards share the rail's end (review,

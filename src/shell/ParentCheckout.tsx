@@ -26,7 +26,9 @@ import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrack
 
      1. The form: the student's first name and number (typed twice, Sam:
         "we can have them type the number twice yeah"), then the parent's
-        name, email and, if they like, their mobile. From an Ask a parent
+        name and mobile (no email for now, Sam, 6 Nov 2026: "let's not
+        capture parent emails and just do phone number for now since we
+        don't have automated emails hooked up yet"). From an Ask a parent
         link the student is already known, so it shows who's covered.
      2. The charge: the parent is charged now ($3.99 the first month, then
         $7.99/month), with the terms right by the button that takes the
@@ -121,7 +123,6 @@ const digitsOf = (raw: string) => {
   return (d.length === 11 && d.startsWith("1") ? d.slice(1) : d).slice(0, 10);
 };
 const maskDigits = (d: string) => `•••${d.slice(-4)}`;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const possessive = (name: string) => `${name}’s`;
 
 /* The student, then you, then the card, one at a time (Sam, 5 Nov 2026:
@@ -133,7 +134,7 @@ type Step = "student" | "you" | "pay" | "done";
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
 let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
-type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
+type Field = "student" | "phone" | "confirm" | "name" | "mobile" | "note" | "from";
 
 function Sheet({
   ask,
@@ -159,7 +160,6 @@ function Sheet({
   const [phone, setPhone] = useState("");
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
      signed, both optional; shown on the student's gift page, never in a
@@ -429,8 +429,7 @@ function Sheet({
     else if (confirmD !== phoneD) errors.confirm = "These numbers don’t match.";
   }
   if (!name.trim()) errors.name = "Add your name.";
-  if (!EMAIL.test(email.trim())) errors.email = "Enter an email we can send your receipt to.";
-  if (mobile.trim() && !toE164(digitsOf(mobile))) errors.mobile = "Enter a 10-digit US number, or leave this empty.";
+  if (!toE164(digitsOf(mobile))) errors.mobile = "Enter your 10-digit US mobile number.";
   const shown = (f: Field) => (tried ? errors[f] : undefined);
 
   const submit = async (e: React.FormEvent) => {
@@ -438,7 +437,7 @@ function Sheet({
     if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
-    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
+    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "mobile"];
     const bad = order.find((f) => errors[f]);
     if (bad) {
       document.getElementById(`prc-${bad}`)?.focus();
@@ -464,8 +463,7 @@ function Sheet({
         student_first_name: ask ? ask.student_first_name : student.trim(),
         student_phone: ask ? "" : (toE164(phoneD) as string),
         parent_name: name.trim(),
-        parent_email: email.trim(),
-        parent_phone: mobile.trim() ? toE164(digitsOf(mobile)) : null,
+        parent_phone: toE164(digitsOf(mobile)) as string,
         ask_token: ask?.token ?? null,
         gift_note: giftNoteSent,
         gift_from: giftFromSent,
@@ -597,8 +595,7 @@ function Sheet({
                 <legend className="prc-legend">You</legend>
                 <div className="prc-fields">
                 <Input id="name" label="Your name" value={name} onChange={setName} error={shown("name")} autoComplete="name" autoCapitalize="words" maxLength={80} />
-                <Input id="email" label="Your email" value={email} onChange={setEmail} error={shown("email")} autoComplete="email" type="email" inputMode="email" />
-                <Input id="mobile" label="Your mobile (optional)" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
+                <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
                 </div>
               </fieldset>
               {noteOpen ? (
@@ -796,12 +793,12 @@ function Sheet({
                        (API.md), unless there's a note: then they get its link. */
                     <>
                       It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
-                      {sentNote ? " We’ve texted them a link to your gift." : ""} Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
+                      {sentNote ? " We’ve texted them a link to your gift." : ""} To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
                     </>
                   ) : (
                     <>
                       We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
-                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. Your receipt is in your email. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
                     </>
                   )}
                 </p>

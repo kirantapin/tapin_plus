@@ -387,3 +387,88 @@
   line-height: 19px;
   color: var(--muted);
 }
+.ppa-ways {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.tpa .ppa-ways > .ppa-way {
+  margin-top: 0;
+}
+
+/* ── A computer (Sam, 6 Nov 2026: "can we layout this page for desktop") ──
+   The two ways are alternatives, so they sit side by side as equals, the
+   same height, the email button at the foot of its card. The title leaves
+   its card and sits on the ground, larger: it introduces the pair rather
+   than being a third box like them. The column widens to hold two cards of
+   readable measure; the note runs under the pair, on its edge. */
+@media (min-width: 840px) {
+  .ppa {
+    --column: 880px;
+  }
+  .ppa .ppm-top {
+    padding-top: 48px;
+  }
+  .tpa .ppa-intro {
+    gap: 12px;
+    margin-top: 40px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .ppa-intro .ppm-h1 {
+    font-size: 40px;
+    line-height: 46px;
+    letter-spacing: -0.02em;
+  }
+  .ppa-intro .ppm-line {
+    font-size: 18px;
+    line-height: 26px;
+    color: var(--muted);
+  }
+  .ppa-ways {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 32px var(--gutter) 0;
+  }
+  .tpa .ppa-ways > .ppa-way {
+    margin: 0;
+  }
+  .tpa .ppa-way {
+    align-content: start;
+    grid-template-rows: auto auto 1fr auto;
+    padding: 32px;
+    border-radius: 24px;
+  }
+  .ppa-glyph {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+  .ppa-glyph svg {
+    width: 24px;
+    height: 24px;
+  }
+  .ppa-h2 {
+    margin-top: 12px;
+    font-size: 22px;
+    line-height: 28px;
+  }
+  .ppa-way .ppm-line {
+    max-width: 38ch;
+    color: var(--muted);
+  }
+  .tpa .ppa-cta {
+    align-self: end;
+    margin-top: 20px;
+  }
+  .ppa-note {
+    max-width: 60ch;
+    margin: 24px var(--gutter) 0;
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .ppa .ppm-foot {
+    margin-top: 40px;
+  }
+}

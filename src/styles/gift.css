@@ -827,41 +827,151 @@ button.tpg-env-link {
 .gft-preview-bg-name .scene-swatch-env {
   display: none;
 }
-.gft-preview-device {
-  display: none;
-  gap: 2px;
-  height: 40px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-}
-.gft-preview-device button {
-  height: 32px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #ffffff;
-  font: 600 15px/1 "Gilroy", Arial, sans-serif;
-  cursor: pointer;
-  transition: background-color 160ms ease-out, color 160ms ease-out;
-}
-.gft-preview-device button[aria-checked="true"] {
-  background: #ffffff;
-  color: #141618;
-}
-.gft-preview-bg button:focus-visible,
-.gft-preview-device button:focus-visible {
+.gft-preview-bg button:focus-visible {
   outline: 3px solid #e5751f;
   outline-offset: 2px;
 }
+
+/* ── The control panel (Sam, 6 Nov 2026: "the grid of background options
+   would show up on the right in a control center") ──────────────────────────
+   A computer only: the frame and a white panel side by side, the same
+   height, the arrows' toolbar gone. Every background as a named swatch, four
+   across; the photo and the device as two-way switches. Phone | Computer
+   needs room for the page's wide layout (960px) beside the panel, so it
+   shows from 1340px. */
+.gft-preview-panel {
+  display: none;
+}
 @media (min-width: 1024px) {
-  .gft-preview-device {
-    display: inline-flex;
+  .gft-preview {
+    --pv-h: min(860px, calc(100vh - 48px));
+    flex-direction: row;
+    gap: 16px;
+  }
+  .gft-preview-bar {
+    display: none;
+  }
+  .gft-preview-frame {
+    --frame-h: var(--pv-h);
+    flex: none;
   }
   .gft-preview[data-device="computer"] .gft-preview-frame {
-    width: min(1200px, calc(100vw - 48px));
+    width: min(1200px, calc(100vw - 48px - 312px));
   }
+  .gft-preview-panel {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: 28px;
+    width: 296px;
+    height: var(--pv-h);
+    padding: 24px 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #141618;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+}
+.gft-pp-group {
+  display: grid;
+  gap: 12px;
+}
+.gft-pp-device {
+  display: none;
+}
+@media (min-width: 1340px) {
+  .gft-pp-device {
+    display: grid;
+  }
+}
+.gft-pp-h {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+}
+.gft-pp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 6px;
+}
+.gft-pp-swatch {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(20, 22, 24, 0.6);
+  font: 500 12px/14px "Gilroy", Arial, sans-serif;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.gft-pp-swatch .scene-swatch {
+  width: 56px;
+  height: 56px;
+  transition: box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+.gft-pp-swatch:hover .scene-swatch {
+  transform: translateY(-2px);
+}
+.gft-pp-swatch:active .scene-swatch {
+  transform: scale(0.95);
+}
+.gft-pp-swatch[aria-checked="true"] {
+  color: #141618;
+  font-weight: 600;
+}
+.gft-pp-swatch[aria-checked="true"] .scene-swatch {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #141618;
+}
+.gft-pp-swatch:focus-visible {
+  outline: none;
+}
+.gft-pp-swatch:focus-visible .scene-swatch {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #e5751f;
+}
+.gft-pp-seg {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f0f0f0;
+}
+.gft-pp-seg button {
+  flex: 1 1 0;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(20, 22, 24, 0.62);
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.gft-pp-seg button[aria-checked="true"] {
+  background: #ffffff;
+  color: #141618;
+  box-shadow: 0 1px 3px rgba(20, 22, 24, 0.14);
+}
+.gft-pp-seg button:focus-visible {
+  outline: 2px solid #e5751f;
+  outline-offset: 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gft-pp-swatch .scene-swatch,
+  .gft-pp-seg button {
+    transition: none;
+  }
+}
+/* In the preview the page's halves fill the frame, not the screen (Sam,
+   6 Nov 2026: "why is this scrollable?"): 100svh is taller than the frame. */
+.gft-preview .gft-a[data-state="open"] .gft-a-band,
+.gft-preview .gft-a[data-state="open"] .gft-after {
+  min-height: var(--frame-h);
 }
 .gft-preview-scroll {
   height: 100%;
@@ -1051,6 +1161,58 @@ button.tpg-env-link {
 .scene-swatch[data-scene="ridge"],
 .scene-swatch[data-scene="sunburst"] { background-size: cover; }
 
+/* ══ FOUR CUTE ONES (Sam, 6 Nov 2026: "can we get a little cute with some of
+   these background options?") ═════════════════════════════════════════════
+   Sprinkles, daisies, XOXO and smileys, in the same flat town colours. Each
+   is busy enough to set the heading on the paper strip; the light ones take
+   ink type and an ink "Open it". */
+.gft-a[data-scene="sprinkles"] .gft-scene-pat,
+.scene-swatch[data-scene="sprinkles"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect x='12.4' y='10.5' width='3.2' height='11' rx='1.6' fill='%23861F41' transform='rotate(30 14 16)'/%3E%3Crect x='42.4' y='4.5' width='3.2' height='11' rx='1.6' fill='%23E5751F' transform='rotate(-50 44 10)'/%3E%3Crect x='76.4' y='14.5' width='3.2' height='11' rx='1.6' fill='%23F2B36B' transform='rotate(70 78 20)'/%3E%3Crect x='102.4' y='6.5' width='3.2' height='11' rx='1.6' fill='%234A1024' transform='rotate(10 104 12)'/%3E%3Crect x='22.4' y='40.5' width='3.2' height='11' rx='1.6' fill='%23FFFFFF' transform='rotate(80 24 46)'/%3E%3Crect x='56.4' y='34.5' width='3.2' height='11' rx='1.6' fill='%23861F41' transform='rotate(-20 58 40)'/%3E%3Crect x='90.4' y='44.5' width='3.2' height='11' rx='1.6' fill='%23E5751F' transform='rotate(40 92 50)'/%3E%3Crect x='10.4' y='74.5' width='3.2' height='11' rx='1.6' fill='%23F2B36B' transform='rotate(-60 12 80)'/%3E%3Crect x='38.4' y='68.5' width='3.2' height='11' rx='1.6' fill='%234A1024' transform='rotate(20 40 74)'/%3E%3Crect x='68.4' y='76.5' width='3.2' height='11' rx='1.6' fill='%23FFFFFF' transform='rotate(-80 70 82)'/%3E%3Crect x='98.4' y='80.5' width='3.2' height='11' rx='1.6' fill='%23861F41' transform='rotate(60 100 86)'/%3E%3Crect x='26.4' y='98.5' width='3.2' height='11' rx='1.6' fill='%23E5751F' transform='rotate(0 28 104)'/%3E%3Crect x='58.4' y='102.5' width='3.2' height='11' rx='1.6' fill='%23F2B36B' transform='rotate(50 60 108)'/%3E%3Crect x='88.4' y='104.5' width='3.2' height='11' rx='1.6' fill='%234A1024' transform='rotate(-30 90 110)'/%3E%3Crect x='50.4' y='54.5' width='3.2' height='11' rx='1.6' fill='%23E5751F' transform='rotate(-75 52 60)'/%3E%3Crect x='106.4' y='30.5' width='3.2' height='11' rx='1.6' fill='%23FFFFFF' transform='rotate(-10 108 36)'/%3E%3C/svg%3E") 0 0 / 120px 120px, #F7E1E4;
+}
+.gft-a[data-scene="daisies"] .gft-scene-pat,
+.scene-swatch[data-scene="daisies"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cg transform='translate(40 42) rotate(10)'%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-16.12' rx='6.76' ry='11.96' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='7.280000000000001' fill='%23E5751F'/%3E%3C/g%3E%3Cg transform='translate(132 30) rotate(30)'%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-9.92' rx='4.16' ry='7.36' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='4.48' fill='%23F2B36B'/%3E%3C/g%3E%3Cg transform='translate(108 106) rotate(-12)'%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-18.6' rx='7.800000000000001' ry='13.8' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='8.4' fill='%23F2B36B'/%3E%3C/g%3E%3Cg transform='translate(30 136) rotate(20)'%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-11.16' rx='4.68' ry='8.280000000000001' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='5.040000000000001' fill='%23E5751F'/%3E%3C/g%3E%3Cg transform='translate(156 152) rotate(0)'%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-8.68' rx='3.64' ry='6.44' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='3.9200000000000004' fill='%23E5751F'/%3E%3C/g%3E%3Cg transform='translate(70 164) rotate(15)'%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(0)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(45)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(90)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(135)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(180)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(225)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(270)'/%3E%3Cellipse cx='0' cy='-6.2' rx='2.6' ry='4.6000000000000005' fill='%23F7F3EA' transform='rotate(315)'/%3E%3Ccircle r='2.8000000000000003' fill='%23F2B36B'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 180px 180px, #861f41;
+}
+.gft-a[data-scene="xoxo"] .gft-scene-pat,
+.scene-swatch[data-scene="xoxo"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M16 16 L32 32 M32 16 L16 32' stroke='%23861F41' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='72' cy='24' r='8.5' fill='none' stroke='%23E5751F' stroke-width='5'/%3E%3Ccircle cx='24' cy='72' r='8.5' fill='none' stroke='%23E5751F' stroke-width='5'/%3E%3Cpath d='M64 64 L80 80 M80 64 L64 80' stroke='%23861F41' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 96px 96px, #f7f3ea;
+}
+.gft-a[data-scene="smileys"] .gft-scene-pat,
+.scene-swatch[data-scene="smileys"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg transform='translate(38 40) rotate(-10)'%3E%3Ccircle r='22' fill='%23F7F3EA'/%3E%3Ccircle cx='-7.48' cy='-4.84' r='2.42' fill='%23141618'/%3E%3Ccircle cx='7.48' cy='-4.84' r='2.42' fill='%23141618'/%3E%3Cpath d='M-10.120000000000001 3.08 Q0 13.64 10.120000000000001 3.08' fill='none' stroke='%23141618' stroke-width='2.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(118 30) rotate(15)'%3E%3Ccircle r='14' fill='%23861F41'/%3E%3Ccircle cx='-4.760000000000001' cy='-3.08' r='1.54' fill='%23F7F3EA'/%3E%3Ccircle cx='4.760000000000001' cy='-3.08' r='1.54' fill='%23F7F3EA'/%3E%3Cpath d='M-6.44 1.9600000000000002 Q0 8.68 6.44 1.9600000000000002' fill='none' stroke='%23F7F3EA' stroke-width='2.0' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(110 108) rotate(8)'%3E%3Ccircle r='24' fill='%23F7F3EA'/%3E%3Ccircle cx='-8.16' cy='-5.28' r='2.64' fill='%23141618'/%3E%3Ccircle cx='8.16' cy='-5.28' r='2.64' fill='%23141618'/%3E%3Cpath d='M-11.040000000000001 3.3600000000000003 Q0 14.879999999999999 11.040000000000001 3.3600000000000003' fill='none' stroke='%23141618' stroke-width='2.9' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(34 124) rotate(-18)'%3E%3Ccircle r='15' fill='%23861F41'/%3E%3Ccircle cx='-5.1000000000000005' cy='-3.3' r='1.65' fill='%23F7F3EA'/%3E%3Ccircle cx='5.1000000000000005' cy='-3.3' r='1.65' fill='%23F7F3EA'/%3E%3Cpath d='M-6.9 2.1 Q0 9.3 6.9 2.1' fill='none' stroke='%23F7F3EA' stroke-width='2.0' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(72 78) rotate(0)'%3E%3Ccircle r='9' fill='%23F7F3EA'/%3E%3Ccircle cx='-3.06' cy='-1.98' r='0.99' fill='%23141618'/%3E%3Ccircle cx='3.06' cy='-1.98' r='0.99' fill='%23141618'/%3E%3Cpath d='M-4.140000000000001 1.2600000000000002 Q0 5.58 4.140000000000001 1.2600000000000002' fill='none' stroke='%23141618' stroke-width='2.0' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(146 148) rotate(-10)'%3E%3Ccircle r='9' fill='%23F7F3EA'/%3E%3Ccircle cx='-3.06' cy='-1.98' r='0.99' fill='%23141618'/%3E%3Ccircle cx='3.06' cy='-1.98' r='0.99' fill='%23141618'/%3E%3Cpath d='M-4.140000000000001 1.2600000000000002 Q0 5.58 4.140000000000001 1.2600000000000002' fill='none' stroke='%23141618' stroke-width='2.0' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 160px 160px, #f2b36b;
+}
+.gft-a[data-scene="sprinkles"] .gft-a-band,
+.gft-a[data-scene="xoxo"] .gft-a-band,
+.gft-a[data-scene="smileys"] .gft-a-band {
+  color: #141618;
+}
+.gft-a[data-scene="sprinkles"] .gft-open,
+.gft-a[data-scene="xoxo"] .gft-open,
+.gft-a[data-scene="smileys"] .gft-open {
+  background: #141618;
+  color: #ffffff;
+}
+.gft-a:is([data-scene="sprinkles"], [data-scene="daisies"], [data-scene="xoxo"], [data-scene="smileys"]) .gft-h1-in {
+  padding: 2px 12px 5px;
+  background: #f7f3ea;
+  color: #141618;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.gft-a:is([data-scene="sprinkles"], [data-scene="daisies"], [data-scene="xoxo"], [data-scene="smileys"]) .gft-h1 {
+  line-height: 46px;
+}
+/* On the gold, the orange focus ring would vanish: ink. */
+.gft-a[data-scene="smileys"] :is(.gft-a-stage, .gft-open):focus-visible {
+  outline-color: #141618;
+}
+.scene-swatch[data-scene="sprinkles"] { background-size: 60px 60px; }
+.scene-swatch[data-scene="daisies"] { background-size: 90px 90px; }
+.scene-swatch[data-scene="xoxo"] { background-size: 40px 40px; }
+.scene-swatch[data-scene="smileys"] { background-size: 80px 80px; }
+
 /* ══ THE CARE PACKAGE AS A PICTURE (GiftPage.tsx EnvelopeDemo, on /parents) ═
    The gift page's envelope at a callout's size: room above it for the card
    it lifts out, the note set a step smaller. */
@@ -1076,6 +1238,19 @@ button.tpg-env-link {
 .gft-mini .gft-a-sig {
   margin-top: 8px;
   font-size: 17px;
+}
+/* With a photo (the /parents callout shows one, 6 Nov 2026): a wider, shorter
+   print than the gift page's 4:3, so the card stays a card; more room above
+   for it to rise into, and a longer letter so its foot still fills the V. */
+.gft-mini .gft-a-photo {
+  aspect-ratio: 2 / 1;
+  margin-bottom: 12px;
+}
+.gft.gft-mini:has(.gft-a-photo) {
+  padding-top: 296px;
+}
+.gft-mini .gft-a-letter:has(.gft-a-photo) {
+  min-height: 470px;
 }
 
 /* ══ THE GIFT PAGE ON A WIDE SCREEN (Sam, 6 Nov 2026: "can we rework this
@@ -1156,4 +1331,181 @@ button.tpg-env-link {
     gap: 18px;
     width: 100%;
   }
+}
+
+/* ══ WHAT'S IN IT, THREE WAYS (?wiv=a|b|c; GiftPage.tsx WhatsIn) ═════════════
+   Same white module, same facts; each leads with a different thing. */
+.gft-in [data-money] {
+  color: #0b7a53;
+}
+.gft-in .gft-also {
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--muted);
+}
+.gft-in .gft-also b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* A · Figures: three big figures side by side, the places named under. */
+.gft-figs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.gft-figs li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px 12px 16px;
+  border-radius: 16px;
+  background: #f4f2ee;
+}
+.gft-figs b {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -0.03em;
+}
+.gft-figs svg {
+  color: #e5751f;
+}
+.gft-figs span {
+  font-size: 13px;
+  line-height: 17px;
+  color: var(--muted);
+}
+.gft-named {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 18px;
+}
+.gft-named li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.gft-named img {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.gft-named span {
+  font-size: 11px;
+  line-height: 13px;
+  color: var(--muted);
+}
+
+/* B · How it works: one real order, in three steps. */
+.gft-steps {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.gft-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.gft-step-img,
+.gft-step-fig {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+.gft-step-fig {
+  background: #f4f2ee;
+  box-shadow: 0 0 0 4px #ffffff;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 18px;
+}
+.gft-step-img {
+  box-shadow: 0 0 0 4px #ffffff;
+}
+.gft-steps li > span {
+  display: grid;
+  gap: 2px;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.gft-steps li b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+  color: var(--ink);
+}
+.gft-in-b .gft-logos {
+  margin-top: 16px;
+}
+
+/* C · Places first: the five as a list, then the three as chips. */
+.gft-placelist {
+  display: grid;
+  margin-top: 8px;
+}
+.gft-placelist li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--hair);
+}
+.gft-placelist li:first-child {
+  border-top: 0;
+}
+.gft-placelist img {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.gft-placelist span {
+  display: grid;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.gft-placelist b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+  color: var(--ink);
+}
+.gft-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.gft-chips li {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #f4f2ee;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.gft-chips b {
+  font-weight: 600;
+  color: var(--ink);
 }

@@ -15,7 +15,7 @@ import { FlatMark, GLYPHS, Glyph } from "./parents_kit";
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 const MAIL = `mailto:support@tapin.app?subject=${encodeURIComponent("My student’s Tapin Plus")}&body=${encodeURIComponent(
-  "Hi Tapin,\n\nI’d like to change / cancel my student’s Tapin Plus.\n\nMy name:\nMy student’s first name:\n\nThanks!",
+  "Hi Tapin,\n\nI’d like to change / cancel my student’s Tapin Plus.\n\nMy name:\nMy mobile:\nMy student’s first name:\n\nThanks!",
 )}`;
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -55,13 +55,16 @@ export default function ParentAccount() {
       </header>
 
       <main className="ppm-main">
-        <section className="tpa-module ppm-card" aria-labelledby="ppa-title">
+        <section className="tpa-module ppm-card ppa-intro" aria-labelledby="ppa-title">
           <h1 id="ppa-title" className="ppm-h1">
             Manage your student’s Plus
           </h1>
           <p className="ppm-line">There are two ways to change or cancel it.</p>
         </section>
 
+        {/* The two ways, side by side on a computer: they're alternatives,
+            not steps (parent-pages.css). */}
+        <div className="ppa-ways">
         <section className="tpa-module ppm-card ppa-way" aria-labelledby="ppa-mail">
           <span className="ppa-glyph" aria-hidden="true">
             <Glyph d={GLYPHS.mail} />
@@ -70,7 +73,7 @@ export default function ParentAccount() {
             Email us
           </h2>
           <p className="ppm-line">
-            Write to support@tapin.app from the email you paid with, with your student’s first name, and a person will change or
+            Write to support@tapin.app with your name, the mobile you signed up with and your student’s first name, and a person will change or
             cancel it for you.
           </p>
           <a className="tpa-cta ppa-cta" href={MAIL} onClick={() => track("parent_account_email")}>
@@ -86,9 +89,10 @@ export default function ParentAccount() {
             Your student cancels in the app
           </h2>
           <p className="ppm-line">
-            They can cancel their Plus in the Tapin app. If they do, your billing stops and we’ll email you.
+            They can cancel their Plus in the Tapin app. If they do, your billing stops.
           </p>
         </section>
+        </div>
 
         <p className="ppa-note">
           If your student hasn’t signed in within 14 days of signing them up, we cancel it and refund you in full.
