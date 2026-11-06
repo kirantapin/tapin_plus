@@ -883,3 +883,22 @@
     radial-gradient(ellipse 110% 70% at 0% 100%, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0.28) 45%, rgba(0, 0, 0, 0) 100%),
     linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0, rgba(0, 0, 0, 0.32) 34%, rgba(0, 0, 0, 0) 62%);
 }
+
+/* The ask, softened (6 Nov 2026): the button opens on the care package, so it
+   carries an envelope; under it, what comes first, then the price, quieter. */
+.tpp .tpp-cta {
+  gap: 10px;
+}
+.tpp-cta-glyph {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.tpp .tpp-under {
+  display: grid;
+  gap: 2px;
+}
+.tpp .tpp-under b {
+  font-weight: 600;
+  color: var(--ink);
+}

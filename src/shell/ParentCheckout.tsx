@@ -16,7 +16,7 @@ import {
 } from "../model/parents";
 import { FROM_MAX, NOTE_MAX, SCENE_GROUPS, type SceneId } from "../model/gift";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
-import { clearGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { GiftPreview } from "../routes/GiftPage";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
@@ -130,7 +130,13 @@ const possessive = (name: string) => `${name}’s`;
 /* The student, then you, then the card, one at a time (Sam, 5 Nov 2026:
    "we should have these two at separate steps of the checkout process"). An
    ask link already knows the student, so it starts at "you". */
-type Step = "student" | "you" | "pay" | "done";
+/* The gift first (Sam, 6 Nov 2026: "we start by having them fill out the
+   note (which they're allowed to skip if they want) that way we're not
+   asking for them to add phone number and payment until the end after the
+   sunk cost of building their note first"): who it's for and the care
+   package, then their number, then you, then the charge. An ask link knows
+   the student already, so it goes gift, you, pay. */
+type Step = "gift" | "student" | "you" | "pay" | "done";
 
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
@@ -157,7 +163,7 @@ function Sheet({
   const source = ask ? "ask_link" : "parent_page";
   const mock = parentMock();
 
-  const [step, setStep] = useState<Step>(() => (charged ? "pay" : ask ? "you" : "student"));
+  const [step, setStep] = useState<Step>(() => (charged ? "pay" : "gift"));
   /* The student's name, note, sign-off, background and photo are the gift
      draft (model/giftDraft.ts), shared with the preview on /parents, so what
      a parent typed there is here already (Sam, 6 Nov 2026: "so they don't
@@ -176,7 +182,8 @@ function Sheet({
   /* The gift (Sam, 6 Nov 2026): a note for their student and how it's
      signed, both optional; shown on the student's gift page, never in a
      text. Folded away unless they came from the envelope. */
-  const [noteOpen, setNoteOpen] = useState(() => noteFirst || giftDraftTouched());
+  /* The note is its own step now, always open; whatever is filled in goes. */
+  const noteOpen = true;
   const giftNote = draft.note;
   const setGiftNote = (note: string) => setGiftDraft({ note });
   const giftFrom = draft.from;
@@ -209,12 +216,14 @@ function Sheet({
   /* Whether a note went to parent_checkout_start: what the done screen says,
      kept across a resumed payment (the fields start empty again then). */
   const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
-  /* Opening the note by its button puts the cursor in it. */
+  /* From the envelope ("Build their care package" by the note), the cursor
+     starts in the note. */
   const noteBox = useRef<HTMLTextAreaElement | null>(null);
-  const noteAsked = useRef(false);
   useEffect(() => {
-    if (noteOpen && noteAsked.current) noteBox.current?.focus();
-  }, [noteOpen]);
+    if (noteFirst && (ask || student.trim())) noteBox.current?.focus();
+    // On opening only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -454,16 +463,17 @@ function Sheet({
     if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
-    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
+    const order: Field[] =
+      step === "gift" ? (ask ? [] : ["student"]) : step === "student" ? ["phone", "confirm"] : ["name", "email", "mobile"];
     const bad = order.find((f) => errors[f]);
     if (bad) {
       document.getElementById(`prc-${bad}`)?.focus();
       return;
     }
-    if (step === "student") {
-      /* On to you; your fields start fresh, without errors showing. */
+    if (step === "gift" || step === "student") {
+      /* On to the next; its fields start fresh, without errors showing. */
       setTried(false);
-      setStep("you");
+      setStep(step === "gift" && !ask ? "student" : "you");
       return;
     }
     setBusy(true);
@@ -517,7 +527,7 @@ function Sheet({
   };
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
-  const noteFor = (ask ? ask.student_first_name : student.trim()) || "them";
+  const noteFor = (ask ? ask.student_first_name : student.trim()) || "your student";
   const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
   const first = started?.first_cents ?? OFFER.first_cents;
   const monthly = started?.monthly_cents ?? OFFER.monthly_cents;
@@ -528,9 +538,28 @@ function Sheet({
 
   /* ── Header ── */
   const title =
-    step === "done" ? `${possessive(done?.student_first_name || who)} Tapin Plus is on.` : step === "pay" ? (ask ? "Pay and turn on their Plus" : "Pay and send their text") : ask ? `Cover ${possessive(ask.student_first_name)} Tapin Plus` : "Sign up my student";
-  /* The pay step's rows and terms say the price, so its header doesn't. */
-  const sub = step === "student" || step === "you" ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.` : null;
+    step === "done"
+      ? `${possessive(done?.student_first_name || who)} Tapin Plus is on.`
+      : step === "pay"
+        ? ask
+          ? "Pay and turn on their Plus"
+          : "Pay and send their text"
+        : step === "gift"
+          ? ask
+            ? `Build ${possessive(ask.student_first_name)} care package`
+            : "Build their care package"
+          : step === "student"
+            ? `Where ${student.trim() ? possessive(student.trim()) : "their"} gift goes`
+            : "Last, you";
+  /* The gift says what comes next; the details steps say the price; the pay
+     step's rows and terms say it there. */
+  const sub =
+    step === "gift"
+      ? "The note and photo are optional. Their number and payment come after."
+      : step === "student" || step === "you"
+        ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.`
+        : null;
+  const STEPS: Step[] = ask ? ["gift", "you", "pay"] : ["gift", "student", "you", "pay"];
 
   return createPortal(
     <div className="prc-layer" ref={layer}>
@@ -540,7 +569,7 @@ function Sheet({
       {/* data-wide: the you step, widest of the steps on a computer (Sam,
           6 Nov 2026: "on desktop this step in checkout can morph to be
           wider"); the width eases between steps (the effect above). */}
-      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} data-wide={step === "you" ? "" : undefined} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
+      <div className="prc-sheet prc-island ph-no-capture" ref={sheet} data-wide={step === "gift" || step === "you" ? "" : undefined} role="dialog" aria-modal="true" aria-labelledby="prc-title" tabIndex={-1}>
         {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
         <span ref={label} className="prc-island-label" aria-hidden="true" />
         <div ref={inner} className="prc-island-inner">
@@ -562,19 +591,159 @@ function Sheet({
         </div>
 
         <div ref={body}>
-          {step === "student" || step === "you" ? (
+          {step === "gift" || step === "student" || step === "you" ? (
             <form className="prc-body" onSubmit={submit} noValidate>
-              <ol className="prc-steps" aria-label={`Step ${ask ? 1 : step === "student" ? 1 : 2} of ${ask ? 2 : 3}`}>
-                {(ask ? ["you", "pay"] : ["student", "you", "pay"]).map((k, i, all) => (
-                  <li key={k} data-on={i <= all.indexOf(step) ? "" : undefined} />
+              <ol className="prc-steps" aria-label={`Step ${STEPS.indexOf(step) + 1} of ${STEPS.length}`}>
+                {STEPS.map((k, i) => (
+                  <li key={k} data-on={i <= STEPS.indexOf(step) ? "" : undefined} />
                 ))}
               </ol>
-              {step === "student" ? (
-
+              {step === "gift" ? (
+                <>
+                  {ask ? (
+                    <div className="prc-module prc-covering">
+                      <span className="prc-covering-dot" aria-hidden="true">
+                        {ask.student_first_name.slice(0, 1).toUpperCase()}
+                      </span>
+                      <p>
+                        For <b>{ask.student_first_name}</b> <span className="tnum">· {ask.masked_phone}</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <fieldset className="prc-module">
+                      <legend className="prc-legend">Who it’s for</legend>
+                      <div className="prc-fields">
+                        <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
+                      </div>
+                    </fieldset>
+                  )}
+<fieldset className="prc-module prc-note">
+                      <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
+                      <div className="prc-fields">
+                        {/* The words and the look: one column on a phone (these
+                            wrappers lay nothing out there), side by side on a
+                            computer's wide step (parent-checkout.css). */}
+                        <div className="prc-note-col">
+                        <div className="prc-field">
+                          <label className="prc-label prc-label-count" htmlFor="prc-note">
+                            Your note
+                            <small className="tnum" aria-hidden="true">
+                              {giftNote.length}/{NOTE_MAX}
+                            </small>
+                          </label>
+                          <div className="prc-box prc-box-area">
+                            <textarea
+                              ref={noteBox}
+                              id="prc-note"
+                              rows={4}
+                              maxLength={NOTE_MAX}
+                              value={giftNote}
+                              placeholder="Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!"
+                              onChange={(e) => setGiftNote(e.target.value)}
+                              aria-describedby="prc-note-help"
+                            />
+                          </div>
+                          <p id="prc-note-help" className="prc-help">
+                            Up to {NOTE_MAX} characters. They open it like a present when they tap their text. Only they get the link.
+                          </p>
+                        </div>
+                        <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
+                        </div>
+                        <div className="prc-note-col">
+                        {/* The photo: printed at the top of their letter. */}
+                        <div className="prc-field">
+                          <span className="prc-label" id="prc-photo-label">
+                            A photo (optional)
+                          </span>
+                          {giftPhoto ? (
+                            <div className="prc-photo">
+                              <img src={giftPhoto} alt="Your photo" />
+                              <div className="prc-photo-actions">
+                                <button type="button" className="prc-edit" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+                                  Change
+                                </button>
+                                <button type="button" className="prc-edit" onClick={() => setGiftPhoto(null)} disabled={photoBusy}>
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              className="prc-photo-add"
+                              onClick={() => photoInput.current?.click()}
+                              disabled={photoBusy}
+                              aria-describedby="prc-photo-help"
+                            >
+                              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                <path d="M4.5 7.5A1.5 1.5 0 0 1 6 6h2l1.5-2h5L16 6h2a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5v-10ZM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                              </svg>
+                              {photoBusy ? "Getting your photo ready…" : "Add a photo"}
+                            </button>
+                          )}
+                          <input
+                            ref={photoInput}
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            aria-labelledby="prc-photo-label"
+                            onChange={(e) => void pickPhoto(e.target.files?.[0])}
+                          />
+                          {photoError ? (
+                            <p className="prc-field-error" role="alert">
+                              {photoError}
+                            </p>
+                          ) : null}
+                          <p id="prc-photo-help" className="prc-help">
+                            Only {noteFor} sees it, on their gift. We delete it when their Plus ends.
+                          </p>
+                        </div>
+                        {/* The background their envelope arrives on. */}
+                        <fieldset className="prc-scenes">
+                          <legend className="prc-label">Background</legend>
+                          {/* Everyday, then seasonal (6 Nov 2026); one choice
+                              across both rows (the radios share a name). */}
+                          {SCENE_GROUPS.map((g, gi) => (
+                          <div key={g.label} className="prc-scene-group">
+                          {gi > 0 ? <span className="prc-scene-sub">{g.label}</span> : null}
+                          <div className="prc-scene-row" role="radiogroup" aria-label={g.label}>
+                            {g.scenes.map((sc) => (
+                              <label key={sc.id} className="prc-scene">
+                                <input
+                                  type="radio"
+                                  name="prc-scene"
+                                  value={sc.id}
+                                  checked={giftScene === sc.id}
+                                  onChange={() => setGiftScene(sc.id)}
+                                />
+                                <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                                  <i className="scene-swatch-env" />
+                                </span>
+                                <span className="prc-scene-name">{sc.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                          </div>
+                          ))}
+                        </fieldset>
+                        <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
+                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                          </svg>
+                          Preview their gift
+                        </button>
+                        </div>
+                      </div>
+                    </fieldset>
+                </>
+              ) : step === "student" ? (
+                <>
+                <button type="button" className="prc-edit prc-back" onClick={() => setStep("gift")} disabled={busy}>
+                  ← For {student.trim() || "your student"}
+                </button>
                 <fieldset className="prc-module">
-                  <legend className="prc-legend">Your student</legend>
+                  <legend className="prc-legend">Their number</legend>
                   <div className="prc-fields">
-                  <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
                   <Input
                     id="phone"
                     label="Your student’s mobile number"
@@ -595,17 +764,13 @@ function Sheet({
                   />
                   </div>
                 </fieldset>
+                </>
               ) : (
                 <>
                   {ask ? (
-                    <div className="prc-module prc-covering">
-                      <span className="prc-covering-dot" aria-hidden="true">
-                        {ask.student_first_name.slice(0, 1).toUpperCase()}
-                      </span>
-                      <p>
-                        Covering <b>{ask.student_first_name}</b> <span className="tnum">· {ask.masked_phone}</span>
-                      </p>
-                    </div>
+                    <button type="button" className="prc-edit prc-back" onClick={() => setStep("gift")} disabled={busy}>
+                      ← {ask.student_first_name} · {ask.masked_phone}
+                    </button>
                   ) : (
                     <button type="button" className="prc-edit prc-back" onClick={() => setStep("student")} disabled={busy}>
                       ← {student.trim() || "Your student"} · {maskDigits(phoneD)}
@@ -619,136 +784,6 @@ function Sheet({
                 <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
                 </div>
               </fieldset>
-              {noteOpen ? (
-                <fieldset className="prc-module prc-note">
-                  <legend className="prc-legend">For {noteFor}, from you (optional)</legend>
-                  <div className="prc-fields">
-                    {/* The words and the look: one column on a phone (these
-                        wrappers lay nothing out there), side by side on a
-                        computer's wide step (parent-checkout.css). */}
-                    <div className="prc-note-col">
-                    <div className="prc-field">
-                      <label className="prc-label prc-label-count" htmlFor="prc-note">
-                        Your note
-                        <small className="tnum" aria-hidden="true">
-                          {giftNote.length}/{NOTE_MAX}
-                        </small>
-                      </label>
-                      <div className="prc-box prc-box-area">
-                        <textarea
-                          ref={noteBox}
-                          id="prc-note"
-                          rows={4}
-                          maxLength={NOTE_MAX}
-                          value={giftNote}
-                          placeholder="Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!"
-                          onChange={(e) => setGiftNote(e.target.value)}
-                          aria-describedby="prc-note-help"
-                        />
-                      </div>
-                      <p id="prc-note-help" className="prc-help">
-                        Up to {NOTE_MAX} characters. They open it like a present when they tap their text. Only they get the link.
-                      </p>
-                    </div>
-                    <Input id="from" label="Sign it" value={giftFrom} onChange={setGiftFrom} placeholder="Mom" maxLength={FROM_MAX} autoComplete="off" autoCapitalize="words" />
-                    </div>
-                    <div className="prc-note-col">
-                    {/* The photo: printed at the top of their letter. */}
-                    <div className="prc-field">
-                      <span className="prc-label" id="prc-photo-label">
-                        A photo (optional)
-                      </span>
-                      {giftPhoto ? (
-                        <div className="prc-photo">
-                          <img src={giftPhoto} alt="Your photo" />
-                          <div className="prc-photo-actions">
-                            <button type="button" className="prc-edit" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
-                              Change
-                            </button>
-                            <button type="button" className="prc-edit" onClick={() => setGiftPhoto(null)} disabled={photoBusy}>
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          className="prc-photo-add"
-                          onClick={() => photoInput.current?.click()}
-                          disabled={photoBusy}
-                          aria-describedby="prc-photo-help"
-                        >
-                          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <path d="M4.5 7.5A1.5 1.5 0 0 1 6 6h2l1.5-2h5L16 6h2a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5v-10ZM12 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                          </svg>
-                          {photoBusy ? "Getting your photo ready…" : "Add a photo"}
-                        </button>
-                      )}
-                      <input
-                        ref={photoInput}
-                        type="file"
-                        accept="image/*"
-                        hidden
-                        aria-labelledby="prc-photo-label"
-                        onChange={(e) => void pickPhoto(e.target.files?.[0])}
-                      />
-                      {photoError ? (
-                        <p className="prc-field-error" role="alert">
-                          {photoError}
-                        </p>
-                      ) : null}
-                      <p id="prc-photo-help" className="prc-help">
-                        Only {noteFor} sees it, on their gift. We delete it when their Plus ends.
-                      </p>
-                    </div>
-                    {/* The background their envelope arrives on. */}
-                    <fieldset className="prc-scenes">
-                      <legend className="prc-label">Background</legend>
-                      {/* Everyday, then seasonal (6 Nov 2026); one choice
-                          across both rows (the radios share a name). */}
-                      {SCENE_GROUPS.map((g, gi) => (
-                      <div key={g.label} className="prc-scene-group">
-                      {gi > 0 ? <span className="prc-scene-sub">{g.label}</span> : null}
-                      <div className="prc-scene-row" role="radiogroup" aria-label={g.label}>
-                        {g.scenes.map((sc) => (
-                          <label key={sc.id} className="prc-scene">
-                            <input
-                              type="radio"
-                              name="prc-scene"
-                              value={sc.id}
-                              checked={giftScene === sc.id}
-                              onChange={() => setGiftScene(sc.id)}
-                            />
-                            <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
-                              <i className="scene-swatch-env" />
-                            </span>
-                            <span className="prc-scene-name">{sc.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                      </div>
-                      ))}
-                    </fieldset>
-                    <button type="button" className="prc-preview" onClick={() => setPreviewing(true)} disabled={photoBusy}>
-                      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                        <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                      </svg>
-                      Preview their gift
-                    </button>
-                    </div>
-                  </div>
-                </fieldset>
-              ) : (
-                <button type="button" className="prc-module prc-add-note" onClick={() => {
-                    noteAsked.current = true;
-                    setNoteOpen(true);
-                  }}>
-                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                    <path d="M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5ZM3.5 7.5l8.5 6 8.5-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Add a note or a photo for {noteFor}
-                </button>
-              )}
                 </>
               )}
               {previewing ? (
@@ -768,7 +803,7 @@ function Sheet({
                 </p>
               ) : null}
               <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
-                {busy ? "One moment…" : formError ? "Try again" : step === "student" ? "Continue" : "Continue to payment"}
+                {busy ? "One moment…" : formError ? "Try again" : step === "you" ? "Continue to payment" : "Continue"}
               </button>
             </form>
           ) : step === "pay" && started ? (
@@ -794,7 +829,7 @@ function Sheet({
                   <b className="tnum">{`${usd(monthly)} every month`}</b>
                 </div>
                 {paid ? null : (
-                  <button type="button" className="prc-edit" onClick={() => setStep(ask ? "you" : "student")} disabled={busy}>
+                  <button type="button" className="prc-edit" onClick={() => setStep("you")} disabled={busy}>
                     Change details
                   </button>
                 )}

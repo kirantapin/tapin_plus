@@ -727,3 +727,12 @@ fieldset.prc-module {
   font-weight: 600;
   color: var(--muted);
 }
+
+/* The gift step on a computer: "Who it's for" has one field, which lines up
+   with the note column under it rather than a third of the row. */
+@media (min-width: 960px) {
+  .prc-sheet[data-wide] .prc-module:has(#prc-student) > .prc-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 28px;
+  }
+}
