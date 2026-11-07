@@ -271,15 +271,26 @@ b = "".join(leaf(*a) for a in [(34, 40, -30, 1.1, O, 4.2, .3), (150, 30, 40, .9,
                                 (30, 170, 20, .8, M, 3.9, 2.2), (178, 150, -10, 1, O, 4.6, 1.1), (120, 196, 60, .7, DM, 3.4, 1.9)])
 SCENES["leaves"] = svg(220, 220, b)
 
-# ── Hanukkah: the stars turn a sixth and glimmer, the gelt flips, the
-#    dreidels spin on their points.
+# ── Hanukkah: the menorahs' flames flicker (each candle on its own clock,
+#    a gentle stretch and lean about the wick), the gelt flips, the dreidels
+#    spin on their points. (Sam, 6 Nov 2026: no Star of David; menorahs where
+#    the stars were.) The menorahs are read from the still tile (extract.py).
 src = (ROOT / "tools/patterns/src/hanukkah.svg").read_text()
-polys = re.findall(r"<polygon [^>]*/>", src)
+menorahs = re.findall(r"<g transform='translate\([^)]*\) rotate\([^)]*\) scale\([^)]*\)'>(?:(?!</g>).)*?<path transform='translate[^>]*/></g>", src)
+assert len(menorahs) == 4, len(menorahs)
+FLAME_EL = re.compile(r"<path transform='translate\([^)]*\)' d='[^']*' fill='#F2B36B'/>")
 b = ""
-for k, (cx, cy) in enumerate([(38, 36), (124, 112), (116, 30), (36, 128)]):
-    dur, beg = [7.2, 6.0, 5.4, 6.6][k], [.4, 2.0, 1.2, 2.9][k]
-    v = [f"{t} {cx} {cy}" for t in (0, 60, 60)]
-    b += f"<g>{polys[2 * k]}{polys[2 * k + 1]}{tf('rotate', v, dur, beg, [0, .4, 1], [SINE, SINE])}{at('opacity', ['1', '.55', '1'], dur * .55, beg + .6)}</g>"
+for k, men in enumerate(menorahs):
+    flames = FLAME_EL.findall(men)
+    assert len(flames) == 9, len(flames)
+    for i, el in enumerate(flames):
+        dur = 1.6 + ((i * 5 + k * 3) % 9) * .11 + (.5 if i == 4 else 0)  # the shamash burns slower
+        beg = ((i * .29 + k * .41) % 1.3)
+        kt = [0, .3, .55, .8, 1]
+        flick = (tf("scale", ["1 1", ".84 1.14", "1.06 .9", ".92 1.08", "1 1"], dur, beg, kt)
+                 + tf("rotate", ["0", f"{n(5 if (i + k) % 2 else -5)}", "0", f"{n(-3 if (i + k) % 2 else 3)}", "0"], dur * 1.3, beg, kt))
+        men = men.replace(el, el[:-2] + ">" + flick + "</path>", 1)
+    b += men
 for k, (cx, cy, r) in enumerate([(92, 64, 9), (62, 106, 7), (146, 66, 5)]):
     dur, beg = [3.6, 4.4, 5.0][k], [.9, 2.3, 1.6][k]
     flip = tf("scale", ["1 1", ".08 1", "1 1", ".08 1", "1 1", "1 1"], dur, beg, [0, .08, .16, .24, .32, 1])
