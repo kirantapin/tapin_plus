@@ -18,6 +18,8 @@ import {
 } from "../model/parents";
 import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { BackArrow } from "./BackArrow";
+import { nextBillingDate } from "../model/plus";
+import { GLYPHS, Glyph } from "../routes/parents_kit";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -784,11 +786,43 @@ function Sheet({
         </div>
         <div className="prc-row">
           <span>Then</span>
-          <b className="tnum">{`${usd(monthly)} every month`}</b>
+          {/* The date the next charge comes (Sam, 7 Nov 2026). */}
+          <b className="tnum">{`${usd(monthly)} a month from ${renewsOn()}`}</b>
         </div>
       </div>
     );
-    const pay = { paying, onBusy: setBusy, onPaid, onDone: close, label: payLabel, frame, rows, onBack: () => toStep("you"), backDisabled: paid || busy };
+    /* The promise, right above Pay (Sam, 7 Nov 2026: "go for it"): what a
+       hesitating parent needs at the button. The 14-day refund isn't on an
+       ask link (their student is signed in already). */
+    const promise = (
+      <ul className="prc-promise" aria-label="Our promise">
+        {ask ? null : (
+          <li>
+            <Glyph d={GLYPHS.refund} />
+            <span>
+              <b>Full refund</b> if they don’t sign in within 14 days
+            </span>
+          </li>
+        )}
+        <li>
+          <Glyph d={GLYPHS.refund} />
+          <span>
+            <b>Not used that month?</b> Ask for a refund
+          </span>
+        </li>
+        <li>
+          <Glyph d={GLYPHS.mail} />
+          <span>
+            <b>Cancel or skip anytime</b> by emailing support@tapin.app
+          </span>
+        </li>
+        <li>
+          <Glyph d={GLYPHS.text} />
+          <span>We’ll text you a few days before each renewal</span>
+        </li>
+      </ul>
+    );
+    const pay = { paying, onBusy: setBusy, onPaid, onDone: close, label: payLabel, frame, rows, promise, onBack: () => toStep("you"), backDisabled: paid || busy };
     view = mock ? (
       <MockPay first={first} monthly={monthly} {...pay} />
     ) : (
@@ -1025,11 +1059,19 @@ function Legal() {
 }
 
 /* ── The terms, right by the button that charges ─────────────────────────── */
+/** "Dec 7": a month from today, placed as Stripe places it. */
+const renewsOn = () =>
+  nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0])
+    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    .replace(" ", "\u00a0");
+
 function Terms({ first, monthly }: { first: number; monthly: number }) {
   const flat = useContext(FlatLook);
   return (
     <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"}>
-      {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime: email support@tapin.app, or your student can cancel in the Tapin app. `}
+      {/* Short: the promise above Pay carries cancelling (Sam, 7 Nov 2026);
+          this keeps the price, the renewal and the links. */}
+      {`${usd(first)} today, then ${usd(monthly)}/month until you cancel. `}
       <Legal />
     </p>
   );
@@ -1081,6 +1123,8 @@ type PayProps = {
   frame: Frame;
   /** What's due, above the card. */
   rows: React.ReactNode;
+  /** The promise, just above Pay. */
+  promise: React.ReactNode;
   /** Back to you, beside Pay (Sam, 6 Nov 2026). */
   onBack: () => void;
   backDisabled: boolean;
@@ -1122,6 +1166,7 @@ function StripePay({
   resumeIntent,
   frame,
   rows,
+  promise,
   onBack,
   backDisabled,
 }: PayProps & { started: ParentCheckoutStarted; onCharged: (paymentIntent: string) => void; resumeIntent: string | null }) {
@@ -1197,6 +1242,7 @@ function StripePay({
               {terms}
             </>
           )}
+          {promise}
           {errorLine}
         </>,
         <PayFoot
@@ -1215,7 +1261,7 @@ function StripePay({
 }
 
 /* ── ?parentmock: a card panel's look in the Payment Element's place ────── */
-function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame, rows, onBack, backDisabled }: PayProps & { first: number; monthly: number }) {
+function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame, rows, promise, onBack, backDisabled }: PayProps & { first: number; monthly: number }) {
   const flat = useContext(FlatLook);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -1287,6 +1333,7 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
               {terms}
             </>
           )}
+          {promise}
           {error ? (
             <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
               {error}
