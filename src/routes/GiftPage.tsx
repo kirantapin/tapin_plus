@@ -218,7 +218,9 @@ export default function GiftPage() {
             <span className="gft-sr">Opening your gift</span>
             <div className="gft-a-stage" aria-hidden="true">
               <div className="gft-a-shell">
-                <Envelope scene="maroon" />
+                {/* No seal until the gift (and so its background's seal) is
+                    known: the brand seal swapping for the gift's own flickered. */}
+                <Envelope scene={null} />
               </div>
             </div>
           </>
@@ -277,7 +279,8 @@ function Envelope({
   seal,
   extra,
 }: {
-  scene: SceneId;
+  /** Its seal's background; null draws no seal (still loading). */
+  scene: SceneId | null;
   flap?: React.Ref<HTMLSpanElement>;
   seal?: React.Ref<HTMLSpanElement>;
   extra?: React.Ref<HTMLSpanElement>;
@@ -291,9 +294,11 @@ function Envelope({
         <i className="gft-a-twine-h" />
         <i className="gft-a-twine-v" />
       </span>
-      <span ref={seal} className="gft-a-seal" data-seal={scene}>
-        <SealFace scene={scene} />
-      </span>
+      {scene ? (
+        <span ref={seal} className="gft-a-seal" data-seal={scene}>
+          <SealFace scene={scene} />
+        </span>
+      ) : null}
     </>
   );
 }
