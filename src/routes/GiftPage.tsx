@@ -16,7 +16,6 @@ import {
   SCENE_GROUPS,
   SCENE_ORDER,
   SCENES,
-  thanksHref,
   type Delight,
   type Gift,
   type SceneId,
@@ -24,13 +23,14 @@ import {
 import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { playDelight } from "./giftDelight";
+import { GiftAfter } from "./giftAfter";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
-import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
+import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
 import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
-import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./parents_kit";
+import { FlatMark, reducedMotion } from "./parents_kit";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -52,6 +52,9 @@ import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES, reducedMotion } from "./p
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+/** How much of the phone drawer shows when collapsed: the handle row and its
+ *  one button (gift.css --gft-peek, less the safe area). */
+const PEEK_H = () => 98;
 
 /* Each background's own drift (gift.css .gft-scene-pat): one tile's travel
    per loop, so it never seams; scenery breathes instead; the sunburst turns.
@@ -83,8 +86,6 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
 };
 const GIFT_KEY = "tp_gift_v1";
 const SAMPLE_PHOTO_SRC = asset(SAMPLE_PHOTO);
-const QR = asset("/brand/tapin-app-qr.svg");
-const APP_ICON = asset("/brand/tapin-app-icon.png");
 export { SAMPLE_PHOTO_SRC };
 
 type Load =
@@ -457,147 +458,6 @@ function useRiseIn(host: React.RefObject<HTMLElement | null>, on: boolean, delay
   }, [host, on, delay]);
 }
 
-/* ══ WHAT'S IN IT (Sam, 6 Nov 2026: three versions designed, "let's do this
-   option": A · Figures) ══════════════════════════════════════════════════════
-   The three in big type side by side, then the five places named. A $5
-   credit earned on a $10+ meal, every week at each place; 15% off instead,
-   once a day; points on everything. */
-/** A · Figures: the three in big type side by side, then the places named. */
-function WhatsInFigures() {
-  return (
-    <section className="gft-in gft-in-a" aria-labelledby="gft-in-h">
-      <h2 id="gft-in-h" className="gft-h2">
-        What’s in it
-      </h2>
-      <ul className="gft-figs">
-        <li>
-          <b className="tnum" data-money="">${CREDIT}</b>
-          <span>credit every week at each place, on a ${MIN_ORDER}+ meal</span>
-        </li>
-        <li>
-          <b className="tnum">{PERCENT}%</b>
-          <span>off instead, once a day</span>
-        </li>
-        <li>
-          <b>
-            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
-              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" fill="currentColor" />
-            </svg>
-            <span className="gft-sr">Points</span>
-          </b>
-          <span>points on everything you order</span>
-        </li>
-      </ul>
-      <ul className="gft-named" aria-label="Where it works">
-        {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt="" decoding="async" loading="lazy" />
-            <span>{p.name}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-/** What's in Plus: the three, in figures, and the five places. */
-function WhatsIn() {
-  return <WhatsInFigures />;
-}
-
-/** How to claim it, and a thank-you home. The button itself is the dock's
- *  ("Claim my gift"), always in reach. */
-function Next({ gift, sample, preview = false, cta }: { gift: Gift; sample: boolean; preview?: boolean; cta?: DockCta }) {
-  const { track } = useEventTracking();
-  return (
-    <div className="gft-next">
-      {/* On a wide screen there's no dock: the button sits here, with the
-          QR code for the phone the app goes on (gift.css, @container). */}
-      <div className="gft-next-wide">
-        {cta ? (
-          <button type="button" className="gft-cta-inline" onClick={(e) => cta.onClick(e.currentTarget)}>
-            {cta.label}
-          </button>
-        ) : (
-          <a
-            className="gft-cta-inline"
-            href={appHref()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              if (preview) e.preventDefault();
-              else track("gift_claim", { sample, where: "inline" });
-            }}
-          >
-            Claim my gift
-          </a>
-        )}
-      </div>
-      {/* The app (Sam, 6 Nov 2026: rework the QR code section, "should
-        include a link to the app on the app store. And include the tapin
-        app logo"; then, on a phone, "wouldn't there be a CTA to download
-        the tapin app to claim?"): which app, the App Store, and the
-        number to sign in with; on a computer the QR for the phone in their
-        pocket too. */}
-      <section className="gft-app" aria-labelledby="gft-app-h">
-        <div className="gft-app-head">
-          <img className="gft-app-icon" src={APP_ICON} alt="" width="52" height="52" />
-          <span>
-            <b id="gft-app-h">Tapin</b>
-            Your Plus lives in the app
-          </span>
-        </div>
-        <div className="gft-app-get">
-          <img className="gft-app-qr" src={QR} alt="QR code for the Tapin app" width="104" height="104" />
-          <div>
-            <p>Scan it with your phone’s camera, or</p>
-            <a
-              className="gft-store"
-              href={APP_STORE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (preview) e.preventDefault();
-                else track("gift_app_store", { sample });
-              }}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.65.8-3.33.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.18-1.54 2.67-.39 6.62 1.1 8.79.74 1.06 1.61 2.25 2.75 2.2 1.11-.04 1.52-.71 2.86-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.07 2.66-2.14.85-1.23 1.19-2.43 1.21-2.49-.03-.01-2.32-.89-2.34-3.52ZM14.18 6.15c.6-.74 1.01-1.75.9-2.77-.87.04-1.94.59-2.56 1.32-.56.64-1.05 1.69-.92 2.68.97.08 1.97-.49 2.58-1.23Z"
-                />
-              </svg>
-              Get it on the App Store
-            </a>
-          </div>
-        </div>
-        <p className="gft-app-sign tnum">
-          Sign in with <b>{gift.masked}</b>. Plus is already on it.
-        </p>
-      </section>
-      <a
-        className="gft-thanks"
-        href={thanksHref(gift.from)}
-        onClick={(e) => {
-          if (preview) e.preventDefault();
-          else track("gift_thanks", { sample });
-        }}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M20 11.5c0 4-3.6 7-8 7-1.1 0-2.2-.2-3.1-.5L4 19.5l1.4-3.6C4.5 14.7 4 13.2 4 11.5c0-4 3.6-7 8-7s8 3 8 7Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-        </svg>
-        Text {gift.from === "Your parent" ? "your parent" : gift.from} a thank-you
-      </a>
-    </div>
-  );
-}
-
 /* ══ THE LETTER ═════════════════════════════════════════════════════════════
    One element throughout: the letter is never swapped, only moved (measured
    before and after the envelope lets go of it). */
@@ -908,8 +768,7 @@ export function Letter({
       </header>
       {state === "open" ? (
         <main ref={after} className="gft-after">
-          <WhatsIn />
-          <Next gift={gift} sample={sample} preview={preview} cta={cta} />
+          <GiftAfter gift={gift} sample={sample} preview={preview} cta={cta} />
         </main>
       ) : null}
       {state === "open" ? (
@@ -1050,7 +909,20 @@ export function GiftPreview({
      I built"): the drawer opens with the fields and one button, Continue;
      Preview drops it away to show the gift whole, and "Back to ..." brings it
      back on the same step. */
-  const [peek, setPeek] = useState(false);
+  /* Collapsed, the drawer peeks up at the bottom instead of leaving (Sam,
+     6 Nov 2026: "the modal shouldn't completely disappear it should just be
+     peeking up at the bottom of the screen when it's collapsed"), and it
+     starts collapsed: from the page's button they see the card first, then
+     "Start designing" opens it ("when someone clicks on build my care
+     package ... we'd want for them to see the card design first"). */
+  const [peek, setPeek] = useState(
+    () => builder && !(startNext && next) && typeof window !== "undefined" && !window.matchMedia?.("(min-width: 1024px)").matches,
+  );
+  const [designed, setDesigned] = useState(!peek);
+  const expand = () => {
+    setDesigned(true);
+    setPeek(false);
+  };
   const [nameErr, setNameErr] = useState(false);
   const nameInput = useRef<HTMLInputElement | null>(null);
   const body = useRef<HTMLDivElement | null>(null);
@@ -1187,13 +1059,33 @@ export function GiftPreview({
     return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px round ${radius}px)`;
   };
   const GROW = { duration: 520, easing: "cubic-bezier(0.32, 0.72, 0, 1)" };
+  /* The veil wears the origin's own colour (the dock's white plate, a dark
+     button), so the hand-off at either end has no flash. */
+  const veilTint = () => {
+    const bg = origin ? getComputedStyle(origin).backgroundColor : "";
+    const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(bg);
+    const solid = !!bg && bg !== "transparent" && (!alpha || parseFloat(alpha[1]) > 0.9);
+    if (veil.current) veil.current.style.background = solid ? bg : "#ffffff";
+  };
+  /* No origin on screen (Sam, 6 Nov 2026: "there should be a smooth
+     animation when I open and close the builder"): it rises and fades in,
+     and sinks and fades out, instead of cutting. */
+  const RISE = [
+    { opacity: 0, transform: "translateY(28px) scale(0.985)" },
+    { opacity: 1, transform: "none" },
+  ];
   useLayoutEffect(() => {
     const from = originFrame();
     if (origin) origin.style.visibility = "hidden";
-    if (from && !reducedMotion()) {
+    veilTint();
+    if (reducedMotion()) veil.current?.style.setProperty("opacity", "0");
+    else if (from) {
       root.current?.animate?.([{ clipPath: from }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], GROW);
       veil.current?.animate?.([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], { duration: GROW.duration, easing: "ease-out", fill: "forwards" });
-    } else veil.current?.style.setProperty("opacity", "0");
+    } else {
+      veil.current?.style.setProperty("opacity", "0");
+      root.current?.animate?.(RISE, { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+    }
     return () => {
       if (origin) origin.style.visibility = "";
     };
@@ -1205,8 +1097,14 @@ export function GiftPreview({
     shutting.current = true;
     const to = originFrame();
     const el = root.current;
-    if (!to || !el || reducedMotion() || typeof el.animate !== "function") return onClose();
+    if (!el || reducedMotion() || typeof el.animate !== "function") return onClose();
     el.style.pointerEvents = "none";
+    if (!to) {
+      const a = el.animate([...RISE].reverse(), { duration: 240, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" });
+      a.onfinish = () => onClose();
+      return;
+    }
+    veilTint();
     veil.current?.animate?.([{ opacity: 0 }, { opacity: 1, offset: 0.7 }, { opacity: 1 }], { duration: 380, easing: "ease-in", fill: "forwards" });
     const a = el.animate([{ clipPath: "inset(0px 0px 0px 0px round 0px)" }, { clipPath: to }], {
       duration: 380,
@@ -1267,6 +1165,51 @@ export function GiftPreview({
     action.onClick(el);
   };
   const toGift = () => setStage("gift");
+  /* The handle row is the one place that drags (Sam, 6 Nov 2026: "the top of
+     the modal, where that draggable icon seems to be, should be something
+     that I can swipe gesture with, only that though"). The drawer follows
+     the finger (a translate over its open or collapsed position); let go and
+     it settles open or collapsed by distance or a flick, from where it is. */
+  const drag = useRef<{ id: number; y: number; t: number; dy: number; v: number; moved: boolean } | null>(null);
+  const onGrabDown = (e: React.PointerEvent<HTMLElement>) => {
+    if ((e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest(".gft-pp-handle-hit")) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    drag.current = { id: e.pointerId, y: e.clientY, t: e.timeStamp, dy: 0, v: 0, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    panel.style.transition = "none";
+  };
+  const onGrabMove = (e: React.PointerEvent<HTMLElement>) => {
+    const g = drag.current;
+    const panel = panelRef.current;
+    if (!g || g.id !== e.pointerId || !panel) return;
+    const raw = e.clientY - g.y;
+    const travel = panel.offsetHeight - PEEK_H();
+    /* Rubber-band past either end. */
+    const dy = peek ? (raw < -travel ? -travel + (raw + travel) / 4 : raw > 0 ? raw / 4 : raw) : raw < 0 ? raw / 4 : raw;
+    const dt = Math.max(1, e.timeStamp - g.t);
+    g.v = (dy - g.dy) / dt;
+    g.t = e.timeStamp;
+    g.dy = dy;
+    if (Math.abs(raw) > 4) g.moved = true;
+    panel.style.translate = `0 ${dy}px`;
+  };
+  const onGrabUp = (e: React.PointerEvent<HTMLElement>) => {
+    const g = drag.current;
+    const panel = panelRef.current;
+    drag.current = null;
+    if (!g || g.id !== e.pointerId || !panel) return;
+    panel.style.transition = "";
+    panel.style.translate = "";
+    const travel = panel.offsetHeight - PEEK_H();
+    let collapse = peek;
+    if (!g.moved) collapse = !peek; // a tap on the handle toggles
+    else if (peek) collapse = !(g.dy < -Math.min(80, travel / 3) || g.v < -0.4);
+    else collapse = g.dy > Math.min(100, travel / 3) || g.v > 0.4;
+    if (g.moved && g.dy !== 0 && !reducedMotion())
+      panel.animate([{ translate: `0 ${g.dy}px` }, { translate: "0 0" }], { duration: 340, easing: EASE });
+    flushSync(() => (collapse ? setPeek(true) : expand()));
+  };
   /* Continue: the checkout slides up into the panel (Sam, 6 Nov 2026: "when
      I click continue, I think it should cause the checkout modal to slide
      up"); on a phone the drawer itself rises as it grows. Back: the care
@@ -1310,6 +1253,7 @@ export function GiftPreview({
       data-device={desk ? "computer" : "phone"}
       data-builder={builder ? "" : undefined}
       data-peek={!wide && builder && peek ? "" : undefined}
+      data-designed={designed ? "" : undefined}
       role="dialog"
       aria-modal="true"
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
@@ -1376,10 +1320,15 @@ export function GiftPreview({
           data-open=""
           data-peek={!wide && peek ? "" : undefined}
           data-stage={stage}
-          {...(!wide && peek ? { inert: "" } : {})}
         >
           {wide ? null : (
-            <div className="gft-pp-grab">
+            <div
+              className="gft-pp-grab"
+              onPointerDown={onGrabDown}
+              onPointerMove={onGrabMove}
+              onPointerUp={onGrabUp}
+              onPointerCancel={onGrabUp}
+            >
               {/* On a phone the drawer's own way out, on the care package
                   (the checkout steps carry theirs); the Close and background
                   pills over the page are gone (Sam, 6 Nov 2026: "on mobile
@@ -1391,24 +1340,43 @@ export function GiftPreview({
                   </svg>
                 </button>
               ) : null}
-              <span className="gft-pp-handle" aria-hidden="true" />
-              <button type="button" className="gft-pp-peek" onClick={() => setPeek(true)}>
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                </svg>
-                Preview
+              <button
+                type="button"
+                className="gft-pp-handle-hit"
+                aria-label={peek ? "Open the editor" : "Collapse the editor"}
+                aria-expanded={!peek}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    if (peek) expand();
+                    else setPeek(true);
+                  }
+                }}
+              >
+                <span className="gft-pp-handle" aria-hidden="true" />
               </button>
             </div>
           )}
+          {/* Collapsed: the one button that opens it. */}
+          {!wide ? (
+            <div className="gft-pp-peekbar" hidden={!peek}>
+              <button type="button" className="gft-pp-cta" onClick={expand}>
+                {/* While previewing it's always "Back to editing" (Sam, 6 Nov 2026), on
+                    any step; only the first time, before they've begun, "Start
+                    designing". */}
+                {designed ? "Back to editing" : "Start designing"}
+              </button>
+            </div>
+          ) : null}
           {visited && next ? (
-            <div className="gft-pp-next" hidden={stage !== "next"}>
+            <div className="gft-pp-next" hidden={stage !== "next"} {...(!wide && peek ? { inert: "" } : {})}>
               {next(toGift, shut)}
             </div>
           ) : null}
           {stage === "next" ? null : (
           <>
           {builder ? (
-            <div className="gft-pp-head">
+            <div className="gft-pp-head" {...(!wide && peek ? { inert: "" } : {})}>
               <ol className="gft-pp-steps" aria-label={`Step 1 of ${stepsTotal}`}>
                 {Array.from({ length: stepsTotal }, (_, i) => (
                   <li key={i} data-on={i === 0 ? "" : undefined} />
@@ -1420,7 +1388,7 @@ export function GiftPreview({
               </p>
             </div>
           ) : null}
-          <div ref={body} className="gft-pp-body">
+          <div ref={body} className="gft-pp-body" {...(!wide && peek ? { inert: "" } : {})}>
             <div className="gft-pp-group">
               {builder ? null : <h2 className="gft-pp-h">Make it theirs</h2>}
               {fixedTo ? null : (
@@ -1577,7 +1545,7 @@ export function GiftPreview({
             </div>
             ))}
           </div>
-          <div className="gft-pp-foot">
+          <div className="gft-pp-foot" {...(!wide && peek ? { inert: "" } : {})}>
             <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>
               {action.label}
             </button>
@@ -1587,12 +1555,15 @@ export function GiftPreview({
         </aside>
       ) : null}
       <div ref={veil} className="gft-preview-veil" aria-hidden="true" />
-      {!wide && builder && peek ? (
-        <button type="button" className="gft-peek-back" onClick={() => setPeek(false)}>
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Preview, over the page at the top centre while the drawer is up
+          (Sam, 6 Nov 2026: "we should make the preview button overlay the
+          banner at the top in the center when the modal is open"). */}
+      {!wide && builder && !peek ? (
+        <button type="button" className="gft-pp-peek" onClick={() => setPeek(true)}>
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
           </svg>
-          {stage === "next" ? "Back to checkout" : "Back to editing"}
+          Preview
         </button>
       ) : null}
     </div>,

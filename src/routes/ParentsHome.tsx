@@ -684,16 +684,11 @@ export default function ParentsHome() {
             className="tpa-cta tpp-cta"
             onClick={(e) => signUp("hero", e.currentTarget)}
           >
-            <Glyph d={GLYPHS.mail} className="tpp-cta-glyph" />
             {cta}
           </button>
-          {/* What happens first, then the price, quieter (Sam, 6 Nov 2026:
-              the callout "makes the ask a bit too early"). */}
+          {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"). */}
           <p className="tpp-under tnum">
-            <b>Start with a note. Their number and payment come last.</b>
-            <span>
-              {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
-            </span>
+            {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
           </p>
         </section>
 
