@@ -1,6 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SAMPLE_GIFT, SCENE_GROUPS, type SceneId } from "../model/gift";
 import { getGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
+
+/** The band's swatches: the seasons, not the religious holidays. */
+const BAND_SCENES: readonly SceneId[] = ["leaves", "thanksgiving", "newyear", "snow"];
 
 /** The seasonal background for today: Thanksgiving until it's past, the
  *  general Holiday through December, New Year's for its first week, Snow
@@ -14,7 +18,6 @@ export function seasonNow(d = new Date()): SceneId {
   if (m >= 8) return "leaves";
   return "snow";
 }
-import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
    The parents page says a parent can send Plus with a note, and that their
@@ -74,8 +77,15 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
      draft, if they haven't picked), so the band never shows one look and the
      gift sends another. */
   const { scene } = useGiftDraft();
-  const choices = SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? [];
-  const season = seasonNow();
+  /* The band shows the seasons, not the religious holidays (Sam, 6 Nov
+     2026: "the religious one's wouldn't be the first in the preview on the
+     main page, maybe we just show snow, thanksgiving, new years, fall
+     leaves"); Hanukkah, Christmas and Holiday are in View more (the
+     builder). In December, when today's season is a holiday, the band and
+     the gift start on Snow. */
+  const choices = (SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? []).filter((c) => BAND_SCENES.includes(c.id));
+  const today = seasonNow();
+  const season: SceneId = BAND_SCENES.includes(today) ? today : "snow";
   useEffect(() => {
     if (!giftDraftTouched(getGiftDraft())) setGiftDraft({ scene: season });
     // Once.
