@@ -116,13 +116,13 @@ export function Guarantee({ asked }: { asked: boolean }) {
           </span>
         </li>
       )}
-      {/* Sam, 7 Nov 2026: a month they didn't use is refunded on asking,
-          by support (by hand; the backend's docs/PARENTS_FLOW.md). On every
-          flow, the ask link's included. */}
+      {/* Sam, 7 Nov 2026: if they don't save what the parent spent, the
+          parent gets a full refund (replaces "Not used that month?"). On
+          every flow, the ask link's included. */}
       <li>
         <Glyph d={GLYPHS.refund} />
         <span>
-          <b>Not used that month?</b> Ask for a refund
+          <b>Full refund</b> if they don’t save what you spent
         </span>
       </li>
       <li>
@@ -444,7 +444,7 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     title: "Cancel, skip or get a refund",
     line: (
       <>
-        We text you before each monthly bill. To skip a month, cancel, or get a refund for a month they didn’t use, email
+        We text you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
         support@tapin.app.
       </>
     ),
