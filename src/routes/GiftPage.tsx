@@ -30,6 +30,7 @@ import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
 import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
+import { StepBars, resetStepBars } from "../shell/StepBars";
 import { BackArrow } from "../shell/BackArrow";
 import { reducedMotion } from "./parents_kit";
 import { SealFace } from "./giftSeals";
@@ -1258,6 +1259,8 @@ export function GiftPreview({
     const unlock = lockScroll();
     return unlock;
   }, []);
+  /* The step bars start fresh on the next open. */
+  useEffect(() => () => resetStepBars(), []);
 
   /* ── Out of the container, and back into it ──
      The builder is laid out whole from the first frame; a clip that starts
@@ -1757,11 +1760,7 @@ export function GiftPreview({
                     ? "Pick what plays as the card comes out."
                     : "Pick how it looks."}
               </p>
-              <ol className="gft-pp-steps" aria-label={`Step ${stepAt} of ${stepsTotal}`}>
-                {Array.from({ length: stepsTotal }, (_, i) => (
-                  <li key={i} data-on={i < stepAt ? "" : undefined} />
-                ))}
-              </ol>
+              <StepBars className="gft-pp-steps" total={stepsTotal} lit={stepAt} label={`Step ${stepAt} of ${stepsTotal}`} />
             </div>
           ) : null}
           <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>

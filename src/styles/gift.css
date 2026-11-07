@@ -2521,3 +2521,25 @@ button.tpg-env-link {
     padding-right: 20px;
   }
 }
+
+/* The step bars' fill (shell/StepBars.tsx): a grey track, an ink fill that
+   wipes in going on and drains coming back (7 Nov 2026). */
+.step-bars li {
+  position: relative;
+  overflow: hidden;
+  background: rgba(20, 22, 24, 0.12);
+}
+.step-bars.step-bars li[data-on] {
+  background: rgba(20, 22, 24, 0.12);
+}
+.step-bars li > i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #141618;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.step-bars li[data-on] > i {
+  transform: none;
+}
