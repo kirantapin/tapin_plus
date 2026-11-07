@@ -678,9 +678,12 @@ export function Letter({
     /* The parent's celebration, as the card comes out (giftDelight.ts). The
        page below waits for its peak. */
     let celebrated: Promise<void> = Promise.resolve();
+    /* The page below is held until the opening has played out (Sam, 7 Nov
+       2026: "the animation should finish, then the background moves up and
+       the tapin plus call out pops up immediately"). */
+    setHeld(true);
     if (gift.effect) {
       const fx = gift.effect;
-      setHeld(true);
       celebrated = new Promise<void>((resolve) => {
         window.setTimeout(() => {
           if (!band.current || !el.isConnected) return resolve();
@@ -720,10 +723,15 @@ export function Letter({
     /* The settle: the card is whole and the envelope gone, so this is a
        move only (no height, no unrolling). */
     const first = el.getBoundingClientRect();
+    /* The band keeps its sealed height through the settle and the
+       celebration, so nothing moves up yet. */
+    const bandEl = band.current;
+    const sealedH = bandEl?.offsetHeight ?? 0;
     el.getAnimations().forEach((a) => a.cancel());
     flushSync(() => setState("open"));
+    if (bandEl && sealedH) bandEl.style.minHeight = `${sealedH}px`;
     const last = el.getBoundingClientRect();
-    go(el, [
+    const settling = go(el, [
       { transform: `translate(${first.left - last.left}px, ${first.top - last.top}px)`, boxShadow: "0 4px 10px rgba(0, 0, 0, 0.12)" },
       { transform: "none", boxShadow: "0 20px 44px rgba(0, 0, 0, 0.32)" },
     ], { duration: 640, fill: "none" });
@@ -733,17 +741,22 @@ export function Letter({
       { opacity: 0, transform: "translateY(8px)" },
       { opacity: 1, transform: "none" },
     ], { duration: 520, delay: 160, fill: "backwards" });
-    /* Then, once the celebration has played out, what's below rises in. */
-    await celebrated;
+    /* Then, once the card has settled and the celebration has peaked: the
+       band eases up to its open height (the background moving up) and
+       what's below is simply there. */
+    await Promise.all([celebrated, settling?.finished.then(() => undefined, () => undefined)]);
     if (!el.isConnected) return;
+    const h0 = bandEl?.offsetHeight ?? 0;
+    if (bandEl) bandEl.style.removeProperty("min-height");
     flushSync(() => setHeld(false));
-    after.current?.animate?.(
-      [
-        { opacity: 0, transform: "translateY(18px)" },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 520, easing: EASE, fill: "backwards" },
-    );
+    const h1 = bandEl?.offsetHeight ?? 0;
+    if (bandEl && h0 && Math.abs(h0 - h1) > 2 && typeof bandEl.animate === "function") {
+      bandEl.style.overflow = "hidden";
+      const a = bandEl.animate([{ height: `${h0}px` }, { height: `${h1}px` }], { duration: 560, easing: EASE });
+      const done = () => bandEl.style.removeProperty("overflow");
+      a.onfinish = done;
+      a.oncancel = done;
+    }
   };
   openRef.current = open;
 
