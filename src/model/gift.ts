@@ -23,7 +23,18 @@ export type Gift = {
   scene: SceneId;
   /** The parent's photo, if they added one: a URL the page can show. */
   photo: string | null;
+  /** What plays as the card comes out (routes/giftDelight.ts), or none. */
+  effect?: Delight | null;
 };
+
+/** The opening's little celebration, the parent's pick (Sam, 6 Nov 2026). */
+export const DELIGHTS = [
+  { id: "confetti", name: "Confetti" },
+  { id: "hearts", name: "Hearts" },
+  { id: "sparkles", name: "Sparkles" },
+] as const;
+export type Delight = (typeof DELIGHTS)[number]["id"];
+export const isDelight = (v: unknown): v is Delight => DELIGHTS.some((d) => d.id === v);
 
 /* ══ THE PARENT'S PICKS (Sam, 6 Nov 2026: "how can we give these a bit more
    personality ... if they could add an image too that'd make it feel super
@@ -57,8 +68,12 @@ export const SCENES = [
   /* Seasonal (Sam, 6 Nov 2026: "can we also add channukah and christmas,
      along with a general "holiday" backgrounds - these would be in a
      "seasonal" category"). */
+  /* In the calendar's order (Thanksgiving and New Year's added the same
+     day: "since that's coming up soon"), the general Holiday last. */
+  { id: "thanksgiving", name: "Thanksgiving", line: "Happy Thanksgiving", group: "seasonal" },
   { id: "hanukkah", name: "Hanukkah", line: "Happy Hanukkah", group: "seasonal" },
   { id: "christmas", name: "Christmas", line: "Merry Christmas", group: "seasonal" },
+  { id: "newyear", name: "New Year’s", line: "Happy New Year", group: "seasonal" },
   { id: "holiday", name: "Holiday", line: "Happy holidays", group: "seasonal" },
 ] as const;
 
@@ -96,9 +111,11 @@ export const SAMPLE_PHOTO = "/parents/hero-hug.webp";
 export function previewGift(search: string, photoSrc: string): Gift {
   const q = new URLSearchParams(search);
   const bg = q.get("bg");
+  const fx = q.get("fx");
   const picks = {
     scene: isScene(bg) ? bg : SAMPLE_GIFT.scene,
     photo: q.get("photo") === "1" ? photoSrc : null,
+    effect: isDelight(fx) ? fx : null,
   };
   if (!import.meta.env.DEV) return { ...SAMPLE_GIFT, ...picks };
   const take = (k: string, fallback: string, max: number) => {

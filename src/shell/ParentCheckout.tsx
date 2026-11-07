@@ -482,6 +482,7 @@ function Sheet({
         gift_from: giftFromSent,
         gift_scene: noteOpen ? giftScene : null,
         gift_photo: noteOpen ? giftPhoto : null,
+        gift_effect: draft.effect,
         utm: keptUtm(),
       });
       setStarted(res);
