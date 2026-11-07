@@ -186,8 +186,12 @@ type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "no
  *  link; the charge needs you). Null with no save. An ask link's student is
  *  theirs, so its own flow decides (it has no number step). */
 export function resumeStep(ask: boolean): ResumeStep | null {
-  const at = keptStep();
-  if (!at) return null;
+  /* Never back onto pay itself: that would start a checkout on load, and
+     with the consent boxes unticked again. "You" comes back filled, with
+     the boxes in view, one tap from pay. */
+  const kept = keptStep();
+  if (!kept) return null;
+  const at: ResumeStep = kept === "pay" ? "you" : kept;
   const f = keptFields();
   const to = getGiftDraft().to.trim();
   const order: ResumeStep[] = ["look", "open", "note", "student", "you", "pay"];
