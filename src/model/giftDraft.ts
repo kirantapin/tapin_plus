@@ -4,11 +4,13 @@
    out so they don't have to do it twice)") ═══════════════════════════════════
    One draft for the page's life: the preview on /parents ("See what they'll
    see") and the checkout read and write the same fields, so whatever a parent
-   types in one is already in the other. In memory only (the photo is a data
-   URL of up to 1.5M characters, and it's a family's own). Cleared once a
-   checkout goes through. */
+   types in one is already in the other. Kept in this browser for a day too
+   (model/checkoutResume.ts, Sam, 7 Nov 2026), so leaving or reloading
+   doesn't lose it; the photo only when it's small enough to store. Cleared
+   once a checkout goes through, or on "Start over". */
 import { useSyncExternalStore } from "react";
 import type { Delight, SceneId } from "./gift";
+import { dropResume, keepGift, keptGift } from "./checkoutResume";
 
 export type GiftDraft = {
   /** The student's first name, as typed. */
@@ -25,18 +27,48 @@ export type GiftDraft = {
 
 const EMPTY: GiftDraft = { to: "", note: "", from: "", scene: "maroon", photo: null, effect: null };
 let draft: GiftDraft = EMPTY;
+/* What the page picked on its own (the band's season), which "Start over"
+   goes back to. */
+let base: GiftDraft = EMPTY;
 const subs = new Set<() => void>();
+const changed = () => subs.forEach((f) => f());
 
 export const getGiftDraft = (): GiftDraft => draft;
 
-export function setGiftDraft(patch: Partial<GiftDraft>) {
+/** A parent's edit, kept for a day. `quiet`: the page's own default (the
+ *  band's season), not theirs, so it isn't kept. */
+export function setGiftDraft(patch: Partial<GiftDraft>, opts?: { quiet?: boolean }) {
   draft = { ...draft, ...patch };
-  subs.forEach((f) => f());
+  if (opts?.quiet) base = { ...base, ...patch };
+  else keepGift(draft);
+  changed();
 }
 
+/** Paid: the next gift starts fresh, and the day's save goes with it. */
 export function clearGiftDraft() {
   draft = EMPTY;
-  subs.forEach((f) => f());
+  dropResume();
+  changed();
+}
+
+/** "Start over": back to the page's own default, nothing of theirs kept. */
+export function startGiftOver() {
+  draft = { ...EMPTY, scene: base.scene };
+  dropResume();
+  changed();
+}
+
+/** The gift as they left it, from the save in this browser (under a day
+ *  old), once per page load. The /parents page asks before it first draws,
+ *  so its band and the builder open on their pick. */
+let hydrated = false;
+export function hydrateGiftDraft() {
+  if (hydrated) return;
+  hydrated = true;
+  const g = keptGift();
+  if (!g) return;
+  draft = { to: g.to, note: g.note, from: g.from, scene: g.scene ?? draft.scene, photo: g.photo, effect: g.effect };
+  changed();
 }
 
 /** Whether they've made any of the gift theirs (beyond the student's name). */

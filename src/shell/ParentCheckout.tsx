@@ -17,7 +17,9 @@ import {
   type ParentCheckoutStarted,
   type ParentConfirmed,
 } from "../model/parents";
-import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { clearGiftDraft, getGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { dropResume, keepFields, keptFields, keptStep, type ResumeStep } from "../model/checkoutResume";
+import { ResumeContext, ResumeLine } from "./ResumeLine";
 import { BackArrow } from "./BackArrow";
 import { GiftSentContext } from "./giftSent";
 import { nextBillingDate } from "../model/plus";
@@ -178,6 +180,29 @@ let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: strin
 export const hasChargedParentCheckout = () => charged !== null;
 type Field = "student" | "phone" | "confirm" | "name" | "email" | "mobile" | "note" | "from";
 
+/** Where a save from earlier (model/checkoutResume.ts) comes back to: the
+ *  step they left, or the furthest one before it that has what it needs
+ *  (their number needs the student's name; you needs their number, or an ask
+ *  link; the charge needs you). Null with no save. An ask link's student is
+ *  theirs, so its own flow decides (it has no number step). */
+export function resumeStep(ask: boolean): ResumeStep | null {
+  const at = keptStep();
+  if (!at) return null;
+  const f = keptFields();
+  const to = getGiftDraft().to.trim();
+  const order: ResumeStep[] = ["look", "open", "note", "student", "you", "pay"];
+  const ok = (s: ResumeStep): boolean =>
+    s === "student"
+      ? !ask && !!to
+      : s === "you"
+        ? ask || (!!to && !!toE164(f.phone) && f.confirm === f.phone)
+        : s === "pay"
+          ? ok("you") && !!f.name.trim() && EMAIL.test(f.email.trim()) && !!toE164(f.mobile)
+          : true;
+  for (let i = order.indexOf(at); i >= 0; i--) if (ok(order[i])) return order[i];
+  return "look";
+}
+
 function Sheet({
   ask,
   from,
@@ -201,7 +226,14 @@ function Sheet({
   const source = ask ? "ask_link" : "parent_page";
   const mock = parentMock();
 
-  const [step, setStep] = useState<Step>(() => (charged ? "pay" : ask ? "you" : "student"));
+  /* A save from earlier (resumeStep): back on its step. The charge makes
+     its checkout again the normal way (start, below, as Continue to payment
+     does), so it opens on you while that runs. */
+  const [plan] = useState<ResumeStep | null>(() => (charged ? null : resumeStep(!!ask)));
+  const [step, setStep] = useState<Step>(() =>
+    charged ? "pay" : plan === "student" || plan === "you" ? plan : plan === "pay" ? "you" : ask ? "you" : "student",
+  );
+  const resume = useContext(ResumeContext);
   /* The student's name, note, sign-off, background and photo are the gift
      draft (model/giftDraft.ts), shared with the preview on /parents, so what
      a parent typed there is here already (Sam, 6 Nov 2026: "so they don't
@@ -209,16 +241,24 @@ function Sheet({
   const draft = useGiftDraft();
   const student = draft.to;
   const setStudent = (to: string) => setGiftDraft({ to });
-  const [phone, setPhone] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [name, setName] = useState("");
+  /* What they typed here before, kept in this browser for a day
+     (model/checkoutResume.ts). An ask link's student number is the link's,
+     so a saved one isn't put back. */
+  const [saved] = useState(keptFields);
+  const [phone, setPhone] = useState(ask ? "" : saved.phone);
+  const [confirm, setConfirm] = useState(ask ? "" : saved.confirm);
+  const [name, setName] = useState(saved.name);
   /* Kept, never emailed for now (Sam, 6 Nov 2026: "No email at all right
      now. Although I think it'd make sense to capture their emails
      regardless"); the parent is texted. */
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState(saved.email);
+  const [mobile, setMobile] = useState(saved.mobile);
+  useEffect(() => {
+    keepFields(ask ? { name, email, mobile } : { phone, confirm, name, email, mobile });
+  }, [ask, phone, confirm, name, email, mobile]);
   /* Marketing, texts and email, each unticked until ticked (Sam, 6 Nov
-     2026); kept while they go back and forth between the steps. */
+     2026); kept while they go back and forth between the steps, never kept
+     for later: consent is given fresh. */
   const [mktSms, setMktSms] = useState(false);
   const [mktEmail, setMktEmail] = useState(false);
   /* The care package as the builder left it (step 1): the note and how it's
@@ -548,6 +588,13 @@ function Sheet({
       toStep("you");
       return;
     }
+    await start();
+  };
+
+  /* The checkout, made: Continue to payment, or a save from earlier coming
+     back to the charge (the same call, so nothing about a payment is ever
+     kept). */
+  const start = async () => {
     setBusy(true);
     const giftNoteSent = noteOpen && giftNote.trim() ? giftNote.trim() : null;
     const giftFromSent = noteOpen && giftFrom.trim() ? giftFrom.trim().replace(/\s+/g, " ") : null;
@@ -588,6 +635,26 @@ function Sheet({
       setBusy(false);
     }
   };
+  /* Back on the charge: made again once, as it opens (a ref, so React's
+     dev double mount doesn't make two). */
+  const autoStart = useRef(plan === "pay");
+  const [resuming, setResuming] = useState(plan === "pay");
+  useEffect(() => {
+    if (!autoStart.current) return;
+    autoStart.current = false;
+    void start().finally(() => setResuming(false));
+    // Once, as it opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  /* The builder keeps the step for the save. A card taken but not yet
+     confirmed comes back no further than you, so a reload never makes a
+     second charge by itself. */
+  useEffect(() => {
+    if (step === "done" || step === "look" || step === "open" || step === "note") return;
+    resume?.report(step === "pay" && paid ? "you" : step);
+    // On the step changing, and the card being taken.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, paid]);
 
   const onCharged = (paymentIntent: string) => {
     if (started)
@@ -612,6 +679,9 @@ function Sheet({
   const [sentTo, setSentTo] = useState<{ who: string; masked: string; phone: string | null; texted: boolean } | null>(null);
   const finished = useRef(false);
   const onPaid = (res: ParentConfirmed) => {
+    /* Paid: the save from this browser goes now (not just as the builder
+       closes), and nothing is kept again until the next gift. */
+    dropResume({ hold: true });
     const first = started?.first_cents ?? OFFER.first_cents;
     const to = {
       who: res.student_first_name || who,
@@ -746,6 +816,7 @@ function Sheet({
         </button>
       ) : null}
       {sub ? <p className="gft-pp-sub tnum">{sub}</p> : null}
+      <ResumeLine step={resuming ? "pay" : step} />
       {/* Done needs no count (A · It's on its way, 7 Nov 2026). */}
       {step === "done" ? null : bars("gft-pp-steps")}
     </div>
