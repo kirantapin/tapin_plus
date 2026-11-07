@@ -676,7 +676,7 @@ export function Letter({
     /* The card: up, and the clip's line held on the envelope's foot. */
     const RISE = { duration: 700, delay: 880 };
     /* The parent's celebration, as the card comes out (giftDelight.ts). The
-       page below waits for it (at most 8s, a safety net). */
+       page below waits for its peak. */
     let celebrated: Promise<void> = Promise.resolve();
     if (gift.effect) {
       const fx = gift.effect;
@@ -692,7 +692,10 @@ export function Letter({
           run.done.then(resolve, resolve);
         }, RISE.delay + 180);
       });
-      celebrated = Promise.race([celebrated, new Promise<void>((r) => window.setTimeout(r, RISE.delay + 180 + 8000))]);
+      /* Not the whole effect (Sam, 7 Nov 2026: "this comes in a bit too
+         late, you can make it a bit quicker"): its peak, about a second
+         after the card settles; its tail finishes in the band. */
+      celebrated = Promise.race([celebrated, new Promise<void>((r) => window.setTimeout(r, RISE.delay + 180 + 2300))]);
     }
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
