@@ -466,7 +466,7 @@ button.tpg-env-link {
 /* Side by side only once the sheet is the desk layout's wide column. */
 @media (min-width: 1024px) {
   .tpp .tpa-sheet > .tpp-offer + .tpg-env,
-  .tpp .tpa-sheet > .tpp-offer + .tpp-more-out + .tpg-env {
+  .tpp .tpa-sheet > .tpp-offer-col + .tpg-env {
     margin-top: 0;
   }
   .tpg-env {

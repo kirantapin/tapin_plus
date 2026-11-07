@@ -697,7 +697,9 @@
   /* The story column's first card lines up with the offer card's top (the
      phone rhythm's first-child 4px would otherwise drop the offer card). */
   .tpp .tpa-sheet > .tpp-offer,
-  .tpp .tpa-sheet > .tpp-offer + .tpa-module {
+  .tpp .tpp-offer-col > .tpp-offer,
+  .tpp .tpa-sheet > .tpp-offer + .tpa-module,
+  .tpp .tpa-sheet > .tpp-offer-col + .tpa-module {
     margin-top: 0;
   }
   .tpp-vs-col b {
@@ -950,13 +952,38 @@
 .tpp-more-out li {
   background: #ffffff;
 }
-@media (max-width: 1023.98px) {
-  .tpp-more-in {
-    display: none;
-  }
-}
 @media (min-width: 1024px) {
   .tpp .tpp-more-out {
     display: none;
+  }
+}
+
+/* The offer column (6 Nov 2026): the offer card with the two other benefits
+   under it. A phone: the wrapper steps aside, and the strip sits between the
+   card and the gift band. A computer: the pair is the held right column, the
+   strip under the card (no longer inside it). */
+.tpp-offer-col {
+  display: contents;
+}
+.tpa-sheet > .tpp-offer-col:first-child > .tpa-module:first-child {
+  margin-top: 4px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-sheet > .tpp-offer-col {
+    display: block;
+    grid-column: 2;
+    grid-row: 1 / span 40;
+    align-self: start;
+    position: sticky;
+    top: 60px;
+    margin: 0;
+  }
+  .tpa-home .tpp-offer-col > [aria-label="Tapin Plus"] {
+    margin: 0;
+    border-radius: 20px;
+  }
+  .tpp .tpp-offer-col > .tpp-more-out {
+    display: grid;
+    margin: 12px 0 0;
   }
 }
