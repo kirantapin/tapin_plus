@@ -31,7 +31,8 @@ import { useDockPulse } from "../shell/dockPulse";
 import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
 import { BackArrow } from "../shell/BackArrow";
-import { FlatMark, reducedMotion } from "./parents_kit";
+import { reducedMotion } from "./parents_kit";
+import { SealFace } from "./giftSeals";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -71,6 +72,12 @@ function whoInHeading(from: string, afterName: boolean): string {
    GENERATED, tools/patterns/animate.py). Picnic and flannel drift by their
    live tile (4 and 3 checks); airmail's stripes and the snow of Christmas
    and Snow travel inside the tile, so their layers stay put. */
+/* Where each background's drift had got to, so a replay (the builder seals
+   the card and opens it again on every pick of "When they open it") picks
+   the drift up where it was instead of jolting back to the start (Sam, 6 Nov
+   2026: "the animation in the background does this weird jolt thing, it
+   resets"). */
+const driftAt = new Map<string, number>();
 const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alternate?: boolean }>> = {
   picnic: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-144px, -144px)" }], ms: 28000 },
   night: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 0)" }], ms: 60000 },
@@ -218,7 +225,9 @@ export default function GiftPage() {
             <span className="gft-sr">Opening your gift</span>
             <div className="gft-a-stage" aria-hidden="true">
               <div className="gft-a-shell">
-                <Envelope />
+                {/* No seal until the gift (and so its background's seal) is
+                    known: the brand seal swapping for the gift's own flickered. */}
+                <Envelope scene={null} />
               </div>
             </div>
           </>
@@ -268,13 +277,17 @@ export default function GiftPage() {
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
 /** The care package: brown kraft (the inside, the pocket, the flap), twine
- *  tied round it, and a maroon wax seal with the flat Plus mark (Sam, 6 Nov
- *  2026: "I think we should just use the flat tapin plus icon"). */
+ *  tied round it, and a wax seal that matches the background (giftSeals.tsx;
+ *  Sam, 6 Nov 2026: "I think it'd be fun if we had a seal that matched the
+ *  background theme and color a bit more"). Maroon keeps the flat Plus mark. */
 function Envelope({
+  scene,
   flap,
   seal,
   extra,
 }: {
+  /** Its seal's background; null draws no seal (still loading). */
+  scene: SceneId | null;
   flap?: React.Ref<HTMLSpanElement>;
   seal?: React.Ref<HTMLSpanElement>;
   extra?: React.Ref<HTMLSpanElement>;
@@ -288,9 +301,11 @@ function Envelope({
         <i className="gft-a-twine-h" />
         <i className="gft-a-twine-v" />
       </span>
-      <span ref={seal} className="gft-a-seal">
-        <FlatMark />
-      </span>
+      {scene ? (
+        <span ref={seal} className="gft-a-seal" data-seal={scene}>
+          <SealFace scene={scene} />
+        </span>
+      ) : null}
     </>
   );
 }
@@ -350,10 +365,13 @@ const hoverPeek = () =>
 
 export function EnvelopeDemo({
   play,
+  scene = "maroon",
   gift,
   onPick,
 }: {
   play: boolean;
+  /** The background picked, so the seal matches it. */
+  scene?: SceneId;
   gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null };
   /** Clicking the envelope does what the band's button does. */
   onPick?: () => void;
@@ -435,7 +453,7 @@ export function EnvelopeDemo({
         onClick={onPick}
       >
         <div className="gft-a-shell">
-          <Envelope flap={flap} seal={seal} extra={extra} />
+          <Envelope scene={scene} flap={flap} seal={seal} extra={extra} />
         </div>
         <div className="gft-a-sleeve">
           <div ref={letter} className="gft-a-letter">
@@ -556,6 +574,8 @@ export function Letter({
             direction: m.alternate ? "alternate" : "normal",
           })
         : null;
+    const at = driftAt.get(gift.scene);
+    if (a && at != null) a.currentTime = at;
     drift.current = a;
     let onScreen = true;
     const sync = () => {
@@ -577,6 +597,8 @@ export function Letter({
         : null;
     if (io && scene.current) io.observe(scene.current);
     return () => {
+      const t = a?.currentTime;
+      if (typeof t === "number") driftAt.set(gift.scene, t);
       a?.cancel();
       el.removeAttribute("data-live");
       drift.current = null;
@@ -717,7 +739,9 @@ export function Letter({
     >
       <header ref={band} className="gft-a-band">
         <div ref={scene} className="gft-scene" aria-hidden="true">
-          <div ref={pat} className="gft-scene-pat" />
+          {/* Live from the first paint (not swapped in after it), so the
+              icons' own loops carry on across a replay. */}
+          <div ref={pat} className="gft-scene-pat" data-live={still ? undefined : ""} />
         </div>
         <h1 ref={title} className="gft-h1" tabIndex={-1}>
           {/* The inner span is the paper strip the busier backgrounds
@@ -753,7 +777,7 @@ export function Letter({
         >
           {state === "open" && still ? null : (
             <div ref={shell} className="gft-a-shell" aria-hidden="true">
-              <Envelope flap={flap} seal={seal} extra={extra} />
+              <Envelope scene={gift.scene} flap={flap} seal={seal} extra={extra} />
             </div>
           )}
           {/* The sleeve: the envelope masks the card (Sam, 6 Nov 2026: "I

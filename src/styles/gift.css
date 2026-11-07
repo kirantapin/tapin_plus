@@ -229,7 +229,9 @@ a.gft-open {
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   transform-origin: 50% 0;
 }
-/* The seal: the flat Plus mark (Sam, 6 Nov 2026) on maroon wax. */
+/* The seal: wax that matches the background, an emblem pressed into it
+   (giftSeals.tsx; maroon keeps the flat Plus mark). The span is what the
+   opening lifts away; the wax is drawn inside it, its uneven edge shadowed. */
 .gft-a-seal {
   position: absolute;
   z-index: 6;
@@ -240,12 +242,21 @@ a.gft-open {
   width: 62px;
   height: 62px;
   margin-left: -31px;
-  border-radius: 50%;
-  background: var(--seal);
   color: var(--seal-ink);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-.gft-a-seal svg {
+.gft-a-seal > .gft-seal-wax {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.3));
+}
+.gft-a-seal > .gft-seal-motif {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+.gft-a-seal > .gft-seal-mark {
   width: 34px;
   height: 34px;
 }
@@ -475,7 +486,7 @@ button.tpg-env-link {
   }
 }
 
-/* ══ THE CARE PACKAGE: brown kraft, twine, a maroon wax seal ══════════════ */
+/* ══ THE CARE PACKAGE: brown kraft, twine, a wax seal per background ══════ */
 .gft-a {
   /* The inside is the flap's own inside colour, so where the folded-back
      flap meets it at the top corners they read as one surface. */
@@ -485,7 +496,6 @@ button.tpg-env-link {
   /* The flap edge-on to the light, then its inside, in its own shade. */
   --env-edge: #8a6640;
   --env-inside: #a27a4d;
-  --seal: #861f41;
   --seal-ink: #f1e7d0;
 }
 
