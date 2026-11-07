@@ -127,6 +127,15 @@ function Places(p: Props) {
 export function GiftAfter(p: Props) {
   return (
     <div className="gav">
+      {/* Whose this is (Sam, 6 Nov 2026: "maybe we have a section right above
+          this which is 'Tapin plus blacksburg' with the tapin logo"). */}
+      <div className="gav-brand">
+        <img src={APP_ICON} alt="" width="40" height="40" />
+        <p>
+          <b>Tapin Plus</b>
+          <span>Blacksburg</span>
+        </p>
+      </div>
       <Places {...p} />
     </div>
   );

@@ -79,9 +79,42 @@ function LogoRow({ size }: { size: number }) {
    two benefits right under this section", then "maybe [they] belong outside
    of this container and below it instead in between this container and the
    care package preview"): 15% off instead of the $5, once a day; points on
-   everything. On a phone they sit between the offer card and the gift band
-   (ParentsHome, tpp-more-out); on a computer the offer card is the held
-   right-hand column, so there they stay in it (tpp-more-in). */
+   everything. Always under the offer card, never in it (ParentsHome
+   .tpp-offer-col): between the card and the gift band on a phone, under the
+   card in the held right-hand column on a computer. */
+/* ══ THE GUARANTEE, UNDER THE OFFER (Sam, 6 Nov 2026: "don't we need to
+   highlight the guarantee as well underneath, like refund if they don't use
+   it, easy cancel anytime"). Only what the backend does today: the 14-day
+   refund if their student never signs in (parent_unclaimed; not on an ask
+   link, where the student is signed in already), cancel by email, and the
+   parent's account. */
+export function Guarantee({ asked }: { asked: boolean }) {
+  return (
+    <ul className="tpp-promise" aria-label="Our promise">
+      {asked ? null : (
+        <li>
+          <Glyph d={GLYPHS.refund} />
+          <span>
+            <b>Full refund</b> if they don’t sign in within 14 days
+          </span>
+        </li>
+      )}
+      <li>
+        <Glyph d={GLYPHS.mail} />
+        <span>
+          <b>Cancel anytime</b> by emailing support@tapin.app
+        </span>
+      </li>
+      <li>
+        <Glyph d={GLYPHS.shield} />
+        <span>
+          <b>Manage it</b> from your account, whenever you like
+        </span>
+      </li>
+    </ul>
+  );
+}
+
 export function MoreBenefits({ className }: { className: string }) {
   return (
     <ul className={className} aria-label="Also with Plus">
@@ -137,7 +170,6 @@ export function OfferPrice() {
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
         <small aria-hidden="true">every week, at each of five spots</small>
       </p>
-      <MoreBenefits className="tpp-more tpp-more-in" />
     </div>
   );
 }

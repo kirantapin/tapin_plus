@@ -29,7 +29,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
+import { BenefitCards, Guarantee, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -659,6 +659,12 @@ export default function ParentsHome() {
         {/* THE OFFER: what it is, the price, the button. Right under the band
             on a phone; on a computer, the card held on the right
             (plus-app.css keys that on aria-label="Tapin Plus"). */}
+        {/* The offer card and, under it (not in it), the other two benefits
+            (Sam, 6 Nov 2026: "the callouts are underneath this parent
+            container, not within it. It's too busy otherwise"). On a computer
+            the two are the held right-hand column together; on a phone the
+            wrapper steps aside (display: contents). */}
+        <div className="tpp-offer-col">
         <section
           className="tpa-module tpa-offer tpp-offer"
           aria-label="Tapin Plus"
@@ -711,6 +717,8 @@ export default function ParentsHome() {
         </section>
 
         <MoreBenefits className="tpp-more tpp-more-out" />
+        <Guarantee asked={!!asked} />
+        </div>
 
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}

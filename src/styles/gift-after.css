@@ -175,6 +175,40 @@
 /* ── E · Member card ── */
 
 
+/* "Tapin Plus · Blacksburg" over the places (6 Nov 2026). */
+.gft .gav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+.gft .gav-brand img {
+  flex: none;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+}
+.gft .gav-brand p {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  line-height: 24px;
+}
+.gft .gav-brand b {
+  font-weight: 600;
+  color: #141618;
+}
+.gft .gav-brand span {
+  font-weight: 500;
+  color: rgba(20, 22, 24, 0.55);
+}
+@container (min-width: 960px) {
+  .gft .gav-brand {
+    order: -2;
+  }
+}
+
 /* On a phone the places sentence sits under the 34px headline and the note:
    at 24/30 it ran four lines and competed with both. */
 @media (max-width: 1023.98px) {

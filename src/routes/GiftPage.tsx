@@ -504,6 +504,7 @@ export function Letter({
   cta,
   onReseal,
   autoOpen = false,
+  onStateChange,
 }: {
   gift: Gift;
   sample: boolean;
@@ -514,9 +515,16 @@ export function Letter({
   onReseal?: () => void;
   /** Opens by itself a moment after it appears (the builder, after a pick). */
   autoOpen?: boolean;
+  /** Told when it's sealed, opening or open (the builder's replay icon). */
+  onStateChange?: (s: "sealed" | "opening" | "open") => void;
 }) {
   const { track } = useEventTracking();
   const [state, setState] = useState<"sealed" | "opening" | "open">("sealed");
+  const onStateRef = useRef(onStateChange);
+  onStateRef.current = onStateChange;
+  useEffect(() => {
+    onStateRef.current?.(state);
+  }, [state]);
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
   const extra = useRef<HTMLSpanElement | null>(null);
@@ -1161,7 +1169,13 @@ export function GiftPreview({
      (a computer), or the arrow keys. The letter stays as it is, open or
      closed; only the background changes, faded in. */
   const sceneAt = SCENE_ORDER.findIndex((e) => e.id === scene);
-  const pick = (next: SceneId) => setGiftDraft({ scene: next });
+  /* A new background closes the card again (Sam, 6 Nov 2026: "when I select
+     a new background I think it should close too"). */
+  const [cardState, setCardState] = useState<"sealed" | "opening" | "open">("sealed");
+  const pick = (next: SceneId) => {
+    setGiftDraft({ scene: next });
+    if (cardState !== "sealed") reseal();
+  };
   const cycle = useRef<(step: number) => void>(() => {});
   cycle.current = (step: number) => pick(SCENE_ORDER[(sceneAt + step + SCENE_ORDER.length) % SCENE_ORDER.length].id as SceneId);
   const firstScene = useRef(true);
@@ -1608,19 +1622,38 @@ export function GiftPreview({
             style={scaled}
             {...(!wide && builder && !peek ? { inert: "" } : {})}
           >
-            <Letter key={replay.n} gift={gift} sample preview cta={pageCta} onReseal={reseal} autoOpen={replay.auto} />
+            <Letter key={replay.n} gift={gift} sample preview cta={pageCta} onReseal={reseal} autoOpen={replay.auto} onStateChange={setCardState} />
           </div>
         </div>
         {/* Phone or computer, under the preview it changes (Sam, 6 Nov 2026:
             "the phone computer toggle should be on the bottom of the left
             column of the builder"). A computer only. */}
         {wide ? (
-          <div className="gft-preview-device gft-pp-seg" role="radiogroup" aria-label="See it on">
-            {(["phone", "computer"] as const).map((dv) => (
-              <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
-                {dv === "phone" ? "Phone" : "Computer"}
-              </button>
-            ))}
+          <div className="gft-preview-tools">
+            <div className="gft-preview-device gft-pp-seg" role="radiogroup" aria-label="See it on">
+              {(["phone", "computer"] as const).map((dv) => (
+                <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
+                  {dv === "phone" ? "Phone" : "Computer"}
+                </button>
+              ))}
+            </div>
+            {/* Close it again, once it's open (Sam, 6 Nov 2026: "maybe we have
+                a replay arrow icon to close the gift if someone has already
+                opened it"). */}
+            <button
+              type="button"
+              className="gft-preview-replay"
+              aria-label="Close the gift"
+              title="Close the gift"
+              data-on={cardState !== "sealed" ? "" : undefined}
+              tabIndex={cardState !== "sealed" ? 0 : -1}
+              aria-hidden={cardState !== "sealed" ? undefined : true}
+              onClick={reseal}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
         ) : null}
       </div>
