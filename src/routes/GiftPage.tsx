@@ -835,7 +835,11 @@ export function Letter({
             }
           }}
         >
-          {state === "open" && still ? null : (
+          {/* Gone once it's open, with motion too: the dropped papers are
+              held at opacity 0 below the card by their fill, still taking
+              taps, and lay over "Close it" (Sam, 7 Nov 2026: "the close it
+              button doesn't work"). "open" is set after they've fallen. */}
+          {state === "open" ? null : (
             <div ref={shell} className="gft-a-shell" aria-hidden="true">
               <Envelope scene={gift.scene} flap={flap} seal={seal} extra={extra} />
             </div>
