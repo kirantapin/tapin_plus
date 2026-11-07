@@ -52,6 +52,16 @@ import { FlatMark, reducedMotion } from "./parents_kit";
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+/** The letter's words when the parent wrote no note. */
+const NO_NOTE = "Thinking of you! Here’s a little something to treat yourself.";
+/** Family words read as "your mom" in the heading; a name stays a name. */
+const FAMILY = /^(mom|mum|mommy|mama|mother|dad|daddy|papa|father|grandma|grandpa|granny|nana|grandmother|grandfather|your parent|parents|mom and dad|mom & dad|dad and mom)$/i;
+function whoInHeading(from: string, afterName: boolean): string {
+  const f = from.trim();
+  if (!FAMILY.test(f)) return f;
+  const w = /^your /i.test(f) ? f.slice(5).toLowerCase() : f.toLowerCase();
+  return `${afterName ? "your" : "Your"} ${w}`;
+}
 
 /* Each background's own drift (gift.css .gft-scene-pat): one tile's travel
    per loop, so it never seams; scenery breathes instead; the sunburst turns.
@@ -703,15 +713,17 @@ export function Letter({
           {/* The inner span is the paper strip the busier backgrounds
               set the heading on. */}
           <span className="gft-h1-in">
+            {/* Their name first, and a family word as "your mom" (Sam, 6 Nov
+                2026: "maya, your mother got you tapin plus"). */}
+            {to ? `${to}, ` : ""}
+            {whoInHeading(gift.from, !!to)}{" "}
             {state === "open" ? (
               <>
-                {gift.from} got you <span className="gft-nowrap">Tapin Plus</span>
+                got you <span className="gft-nowrap">Tapin Plus</span>
               </>
             ) : (
               <>
-                {to ? `${to}, ` : ""}
-                {/* "Your parent" mid-sentence is "your parent". */}
-                {to && gift.from === "Your parent" ? "your parent" : gift.from} sent you <span className="gft-nowrap">something</span>
+                sent you <span className="gft-nowrap">something</span>
               </>
             )}
           </span>
@@ -751,14 +763,11 @@ export function Letter({
             {gift.photo ? (
               <img className="gft-a-photo" src={gift.photo} alt={`A photo from ${gift.from}`} decoding="async" />
             ) : null}
-            {gift.note ? (
-              <>
-                <p className="gft-a-note">{gift.note}</p>
-                <p className="gft-a-sig">{gift.from}</p>
-              </>
-            ) : (
-              <p className="gft-a-note">{gift.from} signed you up for Tapin Plus.</p>
-            )}
+            {/* No note: a short warm line, signed, instead of "signed you up
+                for Tapin Plus" (Sam, 6 Nov 2026: "more of a heartfelt short
+                message"). The builder shows the same, so it's what's sent. */}
+            <p className="gft-a-note">{gift.note || NO_NOTE}</p>
+            <p className="gft-a-sig">{gift.from}</p>
           </div>
           </div>
         </div>
@@ -974,8 +983,12 @@ export function GiftPreview({
     setReplay((r) => ({ n: r.n + 1, auto: true }));
   };
   const gift: Gift = {
-    to: fixedTo ?? (d.to.trim() || (showSample ? SAMPLE_GIFT.to : null)),
-    from: d.from.trim() || !showSample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
+    /* Empty fields show the sample's name and sign-off, in the builder too
+       (Sam, 6 Nov 2026: "the default message would be 'maya, your mother got
+       you tapin plus'"); the note's empty state is the letter's own warm
+       line, which is what's sent. */
+    to: fixedTo ?? (d.to.trim() || (sample ? SAMPLE_GIFT.to : null)),
+    from: d.from.trim() || !sample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
     note: d.note.trim() || (showSample ? SAMPLE_GIFT.note : null),
     masked: masked ?? SAMPLE_GIFT.masked,
     scene,
