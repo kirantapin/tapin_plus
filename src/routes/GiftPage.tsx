@@ -30,6 +30,7 @@ import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
 import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
+import { StepBars, resetStepBars } from "../shell/StepBars";
 import { BackArrow } from "../shell/BackArrow";
 import { reducedMotion } from "./parents_kit";
 import { SealFace } from "./giftSeals";
@@ -536,6 +537,10 @@ export function Letter({
   const runs = useRef<Animation[]>([]);
   const band = useRef<HTMLElement | null>(null);
   const stopDelight = useRef<(() => void) | null>(null);
+  /* What's below the card waits for the opening and its celebration to
+     finish (Sam, 7 Nov 2026: "before revealing this section we should allow
+     the animation to finish for the card and the 'when they open it'"). */
+  const [held, setHeld] = useState(false);
   useEffect(
     () => () => {
       runs.current.forEach((a) => a.cancel());
@@ -670,16 +675,24 @@ export function Letter({
     unwrap(go, extra.current, seal.current, flap.current);
     /* The card: up, and the clip's line held on the envelope's foot. */
     const RISE = { duration: 700, delay: 880 };
-    /* The parent's celebration, as the card comes out (giftDelight.ts). */
+    /* The parent's celebration, as the card comes out (giftDelight.ts). The
+       page below waits for it (at most 8s, a safety net). */
+    let celebrated: Promise<void> = Promise.resolve();
     if (gift.effect) {
       const fx = gift.effect;
-      window.setTimeout(() => {
-        if (!band.current || !el.isConnected) return;
-        /* In the builder on a phone, the open drawer covers the screen's
-           foot: things rise from its top edge instead. */
-        const drawer = preview ? document.querySelector<HTMLElement>(".gft-preview-panel[data-drawer]:not([data-peek])") : null;
-        stopDelight.current = playDelight(fx, band.current, el.getBoundingClientRect(), drawer?.getBoundingClientRect().top);
-      }, RISE.delay + 180);
+      setHeld(true);
+      celebrated = new Promise<void>((resolve) => {
+        window.setTimeout(() => {
+          if (!band.current || !el.isConnected) return resolve();
+          /* In the builder on a phone, the open drawer covers the screen's
+             foot: things rise from its top edge instead. */
+          const drawer = preview ? document.querySelector<HTMLElement>(".gft-preview-panel[data-drawer]:not([data-peek])") : null;
+          const run = playDelight(fx, band.current, el.getBoundingClientRect(), drawer?.getBoundingClientRect().top);
+          stopDelight.current = run;
+          run.done.then(resolve, resolve);
+        }, RISE.delay + 180);
+      });
+      celebrated = Promise.race([celebrated, new Promise<void>((r) => window.setTimeout(r, RISE.delay + 180 + 8000))]);
     }
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
@@ -717,6 +730,17 @@ export function Letter({
       { opacity: 0, transform: "translateY(8px)" },
       { opacity: 1, transform: "none" },
     ], { duration: 520, delay: 160, fill: "backwards" });
+    /* Then, once the celebration has played out, what's below rises in. */
+    await celebrated;
+    if (!el.isConnected) return;
+    flushSync(() => setHeld(false));
+    after.current?.animate?.(
+      [
+        { opacity: 0, transform: "translateY(18px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 520, easing: EASE, fill: "backwards" },
+    );
   };
   openRef.current = open;
 
@@ -727,9 +751,9 @@ export function Letter({
      stays in reach, sliding up as the letter settles, and breathing gently
      like the Plus pages' dock (shell/dockPulse.ts). */
   const dock = useRef<HTMLDivElement | null>(null);
-  useDockPulse(dock, state === "open");
+  useDockPulse(dock, state === "open" && !held);
   useLayoutEffect(() => {
-    if (state !== "open" || still || !dock.current) return;
+    if (state !== "open" || held || still || !dock.current) return;
     const a = dock.current.animate(
       [
         { transform: "translateY(calc(100% + 24px))" },
@@ -738,7 +762,7 @@ export function Letter({
       { duration: 560, delay: 520, easing: EASE, fill: "backwards" },
     );
     return () => a.cancel();
-  }, [state, still]);
+  }, [state, held, still]);
   return (
     <div
       className="gft gft-a ph-no-capture"
@@ -834,7 +858,7 @@ export function Letter({
         ) : null}
       </header>
       {state === "open" ? (
-        <main ref={after} className="gft-after">
+        <main ref={after} className="gft-after" data-held={held ? "" : undefined} aria-hidden={held ? true : undefined}>
           <GiftAfter gift={gift} sample={sample} preview={preview} cta={cta} />
         </main>
       ) : null}
@@ -1258,6 +1282,8 @@ export function GiftPreview({
     const unlock = lockScroll();
     return unlock;
   }, []);
+  /* The step bars start fresh on the next open. */
+  useEffect(() => () => resetStepBars(), []);
 
   /* ── Out of the container, and back into it ──
      The builder is laid out whole from the first frame; a clip that starts
@@ -1391,6 +1417,7 @@ export function GiftPreview({
       return;
     }
     if (next) {
+      partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
       setVisited(true);
       setStage("next");
       return;
@@ -1398,34 +1425,42 @@ export function GiftPreview({
     action.onClick(el);
   };
   const toGift = () => {
+    partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
     setPart("note");
     setStage("gift");
   };
-  /* Continue: the checkout slides up into the panel (Sam, 6 Nov 2026: "when
-     I click continue, I think it should cause the checkout modal to slide
-     up"); on a phone the drawer itself rises as it grows. Back: the care
-     package comes down into view. */
+  /* Into the checkout and back: the same sideways slide as every other
+     step (Sam, 7 Nov 2026: "the next slide animate[s] up, instead of sliding
+     like the other slides ... make sure the transition animations across
+     each step is consistent"): in from the right going on, from the left
+     coming back, and the drawer eases to the new height. */
   const firstStage = useRef(true);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (firstStage.current) {
       firstStage.current = false;
       return;
     }
     const panel = panelRef.current;
+    const was = partFrom.current;
+    partFrom.current = null;
     /* Back on the note from the checkout: its title takes focus, as each
        stage's does. */
     if (stage === "gift") panel?.querySelector<HTMLElement>(".gft-pp-title")?.focus({ preventScroll: true });
-    if (reducedMotion()) return;
-    const content = panel?.querySelector<HTMLElement>(stage === "next" ? ".gft-pp-next" : ".gft-pp-body");
-    content?.animate?.(
-      [
-        { opacity: 0, transform: `translateY(${stage === "next" ? 36 : -16}px)` },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 380, easing: EASE },
+    if (!panel || reducedMotion() || typeof panel.animate !== "function") return;
+    const dir = stage === "next" ? 1 : -1;
+    const parts =
+      stage === "next"
+        ? panel.querySelectorAll<HTMLElement>(".gft-pp-next")
+        : panel.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-steps):not(.gft-pp-x), .gft-pp-body, .gft-pp-foot");
+    parts.forEach((el) =>
+      el.animate([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 360, easing: EASE }),
     );
-    if (!wide && stage === "next")
-      panel?.animate?.([{ transform: "translateY(14%)" }, { transform: "none" }], { duration: 420, easing: EASE });
+    const now = panel.getBoundingClientRect().height;
+    if (wide || was == null || Math.abs(now - was) < 2) return;
+    panel.style.overflow = "hidden";
+    const h = panel.animate([{ height: `${was}px` }, { height: `${now}px` }], { duration: 380, easing: EASE });
+    h.onfinish = () => panel.style.removeProperty("overflow");
+    h.oncancel = () => panel.style.removeProperty("overflow");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
   /* Stage to stage: the drawer eases to the new stage's height (the opening
@@ -1748,11 +1783,7 @@ export function GiftPreview({
                     ? "Pick what plays as the card comes out."
                     : "Pick how it looks."}
               </p>
-              <ol className="gft-pp-steps" aria-label={`Step ${stepAt} of ${stepsTotal}`}>
-                {Array.from({ length: stepsTotal }, (_, i) => (
-                  <li key={i} data-on={i < stepAt ? "" : undefined} />
-                ))}
-              </ol>
+              <StepBars className="gft-pp-steps" total={stepsTotal} lit={stepAt} label={`Step ${stepAt} of ${stepsTotal}`} />
             </div>
           ) : null}
           <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>

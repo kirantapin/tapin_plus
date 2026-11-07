@@ -1,3 +1,4 @@
+import TapInIcon from "../shell/TapInIcon";
 import { takeKey } from "../model/redact";
 import { Link } from "react-router-dom";
 import {
@@ -622,7 +623,8 @@ export default function ParentsHome() {
               this"): the cream of the envelope's seal in the photo, ink type,
               the Plus mark in maroon; the account button matches it. */}
           <span className="tpp-label">
-            <FlatMark className="tpp-label-mark" />
+            {/* The Tapin logo, not the Plus mark (Sam, 7 Nov 2026). */}
+            <TapInIcon className="tpp-label-mark" />
             {EYEBROW}
           </span>
           <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">

@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { StepBars } from "./StepBars";
 import { createPortal } from "react-dom";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Appearance, type Stripe } from "@stripe/stripe-js";
@@ -608,11 +609,12 @@ function Sheet({
   const STEPS: Step[] = ask ? ["look", "open", "note", "you", "pay"] : ["look", "open", "note", "student", "you", "pay"];
   const barsOn = step === "done" ? STEPS.length : STEPS.indexOf(step) + 1;
   const bars = (className: string) => (
-    <ol className={className} aria-label={`Step ${Math.min(barsOn, STEPS.length)} of ${STEPS.length}`}>
-      {STEPS.map((k, i) => (
-        <li key={k} data-on={i < barsOn ? "" : undefined} />
-      ))}
-    </ol>
+    <StepBars
+      className={className}
+      total={STEPS.length}
+      lit={Math.min(barsOn, STEPS.length)}
+      label={`Step ${Math.min(barsOn, STEPS.length)} of ${STEPS.length}`}
+    />
   );
 
   /* Embedded, every step wears the builder's own system (Sam, 6 Nov 2026):
