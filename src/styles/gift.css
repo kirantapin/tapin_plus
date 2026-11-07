@@ -466,7 +466,7 @@ button.tpg-env-link {
 /* Side by side only once the sheet is the desk layout's wide column. */
 @media (min-width: 1024px) {
   .tpp .tpa-sheet > .tpp-offer + .tpg-env,
-  .tpp .tpa-sheet > .tpp-offer + .tpp-more-out + .tpg-env {
+  .tpp .tpa-sheet > .tpp-offer-col + .tpg-env {
     margin-top: 0;
   }
   .tpg-env {
@@ -2392,6 +2392,51 @@ button.tpg-env-link {
 @media (max-width: 1023.98px) {
   .gft-preview[data-builder][data-part="open"] .gft-a[data-state="open"] .gft-a-band {
     min-height: 100svh;
+  }
+}
+
+/* Phone | Computer and, once the card is open, the replay icon beside it
+   (6 Nov 2026). */
+.gft-preview-tools {
+  position: relative;
+  flex: none;
+  pointer-events: auto;
+}
+.gft-preview-replay {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  margin-top: -22px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #f0f0f0;
+  color: #141618;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  transition: opacity 200ms ease-out, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gft-preview-replay[data-on] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.gft-preview-replay:hover {
+  background: #e6e6e6;
+}
+.gft-preview-replay:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gft-preview-replay {
+    transition: none;
   }
 }
 

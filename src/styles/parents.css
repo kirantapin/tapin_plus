@@ -697,7 +697,9 @@
   /* The story column's first card lines up with the offer card's top (the
      phone rhythm's first-child 4px would otherwise drop the offer card). */
   .tpp .tpa-sheet > .tpp-offer,
-  .tpp .tpa-sheet > .tpp-offer + .tpa-module {
+  .tpp .tpp-offer-col > .tpp-offer,
+  .tpp .tpa-sheet > .tpp-offer + .tpa-module,
+  .tpp .tpa-sheet > .tpp-offer-col + .tpa-module {
     margin-top: 0;
   }
   .tpp-vs-col b {
@@ -745,10 +747,6 @@
   }
 }
 @media (max-width: 374px) {
-  .tpp .tpa-band-title h1 {
-    font-size: 26px;
-    line-height: 30px;
-  }
   .tpp .tpa-badge {
     font-size: 13px;
   }
@@ -950,13 +948,176 @@
 .tpp-more-out li {
   background: #ffffff;
 }
-@media (max-width: 1023.98px) {
-  .tpp-more-in {
-    display: none;
-  }
-}
 @media (min-width: 1024px) {
   .tpp .tpp-more-out {
     display: none;
+  }
+}
+
+/* The offer column (6 Nov 2026): the offer card with the two other benefits
+   under it. A phone: the wrapper steps aside, and the strip sits between the
+   card and the gift band. A computer: the pair is the held right column, the
+   strip under the card (no longer inside it). */
+.tpp-offer-col {
+  display: contents;
+}
+.tpa-sheet > .tpp-offer-col:first-child > .tpa-module:first-child {
+  margin-top: 4px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-sheet > .tpp-offer-col {
+    display: block;
+    grid-column: 2;
+    grid-row: 1 / span 40;
+    align-self: start;
+    position: sticky;
+    top: 60px;
+    margin: 0;
+  }
+  .tpa-home .tpp-offer-col > [aria-label="Tapin Plus"] {
+    margin: 0;
+    border-radius: 20px;
+  }
+  .tpp .tpp-offer-col > .tpp-more-out {
+    display: grid;
+    margin: 12px 0 0;
+  }
+}
+
+/* The promise under the offer (6 Nov 2026): three quiet lines on the ground,
+   a green check-style glyph each; under the strip on a phone, under the
+   offer card's strip in the held column on a computer. */
+.tpp-promise {
+  display: grid;
+  gap: 10px;
+  margin: 14px var(--gutter) 0;
+  padding: 0 4px;
+  list-style: none;
+}
+.tpp-promise li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.tpp-promise b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tpp-promise svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--money);
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-offer-col > .tpp-promise {
+    margin: 16px 0 0;
+    padding: 0 8px;
+  }
+}
+
+/* ══ PHONE TYPE (6 Nov 2026) ═════════════════════════════════════════════
+   One role scale for the page on a phone, so the same kind of words look the
+   same from module to module. Gilroy, 600 at most. A computer keeps its own
+   sizes (every rule here is phone-only).
+     Display    48/52   the swipe cards' figures, under the $12 / $7
+     H2         22/28   every section heading, the gift band's included
+     Title      17/22   card and row titles, the places' names
+     Body       16/22   paragraphs, answers; questions 16/21 at 600
+     Small      14/18   lines under a figure
+     Caption    13      footnotes, legal; uppercase tags 12/16 */
+@media (max-width: 1023.98px) {
+  /* Weights: the hero, the order card's total and the places' names were
+     700 (and the total's figure 900 through <b>'s bolder). */
+  .tpp .tpa-band-title h1,
+  .tpp .tpa-order-total,
+  .tpp .tpa-order-total b,
+  .tpp .tpa-order-off b,
+  .tpp .tpa-place-name b {
+    font-weight: 600;
+  }
+  /* "More places are joining." is a <p class="tpp-more">, so the benefit
+     wells' later .tpp-more (no side margin, a grid) caught it: it sat flush
+     on the screen edge. */
+  .tpp p.tpp-more {
+    display: block;
+    margin: 10px var(--gutter) 0;
+  }
+  /* Display: the $60 no longer outranks the $12 / $7 above it. */
+  .tpp-card-fig {
+    font-size: 48px;
+    line-height: 52px;
+  }
+  /* H2: the gift band's heading at the section size. */
+  .tpa.tpp .tpg-env-h {
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: -0.01em;
+  }
+  /* Title */
+  .tpp-card-label,
+  .tpp .tpa-place-name b {
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .tpp .tpa-carousel[data-look] .tpa-order-total {
+    font-size: 22px;
+    line-height: 28px;
+  }
+  /* Body: 16 for a parent's reading, not 14-15. */
+  .tpp-keep,
+  .tpp-math,
+  .tpp .tpa-qa p,
+  .tpp .tpp-sure-row p,
+  .tpp .tpp-line p,
+  .tpp .tpp-faq-sub {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .tpp .tpa-qa summary,
+  .tpp .tpp-sure-row .tpp-fold-label,
+  .tpp .tpa-close-line {
+    font-size: 16px;
+    line-height: 21px;
+  }
+  .tpp .tpa-qa summary,
+  .tpp .tpp-sure-row .tpp-fold-label {
+    text-wrap: balance;
+  }
+  /* Buttons: one primary size; the swatch row's "View more" a step under. */
+  .tpa.tpp .tpg-env-cta {
+    font-size: 16px;
+  }
+  .tpa.tpp .tpg-env-more {
+    font-size: 15px;
+  }
+  /* Small */
+  .tpp .tpp-more span {
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .tpp .tpp-under {
+    line-height: 19px;
+  }
+  /* Caption: nothing under 12, and 12 only for the uppercase tag. */
+  .tpa.tpp .tpg-env-tag {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.04em;
+  }
+  .tpp-cols sup {
+    font-size: 0.77em;
+  }
+}
+/* The smallest phones: the hero at 28 keeps it to two lines (the old 26px
+   rule never applied: .tpa-band[data-hero] ... in plus-app.css outranks it). */
+@media (max-width: 374px) {
+  .tpp .tpa-band[data-hero] .tpa-band-title h1 {
+    font-size: 28px;
+    line-height: 32px;
+    max-width: none;
   }
 }
