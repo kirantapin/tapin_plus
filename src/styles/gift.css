@@ -90,28 +90,6 @@ a.gft-open {
   margin: 0 auto;
   padding: 28px 16px 120px;
 }
-.gft-in {
-  padding: 22px 20px 20px;
-  border-radius: 20px;
-  background: #fff;
-}
-
-.gft-next {
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-  text-align: center;
-}
-.gft-sign {
-  max-width: 300px;
-  font-size: 15px;
-  line-height: 20px;
-  color: var(--muted);
-}
-.gft-sign b {
-  font-weight: 600;
-  color: var(--ink);
-}
 .gft-thanks {
   display: inline-flex;
   align-items: center;
@@ -1367,9 +1345,6 @@ button.tpg-env-link {
 .gft-wrap {
   container-type: inline-size;
 }
-.gft-next-wide {
-  display: none;
-}
 .gft-cta-inline {
   display: flex;
   align-items: center;
@@ -1392,90 +1367,7 @@ button.tpg-env-link {
    link to the app on the app store. And include the tapin app logo"): which
    app, the two ways to get it side by side, and the number to sign in with.
    Wide screens only; a phone has the dock. */
-.gft-app {
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 20px;
-  background: #ffffff;
-  text-align: left;
-}
-.gft-app-head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.gft-app-icon {
-  flex: none;
-  border-radius: 12px;
-  box-shadow: 0 0 0 1px var(--hair), 0 2px 8px rgba(20, 22, 24, 0.12);
-}
-.gft-app-head span {
-  display: grid;
-  font-size: 15px;
-  line-height: 20px;
-  color: var(--muted);
-}
-.gft-app-head b {
-  font-weight: 600;
-  font-size: 19px;
-  line-height: 24px;
-  color: var(--ink);
-}
-.gft-app-get {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 14px;
-  border-radius: 16px;
-  background: #f4f2ee;
-}
-.gft-app-qr {
-  flex: none;
-  padding: 6px;
-  border-radius: 12px;
-  background: #ffffff;
-}
-.gft-app-get > div {
-  display: grid;
-  justify-items: start;
-  gap: 10px;
-}
-.gft-app-get p {
-  font-size: 14px;
-  line-height: 19px;
-  color: var(--muted);
-}
-.gft-store {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 16px 0 13px;
-  border-radius: 12px;
-  background: var(--ink);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 15px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.gft-store svg {
-  margin-top: -2px;
-}
-.gft-store:focus-visible {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
-}
-.gft-app-sign {
-  font-size: 15px;
-  line-height: 21px;
-  color: var(--muted);
-}
-.gft-app-sign b {
-  font-weight: 600;
-  color: var(--ink);
-}
+
 @container (min-width: 960px) {
   .gft-a[data-state="open"] {
     display: grid;
@@ -1499,78 +1391,11 @@ button.tpg-env-link {
   .gft-dock {
     display: none;
   }
-  .gft-next-wide {
-    display: grid;
-    gap: 18px;
-    width: 100%;
-  }
-  /* The number to sign in with is in the app card here. */
-  .gft-sign {
-    display: none;
-  }
 }
 
 /* ══ WHAT'S IN IT (GiftPage.tsx WhatsInFigures; picked 6 Nov 2026) ══════════ */
-.gft-in [data-money] {
-  color: #0b7a53;
-}
-/* A · Figures: three big figures side by side, the places named under. */
-.gft-figs {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 14px;
-}
-.gft-figs li {
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  padding: 14px 12px 16px;
-  border-radius: 16px;
-  background: #f4f2ee;
-}
-.gft-figs b {
-  display: flex;
-  align-items: center;
-  min-height: 40px;
-  font-weight: 600;
-  font-size: 36px;
-  line-height: 40px;
-  letter-spacing: -0.03em;
-}
-.gft-figs svg {
-  color: #e5751f;
-}
-.gft-figs span {
-  font-size: 13px;
-  line-height: 17px;
-  color: var(--muted);
-}
-.gft-named {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 18px;
-}
-.gft-named li {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  text-align: center;
-}
-.gft-named img {
-  width: 48px;
-  height: 48px;
-  border-radius: 13px;
-  object-fit: cover;
-  box-shadow: 0 0 0 1px var(--hair);
-}
-.gft-named span {
-  font-size: 11px;
-  line-height: 13px;
-  color: var(--muted);
-}
 
+/* A · Figures: three big figures side by side, the places named under. */
 
 /* ══ THE BUILDER (step 1 of the purchase; Sam, 6 Nov 2026: "the preview we
    already have is the first step", "should also be configurable on
@@ -1915,46 +1740,6 @@ button.tpg-env-link {
 
 /* The app card on a phone (6 Nov 2026): no QR (they're on the phone it goes
    on); the App Store button full width. A computer gets the QR beside it. */
-.gft-app {
-  width: 100%;
-}
-.gft-app-qr,
-.gft-app-get p {
-  display: none;
-}
-.gft-app-get {
-  display: block;
-  padding: 0;
-  background: none;
-}
-.gft-app-get > div {
-  display: block;
-}
-.gft-store {
-  width: 100%;
-  justify-content: center;
-  height: 50px;
-}
-@container (min-width: 960px) {
-  .gft-app-qr {
-    display: block;
-  }
-  .gft-app-get p {
-    display: block;
-  }
-  .gft-app-get {
-    display: flex;
-    padding: 14px;
-    background: #f4f2ee;
-  }
-  .gft-app-get > div {
-    display: grid;
-  }
-  .gft-store {
-    width: auto;
-    height: 44px;
-  }
-}
 
 /* The envelope's hover peek on a computer (6 Nov 2026): the card rests lower,
    so less room above it; the band clips the envelope's foot as it drops. */
@@ -2224,9 +2009,31 @@ button.tpg-env-link {
 }
 .scene-swatch[data-scene="thanksgiving"] { background-size: 84px 84px; }
 .scene-swatch[data-scene="newyear"] { background-size: 84px 84px; }
-.tpg-env-bg.scene-swatch:is([data-scene="thanksgiving"], [data-scene="newyear"]) {
+.tpg-env-bg.scene-swatch:is([data-scene="thanksgiving"], [data-scene="newyear"], [data-scene="snow"]) {
   background-size: 170px 170px;
 }
+.tpg-env-bg.scene-swatch[data-scene="leaves"] {
+  background-size: 220px 220px;
+}
+
+/* Snow (6 Nov 2026): cream snowflakes and falling dots on winter blue. Busy,
+   so the heading takes the paper strip. */
+.gft-a[data-scene="snow"] .gft-scene-pat,
+.scene-swatch[data-scene="snow"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cg transform='translate(42 44) rotate(8)' stroke='%23F7F3EA' stroke-width='2.4' stroke-linecap='round' fill='none'%3E%3Cg transform='rotate(0)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3Cg transform='rotate(60)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3Cg transform='rotate(120)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3Cg transform='rotate(180)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3Cg transform='rotate(240)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3Cg transform='rotate(300)'%3E%3Cpath d='M0 0 V-20'/%3E%3Cpath d='M0 -11.0 L-5.6 -16.0 M0 -11.0 L5.6 -16.0'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(128 116) rotate(-12)' stroke='%23F7F3EA' stroke-width='2.4' stroke-linecap='round' fill='none'%3E%3Cg transform='rotate(0)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3Cg transform='rotate(60)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3Cg transform='rotate(120)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3Cg transform='rotate(180)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3Cg transform='rotate(240)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3Cg transform='rotate(300)'%3E%3Cpath d='M0 0 V-15'/%3E%3Cpath d='M0 -8.2 L-4.2 -12.0 M0 -8.2 L4.2 -12.0'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(130 30) rotate(0)' stroke='%23F7F3EA' stroke-width='2' stroke-linecap='round' fill='none'%3E%3Cg transform='rotate(0)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3Cg transform='rotate(60)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3Cg transform='rotate(120)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3Cg transform='rotate(180)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3Cg transform='rotate(240)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3Cg transform='rotate(300)'%3E%3Cpath d='M0 0 V-9'/%3E%3Cpath d='M0 -5.0 L-2.5 -7.2 M0 -5.0 L2.5 -7.2'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(36 134) rotate(20)' stroke='%23F7F3EA' stroke-width='2' stroke-linecap='round' fill='none'%3E%3Cg transform='rotate(0)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3Cg transform='rotate(60)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3Cg transform='rotate(120)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3Cg transform='rotate(180)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3Cg transform='rotate(240)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3Cg transform='rotate(300)'%3E%3Cpath d='M0 0 V-11'/%3E%3Cpath d='M0 -6.1 L-3.1 -8.8 M0 -6.1 L3.1 -8.8'/%3E%3C/g%3E%3C/g%3E%3Ccircle cx='88' cy='78' r='3' fill='%23F7F3EA'/%3E%3Ccircle cx='98' cy='18' r='2.2' fill='%23F7F3EA'/%3E%3Ccircle cx='14' cy='88' r='2.4' fill='%23F7F3EA'/%3E%3Ccircle cx='156' cy='158' r='2' fill='%23F7F3EA'/%3E%3Ccircle cx='82' cy='150' r='2.6' fill='%23F7F3EA'/%3E%3Ccircle cx='160' cy='78' r='2' fill='%23F7F3EA'/%3E%3Ccircle cx='70' cy='112' r='1.8' fill='%23F7F3EA'/%3E%3Ccircle cx='110' cy='160' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='64' cy='14' r='1.8' fill='%23F7F3EA'/%3E%3C/svg%3E") 0 0 / 170px 170px, #3a5f8f;
+}
+.gft-a[data-scene="snow"] .gft-h1-in {
+  padding: 2px 12px 5px;
+  background: #f7f3ea;
+  color: #141618;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.gft-a[data-scene="snow"] .gft-h1 {
+  line-height: 46px;
+}
+.scene-swatch[data-scene="snow"] { background-size: 84px 84px; }
 .gft-pp-fx-ico {
   display: block;
 }
@@ -2244,5 +2051,96 @@ button.tpg-env-link {
 @media (min-width: 1024px) and (hover: hover) {
   .tpg-env-art .gft-a-stage[data-pickable] {
     cursor: pointer;
+  }
+}
+
+/* ══ THE PHONE DRAWER PEEKS (Sam, 6 Nov 2026) ═══════════════════════════════
+   Collapsed, it stays up at the bottom: the handle and one button ("Start
+   designing" the first time, then "Keep designing" or "Back to checkout").
+   Only the handle row drags (GiftPage onGrab*). Preview sits over the page at
+   the top centre while it's open; Close at the top left while it's down. */
+@media (max-width: 1023.98px) {
+  .gft-preview {
+    --gft-peek: calc(98px + env(safe-area-inset-bottom));
+  }
+  .gft-preview-panel[data-drawer][data-peek] {
+    transform: translateY(calc(100% - var(--gft-peek)));
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.22);
+  }
+  .gft-preview-panel[data-drawer][data-peek][data-stage="next"] {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+  .gft-pp-grab {
+    min-height: 28px;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .gft-pp-grab:active {
+    cursor: grabbing;
+  }
+  .gft-preview-panel[data-peek] .gft-pp-grab {
+    height: 28px;
+    padding: 0 14px;
+  }
+  .gft-preview-panel[data-peek] .gft-pp-x,
+  .gft-preview-panel[data-peek] .gft-pp-grab::before {
+    display: none;
+  }
+  .gft-pp-handle-hit {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 132px;
+    height: 28px;
+    margin-left: -66px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    cursor: inherit;
+  }
+  .gft-pp-handle-hit:focus-visible {
+    outline: 3px solid #e5751f;
+    outline-offset: -2px;
+  }
+  .gft-pp-peekbar {
+    padding: 4px 16px calc(14px + env(safe-area-inset-bottom));
+  }
+  .gft-pp-peekbar[hidden] {
+    display: none;
+  }
+  .gft-pp-peekbar .gft-pp-cta {
+    width: 100%;
+  }
+  /* Preview over the page, top centre. */
+  .gft-pp-peek {
+    position: fixed;
+    z-index: 71;
+    top: calc(12px + env(safe-area-inset-top));
+    left: 50%;
+    height: 40px;
+    margin: 0;
+    padding: 0 16px 0 13px;
+    background: #ffffff;
+    font-size: 15px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    translate: -50% 0;
+  }
+  /* Close at the top left while the drawer is down. */
+  .gft-preview[data-builder][data-peek] .gft-preview-back {
+    display: inline-flex;
+  }
+  /* The page clears the peeking drawer. */
+  .gft-preview[data-builder][data-peek] .gft-preview-scroll {
+    padding-bottom: var(--gft-peek);
+  }
+  .gft-preview[data-builder][data-peek] .gft-a:not([data-state="open"]) .gft-a-band {
+    min-height: calc(100svh - var(--gft-peek));
+  }
+  .gft-preview[data-builder][data-peek] .gft-dock {
+    bottom: 12px;
   }
 }

@@ -3,13 +3,16 @@ import { SAMPLE_GIFT, SCENE_GROUPS, type SceneId } from "../model/gift";
 import { getGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 
 /** The seasonal background for today: Thanksgiving until it's past, the
- *  general Holiday through December, New Year's for its first week. */
+ *  general Holiday through December, New Year's for its first week, Snow
+ *  for the rest of winter, Fall leaves from September. */
 export function seasonNow(d = new Date()): SceneId {
   const m = d.getMonth();
   const day = d.getDate();
   if (m === 10 && day <= 26) return "thanksgiving";
   if (m === 0 && day <= 7) return "newyear";
-  return "holiday";
+  if (m === 11 || m === 10) return "holiday";
+  if (m >= 8) return "leaves";
+  return "snow";
 }
 import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
 

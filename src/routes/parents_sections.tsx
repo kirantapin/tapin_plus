@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { logoField } from "../model/content";
-import { Chevron, CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, SAVES_NOTE, money, money0, reducedMotion } from "./parents_kit";
+import { Chevron, CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -76,7 +76,10 @@ function LogoRow({ size }: { size: number }) {
 }
 
 /* ══ THE OFFER CARD'S PRICE: WITHOUT / WITH ═════════════════════════════════
-   The same lunch side by side, the $5 on the seam, then the two facts. */
+   The same lunch side by side, the $5 on the seam, and what it is. The $60
+   and the price rows are gone from here (Sam, 6 Nov 2026: "it's far too
+   busy"): the $60 lives in What they get with its footnote, the price once
+   under the button. */
 export function OfferPrice() {
   return (
     <div className="tpp-vs tnum">
@@ -100,22 +103,6 @@ export function OfferPrice() {
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
         <small aria-hidden="true">every week, at each of five spots</small>
       </p>
-      <ul className="tpp-facts">
-        <li>
-          <b aria-hidden="true">${SAVES}</b>
-          <span>
-            {/* For the parent: what it saves their student (Sam, 6 Nov 2026:
-                "they don't necessarily care" that one lunch covers it). */}
-            <span className="tpp-sr">Your student saves an estimated ${SAVES} a month, on average.</span>
-            <span aria-hidden="true">saved a month, on average, for your student*</span>
-          </span>
-        </li>
-        <li>
-          <b>{FIRST}</b>
-          <span>the first month, then {MONTHLY}</span>
-        </li>
-      </ul>
-      <p className="tpp-note">{SAVES_NOTE}</p>
     </div>
   );
 }
