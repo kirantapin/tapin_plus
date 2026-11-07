@@ -174,3 +174,18 @@
 
 /* ── E · Member card ── */
 
+
+/* On a phone the places sentence sits under the 34px headline and the note:
+   at 24/30 it ran four lines and competed with both. */
+@media (max-width: 1023.98px) {
+  .gft .gav-d-lede {
+    font-size: 20px;
+    line-height: 26px;
+    letter-spacing: -0.01em;
+  }
+  /* "$5 credit" and "15% off" never break across lines (at 360 the smaller
+     size otherwise splits "15% / off"). */
+  .gft .gav-d-lede [data-k] {
+    white-space: nowrap;
+  }
+}
