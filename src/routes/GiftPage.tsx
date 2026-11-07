@@ -941,20 +941,18 @@ export function GiftPreview({
      the care package), so what they typed there is still there (review,
      6 Nov 2026). */
   const [visited, setVisited] = useState(startNext && !!next);
-  const [drawer, setDrawer] = useState(false);
+  /* A phone (Sam, 6 Nov 2026: "why do we have two separate buttons here?
+     doesn't make sense", and "there should always be a button to preview the
+     card ... to temporarily leave the checkout flow to preview the gift card
+     I built"): the drawer opens with the fields and one button, Continue;
+     Preview drops it away to show the gift whole, and "Back to ..." brings it
+     back on the same step. */
+  const [peek, setPeek] = useState(false);
   const [nameErr, setNameErr] = useState(false);
   const nameInput = useRef<HTMLInputElement | null>(null);
   const body = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const wide = useWide();
-  const wideRef = useRef(wide);
-  wideRef.current = wide;
-  useEffect(() => {
-    if (!drawer || wideRef.current || reducedMotion()) return;
-    body.current?.animate?.([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], {
-      duration: 260,
-      easing: EASE,
-    });
-  }, [drawer]);
   const d = useGiftDraft();
   /* The builder shows exactly what will be sent (review, 6 Nov 2026: a
      sample standing in for an empty field looked like their gift, and
@@ -1095,7 +1093,7 @@ export function GiftPreview({
   const go = (el: HTMLElement) => {
     if (builder && !fixedTo && !d.to.trim()) {
       setNameErr(true);
-      setDrawer(true);
+      setPeek(false);
       requestAnimationFrame(() => nameInput.current?.focus());
       return;
     }
@@ -1106,10 +1104,31 @@ export function GiftPreview({
     }
     action.onClick(el);
   };
-  const toGift = () => {
-    setStage("gift");
-    setDrawer(false);
-  };
+  const toGift = () => setStage("gift");
+  /* Continue: the checkout slides up into the panel (Sam, 6 Nov 2026: "when
+     I click continue, I think it should cause the checkout modal to slide
+     up"); on a phone the drawer itself rises as it grows. Back: the care
+     package comes down into view. */
+  const firstStage = useRef(true);
+  useEffect(() => {
+    if (firstStage.current) {
+      firstStage.current = false;
+      return;
+    }
+    if (reducedMotion()) return;
+    const panel = panelRef.current;
+    const content = panel?.querySelector<HTMLElement>(stage === "next" ? ".gft-pp-next" : ".gft-pp-body");
+    content?.animate?.(
+      [
+        { opacity: 0, transform: `translateY(${stage === "next" ? 36 : -16}px)` },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 380, easing: EASE },
+    );
+    if (!wide && stage === "next")
+      panel?.animate?.([{ transform: "translateY(14%)" }, { transform: "none" }], { duration: 420, easing: EASE });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
   const stepsTotal = fixedTo ? 3 : 4;
   const scaled: React.CSSProperties | undefined =
     desk && fit
@@ -1163,7 +1182,7 @@ export function GiftPreview({
           <div
             className="gft-preview-scroll gft-wrap"
             style={scaled}
-            {...(!wide && builder && (drawer || stage === "next") ? { inert: "" } : {})}
+            {...(!wide && builder && !peek ? { inert: "" } : {})}
           >
             <Letter gift={gift} sample preview cta={pageCta} />
           </div>
@@ -1171,12 +1190,26 @@ export function GiftPreview({
       </div>
       {wide || builder ? (
         <aside
+          ref={panelRef}
           className="gft-preview-panel"
           aria-label={stage === "next" ? "Checkout" : "Make it theirs"}
           data-drawer={wide ? undefined : ""}
-          data-open={wide || drawer || stage === "next" ? "" : undefined}
+          data-open=""
+          data-peek={!wide && peek ? "" : undefined}
           data-stage={stage}
+          {...(!wide && peek ? { inert: "" } : {})}
         >
+          {wide ? null : (
+            <div className="gft-pp-grab">
+              <span className="gft-pp-handle" aria-hidden="true" />
+              <button type="button" className="gft-pp-peek" onClick={() => setPeek(true)}>
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                </svg>
+                Preview
+              </button>
+            </div>
+          )}
           {visited && next ? (
             <div className="gft-pp-next" hidden={stage !== "next"}>
               {next(toGift, onClose)}
@@ -1333,11 +1366,6 @@ export function GiftPreview({
             ) : null}
           </div>
           <div className="gft-pp-foot">
-            {wide ? null : (
-              <button type="button" className="gft-pp-more" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
-                {drawer ? "Done" : "Edit note & photo"}
-              </button>
-            )}
             <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>
               {action.label}
             </button>
@@ -1345,6 +1373,11 @@ export function GiftPreview({
           </>
           )}
         </aside>
+      ) : null}
+      {!wide && builder && peek ? (
+        <button type="button" className="gft-peek-back" onClick={() => setPeek(false)}>
+          {stage === "next" ? "Back to checkout" : "Back to your care package"}
+        </button>
       ) : null}
     </div>,
     document.body,
