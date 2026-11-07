@@ -27,11 +27,17 @@ export type Gift = {
   effect?: Delight | null;
 };
 
-/** The opening's little celebration, the parent's pick (Sam, 6 Nov 2026). */
+/** The opening's little celebration, the parent's pick (Sam, 6 Nov 2026;
+ *  then "8 total ... options ... (including none)": four more the same day).
+ *  The backend keeps the same list (tokens.ts GIFT_EFFECTS). */
 export const DELIGHTS = [
   { id: "confetti", name: "Confetti" },
   { id: "hearts", name: "Hearts" },
   { id: "sparkles", name: "Sparkles" },
+  { id: "balloons", name: "Balloons" },
+  { id: "fireworks", name: "Fireworks" },
+  { id: "streamers", name: "Streamers" },
+  { id: "petals", name: "Petals" },
 ] as const;
 export type Delight = (typeof DELIGHTS)[number]["id"];
 export const isDelight = (v: unknown): v is Delight => DELIGHTS.some((d) => d.id === v);

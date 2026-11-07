@@ -15,6 +15,7 @@ import {
   type ParentConfirmed,
 } from "../model/parents";
 import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { BackArrow } from "./BackArrow";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
@@ -143,11 +144,11 @@ const possessive = (name: string) => `${name}’s`;
    number and payment until the end after the sunk cost of building their
    note first"; then "the preview we already have is the first step. that
    way we only have one purchase funnel"). Step 1, the care package, is the
-   builder on /parents (routes/GiftPage.tsx GiftPreview), in two stages (Sam,
-   6 Nov 2026): the look, then the note. This sheet is steps 3 to 5: their
-   number, you, the charge. An ask link knows the student, so it's the look,
-   the note, you, the charge. */
-type Step = "look" | "note" | "student" | "you" | "pay" | "done";
+   builder on /parents (routes/GiftPage.tsx GiftPreview), in three stages
+   (Sam, 6 Nov 2026): the look, the opening, the note. This sheet is steps 4
+   to 6: their number, you, the charge. An ask link knows the student, so
+   it's the look, the opening, the note, you, the charge. */
+type Step = "look" | "open" | "note" | "student" | "you" | "pay" | "done";
 
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
@@ -543,9 +544,9 @@ function Sheet({
   /* The gift says what comes next; the details steps say the price; the pay
      step's rows and terms say it there. */
   const sub = step === "student" || step === "you" ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.` : null;
-  /* The builder's two stages count as the first two bars (GiftPreview's
+  /* The builder's three stages count as the first three bars (GiftPreview's
      stepsTotal), so the count is the same across the whole flow. */
-  const STEPS: Step[] = ask ? ["look", "note", "you", "pay"] : ["look", "note", "student", "you", "pay"];
+  const STEPS: Step[] = ask ? ["look", "open", "note", "you", "pay"] : ["look", "open", "note", "student", "you", "pay"];
 
   const content = (
     <>
@@ -582,9 +583,6 @@ function Sheet({
               </ol>
               {step === "student" ? (
                 <>
-                <button type="button" className="prc-edit prc-back" onClick={onEditGift} disabled={busy}>
-                  ← {student.trim() ? `${possessive(student.trim())} care package` : "Their care package"}
-                </button>
                 <fieldset className="prc-module">
                   <legend className="prc-legend">Their number</legend>
                   <div className="prc-fields">
@@ -615,15 +613,6 @@ function Sheet({
                 </>
               ) : (
                 <>
-                  {ask ? (
-                    <button type="button" className="prc-edit prc-back" onClick={onEditGift} disabled={busy}>
-                      ← {possessive(ask.student_first_name)} care package
-                    </button>
-                  ) : (
-                    <button type="button" className="prc-edit prc-back" onClick={() => setStep("student")} disabled={busy}>
-                      ← {student.trim() || "Your student"} · {maskDigits(phoneD)}
-                    </button>
-                  )}
               <fieldset className="prc-module">
                 <legend className="prc-legend">You</legend>
                 <div className="prc-fields">
@@ -639,9 +628,19 @@ function Sheet({
                   {formError}
                 </p>
               ) : null}
-              <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
-                {busy ? "One moment…" : formError ? "Try again" : step === "you" ? "Continue to payment" : "Continue"}
-              </button>
+              {/* Back a step beside Continue, as the builder's stages have it
+                  (Sam, 6 Nov 2026): their number goes back to the note; you,
+                  to their number (an ask link's, to the note). */}
+              <div className="prc-foot">
+                <BackArrow
+                  className="prc-backarrow"
+                  onClick={step === "you" && !ask ? () => setStep("student") : onEditGift}
+                  disabled={busy}
+                />
+                <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
+                  {busy ? "One moment…" : formError ? "Try again" : step === "you" ? "Continue to payment" : "Continue"}
+                </button>
+              </div>
             </form>
           ) : step === "pay" && started ? (
             <div className="prc-body">

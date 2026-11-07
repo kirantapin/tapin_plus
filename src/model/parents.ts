@@ -34,7 +34,7 @@ export interface ParentCheckoutStart {
    *  model/giftPhoto.ts; at most 1.5M characters). Both optional. */
   gift_scene?: string | null;
   gift_photo?: string | null;
-  /** What plays as they open it: confetti | hearts | sparkles, or null. */
+  /** What plays as they open it: a DELIGHTS id (model/gift.ts), or null. */
   gift_effect?: string | null;
   utm?: Record<string, string>;
 }
