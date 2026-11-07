@@ -62,7 +62,7 @@ export default function ParentCheckout({
   onClose: () => void;
   ask: Ask | null;
   from?: HTMLElement | null;
-  /** Back to the care package (step 1, the builder on /parents). */
+  /** Back to the care package (the builder on /parents, on its note). */
   onEditGift: () => void;
   /** Steps 2 to 4 inside the builder's panel (Sam, 6 Nov 2026: "it'd be one
    *  continuous flow ... I hit continue and then the next screens in this
@@ -143,10 +143,11 @@ const possessive = (name: string) => `${name}’s`;
    number and payment until the end after the sunk cost of building their
    note first"; then "the preview we already have is the first step. that
    way we only have one purchase funnel"). Step 1, the care package, is the
-   builder on /parents (routes/GiftPage.tsx GiftPreview); this sheet is steps
-   2 to 4: their number, you, the charge. An ask link knows the student, so
-   it's the care package, you, the charge. */
-type Step = "gift" | "student" | "you" | "pay" | "done";
+   builder on /parents (routes/GiftPage.tsx GiftPreview), in two stages (Sam,
+   6 Nov 2026): the look, then the note. This sheet is steps 3 to 5: their
+   number, you, the charge. An ask link knows the student, so it's the look,
+   the note, you, the charge. */
+type Step = "look" | "note" | "student" | "you" | "pay" | "done";
 
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
@@ -542,7 +543,9 @@ function Sheet({
   /* The gift says what comes next; the details steps say the price; the pay
      step's rows and terms say it there. */
   const sub = step === "student" || step === "you" ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.` : null;
-  const STEPS: Step[] = ask ? ["gift", "you", "pay"] : ["gift", "student", "you", "pay"];
+  /* The builder's two stages count as the first two bars (GiftPreview's
+     stepsTotal), so the count is the same across the whole flow. */
+  const STEPS: Step[] = ask ? ["look", "note", "you", "pay"] : ["look", "note", "student", "you", "pay"];
 
   const content = (
     <>
