@@ -2550,3 +2550,19 @@ button.tpg-env-link {
 .gft-a:has(.gft-after[data-held]) .gft-dock {
   visibility: hidden;
 }
+
+/* The card is always tall enough to fill the envelope's V as it rises (Sam,
+   7 Nov 2026: "just tall enough so that there's not a weird triangle"): the
+   V's point is 122px down the 226px envelope and the card starts 12px in and
+   rises by up to half its height, so 236px covers it at every point. The
+   same height open and closed, so the settle stays a move; the sign-off sits
+   at the card's foot when the note is short. */
+.gft-a-letter {
+  display: flex;
+  flex-direction: column;
+  min-height: 236px;
+}
+.gft-a-letter > .gft-a-sig {
+  margin-top: auto;
+  padding-top: 14px;
+}
