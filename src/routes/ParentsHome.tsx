@@ -29,7 +29,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, HowTimeline, LunchColumns, OfferPrice } from "./parents_sections";
+import { BenefitCards, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -689,6 +689,8 @@ export default function ParentsHome() {
           </p>
         </section>
 
+        <MoreBenefits className="tpp-more tpp-more-out" />
+
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
@@ -949,12 +951,13 @@ export default function ParentsHome() {
           onClose={() => setBuilding(false)}
           action={{ label: "Continue", onClick: () => {} }}
           startNext={hasChargedParentCheckout()}
-          next={(back, close) => (
+          next={(back, close, collapse) => (
             <ParentCheckout
               embedded
               open
               onEditGift={back}
               onClose={close}
+              onCollapse={collapse}
               ask={
                 asked
                   ? {

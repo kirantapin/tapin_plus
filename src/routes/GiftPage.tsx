@@ -334,6 +334,9 @@ const REST_TUCK = 76 + HOVER_PEEK;
    envelope shouldn't move, and the card itself should only animate
    slightly"). */
 const HOVER_LIFT = 16;
+/* How far the card rests tucked in on a phone (gift.css takes the same off
+   the room above it). */
+const PHONE_TUCK = 110;
 const hoverPeek = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 1024px) and (hover: hover)").matches;
 
@@ -376,8 +379,10 @@ export function EnvelopeDemo({
        on desktop it peeks out a bit more"): the card rests HOVER_PEEK lower,
        so the band is shorter, and on hover the envelope drops away by that
        much while the card holds still (gift.css: the band clips the
-       envelope's foot). A phone keeps the whole peek. */
-    const lift = hoverPeek() ? Math.max(0, full - REST_TUCK) : full;
+       envelope's foot). A phone tucks it PHONE_TUCK in too (Sam, 6 Nov
+       2026: "maybe this isn't as tall on mobile?"): the photo and the
+       note's first lines show, the rest stays in the pocket. */
+    const lift = Math.max(0, full - (hoverPeek() ? REST_TUCK : PHONE_TUCK));
     /* It starts up as the flap passes upright (~710ms), so the opening
        never shows a still, blank card (Sam, 6 Nov 2026). The sleeve keeps
        its foot hidden under the envelope. */
@@ -903,7 +908,8 @@ export function GiftPreview({
    *  2026: "it'd be one continuous flow"): the parents page passes its
    *  checkout, embedded. `back` returns to the care package; `close` shuts
    *  the whole thing. */
-  next?: (back: () => void, close: () => void) => React.ReactNode;
+  /** `collapse` (a phone): the drawer's × folds it down instead of leaving. */
+  next?: (back: () => void, close: () => void, collapse?: () => void) => React.ReactNode;
   /** Open on the next steps (a charged checkout that only needs confirming). */
   startNext?: boolean;
   /** The container it grows out of and shrinks back into (Sam, 6 Nov 2026:
@@ -1118,13 +1124,18 @@ export function GiftPreview({
       a.onfinish = () => onClose();
       return;
     }
+    /* Closing, polished (Sam, 6 Nov 2026): the real button comes back
+       underneath at once, the clip closes onto it with an ease-in-out, the
+       veil takes the button's colour as it narrows, and the whole builder
+       fades over the last stretch, so it settles into the button instead of
+       swapping for it (frames showed a blank plate, then the button
+       popping in). */
     veilTint();
-    veil.current?.animate?.([{ opacity: 0 }, { opacity: 1, offset: 0.7 }, { opacity: 1 }], { duration: 380, easing: "ease-in", fill: "forwards" });
-    const a = el.animate([{ clipPath: "inset(0px 0px 0px 0px round 0px)" }, { clipPath: to }], {
-      duration: 380,
-      easing: "cubic-bezier(0.2, 0, 0, 1)",
-      fill: "forwards",
-    });
+    if (origin) origin.style.visibility = "";
+    const SHUT = { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" as const };
+    veil.current?.animate?.([{ opacity: 0 }, { opacity: 0.9, offset: 0.6 }, { opacity: 0.9 }], { ...SHUT, easing: "ease-in" });
+    el.animate([{ opacity: 1 }, { opacity: 1, offset: 0.55 }, { opacity: 0 }], { ...SHUT, easing: "linear" });
+    const a = el.animate([{ clipPath: "inset(0px 0px 0px 0px round 0px)" }, { clipPath: to }], SHUT);
     a.onfinish = () => onClose();
   };
   const shutRef = useRef(shut);
@@ -1347,13 +1358,6 @@ export function GiftPreview({
                   (the checkout steps carry theirs); the Close and background
                   pills over the page are gone (Sam, 6 Nov 2026: "on mobile
                   checkout I don't think we need these"). */}
-              {stage === "gift" ? (
-                <button type="button" className="gft-pp-x" aria-label="Close" onClick={shut}>
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              ) : null}
               <button
                 type="button"
                 className="gft-pp-handle-hit"
@@ -1384,7 +1388,7 @@ export function GiftPreview({
           ) : null}
           {visited && next ? (
             <div className="gft-pp-next" hidden={stage !== "next"} {...(!wide && peek ? { inert: "" } : {})}>
-              {next(toGift, shut)}
+              {next(toGift, shut, wide ? undefined : () => setPeek(true))}
             </div>
           ) : null}
           {stage === "next" ? null : (
@@ -1397,6 +1401,17 @@ export function GiftPreview({
                 ))}
               </ol>
               <h2 className="gft-pp-title">{fixedTo ? `Build ${fixedTo}’s care package` : "Build their care package"}</h2>
+              {/* The drawer's × beside the title, as the checkout steps have
+                  it (Sam, 6 Nov 2026: the placement "looks a bit weird"
+                  alone in a row); it collapses the drawer ("it should
+                  collapse the modal not close out the designer page"). */}
+              {wide ? null : (
+                <button type="button" className="gft-pp-x" aria-label="Collapse" onClick={() => setPeek(true)}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+                  </svg>
+                </button>
+              )}
               <p className="gft-pp-sub">
                 {fixedTo ? "The note and photo are optional. Payment comes next." : "The note and photo are optional. Their number and payment come next."}
               </p>

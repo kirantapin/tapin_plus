@@ -56,6 +56,7 @@ export default function ParentCheckout({
   from = null,
   onEditGift,
   embedded = false,
+  onCollapse,
 }: {
   open: boolean;
   onClose: () => void;
@@ -68,6 +69,9 @@ export default function ParentCheckout({
    *  modal that overlays the care package view"): no island, no scrim, no
    *  scroll lock or focus trap of its own; the builder owns those. */
   embedded?: boolean;
+  /** Inside the phone builder's drawer: its × collapses the drawer instead
+   *  of leaving (Sam, 6 Nov 2026). */
+  onCollapse?: () => void;
 }) {
   /* Mounted while open and while it leaves; each opening starts clean. */
   const [mounted, setMounted] = useState(open);
@@ -92,6 +96,7 @@ export default function ParentCheckout({
       from={from}
       onEditGift={onEditGift}
       embedded={embedded}
+      onCollapse={onCollapse}
       closing={closing}
       onGone={() => {
         setMounted(false);
@@ -157,6 +162,7 @@ function Sheet({
   from,
   onEditGift,
   embedded,
+  onCollapse,
   closing,
   onGone,
   onClose,
@@ -165,6 +171,7 @@ function Sheet({
   from: HTMLElement | null;
   onEditGift: () => void;
   embedded: boolean;
+  onCollapse?: () => void;
   closing: boolean;
   onGone: () => void;
   onClose: () => void;
@@ -548,7 +555,13 @@ function Sheet({
             {sub ? <p className="prc-sub tnum">{sub}</p> : null}
           </div>
           {step !== "done" ? (
-            <button type="button" className="prc-x" aria-label="Close" onClick={close} disabled={busy}>
+            <button
+              type="button"
+              className="prc-x"
+              aria-label={onCollapse ? "Collapse" : "Close"}
+              onClick={onCollapse ?? close}
+              disabled={busy}
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
               </svg>
