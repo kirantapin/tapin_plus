@@ -328,6 +328,10 @@ const HOVER_PEEK = 90;
    unless it's hovered on, [its] current resting state [the] state when it's
    hovered on"): hover brings it HOVER_PEEK out, to where it used to rest. */
 const REST_TUCK = 76 + HOVER_PEEK;
+/* On hover only the card moves, and only a little (Sam, 6 Nov 2026: "the
+   envelope shouldn't move, and the card itself should only animate
+   slightly"). */
+const HOVER_LIFT = 16;
 const hoverPeek = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 1024px) and (hover: hover)").matches;
 
@@ -378,35 +382,30 @@ export function EnvelopeDemo({
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 820, delay: 680 });
   }, [play]);
   const stage = useRef<HTMLDivElement | null>(null);
-  /* The hover, polished: one set of animations made once and run forward
-     on enter, backward (a touch quicker) on leave, so a quick in-and-out
-     never stacks or jumps. The envelope drops away while the card holds
-     its place, lifting a hair past it and settling, with a slight tilt as
-     if picked up; its shadow deepens. `translate` and `rotate` compose with
-     the opening's `transform`, so nothing fights it. */
+  /* The hover: the envelope stays put; the card rises a little out of it
+     with the slightest tilt, its shadow a touch deeper. One animation made
+     once and run forward on enter, backward on leave, so a quick in-and-out
+     never stacks or jumps. `translate` and `rotate` compose with the
+     opening's `transform`, so nothing fights it. */
   const hovered = useRef<Animation[] | null>(null);
   const peekMore = (on: boolean) => {
     if (!play || !hoverPeek() || reducedMotion()) return;
-    const st = stage.current;
     const el = letter.current;
-    if (!st || !el) return;
+    if (!el) return;
     if (!hovered.current) {
-      const o = { duration: 520, fill: "both" as const };
       hovered.current = [
-        st.animate([{ translate: "0 0" }, { translate: `0 ${HOVER_PEEK}px` }], { ...o, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }),
         el.animate(
           [
             { translate: "0 0", rotate: "0deg", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.14)" },
-            { translate: `0 ${-HOVER_PEEK - 8}px`, rotate: "-1.4deg", boxShadow: "0 18px 40px rgba(0, 0, 0, 0.28)", offset: 0.7 },
-            { translate: `0 ${-HOVER_PEEK}px`, rotate: "-1deg", boxShadow: "0 16px 36px rgba(0, 0, 0, 0.26)" },
+            { translate: `0 ${-HOVER_LIFT}px`, rotate: "-0.6deg", boxShadow: "0 10px 24px rgba(0, 0, 0, 0.2)" },
           ],
-          { ...o, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
+          { duration: 360, fill: "both", easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
         ),
       ];
       hovered.current.forEach((a) => a.pause());
     }
     hovered.current.forEach((a) => {
-      a.updatePlaybackRate(on ? 1 : -1.35);
+      a.updatePlaybackRate(on ? 1 : -1.2);
       a.play();
     });
   };
