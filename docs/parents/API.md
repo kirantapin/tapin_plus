@@ -141,6 +141,31 @@ Verifies the PaymentIntent succeeded for this subscription, then, idempotently:
    canceled, the next charge date), how to cancel, and the manage link
    `https://plus.tapin.app/parents/manage/{token}`.
 
+### Paying: wallets and card (Sam, 7 Nov 2026)
+The pay step offers three ways to pay, all on the same first-invoice PaymentIntent
+(`client_secret` from `parent_checkout_start`), in one Stripe `<Elements>`:
+- **Apple Pay / Google Pay** on top: Stripe's Express Checkout Element
+  (`@stripe/react-stripe-js` 6.10, `ExpressCheckoutElement`; Link, PayPal, Amazon Pay
+  and Klarna off). Tapping one opens the wallet sheet and pays straight away.
+- **Card** under "or pay with card": the Payment Element limited to card fields
+  (`wallets: { applePay, googlePay, link: "never" }`); the sticky Pay button submits it.
+
+Both run the same code (`confirm()` in `src/shell/ParentCheckout.tsx`): `stripe.confirmPayment`
+with `redirect: "if_required"`, then `parent_checkout_confirm` with that PaymentIntent id.
+Nothing new for the backend's confirm. The wallet row hides itself when no wallet can
+show (Stripe's `ready` event lists none). For the buttons to appear in production:
+- Register `plus.tapin.app` and every staging/preview host in Stripe: Settings →
+  Payment methods → Payment method domains (Apple Pay domains). An unregistered host
+  just shows no Apple Pay button.
+- Turn on Apple Pay and Google Pay in the account's payment method settings. Both ride
+  on `card`, so the intent must allow card. To keep the card form to card fields only,
+  the subscription's intent should offer card alone (`payment_settings.payment_method_types: ["card"]`,
+  or the other methods off in the Dashboard's payment method configuration).
+- HTTPS only (Apple Pay won't show on localhost); Apple Pay needs Safari, or an iPhone,
+  with a card in Wallet.
+- Optional: `applePay.recurringPaymentRequest` (the $7.99 monthly, a label, a
+  `managementURL`) in the element's options so Apple's sheet shows the renewal.
+
 ### `parent_manage`
 ```ts
 req: { manage_token: string; action?: "status" | "cancel" | "change_number" | "resend";

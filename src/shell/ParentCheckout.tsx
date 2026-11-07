@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StepBars } from "./StepBars";
 import { createPortal } from "react-dom";
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe, type Appearance, type Stripe } from "@stripe/stripe-js";
+import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { loadStripe, type Appearance, type Stripe, type StripeExpressCheckoutElementConfirmEvent, type StripeExpressCheckoutElementOptions } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
@@ -1091,11 +1091,13 @@ const APPEARANCE: Appearance = {
     fontFamily: "Gilroy, Arial, sans-serif",
     fontWeightNormal: "500",
     fontSizeBase: "16px",
-    borderRadius: "12px",
+    /* 14px: the wallet buttons take Elements' borderRadius, to match the
+       builder's Pay (gift.css .gft-pp-cta); the card fields keep 12px below. */
+    borderRadius: "14px",
     spacingUnit: "4px",
   },
   rules: {
-    ".Input": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.06)", backgroundColor: "#f0f0f0" },
+    ".Input": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.06)", backgroundColor: "#f0f0f0", borderRadius: "12px" },
     ".Input:focus": { boxShadow: "0 0 0 1px #141618", border: "1px solid #141618" },
     ".Input--invalid": { boxShadow: "0 0 0 1px #b42318", border: "1px solid #b42318" },
     ".Label": { fontWeight: "500", fontSize: "13px", color: "rgba(20, 22, 24, 0.62)" },
@@ -1155,6 +1157,45 @@ function PayFoot({ error, busy, disabled, label, onPay, onDone, onBack, backDisa
   );
 }
 
+/* ── The wallet row: Apple Pay and Google Pay above the card (Sam, 7 Nov) ──
+   Three ways to pay on one step: a wallet button at the top, which pays at
+   once, or the card fields under it, which the foot's Pay submits. */
+const WALLET_OPTIONS: StripeExpressCheckoutElementOptions = {
+  paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", amazonPay: "never", paypal: "never", klarna: "never" },
+  buttonType: { applePay: "plain", googlePay: "plain" },
+  buttonTheme: { applePay: "black", googlePay: "white" },
+  buttonHeight: 52,
+  layout: { maxColumns: 2, overflow: "never" },
+};
+
+/** "or pay with card": between the wallet row and the card fields. */
+function OrCard() {
+  return (
+    <p className="prc-or" aria-hidden="true">
+      <span>or pay with card</span>
+    </p>
+  );
+}
+
+/* NOTE FOR KIRAN (Sam, 7 Nov 2026; docs/parents/API.md, "Paying: wallets and
+   card"): the wallet row is Stripe's Express Checkout Element on the same
+   Elements (the same first-invoice PaymentIntent) as the card fields. Its
+   confirm runs `confirm()` below, the same stripe.confirmPayment + onCharged
+   + parent_checkout_confirm as the card's Pay, under the same guards.
+   For the buttons to show in production:
+   - Apple Pay: register plus.tapin.app (and every staging/preview host) in
+     Stripe, Settings → Payment methods → Payment method domains (Apple Pay
+     domains). Unregistered hosts simply show no Apple Pay button.
+   - Turn Apple Pay and Google Pay on in the Stripe account's payment method
+     settings; the PaymentIntent must allow `card` (both wallets ride on it).
+     To keep the card form to card fields only, the intent shouldn't offer
+     other methods (Link, Cash App, Klarna…): `payment_method_types: ["card"]`
+     on the subscription's payment_settings, or turn them off in the
+     Dashboard's payment method configuration.
+   - HTTPS only (localhost is exempt for Google Pay, not for Apple Pay), and
+     Apple Pay needs Safari with a card in Wallet.
+   - Optional: pass `applePay.recurringPaymentRequest` (monthly amount, label,
+     managementURL) in WALLET_OPTIONS so Apple's sheet shows the renewal. */
 function StripePay({
   started,
   paying,
@@ -1174,13 +1215,21 @@ function StripePay({
   const stripe = useStripe();
   const elements = useElements();
   const [ready, setReady] = useState(false);
+  /* The wallet row: hidden until Stripe says a wallet can show, and gone if
+     none can (no Apple Pay or Google Pay on this device or browser). */
+  const [wallets, setWallets] = useState<"pending" | "shown" | "none">("pending");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /* Once the card has been charged, a retry only confirms: never pay twice. */
   const paidIntent = useRef<string | null>(resumeIntent);
 
-  const pay = async () => {
-    if (!stripe || !elements || paying.current) return;
+  /* One path for both ways to pay: the card's Pay (no event) and a wallet's
+     confirm (its event, told when we can't go on so its sheet closes). */
+  const confirm = async (wallet?: StripeExpressCheckoutElementConfirmEvent) => {
+    if (!stripe || !elements || paying.current) {
+      wallet?.paymentFailed({ reason: "fail" });
+      return;
+    }
     paying.current = true;
     setBusy(true);
     onBusy(true);
@@ -1209,16 +1258,38 @@ function StripePay({
       onBusy(false);
     }
   };
+  const pay = () => confirm();
 
+  /* Charged already (a retry after the backend failed): Finish only confirms,
+     so the wallets go. */
+  const walletRow =
+    wallets !== "none" && !paidIntent.current ? (
+      <div className="prc-wallets" data-pending={wallets === "pending" ? "" : undefined}>
+        <ExpressCheckoutElement
+          options={WALLET_OPTIONS}
+          onReady={({ availablePaymentMethods: m }) => setWallets(m && (m.applePay || m.googlePay) ? "shown" : "none")}
+          onLoadError={() => setWallets("none")}
+          onClick={(e) => (paying.current || busy ? e.reject() : e.resolve())}
+          onConfirm={(e) => confirm(e)}
+        />
+      </div>
+    ) : null;
   const element = (
     <div className={flat ? "prc-e-pay" : "prc-module prc-pay"}>
       <PaymentElement
-        options={{ wallets: { applePay: "auto", googlePay: "auto" }, layout: "tabs" }}
+        options={{ wallets: { applePay: "never", googlePay: "never", link: "never" }, layout: "tabs" }}
         onReady={() => setReady(true)}
         onLoadError={() => setError("The payment form didn’t load. Close this and try again.")}
       />
       {!ready && !error ? <div className="prc-pay-wait" aria-busy="true" /> : null}
     </div>
+  );
+  const methods = (
+    <>
+      {walletRow}
+      {wallets === "shown" && walletRow ? <OrCard /> : null}
+      {element}
+    </>
   );
   const terms = <Terms first={started.first_cents} monthly={started.monthly_cents} />;
   const errorLine = error ? (
@@ -1233,12 +1304,12 @@ function StripePay({
           {rows}
           {flat ? (
             <div className="gft-pp-group">
-              {element}
+              {methods}
               {terms}
             </div>
           ) : (
             <>
-              {element}
+              {methods}
               {terms}
             </>
           )}
@@ -1260,11 +1331,36 @@ function StripePay({
   );
 }
 
-/* ── ?parentmock: a card panel's look in the Payment Element's place ────── */
+/* ── ?parentmock: the wallet row and a card panel's look, as stand-ins ──── */
+const APPLE_D =
+  "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z";
+const GOOGLE_D =
+  "M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z";
+
+function MockWallets({ onPay, disabled }: { onPay: () => void; disabled: boolean }) {
+  return (
+    <div className="prc-wallets prc-wallet-mock">
+      <button type="button" className="prc-wallet prc-wallet-apple" onClick={onPay} disabled={disabled} aria-label="Pay with Apple Pay (preview)">
+        <svg viewBox="0 0 384 512" width="17" height="21" aria-hidden="true">
+          <path d={APPLE_D} fill="currentColor" />
+        </svg>
+        <span>Pay</span>
+      </button>
+      <button type="button" className="prc-wallet prc-wallet-google" onClick={onPay} disabled={disabled} aria-label="Pay with Google Pay (preview)">
+        <svg viewBox="0 0 488 512" width="18" height="19" aria-hidden="true">
+          <path d={GOOGLE_D} fill="currentColor" />
+        </svg>
+        <span>Pay</span>
+      </button>
+    </div>
+  );
+}
+
 function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame, rows, promise, onBack, backDisabled }: PayProps & { first: number; monthly: number }) {
   const flat = useContext(FlatLook);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /* The wallet stand-ins and Pay share it, as confirm() is shared above. */
   const pay = async () => {
     if (paying.current) return;
     paying.current = true;
@@ -1281,9 +1377,10 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
       onBusy(false);
     }
   };
+  const tag = <p className="prc-mock-tag">Preview: no card is charged</p>;
+  const wallets = <MockWallets onPay={pay} disabled={busy} />;
   const card = flat ? (
-    <div className="prc-e-mock" aria-label="Payment (preview, nothing is charged)">
-      <p className="prc-mock-tag">Preview: no card is charged</p>
+    <div className="prc-e-mock" aria-label="Card (preview, nothing is charged)">
       <div className="gft-pp-field">
         <span>Card number</span>
         <div className="prc-e-fake tnum">1234 1234 1234 1234</div>
@@ -1300,8 +1397,7 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
       </div>
     </div>
   ) : (
-    <div className="prc-module prc-pay prc-mock" aria-label="Payment (preview, nothing is charged)">
-      <p className="prc-mock-tag">Preview: no card is charged</p>
+    <div className="prc-module prc-pay prc-mock" aria-label="Card (preview, nothing is charged)">
       <span className="prc-label">Card number</span>
       <div className="prc-mock-field tnum">1234 1234 1234 1234</div>
       <div className="prc-mock-pair">
@@ -1316,6 +1412,14 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
       </div>
     </div>
   );
+  const methods = (
+    <>
+      {tag}
+      {wallets}
+      <OrCard />
+      {card}
+    </>
+  );
   const terms = <Terms first={first} monthly={monthly} />;
   return (
     <>
@@ -1324,12 +1428,12 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
           {rows}
           {flat ? (
             <div className="gft-pp-group">
-              {card}
+              {methods}
               {terms}
             </div>
           ) : (
             <>
-              {card}
+              {methods}
               {terms}
             </>
           )}
