@@ -20,7 +20,9 @@ import {
   type Gift,
   type SceneId,
 } from "../model/gift";
-import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { clearGiftDraft, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
+import { keepStep, keptSomething, type ResumeStep } from "../model/checkoutResume";
+import { ResumeContext, ResumeLine, type Resume } from "../shell/ResumeLine";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { playDelight } from "./giftDelight";
 import { GiftAfter } from "./giftAfter";
@@ -1110,6 +1112,7 @@ export function GiftPreview({
   builder = false,
   next,
   startNext = false,
+  resumeAt = null,
   origin = null,
 }: {
   onClose: () => void;
@@ -1140,6 +1143,10 @@ export function GiftPreview({
   next?: (back: () => void, close: () => void, collapse?: () => void) => React.ReactNode;
   /** Open on the next steps (a charged checkout that only needs confirming). */
   startNext?: boolean;
+  /** The builder: the step a save from earlier comes back to
+   *  (model/checkoutResume.ts; ParentCheckout resumeStep), or null for a
+   *  fresh start. Read as it opens. */
+  resumeAt?: ResumeStep | null;
   /** The container it grows out of and shrinks back into (Sam, 6 Nov 2026:
    *  "when I click on this CTA, the parent container should expand into the
    *  builder"): the dock's white plate, or the button that was tapped. */
@@ -1147,11 +1154,17 @@ export function GiftPreview({
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
   const peekCta = useRef<HTMLButtonElement | null>(null);
-  const [stage, setStage] = useState<"gift" | "next">(startNext && next ? "next" : "gift");
+  /* Back on the step they left (Sam, 7 Nov 2026: "if someone leaves
+     checkout their information ... should be saved"): a save from earlier
+     opens the builder where it was, the drawer up, not the card first. A
+     card already charged goes to its pay step as it always did. */
+  const [resumed] = useState<ResumeStep | null>(() => (builder && !startNext ? resumeAt : null));
+  const resumeNext = !!next && (resumed === "student" || resumed === "you" || resumed === "pay");
+  const [stage, setStage] = useState<"gift" | "next">((startNext && next) || resumeNext ? "next" : "gift");
   /* Once visited, the next steps stay mounted (hidden while they're back on
      the care package), so what they typed there is still there (review,
      6 Nov 2026). */
-  const [visited, setVisited] = useState(startNext && !!next);
+  const [visited, setVisited] = useState((startNext && !!next) || resumeNext);
   /* The care package in stages, so it isn't all at once (Sam, 6 Nov 2026:
      "the first is where they pick the background and 'when they open it'
      and photo - the next when they do the name message and sender name";
@@ -1159,7 +1172,9 @@ export function GiftPreview({
      the modal would get a bit shorter on that stage so that someone can
      preview what it actually looks like"): the look, the opening, the note.
      Back from the checkout lands on the note, the last of them. */
-  const [part, setPart] = useState<Part>(startNext && next ? "note" : "look");
+  const [part, setPart] = useState<Part>(() =>
+    (startNext && next) || resumeNext ? "note" : resumed === "open" || resumed === "note" ? resumed : "look",
+  );
   const partFrom = useRef<number | null>(null);
   const toPart = (p: Part) => {
     partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
@@ -1178,11 +1193,40 @@ export function GiftPreview({
      "Start designing" opens it ("when someone clicks on build my care
      package ... we'd want for them to see the card design first"). */
   const [peek, setPeek] = useState(
-    () => builder && !(startNext && next) && typeof window !== "undefined" && !window.matchMedia?.("(min-width: 1024px)").matches,
+    () => builder && !(startNext && next) && !resumed && typeof window !== "undefined" && !window.matchMedia?.("(min-width: 1024px)").matches,
   );
   const [designed, setDesigned] = useState(!peek);
   /* Once the checkout has gone through (the sent block below). */
   const sentRef = useRef(false);
+  /* The save follows the step they're on (model/checkoutResume.ts): the
+     care package's stage, or the checkout's step as it tells us
+     (shell/ResumeLine.tsx). Closing the builder keeps it: that's what it's
+     for (only paying, or "Start over", clears it). */
+  const stageNow = useRef(stage);
+  stageNow.current = stage;
+  const checkoutAt = useRef<ResumeStep | null>(null);
+  useEffect(() => {
+    if (!builder || sentRef.current) return;
+    if (stage === "gift") keepStep(part);
+    else if (checkoutAt.current) keepStep(checkoutAt.current);
+  }, [builder, stage, part]);
+  /* "We kept your care package from earlier", on the step it came back to,
+     when there's something of theirs in it. */
+  const [kept, setKept] = useState(() => !!resumed && keptSomething());
+  const startOver = useRef<() => void>(() => {});
+  const resume = useMemo<Resume>(
+    () => ({
+      at: resumed,
+      on: kept,
+      startOver: () => startOver.current(),
+      left: () => setKept(false),
+      report: (step) => {
+        checkoutAt.current = step;
+        if (stageNow.current === "next" && !sentRef.current) keepStep(step);
+      },
+    }),
+    [resumed, kept],
+  );
   const expand = () => {
     setDesigned(true);
     setPeek(false);
@@ -1472,6 +1516,18 @@ export function GiftPreview({
     setPart("note");
     setStage("gift");
   };
+  /* "Start over": the save gone, the gift back to the page's own default,
+     the checkout's fields with it (it mounts fresh), and the first stage. */
+  startOver.current = () => {
+    startGiftOver();
+    setKept(false);
+    setNameErr(false);
+    checkoutAt.current = null;
+    partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
+    setVisited(false);
+    setStage("gift");
+    setPart("look");
+  };
   /* Into the checkout and back: the same sideways slide as every other
      step (Sam, 7 Nov 2026: "the next slide animate[s] up, instead of sliding
      like the other slides ... make sure the transition animations across
@@ -1566,6 +1622,7 @@ export function GiftPreview({
     () => ({
       sent: (s) => {
         sentRef.current = true;
+        setKept(false);
         /* The drawer's height on the pay step, before anything moves. */
         sentFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
         setSent(s);
@@ -1931,6 +1988,7 @@ export function GiftPreview({
         ) : null}
       </div>
       {wide || builder ? (
+        <ResumeContext.Provider value={resume}>
         <aside
           ref={panelRef}
           className="gft-preview-panel"
@@ -2014,6 +2072,7 @@ export function GiftPreview({
                     ? "Pick what plays as the card comes out."
                     : "Pick how it looks."}
               </p>
+              <ResumeLine step={part} />
               <StepBars className="gft-pp-steps" total={stepsTotal} lit={stepAt} label={`Step ${stepAt} of ${stepsTotal}`} />
             </div>
           ) : null}
@@ -2065,6 +2124,7 @@ export function GiftPreview({
           </>
           )}
         </aside>
+        </ResumeContext.Provider>
       ) : null}
       {/* Tapping the page above the open drawer collapses it (Sam, 6 Nov
           2026: "when I click above the designing modal it should collapse

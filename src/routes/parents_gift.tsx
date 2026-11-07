@@ -87,7 +87,9 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
   const today = seasonNow();
   const season: SceneId = BAND_SCENES.includes(today) ? today : "snow";
   useEffect(() => {
-    if (!giftDraftTouched(getGiftDraft())) setGiftDraft({ scene: season });
+    /* Quiet: the page's pick, not theirs, so it isn't kept for later
+       (model/checkoutResume.ts). */
+    if (!giftDraftTouched(getGiftDraft())) setGiftDraft({ scene: season }, { quiet: true });
     // Once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
