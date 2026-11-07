@@ -52,9 +52,6 @@ import { FlatMark, reducedMotion } from "./parents_kit";
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-/** How much of the phone drawer shows when collapsed: the handle row and its
- *  one button (gift.css --gft-peek, less the safe area). */
-const PEEK_H = () => 98;
 
 /* Each background's own drift (gift.css .gft-scene-pat): one tile's travel
    per loop, so it never seams; scenery breathes instead; the sunburst turns.
@@ -1190,51 +1187,6 @@ export function GiftPreview({
     action.onClick(el);
   };
   const toGift = () => setStage("gift");
-  /* The handle row is the one place that drags (Sam, 6 Nov 2026: "the top of
-     the modal, where that draggable icon seems to be, should be something
-     that I can swipe gesture with, only that though"). The drawer follows
-     the finger (a translate over its open or collapsed position); let go and
-     it settles open or collapsed by distance or a flick, from where it is. */
-  const drag = useRef<{ id: number; y: number; t: number; dy: number; v: number; moved: boolean } | null>(null);
-  const onGrabDown = (e: React.PointerEvent<HTMLElement>) => {
-    if ((e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest(".gft-pp-handle-hit")) return;
-    const panel = panelRef.current;
-    if (!panel) return;
-    drag.current = { id: e.pointerId, y: e.clientY, t: e.timeStamp, dy: 0, v: 0, moved: false };
-    e.currentTarget.setPointerCapture(e.pointerId);
-    panel.style.transition = "none";
-  };
-  const onGrabMove = (e: React.PointerEvent<HTMLElement>) => {
-    const g = drag.current;
-    const panel = panelRef.current;
-    if (!g || g.id !== e.pointerId || !panel) return;
-    const raw = e.clientY - g.y;
-    const travel = panel.offsetHeight - PEEK_H();
-    /* Rubber-band past either end. */
-    const dy = peek ? (raw < -travel ? -travel + (raw + travel) / 4 : raw > 0 ? raw / 4 : raw) : raw < 0 ? raw / 4 : raw;
-    const dt = Math.max(1, e.timeStamp - g.t);
-    g.v = (dy - g.dy) / dt;
-    g.t = e.timeStamp;
-    g.dy = dy;
-    if (Math.abs(raw) > 4) g.moved = true;
-    panel.style.translate = `0 ${dy}px`;
-  };
-  const onGrabUp = (e: React.PointerEvent<HTMLElement>) => {
-    const g = drag.current;
-    const panel = panelRef.current;
-    drag.current = null;
-    if (!g || g.id !== e.pointerId || !panel) return;
-    panel.style.transition = "";
-    panel.style.translate = "";
-    const travel = panel.offsetHeight - PEEK_H();
-    let collapse = peek;
-    if (!g.moved) collapse = !peek; // a tap on the handle toggles
-    else if (peek) collapse = !(g.dy < -Math.min(80, travel / 3) || g.v < -0.4);
-    else collapse = g.dy > Math.min(100, travel / 3) || g.v > 0.4;
-    if (g.moved && g.dy !== 0 && !reducedMotion())
-      panel.animate([{ translate: `0 ${g.dy}px` }, { translate: "0 0" }], { duration: 340, easing: EASE });
-    flushSync(() => (collapse ? setPeek(true) : expand()));
-  };
   /* Continue: the checkout slides up into the panel (Sam, 6 Nov 2026: "when
      I click continue, I think it should cause the checkout modal to slide
      up"); on a phone the drawer itself rises as it grows. Back: the care
@@ -1347,13 +1299,7 @@ export function GiftPreview({
           data-stage={stage}
         >
           {wide ? null : (
-            <div
-              className="gft-pp-grab"
-              onPointerDown={onGrabDown}
-              onPointerMove={onGrabMove}
-              onPointerUp={onGrabUp}
-              onPointerCancel={onGrabUp}
-            >
+            <div className="gft-pp-grab">
               {/* On a phone the drawer's own way out, on the care package
                   (the checkout steps carry theirs); the Close and background
                   pills over the page are gone (Sam, 6 Nov 2026: "on mobile
@@ -1363,13 +1309,7 @@ export function GiftPreview({
                 className="gft-pp-handle-hit"
                 aria-label={peek ? "Open the editor" : "Collapse the editor"}
                 aria-expanded={!peek}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    if (peek) expand();
-                    else setPeek(true);
-                  }
-                }}
+                onClick={() => (peek ? expand() : setPeek(true))}
               >
                 <span className="gft-pp-handle" aria-hidden="true" />
               </button>
@@ -1583,6 +1523,11 @@ export function GiftPreview({
           )}
         </aside>
       ) : null}
+      {/* Tapping the page above the open drawer collapses it (Sam, 6 Nov
+          2026: "when I click above the designing modal it should collapse
+          the modal ... instead of being able to drag the modal"); the
+          drawer no longer drags. */}
+      {!wide && builder && !peek ? <div className="gft-pp-above" aria-hidden="true" onClick={() => setPeek(true)} /> : null}
       <div ref={veil} className="gft-preview-veil" aria-hidden="true" />
       {/* No Preview button (Sam, 6 Nov 2026: "instead of having the preview
           button I think we should just let the X on the modal do the
