@@ -197,6 +197,13 @@ For active parent subscriptions whose student hasn't signed in since checkout
   (`cancel_reason = 'student'`) and the parent is emailed.
 - `invoice.payment_failed` on a parent subscription → email the parent with the manage
   link (Stripe's retries apply).
+- `invoice.upcoming` on a parent subscription (7 Nov 2026) → text the parent a few days
+  before each monthly bill, once per renewal: `Tapin: {Student}'s Tapin Plus renews
+  {Mon D} for {price}. To skip a month or cancel, email support@tapin.app. Reply STOP to
+  opt out`. Stripe only sends it with *upcoming renewal events* on (Dashboard > Billing >
+  Subscriptions and emails, 3 days before renewal). The page's "How it works for you"
+  step 4 promises this text. Skips (one billing cycle paused) and refunds for a month the
+  student didn't use are done by support by hand, from the email.
 
 ## Analytics (frontend, PostHog; `parent_purchase` also to Meta as Subscribe)
 `parent_page_view`, `parent_checkout_started`, `parent_purchase` (value = first charge),
