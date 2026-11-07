@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { SAMPLE_GIFT } from "../model/gift";
+import { SAMPLE_GIFT, SCENE_GROUPS, SCENES, type SceneId } from "../model/gift";
+import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
@@ -48,8 +49,18 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
   /* Its button opens the builder (the care package, step 1), as every
      button on the page does; the builder is the preview now. */
   const send = useRef<HTMLButtonElement | null>(null);
+  /* The background, tried here (Sam, 6 Nov 2026: "there should be an option
+     to select the seasonal backgrounds here so that they can be previewed,
+     the default would be the [band] you see here, but right under the build
+     your care package button maybe we show the seasonal options and then a
+     "view more" option"): the band wears the pick, and it's the gift's
+     background (the draft), so the builder opens on it. */
+  const { scene } = useGiftDraft();
+  const choices = [SCENES[0], ...(SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? [])];
+  const shown = choices.some((c) => c.id === scene) ? scene : "maroon";
   return (
-    <section className="tpg tpg-env" aria-labelledby="tpg-env-h">
+    <section className="tpg tpg-env" aria-labelledby="tpg-env-h" data-scene={shown}>
+      {shown === "maroon" ? null : <span className="tpg-env-bg scene-swatch" data-scene={shown} aria-hidden="true" />}
       {/* The gift page's own care package and opening (GiftPage.tsx
           EnvelopeDemo), so the parent sees what their student will. */}
       <div ref={box} className="tpg-env-art">
@@ -69,6 +80,30 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
         <button ref={send} type="button" className="tpg-env-cta" onClick={(e) => onSend(e.currentTarget)}>
           Build their care package
         </button>
+        <div className="tpg-env-pick">
+          <span className="tpg-env-pick-h">
+            Seasonal <span className="tpg-env-tag">Limited time</span>
+          </span>
+          <div className="tpg-env-row" role="radiogroup" aria-label="Background">
+            {choices.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="radio"
+                aria-checked={shown === c.id}
+                aria-label={c.name}
+                title={c.name}
+                className="tpg-env-sw"
+                onClick={() => setGiftDraft({ scene: c.id as SceneId })}
+              >
+                <span className="scene-swatch" data-scene={c.id} aria-hidden="true" />
+              </button>
+            ))}
+            <button type="button" className="tpg-env-more" onClick={(e) => onSend(e.currentTarget)}>
+              View more
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );

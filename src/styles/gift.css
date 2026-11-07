@@ -1037,9 +1037,11 @@ button.tpg-env-link {
 }
 /* In the preview the page's halves fill the frame, not the screen (Sam,
    6 Nov 2026: "why is this scrollable?"): 100svh is taller than the frame. */
-.gft-preview .gft-a[data-state="open"] .gft-a-band,
-.gft-preview .gft-a[data-state="open"] .gft-after {
-  min-height: var(--frame-h);
+@container (min-width: 960px) {
+  .gft-preview .gft-a[data-state="open"] .gft-a-band,
+  .gft-preview .gft-a[data-state="open"] .gft-after {
+    min-height: var(--frame-h);
+  }
 }
 .gft-preview-scroll {
   height: 100%;
@@ -1604,9 +1606,7 @@ button.tpg-env-link {
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
 }
-.gft-preview[data-builder] .gft-dock {
-  display: none;
-}
+/* (The page's dock shows in the builder too: it is the student's page.) */
 .gft-pp-head {
   display: grid;
   gap: 6px;
@@ -1727,8 +1727,7 @@ button.tpg-env-link {
   .gft-preview-panel[data-drawer]:not([data-open]) .gft-pp-sub {
     display: none;
   }
-  .gft-preview[data-builder] .gft,
-  .gft-preview[data-builder] .gft-a-band {
+  .gft-preview[data-builder] .gft-a:not([data-state="open"]) .gft-a-band {
     min-height: calc(100svh - 150px);
   }
 }
@@ -1825,8 +1824,7 @@ button.tpg-env-link {
     cursor: pointer;
   }
   /* The page centres above the open drawer; full height while previewing. */
-  .gft-preview[data-builder] .gft,
-  .gft-preview[data-builder] .gft-a-band {
+  .gft-preview[data-builder] .gft-a:not([data-state="open"]) .gft-a-band {
     min-height: 100svh;
   }
   .gft-preview[data-builder] .gft-preview-scroll {
@@ -1884,5 +1882,246 @@ button.tpg-env-link {
     left: 16px;
     background: #f0f0f0;
     box-shadow: none;
+  }
+}
+
+/* While previewing on a phone, "Back to ..." is at the top left (Close's
+   place), so the page's own sticky button keeps the bottom (6 Nov 2026). */
+@media (max-width: 1023.98px) {
+  .gft-preview[data-peek] .gft-preview-back {
+    display: none;
+  }
+  .gft-peek-back {
+    top: calc(12px + env(safe-area-inset-top));
+    bottom: auto;
+    left: 12px;
+    right: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    height: 40px;
+    padding: 0 16px 0 10px;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #141618;
+    font: 600 15px/1 "Gilroy", Arial, sans-serif;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  }
+  .gft-preview[data-builder][data-peek] .gft-preview-scroll {
+    padding-bottom: 0;
+  }
+}
+
+/* The app card on a phone (6 Nov 2026): no QR (they're on the phone it goes
+   on); the App Store button full width. A computer gets the QR beside it. */
+.gft-app {
+  width: 100%;
+}
+.gft-app-qr,
+.gft-app-get p {
+  display: none;
+}
+.gft-app-get {
+  display: block;
+  padding: 0;
+  background: none;
+}
+.gft-app-get > div {
+  display: block;
+}
+.gft-store {
+  width: 100%;
+  justify-content: center;
+  height: 50px;
+}
+@container (min-width: 960px) {
+  .gft-app-qr {
+    display: block;
+  }
+  .gft-app-get p {
+    display: block;
+  }
+  .gft-app-get {
+    display: flex;
+    padding: 14px;
+    background: #f4f2ee;
+  }
+  .gft-app-get > div {
+    display: grid;
+  }
+  .gft-store {
+    width: auto;
+    height: 44px;
+  }
+}
+
+/* The envelope's hover peek on a computer (6 Nov 2026): the card rests lower,
+   so less room above it; the band clips the envelope's foot as it drops. */
+@media (min-width: 1024px) and (hover: hover) {
+  .gft.gft-mini:has(.gft-a-photo) {
+    padding-top: 178px;
+  }
+  .tpg-env {
+    overflow: hidden;
+  }
+  .tpg-env-art .gft-a-stage {
+    cursor: default;
+  }
+}
+/* The phone builder: the page's Close and background pills go while the
+   drawer is up (its own x and Preview do their jobs). */
+@media (max-width: 1023.98px) {
+  .gft-preview[data-builder]:not([data-peek]) .gft-preview-back,
+  .gft-preview[data-builder] .gft-preview-bar {
+    display: none;
+  }
+  .gft-pp-grab {
+    justify-content: space-between;
+  }
+  .gft-pp-x {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 999px;
+    background: #f0f0f0;
+    color: #141618;
+    cursor: pointer;
+  }
+  .gft-pp-x:focus-visible {
+    outline: 3px solid #e5751f;
+    outline-offset: 2px;
+  }
+  .gft-pp-grab:not(:has(.gft-pp-x))::before {
+    content: "";
+    width: 32px;
+  }
+}
+
+/* ══ THE BAND'S BACKGROUND PICKER (6 Nov 2026) ═══════════════════════════════
+   Maroon (the band as it was) and the seasonal three, under the button; the
+   band wears the pick at the gift page's tile size, and on a pattern the
+   words sit on cream paper so they read. */
+.tpg-env {
+  position: relative;
+  isolation: isolate;
+}
+.tpg-env-bg.scene-swatch {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: inherit;
+  box-shadow: none;
+  background-size: 160px 160px;
+}
+.tpg-env:not([data-scene="maroon"]) .tpg-env-copy {
+  padding: 20px;
+  border-radius: 16px;
+  background: #f7f3ea;
+  color: #141618;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.tpg-env:not([data-scene="maroon"]) .tpg-env-copy p {
+  color: rgba(20, 22, 24, 0.7);
+}
+.tpg-env:not([data-scene="maroon"]) .tpg-env-cta {
+  background: #141618;
+  color: #ffffff;
+}
+.tpg-env-pick {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.tpg-env-pick-h {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 17px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.tpg-env-tag {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fdecd9;
+  color: #9a4a0c;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.tpg-env-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.tpg-env-sw {
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+}
+.tpg-env-sw .scene-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  transition: box-shadow 160ms ease-out, transform 160ms ease-out;
+}
+.tpg-env-sw[data-scene] .scene-swatch,
+.tpg-env-sw .scene-swatch {
+  background-size: 50px 50px;
+}
+.tpg-env-sw .scene-swatch[data-scene="maroon"] {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.tpg-env-sw[aria-checked="true"] .scene-swatch {
+  box-shadow: 0 0 0 2px currentColor, 0 0 0 4px rgba(0, 0, 0, 0.15);
+}
+.tpg-env-sw:hover .scene-swatch {
+  transform: translateY(-2px);
+}
+.tpg-env-sw:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.tpg-env-more {
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: inherit;
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+}
+.tpg-env:not([data-scene="maroon"]) .tpg-env-more {
+  background: rgba(20, 22, 24, 0.08);
+}
+.tpg-env-more:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+@media (min-width: 1024px) {
+  .tpg-env-pick {
+    justify-items: start;
+  }
+  .tpg-env-row {
+    justify-content: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpg-env-sw .scene-swatch {
+    transition: none;
   }
 }
