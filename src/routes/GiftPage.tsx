@@ -537,6 +537,10 @@ export function Letter({
   const runs = useRef<Animation[]>([]);
   const band = useRef<HTMLElement | null>(null);
   const stopDelight = useRef<(() => void) | null>(null);
+  /* What's below the card waits for the opening and its celebration to
+     finish (Sam, 7 Nov 2026: "before revealing this section we should allow
+     the animation to finish for the card and the 'when they open it'"). */
+  const [held, setHeld] = useState(false);
   useEffect(
     () => () => {
       runs.current.forEach((a) => a.cancel());
@@ -671,16 +675,24 @@ export function Letter({
     unwrap(go, extra.current, seal.current, flap.current);
     /* The card: up, and the clip's line held on the envelope's foot. */
     const RISE = { duration: 700, delay: 880 };
-    /* The parent's celebration, as the card comes out (giftDelight.ts). */
+    /* The parent's celebration, as the card comes out (giftDelight.ts). The
+       page below waits for it (at most 8s, a safety net). */
+    let celebrated: Promise<void> = Promise.resolve();
     if (gift.effect) {
       const fx = gift.effect;
-      window.setTimeout(() => {
-        if (!band.current || !el.isConnected) return;
-        /* In the builder on a phone, the open drawer covers the screen's
-           foot: things rise from its top edge instead. */
-        const drawer = preview ? document.querySelector<HTMLElement>(".gft-preview-panel[data-drawer]:not([data-peek])") : null;
-        stopDelight.current = playDelight(fx, band.current, el.getBoundingClientRect(), drawer?.getBoundingClientRect().top);
-      }, RISE.delay + 180);
+      setHeld(true);
+      celebrated = new Promise<void>((resolve) => {
+        window.setTimeout(() => {
+          if (!band.current || !el.isConnected) return resolve();
+          /* In the builder on a phone, the open drawer covers the screen's
+             foot: things rise from its top edge instead. */
+          const drawer = preview ? document.querySelector<HTMLElement>(".gft-preview-panel[data-drawer]:not([data-peek])") : null;
+          const run = playDelight(fx, band.current, el.getBoundingClientRect(), drawer?.getBoundingClientRect().top);
+          stopDelight.current = run;
+          run.done.then(resolve, resolve);
+        }, RISE.delay + 180);
+      });
+      celebrated = Promise.race([celebrated, new Promise<void>((r) => window.setTimeout(r, RISE.delay + 180 + 8000))]);
     }
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
@@ -718,6 +730,17 @@ export function Letter({
       { opacity: 0, transform: "translateY(8px)" },
       { opacity: 1, transform: "none" },
     ], { duration: 520, delay: 160, fill: "backwards" });
+    /* Then, once the celebration has played out, what's below rises in. */
+    await celebrated;
+    if (!el.isConnected) return;
+    flushSync(() => setHeld(false));
+    after.current?.animate?.(
+      [
+        { opacity: 0, transform: "translateY(18px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 520, easing: EASE, fill: "backwards" },
+    );
   };
   openRef.current = open;
 
@@ -728,9 +751,9 @@ export function Letter({
      stays in reach, sliding up as the letter settles, and breathing gently
      like the Plus pages' dock (shell/dockPulse.ts). */
   const dock = useRef<HTMLDivElement | null>(null);
-  useDockPulse(dock, state === "open");
+  useDockPulse(dock, state === "open" && !held);
   useLayoutEffect(() => {
-    if (state !== "open" || still || !dock.current) return;
+    if (state !== "open" || held || still || !dock.current) return;
     const a = dock.current.animate(
       [
         { transform: "translateY(calc(100% + 24px))" },
@@ -739,7 +762,7 @@ export function Letter({
       { duration: 560, delay: 520, easing: EASE, fill: "backwards" },
     );
     return () => a.cancel();
-  }, [state, still]);
+  }, [state, held, still]);
   return (
     <div
       className="gft gft-a ph-no-capture"
@@ -835,7 +858,7 @@ export function Letter({
         ) : null}
       </header>
       {state === "open" ? (
-        <main ref={after} className="gft-after">
+        <main ref={after} className="gft-after" data-held={held ? "" : undefined} aria-hidden={held ? true : undefined}>
           <GiftAfter gift={gift} sample={sample} preview={preview} cta={cta} />
         </main>
       ) : null}

@@ -66,8 +66,13 @@ const PETAL_PATH = "M12 1.5c4.6 3.4 6.2 9.6 3 15.6-1 1.9-2 3.6-3 5.4-1-1.8-2-3.5
  *  where the visible part of the screen ends (a viewport y: the builder's
  *  phone drawer covers the rest), so what rises from below starts there.
  *  Returns a stop function that clears it at once. */
-export function playDelight(kind: Delight, host: HTMLElement, card: DOMRect, floor?: number): () => void {
-  if (typeof window === "undefined" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return () => {};
+/** Stops the celebration; `done` settles when it has played out (or been
+ *  stopped), so the page can wait for it before showing what's below. */
+export type DelightRun = (() => void) & { done: Promise<void> };
+
+export function playDelight(kind: Delight, host: HTMLElement, card: DOMRect, floor?: number): DelightRun {
+  if (typeof window === "undefined" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
+    return Object.assign(() => {}, { done: Promise.resolve() });
   const box = host.getBoundingClientRect();
   const layer = document.createElement("div");
   layer.className = "gft-delight";
@@ -283,6 +288,6 @@ export function playDelight(kind: Delight, host: HTMLElement, card: DOMRect, flo
     runs.forEach((a) => a.cancel());
     layer.remove();
   };
-  Promise.all(runs.map((a) => a.finished.catch(() => undefined))).then(clear);
-  return clear;
+  const done = Promise.all(runs.map((a) => a.finished.catch(() => undefined))).then(clear);
+  return Object.assign(clear, { done });
 }

@@ -2543,3 +2543,10 @@ button.tpg-env-link {
 .step-bars li[data-on] > i {
   transform: none;
 }
+
+/* Held while the card's celebration plays (GiftPage held): the page below
+   and its button wait, then rise in. */
+.gft-after[data-held],
+.gft-a:has(.gft-after[data-held]) .gft-dock {
+  visibility: hidden;
+}
