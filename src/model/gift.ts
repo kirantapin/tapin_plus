@@ -64,17 +64,21 @@ export const SCENES = [
   { id: "flannel", name: "Flannel", line: "Fall" },
   { id: "lunch", name: "Lunch", line: "On me" },
   { id: "sunburst", name: "Sunburst", line: "Hooray" },
-  { id: "leaves", name: "Fall leaves", line: "Autumn" },
   /* Seasonal (Sam, 6 Nov 2026: "can we also add channukah and christmas,
      along with a general "holiday" backgrounds - these would be in a
      "seasonal" category"). */
   /* In the calendar's order (Thanksgiving and New Year's added the same
      day: "since that's coming up soon"), the general Holiday last. */
+  /* Fall leaves count as seasonal, and Snow joins them (Sam, 6 Nov 2026:
+     "fall leaves can be considered a seasonal background too, and we should
+     have a snow background"). */
+  { id: "leaves", name: "Fall leaves", line: "Autumn", group: "seasonal" },
   { id: "thanksgiving", name: "Thanksgiving", line: "Happy Thanksgiving", group: "seasonal" },
   { id: "hanukkah", name: "Hanukkah", line: "Happy Hanukkah", group: "seasonal" },
   { id: "christmas", name: "Christmas", line: "Merry Christmas", group: "seasonal" },
   { id: "newyear", name: "New Year’s", line: "Happy New Year", group: "seasonal" },
   { id: "holiday", name: "Holiday", line: "Happy holidays", group: "seasonal" },
+  { id: "snow", name: "Snow", line: "Let it snow", group: "seasonal" },
 ] as const;
 
 /** The pickers' groups: the seasonal ones first, marked limited time (Sam,
