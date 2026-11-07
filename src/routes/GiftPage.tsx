@@ -4,8 +4,10 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import {
+  DELIGHTS,
   FROM_MAX,
   giftWho,
+  isDelight,
   isScene,
   NOTE_MAX,
   previewGift,
@@ -15,11 +17,13 @@ import {
   SCENE_ORDER,
   SCENES,
   thanksHref,
+  type Delight,
   type Gift,
   type SceneId,
 } from "../model/gift";
 import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
+import { playDelight } from "./giftDelight";
 import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
 import { takeKey } from "../model/redact";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
@@ -70,6 +74,8 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
   hanukkah: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 26000 },
   christmas: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 18000 },
   holiday: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 16000 },
+  thanksgiving: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-170px, 170px)" }], ms: 30000 },
+  newyear: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -170px)" }], ms: 24000 },
   flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
   lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
   sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
@@ -126,6 +132,7 @@ export default function GiftPage() {
               masked: g.masked_phone,
               scene: isScene(g.scene) ? g.scene : "maroon",
               photo: g.photo_url ?? null,
+              effect: isDelight(g.effect) ? g.effect : null,
             },
           });
         } else setLoad({ state: "ended", to: g.to, from: g.from });
@@ -563,11 +570,18 @@ export function Letter({
   sample,
   preview = false,
   cta,
+  onReseal,
+  autoOpen = false,
 }: {
   gift: Gift;
   sample: boolean;
   preview?: boolean;
   cta?: DockCta;
+  /** The builder's replay (Sam, 6 Nov 2026: "after I open a package, the
+   *  "open" button would be "close it""): shown once it's open. */
+  onReseal?: () => void;
+  /** Opens by itself a moment after it appears (the builder, after a pick). */
+  autoOpen?: boolean;
 }) {
   const { track } = useEventTracking();
   const [state, setState] = useState<"sealed" | "opening" | "open">("sealed");
@@ -580,7 +594,15 @@ export function Letter({
   const title = useRef<HTMLHeadingElement | null>(null);
   const after = useRef<HTMLElement | null>(null);
   const runs = useRef<Animation[]>([]);
-  useEffect(() => () => runs.current.forEach((a) => a.cancel()), []);
+  const band = useRef<HTMLElement | null>(null);
+  const stopDelight = useRef<(() => void) | null>(null);
+  useEffect(
+    () => () => {
+      runs.current.forEach((a) => a.cancel());
+      stopDelight.current?.();
+    },
+    [],
+  );
   useRiseIn(after, state === "open", 120);
   const [still] = useState(reducedMotion);
 
@@ -650,9 +672,17 @@ export function Letter({
     );
   };
 
+  /* The builder's replay: it opens by itself shortly after it appears. */
+  useEffect(() => {
+    if (!autoOpen) return;
+    const t = window.setTimeout(() => void openRef.current(), 450);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   /* Focus follows the gift: to the new heading once it's open. */
   const settle = () => title.current?.focus({ preventScroll: true });
   const started = useRef(false);
+  const openRef = useRef<() => Promise<void>>(async () => {});
   const open = async () => {
     if (state !== "sealed" || started.current) return;
     started.current = true;
@@ -691,6 +721,13 @@ export function Letter({
        starts to come out, the background answers (bloom). */
     const RISE = { duration: 700, delay: 880 };
     window.setTimeout(bloom, RISE.delay - 120);
+    /* The parent's celebration, as the card comes out (giftDelight.ts). */
+    if (gift.effect) {
+      const fx = gift.effect;
+      window.setTimeout(() => {
+        if (band.current && el.isConnected) stopDelight.current = playDelight(fx, band.current, el.getBoundingClientRect());
+      }, RISE.delay + 180);
+    }
     const DROP = { duration: 600, delay: 1600 };
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-up}px)` }], RISE);
     /* The sleeve's edge goes down with the envelope's foot. */
@@ -728,6 +765,7 @@ export function Letter({
       { opacity: 1, transform: "none" },
     ], { duration: 520, delay: 160, fill: "backwards" });
   };
+  openRef.current = open;
 
   const to = gift.to;
   const button = useRef<HTMLButtonElement | null>(null);
@@ -754,7 +792,7 @@ export function Letter({
       data-state={state}
       data-scene={gift.scene}
     >
-      <header className="gft-a-band">
+      <header ref={band} className="gft-a-band">
         <div ref={scene} className="gft-scene" aria-hidden="true">
           <div ref={pat} className="gft-scene-pat" />
         </div>
@@ -831,6 +869,13 @@ export function Letter({
             aria-hidden={state !== "sealed" ? true : undefined}
           >
             Open it
+          </button>
+        ) : onReseal ? (
+          <button type="button" className="gft-open gft-reseal" onClick={onReseal}>
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Close it
           </button>
         ) : null}
       </header>
@@ -986,6 +1031,14 @@ export function GiftPreview({
   const showSample = sample && !builder;
   const [samplePhoto, setSamplePhoto] = useState(showSample);
   const scene = d.scene;
+  /* Replay (Sam, 6 Nov 2026): "Close it" seals it again; picking what plays
+     on opening seals it and opens it again by itself, so they see it. */
+  const [replay, setReplay] = useState({ n: 0, auto: false });
+  const reseal = () => setReplay((r) => ({ n: r.n + 1, auto: false }));
+  const pickEffect = (effect: Delight | null) => {
+    setGiftDraft({ effect });
+    setReplay((r) => ({ n: r.n + 1, auto: true }));
+  };
   const gift: Gift = {
     to: fixedTo ?? (d.to.trim() || (showSample ? SAMPLE_GIFT.to : null)),
     from: d.from.trim() || !showSample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
@@ -993,6 +1046,7 @@ export function GiftPreview({
     masked: masked ?? SAMPLE_GIFT.masked,
     scene,
     photo: d.photo ?? (showSample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
+    effect: d.effect,
   };
 
   /* Every background, one after another: the arrows (a phone) or the grid
@@ -1214,7 +1268,7 @@ export function GiftPreview({
             style={scaled}
             {...(!wide && builder && !peek ? { inert: "" } : {})}
           >
-            <Letter gift={gift} sample preview cta={pageCta} />
+            <Letter key={replay.n} gift={gift} sample preview cta={pageCta} onReseal={reseal} autoOpen={replay.auto} />
           </div>
         </div>
         {/* Phone or computer, under the preview it changes (Sam, 6 Nov 2026:
@@ -1376,6 +1430,42 @@ export function GiftPreview({
                     {photoError}
                   </p>
                 ) : null}
+              </div>
+            </div>
+            <div className="gft-pp-group">
+              <h2 id="gft-pp-fx" className="gft-pp-h">
+                When they open it
+              </h2>
+              <div className="gft-pp-fx" role="radiogroup" aria-labelledby="gft-pp-fx">
+                {[{ id: null, name: "None" } as const, ...DELIGHTS].map((fx) => (
+                  <button
+                    key={fx.name}
+                    type="button"
+                    role="radio"
+                    aria-checked={(d.effect ?? null) === fx.id}
+                    onClick={() => pickEffect(fx.id)}
+                  >
+                    <svg className="gft-pp-fx-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                      {fx.id === "confetti" ? (
+                        <g fill="currentColor">
+                          <rect x="4" y="5" width="3" height="6" rx="1" transform="rotate(-20 5.5 8)" />
+                          <rect x="16" y="3" width="3" height="6" rx="1" transform="rotate(25 17.5 6)" />
+                          <rect x="10" y="13" width="3" height="6" rx="1" transform="rotate(10 11.5 16)" />
+                          <circle cx="12" cy="6" r="1.6" />
+                          <circle cx="19" cy="15" r="1.6" />
+                          <circle cx="5" cy="17" r="1.6" />
+                        </g>
+                      ) : fx.id === "hearts" ? (
+                        <path fill="currentColor" d="M12 20s-6.8-4.2-8.7-8.3C1.9 8.4 3.9 5 7.2 5c1.9 0 3.3 1.1 4.8 3 1.5-1.9 2.9-3 4.8-3 3.3 0 5.3 3.4 3.9 6.7C18.8 15.8 12 20 12 20Z" />
+                      ) : fx.id === "sparkles" ? (
+                        <path fill="currentColor" d="M10 3c.7 5 3 7.3 8 8-5 .7-7.3 3-8 8-.7-5-3-7.3-8-8 5-.7 7.3-3 8-8Zm8.5 9.5c.3 2 1.2 2.9 3.2 3.2-2 .3-2.9 1.2-3.2 3.2-.3-2-1.2-2.9-3.2-3.2 2-.3 2.9-1.2 3.2-3.2Z" />
+                      ) : (
+                        <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                      )}
+                    </svg>
+                    {fx.name}
+                  </button>
+                ))}
               </div>
             </div>
             {SCENE_GROUPS.map((g) => (

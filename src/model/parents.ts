@@ -34,6 +34,8 @@ export interface ParentCheckoutStart {
    *  model/giftPhoto.ts; at most 1.5M characters). Both optional. */
   gift_scene?: string | null;
   gift_photo?: string | null;
+  /** What plays as they open it: confetti | hearts | sparkles, or null. */
+  gift_effect?: string | null;
   utm?: Record<string, string>;
 }
 export interface ParentCheckoutStarted {
@@ -83,6 +85,7 @@ export type GiftInfo =
       scene?: string | null;
       /** A short-lived link to the parent's photo, if they added one. */
       photo_url?: string | null;
+      effect?: string | null;
     }
   | { state: "ended"; to: string | null; from: string };
 
@@ -130,6 +133,7 @@ type MockState = {
   gift_from?: string | null;
   gift_scene?: string | null;
   gift_photo?: string | null;
+  gift_effect?: string | null;
 };
 const mockGet = (): MockState | null => {
   try {
@@ -158,6 +162,7 @@ export async function startParentCheckout(req: ParentCheckoutStart): Promise<Par
       gift_from: req.gift_from ?? null,
       gift_scene: req.gift_scene ?? null,
       gift_photo: req.gift_photo ?? null,
+      gift_effect: req.gift_effect ?? null,
     });
     return { checkout_id: "mock", client_secret: "pi_mock_secret_mock", first_cents: 399, monthly_cents: 799 };
   }
@@ -247,6 +252,7 @@ export async function lookupGift(gift_token: string): Promise<GiftInfo> {
       masked_phone: mask(s?.student_phone ?? "5405550123"),
       scene: s?.gift_scene ?? null,
       photo_url: s?.gift_photo ?? null,
+      effect: s?.gift_effect ?? null,
     };
   }
   return call("gift_lookup", { gift_token });

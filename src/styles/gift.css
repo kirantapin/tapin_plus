@@ -2125,3 +2125,108 @@ button.tpg-env-link {
     transition: none;
   }
 }
+
+/* ══ WHEN THEY OPEN IT (routes/giftDelight.ts, 6 Nov 2026) ═══════════════════ */
+.gft-delight {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.gft-delight-bit {
+  position: absolute;
+  display: block;
+  will-change: transform, opacity;
+}
+.gft-delight-bit svg {
+  display: block;
+  transform: translate(-50%, -50%);
+}
+.gft-delight-strip {
+  display: block;
+  width: 7px;
+  height: 12px;
+  border-radius: 1.5px;
+}
+.gft-delight-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+/* "Close it" in the builder: the button the envelope had, back. */
+.gft-reseal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* The pick in the panel: four chips in a row. */
+.gft-pp-fx {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.gft-pp-fx button {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 4px 9px;
+  border: 0;
+  border-radius: 12px;
+  background: #f0f0f0;
+  color: rgba(20, 22, 24, 0.7);
+  font: 600 12px/14px "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 160ms ease-out, color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.gft-pp-fx button[aria-checked="true"] {
+  background: #ffffff;
+  color: #141618;
+  box-shadow: inset 0 0 0 2px #141618;
+}
+.gft-pp-fx button:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.gft-pp-fx-ico {
+  font-size: 18px;
+  line-height: 20px;
+  color: #861f41;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gft-pp-fx button {
+    transition: none;
+  }
+}
+
+/* Thanksgiving and New Year's (6 Nov 2026): pumpkins, acorns and leaves on
+   burnt orange; firework bursts on deep navy. Seasonal, so busy: the heading
+   takes the paper strip. */
+.gft-a[data-scene="thanksgiving"] .gft-scene-pat,
+.scene-swatch[data-scene="thanksgiving"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cg transform='translate(40 44) scale(1.25)'%3E%3Cellipse cx='-7' cy='0' rx='9' ry='11' fill='%23F7F3EA'/%3E%3Cellipse cx='7' cy='0' rx='9' ry='11' fill='%23F7F3EA'/%3E%3Cellipse cx='0' cy='0' rx='9' ry='12' fill='%23F7F3EA'/%3E%3Cpath d='M0 -11 C0 -16 2 -18 4 -19' stroke='%236B3416' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M-3 -3 V6 M3 -3 V6' stroke='%236B3416' stroke-opacity='.18' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(128 120) scale(1.0)'%3E%3Cellipse cx='-7' cy='0' rx='9' ry='11' fill='%23F2B36B'/%3E%3Cellipse cx='7' cy='0' rx='9' ry='11' fill='%23F2B36B'/%3E%3Cellipse cx='0' cy='0' rx='9' ry='12' fill='%23F2B36B'/%3E%3Cpath d='M0 -11 C0 -16 2 -18 4 -19' stroke='%236B3416' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M-3 -3 V6 M3 -3 V6' stroke='%236B3416' stroke-opacity='.18' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(136 30) scale(0.6)'%3E%3Cellipse cx='-7' cy='0' rx='9' ry='11' fill='%23F7F3EA'/%3E%3Cellipse cx='7' cy='0' rx='9' ry='11' fill='%23F7F3EA'/%3E%3Cellipse cx='0' cy='0' rx='9' ry='12' fill='%23F7F3EA'/%3E%3Cpath d='M0 -11 C0 -16 2 -18 4 -19' stroke='%236B3416' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M-3 -3 V6 M3 -3 V6' stroke='%236B3416' stroke-opacity='.18' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(96 76) rotate(-14) scale(1.0)'%3E%3Cpath d='M-7 0 C-7 9 0 13 0 13 C0 13 7 9 7 0Z' fill='%23861F41'/%3E%3Cpath d='M-8.5 0 C-8 -6 8 -6 8.5 0Z' fill='%236B3416'/%3E%3Cpath d='M0 -5 V-9' stroke='%236B3416' stroke-width='2' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(30 132) rotate(18) scale(0.9)'%3E%3Cpath d='M-7 0 C-7 9 0 13 0 13 C0 13 7 9 7 0Z' fill='%23861F41'/%3E%3Cpath d='M-8.5 0 C-8 -6 8 -6 8.5 0Z' fill='%236B3416'/%3E%3Cpath d='M0 -5 V-9' stroke='%236B3416' stroke-width='2' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(150 76) rotate(6) scale(0.7)'%3E%3Cpath d='M-7 0 C-7 9 0 13 0 13 C0 13 7 9 7 0Z' fill='%23861F41'/%3E%3Cpath d='M-8.5 0 C-8 -6 8 -6 8.5 0Z' fill='%236B3416'/%3E%3Cpath d='M0 -5 V-9' stroke='%236B3416' stroke-width='2' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(78 22) rotate(40) scale(0.7)'%3E%3Cpath d='M0 -14 C8 -8 9 4 0 14 C-9 4 -8 -8 0 -14Z' fill='%23F2B36B'/%3E%3Cpath d='M0 -10 V16' stroke='%23F2B36B' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(70 140) rotate(-30) scale(0.8)'%3E%3Cpath d='M0 -14 C8 -8 9 4 0 14 C-9 4 -8 -8 0 -14Z' fill='%23F7F3EA'/%3E%3Cpath d='M0 -10 V16' stroke='%23F7F3EA' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(16 86) rotate(70) scale(0.6)'%3E%3Cpath d='M0 -14 C8 -8 9 4 0 14 C-9 4 -8 -8 0 -14Z' fill='%23F2B36B'/%3E%3Cpath d='M0 -10 V16' stroke='%23F2B36B' stroke-width='1.6' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 170px 170px, #c4581f;
+}
+.gft-a[data-scene="newyear"] .gft-scene-pat,
+.scene-swatch[data-scene="newyear"] {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cg transform='translate(46 46)' stroke='%23F2B36B' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M9.1 0.0 L26.0 0.0'/%3E%3Cpath d='M7.9 4.5 L22.5 13.0'/%3E%3Cpath d='M4.6 7.9 L13.0 22.5'/%3E%3Cpath d='M0.0 9.1 L0.0 26.0'/%3E%3Cpath d='M-4.5 7.9 L-13.0 22.5'/%3E%3Cpath d='M-7.9 4.5 L-22.5 13.0'/%3E%3Cpath d='M-9.1 0.0 L-26.0 0.0'/%3E%3Cpath d='M-7.9 -4.6 L-22.5 -13.0'/%3E%3Cpath d='M-4.6 -7.9 L-13.0 -22.5'/%3E%3Cpath d='M-0.0 -9.1 L-0.0 -26.0'/%3E%3Cpath d='M4.5 -7.9 L13.0 -22.5'/%3E%3Cpath d='M7.9 -4.6 L22.5 -13.0'/%3E%3C/g%3E%3Ccircle cx='75.6' cy='53.9' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='67.7' cy='67.7' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='53.9' cy='75.6' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='38.1' cy='75.6' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='24.3' cy='67.7' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='16.4' cy='53.9' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='16.4' cy='38.1' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='24.3' cy='24.3' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='38.1' cy='16.4' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='53.9' cy='16.4' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='67.7' cy='24.3' r='1.6' fill='%23F2B36B'/%3E%3Ccircle cx='75.6' cy='38.1' r='1.6' fill='%23F2B36B'/%3E%3Cg transform='translate(128 118)' stroke='%23F7F3EA' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M7.0 0.0 L20.0 0.0'/%3E%3Cpath d='M5.7 4.1 L16.2 11.8'/%3E%3Cpath d='M2.2 6.7 L6.2 19.0'/%3E%3Cpath d='M-2.2 6.7 L-6.2 19.0'/%3E%3Cpath d='M-5.7 4.1 L-16.2 11.8'/%3E%3Cpath d='M-7.0 0.0 L-20.0 0.0'/%3E%3Cpath d='M-5.7 -4.1 L-16.2 -11.8'/%3E%3Cpath d='M-2.2 -6.7 L-6.2 -19.0'/%3E%3Cpath d='M2.2 -6.7 L6.2 -19.0'/%3E%3Cpath d='M5.7 -4.1 L16.2 -11.8'/%3E%3C/g%3E%3Ccircle cx='150.8' cy='124.1' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='142.9' cy='136.3' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='129.2' cy='141.6' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='115.1' cy='137.8' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='106.0' cy='126.5' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='105.2' cy='111.9' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='113.1' cy='99.7' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='126.8' cy='94.4' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='140.9' cy='98.2' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='150.0' cy='109.5' r='1.6' fill='%23F7F3EA'/%3E%3Cg transform='translate(132 32)' stroke='%23E5751F' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M3.8 0.0 L11.0 0.0'/%3E%3Cpath d='M2.7 2.7 L7.8 7.8'/%3E%3Cpath d='M0.0 3.8 L0.0 11.0'/%3E%3Cpath d='M-2.7 2.7 L-7.8 7.8'/%3E%3Cpath d='M-3.8 0.0 L-11.0 0.0'/%3E%3Cpath d='M-2.7 -2.7 L-7.8 -7.8'/%3E%3Cpath d='M-0.0 -3.8 L-0.0 -11.0'/%3E%3Cpath d='M2.7 -2.7 L7.8 -7.8'/%3E%3C/g%3E%3Ccircle cx='144.5' cy='35.4' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='138.5' cy='43.2' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='128.6' cy='44.5' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='120.8' cy='38.5' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='119.5' cy='28.6' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='125.5' cy='20.8' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='135.4' cy='19.5' r='1.6' fill='%23E5751F'/%3E%3Ccircle cx='143.2' cy='25.5' r='1.6' fill='%23E5751F'/%3E%3Cg transform='translate(36 136)' stroke='%23F7F3EA' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4.5 0.0 L13.0 0.0'/%3E%3Cpath d='M3.2 3.2 L9.2 9.2'/%3E%3Cpath d='M0.0 4.5 L0.0 13.0'/%3E%3Cpath d='M-3.2 3.2 L-9.2 9.2'/%3E%3Cpath d='M-4.5 0.0 L-13.0 0.0'/%3E%3Cpath d='M-3.2 -3.2 L-9.2 -9.2'/%3E%3Cpath d='M-0.0 -4.5 L-0.0 -13.0'/%3E%3Cpath d='M3.2 -3.2 L9.2 -9.2'/%3E%3C/g%3E%3Ccircle cx='50.8' cy='140.0' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='43.7' cy='149.3' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='32.0' cy='150.8' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='22.7' cy='143.7' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='21.2' cy='132.0' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='28.3' cy='122.7' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='40.0' cy='121.2' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='49.3' cy='128.3' r='1.6' fill='%23F7F3EA'/%3E%3Ccircle cx='90' cy='84' r='2.2' fill='%23E5751F'/%3E%3Ccircle cx='100' cy='20' r='1.8' fill='%23F7F3EA'/%3E%3Ccircle cx='14' cy='92' r='2' fill='%23F2B36B'/%3E%3Ccircle cx='156' cy='158' r='1.8' fill='%23F2B36B'/%3E%3Ccircle cx='80' cy='150' r='2' fill='%23E5751F'/%3E%3Ccircle cx='160' cy='86' r='1.6' fill='%23F7F3EA'/%3E%3C/svg%3E") 0 0 / 170px 170px, #14193d;
+}
+.gft-a:is([data-scene="thanksgiving"], [data-scene="newyear"]) .gft-h1-in {
+  padding: 2px 12px 5px;
+  background: #f7f3ea;
+  color: #141618;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.gft-a:is([data-scene="thanksgiving"], [data-scene="newyear"]) .gft-h1 {
+  line-height: 46px;
+}
+.scene-swatch[data-scene="thanksgiving"] { background-size: 84px 84px; }
+.scene-swatch[data-scene="newyear"] { background-size: 84px 84px; }
+.tpg-env-bg.scene-swatch:is([data-scene="thanksgiving"], [data-scene="newyear"]) {
+  background-size: 170px 170px;
+}
+.gft-pp-fx-ico {
+  display: block;
+}

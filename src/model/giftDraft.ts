@@ -8,7 +8,7 @@
    URL of up to 1.5M characters, and it's a family's own). Cleared once a
    checkout goes through. */
 import { useSyncExternalStore } from "react";
-import type { SceneId } from "./gift";
+import type { Delight, SceneId } from "./gift";
 
 export type GiftDraft = {
   /** The student's first name, as typed. */
@@ -19,9 +19,11 @@ export type GiftDraft = {
   scene: SceneId;
   /** A JPEG data URL (model/giftPhoto.ts shrinkPhoto), or null. */
   photo: string | null;
+  /** What plays as they open it, or none. */
+  effect: Delight | null;
 };
 
-const EMPTY: GiftDraft = { to: "", note: "", from: "", scene: "maroon", photo: null };
+const EMPTY: GiftDraft = { to: "", note: "", from: "", scene: "maroon", photo: null, effect: null };
 let draft: GiftDraft = EMPTY;
 const subs = new Set<() => void>();
 
@@ -39,7 +41,7 @@ export function clearGiftDraft() {
 
 /** Whether they've made any of the gift theirs (beyond the student's name). */
 export const giftDraftTouched = (d: GiftDraft = draft): boolean =>
-  !!(d.note.trim() || d.from.trim() || d.photo || d.scene !== EMPTY.scene);
+  !!(d.note.trim() || d.from.trim() || d.photo || d.effect || d.scene !== EMPTY.scene);
 
 const subscribe = (f: () => void) => {
   subs.add(f);
