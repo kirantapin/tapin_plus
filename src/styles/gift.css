@@ -1616,20 +1616,6 @@ button.tpg-env-link {
     border-radius: 999px;
     background: rgba(20, 22, 24, 0.16);
   }
-  .gft-pp-peek {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 32px;
-    margin-top: 6px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 999px;
-    background: #f0f0f0;
-    color: #141618;
-    font: 600 13px/1 "Gilroy", Arial, sans-serif;
-    cursor: pointer;
-  }
   .gft-pp-peek:focus-visible,
   .gft-peek-back:focus-visible {
     outline: 3px solid #e5751f;
@@ -2129,19 +2115,7 @@ button.tpg-env-link {
     width: 100%;
   }
   /* Preview over the page, top centre. */
-  .gft-pp-peek {
-    position: fixed;
-    z-index: 71;
-    top: calc(12px + env(safe-area-inset-top));
-    left: 50%;
-    height: 40px;
-    margin: 0;
-    padding: 0 16px 0 13px;
-    background: #ffffff;
-    font-size: 15px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-    translate: -50% 0;
-  }
+
   /* Close at the top left while the drawer is down. */
   .gft-preview[data-builder][data-peek] .gft-preview-back {
     display: inline-flex;

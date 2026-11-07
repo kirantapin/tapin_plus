@@ -1584,17 +1584,9 @@ export function GiftPreview({
         </aside>
       ) : null}
       <div ref={veil} className="gft-preview-veil" aria-hidden="true" />
-      {/* Preview, over the page at the top centre while the drawer is up
-          (Sam, 6 Nov 2026: "we should make the preview button overlay the
-          banner at the top in the center when the modal is open"). */}
-      {!wide && builder && !peek ? (
-        <button type="button" className="gft-pp-peek" onClick={() => setPeek(true)}>
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-          </svg>
-          Preview
-        </button>
-      ) : null}
+      {/* No Preview button (Sam, 6 Nov 2026: "instead of having the preview
+          button I think we should just let the X on the modal do the
+          work"): the drawer's × collapses it to show the card. */}
     </div>,
     document.body,
   );
