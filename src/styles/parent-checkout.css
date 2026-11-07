@@ -936,3 +936,32 @@ fieldset.prc-module {
     transition: none;
   }
 }
+
+/* The promise above Pay (7 Nov 2026): four quiet lines, a green glyph each,
+   the same as the promise under the parents page's offer card. */
+.prc-promise {
+  display: grid;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  list-style: none;
+  border-top: 1px solid rgba(20, 22, 24, 0.08);
+}
+.prc-promise li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 19px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.prc-promise b {
+  font-weight: 600;
+  color: #141618;
+}
+.prc-promise svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: #0b7a53;
+}
