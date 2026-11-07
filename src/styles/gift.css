@@ -2690,3 +2690,39 @@ button.tpg-env-link {
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
   }
 }
+
+/* ══ "WE KEPT YOUR CARE PACKAGE FROM EARLIER" (Sam, 7 Nov 2026) ═════════════
+   A save from earlier came back (model/checkoutResume.ts, shell/
+   ResumeLine.tsx): one quiet line under the head's own line, on the step it
+   came back to, with "Start over" as text beside it. The head's grid gets a
+   row for it, between the line and the bars. */
+.gft-preview .gft-pp-head:has(> .gft-pp-kept) {
+  grid-template-areas: "title x" "sub sub" "kept kept" "steps steps";
+}
+.gft-pp-head > .gft-pp-kept {
+  grid-area: kept;
+}
+.gft-pp-kept {
+  margin: 0;
+  font: 500 13px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.gft-pp-kept button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #141618;
+  font: 600 13px/18px "Gilroy", Arial, sans-serif;
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 22, 24, 0.3);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gft-pp-kept button:hover {
+  text-decoration-color: currentColor;
+}
+.gft-pp-kept button:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

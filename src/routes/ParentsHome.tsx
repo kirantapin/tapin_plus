@@ -11,7 +11,8 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { logoField } from "../model/content";
 import { captureUtm, lookupAskLink } from "../model/parents";
-import ParentCheckout, { hasChargedParentCheckout } from "../shell/ParentCheckout";
+import ParentCheckout, { hasChargedParentCheckout, resumeStep } from "../shell/ParentCheckout";
+import { hydrateGiftDraft } from "../model/giftDraft";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import {
@@ -252,6 +253,10 @@ const askToken = (): string | null => {
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
 
+  /* The care package and checkout as they left it, if it's under a day old
+     (model/checkoutResume.ts): before anything draws, so the band and the
+     builder open on their pick. */
+  useState(hydrateGiftDraft);
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
   const headline = PARENT_HEROES[hero];
@@ -847,6 +852,7 @@ export default function ParentsHome() {
           onClose={() => setBuilding(false)}
           action={{ label: "Continue", onClick: () => {} }}
           startNext={hasChargedParentCheckout()}
+          resumeAt={resumeStep(!!asked)}
           next={(back, close, collapse) => (
             <ParentCheckout
               embedded
