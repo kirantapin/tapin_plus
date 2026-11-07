@@ -3,7 +3,7 @@ import { asset } from "../asset";
 import { logoField } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
+import { CREDIT, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -15,8 +15,9 @@ import { CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT,
    drawing changed. Motion is the Web Animations API, once, when the piece
    is first in view; with reduced motion everything is simply there. */
 
-/** True once the element has been 40% in view (or at once without an observer). */
-function useSeen<T extends Element>(): [RefObject<T>, boolean] {
+/** True once the element has been 40% in view (or `threshold` of it; at once
+    without an observer). */
+function useSeen<T extends Element>(threshold = 0.4): [RefObject<T>, boolean] {
   const ref = useRef<T>(null);
   const [seen, setSeen] = useState(false);
   useEffect(() => {
@@ -32,10 +33,12 @@ function useSeen<T extends Element>(): [RefObject<T>, boolean] {
           io.disconnect();
         }
       },
-      { threshold: 0.4 },
+      { threshold },
     );
     io.observe(el);
     return () => io.disconnect();
+    // Once, at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return [ref, seen];
 }
@@ -813,6 +816,237 @@ export function HowPhone() {
             </li>
           ))}
         </ol>
+      </div>
+    </div>
+  );
+}
+
+/* ══ WHAT $5 BACK LOOKS LIKE: THEIR PHONE (Sam's pick D, 7 Nov 2026) ═════════
+   Over their shoulder at the moment they pay: the phone leans out of the
+   page's maroon panel, an orange sun low behind it, and the place's checkout
+   sheet sits over the dish they tapped, dimmed the way the app dims. One
+   real food order at its menu price (Sweetopia's two ice creams as two
+   lines), the Plus credit line, what they pay. The five places switch it:
+   discs under the panel on a phone, a list beside it on a computer (the
+   phone on the left, mirroring How it works). The beat, once, when the
+   panel is half in view: the sheet rises, the credit line slots into the
+   order as the Plus mark's four pieces close, the -$5.00 lands, then the
+   total and the button roll to what they pay (about 1s). A tap crossfades
+   the order and plays the same beat, quicker. The beat's first frame is
+   held from mount, so the finished sheet never shows first and then drops.
+   Reduced motion: the finished sheet. */
+const POP = "cubic-bezier(.34,1.56,.64,1)";
+const MARK_FROM: ReadonlyArray<[number, number]> = [
+  [-3, -2],
+  [3, -1.5],
+  [2, 3],
+  [-3, 2],
+];
+export function CheckoutPhone() {
+  const [stage, seen] = useSeen<HTMLDivElement>(0.5);
+  const [which, setWhich] = useState(0);
+  const runs = useRef<Animation[]>([]);
+  const played = useRef(false);
+  const tapped = useRef(false);
+  const stop = () => {
+    runs.current.forEach((a) => a.cancel());
+    runs.current = [];
+  };
+  const beat = (first: boolean) => {
+    stop();
+    const el = stage.current;
+    if (!el || reducedMotion()) return;
+    const q = (sel: string) => el.querySelector<HTMLElement>(sel);
+    const add = (n: Element | null | undefined, frames: Keyframe[], opts: KeyframeAnimationOptions) => {
+      const a = n?.animate?.(frames, opts);
+      if (a) runs.current.push(a);
+    };
+    /* A tap skips the rise, so everything after it comes 380ms sooner. */
+    const t = first ? 0 : -380;
+    if (first)
+      add(q(".tpp-fb-sheet"), [{ transform: "translateY(100%)" }, { transform: "none" }], {
+        duration: 620,
+        easing: EASE_OUT,
+        fill: "backwards",
+      });
+    else {
+      add(q(".tpp-fb-behind img"), [{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: EASE_OUT });
+      el.querySelectorAll(".tpp-fb-head, .tpp-fb-items").forEach((n) =>
+        add(
+          n,
+          [
+            { opacity: 0, transform: "translateY(6px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 300, easing: EASE_OUT },
+        ),
+      );
+    }
+    const credit = q(".tpp-fb-credit");
+    add(
+      credit,
+      [
+        { height: "0px", opacity: 0 },
+        { height: `${credit?.scrollHeight ?? 0}px`, opacity: 1 },
+      ],
+      { duration: 420, delay: 560 + t, easing: EASE_OUT, fill: "backwards" },
+    );
+    credit?.querySelectorAll("svg path").forEach((p, k) => {
+      const [x, y] = MARK_FROM[k] ?? [0, 0];
+      add(
+        p,
+        [
+          { transform: `translate(${x}px,${y}px)`, opacity: 0 },
+          { transform: "none", opacity: 1 },
+        ],
+        { duration: 520, delay: 620 + t + k * 40, easing: EASE_OUT, fill: "backwards" },
+      );
+    });
+    add(
+      q(".tpp-fb-off"),
+      [
+        { transform: "scale(.6)", opacity: 0 },
+        { transform: "none", opacity: 1 },
+      ],
+      { duration: 420, delay: 760 + t, easing: POP, fill: "backwards" },
+    );
+    el.querySelectorAll(".tpp-fb-swap").forEach((sw, k) => {
+      const opts: KeyframeAnimationOptions = { duration: 340, delay: 1000 + t + k * 50, easing: EASE_OUT, fill: "both" };
+      add(
+        sw.querySelector(".was"),
+        [
+          { transform: "none", opacity: 1 },
+          { transform: "translateY(-70%)", opacity: 0 },
+        ],
+        opts,
+      );
+      add(
+        sw.querySelector(".now"),
+        [
+          { transform: "translateY(70%)", opacity: 0 },
+          { transform: "none", opacity: 1 },
+        ],
+        opts,
+      );
+    });
+  };
+  /* Before the first paint: the beat's first frame, held until it is seen. */
+  useLayoutEffect(() => {
+    if (!reducedMotion() && typeof IntersectionObserver !== "undefined") {
+      beat(true);
+      runs.current.forEach((a) => a.pause());
+    }
+    return stop;
+    // Once, at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!seen || played.current) return;
+    played.current = true;
+    beat(true);
+    // Once, when first seen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seen]);
+  /* A tap: the new order is in the DOM, not yet painted. */
+  useLayoutEffect(() => {
+    if (!tapped.current) return;
+    tapped.current = false;
+    played.current = true;
+    beat(false);
+    // On each tap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [which]);
+  const pick = (i: number) => {
+    if (i === which) return;
+    tapped.current = true;
+    setWhich(i);
+  };
+  const p = PLACES[which] ?? PLACES[0];
+  if (!p) return null;
+  const now = Math.max(0, p.order.price - CREDIT);
+  return (
+    <div className="tpp-fb tnum">
+      <div className="tpp-fb-grid">
+        <div
+          ref={stage}
+          className="tpp-fb-stage"
+          role="img"
+          aria-label={`Their phone at checkout at ${p.name}: ${p.order.label}, ${money(p.order.price)}. Plus credit, minus ${money(CREDIT)}. Total ${money(now)}.`}
+        >
+          <span className="tpp-fb-sun" />
+          <div className="tpp-fb-phone">
+            <div className="tpp-fb-screen">
+              <div className="tpp-fb-behind">
+                <img src={p.order.img} alt="" decoding="async" />
+              </div>
+              <div className="tpp-fb-sheet">
+                <span className="tpp-fb-grab" />
+                <p className="tpp-fb-head">
+                  <span className="collar" data-field={logoField(p.id)}>
+                    <img src={p.logo} alt="" decoding="async" />
+                  </span>
+                  {p.name}
+                </p>
+                <div className="tpp-fb-items">
+                  {p.lines.map((l) => (
+                    <p key={l.name} className="tpp-fb-item">
+                      <img src={l.img} alt="" decoding="async" />
+                      <span>{lineLabel(l)}</span>
+                      <b>{money(Math.round(l.price * l.qty * 100) / 100)}</b>
+                    </p>
+                  ))}
+                </div>
+                <div className="tpp-fb-credit">
+                  <p>
+                    <FlatMark />
+                    <span>Plus credit</span>
+                    <b className="tpp-fb-off">&minus;{money(CREDIT)}</b>
+                  </p>
+                </div>
+                <p className="tpp-fb-total">
+                  <span>Total</span>
+                  <span className="tpp-fb-swap">
+                    <b className="was">{money(p.order.price)}</b>
+                    <b className="now">{money(now)}</b>
+                  </span>
+                </p>
+                <p className="tpp-fb-pay">
+                  <span className="tpp-fb-swap">
+                    <b className="was">Pay {money(p.order.price)}</b>
+                    <b className="now">Pay {money(now)}</b>
+                  </span>
+                </p>
+                <span className="tpp-fb-home" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="tpp-fb-side">
+          <div className="tpp-fb-picks" role="group" aria-label="Example orders">
+            {PLACES.map((x, i) => (
+              <button
+                key={x.id}
+                type="button"
+                className="tpp-fb-pick"
+                aria-label={`Show an order at ${x.name}`}
+                aria-pressed={i === which}
+                onClick={() => pick(i)}
+              >
+                <span className="collar" data-field={logoField(x.id)}>
+                  <img src={x.logo} alt="" decoding="async" />
+                </span>
+                <span className="tpp-fb-pick-text" aria-hidden="true">
+                  <b>{x.name}</b>
+                  <small>{x.order.label}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="tpp-math">
+            They earn the ${CREDIT} on a ${MIN_ORDER}+ meal, and it comes off their next order there. Two credits a month
+            cover the {MONTHLY}. Alcohol is never discounted.
+          </p>
+        </div>
       </div>
     </div>
   );

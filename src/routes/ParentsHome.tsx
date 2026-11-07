@@ -21,7 +21,6 @@ import {
   FIRST,
   MONTHLY,
   PLACES,
-  money,
   reducedMotion,
   Chevron,
   Glyph,
@@ -30,7 +29,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -219,139 +218,6 @@ function Proof() {
         </span>
         {PROOF_STUDENTS}
       </p>
-    </div>
-  );
-}
-
-/* ══ THE ORDER CARD, A PARENT'S VERSION ══════════════════════════════════════
-   The student page's How it works card in its grey look (the same classes,
-   so it reads as the same object): the five logos in the segmented track, one
-   real food order, their $5 credit dropping in, what they pay. Tap a logo to
-   see that place's order. No auto-cycle, no points, no "more joining" tab:
-   quieter, and only the food. The beat is the student card's (420ms in,
-   credit at 500ms, the total swapping at 820ms), played the first time the
-   card is in view and on each tap. Reduced motion: the finished card. */
-function OrderCard() {
-  const card = useRef<HTMLDivElement | null>(null);
-  const [which, setWhich] = useState(0);
-  const [seen, setSeen] = useState(false);
-  useEffect(() => {
-    const el = card.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      setSeen(true);
-      return;
-    }
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e?.isIntersecting) {
-          setSeen(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.5 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  useEffect(() => {
-    const body = card.current;
-    if (!body || !seen || reducedMotion()) return;
-    const ease = "cubic-bezier(.22,1,.36,1)";
-    const q = (sel: string) => body.querySelector<HTMLElement>(sel);
-    const runs = [
-      q(".tpa-order-in")?.animate?.(
-        [
-          { opacity: 0, transform: "translateY(8px)" },
-          { opacity: 1, transform: "none" },
-        ],
-        { duration: 420, easing: ease },
-      ),
-      q(".tpa-order-off")?.animate?.(
-        [
-          { opacity: 0, transform: "translateY(-12px)" },
-          { opacity: 1, transform: "none" },
-        ],
-        { duration: 380, delay: 500, easing: ease, fill: "backwards" },
-      ),
-      q(".tpa-swap .was")?.animate?.(
-        [
-          { opacity: 1, transform: "none" },
-          { opacity: 0, transform: "translateY(-7px)" },
-        ],
-        { duration: 300, delay: 820, easing: ease, fill: "both" },
-      ),
-      q(".tpa-swap .now")?.animate?.(
-        [
-          { opacity: 0, transform: "translateY(9px)" },
-          { opacity: 1, transform: "none" },
-        ],
-        { duration: 300, delay: 820, easing: ease, fill: "both" },
-      ),
-    ];
-    return () => runs.forEach((r) => r?.cancel());
-  }, [which, seen]);
-  const p = PLACES[which] ?? PLACES[0];
-  if (!p) return null;
-  return (
-    <div
-      ref={card}
-      className="tpa-carousel tpp-order"
-      data-tabs="a"
-      data-look="colour"
-      data-grey=""
-      role="group"
-      aria-label="Example orders"
-      style={{
-        ["--brand" as string]: "var(--well)",
-        ["--brand-ink" as string]: "var(--ink)",
-      }}
-    >
-      <div
-        className="tpa-tabs"
-        style={{ ["--i" as string]: which, ["--n" as string]: PLACES.length }}
-      >
-        <span className="tpa-tab-plate" aria-hidden="true" />
-        {PLACES.map((x, i) => (
-          <button
-            key={x.id}
-            type="button"
-            aria-label={`Show an order at ${x.name}`}
-            aria-pressed={i === which}
-            data-on={i === which ? "" : undefined}
-            onClick={() => setWhich(i)}
-          >
-            <span className="collar tpa-tab-logo" data-field={logoField(x.id)}>
-              <img src={x.logo} alt="" decoding="async" />
-            </span>
-            <span className="tpa-tab-name" aria-hidden="true">
-              {x.name}
-            </span>
-          </button>
-        ))}
-      </div>
-      <div className="tpa-order">
-        <p className="tpa-order-band">
-          <b>{p.name}</b>
-        </p>
-        <div className="tpa-order-in" key={which}>
-          <p className="tpa-order-item">
-            <img src={p.order.img} alt="" decoding="async" />
-            <span>{p.order.label}</span>
-            <b className="tnum">{money(p.order.price)}</b>
-          </p>
-          <p className="tpa-order-off">
-            <span>Their ${CREDIT} credit</span>
-            <b className="tnum">&minus;{money(CREDIT)}</b>
-          </p>
-          <p className="tpa-order-total">
-            <span>They pay</span>
-            <span className="tpa-swap">
-              <b className="was tnum">{money(p.order.price)}</b>
-              <b className="now tnum">{money(p.order.price - CREDIT)}</b>
-            </span>
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
@@ -554,7 +420,7 @@ export default function ParentsHome() {
     },
     {
       q: "What if they don’t use it?",
-      a: `Two $${MIN_ORDER} orders a month cover the cost. If it isn’t getting used, you or your student can cancel anytime. If they never sign in within 14 days, we refund you in full.`,
+      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If it isn’t getting used, you or your student can cancel anytime. If they never sign in within 14 days, we refund you in full.`,
     },
     {
       q: "Can I see what they order?",
@@ -778,16 +644,13 @@ export default function ParentsHome() {
           </details>
         </section>
 
-        {/* What a week looks like, in one order. */}
+        {/* What a week looks like, in one order, on their phone (Sam's pick
+            D, 7 Nov 2026). */}
         <section className="tpa-module" aria-labelledby="tpp-save">
           <h2 id="tpp-save" className="tpa-h2">
             What ${CREDIT} back looks like
           </h2>
-          <OrderCard />
-          <p className="tpp-math tnum">
-            Two ${MIN_ORDER} orders a month cover the {MONTHLY}. Alcohol is
-            never discounted.
-          </p>
+          <CheckoutPhone />
         </section>
 
         <section className="tpa-places tpp-places" aria-labelledby="tpp-every">

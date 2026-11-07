@@ -51,7 +51,19 @@ export interface Place {
   what: string;
   photo: string;
   order: { label: string; price: number; img: string };
+  /** The order's own lines, before they are collapsed into `order.label`
+      (Sweetopia's two ice creams, The Burg's three tacos): the unit price,
+      the item's photograph and how many. */
+  lines: OrderLine[];
 }
+export interface OrderLine {
+  name: string;
+  price: number;
+  img: string;
+  qty: number;
+}
+/** A line as the order says it: "3 Pastor tacos", or the item's name. */
+export const lineLabel = (l: { name: string; qty: number }) => (l.qty > 1 ? `${l.qty} ${l.name} tacos` : l.name);
 
 export const PLACES: Place[] = PLACE_DEFS.map((d): Place | null => {
   const v = venues.find((x) => x.id === d.id);
@@ -59,9 +71,8 @@ export const PLACES: Place[] = PLACE_DEFS.map((d): Place | null => {
   const items = d.order.map((p) => ({ item: itemNamed(d.id, p.name), qty: p.qty ?? 1 }));
   const price = Math.round(items.reduce((s, { item, qty }) => s + item.price * qty, 0) * 100) / 100;
   if (price < MIN_ORDER) return null;
-  const label = items
-    .map(({ item, qty }) => (qty > 1 ? `${qty} ${item.name} tacos` : item.name))
-    .join(" + ");
+  const lines = items.map(({ item, qty }) => ({ name: item.name, price: item.price, img: item.img ?? asset(d.photo), qty }));
+  const label = lines.map(lineLabel).join(" + ");
   return {
     id: d.id,
     name: v.name,
@@ -69,6 +80,7 @@ export const PLACES: Place[] = PLACE_DEFS.map((d): Place | null => {
     what: d.what,
     photo: asset(d.photo),
     order: { label, price, img: items[0]?.item.img ?? asset(d.photo) },
+    lines,
   };
 }).filter((p): p is Place => p !== null);
 
