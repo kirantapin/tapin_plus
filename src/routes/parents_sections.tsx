@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { asset } from "../asset";
 import { logoField } from "../model/content";
-import { Chevron, CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
+import { CREDIT, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -41,14 +42,23 @@ function useSeen<T extends Element>(): [RefObject<T>, boolean] {
  *  seen. The animations are made paused at mount, so what is waiting below
  *  sits at its first frame and never shows drawn first, then replays; with
  *  reduced motion (or no animation support) everything is simply there. */
-function useStagger(root: RefObject<Element>, seen: boolean, sel: string, frames: Keyframe[], step: number, duration: number) {
+function useStagger(
+  root: RefObject<Element>,
+  seen: boolean,
+  sel: string,
+  frames: Keyframe[],
+  step: number,
+  duration: number,
+  delay = 60,
+  easing = "cubic-bezier(.16,1,.3,1)",
+) {
   const runs = useRef<Array<Animation | undefined>>([]);
   /* Before the first paint, so nothing is ever drawn finished first. */
   useLayoutEffect(() => {
     const el = root.current;
     if (!el || reducedMotion()) return;
     runs.current = Array.from(el.querySelectorAll<HTMLElement>(sel)).map((n, i) => {
-      const a = n.animate?.(frames, { duration, delay: 60 + i * step, easing: "cubic-bezier(.16,1,.3,1)", fill: "backwards" });
+      const a = n.animate?.(frames, { duration, delay: delay + i * step, easing, fill: "backwards" });
       a?.pause();
       return a;
     });
@@ -272,16 +282,41 @@ export function BenefitCards() {
   );
 }
 
-/* ══ WHAT A LUNCH COSTS: COLUMNS ═════════════════════════════════════════════
-   One meal priced four ways, standing side by side to one scale (the door
-   price is the full height), the Plus column in money green. Never a plan. */
+/* ══ WHAT A LUNCH COSTS: TOWN COLOURS, TONED DOWN (Sam's pick A, 7 Nov 2026) ═
+   One meal priced four ways to one scale (the door price is the full
+   height), each price inside its own bar, and the Plus bar the $12 lunch's
+   height with its $5 lifted off the top: it stands there as a solid piece
+   of the bar first, then rises away to a dashed outline, so the drop to $7
+   happens in front of them. Sam: "a little too much color ... instead of
+   the beige background, we just do white ... the orange here and there and
+   the maroon here and there": the module stays white, the dining hall's bar
+   is a grey well, the lunch downtown is the one orange bar, Plus is money
+   green, and maroon is only "Keep their dining plan." Never a plan. */
 const OFF = Math.round(LUNCH * (100 - PERCENT)) / 100;
-export function LunchColumns() {
+const EASE_OUT = "cubic-bezier(.22,1,.36,1)";
+export function LunchBars() {
   const [list, seen] = useSeen<HTMLUListElement>();
-  useStagger(list, seen, ".tpp-col-fill", [{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], 90, 760);
-  useStagger(list, seen, ".tpp-col b", [{ opacity: 0 }, { opacity: 1 }], 90, 400);
-  const cols: Array<{ label: ReactNode; value: number; kind?: "plus" | "off" }> = [
+  useStagger(list, seen, ".tpp-lc-stack", [{ transform: "scaleY(0)" }, { transform: "scaleY(1)" }], 90, 760, 0, EASE_OUT);
+  useStagger(list, seen, ".tpp-lc-bar > b", [{ opacity: 0 }, { opacity: 1 }], 90, 300, 500);
+  /* The $5: a solid piece of the bar, then lifted off as an outline. */
+  useStagger(
+    list,
+    seen,
+    ".tpp-lc-cap",
+    [
+      { transform: "translateY(6px)", backgroundColor: "#0b7a53", color: "transparent", borderStyle: "solid", offset: 0 },
+      { transform: "translateY(6px)", backgroundColor: "#0b7a53", color: "transparent", borderStyle: "solid", offset: 0.55 },
+      { transform: "translateY(-4px)", backgroundColor: "rgba(11,122,83,0)", color: "#0b7a53", borderStyle: "solid", offset: 0.85 },
+      { transform: "none", backgroundColor: "rgba(11,122,83,0)", color: "#0b7a53", borderStyle: "dashed", offset: 1 },
+    ],
+    0,
+    1700,
+    450,
+    EASE_OUT,
+  );
+  const bars: Array<{ key: string; label: ReactNode; value: number; cap?: number }> = [
     {
+      key: "door",
       label: (
         <>
           Dining hall, paid at the door<sup>1</sup>
@@ -289,8 +324,9 @@ export function LunchColumns() {
       ),
       value: DOOR,
     },
-    { label: "A lunch downtown", value: LUNCH },
+    { key: "down", label: "A lunch downtown", value: LUNCH },
     {
+      key: "plus",
       label: (
         <>
           With Plus, using the week’s {money0(CREDIT)}
@@ -298,36 +334,59 @@ export function LunchColumns() {
         </>
       ),
       value: LUNCH - CREDIT,
-      kind: "plus",
+      cap: CREDIT,
     },
     {
+      key: "off",
       label: (
         <>
           Other orders, {PERCENT}% off<sup>2</sup>
         </>
       ),
       value: OFF,
-      kind: "off",
     },
   ];
   return (
-    <ul ref={list} className="tpp-cols tnum" aria-label="One lunch, priced four ways">
-      {cols.map((c, i) => (
-        <li key={i} data-kind={c.kind}>
-          <span className="tpp-col" style={{ ["--f" as string]: (c.value / DOOR).toFixed(4) }}>
-            <b>{money(c.value)}</b>
-            <span className="tpp-col-fill" aria-hidden="true" />
-          </span>
-          <span className="tpp-col-label">{c.label}</span>
-        </li>
-      ))}
-    </ul>
+    <div className="tpp-lc">
+      <ul ref={list} className="tpp-lc-chart tnum" aria-label="One lunch, priced four ways">
+        {bars.map((b) => (
+          <li key={b.key} data-k={b.key}>
+            <span className="tpp-lc-area">
+              <span
+                className="tpp-lc-stack"
+                style={{
+                  ["--h" as string]: ((b.value + (b.cap ?? 0)) / DOOR).toFixed(4),
+                  ["--c" as string]: ((b.cap ?? 0) / DOOR).toFixed(4),
+                }}
+              >
+                {b.cap ? (
+                  <span className="tpp-lc-cap" aria-hidden="true">
+                    &minus;{money0(b.cap)}
+                  </span>
+                ) : null}
+                <span className="tpp-lc-bar">
+                  <b>{money(b.value)}</b>
+                </span>
+              </span>
+            </span>
+            <span className="tpp-lc-label">{b.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-/* ══ HOW IT WORKS FOR YOU: TIMELINE ══════════════════════════════════════════
-   Down the page, each step with when it happens; its approved line opens
-   under it on a tap. */
+/* ══ HOW IT WORKS FOR YOU: THE PHONE (Sam's pick B, 7 Nov 2026) ══════════════
+   What happens, shown on a phone: their number goes in, the student gets
+   the text with your note, then the $5 waits at every place. The three
+   steps sit beside it (under it on a phone) and the open one says its
+   approved line. Once in view it plays itself through, a thin bar timing
+   each step, and stops on the last; a tap takes over. With reduced motion
+   it simply rests on the first step and taps still move it. Toned down
+   (Sam: "too much color"): the phone stands on the page's grey, one small
+   orange sun behind it, maroon only on the open step's glyph, its timer and
+   the gift's small marks, money green on the $5s. */
 const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode }> = [
   {
     glyph: GLYPHS.card,
@@ -353,40 +412,176 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     ),
   },
 ];
-export function HowTimeline() {
-  const [list, seen] = useSeen<HTMLOListElement>();
-  useStagger(
-    list,
-    seen,
-    ".tpp-line > li",
-    [
-      { opacity: 0, transform: "translateX(-8px)" },
-      { opacity: 1, transform: "none" },
-    ],
-    140,
-    560,
+/* A made-up number (555-01xx is the range kept for fiction). */
+const SAMPLE_NUMBER = "(540) 555-0142";
+const STEP_MS = 3600;
+const APP_ICON = asset("/brand/tapin-app-icon.png");
+const HUG = asset("/parents/hero-hug.webp");
+export function HowPhone() {
+  const [root, seen] = useSeen<HTMLDivElement>();
+  const [cur, setCur] = useState(0);
+  const [timed, setTimed] = useState<number | null>(null);
+  const auto = useRef(true);
+  const timer = useRef<number | undefined>(undefined);
+  const typing = useRef<number | undefined>(undefined);
+  const bar = useRef<Animation | undefined>(undefined);
+  const num = useRef<HTMLSpanElement | null>(null);
+  /* Before the first paint: the number waits empty for its typing. */
+  useLayoutEffect(() => {
+    if (!reducedMotion() && num.current && typeof IntersectionObserver !== "undefined") num.current.textContent = "";
+  }, []);
+  const enter = (i: number) => {
+    const el = root.current;
+    if (!el || reducedMotion()) return;
+    if (i === 0 && num.current) {
+      const n0 = num.current;
+      window.clearInterval(typing.current);
+      let n = 0;
+      n0.textContent = "";
+      typing.current = window.setInterval(() => {
+        n0.textContent = SAMPLE_NUMBER.slice(0, ++n);
+        if (n >= SAMPLE_NUMBER.length) window.clearInterval(typing.current);
+      }, 85);
+    } else if (num.current) {
+      window.clearInterval(typing.current);
+      num.current.textContent = SAMPLE_NUMBER;
+    }
+    if (i === 1)
+      el.querySelector(".tpp-hw-bub")?.animate?.(
+        [
+          { opacity: 0, transform: "translateY(14px) scale(.94)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
+      );
+    if (i === 2)
+      el.querySelectorAll(".tpp-hw-list em").forEach((m, k) =>
+        m.animate?.(
+          [
+            { opacity: 0, transform: "scale(.4)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 420, delay: 160 + k * 110, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" },
+        ),
+      );
+  };
+  const go = (i: number, play: boolean) => {
+    setCur(i);
+    enter(i);
+    bar.current?.cancel();
+    window.clearTimeout(timer.current);
+    setTimed(null);
+    if (play && auto.current && i < STEPS.length - 1) {
+      setTimed(i);
+      const fill = root.current?.querySelectorAll<HTMLElement>(".tpp-hw-timer i")[i];
+      bar.current = fill?.animate?.([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], {
+        duration: STEP_MS,
+        easing: "linear",
+        fill: "forwards",
+      });
+      timer.current = window.setTimeout(() => go(i + 1, true), STEP_MS);
+    }
+  };
+  useEffect(() => {
+    if (seen && auto.current && !reducedMotion()) go(0, true);
+    // Once, when first seen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seen]);
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      window.clearInterval(typing.current);
+      bar.current?.cancel();
+    },
+    [],
   );
+  const tap = (i: number) => {
+    auto.current = false;
+    go(i, false);
+  };
   return (
-    <ol ref={list} className="tpp-line tnum">
-      {STEPS.map((s) => (
-        <li key={s.title}>
-          {/* The step's sentence one tap under it (Sam, 6 Nov 2026: "maybe some
-              of this text is nested? there's a lot of it"). */}
-          <details className="tpp-line-step">
-            <summary>
-              <span className="tpp-line-icon">
-                <Glyph d={s.glyph} />
+    <div ref={root} className="tpp-hw tnum">
+      <div className="tpp-hw-grid">
+        <div className="tpp-hw-stage" aria-hidden="true">
+          <span className="tpp-hw-sun" />
+          <span className="tpp-hw-band" />
+          <div className="tpp-hw-phone">
+            <div className="tpp-hw-screen">
+              <span className="tpp-hw-island" />
+              <div className="tpp-hw-s" data-on={cur === 0 ? "" : undefined}>
+                <div className="tpp-hw-app">
+                  <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                  Tapin Plus
+                </div>
+                <span className="tpp-hw-lbl">Their mobile number</span>
+                <div className="tpp-hw-field">
+                  <span ref={num}>{SAMPLE_NUMBER}</span>
+                  <span className="tpp-hw-caret" />
+                </div>
+                <div className="tpp-hw-row">
+                  <span>First month</span>
+                  <b>{FIRST}</b>
+                </div>
+                <div className="tpp-hw-pay">Pay {FIRST}</div>
+              </div>
+              <div className="tpp-hw-s" data-on={cur === 1 ? "" : undefined}>
+                <div className="tpp-hw-msg">
+                  <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                  <b>Tapin</b>
+                </div>
+                <div className="tpp-hw-bub">
+                  <div className="tpp-hw-gift">
+                    <img src={HUG} alt="" decoding="async" loading="lazy" />
+                    <div>
+                      <small>For Jake</small>
+                      <span>Thinking of you, my love! Here’s a little treat.</span>
+                    </div>
+                  </div>
+                </div>
+                <span className="tpp-hw-open">Open your gift</span>
+              </div>
+              <div className="tpp-hw-s" data-on={cur === 2 ? "" : undefined}>
+                <div className="tpp-hw-wk">
+                  <b>This week</b>
+                  <FlatMark className="tpp-hw-mark" />
+                </div>
+                <ul className="tpp-hw-list">
+                  {PLACES.map((p) => (
+                    <li key={p.id}>
+                      <span className="collar" data-field={logoField(p.id)}>
+                        <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                      </span>
+                      <span>{p.name}</span>
+                      <em>{money0(CREDIT)}</em>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ol className="tpp-hw-steps">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="tpp-hw-step" data-on={cur === i ? "" : undefined} data-timed={timed === i ? "" : undefined}>
+              <button type="button" aria-expanded={cur === i} aria-controls={`tpp-hw-more-${i}`} onClick={() => tap(i)}>
+                <span className="tpp-hw-ic">
+                  <Glyph d={s.glyph} />
+                </span>
+                <span className="tpp-hw-head">
+                  <small>{s.when}</small>
+                  <b>{s.title}</b>
+                </span>
+              </button>
+              <div id={`tpp-hw-more-${i}`} className="tpp-hw-more" aria-hidden={cur !== i}>
+                <p>{s.line}</p>
+              </div>
+              <span className="tpp-hw-timer" aria-hidden="true">
+                <i />
               </span>
-              <span className="tpp-line-head">
-                <small>{s.when}</small>
-                <b>{s.title}</b>
-              </span>
-              <Chevron />
-            </summary>
-            <p>{s.line}</p>
-          </details>
-        </li>
-      ))}
-    </ol>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
   );
 }

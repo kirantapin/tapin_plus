@@ -30,7 +30,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, Guarantee, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
+import { BenefitCards, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -742,8 +742,9 @@ export default function ParentsHome() {
 
         {/* WHAT A LUNCH COSTS (COPY.md v2 final: under the value stack, the
             $12 to $7 first and the door price as context). One meal priced
-            four ways to one scale, never the plan. The footnotes, word for
-            word, under Sources. */}
+            four ways to one scale, never the plan, the Plus bar shedding its
+            $5 (Sam's pick A, toned down to the white module, 7 Nov 2026).
+            The footnotes, word for word, under Sources. */}
         <section
           className="tpa-module"
           aria-labelledby="tpp-lunch"
@@ -751,7 +752,7 @@ export default function ParentsHome() {
           <h2 id="tpp-lunch" className="tpa-h2">
             What a lunch costs
           </h2>
-          <LunchColumns />
+          <LunchBars />
           <p className="tpp-keep">
             <b>Keep their dining plan.</b> Tapin Plus is for the meals they buy
             off campus.
@@ -821,8 +822,8 @@ export default function ParentsHome() {
         </section>
 
         {/* Answering the parent (Elevate's "for parents" section, in our own
-            claims): how sign-up works from their side, as three pictures in
-            a row, each step's full line under "Step by step". */}
+            claims): how sign-up works from their side, shown on a phone
+            beside the three steps (Sam's pick B, toned down, 7 Nov 2026). */}
         <section
           className="tpa-module"
           aria-labelledby="tpp-how"
@@ -830,7 +831,7 @@ export default function ParentsHome() {
           <h2 id="tpp-how" className="tpa-h2">
             How it works for you
           </h2>
-          <HowTimeline />
+          <HowPhone />
         </section>
 
         {/* No surprises: a glyph and a few words per line, the full line one
