@@ -629,13 +629,7 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
-            {/* What "every day" stands on: mostly the weekly $5, and the 15%
-                (instead, once a day). */}
-            {hero === "a" ? (
-              <p className="tpp-hero-sub">
-                ${CREDIT} in credit every week at each of five Blacksburg spots, or {PERCENT}% off once a day.
-              </p>
-            ) : null}
+
             <Proof />
           </div>
         </div>
