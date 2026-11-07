@@ -29,7 +29,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
+import { BenefitCards, Guarantee, HowTimeline, LunchColumns, MoreBenefits, OfferPrice } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -717,6 +717,7 @@ export default function ParentsHome() {
         </section>
 
         <MoreBenefits className="tpp-more tpp-more-out" />
+        <Guarantee asked={!!asked} />
         </div>
 
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
