@@ -2279,3 +2279,21 @@ button.tpg-env-link {
     cursor: pointer;
   }
 }
+
+/* One layout behind the phone drawer, open or collapsed (Sam, 6 Nov 2026:
+   "the positioning of the background when I open and close the designing
+   modal shifts quite a bit"): the page always keeps the collapsed bar's
+   room at its foot, so opening or collapsing the drawer moves nothing
+   behind it (the heading sat 49px lower while it was open). */
+@media (max-width: 1023.98px) {
+  .gft-preview[data-builder] .gft-preview-scroll {
+    padding-bottom: 0;
+  }
+  .gft-preview[data-builder] .gft-a:not([data-state="open"]) .gft-a-band {
+    min-height: 100svh;
+    padding-bottom: calc(72px + var(--gft-peek));
+  }
+  .gft-preview[data-builder] .gft-after {
+    padding-bottom: calc(32px + var(--gft-peek));
+  }
+}
