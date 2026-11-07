@@ -427,64 +427,106 @@
   object-fit: cover;
 }
 
-/* ── What a lunch costs: four columns to one scale (Sam's pick) ─────────── */
-.tpp-cols {
+/* ── What a lunch costs: four bars, the $5 lifted off (Sam's pick A) ────
+   On the white module (Sam, 7 Nov 2026: "too much color ... just do white"):
+   the dining hall a grey well, the lunch downtown the one orange bar, Plus
+   money green with its $5 as a dashed outline above it, 15% off pale green.
+   The price sits inside each bar. Sizes follow the module's own width. */
+.tpp-lc {
+  container-type: inline-size;
+  margin-top: 18px;
+}
+.tpp-lc-chart {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 18px;
 }
-.tpp-cols li {
+.tpp-lc-chart li {
   display: grid;
-  grid-template-rows: 176px auto;
+  grid-template-rows: auto auto;
   gap: 10px;
 }
-.tpp-col {
+.tpp-lc-area {
+  height: 236px;
+  display: flex;
+  align-items: flex-end;
+}
+.tpp-lc-stack {
+  width: 100%;
+  height: calc(var(--h) * 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: stretch;
+  transform-origin: 50% 100%;
 }
-.tpp-col b {
-  margin-bottom: 6px;
+.tpp-lc-bar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  border-radius: 12px;
+  background: var(--well);
+  color: var(--ink);
+}
+.tpp-lc-bar b {
   font-weight: 600;
-  font-size: 16px;
-  line-height: 20px;
-  text-align: center;
+  font-size: clamp(15px, 5cqi, 24px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
-.tpp-col-fill {
-  height: calc((176px - 26px) * var(--f, 1));
-  border-radius: 10px 10px 4px 4px;
-  background: #d1d1d6;
-  transform-origin: bottom center;
+.tpp-lc-chart [data-k="down"] .tpp-lc-bar {
+  background: #e5751f;
 }
-.tpp-cols [data-kind="plus"] .tpp-col-fill {
+.tpp-lc-chart [data-k="plus"] .tpp-lc-bar {
   background: var(--money);
+  color: #ffffff;
 }
-.tpp-cols [data-kind="plus"] b {
-  color: var(--money);
-}
-/* 15% off: the saving's own green, flat and pale. */
-.tpp-cols [data-kind="off"] .tpp-col-fill {
+.tpp-lc-chart [data-k="off"] .tpp-lc-bar {
   background: #c6e2d6;
+  color: #075c3e;
 }
-.tpp-col-label {
+.tpp-lc-cap {
+  flex: 0 0 calc(var(--c) * 236px);
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+  border: 2px dashed var(--money);
+  border-radius: 12px;
+  color: var(--money);
+  font-weight: 600;
+  font-size: clamp(15px, 4.6cqi, 22px);
+}
+.tpp-lc-label {
   font-size: 13px;
   line-height: 17px;
   text-align: center;
   text-wrap: balance;
-  color: var(--muted);
-}
-.tpp-cols [data-kind="plus"] .tpp-col-label {
-  font-weight: 600;
   color: var(--ink);
 }
-.tpp-cols sup {
+.tpp-lc-chart [data-k="plus"] .tpp-lc-label {
+  font-weight: 600;
+  color: #075c3e;
+}
+.tpp-lc sup {
   margin-left: 1px;
-  font-size: 0.68em;
+  font-size: 0.72em;
   line-height: 0;
-  color: var(--muted);
+}
+@container (min-width: 560px) {
+  .tpp-lc-chart {
+    gap: 14px;
+  }
+  .tpp-lc-area {
+    height: 280px;
+  }
+  .tpp-lc-cap {
+    flex-basis: calc(var(--c) * 280px);
+  }
+  .tpp-lc-label {
+    font-size: 15px;
+    line-height: 19px;
+  }
 }
 .tpp-keep {
   margin-top: 16px;
@@ -496,9 +538,10 @@
   color: var(--muted);
   text-wrap: pretty;
 }
+/* Maroon, once in this section. */
 .tpp-keep b {
   font-weight: 600;
-  color: var(--ink);
+  color: #861f41;
 }
 .tpp .tpp-sources {
   margin-top: 4px;
@@ -520,92 +563,388 @@
   padding: 0;
 }
 
-/* ── How it works for you: a timeline (Sam's pick, 6 Nov 2026) ───────────
-   Three steps down the page, when each happens, the approved line under. */
-.tpp-line {
-  display: grid;
+/* ── How it works for you: the phone (Sam's pick B, 7 Nov 2026) ─────────
+   A phone on the page's grey shows each step; the three steps sit under it
+   on a phone and beside it on a computer, the open one with its line.
+   Colour is accent only: a small orange sun, maroon on the open step's
+   glyph, its timer and the gift's small marks, money green on the $5s. */
+.tpp-hw {
+  container-type: inline-size;
   margin-top: 16px;
 }
-.tpp-line li {
+.tpp-hw-grid {
+  display: grid;
+  gap: 14px;
+}
+.tpp-hw-stage {
   position: relative;
-  padding-bottom: 20px;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ground);
 }
-.tpp-line li:last-child {
-  padding-bottom: 0;
-}
-/* From the bottom of one icon to the top of the next, so closed steps read
-   as one line. */
-.tpp-line li:not(:last-child)::before {
-  content: "";
+.tpp-hw-sun {
   position: absolute;
-  top: 48px;
-  bottom: 0;
-  left: 23px;
-  width: 2px;
-  border-radius: 1px;
-  background: rgba(20, 22, 24, 0.12);
+  top: 26px;
+  right: -34px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: #e5751f;
 }
-.tpp-line-icon {
+.tpp-hw-band {
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  bottom: 0;
+  height: 74px;
+  background: var(--well);
+  clip-path: polygon(0 34%, 9% 22%, 21% 30%, 33% 12%, 47% 26%, 60% 8%, 72% 24%, 85% 14%, 100% 28%, 100% 100%, 0 100%);
+}
+.tpp-hw-phone {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  width: 212px;
+  height: 420px;
+  margin-left: -106px;
+  padding: 7px;
+  border-radius: 34px;
+  background: var(--ink);
+  box-shadow: 0 18px 30px -12px rgba(20, 22, 24, 0.35);
+}
+.tpp-hw-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 27px;
+  background: #ffffff;
+}
+.tpp-hw-island {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  left: 50%;
+  width: 62px;
+  height: 18px;
+  margin-left: -31px;
+  border-radius: 10px;
+  background: var(--ink);
+}
+.tpp-hw-s {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 38px 12px 12px;
+  opacity: 0;
+  transform: translateX(14px);
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease);
+}
+.tpp-hw-s[data-on] {
+  opacity: 1;
+  transform: none;
+}
+.tpp-hw-app {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+.tpp-hw-app img {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+.tpp-hw-lbl {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tpp-hw-field {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+.tpp-hw-caret {
+  width: 1.5px;
+  height: 18px;
+  margin-left: 1px;
+  background: #861f41;
+}
+.tpp-hw-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: 10px;
+  border-top: 1px solid var(--hair);
+  font-size: 13px;
+}
+.tpp-hw-row b {
+  font-weight: 600;
+  font-size: 15px;
+}
+.tpp-hw-pay {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpp-hw-msg {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hair);
+}
+.tpp-hw-msg img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.tpp-hw-msg b {
+  font-weight: 600;
+  font-size: 12px;
+}
+.tpp-hw-bub {
+  justify-self: start;
+  width: 86%;
+  padding: 6px;
+  border-radius: 16px 16px 16px 6px;
+  background: #e9e9eb;
+}
+.tpp-hw-gift {
+  overflow: hidden;
+  border-radius: 11px;
+  background: #ffffff;
+}
+.tpp-hw-gift img {
+  display: block;
+  width: 100%;
+  height: 78px;
+  object-fit: cover;
+  object-position: 50% 35%;
+}
+.tpp-hw-gift div {
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px 9px;
+}
+.tpp-hw-gift small {
+  font-weight: 600;
+  font-size: 11px;
+  color: #861f41;
+}
+.tpp-hw-gift span {
+  font-size: 12px;
+  line-height: 15px;
+}
+.tpp-hw-open {
+  justify-self: start;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #861f41;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+}
+.tpp-hw-wk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tpp-hw-wk b {
+  font-weight: 600;
+  font-size: 17px;
+}
+.tpp-hw-mark {
+  width: 24px;
+  height: 24px;
+  color: #861f41;
+}
+.tpp-hw-list {
+  display: grid;
+  gap: 7px;
+}
+.tpp-hw-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.tpp .tpp-hw-list .collar {
+  display: block;
+  flex: none;
+  width: 26px;
+  height: 26px;
+}
+.tpp-hw-list li > span:not(.collar) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tpp-hw-list em {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--money);
+  color: #ffffff;
+  font-style: normal;
+  font-size: 12.5px;
+}
+.tpp-hw-steps {
+  display: grid;
+  gap: 6px;
+}
+.tpp-hw-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  transition: background-color 0.3s var(--ease);
+}
+.tpp-hw-step[data-on] {
+  background: var(--ground);
+}
+.tpp-hw-step button {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 0 12px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tpp-hw-step button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+.tpp-hw-ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--well);
+  transition: background-color 0.3s, color 0.3s;
 }
-.tpp-line-icon .tpp-glyph {
+.tpp-hw-ic .tpp-glyph {
   width: 22px;
   height: 22px;
 }
-.tpp-line li:last-child .tpp-line-icon {
-  background: var(--money);
+.tpp-hw-step[data-on] .tpp-hw-ic {
+  background: #861f41;
   color: #ffffff;
 }
-.tpp-line summary {
+.tpp-hw-step:last-child[data-on] .tpp-hw-ic {
+  background: var(--money);
+}
+.tpp-hw-head {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 18px;
-  gap: 14px;
-  align-items: center;
-  cursor: pointer;
-  list-style: none;
-  -webkit-tap-highlight-color: transparent;
+  gap: 1px;
 }
-.tpp-line summary::-webkit-details-marker {
-  display: none;
-}
-.tpp-line-head {
-  display: grid;
-  gap: 2px;
-}
-.tpp-line summary > svg {
-  width: 18px;
-  height: 18px;
-  color: var(--muted);
-  transition: transform 0.2s var(--ease);
-}
-.tpp-line-step[open] summary > svg {
-  transform: rotate(180deg);
-}
-.tpp-line small {
+.tpp-hw-head small {
   font-weight: 600;
   font-size: 13px;
   line-height: 16px;
   color: var(--muted);
 }
-.tpp-line b {
+.tpp-hw-head b {
   font-weight: 600;
   font-size: 17px;
   line-height: 22px;
 }
-.tpp .tpp-line p {
-  margin-top: 4px;
-  padding-left: 62px;
-  font-size: 14px;
-  line-height: 19px;
-  color: var(--muted);
+.tpp-hw-more {
+  grid-column: 2;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease);
+}
+.tpp-hw-step[data-on] .tpp-hw-more {
+  grid-template-rows: 1fr;
+}
+.tpp .tpp-hw-more > p {
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 21px;
+  color: #2f3134;
   text-wrap: pretty;
 }
-
+.tpp-hw-step[data-on] .tpp-hw-more > p {
+  padding-top: 6px;
+}
+.tpp-hw-timer {
+  position: absolute;
+  left: 64px;
+  right: 14px;
+  bottom: 6px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: rgba(20, 22, 24, 0.08);
+  opacity: 0;
+}
+.tpp-hw-step[data-timed] .tpp-hw-timer {
+  opacity: 1;
+}
+.tpp-hw-timer i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #861f41;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+@container (min-width: 600px) {
+  .tpp-hw-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+    align-items: center;
+  }
+  .tpp-hw-stage {
+    order: 2;
+    height: 400px;
+    border-radius: 16px;
+  }
+  .tpp-hw-phone {
+    top: 34px;
+  }
+  .tpp-hw-sun {
+    top: 36px;
+    right: -50px;
+    width: 180px;
+    height: 180px;
+  }
+  .tpp-hw-steps {
+    gap: 8px;
+  }
+  .tpp-hw-step {
+    padding: 14px 16px;
+  }
+}
 
 /* ── No surprises: a glyph in a well, a few words, the line under ───────── */
 .tpp-sure {
@@ -660,8 +999,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tpp .tpp-sure-row summary > svg,
-  .tpp-line summary > svg,
-  .tpp-cards-dots button::after {
+  .tpp-cards-dots button::after,
+  .tpp-hw-s,
+  .tpp-hw-step,
+  .tpp-hw-ic,
+  .tpp-hw-more {
     transition: none;
   }
 }
@@ -721,19 +1063,6 @@
   }
   .tpp-card {
     flex-basis: 236px;
-  }
-  .tpp-cols {
-    gap: 16px;
-  }
-  .tpp-cols li {
-    grid-template-rows: 220px auto;
-  }
-  .tpp-col-fill {
-    height: calc((220px - 26px) * var(--f, 1));
-  }
-  .tpp-col-label {
-    font-size: 14px;
-    line-height: 18px;
   }
   .tpp .tpa-place-name small {
     font-size: 13px;
@@ -1072,7 +1401,7 @@
   .tpp-math,
   .tpp .tpa-qa p,
   .tpp .tpp-sure-row p,
-  .tpp .tpp-line p,
+  .tpp .tpp-hw-more > p,
   .tpp .tpp-faq-sub {
     font-size: 16px;
     line-height: 22px;
@@ -1108,7 +1437,7 @@
     line-height: 16px;
     letter-spacing: 0.04em;
   }
-  .tpp-cols sup {
+  .tpp-lc sup {
     font-size: 0.77em;
   }
 }
