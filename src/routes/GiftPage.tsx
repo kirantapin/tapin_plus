@@ -1417,12 +1417,13 @@ export function GiftPreview({
     if (shownPart.current === part) return;
     const dir = PARTS.indexOf(part) > PARTS.indexOf(shownPart.current) ? 1 : -1;
     shownPart.current = part;
-    /* The opening: the card is sealed again at the top of its page, so the
-       next pick plays where it can be seen, above the short drawer. */
-    if (part === "open") {
-      setReplay((r) => ({ n: r.n + 1, auto: false }));
-      toPreviewTop();
-    }
+    /* Every stage change seals the card again (Sam, 6 Nov 2026: "when I go
+       back to the closed state, the card should reset so it's not open"),
+       which also stops an effect still playing. The opening: at the top of
+       its page, so the next pick plays where it can be seen, above the
+       short drawer. */
+    setReplay((r) => ({ n: r.n + 1, auto: false }));
+    if (part === "open") toPreviewTop();
     const panel = panelRef.current;
     const was = partFrom.current;
     partFrom.current = null;
@@ -1563,6 +1564,7 @@ export function GiftPreview({
       className="gft-preview"
       data-device={desk ? "computer" : "phone"}
       data-builder={builder ? "" : undefined}
+      data-part={builder ? part : undefined}
       data-peek={!wide && builder && peek ? "" : undefined}
       data-designed={designed ? "" : undefined}
       role="dialog"

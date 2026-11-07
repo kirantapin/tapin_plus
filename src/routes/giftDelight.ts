@@ -14,7 +14,8 @@ const PAPER = ["#861F41", "#E5751F", "#F2B36B", "#F7F3EA", "#2B4C9B", "#0B7A53"]
 const HEART = ["#861F41", "#E8899E", "#E5751F", "#F7F3EA"];
 const SPARK = ["#F2B36B", "#FFFFFF", "#F7F3EA", "#E5751F"];
 const BALLOON = ["#861F41", "#E5751F", "#F2B36B", "#F7F3EA", "#2B4C9B", "#0B7A53", "#E8899E"];
-const FIRE = ["#F2B36B", "#E5751F", "#F7F3EA", "#E8899E", "#FFFFFF"];
+/* No orange: it vanished on the orange backgrounds (Thanksgiving). */
+const FIRE = ["#F2B36B", "#F7F3EA", "#E8899E", "#FFFFFF", "#9FD3FF"];
 const PETAL = ["#F4C6CF", "#E8899E", "#F7F3EA", "#FBE3D2", "#F2B36B"];
 const HEART_PATH = "M12 21s-7.5-4.6-9.6-9.2C.8 8.2 3 4.5 6.6 4.5c2.1 0 3.6 1.2 5.4 3.3 1.8-2.1 3.3-3.3 5.4-3.3 3.6 0 5.8 3.7 4.2 7.3C19.5 16.4 12 21 12 21Z";
 const STAR_PATH = "M12 0C12.9 7.6 16.4 11.1 24 12 16.4 12.9 12.9 16.4 12 24 11.1 16.4 7.6 12.9 0 12 7.6 11.1 11.1 7.6 12 0Z";

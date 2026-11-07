@@ -2416,3 +2416,11 @@ button.tpg-env-link {
     padding-top: calc(76px + env(safe-area-inset-top));
   }
 }
+
+/* The opening stage on a phone: the opened card's band runs to the screen's
+   foot, so no strip of the page's grey shows above the short drawer. */
+@media (max-width: 1023.98px) {
+  .gft-preview[data-builder][data-part="open"] .gft-a[data-state="open"] .gft-a-band {
+    min-height: 100svh;
+  }
+}
