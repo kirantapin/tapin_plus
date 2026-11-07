@@ -86,8 +86,9 @@ function LogoRow({ size }: { size: number }) {
    highlight the guarantee as well underneath, like refund if they don't use
    it, easy cancel anytime"). Only what the backend does today: the 14-day
    refund if their student never signs in (parent_unclaimed; not on an ask
-   link, where the student is signed in already), cancel by email, and the
-   parent's account. */
+   link, where the student is signed in already) and cancel by email. (Not
+   "manage it from your account": that page explains how to cancel, it
+   isn't self-serve; Hormozi audit, 6 Nov 2026.) */
 export function Guarantee({ asked }: { asked: boolean }) {
   return (
     <ul className="tpp-promise" aria-label="Our promise">
@@ -103,12 +104,6 @@ export function Guarantee({ asked }: { asked: boolean }) {
         <Glyph d={GLYPHS.mail} />
         <span>
           <b>Cancel anytime</b> by emailing support@tapin.app
-        </span>
-      </li>
-      <li>
-        <Glyph d={GLYPHS.shield} />
-        <span>
-          <b>Manage it</b> from your account, whenever you like
         </span>
       </li>
     </ul>
