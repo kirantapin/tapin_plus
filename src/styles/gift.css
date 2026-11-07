@@ -835,8 +835,87 @@ button.tpg-env-link {
   overscroll-behavior: contain;
 }
 .gft-pp-foot {
+  display: flex;
+  gap: 8px;
   padding: 16px 20px 20px;
   box-shadow: 0 -1px 0 rgba(20, 22, 24, 0.08);
+}
+.gft-pp-foot .gft-pp-cta {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Back a stage (Sam, 6 Nov 2026): its own container beside Continue, with
+   Continue's height and corners, on the light ground the panel's other
+   quiet buttons wear; Continue fills the rest. */
+.gft-pp-backarrow,
+.prc-backarrow {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: #f0f0f0;
+  color: #141618;
+  cursor: pointer;
+  transition: transform 120ms ease-out, background-color 160ms ease-out;
+}
+@media (hover: hover) {
+  .gft-pp-backarrow:hover {
+    background: #e6e6e6;
+  }
+  .prc-backarrow:hover:not(:disabled) {
+    background: #f7f7f7;
+  }
+}
+/* The checkout's steps sit on its grey ground, so there the arrow's own
+   container is white, as the × beside its title is. */
+.prc-backarrow {
+  background: #ffffff;
+}
+.gft-pp-backarrow:active:not(:disabled),
+.prc-backarrow:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.gft-pp-backarrow:focus-visible,
+.prc-backarrow:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.prc-backarrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gft-pp-backarrow,
+  .prc-backarrow {
+    transition: none;
+  }
+}
+/* The photo first on the look, on one line: its heading, and the button (or
+   the photo with Change and Remove) at the right. */
+.gft-pp-photo-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+}
+.gft-pp-photo-row > .gft-pp-error {
+  grid-column: 1 / -1;
+}
+.gft-pp-photo-row .gft-pp-add {
+  height: 40px;
+}
+.gft-pp-photo-row .gft-pp-photo {
+  grid-template-columns: 44px auto auto;
+}
+.gft-pp-photo-row .gft-pp-photo img {
+  width: 44px;
+  height: 40px;
+}
+.gft-pp-photo-row .gft-pp-photo button {
+  height: 40px;
 }
 .gft-pp-cta {
   width: 100%;
@@ -1939,13 +2018,30 @@ button.tpg-env-link {
   height: 8px;
   border-radius: 50%;
 }
+/* Fireworks: the climbing spark, the tips, and the rays of each bloom. */
+.gft-delight-spark {
+  width: 5px;
+  height: 5px;
+}
+.gft-delight-ray {
+  display: block;
+  width: 3.5px;
+  height: 20px;
+  border-radius: 2px;
+}
+.gft-delight-flash {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
 /* "Close it" in the builder: the button the envelope had, back. */
 .gft-reseal {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
-/* The pick in the panel: four chips in a row. */
+/* The pick in the panel: eight chips, four to a row. */
 .gft-pp-fx {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2280,26 +2376,7 @@ button.tpg-env-link {
   }
 }
 
-/* The builder in two stages (Sam, 6 Nov 2026): the look, then the note. The
-   note's way back to the look is the checkout's back link (parent-checkout.css
-   .prc-edit.prc-back); the title takes focus on each stage, unringed. */
-.gft-pp-back {
-  justify-self: start;
-  margin: -4px 0 0;
-  padding: 4px 0;
-  border: 0;
-  background: none;
-  color: #141618;
-  font: 600 14px/20px "Gilroy", Arial, sans-serif;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.gft-pp-back:focus-visible {
-  outline: 3px solid #e5751f;
-  outline-offset: 2px;
-  border-radius: 4px;
-}
+/* The builder's stages: the title takes focus on each, unringed. */
 .gft-pp-title:focus {
   outline: none;
 }

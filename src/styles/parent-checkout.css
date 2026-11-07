@@ -387,7 +387,8 @@ fieldset.prc-module {
 
 /* On a phone the button stays in reach at the foot of a long form. */
 @media (max-width: 639.98px) {
-  .prc-body > .prc-cta {
+  .prc-body > .prc-cta,
+  .prc-body > .prc-foot {
     position: sticky;
     bottom: 0;
     box-shadow: 0 0 0 8px var(--ground);
@@ -426,9 +427,15 @@ fieldset.prc-module {
 .prc-steps li[data-on] {
   background: #141618;
 }
-.prc-back {
-  align-self: flex-start;
-  font-weight: 600;
+/* Continue with the back arrow beside it (gift.css .prc-backarrow, the
+   builder's own): Continue fills the rest. */
+.prc-foot {
+  display: flex;
+  gap: 8px;
+}
+.prc-foot .prc-cta {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* ══ THE EXPANDING CONTAINER (Sam, 6 Nov 2026: "would we not be able to use
@@ -707,7 +714,8 @@ fieldset.prc-module {
     overflow: visible;
     row-gap: 10px;
   }
-  .prc-sheet[data-wide] .prc-body > .prc-cta {
+  .prc-sheet[data-wide] .prc-body > .prc-cta,
+  .prc-sheet[data-wide] .prc-body > .prc-foot {
     align-self: flex-end;
     width: min(100%, 400px);
   }

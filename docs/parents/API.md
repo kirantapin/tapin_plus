@@ -79,7 +79,7 @@ req: {
   parent_email: string;                                 // required and kept; nothing is emailed for now (the parent is texted)
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
-  gift_effect?: string | null;                          // confetti | hearts | sparkles (what plays as they open it), or null
+  gift_effect?: string | null;                          // confetti | hearts | sparkles | balloons | fireworks | streamers | petals (what plays as they open it), or null
   gift_from?: string | null;                            // optional sign-off ("Mom"), <= 24 chars
   gift_scene?: string | null;                           // optional background: maroon | picnic | night | confetti |
                                                         //   airmail | sunrise | ridge | hearts | flannel | lunch | sunburst | leaves
