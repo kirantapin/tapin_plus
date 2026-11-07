@@ -2568,3 +2568,125 @@ button.tpg-env-link {
   margin-top: auto;
   padding-top: 14px;
 }
+
+/* ══ SENT: A · IT'S ON ITS WAY (Sam, 7 Nov 2026: "lets do A on its way for
+   after they pay") ══════════════════════════════════════════════════════════
+   Once the checkout goes through, the gift the parent made is sent off in
+   front of them (GiftPreview, the sent block): the sealed gift underneath
+   steps aside, and a paper strip with "See it as {who} will" lands where the
+   envelope was. A phone keeps a band of the background above the done
+   drawer; a computer, the frame. "See it" shows the gift whole again
+   (data-seeing). */
+.gft-preview {
+  --gft-sent-band: calc(184px + env(safe-area-inset-top));
+}
+.gft-sent-band[hidden],
+.gft-sent-frame[hidden] {
+  display: none;
+}
+/* The page's ink, for "See it as" (.gft-open reads it; these layers sit
+   outside the page). */
+.gft-sent-band,
+.gft-sent-frame {
+  --ink: #141618;
+}
+.gft-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 16px;
+  text-align: center;
+  pointer-events: none;
+}
+.gft-sent .gft-sent-h {
+  max-width: 360px;
+  margin: 0;
+  color: #141618;
+  line-height: 46px;
+}
+.gft-sent-strip {
+  padding: 2px 12px 5px;
+  background: #f7f3ea;
+  color: #141618;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.gft-sent .gft-sent-see {
+  display: inline-flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 30px;
+  pointer-events: auto;
+}
+.gft-sent-see svg {
+  flex: none;
+  margin: 0 8px 0 -4px;
+}
+.gft-sent-see:focus-visible {
+  outline: 3px solid #f7f3ea;
+  outline-offset: 3px;
+}
+/* A computer: over the frame, centred where the envelope was. */
+.gft-sent-frame {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+/* A phone: the band above the done drawer, clipped at the drawer's edge, so
+   the envelope rises from behind it. */
+.gft-sent-band {
+  position: fixed;
+  z-index: 69;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--gft-sent-band);
+  padding-top: env(safe-area-inset-top);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  pointer-events: none;
+}
+.gft-sent-flyer {
+  position: absolute;
+  isolation: isolate;
+  left: calc(50% - 170px);
+  top: calc(env(safe-area-inset-top) + 92px - 113px);
+  width: 340px;
+  height: 226px;
+  /* Where the flight ends, off the top: what shows if it never runs. */
+  transform: translate(300px, -330px) scale(0.3) rotate(-18deg);
+  pointer-events: none;
+}
+/* The sealed gift underneath steps aside while the strip shows: at once on a
+   phone (the drawer covers it), once the flight is over on a computer (the
+   flight fades it until then). */
+.gft-preview[data-sent][data-landed]:not([data-seeing]) .gft-preview-scroll .gft-a-band > :not(.gft-scene),
+.gft-preview[data-sent]:not([data-seeing]) .gft-preview-scroll :is(.gft-after, .gft-dock) {
+  visibility: hidden;
+}
+.gft-preview[data-sent]:not([data-seeing]) .gft-preview-scroll .gft-a-band {
+  pointer-events: none;
+}
+@media (max-width: 1023.98px) {
+  .gft-preview[data-sent]:not([data-seeing]) .gft-preview-scroll .gft-a-band > :not(.gft-scene) {
+    visibility: hidden;
+  }
+  /* The done drawer sits lower, under the band. */
+  .gft-preview[data-sent] .gft-preview-panel[data-drawer] {
+    top: var(--gft-sent-band);
+    max-height: none;
+  }
+  /* A lighter lift than the editing drawer's, so the band above it stays
+     the background's own flat colour down to the drawer's edge. */
+  .gft-preview[data-sent] .gft-preview-panel[data-drawer]:not([data-peek]) {
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  }
+}
