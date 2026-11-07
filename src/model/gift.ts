@@ -104,8 +104,9 @@ export const NOTE_MAX = 240;
 export const FROM_MAX = 24;
 
 export const SAMPLE_GIFT: Gift = {
-  /* Jake, to match the sample photo's student (Sam, 6 Nov 2026). */
-  to: "Jake",
+  /* Maya, with a sample photo of Maya and her parents (Sam, 6 Nov 2026:
+     "instead of jake we should do maya, and just update the image"). */
+  to: "Maya",
   from: "Mom",
   note: "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!",
   masked: "•••0123",
@@ -114,7 +115,7 @@ export const SAMPLE_GIFT: Gift = {
 };
 /** The sample's photo, for "with a photo" previews: the parents page's own
  *  move-in picture (a parent and their student). */
-export const SAMPLE_PHOTO = "/parents/hero-hug.webp";
+export const SAMPLE_PHOTO = "/parents/gift-sample-maya.webp";
 
 /** The sample, with any of ?to= ?from= ?note= swapped in (local dev only),
  *  and ?bg= ?photo=1 (any build: they only choose among our own
