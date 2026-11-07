@@ -1745,7 +1745,13 @@ button.tpg-env-link {
    so less room above it; the band clips the envelope's foot as it drops. */
 @media (min-width: 1024px) and (hover: hover) {
   .gft.gft-mini:has(.gft-a-photo) {
-    padding-top: 88px;
+    padding-top: 104px;
+  }
+  /* A little taller (Sam, 6 Nov 2026): room above the card and below the
+     envelope. */
+  .tpg-env {
+    padding-top: 44px;
+    padding-bottom: 44px;
   }
   .tpg-env {
     overflow: hidden;
@@ -1845,12 +1851,15 @@ button.tpg-env-link {
 }
 .tpg-env-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 340px;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 .tpg-env-sw {
+  flex: none;
   padding: 0;
   border: 0;
   border-radius: 12px;
@@ -1881,6 +1890,7 @@ button.tpg-env-link {
   outline-offset: 2px;
 }
 .tpg-env-more {
+  flex: none;
   height: 40px;
   padding: 0 14px;
   border: 0;
@@ -1903,6 +1913,7 @@ button.tpg-env-link {
   }
   .tpg-env-row {
     justify-content: flex-start;
+    max-width: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

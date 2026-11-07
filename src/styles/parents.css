@@ -902,3 +902,41 @@
   font-weight: 600;
   color: var(--ink);
 }
+
+/* The other two benefits under the $12 / $7 (6 Nov 2026): two small wells,
+   a figure and a few words each. */
+.tpp-more {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tpp-more li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--ground);
+}
+.tpp-more-fig {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 26px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.tpp-more-fig[data-pts] {
+  color: #e5751f;
+}
+.tpp-more span {
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--muted);
+}
