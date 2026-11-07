@@ -30,6 +30,10 @@ let draft: GiftDraft = EMPTY;
 /* What the page picked on its own (the band's season), which "Start over"
    goes back to. */
 let base: GiftDraft = EMPTY;
+/* A save from earlier brought their background back (hydrateGiftDraft):
+   it's theirs, so the page's own pick doesn't replace it, even when it's
+   the maroon a fresh gift starts on. */
+let restored = false;
 const subs = new Set<() => void>();
 const changed = () => subs.forEach((f) => f());
 
@@ -38,15 +42,21 @@ export const getGiftDraft = (): GiftDraft => draft;
 /** A parent's edit, kept for a day. `quiet`: the page's own default (the
  *  band's season), not theirs, so it isn't kept. */
 export function setGiftDraft(patch: Partial<GiftDraft>, opts?: { quiet?: boolean }) {
-  draft = { ...draft, ...patch };
-  if (opts?.quiet) base = { ...base, ...patch };
-  else keepGift(draft);
+  if (opts?.quiet) {
+    base = { ...base, ...patch };
+    if (restored) return;
+    draft = { ...draft, ...patch };
+  } else {
+    draft = { ...draft, ...patch };
+    keepGift(draft);
+  }
   changed();
 }
 
 /** Paid: the next gift starts fresh, and the day's save goes with it. */
 export function clearGiftDraft() {
   draft = EMPTY;
+  restored = false;
   dropResume();
   changed();
 }
@@ -54,6 +64,7 @@ export function clearGiftDraft() {
 /** "Start over": back to the page's own default, nothing of theirs kept. */
 export function startGiftOver() {
   draft = { ...EMPTY, scene: base.scene };
+  restored = false;
   dropResume();
   changed();
 }
@@ -68,6 +79,7 @@ export function hydrateGiftDraft() {
   const g = keptGift();
   if (!g) return;
   draft = { to: g.to, note: g.note, from: g.from, scene: g.scene ?? draft.scene, photo: g.photo, effect: g.effect };
+  restored = g.scene !== null;
   changed();
 }
 
