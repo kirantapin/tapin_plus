@@ -450,25 +450,32 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
 /* A made-up number (555-01xx is the range kept for fiction). */
 const SAMPLE_NUMBER = "(540) 555-0142";
 const STEP_MS = 3600;
-/* The last screen's week (Sam, 7 Nov 2026: "redesign this last slide"): not
-   five identical $5s, which read as $25 free, but what a week of Plus is.
-   Monday's $12 lunch at the first place earns its $5 (paid in full);
-   Wednesday the second place takes 15% off instead; Thursday the first
-   place's $5 comes off. The other four places' $5 is still to earn this week.
-   Points on what was paid (never more than they'd earn). Real places, real
-   menu prices. */
+/* The week's screen (Sam's pick E, "the savings meter", 7 Nov 2026): what
+   Plus saved in one week, as one figure split by where it came from. The
+   week behind it: Monday's lunch at the first place is paid in full and
+   earns its credit; Wednesday the second place takes the percentage off;
+   Thursday the first place's credit comes off. Not five identical $5s,
+   which read as $25 free; the other four places' credit is still to earn.
+   Points on what was paid, per order, never more than they'd earn. Real
+   places, real menu prices; every number from the constants. */
 const WEEK = (() => {
   const [a, b] = PLACES;
   if (!a || !b) return null;
   const pctOff = Math.round(b.order.price * PERCENT) / 100;
-  const rows = [
-    { day: "Mon", place: a, fig: `+${money0(CREDIT)}`, what: "earned", paid: a.order.price },
-    { day: "Wed", place: b, fig: `−${money(pctOff)}`, what: `${PERCENT}% off`, paid: b.order.price - pctOff },
-    { day: "Thu", place: a, fig: `−${money0(CREDIT)}`, what: "credit used", paid: a.order.price - CREDIT },
-  ];
-  const points = rows.reduce((n, r) => n + Math.floor(Math.round(r.paid * 100) * POINTS_PER_DOLLAR / 100), 0);
-  return { rows, points, toEarn: PLACES.filter((p) => p.id !== a.id) };
+  const paid = [a.order.price, b.order.price - pctOff, a.order.price - CREDIT];
+  const points = paid.reduce((n, d) => n + Math.floor((Math.round(d * 100) * POINTS_PER_DOLLAR) / 100), 0);
+  const pctC = Math.round(pctOff * 100);
+  const creditC = Math.round(CREDIT * 100);
+  return { a, b, pctOff, pctC, creditC, savedC: pctC + creditC, points, toEarn: PLACES.filter((p) => p.id !== a.id) };
 })();
+/* The saved figure as the screen draws it: a small "$", the dollars large,
+   the cents small. */
+function setSaved(root: HTMLElement, c: number) {
+  const whole = root.querySelector("[data-whole]");
+  const cents = root.querySelector("[data-cents]");
+  if (whole) whole.textContent = String(Math.floor(c / 100));
+  if (cents) cents.textContent = String(c % 100).padStart(2, "0");
+}
 /* Hold the steps at their tallest open state, so the page under them never
    moves as they play (Sam, 7 Nov 2026: 22–44px of shift on a phone): every
    step's head, the gaps, and the longest line. Independent of what is open
@@ -497,7 +504,7 @@ export function HowPhone() {
   const typing = useRef<number | undefined>(undefined);
   const bar = useRef<Animation | undefined>(undefined);
   const num = useRef<HTMLSpanElement | null>(null);
-  const pts = useRef<HTMLElement | null>(null);
+  const wk = useRef<Animation[]>([]);
   const count = useRef<number | undefined>(undefined);
   const list = useRef<HTMLOListElement | null>(null);
   const renews = inAMonth();
@@ -539,42 +546,75 @@ export function HowPhone() {
         { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
       );
     if (i === 2) {
-      /* The week fills in as it happened: each order and what Plus did on
-         it, the points counting up, the places still to earn last. */
-      el.querySelectorAll(".tpp-wk-feed li").forEach((r, k) =>
-        r.animate?.(
-          [
-            { opacity: 0, transform: "translateY(8px)" },
-            { opacity: 1, transform: "none" },
-          ],
-          { duration: 460, delay: 160 + k * 260, easing: EASE_OUT, fill: "backwards" },
+      /* The meter fills as the week happened: Wednesday's percentage first,
+         then Thursday's credit, the figure counting with it in the same two
+         steps; the tiles last, the points counting up. Settled well inside
+         the step's time, so it can be read before the next one. */
+      const scr = el.querySelector<HTMLElement>(".tpp-e");
+      if (!scr || !WEEK) return;
+      wk.current.forEach((a) => a.cancel());
+      window.cancelAnimationFrame(count.current ?? 0);
+      const T1 = 300;
+      const D1 = 560;
+      const T2 = T1 + D1 + 160;
+      const D2 = 700;
+      const T3 = T2 + D2 + 160;
+      const run: Animation[] = [];
+      const add = (a: Animation | undefined) => a && run.push(a);
+      const rise = (m: Element, delay: number, d = 460) =>
+        add(
+          m.animate?.(
+            [
+              { opacity: 0, transform: "translateY(6px)" },
+              { opacity: 1, transform: "none" },
+            ],
+            { duration: d, delay, easing: EASE_OUT, fill: "backwards" },
+          ),
+        );
+      const segs = scr.querySelectorAll(".tpp-e-meter b");
+      const parts = scr.querySelectorAll(".tpp-e-part");
+      [T1, T2].forEach((t, k) => {
+        const seg = segs[k];
+        if (seg)
+          add(
+            seg.animate?.([{ clipPath: "inset(0 100% 0 0 round 11px)" }, { clipPath: "inset(0 0 0 0 round 11px)" }], {
+              duration: k ? D2 : D1,
+              delay: t,
+              easing: EASE_OUT,
+              fill: "backwards",
+            }),
+          );
+        const part = parts[k];
+        if (part) rise(part, t + (k ? 380 : 300));
+      });
+      scr.querySelectorAll(".tpp-e-tile").forEach((m, k) => rise(m, T3 + k * 100, 480));
+      scr.querySelectorAll(".tpp-e-logos img").forEach((m, k) =>
+        add(
+          m.animate?.(
+            [
+              { opacity: 0, transform: "scale(.7)" },
+              { opacity: 1, transform: "none" },
+            ],
+            { duration: 340, delay: T3 + 180 + k * 60, easing: EASE_OUT, fill: "backwards" },
+          ),
         ),
       );
-      el.querySelectorAll(".tpp-wk-feed em").forEach((m, k) =>
-        m.animate?.(
-          [
-            { opacity: 0, transform: "scale(.6)" },
-            { opacity: 1, transform: "none" },
-          ],
-          { duration: 380, delay: 360 + k * 260, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" },
-        ),
-      );
-      el.querySelectorAll(".tpp-wk-earn .collar").forEach((m, k) =>
-        m.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 1150 + k * 70, easing: EASE_OUT, fill: "backwards" }),
-      );
-      const out = pts.current;
-      if (out && WEEK) {
-        window.cancelAnimationFrame(count.current ?? 0);
-        const t0 = performance.now() + 900;
-        const total = WEEK.points;
-        out.textContent = "0";
-        const tick = (t: number) => {
-          const k = Math.min(1, Math.max(0, (t - t0) / 700));
-          out.textContent = String(Math.round(total * (1 - Math.pow(1 - k, 3))));
-          if (k < 1) count.current = window.requestAnimationFrame(tick);
-        };
-        count.current = window.requestAnimationFrame(tick);
-      }
+      wk.current = run;
+      const out = scr.querySelector<HTMLElement>(".tpp-e-pts");
+      const ease = (k: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
+      const { pctC, creditC, points } = WEEK;
+      const P0 = T3 + 150;
+      const PD = 650;
+      const t0 = performance.now();
+      setSaved(scr, 0);
+      if (out) out.textContent = "0";
+      const tick = (now: number) => {
+        const t = now - t0;
+        setSaved(scr, Math.round(pctC * ease((t - T1) / D1) + creditC * ease((t - T2) / D2)));
+        if (out) out.textContent = String(Math.round(points * ease((t - P0) / PD)));
+        if (t < P0 + PD) count.current = window.requestAnimationFrame(tick);
+      };
+      count.current = window.requestAnimationFrame(tick);
     }
     if (i === 3) {
       el.querySelector(".tpp-hw-bill")?.animate?.(
@@ -619,6 +659,7 @@ export function HowPhone() {
       window.clearTimeout(timer.current);
       window.clearInterval(typing.current);
       window.cancelAnimationFrame(count.current ?? 0);
+      wk.current.forEach((a) => a.cancel());
       bar.current?.cancel();
     },
     [],
@@ -668,45 +709,68 @@ export function HowPhone() {
                 </div>
                 <span className="tpp-hw-open">Open your gift</span>
               </div>
-              <div className="tpp-hw-s tpp-wk" data-on={cur === 2 ? "" : undefined}>
-                <div className="tpp-hw-wk">
-                  <b>{SAMPLE_GIFT.to}’s week</b>
+              <div className="tpp-hw-s tpp-e" data-on={cur === 2 ? "" : undefined}>
+                <div className="tpp-hw-app">
+                  <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                  {SAMPLE_GIFT.to}’s week
                 </div>
                 {WEEK ? (
                   <>
-                    <ul className="tpp-wk-feed">
-                      {WEEK.rows.map((r) => (
-                        <li key={r.day}>
-                          <span className="collar" data-field={logoField(r.place.id)}>
-                            <img src={r.place.logo} alt="" decoding="async" loading="lazy" />
-                          </span>
-                          <span className="tpp-wk-what">
-                            <b>{r.place.name}</b>
-                            <small>
-                              {r.day} · {money(r.place.order.price)}
-                            </small>
-                          </span>
-                          <span className="tpp-wk-fig">
-                            <em>{r.fig}</em>
-                            <small>{r.what}</small>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="tpp-wk-pts">
-                      <Glyph d={GLYPHS.star} />
-                      <span>Points</span>
-                      <b ref={pts}>{WEEK.points}</b>
-                    </div>
-                    <div className="tpp-wk-earn">
-                      <span>{money0(CREDIT)} still to earn at</span>
-                      <span className="tpp-wk-logos">
-                        {WEEK.toEarn.map((p) => (
-                          <span key={p.id} className="collar" data-field={logoField(p.id)}>
-                            <img src={p.logo} alt="" decoding="async" loading="lazy" />
-                          </span>
-                        ))}
+                    <p className="tpp-e-lead">Saved this week</p>
+                    <p className="tpp-e-sum">
+                      <span className="tpp-e-d">$</span>
+                      <span data-whole="">{Math.floor(WEEK.savedC / 100)}</span>
+                      <span className="tpp-e-c">
+                        .<span data-cents="">{String(WEEK.savedC % 100).padStart(2, "0")}</span>
                       </span>
+                    </p>
+                    {/* The meter is the saved figure itself, split by where it
+                        came from: no ceiling, so nothing reads as a target. */}
+                    <div className="tpp-e-meter" style={{ gridTemplateColumns: `${WEEK.pctC}fr ${WEEK.creditC}fr` }}>
+                      <i>
+                        <b>
+                          <img src={WEEK.b.logo} alt="" decoding="async" loading="lazy" />
+                        </b>
+                      </i>
+                      <i>
+                        <b>
+                          <img src={WEEK.a.logo} alt="" decoding="async" loading="lazy" />
+                        </b>
+                      </i>
+                    </div>
+                    <div className="tpp-e-legend" style={{ gridTemplateColumns: `${WEEK.pctC}fr ${WEEK.creditC}fr` }}>
+                      <div className="tpp-e-part">
+                        <b>{money(WEEK.pctOff)}</b>
+                        <span>
+                          <em>{PERCENT}% off</em>
+                          <br />
+                          Wed
+                        </span>
+                      </div>
+                      <div className="tpp-e-part">
+                        <b>{money(CREDIT)}</b>
+                        <span>
+                          <em>{money0(CREDIT)} credit</em>
+                          <br />
+                          Thu, earned Mon
+                        </span>
+                      </div>
+                    </div>
+                    <div className="tpp-e-tiles">
+                      <div className="tpp-e-tile">
+                        <b>{money0(CREDIT)} still to earn at</b>
+                        <span className="tpp-e-logos">
+                          {WEEK.toEarn.map((p) => (
+                            <img key={p.id} src={p.logo} alt="" decoding="async" loading="lazy" />
+                          ))}
+                        </span>
+                        <small>on a {money0(MIN_ORDER)}+ meal</small>
+                      </div>
+                      <div className="tpp-e-tile">
+                        <b>Points</b>
+                        <span className="tpp-e-pts">{WEEK.points}</span>
+                        <small>{POINTS_PER_DOLLAR} per $1</small>
+                      </div>
                     </div>
                   </>
                 ) : null}
