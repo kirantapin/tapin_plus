@@ -2261,3 +2261,21 @@ button.tpg-env-link {
 .gft-preview[data-builder] .gft-dock {
   display: none;
 }
+
+/* The page above the open phone drawer: a tap there collapses it
+   (GiftPage gft-pp-above). Under the drawer, over the inert page. */
+.gft-pp-above {
+  position: fixed;
+  z-index: 69;
+  inset: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 1023.98px) {
+  .gft-pp-grab {
+    cursor: default;
+    touch-action: auto;
+  }
+  .gft-pp-handle-hit {
+    cursor: pointer;
+  }
+}
