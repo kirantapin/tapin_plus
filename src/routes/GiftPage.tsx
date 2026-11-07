@@ -312,6 +312,12 @@ function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, fla
    into view (`play`), so a parent sees exactly what their student will. It
    stops with the card almost all the way out, its foot still tucked in the
    pocket, so the whole note reads. Reduced motion: shown already open. */
+/* How much less the card peeks at rest on a computer, and how much more on
+   hover. */
+const HOVER_PEEK = 76;
+const hoverPeek = () =>
+  typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 1024px) and (hover: hover)").matches;
+
 export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null } }) {
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
@@ -336,15 +342,36 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
        with it, on the envelope's foot. */
     const sig = el.querySelector<HTMLElement>(".gft-a-sig");
     const words = sig ? sig.offsetTop + sig.offsetHeight : el.offsetHeight;
-    const lift = Math.min(words + 12 + 10, el.offsetHeight - 140);
+    const full = Math.min(words + 12 + 10, el.offsetHeight - 140);
+    /* A computer (Sam, 6 Nov 2026: "still a bit too tall ... Maybe we
+       don't have it peeking all the way out but when someone hovers on it
+       on desktop it peeks out a bit more"): the card rests HOVER_PEEK lower,
+       so the band is shorter, and on hover the envelope drops away by that
+       much while the card holds still (gift.css: the band clips the
+       envelope's foot). A phone keeps the whole peek. */
+    const lift = hoverPeek() ? Math.max(0, full - HOVER_PEEK) : full;
     /* It starts up as the flap passes upright (~710ms), so the opening
        never shows a still, blank card (Sam, 6 Nov 2026). The sleeve keeps
        its foot hidden under the envelope. */
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 820, delay: 680 });
   }, [play]);
+  const stage = useRef<HTMLDivElement | null>(null);
+  const hovered = useRef<Animation[]>([]);
+  const peekMore = (on: boolean) => {
+    if (!play || !hoverPeek() || reducedMotion()) return;
+    const st = stage.current;
+    const el = letter.current;
+    if (!st || !el) return;
+    hovered.current.forEach((a) => a.reverse?.());
+    if (!on) return;
+    hovered.current = [
+      st.animate([{ translate: "0 0" }, { translate: `0 ${HOVER_PEEK}px` }], { duration: 420, easing: EASE, fill: "both" }),
+      el.animate([{ translate: "0 0" }, { translate: `0 ${-HOVER_PEEK}px` }], { duration: 420, easing: EASE, fill: "both", composite: "add" }),
+    ];
+  };
   return (
     <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
-      <div className="gft-a-stage">
+      <div ref={stage} className="gft-a-stage" onMouseEnter={() => peekMore(true)} onMouseLeave={() => peekMore(false)}>
         <div className="gft-a-shell">
           <Envelope flap={flap} seal={seal} extra={extra} />
         </div>
@@ -458,50 +485,49 @@ function Next({ gift, sample, preview = false, cta }: { gift: Gift; sample: bool
             Claim my gift
           </a>
         )}
-        {/* The app (Sam, 6 Nov 2026: rework the QR code section, "should
-            include a link to the app on the app store. And include the tapin
-            app logo"): which app, the QR for the phone in their pocket and
-            the App Store beside it, and the number to sign in with. */}
-        <section className="gft-app" aria-labelledby="gft-app-h">
-          <div className="gft-app-head">
-            <img className="gft-app-icon" src={APP_ICON} alt="" width="52" height="52" />
-            <span>
-              <b id="gft-app-h">Tapin</b>
-              Your Plus lives in the app
-            </span>
-          </div>
-          <div className="gft-app-get">
-            <img className="gft-app-qr" src={QR} alt="QR code for the Tapin app" width="104" height="104" />
-            <div>
-              <p>Scan it with your phone’s camera, or</p>
-              <a
-                className="gft-store"
-                href={APP_STORE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  if (preview) e.preventDefault();
-                  else track("gift_app_store", { sample });
-                }}
-              >
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                  <path
-                    fill="currentColor"
-                    d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.65.8-3.33.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.18-1.54 2.67-.39 6.62 1.1 8.79.74 1.06 1.61 2.25 2.75 2.2 1.11-.04 1.52-.71 2.86-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.07 2.66-2.14.85-1.23 1.19-2.43 1.21-2.49-.03-.01-2.32-.89-2.34-3.52ZM14.18 6.15c.6-.74 1.01-1.75.9-2.77-.87.04-1.94.59-2.56 1.32-.56.64-1.05 1.69-.92 2.68.97.08 1.97-.49 2.58-1.23Z"
-                  />
-                </svg>
-                Get it on the App Store
-              </a>
-            </div>
-          </div>
-          <p className="gft-app-sign tnum">
-            Sign in with <b>{gift.masked}</b>. Plus is already on it.
-          </p>
-        </section>
       </div>
-      <p className="gft-sign tnum">
-        Get the app and sign in with your number, <b>{gift.masked}</b>. Plus is already on it.
-      </p>
+      {/* The app (Sam, 6 Nov 2026: rework the QR code section, "should
+        include a link to the app on the app store. And include the tapin
+        app logo"; then, on a phone, "wouldn't there be a CTA to download
+        the tapin app to claim?"): which app, the App Store, and the
+        number to sign in with; on a computer the QR for the phone in their
+        pocket too. */}
+      <section className="gft-app" aria-labelledby="gft-app-h">
+        <div className="gft-app-head">
+          <img className="gft-app-icon" src={APP_ICON} alt="" width="52" height="52" />
+          <span>
+            <b id="gft-app-h">Tapin</b>
+            Your Plus lives in the app
+          </span>
+        </div>
+        <div className="gft-app-get">
+          <img className="gft-app-qr" src={QR} alt="QR code for the Tapin app" width="104" height="104" />
+          <div>
+            <p>Scan it with your phone’s camera, or</p>
+            <a
+              className="gft-store"
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (preview) e.preventDefault();
+                else track("gift_app_store", { sample });
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.65.8-3.33.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.18-1.54 2.67-.39 6.62 1.1 8.79.74 1.06 1.61 2.25 2.75 2.2 1.11-.04 1.52-.71 2.86-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.07 2.66-2.14.85-1.23 1.19-2.43 1.21-2.49-.03-.01-2.32-.89-2.34-3.52ZM14.18 6.15c.6-.74 1.01-1.75.9-2.77-.87.04-1.94.59-2.56 1.32-.56.64-1.05 1.69-.92 2.68.97.08 1.97-.49 2.58-1.23Z"
+                />
+              </svg>
+              Get it on the App Store
+            </a>
+          </div>
+        </div>
+        <p className="gft-app-sign tnum">
+          Sign in with <b>{gift.masked}</b>. Plus is already on it.
+        </p>
+      </section>
       <a
         className="gft-thanks"
         href={thanksHref(gift.from)}
@@ -519,7 +545,7 @@ function Next({ gift, sample, preview = false, cta }: { gift: Gift; sample: bool
             strokeLinejoin="round"
           />
         </svg>
-        Text {gift.from} a thank-you
+        Text {gift.from === "Your parent" ? "your parent" : gift.from} a thank-you
       </a>
     </div>
   );
@@ -1146,6 +1172,7 @@ export function GiftPreview({
       className="gft-preview"
       data-device={desk ? "computer" : "phone"}
       data-builder={builder ? "" : undefined}
+      data-peek={!wide && builder && peek ? "" : undefined}
       role="dialog"
       aria-modal="true"
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
@@ -1216,6 +1243,17 @@ export function GiftPreview({
         >
           {wide ? null : (
             <div className="gft-pp-grab">
+              {/* On a phone the drawer's own way out, on the care package
+                  (the checkout steps carry theirs); the Close and background
+                  pills over the page are gone (Sam, 6 Nov 2026: "on mobile
+                  checkout I don't think we need these"). */}
+              {stage === "gift" ? (
+                <button type="button" className="gft-pp-x" aria-label="Close" onClick={onClose}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                  </svg>
+                </button>
+              ) : null}
               <span className="gft-pp-handle" aria-hidden="true" />
               <button type="button" className="gft-pp-peek" onClick={() => setPeek(true)}>
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -1377,7 +1415,10 @@ export function GiftPreview({
       ) : null}
       {!wide && builder && peek ? (
         <button type="button" className="gft-peek-back" onClick={() => setPeek(false)}>
-          {stage === "next" ? "Back to checkout" : "Back to your care package"}
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {stage === "next" ? "Back to checkout" : "Back to editing"}
         </button>
       ) : null}
     </div>,
