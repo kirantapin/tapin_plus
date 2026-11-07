@@ -2511,3 +2511,13 @@ button.tpg-env-link {
     display: none;
   }
 }
+
+/* The phone drawer's foot lines up with its fields (20px each side), the
+   collapsed bar too (verify, 6 Nov 2026: the buttons sat 4px wider). */
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer] .gft-pp-foot,
+  .gft-preview-panel[data-drawer] .gft-pp-peekbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
