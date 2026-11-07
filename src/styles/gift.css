@@ -1845,3 +1845,44 @@ button.tpg-env-link {
     background: #f0f0f0;
   }
 }
+
+/* ══ PHONE | COMPUTER UNDER THE PREVIEW (6 Nov 2026) ═════════════════════════
+   The left card stacks the preview and the switch: the phone in the middle,
+   the computer filling the card above it, the switch at the card's foot. */
+@media (min-width: 1024px) {
+  .gft-preview-left,
+  .gft-preview[data-device="computer"] .gft-preview-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px 24px 20px;
+  }
+  .gft-preview-frame {
+    --frame-h: min(844px, calc(100vh - 48px - 44px - 72px));
+  }
+  .gft-preview[data-device="computer"] .gft-preview-frame {
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    border-radius: 16px;
+    box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.08);
+  }
+  .gft-preview-device {
+    flex: none;
+    width: 280px;
+    pointer-events: auto;
+  }
+}
+
+/* Close at the builder's top left on a computer (6 Nov 2026). */
+@media (min-width: 1024px) {
+  .gft-preview-left > .gft-preview-back {
+    top: 16px;
+    left: 16px;
+    background: #f0f0f0;
+    box-shadow: none;
+  }
+}

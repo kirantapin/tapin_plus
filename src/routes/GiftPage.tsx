@@ -1172,13 +1172,16 @@ export function GiftPreview({
         </div>
       </div>
       <div className="gft-preview-left">
-        <div ref={frame} className="gft-preview-frame">
-          <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
+        {/* Close: the builder's own, at its top left (Sam, 6 Nov 2026), not
+            part of the student's page; on a phone, the screen's top left. */}
+        <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {backLabel}
           </button>
+        <div ref={frame} className="gft-preview-frame">
+          
           <div
             className="gft-preview-scroll gft-wrap"
             style={scaled}
@@ -1187,6 +1190,18 @@ export function GiftPreview({
             <Letter gift={gift} sample preview cta={pageCta} />
           </div>
         </div>
+        {/* Phone or computer, under the preview it changes (Sam, 6 Nov 2026:
+            "the phone computer toggle should be on the bottom of the left
+            column of the builder"). A computer only. */}
+        {wide ? (
+          <div className="gft-preview-device gft-pp-seg" role="radiogroup" aria-label="See it on">
+            {(["phone", "computer"] as const).map((dv) => (
+              <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
+                {dv === "phone" ? "Phone" : "Computer"}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
       {wide || builder ? (
         <aside
@@ -1350,20 +1365,6 @@ export function GiftPreview({
               </div>
             </div>
             ))}
-            {wide ? (
-            <div className="gft-pp-group">
-              <h2 id="gft-pp-dev" className="gft-pp-h">
-                See it on
-              </h2>
-              <div className="gft-pp-seg" role="radiogroup" aria-labelledby="gft-pp-dev">
-                {(["phone", "computer"] as const).map((dv) => (
-                  <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
-                    {dv === "phone" ? "Phone" : "Computer"}
-                  </button>
-                ))}
-              </div>
-            </div>
-            ) : null}
           </div>
           <div className="gft-pp-foot">
             <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>
