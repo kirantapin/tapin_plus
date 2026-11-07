@@ -860,21 +860,13 @@ function Sheet({
     );
     /* The promise, right above Pay (Sam, 7 Nov 2026: "go for it"): what a
        hesitating parent needs at the button. The 14-day refund isn't on an
-       ask link (their student is signed in already). */
+       ask link (their student is signed in already), so that line drops its first half there. */
     const promise = (
       <ul className="prc-promise" aria-label="Our promise">
-        {ask ? null : (
-          <li>
-            <Glyph d={GLYPHS.refund} />
-            <span>
-              <b>Full refund</b> if they don’t sign in within 14 days
-            </span>
-          </li>
-        )}
         <li>
           <Glyph d={GLYPHS.refund} />
-          <span>
-            <b>Full refund</b> if they don’t save what you spent
+          <span className="tnum">
+            <b>Full refund</b> if they don’t {ask ? "" : "sign in within 14 days or don’t "}save what you spent
           </span>
         </li>
         <li>
@@ -967,18 +959,10 @@ function Sheet({
        ask link, as there. */
     const promise = (
       <ul className="prc-promise prc-done-promise" aria-label="Our promise">
-        {ask ? null : (
-          <li>
-            <Glyph d={GLYPHS.refund} />
-            <span className="tnum">
-              <b>Full refund</b> if they don’t sign in by {inDays(14)}
-            </span>
-          </li>
-        )}
         <li>
           <Glyph d={GLYPHS.refund} />
-          <span>
-            <b>Full refund</b> if they don’t save what you spent
+          <span className="tnum">
+            <b>Full refund</b> if they don’t {ask ? "" : `sign in by ${inDays(14)} or don’t `}save what you spent
           </span>
         </li>
         <li>
