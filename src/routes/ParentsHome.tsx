@@ -74,7 +74,10 @@ const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
 
-/* ══ THE HERO A/B TEST: THE GIFT ROUND (Sam, 6 Nov 2026: "I think the copy
+/* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
+   package they'll open every day", now everyone's; "b" and "c" stay as ?ph=
+   previews) ═══════════════════════════════════════════════════════════════
+   THE HERO A/B TEST: THE GIFT ROUND (Sam, 6 Nov 2026: "I think the copy
    variants for the header should be focused on this being a gift to their
    kids") ═══════════════════════════════════════════════════════════════════
    The same pattern as model/heroTest.ts, kept in this file. One link, and
@@ -92,10 +95,9 @@ const EYEBROW = NAME_VT
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
 type ParentHero = "a" | "b" | "c";
-const PARENT_HERO_TEST = "plus-parent-hero-gift";
 const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
-  a: ["A care package", "they’ll open every week."],
+  a: ["A care package", "they’ll open every day."],
   b: ["Lunch is on you.", "Even from home."],
   c: ["Send them Tapin Plus,", "with a note from you."],
 };
@@ -109,24 +111,18 @@ function parentHero(): ParentHero {
   const asked = new URLSearchParams(window.location.search).get("ph");
   if (isParentHero(asked)) return (parentHeroCached = asked);
   try {
-    const kept = window.localStorage.getItem(PARENT_HERO_KEY);
-    if (isParentHero(kept)) return (parentHeroCached = kept);
+    window.localStorage.removeItem(PARENT_HERO_KEY);
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
-  const roll = Math.random();
-  const drawn: ParentHero = roll < 1 / 3 ? "a" : roll < 2 / 3 ? "b" : "c";
-  try {
-    window.localStorage.setItem(PARENT_HERO_KEY, drawn);
-  } catch {
-    /* As above. */
-  }
-  return (parentHeroCached = drawn);
+  /* The test is over (Sam, 6 Nov 2026, picking "A care package they'll
+     open every day"): everyone gets "a"; ?ph= still previews the others, and
+     an earlier draw is cleared. */
+  return (parentHeroCached = "a");
 }
-const parentHeroProps = (v: ParentHero) => ({
-  parent_hero_variant: v,
-  [`$feature/${PARENT_HERO_TEST}`]: v,
-});
+/* The experiment's flag isn't registered any more (the test is over); the
+   variant still is, so events say which headline was showing. */
+const parentHeroProps = (v: ParentHero) => ({ parent_hero_variant: v });
 
 /* ══ THE HERO PHOTOGRAPH ═════════════════════════════════════════════════════
    Parents and their student, framed so the faces clear the pill and the
@@ -633,6 +629,13 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
+            {/* What "every day" stands on: mostly the weekly $5, and the 15%
+                (instead, once a day). */}
+            {hero === "a" ? (
+              <p className="tpp-hero-sub">
+                ${CREDIT} in credit every week at each of five Blacksburg spots, or {PERCENT}% off once a day.
+              </p>
+            ) : null}
             <Proof />
           </div>
         </div>

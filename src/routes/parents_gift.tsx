@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SAMPLE_GIFT, SCENE_GROUPS, type SceneId } from "../model/gift";
 import { getGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 
@@ -82,6 +82,33 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const shown = choices.some((c) => c.id === scene) ? scene : season;
+  /* One row (Sam, 6 Nov 2026: "we can just show one row of options here"):
+     as many swatches as fit beside View more, in the calendar's order from
+     the season before today's; the one showing is always among them. */
+  const row = useRef<HTMLDivElement | null>(null);
+  const [fits, setFits] = useState(choices.length);
+  useLayoutEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const measure = () => {
+      const more = el.querySelector<HTMLElement>(".tpg-env-more");
+      const sw = el.querySelector<HTMLElement>(".tpg-env-sw");
+      if (!more || !sw) return;
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 8;
+      const n = Math.floor((el.clientWidth - more.offsetWidth) / (sw.offsetWidth + gap));
+      setFits(Math.max(1, Math.min(choices.length, n)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [choices.length]);
+  const start = Math.max(0, Math.min(choices.findIndex((c) => c.id === season) - 1, choices.length - fits));
+  let visible = choices.slice(start, start + fits);
+  if (!visible.some((c) => c.id === shown)) {
+    const pick = choices.find((c) => c.id === shown);
+    if (pick) visible = [...visible.slice(0, -1), pick];
+  }
   return (
     <section className="tpg tpg-env" aria-labelledby="tpg-env-h" data-scene={shown}>
       <span className="tpg-env-bg scene-swatch" data-scene={shown} aria-hidden="true" />
@@ -109,8 +136,8 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           <span className="tpg-env-pick-h">
             Seasonal <span className="tpg-env-tag">Limited time</span>
           </span>
-          <div className="tpg-env-row" role="radiogroup" aria-label="Background">
-            {choices.map((c) => (
+          <div ref={row} className="tpg-env-row" role="radiogroup" aria-label="Background">
+            {visible.map((c) => (
               <button
                 key={c.id}
                 type="button"
