@@ -98,7 +98,8 @@ export const NOTE_MAX = 240;
 export const FROM_MAX = 24;
 
 export const SAMPLE_GIFT: Gift = {
-  to: "Maya",
+  /* Jake, to match the sample photo's student (Sam, 6 Nov 2026). */
+  to: "Jake",
   from: "Mom",
   note: "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!",
   masked: "•••0123",
