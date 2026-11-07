@@ -987,3 +987,38 @@
     margin: 12px 0 0;
   }
 }
+
+/* The promise under the offer (6 Nov 2026): three quiet lines on the ground,
+   a green check-style glyph each; under the strip on a phone, under the
+   offer card's strip in the held column on a computer. */
+.tpp-promise {
+  display: grid;
+  gap: 10px;
+  margin: 14px var(--gutter) 0;
+  padding: 0 4px;
+  list-style: none;
+}
+.tpp-promise li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.tpp-promise b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tpp-promise svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--money);
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-offer-col > .tpp-promise {
+    margin: 16px 0 0;
+    padding: 0 8px;
+  }
+}
