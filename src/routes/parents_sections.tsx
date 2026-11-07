@@ -103,6 +103,31 @@ export function OfferPrice() {
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
         <small aria-hidden="true">every week, at each of five spots</small>
       </p>
+      {/* The other two, as pictures too (Sam, 6 Nov 2026: "maybe we
+          visualize the other two benefits right under this section"): 15%
+          off instead of the $5, once a day; points on everything. */}
+      <ul className="tpp-more" aria-label="Also with Plus">
+        <li>
+          <b className="tpp-more-fig">{PERCENT}%</b>
+          <span>
+            off instead,
+            <br />
+            once a day
+          </span>
+        </li>
+        <li>
+          <b className="tpp-more-fig" data-pts="">
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" fill="currentColor" />
+            </svg>
+          </b>
+          <span>
+            points on
+            <br />
+            everything
+          </span>
+        </li>
+      </ul>
     </div>
   );
 }
