@@ -874,7 +874,7 @@ function Sheet({
         <li>
           <Glyph d={GLYPHS.refund} />
           <span>
-            <b>Not used that month?</b> Ask for a refund
+            <b>Full refund</b> if they don’t save what you spent
           </span>
         </li>
         <li>
@@ -978,7 +978,7 @@ function Sheet({
         <li>
           <Glyph d={GLYPHS.refund} />
           <span>
-            <b>Not used one month?</b> Ask for a refund
+            <b>Full refund</b> if they don’t save what you spent
           </span>
         </li>
         <li>
