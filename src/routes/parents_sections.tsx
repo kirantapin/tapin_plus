@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { asset } from "../asset";
 import { logoField } from "../model/content";
-import { CREDIT, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
+import { SAMPLE_GIFT } from "../model/gift";
+import { POINTS_PER_DOLLAR } from "../model/order";
+import { CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -96,7 +98,8 @@ function LogoRow({ size }: { size: number }) {
    highlight the guarantee as well underneath, like refund if they don't use
    it, easy cancel anytime"). Only what the backend does today: the 14-day
    refund if their student never signs in (parent_unclaimed; not on an ask
-   link, where the student is signed in already) and cancel by email. (Not
+   link, where the student is signed in already), a month they didn't use
+   refunded on asking (support, by hand; Sam, 7 Nov 2026) and cancel by email. (Not
    "manage it from your account": that page explains how to cancel, it
    isn't self-serve; Hormozi audit, 6 Nov 2026.) */
 export function Guarantee({ asked }: { asked: boolean }) {
@@ -110,6 +113,15 @@ export function Guarantee({ asked }: { asked: boolean }) {
           </span>
         </li>
       )}
+      {/* Sam, 7 Nov 2026: a month they didn't use is refunded on asking,
+          by support (by hand; the backend's docs/PARENTS_FLOW.md). On every
+          flow, the ask link's included. */}
+      <li>
+        <Glyph d={GLYPHS.refund} />
+        <span>
+          <b>Not used that month?</b> Ask for a refund
+        </span>
+      </li>
       <li>
         <Glyph d={GLYPHS.mail} />
         <span>
@@ -383,10 +395,21 @@ export function LunchBars() {
    steps sit beside it (under it on a phone) and the open one says its
    approved line. Once in view it plays itself through, a thin bar timing
    each step, and stops on the last; a tap takes over. With reduced motion
-   it simply rests on the first step and taps still move it. Toned down
-   (Sam: "too much color"): the phone stands on the page's grey, one small
-   orange sun behind it, maroon only on the open step's glyph, its timer and
-   the gift's small marks, money green on the $5s. */
+   it simply rests on the first step and taps still move it. The phone
+   stands on maroon again, as the lab's pick did (Sam, 7 Nov 2026: "for this
+   card, we can have the background color"; the one coloured ground on the
+   page), with the orange sun and a cream ridge; maroon also on the open
+   step's glyph, its timer and the gift's small marks, money green on the
+   savings. Four steps since 7 Nov: the last is how to skip, cancel or get a
+   refund, on the reminder text the parent gets before each bill. */
+/* One month from today, as a text says it ("Dec 7"): the reminder's example.
+   The 31st of a month with no 31st next month lands on that month's last day. */
+function inAMonth(now = new Date()): string {
+  const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(now.getDate(), last));
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode }> = [
   {
     glyph: GLYPHS.card,
@@ -404,10 +427,22 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     glyph: GLYPHS.tag,
     when: "After that",
     title: "They save every week",
+    /* One $5 a place a week, not "every time" (Sam, 7 Nov 2026). */
     line: (
       <>
-        ${CREDIT} back every week at each Plus place, every time they order ${MIN_ORDER} or more of food through Tapin. Or{" "}
-        {PERCENT}% off, once a day. One per order.
+        {money0(CREDIT)} in credit every week at each Plus place, earned on a {money0(MIN_ORDER)}+ order of food. Or {PERCENT}% off,
+        once a day.
+      </>
+    ),
+  },
+  {
+    glyph: GLYPHS.mail,
+    when: "Anytime",
+    title: "Cancel, skip or get a refund",
+    line: (
+      <>
+        We text you before each monthly bill. To skip a month, cancel, or get a refund for a month they didn’t use, email
+        support@tapin.app.
       </>
     ),
   },
@@ -415,6 +450,42 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
 /* A made-up number (555-01xx is the range kept for fiction). */
 const SAMPLE_NUMBER = "(540) 555-0142";
 const STEP_MS = 3600;
+/* The last screen's week (Sam, 7 Nov 2026: "redesign this last slide"): not
+   five identical $5s, which read as $25 free, but what a week of Plus is.
+   Monday's $12 lunch at the first place earns its $5 (paid in full);
+   Wednesday the second place takes 15% off instead; Thursday the first
+   place's $5 comes off. The other four places' $5 is still to earn this week.
+   Points on what was paid (never more than they'd earn). Real places, real
+   menu prices. */
+const WEEK = (() => {
+  const [a, b] = PLACES;
+  if (!a || !b) return null;
+  const pctOff = Math.round(b.order.price * PERCENT) / 100;
+  const rows = [
+    { day: "Mon", place: a, fig: `+${money0(CREDIT)}`, what: "earned", paid: a.order.price },
+    { day: "Wed", place: b, fig: `−${money(pctOff)}`, what: `${PERCENT}% off`, paid: b.order.price - pctOff },
+    { day: "Thu", place: a, fig: `−${money0(CREDIT)}`, what: "credit used", paid: a.order.price - CREDIT },
+  ];
+  const points = rows.reduce((n, r) => n + Math.floor(Math.round(r.paid * 100) * POINTS_PER_DOLLAR / 100), 0);
+  return { rows, points, toEarn: PLACES.filter((p) => p.id !== a.id) };
+})();
+/* Hold the steps at their tallest open state, so the page under them never
+   moves as they play (Sam, 7 Nov 2026: 22–44px of shift on a phone): every
+   step's head, the gaps, and the longest line. Independent of what is open
+   or mid-transition, so it can run at any time. */
+function holdTallest(list: HTMLOListElement) {
+  const steps = Array.from(list.children) as HTMLElement[];
+  let heads = 0;
+  let body = 0;
+  for (const li of steps) {
+    const more = li.querySelector<HTMLElement>(".tpp-hw-more");
+    const p = more?.firstElementChild as HTMLElement | null;
+    heads += li.offsetHeight - (more?.offsetHeight ?? 0);
+    if (p) body = Math.max(body, p.scrollHeight - parseFloat(getComputedStyle(p).paddingTop || "0") + 6);
+  }
+  const gap = parseFloat(getComputedStyle(list).rowGap || "0") || 0;
+  list.style.minHeight = `${Math.ceil(heads + body + gap * Math.max(0, steps.length - 1))}px`;
+}
 const APP_ICON = asset("/brand/tapin-app-icon.png");
 const HUG = asset("/parents/hero-hug.webp");
 export function HowPhone() {
@@ -426,6 +497,19 @@ export function HowPhone() {
   const typing = useRef<number | undefined>(undefined);
   const bar = useRef<Animation | undefined>(undefined);
   const num = useRef<HTMLSpanElement | null>(null);
+  const pts = useRef<HTMLElement | null>(null);
+  const count = useRef<number | undefined>(undefined);
+  const list = useRef<HTMLOListElement | null>(null);
+  const renews = inAMonth();
+  useLayoutEffect(() => {
+    const el = list.current;
+    if (!el) return;
+    holdTallest(el);
+    const again = () => holdTallest(el);
+    window.addEventListener("resize", again);
+    document.fonts?.ready.then(again).catch(() => undefined);
+    return () => window.removeEventListener("resize", again);
+  }, []);
   /* Before the first paint: the number waits empty for its typing. */
   useLayoutEffect(() => {
     if (!reducedMotion() && num.current && typeof IntersectionObserver !== "undefined") num.current.textContent = "";
@@ -454,16 +538,59 @@ export function HowPhone() {
         ],
         { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
       );
-    if (i === 2)
-      el.querySelectorAll(".tpp-hw-list em").forEach((m, k) =>
-        m.animate?.(
+    if (i === 2) {
+      /* The week fills in as it happened: each order and what Plus did on
+         it, the points counting up, the places still to earn last. */
+      el.querySelectorAll(".tpp-wk-feed li").forEach((r, k) =>
+        r.animate?.(
           [
-            { opacity: 0, transform: "scale(.4)" },
+            { opacity: 0, transform: "translateY(8px)" },
             { opacity: 1, transform: "none" },
           ],
-          { duration: 420, delay: 160 + k * 110, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" },
+          { duration: 460, delay: 160 + k * 260, easing: EASE_OUT, fill: "backwards" },
         ),
       );
+      el.querySelectorAll(".tpp-wk-feed em").forEach((m, k) =>
+        m.animate?.(
+          [
+            { opacity: 0, transform: "scale(.6)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 380, delay: 360 + k * 260, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" },
+        ),
+      );
+      el.querySelectorAll(".tpp-wk-earn .collar").forEach((m, k) =>
+        m.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 1150 + k * 70, easing: EASE_OUT, fill: "backwards" }),
+      );
+      const out = pts.current;
+      if (out && WEEK) {
+        window.cancelAnimationFrame(count.current ?? 0);
+        const t0 = performance.now() + 900;
+        const total = WEEK.points;
+        out.textContent = "0";
+        const tick = (t: number) => {
+          const k = Math.min(1, Math.max(0, (t - t0) / 700));
+          out.textContent = String(Math.round(total * (1 - Math.pow(1 - k, 3))));
+          if (k < 1) count.current = window.requestAnimationFrame(tick);
+        };
+        count.current = window.requestAnimationFrame(tick);
+      }
+    }
+    if (i === 3) {
+      el.querySelector(".tpp-hw-bill")?.animate?.(
+        [
+          { opacity: 0, transform: "translateY(14px) scale(.94)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
+      );
+      el.querySelector(".tpp-hw-mail")?.animate?.([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 360,
+        delay: 700,
+        easing: EASE_OUT,
+        fill: "backwards",
+      });
+    }
   };
   const go = (i: number, play: boolean) => {
     setCur(i);
@@ -491,6 +618,7 @@ export function HowPhone() {
     () => () => {
       window.clearTimeout(timer.current);
       window.clearInterval(typing.current);
+      window.cancelAnimationFrame(count.current ?? 0);
       bar.current?.cancel();
     },
     [],
@@ -533,34 +661,74 @@ export function HowPhone() {
                   <div className="tpp-hw-gift">
                     <img src={HUG} alt="" decoding="async" loading="lazy" />
                     <div>
-                      <small>For Jake</small>
+                      <small>For {SAMPLE_GIFT.to}</small>
                       <span>Thinking of you, my love! Here’s a little treat.</span>
                     </div>
                   </div>
                 </div>
                 <span className="tpp-hw-open">Open your gift</span>
               </div>
-              <div className="tpp-hw-s" data-on={cur === 2 ? "" : undefined}>
+              <div className="tpp-hw-s tpp-wk" data-on={cur === 2 ? "" : undefined}>
                 <div className="tpp-hw-wk">
-                  <b>This week</b>
-                  <FlatMark className="tpp-hw-mark" />
+                  <b>{SAMPLE_GIFT.to}’s week</b>
                 </div>
-                <ul className="tpp-hw-list">
-                  {PLACES.map((p) => (
-                    <li key={p.id}>
-                      <span className="collar" data-field={logoField(p.id)}>
-                        <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                {WEEK ? (
+                  <>
+                    <ul className="tpp-wk-feed">
+                      {WEEK.rows.map((r) => (
+                        <li key={r.day}>
+                          <span className="collar" data-field={logoField(r.place.id)}>
+                            <img src={r.place.logo} alt="" decoding="async" loading="lazy" />
+                          </span>
+                          <span className="tpp-wk-what">
+                            <b>{r.place.name}</b>
+                            <small>
+                              {r.day} · {money(r.place.order.price)}
+                            </small>
+                          </span>
+                          <span className="tpp-wk-fig">
+                            <em>{r.fig}</em>
+                            <small>{r.what}</small>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="tpp-wk-pts">
+                      <Glyph d={GLYPHS.star} />
+                      <span>Points</span>
+                      <b ref={pts}>{WEEK.points}</b>
+                    </div>
+                    <div className="tpp-wk-earn">
+                      <span>{money0(CREDIT)} still to earn at</span>
+                      <span className="tpp-wk-logos">
+                        {WEEK.toEarn.map((p) => (
+                          <span key={p.id} className="collar" data-field={logoField(p.id)}>
+                            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                          </span>
+                        ))}
                       </span>
-                      <span>{p.name}</span>
-                      <em>{money0(CREDIT)}</em>
-                    </li>
-                  ))}
-                </ul>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+              <div className="tpp-hw-s" data-on={cur === 3 ? "" : undefined}>
+                <div className="tpp-hw-msg">
+                  <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                  <b>Tapin</b>
+                </div>
+                <div className="tpp-hw-bill">
+                  Tapin: {SAMPLE_GIFT.to}’s Tapin Plus renews {renews} for {MONTHLY}. To skip a month or cancel, email
+                  support@tapin.app. Reply STOP to opt out
+                </div>
+                <span className="tpp-hw-mail">
+                  <Glyph d={GLYPHS.mail} />
+                  support@tapin.app
+                </span>
               </div>
             </div>
           </div>
         </div>
-        <ol className="tpp-hw-steps">
+        <ol ref={list} className="tpp-hw-steps">
           {STEPS.map((s, i) => (
             <li key={s.title} className="tpp-hw-step" data-on={cur === i ? "" : undefined} data-timed={timed === i ? "" : undefined}>
               <button type="button" aria-expanded={cur === i} aria-controls={`tpp-hw-more-${i}`} onClick={() => tap(i)}>
