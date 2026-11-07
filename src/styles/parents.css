@@ -940,3 +940,23 @@
   line-height: 16px;
   color: var(--muted);
 }
+
+/* Where the two go (6 Nov 2026): out on the ground between the offer card
+   and the gift band on a phone, as white wells; in the held offer card on a
+   computer. */
+.tpp-more-out {
+  margin: 12px var(--gutter) 0;
+}
+.tpp-more-out li {
+  background: #ffffff;
+}
+@media (max-width: 1023.98px) {
+  .tpp-more-in {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-more-out {
+    display: none;
+  }
+}

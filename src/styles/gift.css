@@ -454,7 +454,8 @@ button.tpg-env-link {
 }
 /* Side by side only once the sheet is the desk layout's wide column. */
 @media (min-width: 1024px) {
-  .tpp .tpa-sheet > .tpp-offer + .tpg-env {
+  .tpp .tpa-sheet > .tpp-offer + .tpg-env,
+  .tpp .tpa-sheet > .tpp-offer + .tpp-more-out + .tpg-env {
     margin-top: 0;
   }
   .tpg-env {
@@ -1328,7 +1329,8 @@ button.tpg-env-link {
   object-position: 50% 30%;
 }
 .gft.gft-mini:has(.gft-a-photo) {
-  padding-top: 254px;
+  /* 254px for the whole peek, less the phone's tuck (PHONE_TUCK, 110). */
+  padding-top: 144px;
 }
 .gft-mini .gft-a-letter:has(.gft-a-photo) {
   min-height: 430px;
@@ -2144,15 +2146,23 @@ button.tpg-env-link {
   .gft-preview[data-builder][data-peek] .gft-preview-back {
     display: inline-flex;
   }
-  /* The page clears the peeking drawer. */
+  /* The drawer floats over the page (Sam, 6 Nov 2026: "this should hover
+     slightly above the animation behind it so there isn't a white blank
+     space on the top right and left of the modal"): the band runs under it
+     to the screen's foot, its contents centred in the space above it; the
+     opened page and its button clear it. */
   .gft-preview[data-builder][data-peek] .gft-preview-scroll {
-    padding-bottom: var(--gft-peek);
+    padding-bottom: 0;
   }
   .gft-preview[data-builder][data-peek] .gft-a:not([data-state="open"]) .gft-a-band {
-    min-height: calc(100svh - var(--gft-peek));
+    min-height: 100svh;
+    padding-bottom: calc(72px + var(--gft-peek));
+  }
+  .gft-preview[data-builder][data-peek] .gft-after {
+    padding-bottom: calc(32px + var(--gft-peek));
   }
   .gft-preview[data-builder][data-peek] .gft-dock {
-    bottom: 12px;
+    bottom: calc(12px + var(--gft-peek));
   }
 }
 
@@ -2230,3 +2240,43 @@ button.tpg-env-link {
   }
 }
 /* ══ END GENERATED ═ */
+
+/* The phone drawer's head (6 Nov 2026): title with the × at its right, the
+   line under it, then the step bars, as the checkout steps are laid out. The
+   handle row above is the handle alone. */
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer] .gft-pp-grab {
+    height: 24px;
+    min-height: 24px;
+    padding: 0 14px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-grab::before {
+    display: none;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title x" "sub sub" "steps steps";
+    align-items: start;
+    column-gap: 12px;
+    row-gap: 6px;
+    padding: 8px 20px 2px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-title {
+    grid-area: title;
+    padding-top: 6px;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-sub {
+    grid-area: sub;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-steps {
+    grid-area: steps;
+    margin: 10px 0 0;
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-head .gft-pp-x {
+    grid-area: x;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
+}
