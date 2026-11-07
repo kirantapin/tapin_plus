@@ -10,7 +10,7 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { thanksHref, type Gift } from "../model/gift";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
-import { CREDIT, MIN_ORDER, PERCENT, PLACES } from "./parents_kit";
+import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES } from "./parents_kit";
 import type { DockCta } from "./GiftPage";
 import "../styles/gift-after.css";
 
@@ -130,7 +130,10 @@ export function GiftAfter(p: Props) {
       {/* Whose this is (Sam, 6 Nov 2026: "maybe we have a section right above
           this which is 'Tapin plus blacksburg' with the tapin logo"). */}
       <div className="gav-brand">
-        <img src={APP_ICON} alt="" width="40" height="40" />
+        {/* The Plus mark, not the app icon (Sam, 7 Nov 2026). */}
+        <span className="gav-brand-mark" aria-hidden="true">
+          <FlatMark />
+        </span>
         <p>
           <b>Tapin Plus</b>
           <span>Blacksburg</span>

@@ -749,6 +749,17 @@ export function Letter({
 
   const to = gift.to;
   const button = useRef<HTMLButtonElement | null>(null);
+  const resealBtn = useRef<HTMLButtonElement | null>(null);
+  useLayoutEffect(() => {
+    if (state !== "open" || still || !resealBtn.current) return;
+    const a = resealBtn.current.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], {
+      duration: 420,
+      delay: 300,
+      easing: EASE,
+      fill: "backwards",
+    });
+    return () => a.cancel();
+  }, [state, still]);
   /* ── The dock (Sam, 6 Nov 2026: "we should have a sticky 'claim my gift'
      button at the bottom of the page"): once it's open, the one thing to do
      stays in reach, sliding up as the letter settles, and breathing gently
@@ -842,6 +853,7 @@ export function Letter({
         </div>
         {state !== "open" ? (
           <button
+            key="open"
             ref={button}
             type="button"
             className="gft-open"
@@ -852,7 +864,10 @@ export function Letter({
             Open it
           </button>
         ) : onReseal ? (
-          <button type="button" className="gft-open gft-reseal" onClick={onReseal}>
+          /* Its own element (key): React would otherwise reuse "Open it"'s,
+             still faded out at opacity 0 from the opening (Sam, 7 Nov 2026:
+             "the close it button isn't showing"). It fades in instead. */
+          <button key="reseal" ref={resealBtn} type="button" className="gft-open gft-reseal" onClick={onReseal}>
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
