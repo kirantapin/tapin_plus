@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Appearance, type Stripe } from "@stripe/stripe-js";
@@ -8,6 +8,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import {
   confirmParentCheckout,
   keptUtm,
+  PARENT_CONSENT_VERSION,
   parentMock,
   startParentCheckout,
   toE164,
@@ -27,8 +28,10 @@ import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrack
         "we can have them type the number twice yeah"), then the parent's
         name and mobile (no email for now, Sam, 6 Nov 2026: "let's not
         capture parent emails and just do phone number for now since we
-        don't have automated emails hooked up yet"). From an Ask a parent
-        link the student is already known, so it shows who's covered.
+        don't have automated emails hooked up yet"; the email is asked for
+        again since), and two marketing boxes, texts and email, unticked
+        until ticked (6 Nov 2026). From an Ask a parent link the student is
+        already known, so it shows who's covered.
      2. The charge: the parent is charged now ($3.99 the first month, then
         $7.99/month), with the terms right by the button that takes the
         money (Virginia's auto-renewal rule). Stripe's Payment Element, so a
@@ -198,6 +201,10 @@ function Sheet({
      regardless"); the parent is texted. */
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  /* Marketing, texts and email, each unticked until ticked (Sam, 6 Nov
+     2026); kept while they go back and forth between the steps. */
+  const [mktSms, setMktSms] = useState(false);
+  const [mktEmail, setMktEmail] = useState(false);
   /* The care package as the builder left it (step 1): the note and how it's
      signed, the background and the photo, all optional; whatever is filled
      in goes with the checkout. */
@@ -227,6 +234,14 @@ function Sheet({
   const sheet = useRef<HTMLDivElement | null>(null);
   const body = useRef<HTMLDivElement | null>(null);
   const inner = useRef<HTMLDivElement | null>(null);
+  /* The step's body; embedded, it's also what scrolls (the panel's body). */
+  const setBody = useCallback(
+    (el: HTMLDivElement | null) => {
+      body.current = el;
+      if (embedded) inner.current = el;
+    },
+    [embedded],
+  );
   const label = useRef<HTMLSpanElement | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   const leaving = useRef(false);
@@ -416,18 +431,46 @@ function Sheet({
     el.animate([{ width: `${was}px`, maxWidth: "none" }, { width: `${now}px`, maxWidth: "none" }], { duration: 420, easing: EASE });
   }, [step]);
 
-  /* Each step comes in with a short lift; its heading takes focus so a
-     screen reader says where it is. */
-  const firstStep = useRef(true);
-  useEffect(() => {
-    if (firstStep.current) {
-      firstStep.current = false;
-      return;
-    }
+  /* Step to step. Embedded, as the builder's stages move (GiftPage): the
+     title, its line and the body slide in from the side they come from, and
+     on a phone the drawer eases to the new step's height. On its own, each
+     step comes in with a short lift. Either way the heading takes focus so
+     a screen reader says where it is, and the body starts at its top. */
+  const ORDER: Step[] = ["student", "you", "pay", "done"];
+  const shownStep = useRef(step);
+  const heightFrom = useRef<number | null>(null);
+  const toStep = (next: Step) => {
+    const panel = embedded ? sheet.current?.closest<HTMLElement>(".gft-preview-panel") : null;
+    heightFrom.current = panel ? panel.getBoundingClientRect().height : null;
+    setStep(next);
+  };
+  useLayoutEffect(() => {
+    if (shownStep.current === step) return;
+    const dir = ORDER.indexOf(step) >= ORDER.indexOf(shownStep.current) ? 1 : -1;
+    shownStep.current = step;
     inner.current?.scrollTo?.({ top: 0 });
     document.getElementById("prc-title")?.focus({ preventScroll: true });
+    const was = heightFrom.current;
+    heightFrom.current = null;
+    if (still()) return;
+    if (embedded) {
+      const root = sheet.current;
+      root?.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-steps):not(.gft-pp-x), .gft-pp-body").forEach((el) =>
+        el.animate?.([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 360, easing: EASE }),
+      );
+      const panel = root?.closest<HTMLElement>(".gft-preview-panel");
+      if (!panel || was == null || typeof panel.animate !== "function") return;
+      const now = panel.getBoundingClientRect().height;
+      if (Math.abs(now - was) < 2) return;
+      panel.style.overflow = "hidden";
+      const a = panel.animate([{ height: `${was}px` }, { height: `${now}px` }], { duration: 380, easing: EASE });
+      const end = () => panel.style.removeProperty("overflow");
+      a.onfinish = end;
+      a.oncancel = end;
+      return;
+    }
     const b = body.current;
-    if (b && !still() && typeof b.animate === "function")
+    if (b && typeof b.animate === "function")
       b.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], {
         duration: 260,
         /* While the width eases, the contents (laid out at the new width)
@@ -436,6 +479,8 @@ function Sheet({
         easing: EASE,
         fill: "backwards",
       });
+    // On the step changing only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
   /* ── The form ── */
@@ -458,7 +503,7 @@ function Sheet({
     if (busy || photoBusy) return;
     setTried(true);
     setFormError(null);
-    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "email", "mobile"];
+    const order: Field[] = step === "student" ? ["student", "phone", "confirm"] : ["name", "mobile", "email"];
     const bad = order.find((f) => errors[f]);
     if (bad) {
       document.getElementById(`prc-${bad}`)?.focus();
@@ -467,7 +512,7 @@ function Sheet({
     if (step === "student") {
       /* On to you; your fields start fresh, without errors showing. */
       setTried(false);
-      setStep("you");
+      toStep("you");
       return;
     }
     setBusy(true);
@@ -478,6 +523,8 @@ function Sheet({
       has_note: !!giftNoteSent,
       has_photo: noteOpen && !!giftPhoto,
       gift_scene: noteOpen ? giftScene : null,
+      marketing_sms: mktSms,
+      marketing_email: mktEmail,
     });
     try {
       const res = await startParentCheckout({
@@ -492,13 +539,16 @@ function Sheet({
         gift_scene: noteOpen ? giftScene : null,
         gift_photo: noteOpen ? giftPhoto : null,
         gift_effect: draft.effect,
+        marketing_sms: mktSms,
+        marketing_email: mktEmail,
+        consent_text_version: PARENT_CONSENT_VERSION,
         utm: keptUtm(),
       });
       setStarted(res);
       /* A gift goes out with a note or a photo (API.md: an ask link's
          student is texted their gift link when there is either). */
       setSentNote(!!giftNoteSent || (noteOpen && !!giftPhoto));
-      setStep("pay");
+      toStep("pay");
     } catch (err) {
       setFormError((err as Error).message || "Something went wrong. Please try again.");
     } finally {
@@ -516,7 +566,7 @@ function Sheet({
     track("parent_purchase", { value: first / 100, currency: "USD", source, checkout_id: started?.checkout_id });
     if (ask) track("ask_paid", { source });
     setDone(res);
-    setStep("done");
+    toStep("done");
     /* Sent: the next gift starts fresh. */
     clearGiftDraft();
   };
@@ -541,177 +591,252 @@ function Sheet({
         : step === "student"
             ? `Where ${student.trim() ? possessive(student.trim()) : "their"} gift goes`
             : "Last, you";
-  /* The gift says what comes next; the details steps say the price; the pay
-     step's rows and terms say it there. */
-  const sub = step === "student" || step === "you" ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.` : null;
+  /* Every step has its line under the title, as the builder's stages do
+     (Sam, 6 Nov 2026: "consistent across every single step of the modal"):
+     the price on the details steps, who it's for on the charge (its rows
+     and terms say the money), the receipt once it's done. */
+  const sub =
+    step === "student" || step === "you"
+      ? `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.`
+      : step === "pay"
+        ? `For ${who}, ${masked}.`
+        : step === "done"
+          ? "We’ll text you a receipt."
+          : null;
   /* The builder's three stages count as the first three bars (GiftPreview's
      stepsTotal), so the count is the same across the whole flow. */
   const STEPS: Step[] = ask ? ["look", "open", "note", "you", "pay"] : ["look", "open", "note", "student", "you", "pay"];
-
-  const content = (
-    <>
-        <div className="prc-top">
-          {step === "done" ? <Tick /> : null}
-          <div className="prc-head">
-            <h2 id="prc-title" className="prc-title" tabIndex={-1}>
-              {title}
-            </h2>
-            {sub ? <p className="prc-sub tnum">{sub}</p> : null}
-          </div>
-          {step !== "done" ? (
-            <button
-              type="button"
-              className="prc-x"
-              aria-label={onCollapse ? "Collapse" : "Close"}
-              onClick={onCollapse ?? close}
-              disabled={busy}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
-              </svg>
-            </button>
-          ) : null}
-        </div>
-
-        <div ref={body}>
-          {step === "student" || step === "you" ? (
-            <form className="prc-body" onSubmit={submit} noValidate>
-              <ol className="prc-steps" aria-label={`Step ${STEPS.indexOf(step) + 1} of ${STEPS.length}`}>
-                {STEPS.map((k, i) => (
-                  <li key={k} data-on={i <= STEPS.indexOf(step) ? "" : undefined} />
-                ))}
-              </ol>
-              {step === "student" ? (
-                <>
-                <fieldset className="prc-module">
-                  <legend className="prc-legend">Their number</legend>
-                  <div className="prc-fields">
-                  {/* Named in the builder; asked here only if it isn't. */}
-                  {student.trim() && !shown("student") ? null : (
-                    <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
-                  )}
-                  <Input
-                    id="phone"
-                    label="Your student’s mobile number"
-                    value={formatPhone(phoneD)}
-                    onChange={(v) => setPhone(digitsOf(v))}
-                    error={shown("phone")}
-                    tel
-                    help="We’ll text this number once to let them know. Their Plus is tied to it, so double-check it. By continuing you confirm it’s your student’s number and they’re OK getting texts from Tapin about it."
-                  />
-                  <Input
-                    id="confirm"
-                    label="Confirm their number"
-                    value={formatPhone(confirmD)}
-                    onChange={(v) => setConfirm(digitsOf(v))}
-                    error={shown("confirm")}
-                    tel
-                    ok={confirmD.length === 10 && confirmD === phoneD}
-                  />
-                  </div>
-                </fieldset>
-                </>
-              ) : (
-                <>
-              <fieldset className="prc-module">
-                <legend className="prc-legend">You</legend>
-                <div className="prc-fields">
-                <Input id="name" label="Your name" value={name} onChange={setName} error={shown("name")} autoComplete="name" autoCapitalize="words" maxLength={80} />
-                <Input id="email" label="Your email" value={email} onChange={setEmail} error={shown("email")} autoComplete="email" type="email" inputMode="email" />
-                <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
-                </div>
-              </fieldset>
-                </>
-              )}
-              {formError ? (
-                <p className="prc-error" role="alert">
-                  {formError}
-                </p>
-              ) : null}
-              {/* Back a step beside Continue, as the builder's stages have it
-                  (Sam, 6 Nov 2026): their number goes back to the note; you,
-                  to their number (an ask link's, to the note). */}
-              <div className="prc-foot">
-                <BackArrow
-                  className="prc-backarrow"
-                  onClick={step === "you" && !ask ? () => setStep("student") : onEditGift}
-                  disabled={busy}
-                />
-                <button type="submit" className="prc-cta" data-island-cta="" disabled={busy || photoBusy}>
-                  {busy ? "One moment…" : formError ? "Try again" : step === "you" ? "Continue to payment" : "Continue"}
-                </button>
-              </div>
-            </form>
-          ) : step === "pay" && started ? (
-            <div className="prc-body">
-              <ol className="prc-steps" aria-label={`Step ${STEPS.length} of ${STEPS.length}`}>
-                {STEPS.map((k) => (
-                  <li key={k} data-on="" />
-                ))}
-              </ol>
-              <div className="prc-module prc-rows">
-                <div className="prc-row">
-                  <span>For</span>
-                  <b className="tnum">
-                    {who} · {masked}
-                  </b>
-                </div>
-                <div className="prc-row">
-                  <span>Due today</span>
-                  <b className="tnum">{usd(first)}</b>
-                </div>
-                <div className="prc-row">
-                  <span>Then</span>
-                  <b className="tnum">{`${usd(monthly)} every month`}</b>
-                </div>
-                {paid ? null : (
-                  <button type="button" className="prc-edit" onClick={() => setStep("you")} disabled={busy}>
-                    Change details
-                  </button>
-                )}
-              </div>
-              {mock ? (
-                <MockPay first={first} monthly={monthly} paying={paying} onBusy={setBusy} onPaid={onPaid} onDone={close} label={payLabel} />
-              ) : (
-                <Elements stripe={getStripe()} options={{ clientSecret: started.client_secret, appearance: APPEARANCE, fonts: FONTS }}>
-                  <StripePay started={started} paying={paying} onBusy={setBusy} onPaid={onPaid} onCharged={onCharged} onDone={close} label={payLabel} resumeIntent={charged?.paymentIntent ?? null} />
-                </Elements>
-              )}
-            </div>
-          ) : step === "done" && done ? (
-            <div className="prc-body" role="status">
-              <div className="prc-module prc-done">
-                <p>
-                  {ask ? (
-                    /* An ask link's student is already signed in, and isn't texted
-                       (API.md), unless there's a note: then they get its link. */
-                    <>
-                      It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
-                      {sentNote ? " We’ve texted them a link to your gift." : ""} We’ll text you a receipt. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
-                    </>
-                  ) : (
-                    <>
-                      We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
-                      {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. We’ll text you a receipt. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
-                    </>
-                  )}
-                </p>
-              </div>
-              <button type="button" className="prc-cta" onClick={close}>
-                Done
-              </button>
-            </div>
-          ) : null}
-        </div>
-    </>
+  const barsOn = step === "done" ? STEPS.length : STEPS.indexOf(step) + 1;
+  const bars = (className: string) => (
+    <ol className={className} aria-label={`Step ${Math.min(barsOn, STEPS.length)} of ${STEPS.length}`}>
+      {STEPS.map((k, i) => (
+        <li key={k} data-on={i < barsOn ? "" : undefined} />
+      ))}
+    </ol>
   );
-  if (embedded)
-    return (
-      <div className="prc-embedded ph-no-capture" ref={sheet} aria-labelledby="prc-title" role="group" tabIndex={-1}>
-        <div ref={inner} className="prc-embedded-inner">
-          {content}
+
+  /* Embedded, every step wears the builder's own system (Sam, 6 Nov 2026):
+     the white panel, its head (title and ×, the line, the bars), the fields
+     straight on white, the foot with Continue and the back arrow, all in
+     the builder's classes (gift.css gft-pp-*), so nothing changes between
+     the care package's stages and these. The sheet on its own keeps its
+     grey ground and white modules (parent-checkout.css). */
+  const flat = embedded;
+  const cta = flat ? "gft-pp-cta" : "prc-cta";
+  const arrowClass = flat ? "gft-pp-backarrow" : "prc-backarrow";
+  const group = (legend: string, kids: React.ReactNode) =>
+    flat ? (
+      <div className="gft-pp-group">{kids}</div>
+    ) : (
+      <fieldset className="prc-module">
+        <legend className="prc-legend">{legend}</legend>
+        <div className="prc-fields">{kids}</div>
+      </fieldset>
+    );
+  const errorLine = (msg: string | null) =>
+    msg ? (
+      <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
+        {msg}
+      </p>
+    ) : null;
+  /* The step's body and its foot: embedded, the panel's scrolling body and
+     its foot under it (the head stays put above); on its own, one column
+     in the sheet's scroller with the bars on top. */
+  const frame: Frame = (kids, foot) =>
+    flat ? (
+      <>
+        <div ref={setBody} className="gft-pp-body prc-e-body">
+          {kids}
+        </div>
+        <div className="gft-pp-foot">{foot}</div>
+      </>
+    ) : (
+      <div ref={setBody}>
+        <div className="prc-body">
+          {step === "done" ? null : bars("prc-steps")}
+          {kids}
+          <div className="prc-foot">{foot}</div>
         </div>
       </div>
+    );
+
+  const head = flat ? (
+    <div className="gft-pp-head">
+      <h2 id="prc-title" className="gft-pp-title" tabIndex={-1}>
+        {title}
+      </h2>
+      {/* The phone drawer's ×, collapsing it, as on the care package's
+          stages; a computer's way out is Close in the left card. */}
+      {onCollapse && step !== "done" ? (
+        <button type="button" className="gft-pp-x" aria-label="Collapse" onClick={onCollapse} disabled={busy}>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+          </svg>
+        </button>
+      ) : null}
+      {sub ? <p className="gft-pp-sub tnum">{sub}</p> : null}
+      {bars("gft-pp-steps")}
+    </div>
+  ) : (
+    <div className="prc-top">
+      {step === "done" ? <Tick /> : null}
+      <div className="prc-head">
+        <h2 id="prc-title" className="prc-title" tabIndex={-1}>
+          {title}
+        </h2>
+        {sub ? <p className="prc-sub tnum">{sub}</p> : null}
+      </div>
+      {step !== "done" ? (
+        <button type="button" className="prc-x" aria-label={onCollapse ? "Collapse" : "Close"} onClick={onCollapse ?? close} disabled={busy}>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+          </svg>
+        </button>
+      ) : null}
+    </div>
+  );
+
+  let view: React.ReactNode = null;
+  if (step === "student" || step === "you") {
+    const fields =
+      step === "student" ? (
+        group(
+          "Their number",
+          <>
+            {/* Named in the builder; asked here only if it isn't. */}
+            {student.trim() && !shown("student") ? null : (
+              <Input id="student" label="Your student’s first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
+            )}
+            <Input
+              id="phone"
+              label="Your student’s mobile number"
+              value={formatPhone(phoneD)}
+              onChange={(v) => setPhone(digitsOf(v))}
+              error={shown("phone")}
+              tel
+              help="We’ll text this number once to let them know. Their Plus is tied to it, so double-check it. By continuing you confirm it’s your student’s number and they’re OK getting texts from Tapin about it."
+            />
+            <Input
+              id="confirm"
+              label="Confirm their number"
+              value={formatPhone(confirmD)}
+              onChange={(v) => setConfirm(digitsOf(v))}
+              error={shown("confirm")}
+              tel
+              ok={confirmD.length === 10 && confirmD === phoneD}
+            />
+          </>,
+        )
+      ) : (
+        <>
+          {/* The mobile above the email, so the texts box under them can say
+              "the number above" and mean it. */}
+          {group(
+            "You",
+            <>
+              <Input id="name" label="Your name" value={name} onChange={setName} error={shown("name")} autoComplete="name" autoCapitalize="words" maxLength={80} />
+              <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(digitsOf(mobile)) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
+              <Input id="email" label="Your email" value={email} onChange={setEmail} error={shown("email")} autoComplete="email" type="email" inputMode="email" />
+            </>,
+          )}
+          {/* Marketing, each its own box, both unticked until they tick
+              them (Sam, 6 Nov 2026), with the texts' disclosure under its
+              box. Sent with the checkout (PARENT_CONSENT_VERSION). */}
+          <div className="prc-consents">
+            <Consent id="mkt-sms" checked={mktSms} onChange={setMktSms} label="Text me about free gifts and offers for my student">
+              By checking this, you agree to get recurring automated marketing texts from Tapin at the number above. Consent isn’t a condition of purchase. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.{" "}
+              <Legal />
+            </Consent>
+            <Consent id="mkt-email" checked={mktEmail} onChange={setMktEmail} label="Email me about free gifts and offers for my student" />
+          </div>
+        </>
+      );
+    view = (
+      <form className="prc-form" onSubmit={submit} noValidate>
+        {frame(
+          <>
+            {fields}
+            {errorLine(formError)}
+          </>,
+          <>
+            {/* Back a step beside Continue, as the builder's stages have it
+                (Sam, 6 Nov 2026): their number goes back to the note; you,
+                to their number (an ask link's, to the note). */}
+            <BackArrow className={arrowClass} onClick={step === "you" && !ask ? () => toStep("student") : onEditGift} disabled={busy} />
+            <button type="submit" className={cta} data-island-cta="" disabled={busy || photoBusy}>
+              {busy ? "One moment…" : formError ? "Try again" : step === "you" ? "Continue to payment" : "Continue"}
+            </button>
+          </>,
+        )}
+      </form>
+    );
+  } else if (step === "pay" && started) {
+    /* The charge: what's due, straight on the panel. Back to you beside Pay
+       (Sam, 6 Nov 2026: "wouldn't we want a back button here?"), with
+       everything kept; once the card is charged there's no going back. */
+    const rows = (
+      <div className={flat ? "prc-e-rows" : "prc-module prc-rows"}>
+        <div className="prc-row">
+          <span>Due today</span>
+          <b className="tnum">{usd(first)}</b>
+        </div>
+        <div className="prc-row">
+          <span>Then</span>
+          <b className="tnum">{`${usd(monthly)} every month`}</b>
+        </div>
+      </div>
+    );
+    const pay = { paying, onBusy: setBusy, onPaid, onDone: close, label: payLabel, frame, rows, onBack: () => toStep("you"), backDisabled: paid || busy };
+    view = mock ? (
+      <MockPay first={first} monthly={monthly} {...pay} />
+    ) : (
+      <Elements stripe={getStripe()} options={{ clientSecret: started.client_secret, appearance: APPEARANCE, fonts: FONTS }}>
+        <StripePay started={started} onCharged={onCharged} resumeIntent={charged?.paymentIntent ?? null} {...pay} />
+      </Elements>
+    );
+  } else if (step === "done" && done) {
+    const said = (
+      <p>
+        {ask ? (
+          /* An ask link's student is already signed in, and isn't texted
+             (API.md), unless there's a note: then they get its link. */
+          <>
+            It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
+            {sentNote ? " We’ve texted them a link to your gift." : ""} To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
+          </>
+        ) : (
+          <>
+            We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
+            {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
+          </>
+        )}
+      </p>
+    );
+    view = frame(
+      flat ? (
+        <div className="prc-e-done" role="status">
+          <Tick />
+          {said}
+        </div>
+      ) : (
+        <div className="prc-module prc-done" role="status">
+          {said}
+        </div>
+      ),
+      <button type="button" className={cta} onClick={close}>
+        Done
+      </button>,
+    );
+  }
+
+  if (embedded)
+    return (
+      <FlatLook.Provider value>
+        <div className="prc-embedded ph-no-capture" ref={sheet} aria-labelledby="prc-title" role="group" tabIndex={-1}>
+          {head}
+          {view}
+        </div>
+      </FlatLook.Provider>
     );
   return createPortal(
     <div className="prc-layer" ref={layer}>
@@ -725,13 +850,21 @@ function Sheet({
         {/* A stand-in for the tapped button, carried as it grows and back as it shrinks. */}
         <span ref={label} className="prc-island-label" aria-hidden="true" />
         <div ref={inner} className="prc-island-inner">
-        {content}
+          {head}
+          {view}
         </div>
       </div>
     </div>,
     document.body,
   );
 }
+
+/* ── Embedded: the builder's look (gift.css gft-pp-*) ───────────────────── */
+/** Inside the builder's panel: fields, boxes and the pay form wear the
+ *  builder's classes instead of the sheet's own modules. */
+const FlatLook = createContext(false);
+/** A step's body and foot, laid out for where the sheet is (Sheet frame). */
+type Frame = (kids: React.ReactNode, foot: React.ReactNode) => React.ReactNode;
 
 /* ── A field ─────────────────────────────────────────────────────────────── */
 function Input({
@@ -765,37 +898,64 @@ function Input({
   maxLength?: number;
   placeholder?: string;
 }) {
+  const flat = useContext(FlatLook);
   const fid = `prc-${id}`;
   const described = [help ? `${fid}-help` : null, error ? `${fid}-error` : null].filter(Boolean).join(" ") || undefined;
+  const input = (
+    <input
+      id={fid}
+      type={tel ? "tel" : type}
+      inputMode={tel ? "numeric" : inputMode}
+      autoComplete={tel ? (autoComplete ?? "off") : autoComplete}
+      autoCapitalize={autoCapitalize}
+      autoCorrect="off"
+      spellCheck={false}
+      placeholder={tel ? "(540) 555-0123" : placeholder}
+      maxLength={maxLength}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={described}
+      className={tel ? "tnum" : undefined}
+    />
+  );
+  const tick = ok ? (
+    <span className="prc-ok" aria-label="Numbers match">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  ) : null;
+  /* The builder's field: its label line, its grey box, its red ring and
+     line for an error (GiftPage noteFields). */
+  if (flat)
+    return (
+      <div className="gft-pp-field" data-error={error ? "" : undefined}>
+        <label htmlFor={fid}>{label}</label>
+        <div className="prc-e-box">
+          {input}
+          {tick}
+        </div>
+        {error ? (
+          <small id={`${fid}-error`} className="gft-pp-error">
+            {error}
+          </small>
+        ) : null}
+        {help ? (
+          <p id={`${fid}-help`} className="prc-e-help">
+            {help}
+          </p>
+        ) : null}
+      </div>
+    );
   return (
     <div className="prc-field" data-bad={error ? "" : undefined}>
       <label className="prc-label" htmlFor={fid}>
         {label}
       </label>
       <div className="prc-box">
-        <input
-          id={fid}
-          type={tel ? "tel" : type}
-          inputMode={tel ? "numeric" : inputMode}
-          autoComplete={tel ? (autoComplete ?? "off") : autoComplete}
-          autoCapitalize={autoCapitalize}
-          autoCorrect="off"
-          spellCheck={false}
-          placeholder={tel ? "(540) 555-0123" : placeholder}
-          maxLength={maxLength}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={described}
-          className={tel ? "tnum" : undefined}
-        />
-        {ok ? (
-          <span className="prc-ok" aria-label="Numbers match">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        ) : null}
+        {input}
+        {tick}
       </div>
       {error ? (
         <p id={`${fid}-error`} className="prc-field-error">
@@ -811,25 +971,71 @@ function Input({
   );
 }
 
+/* ── A consent box (Sam, 6 Nov 2026): unticked until ticked ─────────────── */
+function Consent({
+  id,
+  checked,
+  onChange,
+  label,
+  children,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (on: boolean) => void;
+  label: string;
+  /** What ticking it agrees to, under it. */
+  children?: React.ReactNode;
+}) {
+  const fid = `prc-${id}`;
+  return (
+    <div className="prc-consent">
+      <label className="prc-check" htmlFor={fid}>
+        <input id={fid} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} aria-describedby={children ? `${fid}-fine` : undefined} />
+        <span className="prc-check-box" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16">
+            <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <span className="prc-check-text">{label}</span>
+      </label>
+      {children ? (
+        <p id={`${fid}-fine`} className="prc-fine">
+          {children}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/* ── Terms and Privacy, linked the same way everywhere ───────────────────── */
+function Legal() {
+  return (
+    <span className="prc-legal">
+      <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">
+        Terms
+      </a>
+      {" · "}
+      <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+        Privacy
+      </a>
+    </span>
+  );
+}
+
 /* ── The terms, right by the button that charges ─────────────────────────── */
 function Terms({ first, monthly }: { first: number; monthly: number }) {
+  const flat = useContext(FlatLook);
   return (
-    <p className="prc-terms tnum">
+    <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"}>
       {`${usd(first)} today for the first month, then ${usd(monthly)}/month until you cancel. Cancel anytime: email support@tapin.app, or your student can cancel in the Tapin app. `}
-      <span className="prc-legal">
-        <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">
-          Terms
-        </a>
-        {" · "}
-        <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
-          Privacy
-        </a>
-      </span>
+      <Legal />
     </p>
   );
 }
 
 /* ── Stripe: the Payment Element on the first invoice's PaymentIntent ───── */
+/* Its fields as the builder's are (gift.css .gft-pp-field): the grey box
+   with a hairline, 12px corners, 16px type, the label line muted. */
 const APPEARANCE: Appearance = {
   theme: "stripe",
   variables: {
@@ -837,18 +1043,21 @@ const APPEARANCE: Appearance = {
     colorText: "#141618",
     colorTextSecondary: "rgba(20, 22, 24, 0.62)",
     colorBackground: "#ffffff",
-    colorDanger: "#c0392b",
+    colorDanger: "#b42318",
     fontFamily: "Gilroy, Arial, sans-serif",
     fontWeightNormal: "500",
-    borderRadius: "14px",
+    fontSizeBase: "16px",
+    borderRadius: "12px",
     spacingUnit: "4px",
   },
   rules: {
-    ".Input": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.12)", backgroundColor: "#f0f0f0" },
+    ".Input": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.06)", backgroundColor: "#f0f0f0" },
     ".Input:focus": { boxShadow: "0 0 0 1px #141618", border: "1px solid #141618" },
-    ".Label": { fontWeight: "600" },
-    ".Tab": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.12)" },
-    ".Tab--selected": { border: "1px solid #141618", boxShadow: "0 0 0 1px #141618" },
+    ".Input--invalid": { boxShadow: "0 0 0 1px #b42318", border: "1px solid #b42318" },
+    ".Label": { fontWeight: "500", fontSize: "13px", color: "rgba(20, 22, 24, 0.62)" },
+    ".Error": { fontSize: "13px" },
+    ".Tab": { boxShadow: "none", border: "1px solid rgba(20, 22, 24, 0.06)", backgroundColor: "#f0f0f0" },
+    ".Tab--selected": { border: "1px solid #141618", boxShadow: "0 0 0 1px #141618", backgroundColor: "#ffffff" },
   },
 };
 const FONTS =
@@ -866,11 +1075,39 @@ type PayProps = {
   /** Closes the sheet (after a refusal that's final). */
   onDone: () => void;
   label: string;
+  /** Lays the body and the foot out for where the sheet is. */
+  frame: Frame;
+  /** What's due, above the card. */
+  rows: React.ReactNode;
+  /** Back to you, beside Pay (Sam, 6 Nov 2026). */
+  onBack: () => void;
+  backDisabled: boolean;
 };
 
 /* The backend refused after taking the money and refunded it (someone else
    already covers this number): nothing to retry. */
 const isFinalRefusal = (msg: string) => /refunded you/i.test(msg);
+
+/* The pay step's foot: the back arrow, then Pay filling the rest, as every
+   other step's Continue; Done alone once a refusal is final. */
+function PayFoot({ error, busy, disabled, label, onPay, onDone, onBack, backDisabled }: { error: string | null; busy: boolean; disabled: boolean; label: string; onPay: () => void; onDone: () => void; onBack: () => void; backDisabled: boolean }) {
+  const flat = useContext(FlatLook);
+  const cta = flat ? "gft-pp-cta" : "prc-cta";
+  if (error && isFinalRefusal(error))
+    return (
+      <button type="button" className={cta} onClick={onDone}>
+        Done
+      </button>
+    );
+  return (
+    <>
+      <BackArrow className={flat ? "gft-pp-backarrow" : "prc-backarrow"} onClick={onBack} disabled={backDisabled || busy} />
+      <button type="button" className={cta} data-island-cta="" onClick={onPay} disabled={disabled}>
+        {label}
+      </button>
+    </>
+  );
+}
 
 function StripePay({
   started,
@@ -881,7 +1118,12 @@ function StripePay({
   onDone,
   label,
   resumeIntent,
+  frame,
+  rows,
+  onBack,
+  backDisabled,
 }: PayProps & { started: ParentCheckoutStarted; onCharged: (paymentIntent: string) => void; resumeIntent: string | null }) {
+  const flat = useContext(FlatLook);
   const stripe = useStripe();
   const elements = useElements();
   const [ready, setReady] = useState(false);
@@ -921,37 +1163,58 @@ function StripePay({
     }
   };
 
+  const element = (
+    <div className={flat ? "prc-e-pay" : "prc-module prc-pay"}>
+      <PaymentElement
+        options={{ wallets: { applePay: "auto", googlePay: "auto" }, layout: "tabs" }}
+        onReady={() => setReady(true)}
+        onLoadError={() => setError("The payment form didn’t load. Close this and try again.")}
+      />
+      {!ready && !error ? <div className="prc-pay-wait" aria-busy="true" /> : null}
+    </div>
+  );
+  const terms = <Terms first={started.first_cents} monthly={started.monthly_cents} />;
+  const errorLine = error ? (
+    <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
+      {error}
+    </p>
+  ) : null;
   return (
     <>
-      <div className="prc-module prc-pay">
-        <PaymentElement
-          options={{ wallets: { applePay: "auto", googlePay: "auto" }, layout: "tabs" }}
-          onReady={() => setReady(true)}
-          onLoadError={() => setError("The payment form didn’t load. Close this and try again.")}
-        />
-        {!ready && !error ? <div className="prc-pay-wait" aria-busy="true" /> : null}
-      </div>
-      <Terms first={started.first_cents} monthly={started.monthly_cents} />
-      {error ? (
-        <p className="prc-error" role="alert">
-          {error}
-        </p>
-      ) : null}
-      {error && isFinalRefusal(error) ? (
-        <button type="button" className="prc-cta" onClick={onDone}>
-          Done
-        </button>
-      ) : (
-        <button type="button" className="prc-cta" data-island-cta="" onClick={pay} disabled={busy || (!paidIntent.current && (!ready || !stripe))}>
-          {busy ? "Paying…" : paidIntent.current ? "Finish" : label}
-        </button>
+      {frame(
+        <>
+          {rows}
+          {flat ? (
+            <div className="gft-pp-group">
+              {element}
+              {terms}
+            </div>
+          ) : (
+            <>
+              {element}
+              {terms}
+            </>
+          )}
+          {errorLine}
+        </>,
+        <PayFoot
+          error={error}
+          busy={busy}
+          disabled={busy || (!paidIntent.current && (!ready || !stripe))}
+          label={busy ? "Paying…" : paidIntent.current ? "Finish" : label}
+          onPay={pay}
+          onDone={onDone}
+          onBack={onBack}
+          backDisabled={backDisabled || !!paidIntent.current}
+        />,
       )}
     </>
   );
 }
 
 /* ── ?parentmock: a card panel's look in the Payment Element's place ────── */
-function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label }: PayProps & { first: number; monthly: number }) {
+function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame, rows, onBack, backDisabled }: PayProps & { first: number; monthly: number }) {
+  const flat = useContext(FlatLook);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pay = async () => {
@@ -970,37 +1233,65 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label }: PayP
       onBusy(false);
     }
   };
-  return (
-    <>
-      <div className="prc-module prc-pay prc-mock" aria-label="Payment (preview, nothing is charged)">
-        <p className="prc-mock-tag">Preview: no card is charged</p>
-        <span className="prc-label">Card number</span>
-        <div className="prc-mock-field tnum">1234 1234 1234 1234</div>
-        <div className="prc-mock-pair">
-          <div>
-            <span className="prc-label">Expiration</span>
-            <div className="prc-mock-field tnum">MM / YY</div>
-          </div>
-          <div>
-            <span className="prc-label">CVC</span>
-            <div className="prc-mock-field tnum">CVC</div>
-          </div>
+  const card = flat ? (
+    <div className="prc-e-mock" aria-label="Payment (preview, nothing is charged)">
+      <p className="prc-mock-tag">Preview: no card is charged</p>
+      <div className="gft-pp-field">
+        <span>Card number</span>
+        <div className="prc-e-fake tnum">1234 1234 1234 1234</div>
+      </div>
+      <div className="prc-e-pair">
+        <div className="gft-pp-field">
+          <span>Expiration</span>
+          <div className="prc-e-fake tnum">MM / YY</div>
+        </div>
+        <div className="gft-pp-field">
+          <span>CVC</span>
+          <div className="prc-e-fake tnum">CVC</div>
         </div>
       </div>
-      <Terms first={first} monthly={monthly} />
-      {error ? (
-        <p className="prc-error" role="alert">
-          {error}
-        </p>
-      ) : null}
-      {error && isFinalRefusal(error) ? (
-        <button type="button" className="prc-cta" onClick={onDone}>
-          Done
-        </button>
-      ) : (
-        <button type="button" className="prc-cta" data-island-cta="" onClick={pay} disabled={busy}>
-          {busy ? "Paying…" : error ? "Try again" : label}
-        </button>
+    </div>
+  ) : (
+    <div className="prc-module prc-pay prc-mock" aria-label="Payment (preview, nothing is charged)">
+      <p className="prc-mock-tag">Preview: no card is charged</p>
+      <span className="prc-label">Card number</span>
+      <div className="prc-mock-field tnum">1234 1234 1234 1234</div>
+      <div className="prc-mock-pair">
+        <div>
+          <span className="prc-label">Expiration</span>
+          <div className="prc-mock-field tnum">MM / YY</div>
+        </div>
+        <div>
+          <span className="prc-label">CVC</span>
+          <div className="prc-mock-field tnum">CVC</div>
+        </div>
+      </div>
+    </div>
+  );
+  const terms = <Terms first={first} monthly={monthly} />;
+  return (
+    <>
+      {frame(
+        <>
+          {rows}
+          {flat ? (
+            <div className="gft-pp-group">
+              {card}
+              {terms}
+            </div>
+          ) : (
+            <>
+              {card}
+              {terms}
+            </>
+          )}
+          {error ? (
+            <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
+              {error}
+            </p>
+          ) : null}
+        </>,
+        <PayFoot error={error} busy={busy} disabled={busy} label={busy ? "Paying…" : error ? "Try again" : label} onPay={pay} onDone={onDone} onBack={onBack} backDisabled={backDisabled} />,
       )}
     </>
   );

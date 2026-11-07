@@ -84,6 +84,9 @@ req: {
   gift_scene?: string | null;                           // optional background: maroon | picnic | night | confetti |
                                                         //   airmail | sunrise | ridge | hearts | flannel | lunch | sunburst | leaves
   gift_photo?: string | null;                           // optional photo: "data:image/jpeg;base64,…", <= 1,500,000 chars
+  marketing_sms?: boolean;                              // "Text me about free gifts and offers for my student" (unticked by default; absent = false)
+  marketing_email?: boolean;                            // "Email me about free gifts and offers for my student" (unticked by default; absent = false)
+  consent_text_version?: string | null;                 // id of the consent words shown ("parents-marketing-2026-11-06"); [A-Za-z0-9._-], <= 64; required if a box is ticked
   utm?: Record<string, string>;                         // first-touch utm_*, fbclid, referrer
 }
 res: {
@@ -98,6 +101,18 @@ Creates (or reuses by email) the payer and their Stripe Customer, a
 price with the welcome first-month discount, `payment_behavior: "default_incomplete"`,
 returning the first invoice's PaymentIntent secret. Radar on. Rate-limit by IP and by
 student_phone. For an ask link the member comes from the link (phone fields ignored).
+
+Marketing consent (6 Nov 2026) is kept on this checkout's row, never on the payer
+(nothing before payment proves the caller owns the number): `marketing_sms_opt_in`,
+`marketing_sms_opt_in_at`, `marketing_email_opt_in`, `marketing_email_opt_in_at`,
+`marketing_consent_version`, each `_at` set when its box is ticked. A box that isn't a
+boolean, a bad version, or a ticked box with no version is refused ("Something's off
+with your choices. Please try again."). A later checkout never downgrades an earlier
+row's opt-in; a retry of the same unpaid checkout takes the latest answer. The words
+shown with the text box: "By checking this, you agree to get recurring automated
+marketing texts from Tapin at the number above. Consent isn't a condition of purchase.
+Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for
+help." with links to the Terms and the Privacy Policy.
 
 ### `parent_checkout_confirm`
 ```ts

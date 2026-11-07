@@ -746,8 +746,13 @@ fieldset.prc-module {
 }
 
 /* ══ EMBEDDED (Sam, 6 Nov 2026: "one continuous flow") ══════════════════════
-   Steps 2 to 4 inside the builder's panel (routes/GiftPage.tsx): the
-   sheet's own tokens and resets, no island; the panel scrolls it. */
+   Steps 4 to 6 inside the builder's panel (routes/GiftPage.tsx), in the
+   builder's own look (Sam, 6 Nov 2026: "consistent across every single step
+   of the modal"): the white panel, its head, body and foot from gift.css
+   (gft-pp-head, gft-pp-body, gft-pp-foot, gft-pp-field, gft-pp-cta,
+   gft-pp-backarrow), the fields straight on white. Only what the builder
+   has no class for is here (prc-e-*). The sheet on its own (prc-layer, above)
+   keeps its grey ground and white modules. */
 .prc-embedded {
   --ink: #141618;
   --muted: rgba(20, 22, 24, 0.62);
@@ -756,20 +761,19 @@ fieldset.prc-module {
   --line: rgba(20, 22, 24, 0.12);
   --ground: #f0f0f0;
   --money: #0b7a53;
-  --bad: #c0392b;
+  --bad: #b42318;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--ground);
+  overflow: hidden;
+  background: #ffffff;
   font-family: "Gilroy", Arial, sans-serif;
   font-weight: 500;
   font-size: 15px;
   line-height: 20px;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-}
-.prc-embedded-inner {
-  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  outline: none;
 }
 .prc-embedded *,
 .prc-embedded *::before,
@@ -780,14 +784,155 @@ fieldset.prc-module {
   margin: 0;
   padding: 0;
 }
-:where(.prc-embedded) fieldset {
-  border: 0;
-  min-width: 0;
-}
 .prc-embedded .tnum {
   font-variant-numeric: tabular-nums;
 }
+/* The builder's focus ring. */
 .prc-embedded :where(a, button, input):focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 3px solid #e5751f;
   outline-offset: 2px;
+}
+/* The details steps' form: its body and foot are the panel's rows. */
+.prc-embedded .prc-form {
+  display: contents;
+}
+/* A field's box: the builder's input, with room for the numbers-match tick. */
+.prc-e-box {
+  position: relative;
+}
+.prc-e-box .prc-ok {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+}
+.prc-e-box:has(.prc-ok) input {
+  padding-right: 40px;
+}
+.prc-e-help {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 17px;
+}
+/* The charge's rows, straight on white with a hairline between. */
+.prc-e-rows {
+  display: grid;
+}
+.prc-e-rows .prc-row:first-child {
+  padding-top: 0;
+}
+.prc-e-rows .prc-row:last-child {
+  padding-bottom: 0;
+}
+.prc-e-pay {
+  position: relative;
+  min-height: 120px;
+}
+.prc-e-pay .prc-pay-wait {
+  inset: 0;
+  border-radius: 12px;
+}
+/* ?parentmock's card: the builder's fields, as text. */
+.prc-e-mock {
+  display: grid;
+  gap: 12px;
+}
+.prc-e-mock .prc-mock-tag {
+  justify-self: start;
+}
+.prc-e-fake {
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.06);
+  color: rgba(20, 22, 24, 0.4);
+  font: 500 16px/20px "Gilroy", Arial, sans-serif;
+}
+.prc-e-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.prc-e-done {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+.prc-e-done p {
+  font-size: 16px;
+  line-height: 22px;
+}
+
+/* ══ MARKETING CONSENT (Sam, 6 Nov 2026) ═════════════════════════════════════
+   Two boxes on the you step, unticked by default; the texts' disclosure
+   under its box, small but legible. Both looks. */
+.prc-consents {
+  display: grid;
+  gap: 16px;
+}
+.prc-check {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prc-check input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.prc-check-box {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.28);
+  color: #ffffff;
+  transition: background-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+.prc-check-box svg {
+  opacity: 0;
+}
+.prc-check input:checked + .prc-check-box {
+  background: #141618;
+  box-shadow: none;
+}
+.prc-check input:checked + .prc-check-box svg {
+  opacity: 1;
+}
+.prc-check input:focus-visible + .prc-check-box {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.prc-check-text {
+  padding-top: 1px;
+  color: #141618;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+}
+.prc-fine {
+  margin: 6px 0 0 34px;
+  color: rgba(20, 22, 24, 0.62);
+  font: 500 13px/18px "Gilroy", Arial, sans-serif;
+}
+.prc-fine a {
+  color: #141618;
+  text-underline-offset: 2px;
+}
+.prc-e-terms {
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-check-box {
+    transition: none;
+  }
 }

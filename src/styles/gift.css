@@ -904,29 +904,6 @@ button.tpg-env-link {
     transition: none;
   }
 }
-/* The photo first on the look, on one line: its heading, and the button (or
-   the photo with Change and Remove) at the right. */
-.gft-pp-photo-row {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  column-gap: 12px;
-}
-.gft-pp-photo-row > .gft-pp-error {
-  grid-column: 1 / -1;
-}
-.gft-pp-photo-row .gft-pp-add {
-  height: 40px;
-}
-.gft-pp-photo-row .gft-pp-photo {
-  grid-template-columns: 44px auto auto;
-}
-.gft-pp-photo-row .gft-pp-photo img {
-  width: 44px;
-  height: 40px;
-}
-.gft-pp-photo-row .gft-pp-photo button {
-  height: 40px;
-}
 .gft-pp-cta {
   width: 100%;
   height: 52px;
@@ -1738,13 +1715,6 @@ button.tpg-env-link {
     transition: none;
   }
 }
-@media (max-width: 1023.98px) {
-  /* In checkout the drawer wears the checkout's ground, so the Preview row
-     isn't a white strip above it. */
-  .gft-preview-panel[data-drawer][data-stage="next"] {
-    background: #f0f0f0;
-  }
-}
 
 /* ══ PHONE | COMPUTER UNDER THE PREVIEW (6 Nov 2026) ═════════════════════════
    The left card stacks the preview and the switch: the phone in the middle,
@@ -2467,5 +2437,87 @@ button.tpg-env-link {
 @media (prefers-reduced-motion: reduce) {
   .gft-preview-replay {
     transition: none;
+  }
+}
+
+/* ══ ONE LOOK FOR EVERY STEP (Sam, 6 Nov 2026: "The design of this modal
+   seems to change between these two slides. I think it should be consistent
+   across every single step of the modal") ══════════════════════════════════
+   The builder's stages and the checkout's steps (ParentCheckout embedded,
+   which wears these same classes) share one head, one body, one foot, on a
+   phone and a computer: the title with the drawer's × at its right, the
+   line under it, then the bars; the fields straight on the white panel. */
+.gft-pp-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "title x" "sub sub" "steps steps";
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.gft-pp-head > .gft-pp-title {
+  grid-area: title;
+}
+.gft-pp-head > .gft-pp-sub {
+  grid-area: sub;
+}
+.gft-pp-head > .gft-pp-x {
+  grid-area: x;
+}
+.gft-pp-head > .gft-pp-steps {
+  grid-area: steps;
+  margin: 10px 0 0;
+}
+/* A field's label line is a <span> in the builder and a <label> in the
+   checkout; one look. 16px type, so a phone doesn't zoom into the field. */
+.gft-pp-field > label {
+  font: 500 13px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.gft-pp-field input,
+.gft-pp-field textarea {
+  font-size: 16px;
+}
+.gft-pp-field[data-error] input {
+  box-shadow: inset 0 0 0 2px #b42318;
+}
+.gft-pp-x:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.gft-pp-backarrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* The checkout's steps fill the panel: their own head, body and foot. */
+.gft-pp-next {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* The collapsed phone drawer: the back arrow (out of the builder) beside
+   "Start designing" / "Back to editing", and no Close pill over the page
+   (the arrow replaces it). A computer keeps Close in the left card. */
+@media (max-width: 1023.98px) {
+  .gft-pp-peekbar {
+    display: flex;
+    gap: 8px;
+  }
+  .gft-pp-peekbar .gft-pp-cta {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+  .gft-preview[data-builder] .gft-preview-back,
+  .gft-preview[data-builder][data-peek] .gft-preview-back {
+    display: none;
+  }
+}
+
+/* The phone drawer's foot lines up with its fields (20px each side), the
+   collapsed bar too (verify, 6 Nov 2026: the buttons sat 4px wider). */
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer] .gft-pp-foot,
+  .gft-preview-panel[data-drawer] .gft-pp-peekbar {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
