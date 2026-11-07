@@ -139,7 +139,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
           Write them a few words and add a photo when you sign up. They get
           a text, tap it, and open their Plus like a present.
         </p>
-        <button ref={send} type="button" className="tpg-env-cta" onClick={(e) => onSend(e.currentTarget)}>
+        <button ref={send} type="button" className="tpg-env-cta" data-page-cta="" onClick={(e) => onSend(e.currentTarget)}>
           Build their care package
         </button>
         <div className="tpg-env-pick">

@@ -464,12 +464,32 @@ export default function ParentsHome() {
   };
 
 
-  /* ── The dock: always on screen on a phone (Sam, 6 Nov 2026: "the sign up
-     my student sticky CTA should always be visible"), even with the offer
-     card's own button in view. On a computer the offer card is held in view
-     and the dock is hidden (parents.css). ── */
+  /* ── The dock: only while none of the page's own buttons is on screen
+     (Sam, 6 Nov 2026: "maybe the sticky CTA only shows up when there isn't a
+     CTA already on the page like we originally had it"), so there's never
+     two of the same button in view. The page's buttons carry data-page-cta
+     (the offer card's, the gift band's, the closing one). On a computer the
+     offer card is held in view and the dock is hidden (parents.css). ── */
   const dockRef = useRef<HTMLDivElement | null>(null);
-  const dockOn = true;
+  const [dockOn, setDockOn] = useState(false);
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-page-cta]"));
+    if (!els.length || typeof IntersectionObserver === "undefined") {
+      setDockOn(true);
+      return;
+    }
+    const seen = new Set<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
+        setDockOn(seen.size === 0);
+      },
+      /* The dock's own strip at the foot doesn't count as "on screen". */
+      { rootMargin: "0px 0px -96px 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
   useDockPulse(dockRef, dockOn && !building);
   const firstDock = useRef(true);
   useEffect(() => {
@@ -679,6 +699,7 @@ export default function ParentsHome() {
           <button
             type="button"
             className="tpa-cta tpp-cta"
+            data-page-cta=""
             onClick={(e) => signUp("hero", e.currentTarget)}
           >
             {cta}
@@ -896,6 +917,7 @@ export default function ParentsHome() {
           <button
             type="button"
             className="tpa-cta tpa-cta-white"
+            data-page-cta=""
             onClick={(e) => signUp("close", e.currentTarget)}
           >
             {cta}
