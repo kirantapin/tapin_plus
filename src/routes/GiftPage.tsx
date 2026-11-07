@@ -30,7 +30,8 @@ import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
 import { lockScroll } from "../shell/scrollLock";
 import { DockArrow } from "../shell/DockArrow";
-import { FlatMark, reducedMotion } from "./parents_kit";
+import { reducedMotion } from "./parents_kit";
+import { SealFace } from "./giftSeals";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -217,7 +218,9 @@ export default function GiftPage() {
             <span className="gft-sr">Opening your gift</span>
             <div className="gft-a-stage" aria-hidden="true">
               <div className="gft-a-shell">
-                <Envelope />
+                {/* No seal until the gift (and so its background's seal) is
+                    known: the brand seal swapping for the gift's own flickered. */}
+                <Envelope scene={null} />
               </div>
             </div>
           </>
@@ -267,13 +270,17 @@ export default function GiftPage() {
 /* ── Pieces ──────────────────────────────────────────────────────────────── */
 
 /** The care package: brown kraft (the inside, the pocket, the flap), twine
- *  tied round it, and a maroon wax seal with the flat Plus mark (Sam, 6 Nov
- *  2026: "I think we should just use the flat tapin plus icon"). */
+ *  tied round it, and a wax seal that matches the background (giftSeals.tsx;
+ *  Sam, 6 Nov 2026: "I think it'd be fun if we had a seal that matched the
+ *  background theme and color a bit more"). Maroon keeps the flat Plus mark. */
 function Envelope({
+  scene,
   flap,
   seal,
   extra,
 }: {
+  /** Its seal's background; null draws no seal (still loading). */
+  scene: SceneId | null;
   flap?: React.Ref<HTMLSpanElement>;
   seal?: React.Ref<HTMLSpanElement>;
   extra?: React.Ref<HTMLSpanElement>;
@@ -287,9 +294,11 @@ function Envelope({
         <i className="gft-a-twine-h" />
         <i className="gft-a-twine-v" />
       </span>
-      <span ref={seal} className="gft-a-seal">
-        <FlatMark />
-      </span>
+      {scene ? (
+        <span ref={seal} className="gft-a-seal" data-seal={scene}>
+          <SealFace scene={scene} />
+        </span>
+      ) : null}
     </>
   );
 }
@@ -349,10 +358,13 @@ const hoverPeek = () =>
 
 export function EnvelopeDemo({
   play,
+  scene = "maroon",
   gift,
   onPick,
 }: {
   play: boolean;
+  /** The background picked, so the seal matches it. */
+  scene?: SceneId;
   gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null };
   /** Clicking the envelope does what the band's button does. */
   onPick?: () => void;
@@ -434,7 +446,7 @@ export function EnvelopeDemo({
         onClick={onPick}
       >
         <div className="gft-a-shell">
-          <Envelope flap={flap} seal={seal} extra={extra} />
+          <Envelope scene={scene} flap={flap} seal={seal} extra={extra} />
         </div>
         <div className="gft-a-sleeve">
           <div ref={letter} className="gft-a-letter">
@@ -743,7 +755,7 @@ export function Letter({
         >
           {state === "open" && still ? null : (
             <div ref={shell} className="gft-a-shell" aria-hidden="true">
-              <Envelope flap={flap} seal={seal} extra={extra} />
+              <Envelope scene={gift.scene} flap={flap} seal={seal} extra={extra} />
             </div>
           )}
           {/* The sleeve: the envelope masks the card (Sam, 6 Nov 2026: "I

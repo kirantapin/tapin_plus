@@ -127,6 +127,7 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
       <div ref={box} className="tpg-env-art">
         <EnvelopeDemo
           play={seen}
+          scene={shown}
           onPick={() => send.current && onSend(send.current)}
           gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: ENVELOPE_NOTE, photo: SAMPLE_PHOTO_SRC }}
         />
