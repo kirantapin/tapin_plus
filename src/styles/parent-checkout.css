@@ -837,7 +837,8 @@ fieldset.prc-module {
   display: grid;
   gap: 12px;
 }
-.prc-e-mock .prc-mock-tag {
+.prc-e-mock .prc-mock-tag,
+.gft-pp-group > .prc-mock-tag {
   justify-self: start;
 }
 .prc-e-fake {
@@ -852,6 +853,90 @@ fieldset.prc-module {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+/* ══ WALLETS (Sam, 7 Nov 2026) ═══════════════════════════════════════════════
+   Apple Pay and Google Pay on top (Stripe's Express Checkout Element, or
+   ?parentmock's stand-ins), "or pay with card", then the card fields. Both
+   looks; the builder's 52px height and 14px corners (gift.css .gft-pp-cta). */
+.prc-wallets {
+  display: grid;
+  min-height: 52px;
+}
+/* Until Stripe says a wallet can show: laid out (so it can measure) but not
+   seen, and taking none of the column's 12px gap. */
+.prc-wallets[data-pending] {
+  height: 0;
+  min-height: 0;
+  margin-bottom: -12px;
+  overflow: hidden;
+  visibility: hidden;
+}
+.prc-wallet-mock {
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+.prc-wallet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 52px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  font: 600 19px/1 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease-out;
+}
+.prc-wallet:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.prc-wallet:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.prc-wallet:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.prc-wallet svg {
+  flex: none;
+}
+.prc-wallet-apple {
+  background: #000000;
+  color: #ffffff;
+}
+.prc-wallet-apple svg {
+  margin-top: -3px;
+}
+.prc-wallet-google {
+  background: #ffffff;
+  color: #3c4043;
+  box-shadow: inset 0 0 0 1px #747775;
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-weight: 500;
+}
+.prc-or {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0;
+  color: rgba(20, 22, 24, 0.62);
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+}
+.prc-or::before,
+.prc-or::after {
+  content: "";
+  height: 1px;
+  background: rgba(20, 22, 24, 0.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-wallet {
+    transition: none;
+  }
 }
 .prc-e-done {
   display: grid;
