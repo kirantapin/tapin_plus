@@ -1960,7 +1960,7 @@ button.tpg-env-link {
    so less room above it; the band clips the envelope's foot as it drops. */
 @media (min-width: 1024px) and (hover: hover) {
   .gft.gft-mini:has(.gft-a-photo) {
-    padding-top: 178px;
+    padding-top: 88px;
   }
   .tpg-env {
     overflow: hidden;
@@ -2229,4 +2229,20 @@ button.tpg-env-link {
 }
 .gft-pp-fx-ico {
   display: block;
+}
+
+/* The white the builder grows out of (the dock's plate): over everything as
+   it opens, faded as it lands; back as it closes (GiftPreview). */
+.gft-preview-veil {
+  position: absolute;
+  z-index: 200;
+  inset: 0;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) and (hover: hover) {
+  .tpg-env-art .gft-a-stage[data-pickable] {
+    cursor: pointer;
+  }
 }
