@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { asset } from "../asset";
@@ -20,7 +20,7 @@ import {
   type Gift,
   type SceneId,
 } from "../model/gift";
-import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { playDelight } from "./giftDelight";
 import { GiftAfter } from "./giftAfter";
@@ -34,6 +34,7 @@ import { StepBars, resetStepBars } from "../shell/StepBars";
 import { BackArrow } from "../shell/BackArrow";
 import { reducedMotion } from "./parents_kit";
 import { SealFace } from "./giftSeals";
+import { GiftSentContext, type GiftSent, type GiftSentHost } from "../shell/giftSent";
 
 /* ══ THE GIFT PAGE (Sam, 6 Nov 2026; picked: A · Letter) ════════════════════
    What a student opens from their text when a parent has bought them Tapin
@@ -1176,9 +1177,14 @@ export function GiftPreview({
     () => builder && !(startNext && next) && typeof window !== "undefined" && !window.matchMedia?.("(min-width: 1024px)").matches,
   );
   const [designed, setDesigned] = useState(!peek);
+  /* Once the checkout has gone through (the sent block below). */
+  const sentRef = useRef(false);
   const expand = () => {
     setDesigned(true);
     setPeek(false);
+    /* Back to the done step from seeing it: the gift seals again under the
+       strip. */
+    if (sentRef.current) setReplay((r) => ({ n: r.n + 1, auto: false }));
   };
   const [nameErr, setNameErr] = useState(false);
   const nameInput = useRef<HTMLInputElement | null>(null);
@@ -1246,6 +1252,8 @@ export function GiftPreview({
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      /* Sent: the background is the one they paid for. */
+      if (sentRef.current) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
       e.preventDefault();
@@ -1528,6 +1536,185 @@ export function GiftPreview({
     a.oncancel = done;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [part]);
+  /* ── Sent: A · It's on its way (Sam, 7 Nov 2026: "lets do A on its way for
+     after they pay") ──
+     The checkout's done step tells the preview (shell/giftSent.ts), and the
+     gift the parent made is sent off in front of them: the seal pressed
+     once more (0.8, 1.08, 1), a tilt back, then away up and to the right.
+     A phone: the done drawer sits lower, leaving a band of the background
+     above it; the envelope rises from behind the drawer's top edge at half
+     size (through a layer clipped at that edge) and flies off the top. A
+     computer: the preview's own envelope goes, after the heading and Open
+     it fade. Then a paper strip, "On its way to {who}", and "See it as {who}
+     will" land where it was. Reduced motion: straight to that. The panel's
+     words never wait for any of it. */
+  const [sent, setSent] = useState<GiftSent | null>(null);
+  /* The flight is over (a computer hides the sealed gift underneath then). */
+  const [landed, setLanded] = useState(false);
+  /* "See it as {who} will" on a computer; a phone's is the collapsed drawer. */
+  const [seen, setSeen] = useState(false);
+  const seeing = !!sent && (wide ? seen : peek);
+  const sentFrom = useRef<number | null>(null);
+  const sentBand = useRef<HTMLDivElement | null>(null);
+  const sentFrame = useRef<HTMLDivElement | null>(null);
+  const flyer = useRef<HTMLDivElement | null>(null);
+  const sentHost = useMemo<GiftSentHost>(
+    () => ({
+      sent: (s) => {
+        sentRef.current = true;
+        /* The drawer's height on the pay step, before anything moves. */
+        sentFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
+        setSent(s);
+        if (reducedMotion()) {
+          setLanded(true);
+          return 0;
+        }
+        if (!s.texted) return 300;
+        return window.matchMedia?.("(min-width: 1024px)").matches ? 1150 : 1760;
+      },
+    }),
+    [],
+  );
+  useLayoutEffect(() => {
+    if (!sent) return;
+    toPreviewTop();
+    if (reducedMotion()) return;
+    const runs: Animation[] = [];
+    const timers: number[] = [];
+    const go = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => {
+      const a = el?.animate?.(kf, { fill: "both", ...o });
+      if (a) runs.push(a);
+      return a;
+    };
+    const OUT = EASE;
+    const AWAY = "cubic-bezier(0.55, 0, 0.85, 0.25)";
+    /* The seal pressed once more: sealed. */
+    const press = (seal: Element | null | undefined, at: number) =>
+      go(seal, [{ transform: "none" }, { transform: "scale(0.8)", offset: 0.35 }, { transform: "scale(1.08)", offset: 0.7 }, { transform: "none" }], {
+        duration: 340,
+        delay: at,
+        easing: "ease-in-out",
+        fill: "none",
+      });
+    let landAt = 300;
+    if (!wide) {
+      /* The drawer eases down from the pay step's height to the done one. */
+      const panel = panelRef.current;
+      const was = sentFrom.current;
+      if (panel && was != null && typeof panel.animate === "function") {
+        const now = panel.getBoundingClientRect().height;
+        if (Math.abs(now - was) > 2) {
+          panel.style.overflow = "hidden";
+          const a = panel.animate([{ height: `${was}px` }, { height: `${now}px` }], { duration: 520, easing: OUT });
+          const end = () => panel.style.removeProperty("overflow");
+          a.onfinish = end;
+          a.oncancel = end;
+          runs.push(a);
+        }
+      }
+      const fly = flyer.current;
+      if (sent.texted && fly) {
+        /* Up from behind the drawer (260–900ms), a breath while the seal
+           presses, then away (900–1980ms): one animation, so nothing
+           fights over the transform. */
+        const RISE = 640;
+        const FLY = 1080;
+        const T = RISE + FLY;
+        const at = (ms: number) => ms / T;
+        go(
+          fly,
+          [
+            { transform: "translateY(200px) scale(0.5)", offset: 0, easing: OUT },
+            { transform: "translateY(-6px) scale(0.5)", offset: at(RISE * 0.82), easing: OUT },
+            { transform: "translateY(0) scale(0.5)", offset: at(RISE), easing: "linear" },
+            { transform: "translateY(0) scale(0.5)", offset: at(RISE + FLY * 0.33), easing: "cubic-bezier(0.3, 0, 0.3, 1)" },
+            { transform: "translate(-6px, -12px) scale(0.53) rotate(4deg)", offset: at(RISE + FLY * 0.52), easing: AWAY },
+            { transform: "translate(300px, -330px) scale(0.3) rotate(-18deg)", offset: 1 },
+          ],
+          { duration: T, delay: 260, easing: "linear" },
+        );
+        press(fly.querySelector(".gft-a-seal"), 260 + RISE);
+        landAt = 1840;
+      }
+    } else {
+      const fr = frame.current;
+      /* "{Who}, your mom sent you something" and Open it go first. */
+      fr?.querySelectorAll(".gft-a-band > .gft-h1, .gft-a-band > .gft-open").forEach((el) =>
+        go(el, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 120, easing: "ease-out", fill: "forwards" }),
+      );
+      const stage = fr?.querySelector<HTMLElement>(".gft-a-band > .gft-a-stage");
+      if (sent.texted && stage) {
+        press(stage.querySelector(".gft-a-seal"), 260);
+        go(
+          stage,
+          [
+            { transform: "none", offset: 0 },
+            { transform: "none", offset: 0.33, easing: "cubic-bezier(0.3, 0, 0.3, 1)" },
+            { transform: "translate(-8px, -18px) scale(1.04) rotate(4deg)", offset: 0.52, easing: AWAY },
+            { transform: "translate(380px, -560px) scale(0.55) rotate(-18deg)", offset: 1 },
+          ],
+          { duration: 1080, delay: 260, fill: "forwards" },
+        );
+        landAt = 1260;
+      } else if (stage) go(stage, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, delay: 120, easing: "ease-out", fill: "forwards" });
+    }
+    /* The strip lands with a little give; the way to see it follows. */
+    const [line, see] = Array.from((wide ? sentFrame.current : sentBand.current)?.querySelectorAll(".gft-sent > *") ?? []);
+    go(line, [{ opacity: 0, transform: "translateY(-14px) scale(1.05)" }, { opacity: 1, transform: "none" }], {
+      duration: 520,
+      delay: landAt,
+      easing: "cubic-bezier(0.34, 1.4, 0.64, 1)",
+      fill: "backwards",
+    });
+    go(see, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 420, delay: landAt + 160, easing: OUT, fill: "backwards" });
+    timers.push(window.setTimeout(() => setLanded(true), landAt + 600));
+    return () => {
+      runs.forEach((a) => a.cancel());
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+    // Once, as it's sent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sent]);
+  /* "See it as {who} will": the gift whole again, sealed, as they'll get
+     it. A phone collapses the drawer to its peek ("Back" brings the done
+     step back); a computer shows it in the frame. */
+  const seeIt = () => {
+    reseal();
+    if (wide) setSeen(true);
+    else setPeek(true);
+  };
+  useLayoutEffect(() => {
+    if (!seen || reducedMotion()) return;
+    const runs = Array.from(frame.current?.querySelectorAll<HTMLElement>(".gft-a-band > :not(.gft-scene)") ?? []).map((el, i) =>
+      el.animate([{ opacity: 0, transform: "translateY(24px)" }, { opacity: 1, transform: "none" }], { duration: 480, delay: i * 60, easing: EASE, fill: "backwards" }),
+    );
+    return () => runs.forEach((a) => a.cancel());
+  }, [seen]);
+  /* Sent, the next gift starts fresh, once this closes (the parent's design
+     stays on screen until then: 7 Nov 2026, it used to fall back to the
+     sample's maroon the moment they paid). */
+  useEffect(
+    () => () => {
+      if (sentRef.current) clearGiftDraft();
+    },
+    [],
+  );
+  const sentLine = sent ? (
+    <div className="gft-sent">
+      <h2 className="gft-h1 gft-sent-h">
+        <span className="gft-sent-strip">{sent.texted ? `On its way to ${sent.who}` : `On ${sent.who}’s account now`}</span>
+      </h2>
+      {sent.texted ? (
+        <button type="button" className="gft-open gft-sent-see" onClick={seeIt}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M3.5 12s3-6 8.5-6 8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6ZM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          See it as {sent.who} will
+        </button>
+      ) : null}
+    </div>
+  ) : null;
+
   /* Six bars in all, five for an ask link (no number step): the three design
      stages, then the checkout's (ParentCheckout STEPS). */
   const stepsTotal = fixedTo ? 5 : 6;
@@ -1654,6 +1841,9 @@ export function GiftPreview({
       data-part={builder ? part : undefined}
       data-peek={!wide && builder && peek ? "" : undefined}
       data-designed={designed ? "" : undefined}
+      data-sent={sent ? "" : undefined}
+      data-landed={landed ? "" : undefined}
+      data-seeing={seeing ? "" : undefined}
       role="dialog"
       aria-modal="true"
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
@@ -1697,6 +1887,12 @@ export function GiftPreview({
           >
             <Letter key={replay.n} gift={gift} sample preview cta={pageCta} onReseal={reseal} autoOpen={replay.auto} onStateChange={setCardState} />
           </div>
+          {/* Sent, on a computer: the strip where the envelope was. */}
+          {sent && wide ? (
+            <div ref={sentFrame} className="gft-sent-frame gft-a" data-scene={scene} hidden={seen}>
+              {sentLine}
+            </div>
+          ) : null}
         </div>
         {/* Phone or computer, under the preview it changes (Sam, 6 Nov 2026:
             "the phone computer toggle should be on the bottom of the left
@@ -1749,7 +1945,7 @@ export function GiftPreview({
               <button
                 type="button"
                 className="gft-pp-handle-hit"
-                aria-label={peek ? "Open the editor" : "Collapse the editor"}
+                aria-label={sent ? (peek ? "Back" : "See the gift") : peek ? "Open the editor" : "Collapse the editor"}
                 aria-expanded={!peek}
                 onClick={() => (peek ? expand() : setPeek(true))}
               >
@@ -1768,13 +1964,13 @@ export function GiftPreview({
                 {/* While previewing it's always "Back to editing" (Sam, 6 Nov 2026), on
                     any step; only the first time, before they've begun, "Start
                     designing". */}
-                {designed ? "Back to editing" : "Start designing"}
+                {sent ? "Back" : designed ? "Back to editing" : "Start designing"}
               </button>
             </div>
           ) : null}
           {visited && next ? (
             <div className="gft-pp-next" hidden={stage !== "next"} {...(!wide && peek ? { inert: "" } : {})}>
-              {next(toGift, shut, wide ? undefined : () => setPeek(true))}
+              <GiftSentContext.Provider value={sentHost}>{next(toGift, shut, wide ? undefined : () => setPeek(true))}</GiftSentContext.Provider>
             </div>
           ) : null}
           {stage === "next" ? null : (
@@ -1870,7 +2066,22 @@ export function GiftPreview({
           2026: "when I click above the designing modal it should collapse
           the modal ... instead of being able to drag the modal"); the
           drawer no longer drags. */}
-      {!wide && builder && !peek ? <div className="gft-pp-above" aria-hidden="true" onClick={() => setPeek(true)} /> : null}
+      {!wide && builder && !peek && !sent ? <div className="gft-pp-above" aria-hidden="true" onClick={() => setPeek(true)} /> : null}
+      {/* Sent, on a phone: the band of background above the done drawer,
+          clipped at its top edge, that the envelope rises through and the
+          strip lands in. */}
+      {sent && !wide ? (
+        <div ref={sentBand} className="gft-sent-band gft-a" data-scene={scene} hidden={seeing}>
+          {sentLine}
+          {sent.texted ? (
+            <div ref={flyer} className="gft-sent-flyer" aria-hidden="true">
+              <div className="gft-a-shell">
+                <Envelope scene={scene} />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
       <div ref={veil} className="gft-preview-veil" aria-hidden="true" />
       {/* No Preview button (Sam, 6 Nov 2026: "instead of having the preview
           button I think we should just let the X on the modal do the

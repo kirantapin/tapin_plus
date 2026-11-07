@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StepBars } from "./StepBars";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Appearance, type Stripe, type StripeExpressCheckoutElementConfirmEvent, type StripeExpressCheckoutElementOptions } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
@@ -18,6 +19,7 @@ import {
 } from "../model/parents";
 import { clearGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { BackArrow } from "./BackArrow";
+import { GiftSentContext } from "./giftSent";
 import { nextBillingDate } from "../model/plus";
 import { GLYPHS, Glyph } from "../routes/parents_kit";
 import { lockScroll } from "./scrollLock";
@@ -142,6 +144,17 @@ const digitsOf = (raw: string) => {
 const maskDigits = (d: string) => `•••${d.slice(-4)}`;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const possessive = (name: string) => `${name}’s`;
+/** A name starting a sentence ("maya" as typed: "Maya opens it"). */
+const cap = (name: string) => (name ? name.charAt(0).toUpperCase() + name.slice(1) : name);
+/** "Nov 21": `n` days from today. */
+const inDays = (n: number) =>
+  new Date(Date.now() + n * 864e5).toLocaleDateString("en-US", { month: "short", day: "numeric" }).replace(" ", " ");
+
+/* The done step's glyphs, in the page's family (parents_kit Glyph): an open
+   eye, a bell, a speech bubble. */
+const EYE = "M3.5 12s3-6 8.5-6 8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6ZM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z";
+const BELL = "M18 15.5V11a6 6 0 0 0-12 0v4.5L4.5 17.5h15L18 15.5ZM10 20.5h4";
+const TEXT_BUBBLE = "M20 11.5c0 4-3.6 7-8 7-1.1 0-2.2-.2-3.1-.5L4 19.5l1.4-3.6C4.5 14.7 4 13.2 4 11.5c0-4 3.6-7 8-7s8 3 8 7Z";
 
 /* The student, then you, then the card, one at a time (Sam, 5 Nov 2026:
    "we should have these two at separate steps of the checkout process"). An
@@ -159,7 +172,7 @@ type Step = "look" | "open" | "note" | "student" | "you" | "pay" | "done";
 /* Once a card has been charged, that checkout is kept for the page's life,
    so closing and reopening the sheet picks it up again (it only needs
    confirming) instead of starting a new one that would charge again. */
-let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; hasNote: boolean } | null = null;
+let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; phone: string | null; hasNote: boolean } | null = null;
 /** A card already charged whose checkout still needs confirming: the
  *  builder goes straight to it (its gift went with the charge). */
 export const hasChargedParentCheckout = () => charged !== null;
@@ -458,9 +471,26 @@ function Sheet({
     if (still()) return;
     if (embedded) {
       const root = sheet.current;
-      root?.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-steps):not(.gft-pp-x), .gft-pp-body").forEach((el) =>
-        el.animate?.([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 360, easing: EASE }),
-      );
+      if (step === "done") {
+        /* Done settles in place, row by row, while the preview sends the
+           envelope off: every word on screen within about 400ms, never held
+           back for the flight (A · It's on its way). */
+        root
+          ?.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-x), .prc-tl > li, .prc-done-promise, .gft-pp-foot")
+          .forEach((el, i) =>
+            el.animate?.([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], {
+              duration: 420,
+              delay: 60 + i * 40,
+              easing: EASE,
+              fill: "backwards",
+            }),
+          );
+        /* The preview moves the drawer itself (GiftPreview). */
+        if (host) return;
+      } else
+        root?.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-steps):not(.gft-pp-x), .gft-pp-body").forEach((el) =>
+          el.animate?.([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 360, easing: EASE }),
+        );
       const panel = root?.closest<HTMLElement>(".gft-preview-panel");
       if (!panel || was == null || typeof panel.animate !== "function") return;
       const now = panel.getBoundingClientRect().height;
@@ -560,19 +590,56 @@ function Sheet({
   };
 
   const onCharged = (paymentIntent: string) => {
-    if (started) charged = { started, paymentIntent, who: ask ? ask.student_first_name : student.trim(), masked: ask ? ask.masked_phone : maskDigits(phoneD), hasNote: sentNote };
+    if (started)
+      charged = {
+        started,
+        paymentIntent,
+        who: ask ? ask.student_first_name : student.trim(),
+        masked: ask ? ask.masked_phone : maskDigits(phoneD),
+        phone: ask ? null : toE164(phoneD) || null,
+        hasNote: sentNote,
+      };
     setPaid(true);
   };
+  /* The gift preview this sits in (GiftPreview), which sends the envelope
+     off as this step arrives; null on its own. */
+  const host = useContext(GiftSentContext);
+  /* When the first moment ("We texted …") fills in: as the envelope leaves. */
+  const tickAt = useRef<number | null>(null);
+  /* Who it went to, kept as the charge cleared (a resumed payment's fields
+     are empty). The student's number is only known when the parent typed it:
+     an ask link's is masked. */
+  const [sentTo, setSentTo] = useState<{ who: string; masked: string; phone: string | null; texted: boolean } | null>(null);
+  const finished = useRef(false);
   const onPaid = (res: ParentConfirmed) => {
     const first = started?.first_cents ?? OFFER.first_cents;
+    const to = {
+      who: res.student_first_name || who,
+      masked: res.masked_phone || masked,
+      phone: ask ? null : charged?.phone ?? (toE164(phoneD) || null),
+      /* An ask link's student is texted only for a note or a photo (API.md). */
+      texted: !ask || sentNote,
+    };
     charged = null;
     track("parent_purchase", { value: first / 100, currency: "USD", source, checkout_id: started?.checkout_id });
     if (ask) track("ask_paid", { source });
+    finished.current = true;
+    /* The preview measures the drawer before it moves, so first. */
+    tickAt.current = host ? host.sent({ who: cap(to.who), texted: to.texted }) : null;
+    setSentTo(to);
     setDone(res);
     toStep("done");
-    /* Sent: the next gift starts fresh. */
-    clearGiftDraft();
   };
+  /* Sent: the next gift starts fresh. Not as it's paid (the parent's design
+     stays on screen for the done step, 7 Nov 2026), but once it's closed:
+     the preview clears it as it goes (GiftPreview), or this does on its own. */
+  useEffect(
+    () => () => {
+      if (finished.current && !host) clearGiftDraft();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
   const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
@@ -604,7 +671,7 @@ function Sheet({
       : step === "pay"
         ? `For ${who}, ${masked}.`
         : step === "done"
-          ? "We’ll text you a receipt."
+          ? `${usd(first)} paid today. We’ll text you a receipt.`
           : null;
   /* The builder's three stages count as the first three bars (GiftPreview's
      stepsTotal), so the count is the same across the whole flow. */
@@ -679,11 +746,11 @@ function Sheet({
         </button>
       ) : null}
       {sub ? <p className="gft-pp-sub tnum">{sub}</p> : null}
-      {bars("gft-pp-steps")}
+      {/* Done needs no count (A · It's on its way, 7 Nov 2026). */}
+      {step === "done" ? null : bars("gft-pp-steps")}
     </div>
   ) : (
     <div className="prc-top">
-      {step === "done" ? <Tick /> : null}
       <div className="prc-head">
         <h2 id="prc-title" className="prc-title" tabIndex={-1}>
           {title}
@@ -831,37 +898,123 @@ function Sheet({
       </Elements>
     );
   } else if (step === "done" && done) {
-    const said = (
-      <p>
-        {ask ? (
-          /* An ask link's student is already signed in, and isn't texted
-             (API.md), unless there's a note: then they get its link. */
-          <>
-            It’s on {done.student_first_name || who}’s account (<span className="tnum">{done.masked_phone || masked}</span>) now.
-            {sentNote ? " We’ve texted them a link to your gift." : ""} To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app.
-          </>
-        ) : (
-          <>
-            We’ve texted <span className="tnum">{done.masked_phone || masked}</span>
-            {sentNote ? " a link to your gift" : ""}. They sign in to Tapin with that number and it’s there. To change or cancel, email support@tapin.app, or your student can cancel in the Tapin app. If they haven’t signed in within 14 days, we’ll cancel and refund you in full.
-          </>
-        )}
-      </p>
+    /* A · It's on its way (Sam, 7 Nov 2026: "lets do A on its way for after
+       they pay"): what happens next, three moments on one line, then the
+       pay step's promise on paper, then a quiet way to give them a heads-up
+       beside Done. Never she or he for the student: their name, or they. */
+    const to = sentTo ?? { who: done.student_first_name || who, masked: done.masked_phone || masked, phone: null, texted: !ask || sentNote };
+    const Who = cap(to.who);
+    /* The student is texted their gift link at checkout; an ask link's only
+       for a note or a photo (API.md step 4), and an ask link's student has
+       signed in to Tapin already (they asked from the app). */
+    const first = to.texted ? (
+      <>
+        <b>We texted {Who}</b>
+        <p className="tnum">A link to your gift, sent to {to.masked} just now.</p>
+      </>
+    ) : (
+      <>
+        <b>It’s on their account now</b>
+        <p className="tnum">
+          Plus is on {possessive(Who)} number, {to.masked}. They asked for it, so there’s no text.
+        </p>
+      </>
     );
-    view = frame(
-      flat ? (
-        <div className="prc-e-done" role="status">
-          <Tick />
-          {said}
-        </div>
+    const second = ask ? (
+      to.texted ? (
+        <>
+          <b>{Who} opens it</b>
+          <p>Plus is already on their Tapin account.</p>
+        </>
       ) : (
-        <div className="prc-module prc-done" role="status">
-          {said}
-        </div>
-      ),
-      <button type="button" className={cta} onClick={close}>
-        Done
-      </button>,
+        <>
+          <b>{Who} opens Tapin</b>
+          <p>Plus is there the next time they do.</p>
+        </>
+      )
+    ) : (
+      <>
+        <b>{Who} opens it</b>
+        <p>They sign in to Tapin, and Plus is there.</p>
+      </>
+    );
+    const timeline = (
+      <ol className="prc-tl" aria-label="What happens next">
+        <li data-now="">
+          <RingTick at={tickAt.current} />
+          <div>{first}</div>
+        </li>
+        <li>
+          <span className="prc-tl-mk" aria-hidden="true">
+            <Glyph d={EYE} />
+          </span>
+          <div>{second}</div>
+        </li>
+        <li>
+          <span className="prc-tl-mk" aria-hidden="true">
+            <Glyph d={BELL} />
+          </span>
+          <div>
+            <b>Before each bill</b>
+            <p className="tnum">
+              We text you a few days before each {usd(monthly)} renewal. The first is {renewsOn()}.
+            </p>
+          </div>
+        </li>
+      </ol>
+    );
+    /* The pay step's promise rows, on paper; the 14-day refund isn't on an
+       ask link, as there. */
+    const promise = (
+      <ul className="prc-promise prc-done-promise" aria-label="Our promise">
+        {ask ? null : (
+          <li>
+            <Glyph d={GLYPHS.refund} />
+            <span className="tnum">
+              <b>Full refund</b> if they don’t sign in by {inDays(14)}
+            </span>
+          </li>
+        )}
+        <li>
+          <Glyph d={GLYPHS.refund} />
+          <span>
+            <b>Not used one month?</b> Ask for a refund
+          </span>
+        </li>
+        <li>
+          <Glyph d={GLYPHS.mail} />
+          <span>
+            <b>Cancel or skip anytime</b> by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
+          </span>
+        </li>
+        <li className="prc-done-how-row">
+          <Link className="prc-done-how" to="/parents/account">
+            How to change or cancel
+            <Glyph d={GLYPHS.arrow} />
+          </Link>
+        </li>
+      </ul>
+    );
+    /* A heads-up from them, in their own messages app; it needs the number
+       they typed, so an ask link (masked) has none. `?&body=` reads on iOS
+       and Android alike. */
+    const sms = to.phone ? `sms:${to.phone}?&body=${encodeURIComponent(`${Who}, I sent you something! Look for a text from Tapin.`)}` : null;
+    view = frame(
+      <div className={flat ? "prc-e-done" : "prc-module prc-done"} role="status">
+        {timeline}
+        {promise}
+      </div>,
+      <>
+        {sms ? (
+          <a className="prc-e-text" href={sms}>
+            <Glyph d={TEXT_BUBBLE} />
+            Text {Who}
+          </a>
+        ) : null}
+        <button type="button" className={cta} onClick={close}>
+          Done
+        </button>
+      </>,
     );
   }
 
@@ -1451,19 +1604,38 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
 }
 
 /* ── The tick that draws itself on the done step ─────────────────────────── */
-function Tick() {
+/** The first moment's marker: it waits as an empty ring, like the moments
+ *  still to come, and fills green with its tick as the envelope leaves
+ *  (`at` ms from now; a beat in when nothing flies). Its resting state is
+ *  the filled tick, so reduced motion shows it done. */
+function RingTick({ at }: { at: number | null }) {
   const path = useRef<SVGPathElement | null>(null);
   const ring = useRef<HTMLSpanElement | null>(null);
   useEffect(() => {
     const p = path.current;
-    if (!p || still() || typeof p.animate !== "function") return;
-    ring.current?.animate?.([{ transform: "scale(0.6)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 360, easing: "cubic-bezier(0.34, 1.56, 0.64, 1)" });
-    p.animate([{ strokeDashoffset: 20 }, { strokeDashoffset: 0 }], { duration: 420, delay: 120, easing: EASE, fill: "backwards" });
+    const r = ring.current;
+    if (!p || !r || still() || typeof r.animate !== "function") return;
+    const delay = at ?? 240;
+    const fillIn = r.animate(
+      [
+        { transform: "none", backgroundColor: "#ffffff", boxShadow: "inset 0 0 0 2px rgba(20, 22, 24, 0.16)" },
+        { transform: "scale(1.14)", backgroundColor: "#0b7a53", boxShadow: "inset 0 0 0 2px rgba(11, 122, 83, 0)", offset: 0.55 },
+        { transform: "none", backgroundColor: "#0b7a53", boxShadow: "inset 0 0 0 2px rgba(11, 122, 83, 0)" },
+      ],
+      { duration: 480, delay, easing: EASE, fill: "backwards" },
+    );
+    const draw = p.animate([{ strokeDashoffset: 20 }, { strokeDashoffset: 0 }], { duration: 380, delay: delay + 140, easing: EASE, fill: "backwards" });
+    return () => {
+      fillIn.cancel();
+      draw.cancel();
+    };
+    // Once, as the step arrives.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <span ref={ring} className="prc-tick" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <path ref={path} d="m6.5 12.5 3.6 3.6 7.4-7.6" pathLength={20} strokeDasharray={20} fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    <span ref={ring} className="prc-tl-mk prc-tl-now" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path ref={path} d="m6.5 12.5 3.6 3.6 7.4-7.6" pathLength={20} strokeDasharray={20} fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
   );
