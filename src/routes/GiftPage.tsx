@@ -941,6 +941,19 @@ export function GiftPreview({
      the care package), so what they typed there is still there (review,
      6 Nov 2026). */
   const [visited, setVisited] = useState(startNext && !!next);
+  /* The care package in two stages, so it isn't all at once (Sam, 6 Nov
+     2026: "the first is where they pick the background and 'when they open
+     it' and photo - the next when they do the name message and sender
+     name"): the look, then the note. Back from the checkout lands on the
+     note, the last of them. */
+  const [part, setPart] = useState<"look" | "note">(startNext && next ? "note" : "look");
+  const look = !builder || part === "look";
+  const note = !builder || part === "note";
+  const partFrom = useRef<number | null>(null);
+  const toPart = (p: "look" | "note") => {
+    partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
+    setPart(p);
+  };
   /* A phone (Sam, 6 Nov 2026: "why do we have two separate buttons here?
      doesn't make sense", and "there should always be a button to preview the
      card ... to temporarily leave the checkout flow to preview the gift card
@@ -1198,6 +1211,10 @@ export function GiftPreview({
   const pageCta: DockCta = wide || builder ? { label: "Claim my gift", onClick: () => {} } : action;
   /* Continue: the student's first name is the one thing it needs. */
   const go = (el: HTMLElement) => {
+    if (builder && part === "look") {
+      toPart("note");
+      return;
+    }
     if (builder && !fixedTo && !d.to.trim()) {
       setNameErr(true);
       setPeek(false);
@@ -1211,7 +1228,10 @@ export function GiftPreview({
     }
     action.onClick(el);
   };
-  const toGift = () => setStage("gift");
+  const toGift = () => {
+    setPart("note");
+    setStage("gift");
+  };
   /* Continue: the checkout slides up into the panel (Sam, 6 Nov 2026: "when
      I click continue, I think it should cause the checkout modal to slide
      up"); on a phone the drawer itself rises as it grows. Back: the care
@@ -1222,8 +1242,11 @@ export function GiftPreview({
       firstStage.current = false;
       return;
     }
-    if (reducedMotion()) return;
     const panel = panelRef.current;
+    /* Back on the note from the checkout: its title takes focus, as each
+       stage's does. */
+    if (stage === "gift") panel?.querySelector<HTMLElement>(".gft-pp-title")?.focus({ preventScroll: true });
+    if (reducedMotion()) return;
     const content = panel?.querySelector<HTMLElement>(stage === "next" ? ".gft-pp-next" : ".gft-pp-body");
     content?.animate?.(
       [
@@ -1236,7 +1259,36 @@ export function GiftPreview({
       panel?.animate?.([{ transform: "translateY(14%)" }, { transform: "none" }], { duration: 420, easing: EASE });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
-  const stepsTotal = fixedTo ? 3 : 4;
+  /* Look, then note: the drawer eases to the new stage's height (the note is
+     shorter), the stage slides in from the side it comes from, the body
+     starts at its top and the title takes focus, as the checkout's steps do. */
+  const shownPart = useRef(part);
+  useLayoutEffect(() => {
+    if (shownPart.current === part) return;
+    shownPart.current = part;
+    const panel = panelRef.current;
+    const was = partFrom.current;
+    partFrom.current = null;
+    if (body.current) body.current.scrollTop = 0;
+    panel?.querySelector<HTMLElement>(".gft-pp-title")?.focus({ preventScroll: true });
+    if (!panel || reducedMotion() || typeof panel.animate !== "function") return;
+    const dir = part === "note" ? 1 : -1;
+    panel.querySelectorAll<HTMLElement>(".gft-pp-head > :not(.gft-pp-steps):not(.gft-pp-x), .gft-pp-body").forEach((el) =>
+      el.animate([{ opacity: 0, transform: `translateX(${dir * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 360, easing: EASE }),
+    );
+    const now = panel.getBoundingClientRect().height;
+    if (wide || was == null || Math.abs(now - was) < 2) return;
+    panel.style.overflow = "hidden";
+    const a = panel.animate([{ height: `${was}px` }, { height: `${now}px` }], { duration: 380, easing: EASE });
+    const done = () => panel.style.removeProperty("overflow");
+    a.onfinish = done;
+    a.oncancel = done;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [part]);
+  /* Five bars in all, four for an ask link (no number step): the two design
+     stages, then the checkout's (ParentCheckout STEPS). */
+  const stepsTotal = fixedTo ? 4 : 5;
+  const stepAt = part === "note" ? 2 : 1;
   const scaled: React.CSSProperties | undefined =
     desk && fit
       ? ({
@@ -1247,6 +1299,53 @@ export function GiftPreview({
           "--frame-h": `${fit.h / fit.s}px`,
         } as React.CSSProperties)
       : undefined;
+
+  /* The photo: on the look in the builder, with the fields otherwise. */
+  const photoParts = (
+    <>
+      {d.photo ? (
+        <div className="gft-pp-photo">
+          <img src={d.photo} alt="Your photo" />
+          <button type="button" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+            Change
+          </button>
+          <button type="button" onClick={() => setGiftDraft({ photo: null })} disabled={photoBusy}>
+            Remove
+          </button>
+        </div>
+      ) : (
+        <>
+          <button type="button" className="gft-pp-add" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9ZM12 16a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+            </svg>
+            {photoBusy ? "One moment…" : "Add your photo"}
+          </button>
+          {showSample ? (
+            <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
+              {[true, false].map((on) => (
+                <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>
+                  {on ? "Sample photo" : "No photo"}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </>
+      )}
+      <input
+        ref={photoInput}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => void pickPhoto(e.target.files?.[0])}
+      />
+      {photoError ? (
+        <p className="gft-pp-error" role="alert">
+          {photoError}
+        </p>
+      ) : null}
+    </>
+  );
 
   return createPortal(
     <div
@@ -1360,12 +1459,20 @@ export function GiftPreview({
           <>
           {builder ? (
             <div className="gft-pp-head" {...(!wide && peek ? { inert: "" } : {})}>
-              <ol className="gft-pp-steps" aria-label={`Step 1 of ${stepsTotal}`}>
+              <ol className="gft-pp-steps" aria-label={`Step ${stepAt} of ${stepsTotal}`}>
                 {Array.from({ length: stepsTotal }, (_, i) => (
-                  <li key={i} data-on={i === 0 ? "" : undefined} />
+                  <li key={i} data-on={i < stepAt ? "" : undefined} />
                 ))}
               </ol>
-              <h2 className="gft-pp-title">{fixedTo ? `Build ${fixedTo}’s care package` : "Build their care package"}</h2>
+              <h2 className="gft-pp-title" tabIndex={-1}>
+                {part === "note"
+                  ? fixedTo
+                    ? `Write ${fixedTo}’s note`
+                    : "Write their note"
+                  : fixedTo
+                    ? `Build ${fixedTo}’s care package`
+                    : "Build their care package"}
+              </h2>
               {/* The drawer's × beside the title, as the checkout steps have
                   it (Sam, 6 Nov 2026: the placement "looks a bit weird"
                   alone in a row); it collapses the drawer ("it should
@@ -1377,14 +1484,92 @@ export function GiftPreview({
                   </svg>
                 </button>
               )}
-              <p className="gft-pp-sub">
-                {fixedTo ? "The note and photo are optional. Payment comes next." : "The note and photo are optional. Their number and payment come next."}
-              </p>
+              <p className="gft-pp-sub">{part === "note" ? "The note is optional." : "Pick how it looks. The photo is optional."}</p>
             </div>
           ) : null}
-          <div ref={body} className="gft-pp-body" {...(!wide && peek ? { inert: "" } : {})}>
+          <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>
+            {/* Stage 1, the look: the background (seasonal first), what plays
+                when they open it, the photo. Stage 2, the note: their name,
+                the note, how it's signed. Without the builder, all of it,
+                in the order it always had. */}
+            {builder && look ? (
+              <>
+                {SCENE_GROUPS.map((g) => (
+                <div key={g.label} className="gft-pp-group">
+                  <h2 id={`gft-pp-${g.label}`} className="gft-pp-h">
+                    {g.label}
+                    {g.tag ? <span className="gft-pp-tag">{g.tag}</span> : null}
+                  </h2>
+                  <div className="gft-pp-grid" role="radiogroup" aria-labelledby={`gft-pp-${g.label}`}>
+                    {g.scenes.map((sc) => (
+                      <button
+                        key={sc.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={scene === sc.id}
+                        className="gft-pp-swatch"
+                        onClick={() => pick(sc.id as SceneId)}
+                      >
+                        <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                          <i className="scene-swatch-env" />
+                        </span>
+                        <span className="gft-pp-name">{sc.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                ))}
+                <div className="gft-pp-group">
+                  <h2 id="gft-pp-fx" className="gft-pp-h">
+                    When they open it
+                  </h2>
+                  <div className="gft-pp-fx" role="radiogroup" aria-labelledby="gft-pp-fx">
+                    {[{ id: null, name: "None" } as const, ...DELIGHTS].map((fx) => (
+                      <button
+                        key={fx.name}
+                        type="button"
+                        role="radio"
+                        aria-checked={(d.effect ?? null) === fx.id}
+                        onClick={() => pickEffect(fx.id)}
+                      >
+                        <svg className="gft-pp-fx-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                          {fx.id === "confetti" ? (
+                            <g fill="currentColor">
+                              <rect x="4" y="5" width="3" height="6" rx="1" transform="rotate(-20 5.5 8)" />
+                              <rect x="16" y="3" width="3" height="6" rx="1" transform="rotate(25 17.5 6)" />
+                              <rect x="10" y="13" width="3" height="6" rx="1" transform="rotate(10 11.5 16)" />
+                              <circle cx="12" cy="6" r="1.6" />
+                              <circle cx="19" cy="15" r="1.6" />
+                              <circle cx="5" cy="17" r="1.6" />
+                            </g>
+                          ) : fx.id === "hearts" ? (
+                            <path fill="currentColor" d="M12 20s-6.8-4.2-8.7-8.3C1.9 8.4 3.9 5 7.2 5c1.9 0 3.3 1.1 4.8 3 1.5-1.9 2.9-3 4.8-3 3.3 0 5.3 3.4 3.9 6.7C18.8 15.8 12 20 12 20Z" />
+                          ) : fx.id === "sparkles" ? (
+                            <path fill="currentColor" d="M10 3c.7 5 3 7.3 8 8-5 .7-7.3 3-8 8-.7-5-3-7.3-8-8 5-.7 7.3-3 8-8Zm8.5 9.5c.3 2 1.2 2.9 3.2 3.2-2 .3-2.9 1.2-3.2 3.2-.3-2-1.2-2.9-3.2-3.2 2-.3 2.9-1.2 3.2-3.2Z" />
+                          ) : (
+                            <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          )}
+                        </svg>
+                        {fx.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                  <div className="gft-pp-group">
+                    <h2 className="gft-pp-h">Photo</h2>
+                    {photoParts}
+                  </div>
+              </>
+            ) : null}
+            {note ? (
             <div className="gft-pp-group">
               {builder ? null : <h2 className="gft-pp-h">Make it theirs</h2>}
+              {builder ? (
+                /* Back to the look, as the checkout's steps go back. */
+                <button type="button" className="gft-pp-back" onClick={() => toPart("look")}>
+                  ← The look
+                </button>
+              ) : null}
               {fixedTo ? null : (
                 <label className="gft-pp-field" data-error={nameErr && !d.to.trim() ? "" : undefined}>
                   <span>Your student’s first name</span>
@@ -1432,112 +1617,79 @@ export function GiftPreview({
                   autoCapitalize="words"
                 />
               </label>
-              <div className="gft-pp-field">
-                <span>Photo</span>
-                {d.photo ? (
-                  <div className="gft-pp-photo">
-                    <img src={d.photo} alt="Your photo" />
-                    <button type="button" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
-                      Change
-                    </button>
-                    <button type="button" onClick={() => setGiftDraft({ photo: null })} disabled={photoBusy}>
-                      Remove
-                    </button>
+              {builder ? null : (
+                <div className="gft-pp-field">
+                  <span>Photo</span>
+                  {photoParts}
+                </div>
+              )}
+            </div>
+            ) : null}
+            {builder ? null : (
+              <>
+                <div className="gft-pp-group">
+                  <h2 id="gft-pp-fx" className="gft-pp-h">
+                    When they open it
+                  </h2>
+                  <div className="gft-pp-fx" role="radiogroup" aria-labelledby="gft-pp-fx">
+                    {[{ id: null, name: "None" } as const, ...DELIGHTS].map((fx) => (
+                      <button
+                        key={fx.name}
+                        type="button"
+                        role="radio"
+                        aria-checked={(d.effect ?? null) === fx.id}
+                        onClick={() => pickEffect(fx.id)}
+                      >
+                        <svg className="gft-pp-fx-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                          {fx.id === "confetti" ? (
+                            <g fill="currentColor">
+                              <rect x="4" y="5" width="3" height="6" rx="1" transform="rotate(-20 5.5 8)" />
+                              <rect x="16" y="3" width="3" height="6" rx="1" transform="rotate(25 17.5 6)" />
+                              <rect x="10" y="13" width="3" height="6" rx="1" transform="rotate(10 11.5 16)" />
+                              <circle cx="12" cy="6" r="1.6" />
+                              <circle cx="19" cy="15" r="1.6" />
+                              <circle cx="5" cy="17" r="1.6" />
+                            </g>
+                          ) : fx.id === "hearts" ? (
+                            <path fill="currentColor" d="M12 20s-6.8-4.2-8.7-8.3C1.9 8.4 3.9 5 7.2 5c1.9 0 3.3 1.1 4.8 3 1.5-1.9 2.9-3 4.8-3 3.3 0 5.3 3.4 3.9 6.7C18.8 15.8 12 20 12 20Z" />
+                          ) : fx.id === "sparkles" ? (
+                            <path fill="currentColor" d="M10 3c.7 5 3 7.3 8 8-5 .7-7.3 3-8 8-.7-5-3-7.3-8-8 5-.7 7.3-3 8-8Zm8.5 9.5c.3 2 1.2 2.9 3.2 3.2-2 .3-2.9 1.2-3.2 3.2-.3-2-1.2-2.9-3.2-3.2 2-.3 2.9-1.2 3.2-3.2Z" />
+                          ) : (
+                            <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          )}
+                        </svg>
+                        {fx.name}
+                      </button>
+                    ))}
                   </div>
-                ) : (
-                  <>
-                    <button type="button" className="gft-pp-add" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                        <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9ZM12 16a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-                      </svg>
-                      {photoBusy ? "One moment…" : "Add your photo"}
-                    </button>
-                    {showSample ? (
-                      <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
-                        {[true, false].map((on) => (
-                          <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>
-                            {on ? "Sample photo" : "No photo"}
-                          </button>
-                        ))}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-                <input
-                  ref={photoInput}
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={(e) => void pickPhoto(e.target.files?.[0])}
-                />
-                {photoError ? (
-                  <p className="gft-pp-error" role="alert">
-                    {photoError}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-            <div className="gft-pp-group">
-              <h2 id="gft-pp-fx" className="gft-pp-h">
-                When they open it
-              </h2>
-              <div className="gft-pp-fx" role="radiogroup" aria-labelledby="gft-pp-fx">
-                {[{ id: null, name: "None" } as const, ...DELIGHTS].map((fx) => (
-                  <button
-                    key={fx.name}
-                    type="button"
-                    role="radio"
-                    aria-checked={(d.effect ?? null) === fx.id}
-                    onClick={() => pickEffect(fx.id)}
-                  >
-                    <svg className="gft-pp-fx-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                      {fx.id === "confetti" ? (
-                        <g fill="currentColor">
-                          <rect x="4" y="5" width="3" height="6" rx="1" transform="rotate(-20 5.5 8)" />
-                          <rect x="16" y="3" width="3" height="6" rx="1" transform="rotate(25 17.5 6)" />
-                          <rect x="10" y="13" width="3" height="6" rx="1" transform="rotate(10 11.5 16)" />
-                          <circle cx="12" cy="6" r="1.6" />
-                          <circle cx="19" cy="15" r="1.6" />
-                          <circle cx="5" cy="17" r="1.6" />
-                        </g>
-                      ) : fx.id === "hearts" ? (
-                        <path fill="currentColor" d="M12 20s-6.8-4.2-8.7-8.3C1.9 8.4 3.9 5 7.2 5c1.9 0 3.3 1.1 4.8 3 1.5-1.9 2.9-3 4.8-3 3.3 0 5.3 3.4 3.9 6.7C18.8 15.8 12 20 12 20Z" />
-                      ) : fx.id === "sparkles" ? (
-                        <path fill="currentColor" d="M10 3c.7 5 3 7.3 8 8-5 .7-7.3 3-8 8-.7-5-3-7.3-8-8 5-.7 7.3-3 8-8Zm8.5 9.5c.3 2 1.2 2.9 3.2 3.2-2 .3-2.9 1.2-3.2 3.2-.3-2-1.2-2.9-3.2-3.2 2-.3 2.9-1.2 3.2-3.2Z" />
-                      ) : (
-                        <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                      )}
-                    </svg>
-                    {fx.name}
-                  </button>
+                </div>
+                {SCENE_GROUPS.map((g) => (
+                <div key={g.label} className="gft-pp-group">
+                  <h2 id={`gft-pp-${g.label}`} className="gft-pp-h">
+                    {g.label}
+                    {g.tag ? <span className="gft-pp-tag">{g.tag}</span> : null}
+                  </h2>
+                  <div className="gft-pp-grid" role="radiogroup" aria-labelledby={`gft-pp-${g.label}`}>
+                    {g.scenes.map((sc) => (
+                      <button
+                        key={sc.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={scene === sc.id}
+                        className="gft-pp-swatch"
+                        onClick={() => pick(sc.id as SceneId)}
+                      >
+                        <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
+                          <i className="scene-swatch-env" />
+                        </span>
+                        <span className="gft-pp-name">{sc.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 ))}
-              </div>
-            </div>
-            {SCENE_GROUPS.map((g) => (
-            <div key={g.label} className="gft-pp-group">
-              <h2 id={`gft-pp-${g.label}`} className="gft-pp-h">
-                {g.label}
-                {g.tag ? <span className="gft-pp-tag">{g.tag}</span> : null}
-              </h2>
-              <div className="gft-pp-grid" role="radiogroup" aria-labelledby={`gft-pp-${g.label}`}>
-                {g.scenes.map((sc) => (
-                  <button
-                    key={sc.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={scene === sc.id}
-                    className="gft-pp-swatch"
-                    onClick={() => pick(sc.id as SceneId)}
-                  >
-                    <span className="scene-swatch" data-scene={sc.id} aria-hidden="true">
-                      <i className="scene-swatch-env" />
-                    </span>
-                    <span className="gft-pp-name">{sc.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            ))}
+              </>
+            )}
           </div>
           <div className="gft-pp-foot" {...(!wide && peek ? { inert: "" } : {})}>
             <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>

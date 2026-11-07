@@ -2290,6 +2290,30 @@ button.tpg-env-link {
   }
 }
 
+/* The builder in two stages (Sam, 6 Nov 2026): the look, then the note. The
+   note's way back to the look is the checkout's back link (parent-checkout.css
+   .prc-edit.prc-back); the title takes focus on each stage, unringed. */
+.gft-pp-back {
+  justify-self: start;
+  margin: -4px 0 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: #141618;
+  font: 600 14px/20px "Gilroy", Arial, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gft-pp-back:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.gft-pp-title:focus {
+  outline: none;
+}
+
 /* One layout behind the phone drawer, open or collapsed (Sam, 6 Nov 2026:
    "the positioning of the background when I open and close the designing
    modal shifts quite a bit"): the page always keeps the collapsed bar's
