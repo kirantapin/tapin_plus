@@ -2280,3 +2280,10 @@ button.tpg-env-link {
     margin: 0;
   }
 }
+
+/* No sticky "Claim my gift" in the builder's preview (Sam, 6 Nov 2026:
+   "while in preview, I don't think we should have the claim my gift sticky
+   CTA"): it's the student's button, and the parent can't use it here. */
+.gft-preview[data-builder] .gft-dock {
+  display: none;
+}
