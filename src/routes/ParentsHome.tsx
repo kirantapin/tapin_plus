@@ -457,8 +457,13 @@ export default function ParentsHome() {
      every button opens the builder, and its Continue carries on to their
      number, you and the charge in the same panel. */
   const [building, setBuilding] = useState(false);
-  const signUp = (where: string, _el: HTMLElement) => {
+  /* What the builder grows out of: the dock's white plate (Sam, 6 Nov 2026:
+     "the parent container should expand into the builder"), else the
+     button itself. */
+  const [origin, setOrigin] = useState<HTMLElement | null>(null);
+  const signUp = (where: string, el: HTMLElement) => {
     track("parent_signup_clicked", { where, ask: !!asked });
+    setOrigin(el.closest<HTMLElement>("[data-island-origin]") ?? el);
     setBuilding(true);
   };
 
@@ -948,6 +953,7 @@ export default function ParentsHome() {
           sample
           fixedTo={asked ? asked.name : null}
           masked={asked ? asked.masked : undefined}
+          origin={origin}
           onClose={() => setBuilding(false)}
           action={{ label: "Continue", onClick: () => {} }}
           startNext={hasChargedParentCheckout()}

@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { SAMPLE_GIFT, SCENE_GROUPS, SCENES, type SceneId } from "../model/gift";
-import { setGiftDraft, useGiftDraft } from "../model/giftDraft";
+import { SAMPLE_GIFT, SCENE_GROUPS, type SceneId } from "../model/gift";
+import { getGiftDraft, giftDraftTouched, setGiftDraft, useGiftDraft } from "../model/giftDraft";
+
+/** The seasonal background for today: Thanksgiving until it's past, the
+ *  general Holiday through December, New Year's for its first week. */
+export function seasonNow(d = new Date()): SceneId {
+  const m = d.getMonth();
+  const day = d.getDate();
+  if (m === 10 && day <= 26) return "thanksgiving";
+  if (m === 0 && day <= 7) return "newyear";
+  return "holiday";
+}
 import { EnvelopeDemo, SAMPLE_PHOTO_SRC } from "./GiftPage";
 
 /* ══ THE GIFT CALLOUT ON /parents (Sam, 6 Nov 2026; picked: 3 · Envelope) ═══
@@ -55,17 +65,29 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
      your care package button maybe we show the seasonal options and then a
      "view more" option"): the band wears the pick, and it's the gift's
      background (the draft), so the builder opens on it. */
+  /* Seasonal only (Sam, 6 Nov 2026: "let's get rid of the maroon one, and
+     just go with the seasonal and view more with the parent container"): the
+     band opens on today's season, which the gift then starts on too (the
+     draft, if they haven't picked), so the band never shows one look and the
+     gift sends another. */
   const { scene } = useGiftDraft();
-  const choices = [SCENES[0], ...(SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? [])];
-  const shown = choices.some((c) => c.id === scene) ? scene : "maroon";
+  const choices = SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? [];
+  const season = seasonNow();
+  useEffect(() => {
+    if (!giftDraftTouched(getGiftDraft())) setGiftDraft({ scene: season });
+    // Once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const shown = choices.some((c) => c.id === scene) ? scene : season;
   return (
     <section className="tpg tpg-env" aria-labelledby="tpg-env-h" data-scene={shown}>
-      {shown === "maroon" ? null : <span className="tpg-env-bg scene-swatch" data-scene={shown} aria-hidden="true" />}
+      <span className="tpg-env-bg scene-swatch" data-scene={shown} aria-hidden="true" />
       {/* The gift page's own care package and opening (GiftPage.tsx
           EnvelopeDemo), so the parent sees what their student will. */}
       <div ref={box} className="tpg-env-art">
         <EnvelopeDemo
           play={seen}
+          onPick={() => send.current && onSend(send.current)}
           gift={{ to: SAMPLE_GIFT.to, from: SAMPLE_GIFT.from, note: ENVELOPE_NOTE, photo: SAMPLE_PHOTO_SRC }}
         />
       </div>

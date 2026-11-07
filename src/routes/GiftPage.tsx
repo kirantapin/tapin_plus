@@ -321,11 +321,25 @@ function unwrap(go: Go, extra: HTMLElement | null, seal: HTMLElement | null, fla
    pocket, so the whole note reads. Reduced motion: shown already open. */
 /* How much less the card peeks at rest on a computer, and how much more on
    hover. */
-const HOVER_PEEK = 76;
+const HOVER_PEEK = 90;
+/* At rest on a computer the card is tucked this far below its full peek
+   (Sam, 6 Nov 2026: "have the card be tucked into the envelope a bit more
+   unless it's hovered on, [its] current resting state [the] state when it's
+   hovered on"): hover brings it HOVER_PEEK out, to where it used to rest. */
+const REST_TUCK = 76 + HOVER_PEEK;
 const hoverPeek = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 1024px) and (hover: hover)").matches;
 
-export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null } }) {
+export function EnvelopeDemo({
+  play,
+  gift,
+  onPick,
+}: {
+  play: boolean;
+  gift: Pick<Gift, "to" | "from" | "note"> & { photo?: string | null };
+  /** Clicking the envelope does what the band's button does. */
+  onPick?: () => void;
+}) {
   const seal = useRef<HTMLSpanElement | null>(null);
   const flap = useRef<HTMLSpanElement | null>(null);
   const extra = useRef<HTMLSpanElement | null>(null);
@@ -356,29 +370,55 @@ export function EnvelopeDemo({ play, gift }: { play: boolean; gift: Pick<Gift, "
        so the band is shorter, and on hover the envelope drops away by that
        much while the card holds still (gift.css: the band clips the
        envelope's foot). A phone keeps the whole peek. */
-    const lift = hoverPeek() ? Math.max(0, full - HOVER_PEEK) : full;
+    const lift = hoverPeek() ? Math.max(0, full - REST_TUCK) : full;
     /* It starts up as the flap passes upright (~710ms), so the opening
        never shows a still, blank card (Sam, 6 Nov 2026). The sleeve keeps
        its foot hidden under the envelope. */
     go(el, [{ transform: "translateY(0)" }, { transform: `translateY(${-lift}px)` }], { duration: 820, delay: 680 });
   }, [play]);
   const stage = useRef<HTMLDivElement | null>(null);
-  const hovered = useRef<Animation[]>([]);
+  /* The hover, polished: one set of animations made once and run forward
+     on enter, backward (a touch quicker) on leave, so a quick in-and-out
+     never stacks or jumps. The envelope drops away while the card holds
+     its place, lifting a hair past it and settling, with a slight tilt as
+     if picked up; its shadow deepens. `translate` and `rotate` compose with
+     the opening's `transform`, so nothing fights it. */
+  const hovered = useRef<Animation[] | null>(null);
   const peekMore = (on: boolean) => {
     if (!play || !hoverPeek() || reducedMotion()) return;
     const st = stage.current;
     const el = letter.current;
     if (!st || !el) return;
-    hovered.current.forEach((a) => a.reverse?.());
-    if (!on) return;
-    hovered.current = [
-      st.animate([{ translate: "0 0" }, { translate: `0 ${HOVER_PEEK}px` }], { duration: 420, easing: EASE, fill: "both" }),
-      el.animate([{ translate: "0 0" }, { translate: `0 ${-HOVER_PEEK}px` }], { duration: 420, easing: EASE, fill: "both", composite: "add" }),
-    ];
+    if (!hovered.current) {
+      const o = { duration: 520, fill: "both" as const };
+      hovered.current = [
+        st.animate([{ translate: "0 0" }, { translate: `0 ${HOVER_PEEK}px` }], { ...o, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }),
+        el.animate(
+          [
+            { translate: "0 0", rotate: "0deg", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.14)" },
+            { translate: `0 ${-HOVER_PEEK - 8}px`, rotate: "-1.4deg", boxShadow: "0 18px 40px rgba(0, 0, 0, 0.28)", offset: 0.7 },
+            { translate: `0 ${-HOVER_PEEK}px`, rotate: "-1deg", boxShadow: "0 16px 36px rgba(0, 0, 0, 0.26)" },
+          ],
+          { ...o, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
+        ),
+      ];
+      hovered.current.forEach((a) => a.pause());
+    }
+    hovered.current.forEach((a) => {
+      a.updatePlaybackRate(on ? 1 : -1.35);
+      a.play();
+    });
   };
   return (
     <div className="gft gft-a gft-mini" data-state="sealed" aria-hidden="true">
-      <div ref={stage} className="gft-a-stage" onMouseEnter={() => peekMore(true)} onMouseLeave={() => peekMore(false)}>
+      <div
+        ref={stage}
+        className="gft-a-stage"
+        data-pickable={onPick ? "" : undefined}
+        onMouseEnter={() => peekMore(true)}
+        onMouseLeave={() => peekMore(false)}
+        onClick={onPick}
+      >
         <div className="gft-a-shell">
           <Envelope flap={flap} seal={seal} extra={extra} />
         </div>
@@ -657,20 +697,9 @@ export function Letter({
       io?.disconnect();
     };
   }, [gift.scene, still]);
-  const bloom = () => {
-    go(scene.current, [
-      { transform: "scale(1)" },
-      { transform: "scale(1.06)", offset: 0.4 },
-      { transform: "scale(1)" },
-    ], { duration: 1800, easing: "cubic-bezier(.3,0,.2,1)", fill: "none" });
-    const a = drift.current;
-    if (!a) return;
-    [[0, 6], [500, 3], [1000, 1.6], [1500, 1]].forEach(([at, rate]) =>
-      window.setTimeout(() => {
-        if (drift.current === a) a.updatePlaybackRate(rate);
-      }, at),
-    );
-  };
+  /* (The background's swell as the card came out, "bloom", is gone: Sam,
+     6 Nov 2026, "I think we can get rid of that ... doesn't make sense
+     anymore". The parent's celebration plays there now.) */
 
   /* The builder's replay: it opens by itself shortly after it appears. */
   useEffect(() => {
@@ -717,10 +746,8 @@ export function Letter({
     go(button.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: "linear" });
     const titleOut = go(title.current, [{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: "linear" });
     unwrap(go, extra.current, seal.current, flap.current);
-    /* The card: up, and the clip's line held on the envelope's foot. As it
-       starts to come out, the background answers (bloom). */
+    /* The card: up, and the clip's line held on the envelope's foot. */
     const RISE = { duration: 700, delay: 880 };
-    window.setTimeout(bloom, RISE.delay - 120);
     /* The parent's celebration, as the card comes out (giftDelight.ts). */
     if (gift.effect) {
       const fx = gift.effect;
@@ -977,6 +1004,7 @@ export function GiftPreview({
   builder = false,
   next,
   startNext = false,
+  origin = null,
 }: {
   onClose: () => void;
   /** The parent's button: "Send Tapin Plus" on /parents, "Back to checkout"
@@ -1005,6 +1033,10 @@ export function GiftPreview({
   next?: (back: () => void, close: () => void) => React.ReactNode;
   /** Open on the next steps (a charged checkout that only needs confirming). */
   startNext?: boolean;
+  /** The container it grows out of and shrinks back into (Sam, 6 Nov 2026:
+   *  "when I click on this CTA, the parent container should expand into the
+   *  builder"): the dock's white plate, or the button that was tapped. */
+  origin?: HTMLElement | null;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
   const [stage, setStage] = useState<"gift" | "next">(startNext && next ? "next" : "gift");
@@ -1135,13 +1167,63 @@ export function GiftPreview({
     const unlock = lockScroll();
     return unlock;
   }, []);
+
+  /* ── Out of the container, and back into it ──
+     The builder is laid out whole from the first frame; a clip that starts
+     as exactly the origin's rectangle and corners opens to the screen, while
+     a white veil (the plate's own white) fades as it grows, so it reads as
+     the plate itself becoming the builder. The plate hides underneath while
+     it's open. Closing runs it backwards into the plate, then unmounts.
+     Reduced motion, or no origin on screen: it just appears and goes. */
+  const root = useRef<HTMLDivElement | null>(null);
+  const veil = useRef<HTMLDivElement | null>(null);
+  const shutting = useRef(false);
+  const originFrame = () => {
+    const el = origin;
+    if (!el || !el.isConnected) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width < 8 || r.height < 8 || r.bottom <= 0 || r.top >= window.innerHeight) return null;
+    const radius = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 16, 28);
+    return `inset(${r.top}px ${window.innerWidth - r.right}px ${window.innerHeight - r.bottom}px ${r.left}px round ${radius}px)`;
+  };
+  const GROW = { duration: 520, easing: "cubic-bezier(0.32, 0.72, 0, 1)" };
+  useLayoutEffect(() => {
+    const from = originFrame();
+    if (origin) origin.style.visibility = "hidden";
+    if (from && !reducedMotion()) {
+      root.current?.animate?.([{ clipPath: from }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], GROW);
+      veil.current?.animate?.([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], { duration: GROW.duration, easing: "ease-out", fill: "forwards" });
+    } else veil.current?.style.setProperty("opacity", "0");
+    return () => {
+      if (origin) origin.style.visibility = "";
+    };
+    // Once, as it opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const shut = () => {
+    if (shutting.current) return;
+    shutting.current = true;
+    const to = originFrame();
+    const el = root.current;
+    if (!to || !el || reducedMotion() || typeof el.animate !== "function") return onClose();
+    el.style.pointerEvents = "none";
+    veil.current?.animate?.([{ opacity: 0 }, { opacity: 1, offset: 0.7 }, { opacity: 1 }], { duration: 380, easing: "ease-in", fill: "forwards" });
+    const a = el.animate([{ clipPath: "inset(0px 0px 0px 0px round 0px)" }, { clipPath: to }], {
+      duration: 380,
+      easing: "cubic-bezier(0.2, 0, 0, 1)",
+      fill: "forwards",
+    });
+    a.onfinish = () => onClose();
+  };
+  const shutRef = useRef(shut);
+  shutRef.current = shut;
   useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
     back.current?.focus({ preventScroll: true });
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        shutRef.current();
         return;
       }
       /* Tab stays inside the preview. */
@@ -1223,6 +1305,7 @@ export function GiftPreview({
 
   return createPortal(
     <div
+      ref={root}
       className="gft-preview"
       data-device={desk ? "computer" : "phone"}
       data-builder={builder ? "" : undefined}
@@ -1231,7 +1314,7 @@ export function GiftPreview({
       aria-modal="true"
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
     >
-      <div className="gft-preview-scrim" onClick={onClose} aria-hidden="true" />
+      <div className="gft-preview-scrim" onClick={shut} aria-hidden="true" />
       <div className="gft-preview-bar">
         <div className="gft-preview-bg" role="group" aria-label="Background">
           <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
@@ -1255,7 +1338,7 @@ export function GiftPreview({
       <div className="gft-preview-left">
         {/* Close: the builder's own, at its top left (Sam, 6 Nov 2026), not
             part of the student's page; on a phone, the screen's top left. */}
-        <button ref={back} type="button" className="gft-preview-back" onClick={onClose}>
+        <button ref={back} type="button" className="gft-preview-back" onClick={shut}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -1302,7 +1385,7 @@ export function GiftPreview({
                   pills over the page are gone (Sam, 6 Nov 2026: "on mobile
                   checkout I don't think we need these"). */}
               {stage === "gift" ? (
-                <button type="button" className="gft-pp-x" aria-label="Close" onClick={onClose}>
+                <button type="button" className="gft-pp-x" aria-label="Close" onClick={shut}>
                   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
                   </svg>
@@ -1319,7 +1402,7 @@ export function GiftPreview({
           )}
           {visited && next ? (
             <div className="gft-pp-next" hidden={stage !== "next"}>
-              {next(toGift, onClose)}
+              {next(toGift, shut)}
             </div>
           ) : null}
           {stage === "next" ? null : (
@@ -1503,6 +1586,7 @@ export function GiftPreview({
           )}
         </aside>
       ) : null}
+      <div ref={veil} className="gft-preview-veil" aria-hidden="true" />
       {!wide && builder && peek ? (
         <button type="button" className="gft-peek-back" onClick={() => setPeek(false)}>
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
