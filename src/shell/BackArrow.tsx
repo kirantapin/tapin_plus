@@ -3,10 +3,12 @@
    bottom. It'd be its own container with the same corner radius"): the
    arrow beside Continue in the care package builder (routes/GiftPage.tsx)
    and in the checkout's steps inside it (shell/ParentCheckout.tsx). Each
-   place styles it to its own Continue's corners and height. */
-export function BackArrow({ className, onClick, disabled }: { className: string; onClick: () => void; disabled?: boolean }) {
+   place styles it to its own Continue's corners and height. Beside "Start
+   designing" on the collapsed phone drawer it leaves the builder, so it's
+   labelled for that (`label`). */
+export function BackArrow({ className, onClick, disabled, label = "Back" }: { className: string; onClick: () => void; disabled?: boolean; label?: string }) {
   return (
-    <button type="button" className={className} aria-label="Back" onClick={onClick} disabled={disabled}>
+    <button type="button" className={className} aria-label={label} onClick={onClick} disabled={disabled}>
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
         <path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

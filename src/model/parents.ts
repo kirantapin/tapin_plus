@@ -36,8 +36,18 @@ export interface ParentCheckoutStart {
   gift_photo?: string | null;
   /** What plays as they open it: a DELIGHTS id (model/gift.ts), or null. */
   gift_effect?: string | null;
+  /** Marketing consent from the "you" step (6 Nov 2026): two boxes,
+   *  unticked by default, texts to parent_phone and email to parent_email,
+   *  and the id of the words shown beside them (PARENT_CONSENT_VERSION).
+   *  Kept on the checkout's row; a later checkout never downgrades it. */
+  marketing_sms?: boolean;
+  marketing_email?: boolean;
+  consent_text_version?: string | null;
   utm?: Record<string, string>;
 }
+/** The id of the consent words on the checkout's "you" step
+ *  (ParentCheckout CONSENT copy). A new id whenever those words change. */
+export const PARENT_CONSENT_VERSION = "parents-marketing-2026-11-06";
 export interface ParentCheckoutStarted {
   checkout_id: string;
   /** The first invoice's PaymentIntent secret: paid now. */
@@ -134,6 +144,9 @@ type MockState = {
   gift_scene?: string | null;
   gift_photo?: string | null;
   gift_effect?: string | null;
+  marketing_sms?: boolean;
+  marketing_email?: boolean;
+  consent_text_version?: string | null;
 };
 const mockGet = (): MockState | null => {
   try {
@@ -153,6 +166,12 @@ const mockSet = (s: MockState) => {
 export async function startParentCheckout(req: ParentCheckoutStart): Promise<ParentCheckoutStarted> {
   if (parentMock()) {
     await wait(500);
+    /* The consent as the backend checks it (parent_checkout_start): each box
+       a boolean (absent is unticked), and the words' version whenever one is
+       ticked. */
+    const box = (v: unknown) => v === undefined || v === null || typeof v === "boolean";
+    if (!box(req.marketing_sms) || !box(req.marketing_email) || ((req.marketing_sms || req.marketing_email) && !req.consent_text_version))
+      throw new Error("Something’s off with your choices. Please try again.");
     mockSet({
       student_first_name: req.student_first_name || "Alex",
       student_phone: req.student_phone || "+15405550123",
@@ -163,6 +182,9 @@ export async function startParentCheckout(req: ParentCheckoutStart): Promise<Par
       gift_scene: req.gift_scene ?? null,
       gift_photo: req.gift_photo ?? null,
       gift_effect: req.gift_effect ?? null,
+      marketing_sms: req.marketing_sms === true,
+      marketing_email: req.marketing_email === true,
+      consent_text_version: req.consent_text_version ?? null,
     });
     return { checkout_id: "mock", client_secret: "pi_mock_secret_mock", first_cents: 399, monthly_cents: 799 };
   }

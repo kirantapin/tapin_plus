@@ -1078,6 +1078,7 @@ export function GiftPreview({
   origin?: HTMLElement | null;
 }) {
   const back = useRef<HTMLButtonElement | null>(null);
+  const peekCta = useRef<HTMLButtonElement | null>(null);
   const [stage, setStage] = useState<"gift" | "next">(startNext && next ? "next" : "gift");
   /* Once visited, the next steps stay mounted (hidden while they're back on
      the care package), so what they typed there is still there (review,
@@ -1326,7 +1327,12 @@ export function GiftPreview({
   shutRef.current = shut;
   useEffect(() => {
     const was = document.activeElement as HTMLElement | null;
-    back.current?.focus({ preventScroll: true });
+    /* Close, or on a phone's builder (no Close there) the collapsed bar's
+       button. */
+    const first = back.current?.getClientRects().length ? back.current : peekCta.current?.getClientRects().length ? peekCta.current : back.current;
+    /* No ring on opening (focusVisible: false where the browser knows it):
+       it's where focus starts, not something they tabbed to. */
+    first?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
@@ -1457,7 +1463,8 @@ export function GiftPreview({
         } as React.CSSProperties)
       : undefined;
 
-  /* The photo: on the look in the builder, with the fields otherwise. */
+  /* The photo: after the sign-off, on the builder's note and in the plain
+     preview's fields alike. */
   const photoParts = (
     <>
       {d.photo ? (
@@ -1654,7 +1661,11 @@ export function GiftPreview({
           {/* Collapsed: the one button that opens it. */}
           {!wide ? (
             <div className="gft-pp-peekbar" hidden={!peek}>
-              <button type="button" className="gft-pp-cta" onClick={expand}>
+              {/* The way out on a phone (Sam, 6 Nov 2026): the back arrow
+                  beside it leaves the builder, as Close did at the top
+                  left, which is gone on a phone. */}
+              <BackArrow className="gft-pp-backarrow" label="Close" onClick={shut} />
+              <button ref={peekCta} type="button" className="gft-pp-cta" onClick={expand}>
                 {/* While previewing it's always "Back to editing" (Sam, 6 Nov 2026), on
                     any step; only the first time, before they've begun, "Start
                     designing". */}
@@ -1671,11 +1682,10 @@ export function GiftPreview({
           <>
           {builder ? (
             <div className="gft-pp-head" {...(!wide && peek ? { inert: "" } : {})}>
-              <ol className="gft-pp-steps" aria-label={`Step ${stepAt} of ${stepsTotal}`}>
-                {Array.from({ length: stepsTotal }, (_, i) => (
-                  <li key={i} data-on={i < stepAt ? "" : undefined} />
-                ))}
-              </ol>
+              {/* One head for every step, the checkout's too (Sam, 6 Nov
+                  2026: "consistent across every single step of the modal"):
+                  the title with the phone drawer's × at its right, the line
+                  under it, then the bars (gift.css). */}
               <h2 className="gft-pp-title" tabIndex={-1}>
                 {part === "note"
                   ? fixedTo
@@ -1687,10 +1697,8 @@ export function GiftPreview({
                       ? `Build ${fixedTo}’s care package`
                       : "Build their care package"}
               </h2>
-              {/* The drawer's × beside the title, as the checkout steps have
-                  it (Sam, 6 Nov 2026: the placement "looks a bit weird"
-                  alone in a row); it collapses the drawer ("it should
-                  collapse the modal not close out the designer page"). */}
+              {/* The drawer's × collapses it ("it should collapse the modal
+                  not close out the designer page"). */}
               {wide ? null : (
                 <button type="button" className="gft-pp-x" aria-label="Collapse" onClick={() => setPeek(true)}>
                   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -1698,35 +1706,42 @@ export function GiftPreview({
                   </svg>
                 </button>
               )}
+              {/* The photo is on the note now (Sam, 6 Nov 2026: "maybe we
+                  have photo be on the write their note page?"). */}
               <p className="gft-pp-sub">
                 {part === "note"
-                  ? "The note is optional."
+                  ? "The note and photo are optional."
                   : part === "open"
                     ? "Pick what plays as the card comes out."
-                    : "Pick how it looks. The photo is optional."}
+                    : "Pick how it looks."}
               </p>
+              <ol className="gft-pp-steps" aria-label={`Step ${stepAt} of ${stepsTotal}`}>
+                {Array.from({ length: stepsTotal }, (_, i) => (
+                  <li key={i} data-on={i < stepAt ? "" : undefined} />
+                ))}
+              </ol>
             </div>
           ) : null}
           <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>
-            {/* Stage 1, the look: the photo, then the backgrounds (seasonal
-                first). Stage 2, the opening: what plays when they open it,
-                alone, so on a phone the drawer is short and the card plays
-                above it. Stage 3, the note: their name, the note, how it's
-                signed. Without the builder, all of it, in the order it
-                always had. */}
+            {/* Stage 1, the look: the backgrounds (seasonal first). Stage
+                2, the opening: what plays when they open it, alone, so on a
+                phone the drawer is short and the card plays above it. Stage
+                3, the note: their name, the note, how it's signed, then the
+                photo. Without the builder, all of it, in the order it always
+                had. */}
             {builder ? (
               part === "look" ? (
-                <>
-                  <div className="gft-pp-group gft-pp-photo-row">
-                    <h2 className="gft-pp-h">Photo</h2>
-                    {photoParts}
-                  </div>
-                  <ScenePicker scene={scene} onPick={pick} />
-                </>
+                <ScenePicker scene={scene} onPick={pick} />
               ) : part === "open" ? (
                 <EffectPicker effect={d.effect ?? null} onPick={pickEffect} labelled={false} />
               ) : (
-                <div className="gft-pp-group">{noteFields}</div>
+                <div className="gft-pp-group">
+                  {noteFields}
+                  <div className="gft-pp-field">
+                    <span>Photo</span>
+                    {photoParts}
+                  </div>
+                </div>
               )
             ) : (
               <>
