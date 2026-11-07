@@ -3,7 +3,7 @@ import { asset } from "../asset";
 import { logoField } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { CREDIT, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
+import { CREDIT, DOOR, FIRST, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -671,7 +671,6 @@ export function HowPhone() {
               <div className="tpp-hw-s tpp-wk" data-on={cur === 2 ? "" : undefined}>
                 <div className="tpp-hw-wk">
                   <b>{SAMPLE_GIFT.to}’s week</b>
-                  <FlatMark className="tpp-hw-mark" />
                 </div>
                 {WEEK ? (
                   <>
