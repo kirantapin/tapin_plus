@@ -58,12 +58,15 @@ const PEEK_H = () => 98;
 
 /* Each background's own drift (gift.css .gft-scene-pat): one tile's travel
    per loop, so it never seams; scenery breathes instead; the sunburst turns.
-   Slow enough to notice only when you look. Maroon is a plain field: still. */
+   Slow enough to notice only when you look. Maroon is a plain field: still.
+   The icons inside each tile move on their own clocks as well (gift.css
+   GENERATED, tools/patterns/animate.py). Picnic and flannel drift by their
+   live tile (4 and 3 checks); airmail's stripes and the snow of Christmas
+   and Snow travel inside the tile, so their layers stay put. */
 const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alternate?: boolean }>> = {
-  picnic: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-36px, -36px)" }], ms: 7000 },
+  picnic: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-144px, -144px)" }], ms: 28000 },
   night: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 0)" }], ms: 60000 },
   confetti: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 180px)" }], ms: 14000 },
-  airmail: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-32px, 0)" }], ms: 4000 },
   sunrise: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.04)" }], ms: 6000, alternate: true },
   ridge: { kf: [{ transform: "scale(1)" }, { transform: "scale(1.03)" }], ms: 7000, alternate: true },
   hearts: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 16000 },
@@ -73,13 +76,12 @@ const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alterna
   daisies: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-180px, -180px)" }], ms: 40000 },
   xoxo: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-96px, 0)" }], ms: 9000 },
   smileys: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 22000 },
-  /* Seasonal: the snow falls; the stars rise. */
+  /* Seasonal: the stars rise; the snowflakes and presents fall. */
   hanukkah: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -160px)" }], ms: 26000 },
-  christmas: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 18000 },
   holiday: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, 160px)" }], ms: 16000 },
   thanksgiving: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-170px, 170px)" }], ms: 30000 },
   newyear: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(0, -170px)" }], ms: 24000 },
-  flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-64px, -64px)" }], ms: 18000 },
+  flannel: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-192px, -192px)" }], ms: 54000 },
   lunch: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, -220px)" }], ms: 44000 },
   sunburst: { kf: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], ms: 120000 },
   leaves: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 220px)" }], ms: 26000 },
@@ -522,24 +524,36 @@ export function Letter({
   };
 
   /* ── The background, alive (Sam, 6 Nov 2026): a slow drift of its own,
-     paused while the page is hidden or the band is off screen, and a swell
-     when the card comes out (the drift speeds up, then eases back). */
+     and its icons moving inside the tile (data-live swaps in the animated
+     tile, gift.css GENERATED), both only while the page is shown and the
+     band is on screen. Reduced motion: neither, the still tile stays. */
   const scene = useRef<HTMLDivElement | null>(null);
   const pat = useRef<HTMLDivElement | null>(null);
   const drift = useRef<Animation | null>(null);
   useEffect(() => {
     const m = SCENE_MOTION[gift.scene];
     const el = pat.current;
-    if (!m || !el || still || typeof el.animate !== "function") return;
-    const a = el.animate(m.kf, {
-      duration: m.ms,
-      iterations: Infinity,
-      easing: m.alternate ? "ease-in-out" : "linear",
-      direction: m.alternate ? "alternate" : "normal",
-    });
+    if (!el || still) return;
+    const a =
+      m && typeof el.animate === "function"
+        ? el.animate(m.kf, {
+            duration: m.ms,
+            iterations: Infinity,
+            easing: m.alternate ? "ease-in-out" : "linear",
+            direction: m.alternate ? "alternate" : "normal",
+          })
+        : null;
     drift.current = a;
     let onScreen = true;
-    const sync = () => (onScreen && !document.hidden ? a.play() : a.pause());
+    const sync = () => {
+      const on = onScreen && !document.hidden;
+      el.toggleAttribute("data-live", on);
+      if (a) {
+        if (on) a.play();
+        else a.pause();
+      }
+    };
+    sync();
     document.addEventListener("visibilitychange", sync);
     const io =
       typeof IntersectionObserver !== "undefined" && scene.current
@@ -550,7 +564,8 @@ export function Letter({
         : null;
     if (io && scene.current) io.observe(scene.current);
     return () => {
-      a.cancel();
+      a?.cancel();
+      el.removeAttribute("data-live");
       drift.current = null;
       document.removeEventListener("visibilitychange", sync);
       io?.disconnect();
