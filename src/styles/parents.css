@@ -828,9 +828,9 @@
 }
 .tpp-label-mark {
   flex: none;
-  width: 16px;
-  height: 16px;
-  color: #861f41;
+  width: 15px;
+  height: 15px;
+  color: #141618;
 }
 .tpp-account {
   flex: none;
