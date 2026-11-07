@@ -1752,3 +1752,96 @@ button.tpg-env-link {
 .gft-pp-next[hidden] {
   display: none;
 }
+
+/* ══ THE PHONE DRAWER, ONE BUTTON (6 Nov 2026) ═══════════════════════════════
+   Open with the fields and Continue; a handle row with Preview on top of
+   every step; Preview slides it away (transform only) and a "Back to ..."
+   pill brings it back. */
+@media (max-width: 1023.98px) {
+  .gft-preview-panel[data-drawer] {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    max-height: 78svh;
+    transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .gft-preview-panel[data-drawer][data-stage="next"] {
+    grid-template-rows: auto minmax(0, 1fr);
+    max-height: 90svh;
+  }
+  .gft-preview-panel[data-drawer][data-peek] {
+    transform: translateY(calc(100% + 24px));
+  }
+  .gft-preview-panel[data-drawer] .gft-pp-head {
+    padding-top: 2px;
+  }
+  .gft-pp-grab {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px 14px 4px;
+  }
+  .gft-pp-handle {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 5px;
+    margin-left: -20px;
+    border-radius: 999px;
+    background: rgba(20, 22, 24, 0.16);
+  }
+  .gft-pp-peek {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    margin-top: 6px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: #f0f0f0;
+    color: #141618;
+    font: 600 13px/1 "Gilroy", Arial, sans-serif;
+    cursor: pointer;
+  }
+  .gft-pp-peek:focus-visible,
+  .gft-peek-back:focus-visible {
+    outline: 3px solid #e5751f;
+    outline-offset: 2px;
+  }
+  .gft-peek-back {
+    position: fixed;
+    z-index: 71;
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    height: 52px;
+    border: 0;
+    border-radius: 14px;
+    background: #141618;
+    color: #ffffff;
+    font: 600 16px/1 "Gilroy", Arial, sans-serif;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+  /* The page centres above the open drawer; full height while previewing. */
+  .gft-preview[data-builder] .gft,
+  .gft-preview[data-builder] .gft-a-band {
+    min-height: 100svh;
+  }
+  .gft-preview[data-builder] .gft-preview-scroll {
+    padding-bottom: 88px;
+  }
+}
+@media (max-width: 1023.98px) and (prefers-reduced-motion: reduce) {
+  .gft-preview-panel[data-drawer] {
+    transition: none;
+  }
+}
+@media (max-width: 1023.98px) {
+  /* In checkout the drawer wears the checkout's ground, so the Preview row
+     isn't a white strip above it. */
+  .gft-preview-panel[data-drawer][data-stage="next"] {
+    background: #f0f0f0;
+  }
+}
