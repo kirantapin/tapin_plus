@@ -79,9 +79,9 @@ function LogoRow({ size }: { size: number }) {
    two benefits right under this section", then "maybe [they] belong outside
    of this container and below it instead in between this container and the
    care package preview"): 15% off instead of the $5, once a day; points on
-   everything. On a phone they sit between the offer card and the gift band
-   (ParentsHome, tpp-more-out); on a computer the offer card is the held
-   right-hand column, so there they stay in it (tpp-more-in). */
+   everything. Always under the offer card, never in it (ParentsHome
+   .tpp-offer-col): between the card and the gift band on a phone, under the
+   card in the held right-hand column on a computer. */
 export function MoreBenefits({ className }: { className: string }) {
   return (
     <ul className={className} aria-label="Also with Plus">
@@ -137,7 +137,6 @@ export function OfferPrice() {
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
         <small aria-hidden="true">every week, at each of five spots</small>
       </p>
-      <MoreBenefits className="tpp-more tpp-more-in" />
     </div>
   );
 }
