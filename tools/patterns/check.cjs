@@ -6,7 +6,8 @@
       paused (so only the icons inside the tile can have moved).
    3. Reduced motion: no data-live, and two frames are identical.
    4. A contact sheet and a short recording in tools/patterns/.
-   Run with the dev server on :5299:  node tools/patterns/check.cjs [--video] */
+   Run with the dev server on :5299:  node tools/patterns/check.cjs [--video] [--snow]
+   (--snow: tools/patterns/preview-snow.mp4, 8 s of the Snow band) */
 const puppeteer = require("/Users/samuelwhite/.npm/_npx/fd355c6121ed2f2b/node_modules/puppeteer");
 const fs = require("fs");
 const path = require("path");
@@ -16,7 +17,7 @@ const DIR = __dirname;
 const SHOTS = path.join(DIR, "shots");
 const BASE = "http://localhost:5299/gift/sample?bg=";
 const SCENES = ["picnic", "night", "confetti", "airmail", "sunrise", "ridge", "hearts", "sprinkles", "daisies", "xoxo", "smileys",
-  "flannel", "lunch", "sunburst", "leaves", "thanksgiving", "hanukkah", "christmas", "newyear", "holiday"];
+  "flannel", "lunch", "sunburst", "leaves", "thanksgiving", "hanukkah", "christmas", "newyear", "holiday", "snow"];
 const COVER = { sunrise: [400, 800], ridge: [400, 800], sunburst: [800, 800] };
 fs.mkdirSync(SHOTS, { recursive: true });
 
@@ -88,7 +89,7 @@ async function diffPngs(page, a, b) {
   const rm = await browser.newPage();
   await rm.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
   await rm.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-  for (const s of ["hearts", "newyear", "christmas", "airmail"]) {
+  for (const s of ["hearts", "newyear", "christmas", "airmail", "snow"]) {
     await rm.goto(BASE + s, { waitUntil: "networkidle0" });
     await rm.addStyleTag({ content: ".gft-a-band > :not(.gft-scene) { visibility: hidden !important; }" });
     await new Promise((r) => setTimeout(r, 2500));
@@ -108,7 +109,7 @@ async function diffPngs(page, a, b) {
     const v = await browser.newPage();
     await v.setViewport({ width: 390, height: 700, deviceScaleFactor: 1 });
     const parts = [];
-    for (const s of ["hearts", "newyear", "christmas", "daisies", "smileys", "sunburst", "confetti", "airmail", "thanksgiving", "night"]) {
+    for (const s of ["hearts", "newyear", "christmas", "daisies", "smileys", "sunburst", "confetti", "airmail", "thanksgiving", "night", "snow"]) {
       await v.goto(BASE + s, { waitUntil: "networkidle0" });
       await new Promise((r) => setTimeout(r, 2500));
       const file = path.join(SHOTS, `rec-${s}.webm`);
@@ -121,6 +122,18 @@ async function diffPngs(page, a, b) {
     fs.writeFileSync(list, parts.map((p) => `file '${p}'`).join("\n"));
     execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", list, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30", path.join(DIR, "preview.mp4")]);
     console.log("video: tools/patterns/preview.mp4");
+  }
+  if (process.argv.includes("--snow")) {
+    const v = await browser.newPage();
+    await v.setViewport({ width: 390, height: 700, deviceScaleFactor: 2 });
+    await v.goto(BASE + "snow", { waitUntil: "networkidle0" });
+    await new Promise((r) => setTimeout(r, 1500));
+    const file = path.join(SHOTS, "rec-snow-only.webm");
+    const rec = await v.screencast({ path: file });
+    await new Promise((r) => setTimeout(r, 8000));
+    await rec.stop();
+    execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30", path.join(DIR, "preview-snow.mp4")]);
+    console.log("video: tools/patterns/preview-snow.mp4");
   }
   await browser.close();
 })().catch((e) => { console.error(e); process.exit(1); });

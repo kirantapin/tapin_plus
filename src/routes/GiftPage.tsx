@@ -61,8 +61,8 @@ const PEEK_H = () => 98;
    Slow enough to notice only when you look. Maroon is a plain field: still.
    The icons inside each tile move on their own clocks as well (gift.css
    GENERATED, tools/patterns/animate.py). Picnic and flannel drift by their
-   live tile (4 and 3 checks); airmail's stripes and Christmas's snow travel
-   inside the tile, so their layers stay put. */
+   live tile (4 and 3 checks); airmail's stripes and the snow of Christmas
+   and Snow travel inside the tile, so their layers stay put. */
 const SCENE_MOTION: Partial<Record<string, { kf: Keyframe[]; ms: number; alternate?: boolean }>> = {
   picnic: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-144px, -144px)" }], ms: 28000 },
   night: { kf: [{ transform: "translate(0, 0)" }, { transform: "translate(-220px, 0)" }], ms: 60000 },

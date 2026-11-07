@@ -372,6 +372,37 @@ for k, (x, y, r, col) in enumerate([(90, 84, 2.2, O), (100, 20, 1.8, C), (14, 92
     b += f"<circle cx='{x}' cy='{y}' r='{r}' fill='{col}'>{at('opacity', ['1', '.15', '1'], [2.4, 3.3, 2.9, 3.7, 2.6, 3.1][k], [.2, 1.0, 1.7, .6, 2.3, 1.3][k])}</circle>"
 SCENES["newyear"] = svg(170, 170, b)
 
+# ── Snow: the flakes drift down, each turning slowly (a sixth of a turn, one
+#    arm on, so it loops on its own symmetry), the dots fall faster, each at
+#    its own speed with a little sway. Nearer (bigger) dots fall faster; no
+#    two share a clock, so the field never moves in step. Every piece is drawn
+#    twice, one tile apart, and falls one tile per loop, so it wraps without a
+#    seam; the layer itself stays put (no drift in GiftPage SCENE_MOTION), as
+#    with Christmas. Geometry is read from the still tile (extract.py).
+src = (ROOT / "tools/patterns/src/snow.svg").read_text()
+T = 170
+flakes = re.findall(r"<g transform='translate\(([\d.]+) ([\d.]+)\) rotate\((-?[\d.]+)\)'([^>]*)>((?:<g transform='rotate\(\d+\)'>.*?</g>){6})</g>", src)
+dots = re.findall(r"<circle cx='([\d.]+)' cy='([\d.]+)' r='([\d.]+)' fill='([^']+)'/>", src)
+assert len(flakes) == 4 and len(dots) == 9, (len(flakes), len(dots))
+def falling(copies, dur, sway, sway_dur, sway_beg):
+    fall = tf("translate", ["0 0", f"0 {T}"], dur, 0, calc="linear")
+    drift = tf("translate", ["0 0", f"{n(sway)} 0", "0 0", f"{n(-sway)} 0", "0 0"], sway_dur, sway_beg)
+    return f"<g>{copies}{fall}{drift}</g>"
+b = "<defs>" + "".join(f"<g id='f{k}'>{f[4]}</g>" for k, f in enumerate(flakes)) + "</defs>"
+for k, (x, y, rot, attrs, arms) in enumerate(flakes):
+    L = float(re.search(r"V-([\d.]+)", arms).group(1))
+    turn_dur = [26, 21, 17, 23][k]
+    turn = tf("rotate", ["0", f"{60 if k % 2 == 0 else -60}"], turn_dur, 0, calc="linear")
+    body = lambda yy: f"<g transform='translate({x} {n(yy)}) rotate({rot})'{attrs}><use href='#f{k}'>{turn}</use></g>"
+    y = float(y)
+    b += falling(body(y) + body(y - T), 360 / L, [4, 3.5, 2.5, 3][k], [7.4, 6.2, 5.3, 6.8][k], [.4, 1.7, 1.1, 2.4][k])
+for k, (cx, cy, r, col) in enumerate(dots):
+    r_ = float(r)
+    dot = lambda yy: f"<circle cx='{cx}' cy='{n(yy)}' r='{r}' fill='{col}'/>"
+    sway_dur = [3.1, 4.3, 3.7, 4.9, 3.4, 4.1, 5.2, 3.9, 4.6][k]
+    b += falling(dot(float(cy)) + dot(float(cy) - T), round(34 / r_ + (k % 3) * .7, 2), 2 + (k % 3) * .6, sway_dur, (k * .53) % 2.6)
+SCENES["snow"] = svg(T, T, b)
+
 
 # ── Output ────────────────────────────────────────────────────────────────
 def enc(s):
