@@ -108,21 +108,13 @@ function LogoRow({ size }: { size: number }) {
 export function Guarantee({ asked }: { asked: boolean }) {
   return (
     <ul className="tpp-promise" aria-label="Our promise">
-      {asked ? null : (
-        <li>
-          <Glyph d={GLYPHS.refund} />
-          <span>
-            <b>Full refund</b> if they don’t sign in within 14 days
-          </span>
-        </li>
-      )}
-      {/* Sam, 7 Nov 2026: if they don't save what the parent spent, the
-          parent gets a full refund (replaces "Not used that month?"). On
-          every flow, the ask link's included. */}
+      {/* Sam, 7 Nov 2026: one "Full refund" line, not two: if they don't
+          sign in within 14 days (not on an ask link, where they're signed in
+          already) or don't save what the parent spent. */}
       <li>
         <Glyph d={GLYPHS.refund} />
         <span>
-          <b>Full refund</b> if they don’t save what you spent
+          <b>Full refund</b> if they don’t {asked ? "" : "sign in within 14 days or don’t "}save what you spent
         </span>
       </li>
       <li>
