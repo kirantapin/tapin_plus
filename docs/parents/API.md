@@ -77,7 +77,7 @@ For a parent with no account. No auth.
 req: {
   student_first_name: string; student_phone: string;   // E.164 +1XXXXXXXXXX
   parent_name: string; parent_phone: string;           // E.164; how a payer is known (6 Nov 2026)
-  parent_email: string;                                 // required and kept; nothing is emailed for now (the parent is texted)
+  parent_email: string;                                 // required; where the reminder before each bill goes (8 Nov 2026)
   ask_token?: string | null;                            // from an Ask a parent link
   gift_note?: string | null;                            // optional note, <= 240 chars after trimming
   gift_effect?: string | null;                          // confetti | hearts | sparkles | balloons | fireworks | streamers | petals (what plays as they open it), or null
@@ -235,13 +235,21 @@ don't claim it it's not our fault. We still bill them"): an unclaimed gift keeps
   (`cancel_reason = 'student'`) and the parent is emailed.
 - `invoice.payment_failed` on a parent subscription → email the parent with the manage
   link (Stripe's retries apply).
-- `invoice.upcoming` on a parent subscription (7 Nov 2026) → text the parent a few days
-  before each monthly bill, once per renewal: `Tapin: {Student}'s Tapin Plus renews
-  {Mon D} for {price}. To skip a month or cancel, email support@tapin.app. Reply STOP to
-  opt out`. Stripe only sends it with *upcoming renewal events* on (Dashboard > Billing >
-  Subscriptions and emails, 3 days before renewal). The page's "How it works for you"
-  step 4 promises this text. Skips (one billing cycle paused) and refunds for a month the
-  student didn't use are done by support by hand, from the email.
+- `invoice.upcoming` on a parent subscription → **email** the parent at `parent_email`
+  a few days before each monthly bill, once per renewal. An email, not a text, since
+  8 Nov 2026 (Sam: "let's not do the text notifications, I think that'll lead to more
+  churn to be honest. Maybe email notifications?", then "Bill reminders → email"); the
+  backend change is draft PR kirantapin/tapin_edge_functions#287. Subject
+  `{Student}'s Tapin Plus renews {Mon D}`; the body gives the date and {price} and says
+  to email support@tapin.app to skip a month, cancel or get a refund (no "Reply STOP":
+  it's an email). Stripe only sends the event with *upcoming renewal events* on
+  (Dashboard > Billing > Subscriptions and emails, 3 days before renewal). The page
+  promises this email in four places: the under-offer list ("An email before each
+  bill"), No surprises, "How it works for you" step 4 (the phone shows the email), and
+  the checkout's promise rows and done timeline ("We'll email you a few days before each
+  renewal"). Every other text stays a text: the gift text to the student, the student's
+  sign-in reminders, the receipt. Skips (one billing cycle paused) and refunds for a
+  month the student didn't use are done by support by hand, from the email.
 
 ## Analytics (frontend, PostHog; `parent_purchase` also to Meta as Subscribe)
 `parent_page_view`, `parent_checkout_started`, `parent_purchase` (value = first charge),

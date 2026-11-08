@@ -134,11 +134,13 @@ export function UnderOffer() {
           </span>
         </li>
         {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
-            before their next bill" (the backend's renewal reminder). */}
+            before their next bill" (the backend's renewal reminder); an
+            email since 8 Nov ("Bill reminders → email"): a text "will lead
+            to more churn". The bell, so it doesn't twin the mail row under it. */}
         <li>
-          <Glyph d={GLYPHS.text} />
+          <Glyph d={GLYPHS.bell} />
           <span>
-            <b>A text before each bill</b>, a few days ahead
+            <b>An email before each bill</b>, a few days ahead
           </span>
         </li>
         <li>
@@ -394,8 +396,9 @@ export function LunchBars() {
    page), with the orange sun and a cream ridge; maroon also on the open
    step's glyph, its timer and the gift's small marks, money green on the
    savings. Four steps since 7 Nov: the last is how to skip, cancel or get a
-   refund, on the reminder text the parent gets before each bill. */
-/* One month from today, as a text says it ("Dec 7"): the reminder's example.
+   refund, on the reminder email the parent gets before each bill (an email,
+   not a text, since 8 Nov 2026). */
+/* One month from today, as the email says it ("Dec 7"): the reminder's example.
    The 31st of a month with no 31st next month lands on that month's last day. */
 function inAMonth(now = new Date()): string {
   const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -434,7 +437,7 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     title: "Cancel, skip or get a refund",
     line: (
       <>
-        We text you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
+        We email you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
         support@tapin.app.
       </>
     ),
@@ -584,14 +587,18 @@ export function HowPhone() {
       wk.current = run;
     }
     if (i === 3) {
-      el.querySelector(".tpp-hw-bill")?.animate?.(
-        [
-          { opacity: 0, transform: "translateY(14px) scale(.94)" },
-          { opacity: 1, transform: "none" },
-        ],
-        { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
+      /* The email opens: subject, sender and body rise in turn, then the
+         address fades in. */
+      el.querySelectorAll(".tpp-hw-em-subj, .tpp-hw-em-from, .tpp-hw-em-body").forEach((m, k) =>
+        m.animate?.(
+          [
+            { opacity: 0, transform: "translateY(10px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 460, delay: 160 + k * 110, easing: EASE_OUT, fill: "backwards" },
+        ),
       );
-      el.querySelector(".tpp-hw-mail")?.animate?.([{ opacity: 0 }, { opacity: 1 }], {
+      el.querySelector(".tpp-hw-em .tpp-hw-mail")?.animate?.([{ opacity: 0 }, { opacity: 1 }], {
         duration: 360,
         delay: 700,
         easing: EASE_OUT,
@@ -724,15 +731,26 @@ export function HowPhone() {
                   </>
                 ) : null}
               </div>
-              <div className="tpp-hw-s" data-on={cur === 3 ? "" : undefined}>
-                <div className="tpp-hw-msg">
+              {/* The reminder before each bill, as the email it is (Sam, 8 Nov
+                  2026: "Bill reminders → email"): the open message, from
+                  Tapin, the date and the price, and where to write. */}
+              <div className="tpp-hw-s tpp-hw-em" data-on={cur === 3 ? "" : undefined}>
+                <span className="tpp-hw-em-bar">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Inbox
+                </span>
+                <b className="tpp-hw-em-subj">
+                  {SAMPLE_GIFT.to}’s Tapin Plus renews {renews}
+                </b>
+                <div className="tpp-hw-em-from">
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
                   <b>Tapin</b>
                 </div>
-                <div className="tpp-hw-bill">
-                  Tapin: {SAMPLE_GIFT.to}’s Tapin Plus renews {renews} for {MONTHLY}. To skip a month or cancel, email
-                  support@tapin.app. Reply STOP to opt out
-                </div>
+                <p className="tpp-hw-em-body tnum">
+                  {MONTHLY} on {renews}. To skip a month, cancel or get a refund, email us.
+                </p>
                 <span className="tpp-hw-mail">
                   <Glyph d={GLYPHS.mail} />
                   support@tapin.app

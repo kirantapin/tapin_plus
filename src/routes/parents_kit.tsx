@@ -124,6 +124,8 @@ export const GLYPHS = {
   calendar: "M5 5.5h14A1.5 1.5 0 0 1 20.5 7v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7A1.5 1.5 0 0 1 5 5.5ZM3.5 10h17M8 3.5v4M16 3.5v4",
   /* Money coming back: an arrow turning back on itself. */
   refund: "M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v3.5H8",
+  /* A bell: a reminder (the email before each bill). */
+  bell: "M18 15.5V11a6 6 0 0 0-12 0v4.5L4.5 17.5h15L18 15.5ZM10 20.5h4",
   /* An envelope. */
   mail: "M4.5 5.5h15A1.5 1.5 0 0 1 21 7v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17V7a1.5 1.5 0 0 1 1.5-1.5ZM3.5 7.5l8.5 6 8.5-6",
   /* A shield with a tick. */
