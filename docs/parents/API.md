@@ -117,20 +117,15 @@ help." with links to the Terms and the Privacy Policy.
 
 ### Summer pause (Sam, 8 Nov 2026), new field on `parent_checkout_start`
 `summer_pause: boolean` (absent = false), from a box on the who step: "Pause billing
-over summer break. No charges over the summer. We text you before it pauses and before it
-starts again." The box is hidden until the backend keeps it (`SUMMER_PAUSE_LIVE` in
-src/model/parents.ts; ?parentmock shows it).
+over summer break. We'll pause it for you over the summer, so there are no charges while
+they're away." It shows whenever the parents backend is live (`SUMMER_PAUSE_LIVE` follows
+`PARENTS_BACKEND_LIVE`; ?parentmock shows it in local dev).
 
-Backend, for Kiran:
-- Keep it on the checkout and subscription rows.
-- Before summer, pause the subscription with Stripe `pause_collection: { behavior: "void",
-  resumes_at }` (or skip those invoices). Suggested window: after the last spring charge,
-  resuming in time for fall classes. **Sam to confirm the months** and whether Plus is off
-  while paused (the copy promises only "no charges").
-- Text the parent a few days before it pauses and before it resumes (same sender and STOP
-  line as the renewal reminder), e.g. "Tapin: Maya's Tapin Plus pauses for summer on May 8.
-  No charges until it starts again on Aug 8. Reply STOP to opt out".
-- The parent manage page should show it and let them turn it off.
+**Manual for now** (Sam, 8 Nov 2026: "none of this works yet, but you can check a box and
+we'll manually pause accounts that want to be paused for the summer"): the backend only
+keeps the flag on the checkout row (draft PR #287), and support pauses those subscriptions
+by hand before summer (e.g. Stripe `pause_collection`) and resumes them for fall. Skip a
+month and refunds are by email to support@tapin.app, too.
 
 ### `parent_checkout_confirm`
 ```ts
