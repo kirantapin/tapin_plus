@@ -30,7 +30,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice, ProofTurn, Voices, WhatIfUnused } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, LunchBars, OfferPrice, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -593,10 +593,12 @@ export default function ParentsHome() {
           <ProofTurn className="tpp-pt-card" start="places" paused={building} />
         </section>
 
-        <MoreBenefits className="tpp-more tpp-more-out" />
-        <Guarantee />
-        {/* C · a parent's and a student's own words (Sam's pick, 7 Nov
-            2026): nothing shows until model/voices.ts has real ones. */}
+        {/* The other two benefits and the promise, one quiet list (7 Nov
+            2026 polish: the chips and the promise lines were four objects
+            in two styles). */}
+        <UnderOffer />
+        {/* C · parents' own words (Sam's pick, 7 Nov 2026): nothing shows
+            until model/voices.ts has real ones. */}
         <Voices />
         </div>
 

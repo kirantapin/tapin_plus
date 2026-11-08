@@ -1180,8 +1180,10 @@
     font-size: 13px;
     line-height: 17px;
   }
+  /* "More places are joining." (14px: what the retired benefit wells'
+     later .tpp-more rule gave it). */
   .tpp-more {
-    margin: 12px 0 0;
+    margin: 14px 0 0;
   }
   .tpp .tpp-dock {
     display: none;
@@ -1342,63 +1344,10 @@
   color: var(--ink);
 }
 
-/* The other two benefits under the $12 / $7 (6 Nov 2026): two small wells,
-   a figure and a few words each. */
-.tpp-more {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.tpp-more li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: var(--ground);
-}
-.tpp-more-fig {
-  flex: none;
-  display: grid;
-  place-items: center;
-  min-width: 34px;
-  font-weight: 600;
-  font-size: 22px;
-  line-height: 26px;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.tpp-more-fig[data-pts] {
-  color: #e5751f;
-}
-.tpp-more span {
-  font-size: 13px;
-  line-height: 16px;
-  color: var(--muted);
-}
-
-/* Where the two go (6 Nov 2026): out on the ground between the offer card
-   and the gift band on a phone, as white wells; in the held offer card on a
-   computer. */
-.tpp-more-out {
-  margin: 12px var(--gutter) 0;
-}
-.tpp-more-out li {
-  background: #ffffff;
-}
-@media (min-width: 1024px) {
-  .tpp .tpp-more-out {
-    display: none;
-  }
-}
-
-/* The offer column (6 Nov 2026): the offer card with the two other benefits
-   under it. A phone: the wrapper steps aside, and the strip sits between the
-   card and the gift band. A computer: the pair is the held right column, the
-   strip under the card (no longer inside it). */
+/* The offer column (6 Nov 2026): the offer card with what sits under it.
+   A phone: the wrapper steps aside, and the list and the voices sit between
+   the card and the gift band. A computer: the three are the held right
+   column, the list and the voices under the card (not inside it). */
 .tpp-offer-col {
   display: contents;
 }
@@ -1419,44 +1368,60 @@
     margin: 0;
     border-radius: 20px;
   }
-  .tpp .tpp-offer-col > .tpp-more-out {
-    display: grid;
-    margin: 12px 0 0;
+}
+/* A held column must never be taller than the window, or its foot can't be
+   reached until the page ends. Held, it sits 60px down and is about 675px
+   tall; on a window shorter than that it simply scrolls with the page. */
+@media (min-width: 1024px) and (max-height: 749.98px) {
+  .tpa-home .tpa-sheet > .tpp-offer-col {
+    position: static;
   }
 }
 
-/* The promise under the offer (6 Nov 2026): three quiet lines on the ground,
-   a green check-style glyph each; under the strip on a phone, under the
-   offer card's strip in the held column on a computer. */
-.tpp-promise {
+/* ── Under the offer: one quiet list (7 Nov 2026 polish) ─────────────────
+   The other two benefits, then the promise: one row style, on the ground,
+   no wells. A glyph, the fact in ink, the rest muted. Tight inside a group,
+   a little more between the two. The glyph column lines up with the
+   voices' faces under it (12px into a card). */
+.tpp-notes {
   display: grid;
-  gap: 10px;
-  margin: 14px var(--gutter) 0;
-  padding: 0 4px;
+  gap: 14px;
+  margin: 16px var(--gutter) 0;
+  padding: 0 12px;
+}
+.tpp-notes ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
-.tpp-promise li {
+.tpp-notes li {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 500;
   font-size: 14px;
-  line-height: 19px;
+  line-height: 20px;
   color: var(--muted);
 }
-.tpp-promise b {
+.tpp-notes li > span {
+  text-wrap: pretty;
+}
+.tpp-notes b {
   font-weight: 600;
   color: var(--ink);
 }
-.tpp-promise svg {
+.tpp-notes svg {
   flex: none;
-  width: 20px;
-  height: 20px;
-  color: var(--money);
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--ink);
 }
 @media (min-width: 1024px) {
-  .tpp .tpp-offer-col > .tpp-promise {
+  .tpp .tpp-offer-col > .tpp-notes {
     margin: 16px 0 0;
-    padding: 0 8px;
   }
 }
 
@@ -1479,13 +1444,6 @@
   .tpp .tpa-order-off b,
   .tpp .tpa-place-name b {
     font-weight: 600;
-  }
-  /* "More places are joining." is a <p class="tpp-more">, so the benefit
-     wells' later .tpp-more (no side margin, a grid) caught it: it sat flush
-     on the screen edge. */
-  .tpp p.tpp-more {
-    display: block;
-    margin: 10px var(--gutter) 0;
   }
   /* Display: the $60 no longer outranks the $12 / $7 above it. */
   .tpp-card-fig {
@@ -1536,10 +1494,6 @@
     font-size: 15px;
   }
   /* Small */
-  .tpp .tpp-more span {
-    font-size: 14px;
-    line-height: 18px;
-  }
   .tpp .tpp-under {
     line-height: 19px;
   }
@@ -2022,15 +1976,16 @@
   }
 }
 
-/* C · two voices, under the promise (renders only with real quotes, or the
-   dashed placeholder slots under ?parentmock in local dev). */
-/* A row that scrolls sideways, one card and the next one's edge in view
-   (three parents' quotes, 7 Nov 2026). */
+/* C · parents' voices, under the list (renders only with real quotes, or
+   the dashed placeholder slots under ?parentmock in local dev).
+   A compact rail that scrolls sideways, one card and the next one's edge in
+   view (7 Nov 2026 polish: who said it on one line with a small mark, the
+   quote under it, "Read more" running on after its last word). */
 .tpp-v {
   display: flex;
   align-items: stretch;
   gap: 8px;
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   padding: 0 var(--gutter);
   list-style: none;
   overflow-x: auto;
@@ -2043,64 +1998,33 @@
   display: none;
 }
 .tpp-v > li {
-  flex: 0 0 min(82%, 300px);
+  flex: 0 0 min(80%, 288px);
   scroll-snap-align: start;
-}
-.tpp-v-more {
-  align-self: flex-start;
-  margin: -4px 0 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 18px;
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
 }
 .tpp-v-q {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   height: 100%;
   margin: 0;
-  padding: 14px;
-  border-radius: 16px;
+  padding: 12px 12px 14px;
+  border-radius: 14px;
   background: #ffffff;
-}
-.tpp-v-mark {
-  display: block;
-  height: 20px;
-  font-weight: 600;
-  font-size: 44px;
-  line-height: 40px;
-  color: #861f41;
-}
-.tpp-v-q[data-who="student"] .tpp-v-mark {
-  color: #e5751f;
-}
-.tpp-v-quote {
-  flex: 1;
-  margin: 0;
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 20px;
-  color: var(--ink);
 }
 .tpp-v-by {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   font-weight: 600;
   font-size: 14px;
   line-height: 18px;
   color: var(--ink);
+  white-space: nowrap;
 }
 .tpp-v-by small {
-  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 500;
   font-size: 14px;
   line-height: 18px;
@@ -2108,13 +2032,62 @@
 }
 .tpp-v-face {
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
 }
+/* The mark: small, at the end of the who-line, the card's one accent. */
+.tpp-v-mark {
+  flex: none;
+  margin-left: auto;
+  height: 18px;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 30px;
+  color: #861f41;
+}
+.tpp-v-q[data-who="student"] .tpp-v-mark {
+  color: #e5751f;
+}
+.tpp-v-body {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--ink);
+}
+.tpp-v-quote {
+  display: inline;
+  margin: 0;
+}
+.tpp-v-more {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 22, 24, 0.25);
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+  /* A bigger tap target than the words (the ::after), without moving them. */
+  position: relative;
+}
+.tpp-v-more:hover {
+  color: var(--ink);
+}
+.tpp-v-more::after {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
+}
 /* The placeholder slots: marked as missing, never mistaken for a quote. */
-.tpp-v[data-placeholder] .tpp-v-quote {
+.tpp-v[data-placeholder] .tpp-v-body {
   padding: 10px;
   border: 1.5px dashed rgba(20, 22, 24, 0.35);
   border-radius: 10px;
@@ -2124,23 +2097,29 @@
   border: 1.5px dashed rgba(20, 22, 24, 0.35);
 }
 @media (min-width: 1024px) {
+  /* In the 400px column: the next card shows a clear edge, so it reads as
+     a row to scroll, not a card cut off. */
   .tpp .tpp-offer-col > .tpp-v {
-    margin: 16px 0 0;
+    margin: 18px 0 0;
     padding: 0;
     scroll-padding-inline: 0;
+  }
+  .tpp .tpp-offer-col > .tpp-v > li {
+    flex-basis: 84%;
   }
 }
 
 /* E · the proof line that turns over: on the dock on a phone, at the foot
-   of the held offer card on a computer. */
+   of the held offer card on a computer. The two lines of a turn share one
+   cell, so the old one rolls up and out as the new one rolls in. */
 .tpp-pt {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   height: 24px;
   overflow: hidden;
 }
 .tpp-pt-line {
+  grid-area: 1 / 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2191,6 +2170,6 @@
 }
 @media (min-width: 1024px) {
   .tpp .tpp-pt-card {
-    display: flex;
+    display: grid;
   }
 }
