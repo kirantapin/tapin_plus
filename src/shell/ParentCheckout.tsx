@@ -148,9 +148,6 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const possessive = (name: string) => `${name}’s`;
 /** A name starting a sentence ("maya" as typed: "Maya opens it"). */
 const cap = (name: string) => (name ? name.charAt(0).toUpperCase() + name.slice(1) : name);
-/** "Nov 21": `n` days from today. */
-const inDays = (n: number) =>
-  new Date(Date.now() + n * 864e5).toLocaleDateString("en-US", { month: "short", day: "numeric" }).replace(" ", " ");
 
 /* The done step's glyphs, in the page's family (parents_kit Glyph): an open
    eye, a bell, a speech bubble. */
@@ -563,6 +560,9 @@ function Sheet({
   /* ── The form ── */
   const phoneD = digitsOf(phone);
   const confirmD = digitsOf(confirm);
+  /* Both fields hold the same full number: the confirm field's tick, and
+     the "on their number" card under the fields. */
+  const numbersMatch = confirmD.length === 10 && confirmD === phoneD;
   const errors: Partial<Record<Field, string>> = {};
   if (!ask) {
     if (!student.trim()) errors.student = "Add your student’s first name.";
@@ -869,7 +869,7 @@ function Sheet({
               onChange={(v) => setConfirm(digitsOf(v))}
               error={shown("confirm")}
               tel
-              ok={confirmD.length === 10 && confirmD === phoneD}
+              ok={numbersMatch}
             />
           </>,
         )
@@ -902,6 +902,9 @@ function Sheet({
         {frame(
           <>
             {fields}
+            {step === "student" && !ask ? (
+              <OnTheirNumber show={numbersMatch} who={student.trim() ? possessive(student.trim()) : "their"} />
+            ) : null}
             {errorLine(formError)}
           </>,
           <>
@@ -934,14 +937,15 @@ function Sheet({
       </div>
     );
     /* The promise, right above Pay (Sam, 7 Nov 2026: "go for it"): what a
-       hesitating parent needs at the button. The 14-day refund isn't on an
-       ask link (their student is signed in already), so that line drops its first half there. */
+       hesitating parent needs at the button. No refund for not signing in
+       (Sam, 7 Nov 2026: "if someone doesn't claim it they don't claim it");
+       the refund is for not saving what they spent, ask link or not. */
     const promise = (
       <ul className="prc-promise" aria-label="Our promise">
         <li>
           <Glyph d={GLYPHS.refund} />
           <span className="tnum">
-            <b>Full refund</b> if they don’t {ask ? "" : "sign in within 14 days or don’t "}save what you spent
+            <b>Full refund</b> if they don’t save what you spent
           </span>
         </li>
         <li>
@@ -1030,14 +1034,13 @@ function Sheet({
         </li>
       </ol>
     );
-    /* The pay step's promise rows, on paper; the 14-day refund isn't on an
-       ask link, as there. */
+    /* The pay step's promise rows, on paper. */
     const promise = (
       <ul className="prc-promise prc-done-promise" aria-label="Our promise">
         <li>
           <Glyph d={GLYPHS.refund} />
           <span className="tnum">
-            <b>Full refund</b> if they don’t {ask ? "" : `sign in by ${inDays(14)} or don’t `}save what you spent
+            <b>Full refund</b> if they don’t save what you spent
           </span>
         </li>
         <li>
@@ -1113,6 +1116,48 @@ function Sheet({
 const FlatLook = createContext(false);
 /** A step's body and foot, laid out for where the sheet is (Sheet frame). */
 type Frame = (kids: React.ReactNode, foot: React.ReactNode) => React.ReactNode;
+
+/* ── D · "It's on their number" (Sam's pick, 7 Nov 2026) ─────────────────
+   Their number's step: once both fields hold the same number, a card rises
+   under them with the Tapin icon and one line, so the parent sees the gift
+   land on their student's own phone while typing it. It hides again if the
+   numbers stop matching. Reduced motion: it's simply there. (Preview and
+   notes: tapin-staging-work/lever-lab/likelihood.) */
+const TAPIN_ICON_WHITE = asset("/tapin_icon_white.png");
+function OnTheirNumber({ show, who }: { show: boolean; who: string }) {
+  const card = useRef<HTMLDivElement | null>(null);
+  const icon = useRef<HTMLSpanElement | null>(null);
+  /* Only a match made here animates; a step that opens matched (a save
+     from earlier) shows it still, under the step's own entrance. */
+  const was = useRef(show);
+  useEffect(() => {
+    if (was.current === show) return;
+    was.current = show;
+    if (!show || still()) return;
+    const rise = card.current?.animate?.([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], {
+      duration: 460,
+      easing: EASE,
+    });
+    const settleIn = icon.current?.animate?.([{ opacity: 0, transform: "scale(.7)" }, { opacity: 1, transform: "none" }], {
+      duration: 420,
+      delay: 120,
+      easing: EASE,
+      fill: "backwards",
+    });
+    return () => {
+      rise?.cancel();
+      settleIn?.cancel();
+    };
+  }, [show]);
+  return (
+    <div ref={card} className="prc-on" role="status" hidden={!show}>
+      <span ref={icon} className="prc-on-icon" aria-hidden="true">
+        <img src={TAPIN_ICON_WHITE} alt="" width="20" height="20" decoding="async" />
+      </span>
+      <b>On {who} number once they sign in</b>
+    </div>
+  );
+}
 
 /* ── A field ─────────────────────────────────────────────────────────────── */
 function Input({

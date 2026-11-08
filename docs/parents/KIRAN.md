@@ -14,8 +14,9 @@ in this repo.
    with a link to their gift (**plus.tapin.app/gift/{token}**): an envelope they tap
    open, the parent's note, then "Get the app" and sign in with that number. Plus is
    already there. It's the same membership as a self-bought Plus.
-3. If the student hasn't signed in within **14 days**, it's canceled and the parent is
-   refunded in full. The page promises this.
+3. No unclaimed refund (Sam, 7 Nov 2026): if the student never signs in, it keeps billing.
+   The page promises "Full refund if they don't save what you spent", which support
+   handles by hand on request.
 
 ## Who manages it
 
@@ -63,7 +64,7 @@ in `src/model/parents.ts`); leave it off.
    (no JWT, like `ask_link_lookup`). Redeploy
    `stripe_webhook_handler` and `manage_subscription`.
 5. Set `app_config.parent_unclaimed_job_url` to the deployed `parent_unclaimed` URL. It
-   runs daily: it sends the reminder texts and does the day-14 refund.
+   runs daily and sends the student reminder texts (no refund any more).
 6. Test in the Stripe sandbox with card `4242 4242 4242 4242`: pay with a note, a photo
    and a background, open the
    gift link from the student's text, sign in as the student, cancel from the parent's

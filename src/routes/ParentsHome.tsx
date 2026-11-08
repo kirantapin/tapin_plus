@@ -30,7 +30,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice, ProofTurn, Voices, WhatIfUnused } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -49,7 +49,7 @@ import { GiftPreview } from "./GiftPage";
    stack, then "What a lunch costs" priced per meal, never per plan.
    Left out on purpose: a weekly dollar total, plan prices, anything that sets
    Plus against their dining plan or calls it an alternative, budget control,
-   where the money goes, money-back lines beyond the 14-day refund, seat
+   where the money goes, money-back lines beyond the refund, seat
    counts, points values, VT marks. Food only: no bar, cover, line-skip or
    crowd imagery; The Burg's and The Milk Parlor's own photographs are
    swapped for their dishes.
@@ -425,7 +425,7 @@ export default function ParentsHome() {
     },
     {
       q: "What if they don’t use it?",
-      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If it isn’t getting used, you or your student can cancel anytime. If they never sign in within 14 days, we refund you in full.`,
+      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If they don’t save what you spent, ask for a full refund. You or your student can cancel anytime.`,
     },
     {
       q: "Can I see what they order?",
@@ -587,15 +587,26 @@ export default function ParentsHome() {
           <p className="tpp-under tnum">
             {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
           </p>
+          {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):
+              a computer only here, at the foot of the held card; on a phone
+              it rides on the dock. */}
+          <ProofTurn className="tpp-pt-card" start="places" paused={building} />
         </section>
 
         <MoreBenefits className="tpp-more tpp-more-out" />
-        <Guarantee asked={!!asked} />
+        <Guarantee />
+        {/* C · a parent's and a student's own words (Sam's pick, 7 Nov
+            2026): nothing shows until model/voices.ts has real ones. */}
+        <Voices />
         </div>
 
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
+
+        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
+            parent's own question, answered, then as a picture. */}
+        <WhatIfUnused />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -719,10 +730,9 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.refund} />}
-              label="Full refund if they never sign in"
+              label="Full refund if they don’t save what you spent"
             >
-              If they haven’t signed in within 14 days, we cancel it and refund
-              you in full.
+              Email support@tapin.app and we’ll refund you in full.
             </Fold>
             <Fold
               className="tpp-sure-row"
@@ -809,8 +819,9 @@ export default function ParentsHome() {
             of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
             off once a day. One benefit per order. Alcohol excluded. {FIRST}{" "}
             first month, then {MONTHLY}/month. Billed today, then every month
-            until cancelled. Refunded in full if your student doesn’t sign in
-            within 14 days. Tapin is not affiliated with Virginia Tech.
+            until cancelled. Refunded in full on request if your student
+            doesn’t save what you spent. Tapin is not affiliated with Virginia
+            Tech.
           </p>
           <p className="tpa-links">
             {LEGAL.map((l) => (
@@ -829,6 +840,7 @@ export default function ParentsHome() {
       </main>
 
       <div ref={dockRef} className="tpa-dock tpp-dock" data-island-origin="" hidden>
+        <ProofTurn className="tpp-pt-dock" start="students" paused={building} />
         <button
           type="button"
           className="tpa-cta tpa-dock-cta"

@@ -95,7 +95,7 @@ export default function ParentAccount() {
         </div>
 
         <p className="ppa-note">
-          If your student hasn’t signed in within 14 days of signing them up, we cancel it and refund you in full.
+          Full refund if they don’t save what you spent. Email support@tapin.app to ask.
         </p>
 
         <footer className="tpa-foot ppm-foot">

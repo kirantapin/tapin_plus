@@ -201,7 +201,7 @@ function Status({
 
   let line: string;
   if (waiting)
-    line = `Waiting for ${name} to sign in to Tapin. If they haven’t within 14 days we’ll cancel and refund you in full.`;
+    line = `Waiting for ${name} to sign in to Tapin.`;
   else if (active)
     line = info.next_charge_on && typeof info.next_charge_cents === "number"
       ? `Active. Next charge ${usd(info.next_charge_cents)} on ${day(info.next_charge_on)}.`
