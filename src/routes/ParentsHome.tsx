@@ -604,10 +604,6 @@ export default function ParentsHome() {
             their student opens. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
 
-        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
-            parent's own question, answered, then as a picture. */}
-        <WhatIfUnused />
-
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
             anywhere, no points value. */}
@@ -712,6 +708,13 @@ export default function ParentsHome() {
           </h2>
           <HowPhone />
         </section>
+
+        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
+            parent's own question, answered, then as a picture. Moved down
+            from under the gift band to here, with the other reassurance,
+            just above No surprises (Sam, 7 Nov 2026: "it belongs much
+            farther down the page"). */}
+        <WhatIfUnused />
 
         {/* No surprises: a glyph and a few words per line, the full line one
             tap under it. */}
