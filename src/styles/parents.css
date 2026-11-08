@@ -2660,3 +2660,13 @@
     outline: 2px solid #ffffff;
   }
 }
+
+/* Two tags (pick D, 8 Nov 2026): the $5 credit wider than the 15%. */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-tags {
+    grid-template-columns: 1.55fr 1fr;
+  }
+  .tpp .tpp-tags b {
+    white-space: nowrap;
+  }
+}
