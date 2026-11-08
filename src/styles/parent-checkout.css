@@ -1182,6 +1182,16 @@ fieldset.prc-module {
   border-radius: 4px;
 }
 /* Text {who}: the quiet one beside Done, on the panel's light ground. */
+/* Done takes the space left after "Text {name}" (basis 0), so a normal
+   name shows in full and only a very long one shortens. */
+.gft-preview-panel .gft-pp-foot .prc-e-text + .gft-pp-cta,
+.gft-preview-panel .gft-pp-foot .prc-e-text + button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.gft-preview-panel .gft-pp-foot .prc-e-text {
+  flex: 0 0 auto;
+}
 .prc-e-text {
   /* A long name ("Text Alexandria-Maximiliana") shrinks and ends in an
      ellipsis, never pushing Done out of the panel. */
