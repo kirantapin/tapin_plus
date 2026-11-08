@@ -153,14 +153,17 @@ which assumed billing at activation:
   3. They save every week. (unchanged)
 - No surprises:
   - $3.99 today for the first month, then $7.99 a month.
-  - If they haven't signed in within 14 days, we cancel it and refund you in full.
+  - Full refund if they don't save what you spent. (Sam, 7 Nov 2026: no refund for
+    never signing in, "if someone doesn't claim it they don't claim it ... We still bill
+    them".)
   - You can cancel anytime from the link in your email. (unchanged)
   - They can cancel in the app too. If they do, your billing stops and we'll email you.
   - If they already have Tapin Plus, billing moves to you and their own subscription
     ends. No one is charged twice.
 - FAQ, What if they don't use it?: Two $10 orders a month cover the cost. If it isn't
-  getting used, you or your student can cancel anytime. If they never sign in within 14
-  days, we refund you in full.
+  getting used, you or your student can cancel anytime. (7 Nov 2026, as built: "Two $5
+  credits used in a month cover the $7.99. If they don't save what you spent, ask for a
+  full refund. You or your student can cancel anytime.")
 - FAQ, What do you text my student?: One text to let them know, and up to two reminders
   if they haven't signed in. We don't send them marketing texts unless they sign up for
   them.
@@ -173,14 +176,14 @@ which assumed billing at activation:
 - Button: Pay $3.99 and send their text
 - Confirmation heading: [Name]'s Tapin Plus is on.
 - Confirmation body: We've texted [•••1234]. They sign in to Tapin with that number and
-  it's there. Your receipt and a manage or cancel link are in your email. If they haven't
-  signed in within 14 days, we'll cancel and refund you in full.
+  it's there. Your receipt and a manage or cancel link are in your email. (The 14-day
+  refund sentence is gone, 7 Nov 2026.)
 - Student text, unchanged (Sam), its link now the sign-in page: Tapin: [Parent first
   name] signed you up for Tapin Plus, $5 back every week at 5 Blacksburg spots.
   Activate: https://plus.tapin.app/in Reply STOP to opt out
 - Fine print: "Billing begins when your student activates." becomes "Billed today, then
-  every month until cancelled. Refunded in full if your student doesn't sign in within
-  14 days."
+  every month until cancelled. Refunded in full on request if your student doesn't save
+  what you spent." (7 Nov 2026: the 14-day sign-in refund is gone.)
 
 ---
 
@@ -220,8 +223,8 @@ VALUE STACK (no total anywhere: no weekly dollar sum)
 - On their number right away. You pay, they sign in with their number, and it's there.
 - One lunch covers the first month. The $5 credit is more than $3.99. After that, two
   lunches a month cover $7.99.
-Reassurance: keep "If they haven't signed in within 14 days, we cancel it and refund you
-in full" and "Cancel anytime from the link in your email". No other money-back line.
+Reassurance: "Full refund if they don't save what you spent" (7 Nov 2026; it replaced
+the 14-day sign-in refund, which is gone) and "Cancel anytime". No other money-back line.
 
 KEEP the FAQ "Does this replace their meal plan? No…". Hold the line: price one meal,
 never the plan; no plan price ($3,413/$2,090), no "$11 a meal", no "cheaper than a meal

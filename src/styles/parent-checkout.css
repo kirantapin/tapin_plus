@@ -1220,3 +1220,44 @@ fieldset.prc-module {
     transition: none;
   }
 }
+
+/* ══ D · "ON THEIR NUMBER" (Sam's pick, 7 Nov 2026) ══════════════════════════
+   ParentCheckout OnTheirNumber: under their number's fields once both match,
+   the Tapin icon on ink and one line. A white module on the sheet's grey
+   ground; a grey well on the builder's white panel. The rise is the Web
+   Animations API in the component. */
+.prc-on {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+  margin: 0;
+  padding: 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--ink);
+}
+.prc-embedded .prc-on {
+  background: var(--ground);
+}
+.prc-on[hidden] {
+  display: none;
+}
+.prc-on-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #141618;
+}
+.prc-on-icon img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.prc-on b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+}

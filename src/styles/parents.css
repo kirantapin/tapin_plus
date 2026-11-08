@@ -1901,3 +1901,277 @@
     transition: none;
   }
 }
+
+/* ══ BELIEF IT WILL WORK (Sam's picks B, C and E, 7 Nov 2026) ═════════════
+   parents_sections.tsx WhatIfUnused, Voices and ProofTurn. White grounds,
+   money green only for the credits and the refund, maroon and orange only
+   as the two quote marks. Motion is the Web Animations API. */
+
+/* B · "What if they don't use it?" */
+.tpp-b-row {
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--ground);
+  font: inherit;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 20px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.tpp-b-row:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tpp-b-ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--money);
+}
+.tpp-b-chev {
+  display: grid;
+  margin-left: auto;
+  color: rgba(20, 22, 24, 0.5);
+}
+.tpp-b-chev svg {
+  width: 16px;
+  height: 16px;
+}
+.tpp-b-row[aria-expanded="true"] .tpp-b-chev {
+  transform: rotate(180deg);
+}
+.tpp .tpp-b-fine {
+  margin: 0;
+  padding: 10px 4px 0;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.tpp-b-fine[hidden] {
+  display: none;
+}
+.tpp-b-meter {
+  position: relative;
+  height: 44px;
+  margin-top: 44px;
+}
+.tpp-b-track {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 3px;
+  border-radius: 12px;
+  background: var(--well);
+  overflow: hidden;
+}
+.tpp-b-seg {
+  flex: 0 0 calc(var(--seg) - 2px);
+  display: flex;
+  align-items: center;
+  padding-left: 14px;
+  background: var(--money);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  transform-origin: left center;
+}
+.tpp-b-seg:first-child {
+  border-radius: 12px 0 0 12px;
+}
+.tpp-b-mark {
+  position: absolute;
+  top: -30px;
+  bottom: -6px;
+  left: var(--at);
+  width: 0;
+  pointer-events: none;
+}
+.tpp-b-mark i {
+  position: absolute;
+  top: 24px;
+  bottom: 0;
+  left: -1px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+}
+.tpp-b-mark b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(-50%);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.tpp .tpp-b-big {
+  margin: 14px 0 0;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--ink);
+}
+@media (min-width: 1024px) {
+  .tpp-b-meter {
+    height: 52px;
+  }
+  .tpp .tpp-b-big {
+    font-size: 17px;
+    line-height: 24px;
+  }
+}
+
+/* C · two voices, under the promise (renders only with real quotes, or the
+   dashed placeholder slots under ?parentmock in local dev). */
+.tpp-v {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px var(--gutter) 0;
+  padding: 0;
+  list-style: none;
+}
+.tpp-v-q {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  margin: 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.tpp-v-mark {
+  display: block;
+  height: 20px;
+  font-weight: 600;
+  font-size: 44px;
+  line-height: 40px;
+  color: #861f41;
+}
+.tpp-v-q[data-who="student"] .tpp-v-mark {
+  color: #e5751f;
+}
+.tpp-v-quote {
+  flex: 1;
+  margin: 0;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink);
+}
+.tpp-v-by {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--ink);
+}
+.tpp-v-by small {
+  display: block;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.tpp-v-face {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+/* The placeholder slots: marked as missing, never mistaken for a quote. */
+.tpp-v[data-placeholder] .tpp-v-quote {
+  padding: 10px;
+  border: 1.5px dashed rgba(20, 22, 24, 0.35);
+  border-radius: 10px;
+  color: var(--muted);
+}
+.tpp-v[data-placeholder] .tpp-v-face {
+  border: 1.5px dashed rgba(20, 22, 24, 0.35);
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-offer-col > .tpp-v {
+    margin: 16px 0 0;
+  }
+}
+
+/* E · the proof line that turns over: on the dock on a phone, at the foot
+   of the held offer card on a computer. */
+.tpp-pt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  overflow: hidden;
+}
+.tpp-pt-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tpp-pt-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--money);
+}
+.tpp-pt-ico {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--money);
+}
+.tpp-pt-logos {
+  display: flex;
+  flex: none;
+  gap: 3px;
+}
+.tpp-pt-logos img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  outline: 1px solid rgba(20, 22, 24, 0.1);
+  outline-offset: -1px;
+  object-fit: cover;
+}
+.tpp-dock .tpp-pt-dock {
+  margin: 2px 0 0;
+}
+/* One height for all three lines (the logos are taller than the words),
+   so the column under the card never moves as it turns: 14 + 24 + 1. */
+.tpp .tpp-pt-card {
+  display: none;
+  height: 39px;
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-pt-card {
+    display: flex;
+  }
+}

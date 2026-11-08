@@ -3,7 +3,9 @@ import { asset } from "../asset";
 import { logoField } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
-import { CREDIT, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion } from "./parents_kit";
+import { parentMock } from "../model/parents";
+import { PREVIEW_VOICES, VOICES } from "../model/voices";
+import { CREDIT, Chevron, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -99,22 +101,20 @@ function LogoRow({ size }: { size: number }) {
    card in the held right-hand column on a computer. */
 /* ══ THE GUARANTEE, UNDER THE OFFER (Sam, 6 Nov 2026: "don't we need to
    highlight the guarantee as well underneath, like refund if they don't use
-   it, easy cancel anytime"). Only what the backend does today: the 14-day
-   refund if their student never signs in (parent_unclaimed; not on an ask
-   link, where the student is signed in already), a month they didn't use
-   refunded on asking (support, by hand; Sam, 7 Nov 2026) and cancel by email. (Not
+   it, easy cancel anytime"). Only what we do today: a month that didn't
+   save them what you spent, refunded on asking (support, by hand; Sam, 7 Nov
+   2026), and cancel by email. No refund for never signing in (Sam, 7 Nov
+   2026: "if someone doesn't claim it they don't claim it ... We still bill
+   them"), so the line is the same on an ask link. (Not
    "manage it from your account": that page explains how to cancel, it
    isn't self-serve; Hormozi audit, 6 Nov 2026.) */
-export function Guarantee({ asked }: { asked: boolean }) {
+export function Guarantee() {
   return (
     <ul className="tpp-promise" aria-label="Our promise">
-      {/* Sam, 7 Nov 2026: one "Full refund" line, not two: if they don't
-          sign in within 14 days (not on an ask link, where they're signed in
-          already) or don't save what the parent spent. */}
       <li>
         <Glyph d={GLYPHS.refund} />
         <span>
-          <b>Full refund</b> if they don’t {asked ? "" : "sign in within 14 days or don’t "}save what you spent
+          <b>Full refund</b> if they don’t save what you spent
         </span>
       </li>
       <li>
@@ -1040,6 +1040,264 @@ export function CheckoutPhone() {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ══ BELIEF IT WILL WORK (Sam's picks B, C and E, 7 Nov 2026) ══════════════
+   The parent's fear is "will they actually use it?". Previews and notes:
+   tapin-staging-work/lever-lab/likelihood (A was not picked; D is in
+   shell/ParentCheckout.tsx). Motion is the Web Animations API, cancelled on
+   unmount; with reduced motion each piece is simply there, still. */
+const EASE_IN_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+/* ── B · "What if they don't use it?" as a picture ─────────────────────────
+   After the gift band: the parent's own question, answered first in two
+   words ("Full refund.", the exact terms one tap down, as the promise under
+   the offer says them), then two $5 credits running past the $7.99 line.
+   The track is $12 wide, so each credit is 5/12 of it and the line sits at
+   7.99/12. When the bar is on screen the credits fill one after the other
+   and the line nods as the second passes it. */
+const B_TRACK = 12;
+const MONTHLY_N = Number(MONTHLY.replace(/[^\d.]/g, ""));
+export function WhatIfUnused() {
+  const [meter, seen] = useSeen<HTMLDivElement>(0.6);
+  useStagger(meter, seen, ".tpp-b-seg", [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], 520, 700, 120, EASE_IN_OUT);
+  useStagger(meter, seen, ".tpp-b-mark", [{ transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }], 0, 360, 1060, "ease-out");
+  const [open, setOpen] = useState(false);
+  const fine = useRef<HTMLParagraphElement>(null);
+  const chev = useRef<HTMLSpanElement>(null);
+  const was = useRef(open);
+  useEffect(() => {
+    if (was.current === open) return;
+    was.current = open;
+    if (reducedMotion()) return;
+    const turn = chev.current?.animate?.(
+      [{ transform: open ? "none" : "rotate(180deg)" }, { transform: open ? "rotate(180deg)" : "none" }],
+      { duration: 240, easing: EASE_IN_OUT },
+    );
+    const show = open
+      ? fine.current?.animate?.([{ opacity: 0, transform: "translateY(-4px)" }, { opacity: 1, transform: "none" }], {
+          duration: 280,
+          easing: EASE_IN_OUT,
+        })
+      : undefined;
+    return () => {
+      turn?.cancel();
+      show?.cancel();
+    };
+  }, [open]);
+  const seg = `${((CREDIT / B_TRACK) * 100).toFixed(3)}%`;
+  return (
+    <section className="tpa-module tpp-b" aria-labelledby="tpp-b-h">
+      <h2 id="tpp-b-h" className="tpa-h2">
+        What if they don’t use it?
+      </h2>
+      <button type="button" className="tpp-b-row" aria-expanded={open} aria-controls="tpp-b-fine" onClick={() => setOpen((o) => !o)}>
+        <Glyph d={GLYPHS.refund} className="tpp-b-ico" />
+        <span>Full refund.</span>
+        <span ref={chev} className="tpp-b-chev">
+          <Chevron />
+        </span>
+      </button>
+      {/* Word for word the promise under the offer (Guarantee). */}
+      <p ref={fine} id="tpp-b-fine" className="tpp-b-fine" hidden={!open}>
+        Full refund if they don’t save what you spent. Cancel anytime by emailing support@tapin.app.
+      </p>
+      <div
+        ref={meter}
+        className="tpp-b-meter tnum"
+        role="img"
+        aria-label={`Two ${money0(CREDIT)} credits make ${money0(CREDIT * 2)}, more than the ${MONTHLY} a month`}
+        style={{ ["--seg" as string]: seg, ["--at" as string]: `${((MONTHLY_N / B_TRACK) * 100).toFixed(3)}%` }}
+      >
+        <div className="tpp-b-track">
+          <span className="tpp-b-seg">{money0(CREDIT)}</span>
+          <span className="tpp-b-seg">{money0(CREDIT)}</span>
+        </div>
+        <span className="tpp-b-mark" aria-hidden="true">
+          <b>{MONTHLY} a month</b>
+          <i />
+        </span>
+      </div>
+      <p className="tpp-b-big">Two credits cover it.</p>
+    </section>
+  );
+}
+
+/* ── C · Two voices by the first button ────────────────────────────────────
+   The split hero (the parent sends, the student opens) as two short quotes
+   under the promise: between it and the gift band on a phone, in the held
+   right column on a computer. Renders nothing until model/voices.ts VOICES
+   has real, permissioned quotes (how to add them is there). Local dev with
+   ?parentmock shows the marked placeholder slots instead, dashed. The two
+   meet from either side once, when first in view. */
+export function Voices() {
+  const real = VOICES.length > 0;
+  const list = real ? VOICES : parentMock() ? PREVIEW_VOICES : [];
+  const [box, seen] = useSeen<HTMLUListElement>(0.5);
+  const runs = useRef<Array<Animation | undefined>>([]);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el || reducedMotion()) return;
+    runs.current = Array.from(el.children).map((li, i) => {
+      const a = li.animate?.([{ transform: `translateX(${i ? 10 : -10}px)`, opacity: 0.4 }, { transform: "none", opacity: 1 }], {
+        duration: 600,
+        easing: EASE_IN_OUT,
+        fill: "backwards",
+      });
+      a?.pause();
+      return a;
+    });
+    const made = runs.current;
+    return () => made.forEach((r) => r?.cancel());
+    // Once, at mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (seen) runs.current.forEach((r) => r?.play());
+  }, [seen]);
+  if (!list.length) return null;
+  return (
+    <ul ref={box} className="tpp-v" aria-label="From parents and students" data-placeholder={real ? undefined : ""}>
+      {list.map((v, i) => (
+        <li key={`${v.role}-${i}`}>
+          <figure className="tpp-v-q" data-who={v.role === "Parent" ? "parent" : "student"}>
+            <span className="tpp-v-mark" aria-hidden="true">
+              “
+            </span>
+            <blockquote className="tpp-v-quote">{v.quote}</blockquote>
+            <figcaption className="tpp-v-by">
+              {v.photo ? (
+                <img className="tpp-v-face" src={asset(v.photo)} alt="" decoding="async" loading="lazy" />
+              ) : real ? null : (
+                <span className="tpp-v-face" aria-hidden="true" />
+              )}
+              <span>
+                {v.name}
+                <small>{v.role}</small>
+              </span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ── E · One proof line that turns over, by the button that follows you ───
+   On a phone it rides on the docked button; on a computer, at the foot of
+   the held offer card. Every 3.2s it turns over through three true lines
+   (500+ students, the refund, the places); on a computer it starts on the
+   places, since the hero's 500+ line shares that screen. It only turns
+   while it's on screen, the page is showing and the builder is closed.
+   Reduced motion: the first line, still. aria-hidden: the same facts are in
+   the page's own text, and a turning line isn't read aloud. */
+type ProofKey = "students" | "refund" | "places";
+const TURN_MS = 3200;
+export function ProofTurn({
+  className,
+  start,
+  paused,
+}: {
+  className: string;
+  start: ProofKey;
+  paused: boolean;
+}) {
+  const lines: Array<{ key: ProofKey; body: ReactNode }> = [
+    {
+      key: "students",
+      body: (
+        <>
+          <span className="tpp-pt-dot" aria-hidden="true" />
+          Over 500 Blacksburg students on Plus
+        </>
+      ),
+    },
+    {
+      key: "refund",
+      body: (
+        <>
+          <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
+          Didn’t save what you spent? Full refund.
+        </>
+      ),
+    },
+    {
+      key: "places",
+      body: (
+        <>
+          <span className="tpp-pt-logos" aria-hidden="true">
+            {PLACES.slice(0, 3).map((p) => (
+              <img key={p.id} src={p.logo} alt="" decoding="async" />
+            ))}
+          </span>
+          Five Blacksburg spots
+        </>
+      ),
+    },
+  ];
+  const [k, setK] = useState(() => Math.max(0, lines.findIndex((l) => l.key === start)));
+  const box = useRef<HTMLDivElement>(null);
+  const line = useRef<HTMLSpanElement>(null);
+  const [onScreen, setOnScreen] = useState(false);
+  const [pageOn, setPageOn] = useState(() => typeof document === "undefined" || document.visibilityState !== "hidden");
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(!!e?.isIntersecting));
+    io.observe(el);
+    const vis = () => setPageOn(document.visibilityState !== "hidden");
+    document.addEventListener("visibilitychange", vis);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", vis);
+    };
+  }, []);
+  const out = useRef<Animation | null>(null);
+  const into = useRef<Animation | null>(null);
+  const turning = !paused && onScreen && pageOn && !reducedMotion();
+  useEffect(() => {
+    if (!turning) return;
+    const id = window.setInterval(() => {
+      const next = () => setK((n) => (n + 1) % lines.length);
+      const el = line.current;
+      if (!el?.animate) return next();
+      out.current?.cancel();
+      out.current = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(-10px)", opacity: 0 }], {
+        duration: 200,
+        easing: "ease-in",
+        fill: "forwards",
+      });
+      out.current.onfinish = next;
+    }, TURN_MS);
+    return () => window.clearInterval(id);
+  }, [turning, lines.length]);
+  /* The new line rises in, before it's painted, as the old one's hold lets go. */
+  const drawn = useRef(k);
+  useLayoutEffect(() => {
+    if (drawn.current === k) return;
+    drawn.current = k;
+    out.current?.cancel();
+    out.current = null;
+    into.current?.cancel();
+    into.current = line.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
+      duration: 420,
+      easing: EASE_IN_OUT,
+    }) ?? null;
+  }, [k]);
+  useEffect(
+    () => () => {
+      out.current?.cancel();
+      into.current?.cancel();
+    },
+    [],
+  );
+  return (
+    <div ref={box} className={`tpp-pt ${className}`} aria-hidden="true">
+      <span ref={line} className="tpp-pt-line">
+        {lines[k % lines.length]?.body}
+      </span>
     </div>
   );
 }
