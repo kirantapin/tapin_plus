@@ -52,6 +52,32 @@ function PhoneGlyph() {
   );
 }
 
+/** Get the app as a quiet text link, for a line of words (the student
+ *  page's foot and its How it works): the App Store on an iPhone and a
+ *  computer (a new tab there), the web app on Android ("Open Tapin"). */
+export function AppLink({ where, className, glyph = false, tabIndex }: { where: string; className?: string; glyph?: boolean; tabIndex?: number }) {
+  const { track } = useEventTracking();
+  const d = device();
+  return (
+    <a
+      className={className}
+      href={appHref(d)}
+      target={d === "desktop" ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      tabIndex={tabIndex}
+      onClick={() => track("plus_get_app_clicked", { where, device: d })}
+    >
+      {glyph && d !== "android" ? <AppleGlyph /> : null}
+      {d === "android" ? "Open Tapin" : "Get the app"}
+    </a>
+  );
+}
+
+/** On a computer, the App Store QR: the phone in your pocket scans it. */
+export function AppQr({ className, size = 76 }: { className?: string; size?: number }) {
+  return <img className={className} src={QR} alt="QR code for Tapin on the App Store" width={size} height={size} decoding="async" loading="lazy" />;
+}
+
 /** The card: the app's icon and name, one line on what's in it, then the
  *  way to get it for this device. A phone gets the button. A computer gets
  *  the QR code as the main act (the phone is where Plus is used), with the

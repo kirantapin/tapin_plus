@@ -59,3 +59,18 @@ export const PREVIEW_VOICES: Voice[] = import.meta.env.DEV
       { quote: "[real student quote needed]", name: "[First name]", role: "Student" },
     ]
   : [];
+
+/* ══ VOICES ON THE STUDENT PAGE, plus.tapin.app (Sam, 8 Nov 2026) ════════
+   The same rules as VOICES above: a real student's own words, with their
+   permission (first name, last initial, photo), `label` "VT student". Empty
+   until there are some, and while it's empty the slot renders nothing in a
+   build. Never write one for anyone, and never reuse a parent's quote here
+   without asking them again (Denise M.'s permission covered /parents). */
+export const STUDENT_VOICES: Voice[] = [];
+
+/* Local dev only (npm run dev): three marked placeholder slots, so the
+   layout can be seen before real quotes exist. A production build drops
+   this list (import.meta.env.DEV is false there). */
+export const PREVIEW_STUDENT_VOICES: Voice[] = import.meta.env.DEV
+  ? [1, 2, 3].map(() => ({ quote: "[real student quote needed]", name: "[First name]", role: "Student" as const, label: "VT student" }))
+  : [];

@@ -4011,3 +4011,122 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpa details[data-closing] > summary svg {
   transform: none !important;
 }
+
+/* ══ THE MAIN PAGE WEARS THE PARENTS PAGE'S PIECES (Sam, 8 Nov 2026: "push
+   the round 2 changes, they look good, for the main plus.tapin.app page") ══
+   routes/PlusHome.tsx, root .tps. The pieces themselves (the checkout phone,
+   the four-step phone, the list under the offer, the voices, What if I
+   don't save?, the proof line) are parents_sections.tsx's, styled in
+   parents.css; this is only where the student page places them and its own
+   rules: one colour family (maroon and the orange sun on the two phone
+   panels, money green only on money, the rest white and ink), one heading
+   weight (600, the hero untouched), nothing under 14px. */
+.tps .tpa-sheet .tpa-h2 {
+  font-weight: 600;
+}
+/* The parents' sheet allows 13px; this page doesn't. */
+.tps :is(.tpp-fb-pick-text small, .tpp-fb-credit p, .tpp-fb-item, .tpp-fb-total span:first-child) {
+  font-size: 14px;
+}
+/* The checkout phone's section: Step through it and View FAQ under it. */
+.tps-fb .tpa-step-wide {
+  margin-top: 14px;
+}
+/* Under Join: the wallet line, then Try as a quiet text link (it was keyed
+   to sit straight after Join). */
+.tps .tps-wallet b {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tps .tpa-s2 .tps-wallet + .tpa-try {
+  width: auto;
+  height: 44px;
+  margin: 2px auto 0;
+  padding: 0 12px;
+  background: none;
+  box-shadow: none;
+  font-size: 15px;
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 22, 24, 0.28);
+  text-underline-offset: 3px;
+}
+/* The voices' quote marks in maroon, not the parents' orange. */
+.tps .tpp-v-q[data-who] .tpp-v-mark {
+  color: #861f41;
+}
+/* A <b> inside the credit's 600 line computes to 900 (bolder); 600 here. */
+.tps .tpp-fb-off {
+  font-weight: 600;
+}
+/* The foot's account line at the page's 14px floor. */
+.tps .tpa-foot .tpa-account-app .tpa-account {
+  font-size: 14px;
+}
+/* The dock carries the proof line over Join. */
+.tps .tpa-dock .tpp-pt-dock {
+  margin: 2px 0 0;
+}
+@media (max-width: 1023px) {
+  .tps.tpa-home .tpa-foot {
+    padding-bottom: calc(126px + env(safe-area-inset-bottom));
+  }
+}
+/* The foot: "Already a member? Get the app or Sign in", and on a computer
+   the App Store QR beside it. */
+.tpa-account a.tpa-account-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tpa-account-qr,
+.tpa-account-scan {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .tpa-account-app {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .tpa-account-app .tpa-account {
+    margin-top: 0;
+  }
+  .tpa-account-qr {
+    display: block;
+    flex: none;
+    width: 76px;
+    height: 76px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+  .tpa-account-scan {
+    display: block;
+    font-size: 14px;
+    line-height: 18px;
+    color: var(--muted);
+  }
+  /* The held column is the offer card with the list under it. */
+  .tps .tpp-offer-col > [aria-label="Tapin Plus"] {
+    padding: 24px;
+  }
+  /* The voices under the places, three across. */
+  .tps .tps-voices-desk {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .tps .tps-voices-desk > li {
+    min-width: 0;
+  }
+}
