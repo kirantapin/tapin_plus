@@ -7,7 +7,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { manageParent, toE164, type ManageInfo } from "../model/parents";
 
 /* ══ THE PARENT'S MANAGE PAGE (/parents/manage/:token) ══════════════════════
-   The link in the parent's receipt email (docs/parents/API.md, parent_manage).
+   The link in the parent's texts (docs/parents/API.md, parent_manage).
    No login: the token is the key. It says whose Plus this is, the masked
    number, and where it stands: waiting for the student to sign in (resend
    the text, change the number, entered twice), active with the next charge,
@@ -145,7 +145,7 @@ export default function ParentManage() {
               This link didn’t open
             </h1>
             <p className="ppm-line">
-              Use the manage link in your receipt email. If it still doesn’t work, email support@tapin.app and a person will
+              Use the link in the text we sent you. If it still doesn’t work, email support@tapin.app and a person will
               help.
             </p>
             <p className="ppm-sub">{failed}</p>
