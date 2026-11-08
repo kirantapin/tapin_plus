@@ -115,6 +115,23 @@ marketing texts from Tapin at the number above. Consent isn't a condition of pur
 Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for
 help." with links to the Terms and the Privacy Policy.
 
+### Summer pause (Sam, 8 Nov 2026), new field on `parent_checkout_start`
+`summer_pause: boolean` (absent = false), from a box on the who step: "Pause billing
+over summer break. No charges over the summer. We text you before it pauses and before it
+starts again." The box is hidden until the backend keeps it (`SUMMER_PAUSE_LIVE` in
+src/model/parents.ts; ?parentmock shows it).
+
+Backend, for Kiran:
+- Keep it on the checkout and subscription rows.
+- Before summer, pause the subscription with Stripe `pause_collection: { behavior: "void",
+  resumes_at }` (or skip those invoices). Suggested window: after the last spring charge,
+  resuming in time for fall classes. **Sam to confirm the months** and whether Plus is off
+  while paused (the copy promises only "no charges").
+- Text the parent a few days before it pauses and before it resumes (same sender and STOP
+  line as the renewal reminder), e.g. "Tapin: Maya's Tapin Plus pauses for summer on May 8.
+  No charges until it starts again on Aug 8. Reply STOP to opt out".
+- The parent manage page should show it and let them turn it off.
+
 ### `parent_checkout_confirm`
 ```ts
 req: { checkout_id: string; payment_intent_id: string }

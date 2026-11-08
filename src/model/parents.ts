@@ -43,6 +43,12 @@ export interface ParentCheckoutStart {
   marketing_sms?: boolean;
   marketing_email?: boolean;
   consent_text_version?: string | null;
+  /** Pause billing over summer break (Sam, 8 Nov 2026: "they can just check
+   *  a box if they'd like billing paused for summer break"). Unticked by
+   *  default. The backend keeps it and pauses the subscription over the
+   *  summer (Stripe pause_collection), texting the parent before it pauses
+   *  and before it starts again. Kiran: docs/parents/API.md. */
+  summer_pause?: boolean;
   utm?: Record<string, string>;
 }
 /** The id of the consent words on the checkout's "you" step
@@ -104,6 +110,10 @@ export type GiftInfo =
  *  Members page (it would call a function that doesn't exist yet); local dev
  *  and ?parentmock still show it. Flip to true once the functions are live. */
 export const PARENTS_BACKEND_LIVE = false;
+
+/** The summer-pause box on the checkout's who step shows once the backend
+ *  keeps `summer_pause` (Kiran); local dev with ?parentmock shows it now. */
+export const SUMMER_PAUSE_LIVE = false;
 
 /** Local dev only: fake every backend call. */
 export const parentMock = (): boolean =>
