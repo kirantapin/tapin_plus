@@ -20,8 +20,8 @@ import {
   type Gift,
   type SceneId,
 } from "../model/gift";
-import { clearGiftDraft, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
-import { keepStep, keptSomething, type ResumeStep } from "../model/checkoutResume";
+import { clearGiftDraft, defaultGiftScene, getGiftDraft, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
+import { keepQuick, keepStep, keptQuick, keptSomething, type ResumeStep } from "../model/checkoutResume";
 import { ResumeContext, ResumeLine, type Resume } from "../shell/ResumeLine";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { playDelight } from "./giftDelight";
@@ -1062,6 +1062,131 @@ function EffectPicker({ effect, onPick, labelled = true }: { effect: Delight | n
   );
 }
 
+/* ══ C · ONE LOOK SCREEN (Sam's pick, 7 Nov 2026: "these 4 look good") ══════
+   The builder's first screen: the look and what plays when they open it,
+   together, with few choices up front. Three looks (the page's own season
+   first, then theirs if it's another, then everyday ones), no names under
+   them (the picked one's name sits beside the heading), and "+19", which
+   opens every look in place; then four openings in one row. (Preview and
+   notes: tapin-staging-work/lever-lab/effort.) */
+const LOOKS_UP_FRONT = 3;
+const FX_UP_FRONT: ReadonlyArray<Delight | null> = [null, "confetti", "hearts", "sparkles"];
+/** The three looks up front, worked out once as the builder opens (so a
+ *  pick never reshuffles them). */
+function frontLooks(): SceneId[] {
+  const out: SceneId[] = [];
+  for (const id of [defaultGiftScene(), getGiftDraft().scene, "leaves", "maroon", "snow", "thanksgiving"] as SceneId[])
+    if (!out.includes(id) && SCENE_ORDER.some((s) => s.id === id)) out.push(id);
+  return out.slice(0, LOOKS_UP_FRONT);
+}
+
+function LookPicker({ scene, onPick, effect, onPickEffect }: { scene: SceneId; onPick: (id: SceneId) => void; effect: Delight | null; onPickEffect: (id: Delight | null) => void }) {
+  const [front] = useState(frontLooks);
+  const [all, setAll] = useState(false);
+  const group = useRef<HTMLDivElement | null>(null);
+  const grid = useRef<HTMLDivElement | null>(null);
+  const fromH = useRef<number | null>(null);
+  const looks = all
+    ? [...front, ...SCENE_ORDER.map((s) => s.id as SceneId).filter((id) => !front.includes(id))]
+    : front;
+  const more = SCENE_ORDER.length - front.length;
+  const named = SCENE_ORDER.find((s) => s.id === scene)?.name ?? "";
+  /* The rest open in place: the group eases from its height to the new one,
+     and focus goes to the first look that wasn't showing. */
+  useLayoutEffect(() => {
+    if (!all) return;
+    /* No ring for a tap (focusVisible: false where the browser knows it);
+       a keyboard's focus still lands on the first new look. */
+    grid.current?.querySelectorAll<HTMLElement>("[role=radio]")[front.length]?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+    const el = group.current;
+    const was = fromH.current;
+    fromH.current = null;
+    if (!el || was == null || reducedMotion() || typeof el.animate !== "function") return;
+    const now = el.getBoundingClientRect().height;
+    const a = el.animate([{ height: `${was}px`, overflow: "hidden" }, { height: `${now}px`, overflow: "hidden" }], { duration: 380, easing: EASE });
+    return () => a.cancel();
+    // On opening the rest only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all]);
+  /* The openings: four up front. One picked before (a save from earlier)
+     that isn't among them takes the last place, so a pick is always in view. */
+  const fx = FX_UP_FRONT.includes(effect) ? FX_UP_FRONT : [...FX_UP_FRONT.slice(0, -1), effect];
+  return (
+    <>
+      <div ref={group} className="gft-pp-group">
+        <h2 id="gft-pp-look" className="gft-pp-h gft-pp-look-h">
+          Pick a look
+          <span aria-live="polite">{named}</span>
+        </h2>
+        <div ref={grid} className="gft-pp-grid">
+          <div role="radiogroup" aria-labelledby="gft-pp-look" className="gft-pp-looks">
+            {looks.map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={scene === id}
+                aria-label={SCENE_ORDER.find((s) => s.id === id)?.name}
+                className="gft-pp-swatch"
+                onClick={() => onPick(id)}
+              >
+                <span className="scene-swatch" data-scene={id} aria-hidden="true">
+                  <i className="scene-swatch-env" />
+                </span>
+              </button>
+            ))}
+          </div>
+          {all ? null : (
+            <button
+              type="button"
+              className="gft-pp-swatch gft-pp-lookmore"
+              aria-expanded="false"
+              aria-label={`${more} more looks`}
+              onClick={() => {
+                fromH.current = group.current?.getBoundingClientRect().height ?? null;
+                setAll(true);
+              }}
+            >
+              <span className="scene-swatch tnum" aria-hidden="true">
+                +{more}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="gft-pp-group">
+        <h2 id="gft-pp-fx" className="gft-pp-h">
+          When they open it
+        </h2>
+        <div className="gft-pp-fx" role="radiogroup" aria-labelledby="gft-pp-fx">
+          {fx.map((id) => (
+            <button key={id ?? "none"} type="button" role="radio" aria-checked={effect === id} onClick={() => onPickEffect(id)}>
+              <FxIcon id={id} />
+              {EFFECT_CHOICES.find((c) => c.id === id)?.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** The builder's hand-off to the checkout's steps in its panel (the parents
+ *  page passes its ParentCheckout). */
+export type NextSteps = {
+  /** Back from who it's for: to the note, or with Send as is, to where it
+   *  was chosen (the card on a phone, the look on a computer). */
+  back: () => void;
+  /** The whole builder shuts. */
+  close: () => void;
+  /** A phone: the drawer's × folds it down instead of leaving. */
+  collapse?: () => void;
+  /** They chose "Send as is" (Effort B): the note was skipped. */
+  quick: boolean;
+  /** "Change" on the card's row: back into the builder, on the look. */
+  change: () => void;
+};
+
 /* ══ THE PARENT'S PREVIEW (Sam, 6 Nov 2026: "on the parent's page, can we
    have a preview of the card they're sending?"; then "the grid of background
    options would show up on the right in a control center", "we should still
@@ -1084,9 +1209,10 @@ function EffectPicker({ effect, onPick, labelled = true }: { effect: Delight | n
    checkout's own there.) Escape or Close shuts it. */
 const DESK_W = 1280;
 
-/** The builder's design stages, in order. */
-type Part = "look" | "open" | "note";
-const PARTS: readonly Part[] = ["look", "open", "note"];
+/** The builder's design stages, in order: the look (with what plays, Effort
+ *  C), then the note. */
+type Part = "look" | "note";
+const PARTS: readonly Part[] = ["look", "note"];
 
 
 function useWide(query = "(min-width: 1024px)") {
@@ -1139,8 +1265,7 @@ export function GiftPreview({
    *  2026: "it'd be one continuous flow"): the parents page passes its
    *  checkout, embedded. `back` returns to the care package; `close` shuts
    *  the whole thing. */
-  /** `collapse` (a phone): the drawer's × folds it down instead of leaving. */
-  next?: (back: () => void, close: () => void, collapse?: () => void) => React.ReactNode;
+  next?: (steps: NextSteps) => React.ReactNode;
   /** Open on the next steps (a charged checkout that only needs confirming). */
   startNext?: boolean;
   /** The builder: the step a save from earlier comes back to
@@ -1159,7 +1284,7 @@ export function GiftPreview({
      opens the builder where it was, the drawer up, not the card first. A
      card already charged goes to its pay step as it always did. */
   const [resumed] = useState<ResumeStep | null>(() => (builder && !startNext ? resumeAt : null));
-  const resumeNext = !!next && (resumed === "student" || resumed === "you" || resumed === "pay");
+  const resumeNext = !!next && (resumed === "who" || resumed === "pay");
   const [stage, setStage] = useState<"gift" | "next">((startNext && next) || resumeNext ? "next" : "gift");
   /* Once visited, the next steps stay mounted (hidden while they're back on
      the care package), so what they typed there is still there (review,
@@ -1172,8 +1297,18 @@ export function GiftPreview({
      the modal would get a bit shorter on that stage so that someone can
      preview what it actually looks like"): the look, the opening, the note.
      Back from the checkout lands on the note, the last of them. */
+  /* B · Send as is (Sam's pick, 7 Nov 2026): the card they see first is
+     already a finished gift, so they can send it without designing: straight
+     to who it's for, which then asks their first name too and shows the card
+     with a way back into the builder. Kept with the save, so a reload comes
+     back on the same path. */
+  const [quick, setQuickState] = useState(() => !!next && !!resumed && !startNext && keptQuick());
+  const setQuick = (q: boolean) => {
+    setQuickState(q);
+    keepQuick(q);
+  };
   const [part, setPart] = useState<Part>(() =>
-    (startNext && next) || resumeNext ? "note" : resumed === "open" || resumed === "note" ? resumed : "look",
+    ((startNext && next) || resumeNext) && !quick ? "note" : resumed === "note" && !quick ? "note" : "look",
   );
   const partFrom = useRef<number | null>(null);
   const toPart = (p: Part) => {
@@ -1494,7 +1629,9 @@ export function GiftPreview({
   /* Continue: the student's first name is the one thing it needs. */
   const go = (el: HTMLElement) => {
     if (builder && part !== "note") {
-      toPart(part === "look" ? "open" : "note");
+      /* Making it theirs after all: the note asks their name again. */
+      if (quick) setQuick(false);
+      toPart("note");
       return;
     }
     if (builder && !fixedTo && !d.to.trim()) {
@@ -1511,9 +1648,35 @@ export function GiftPreview({
     }
     action.onClick(el);
   };
+  /* B · Send as is: from the card (a phone's collapsed bar) or the look (a
+     computer, or a phone back from Change), straight to who it's for. */
+  const sendAsIs = () => {
+    setQuick(true);
+    setDesigned(true);
+    setPeek(false);
+    partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
+    setVisited(true);
+    setStage("next");
+  };
+  /* Back from who it's for: to the note, or with Send as is to where it was
+     chosen (a phone: the card, with its two buttons again; a computer: the
+     look). */
   const toGift = () => {
     partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
-    setPart("note");
+    if (quick) {
+      setPart("look");
+      if (!wide) {
+        setDesigned(false);
+        setPeek(true);
+      }
+    } else setPart("note");
+    setStage("gift");
+  };
+  /* "Change" on who it's for: into the builder on the look, the drawer up. */
+  const change = () => {
+    partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
+    setPart("look");
+    setPeek(false);
     setStage("gift");
   };
   /* "Start over": the save gone, the gift back to the page's own default,
@@ -1525,6 +1688,7 @@ export function GiftPreview({
     checkoutAt.current = null;
     partFrom.current = panelRef.current?.getBoundingClientRect().height ?? null;
     setVisited(false);
+    setQuick(false);
     setStage("gift");
     setPart("look");
   };
@@ -1577,7 +1741,6 @@ export function GiftPreview({
        its page, so the next pick plays where it can be seen, above the
        short drawer. */
     setReplay((r) => ({ n: r.n + 1, auto: false }));
-    if (part === "open") toPreviewTop();
     const panel = panelRef.current;
     const was = partFrom.current;
     partFrom.current = null;
@@ -1776,9 +1939,10 @@ export function GiftPreview({
     </div>
   ) : null;
 
-  /* Six bars in all, five for an ask link (no number step): the three design
-     stages, then the checkout's (ParentCheckout STEPS). */
-  const stepsTotal = fixedTo ? 5 : 6;
+  /* Four bars in all, an ask link's too (its who step is just you): the
+     look, the note, then the checkout's (ParentCheckout STEPS). Send as is
+     counts only the checkout's two, there. */
+  const stepsTotal = 4;
   const stepAt = PARTS.indexOf(part) + 1;
   const scaled: React.CSSProperties | undefined =
     desk && fit
@@ -2022,17 +2186,25 @@ export function GiftPreview({
                   beside it leaves the builder, as Close did at the top
                   left, which is gone on a phone. */}
               <BackArrow className="gft-pp-backarrow" label="Close" onClick={shut} />
+              {/* While previewing it's always "Back to editing" (Sam, 6 Nov
+                  2026), on any step. The first time, before they've begun,
+                  the card is already a finished gift (B · Send as is, 7 Nov
+                  2026): send it as it is, or make it theirs. */}
+              {!sent && !designed && next ? (
+                <button type="button" className="gft-pp-ghost" onClick={sendAsIs}>
+                  Send as is
+                </button>
+              ) : null}
               <button ref={peekCta} type="button" className="gft-pp-cta" onClick={expand}>
-                {/* While previewing it's always "Back to editing" (Sam, 6 Nov 2026), on
-                    any step; only the first time, before they've begun, "Start
-                    designing". */}
-                {sent ? "Back" : designed ? "Back to editing" : "Start designing"}
+                {sent ? "Back" : designed ? "Back to editing" : next ? "Make it yours" : "Start designing"}
               </button>
             </div>
           ) : null}
           {visited && next ? (
             <div className="gft-pp-next" hidden={stage !== "next"} {...(!wide && peek ? { inert: "" } : {})}>
-              <GiftSentContext.Provider value={sentHost}>{next(toGift, shut, wide ? undefined : () => setPeek(true))}</GiftSentContext.Provider>
+              <GiftSentContext.Provider value={sentHost}>
+                {next({ back: toGift, close: shut, collapse: wide ? undefined : () => setPeek(true), quick, change })}
+              </GiftSentContext.Provider>
             </div>
           ) : null}
           {stage === "next" ? null : (
@@ -2048,9 +2220,7 @@ export function GiftPreview({
                   ? fixedTo
                     ? `Write ${fixedTo}’s note`
                     : "Write their note"
-                  : part === "open"
-                    ? "When they open it"
-                    : fixedTo
+                  : fixedTo
                       ? `Build ${fixedTo}’s care package`
                       : "Build their care package"}
               </h2>
@@ -2068,26 +2238,20 @@ export function GiftPreview({
               <p className="gft-pp-sub">
                 {part === "note"
                   ? "The note and photo are optional."
-                  : part === "open"
-                    ? "Pick what plays as the card comes out."
-                    : "Pick how it looks."}
+                  : "Pick how it looks."}
               </p>
               <ResumeLine step={part} />
               <StepBars className="gft-pp-steps" total={stepsTotal} lit={stepAt} label={`Step ${stepAt} of ${stepsTotal}`} />
             </div>
           ) : null}
           <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>
-            {/* Stage 1, the look: the backgrounds (seasonal first). Stage
-                2, the opening: what plays when they open it, alone, so on a
-                phone the drawer is short and the card plays above it. Stage
-                3, the note: their name, the note, how it's signed, then the
-                photo. Without the builder, all of it, in the order it always
-                had. */}
+            {/* Stage 1, the look and what plays when they open it, on one
+                screen (C · One look screen, 7 Nov 2026). Stage 2, the note:
+                their name, the note, how it's signed, then the photo.
+                Without the builder, all of it, in the order it always had. */}
             {builder ? (
               part === "look" ? (
-                <ScenePicker scene={scene} onPick={pick} />
-              ) : part === "open" ? (
-                <EffectPicker effect={d.effect ?? null} onPick={pickEffect} labelled={false} />
+                <LookPicker scene={scene} onPick={pick} effect={d.effect ?? null} onPickEffect={pickEffect} />
               ) : (
                 <div className="gft-pp-group">
                   {noteFields}
@@ -2116,7 +2280,15 @@ export function GiftPreview({
             {/* Back a stage, beside Continue, from the second stage on (Sam,
                 6 Nov 2026: "a back arrow next to the 'continue' button ...
                 its own container with the same corner radius"). */}
-            {builder && part !== "look" ? <BackArrow className="gft-pp-backarrow" onClick={() => toPart(part === "note" ? "open" : "look")} /> : null}
+            {builder && part !== "look" ? <BackArrow className="gft-pp-backarrow" onClick={() => toPart("look")} /> : null}
+            {/* B · Send as is beside Continue on the look: always on a
+                computer (its builder opens here, with no card first), and
+                on a phone once they've chosen it and come back to Change. */}
+            {builder && next && part === "look" && (wide || quick) ? (
+              <button type="button" className="gft-pp-ghost gft-pp-ghost-fit" onClick={sendAsIs}>
+                Send as is
+              </button>
+            ) : null}
             <button type="button" className="gft-pp-cta" onClick={(e) => go(e.currentTarget)} disabled={photoBusy}>
               {action.label}
             </button>

@@ -1261,3 +1261,144 @@ fieldset.prc-module {
   font-size: 16px;
   line-height: 21px;
 }
+
+/* ══ WHO IT'S FOR, IN THE BUILDER (Effort B, D and E, Sam, 7 Nov 2026) ══════
+   One step for their number and yours (D). With Send as is (B) the card's
+   row heads it, with Change. The wallets (E) fill the foot beside the back
+   arrow, dimmed until the step is ready (a tap then shows what's missing);
+   what's due, the promise and the terms sit under the boxes, then "Pay by
+   card instead". Flat fills, white ground, no text under 14px. */
+.prc-e-help,
+.prc-embedded .prc-fine {
+  font-size: 14px;
+  line-height: 19px;
+}
+.prc-e-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #f0f0f0;
+}
+.prc-e-card .scene-swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.prc-e-card .scene-swatch-env {
+  width: 22px;
+  height: 15px;
+}
+.prc-e-card p {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: #141618;
+}
+.prc-e-card button {
+  flex: none;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.12);
+  color: #141618;
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+}
+.prc-e-card button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.prc-on-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.prc-on-text > span {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.prc-e-due {
+  display: grid;
+}
+.prc-e-due .prc-promise {
+  margin-top: 14px;
+}
+.prc-e-legal {
+  display: grid;
+  gap: 8px;
+}
+.prc-e-consent {
+  color: rgba(20, 22, 24, 0.62);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+}
+.prc-e-legal .prc-e-terms {
+  margin: 0;
+}
+.prc-e-bycard {
+  justify-self: start;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: #141618;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  text-decoration: underline;
+  text-decoration-color: rgba(20, 22, 24, 0.35);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.prc-e-bycard:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.prc-e-bycard:focus-visible {
+  border-radius: 4px;
+}
+/* The foot: the back arrow, then the wallets (or Continue to payment). */
+.prc-e-footmain {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.prc-e-footmain > .gft-pp-cta {
+  flex: 1 1 auto;
+}
+.prc-e-wallets {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 52px;
+  transition: opacity 200ms ease-out;
+}
+.prc-e-wallets:not([data-ready]) {
+  opacity: 0.5;
+}
+/* Until Stripe says a wallet can show: laid out over Continue at its width
+   (so it can measure), unseen and untouchable. */
+.prc-e-wallets[data-pending] {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.prc-e-wallets.prc-wallet-mock {
+  display: flex;
+  gap: 8px;
+}
+.prc-e-wallets .prc-wallet {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-e-wallets {
+    transition: none;
+  }
+}
+.prc-embedded .prc-mock-tag {
+  font-size: 14px;
+  line-height: 18px;
+}

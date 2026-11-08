@@ -8,7 +8,8 @@
    (model/giftDraft.ts: the background, what plays, the note, the sign-off,
    their student's name, and the photo when it's small enough to store), the
    fields they typed (their student's number, their own name, mobile and
-   email) and the step they were on.
+   email), the step they were on, and whether they chose "Send as is" (the
+   card as it is, straight to who it's for; Effort B, 7 Nov 2026).
 
    Never kept: the card (it's in Stripe's frames: we can't read it, and
    mustn't store it), the marketing boxes (consent is given fresh each time),
@@ -21,13 +22,21 @@ import { FROM_MAX, NOTE_MAX, isDelight, isScene, type SceneId } from "./gift";
 import type { GiftDraft } from "./giftDraft";
 import { PHOTO_MAX_CHARS } from "./giftPhoto";
 
-/** The builder's stages, then the checkout's steps (ParentCheckout Step). */
-export type ResumeStep = "look" | "open" | "note" | "student" | "you" | "pay";
-const STEPS: readonly ResumeStep[] = ["look", "open", "note", "student", "you", "pay"];
+/** The builder's stages, then the checkout's steps (ParentCheckout Step):
+ *  the look (and what plays, one screen since Effort C, 7 Nov 2026), the
+ *  note, who it's for and who it's from (one step since Effort D), the
+ *  charge. */
+export type ResumeStep = "look" | "note" | "who" | "pay";
+const STEPS: readonly ResumeStep[] = ["look", "note", "who", "pay"];
+/** A save from before the steps were merged (v1, 7 Nov 2026) comes back on
+ *  the step its old one became: the opening is on the look now, and their
+ *  number and you are one step. */
+const OLD_STEPS: Record<string, ResumeStep> = { look: "look", open: "look", note: "note", student: "who", you: "who", pay: "who" };
 
-/** What they typed in the checkout. Phone numbers are digits only. */
-export type KeptFields = { phone: string; confirm: string; name: string; email: string; mobile: string };
-const NO_FIELDS: KeptFields = { phone: "", confirm: "", name: "", email: "", mobile: "" };
+/** What they typed in the checkout. Phone numbers are digits only. (Their
+ *  number is typed once since Effort D; a v1 save's confirm is dropped.) */
+export type KeptFields = { phone: string; name: string; email: string; mobile: string };
+const NO_FIELDS: KeptFields = { phone: "", name: "", email: "", mobile: "" };
 
 /** The gift as kept. `scene` is null when the one saved has since been
  *  retired (the page's own pick stands then). */
@@ -37,12 +46,16 @@ type Kept = {
   /** The last edit (ms): the save is a day old 24 hours after it. */
   at: number;
   step: ResumeStep;
+  /** "Send as is": the card as it is, the note skipped (Effort B). */
+  quick: boolean;
   fields: KeptFields;
   /** Null until the gift itself is edited (the page's own season pick isn't kept). */
   gift: KeptGift | null;
 };
 
 const KEY = "tp_parent_resume_v1";
+/** The shape written now; v1 (six steps, a confirm field) is still read. */
+const VERSION = 2;
 const DAY = 24 * 60 * 60 * 1000;
 /** Bigger than any honest save (a photo at its cap and a full note). */
 const RAW_MAX = PHOTO_MAX_CHARS + 20_000;
@@ -56,6 +69,7 @@ let timer: ReturnType<typeof setTimeout> | null = null;
    never starts one (pressing Continue isn't something to keep), but the
    first edit's save starts on it. */
 let stepNow: ResumeStep = "look";
+let quickNow = false;
 
 const storage = (): Storage | null => {
   try {
@@ -88,16 +102,18 @@ function parse(raw: string): Kept | null {
   }
   if (!j || typeof j !== "object") return null;
   const o = j as Record<string, unknown>;
-  if (o.v !== 1 || typeof o.at !== "number" || !Number.isFinite(o.at)) return null;
+  if ((o.v !== 1 && o.v !== VERSION) || typeof o.at !== "number" || !Number.isFinite(o.at)) return null;
   const now = Date.now();
   /* A day old, or from the future (a clock moved): a fresh start. */
   if (now - o.at > DAY || o.at > now + 5 * 60 * 1000) return null;
-  const step = STEPS.includes(o.step as ResumeStep) ? (o.step as ResumeStep) : "look";
+  const step =
+    o.v === VERSION ? (STEPS.includes(o.step as ResumeStep) ? (o.step as ResumeStep) : "look") : (OLD_STEPS[String(o.step)] ?? "look");
+  /* Only a v2 save can have chosen Send as is. */
+  const quick = o.v === VERSION && o.quick === true;
   const f = (o.fields ?? {}) as Record<string, unknown>;
   if (typeof f !== "object") return null;
   const fields: KeptFields = {
     phone: digits(f.phone) ?? "",
-    confirm: digits(f.confirm) ?? "",
     name: str(f.name, 80) ?? "",
     email: str(f.email, 254) ?? "",
     mobile: digits(f.mobile) ?? "",
@@ -114,7 +130,7 @@ function parse(raw: string): Kept | null {
       effect: isDelight(g.effect) ? g.effect : null,
     };
   }
-  return { at: o.at, step, fields, gift };
+  return { at: o.at, step, quick, fields, gift };
 }
 
 function load() {
@@ -147,7 +163,7 @@ function write() {
   if (!s) return;
   const g = kept.gift;
   const body = (photo: string | null) =>
-    JSON.stringify({ v: 1, at: kept!.at, step: kept!.step, fields: kept!.fields, gift: g ? { ...g, photo } : null });
+    JSON.stringify({ v: VERSION, at: kept!.at, step: kept!.step, quick: kept!.quick, fields: kept!.fields, gift: g ? { ...g, photo } : null });
   /* The photo only if it's our small data URL and the write takes it; else
      the rest goes without it, quietly. */
   const photo = g && okPhoto(g.photo) ? g.photo : null;
@@ -182,7 +198,7 @@ if (typeof window !== "undefined") {
   });
 }
 
-const blank = (): Kept => ({ at: Date.now(), step: stepNow, fields: NO_FIELDS, gift: null });
+const blank = (): Kept => ({ at: Date.now(), step: stepNow, quick: quickNow, fields: NO_FIELDS, gift: null });
 const sameGift = (a: KeptGift | null, b: KeptGift | null) =>
   a === b ||
   (!!a && !!b && a.to === b.to && a.note === b.note && a.from === b.from && a.scene === b.scene && a.photo === b.photo && a.effect === b.effect);
@@ -218,6 +234,17 @@ export function keepStep(step: ResumeStep) {
   schedule();
 }
 
+/** "Send as is" chosen, or left (they went on to write the note). Like a
+ *  step, a path: it starts no save, and the day runs from the last edit. */
+export function keepQuick(quick: boolean) {
+  quickNow = quick;
+  if (held) return;
+  const was = current();
+  if (!was || was.quick === quick) return;
+  kept = { ...was, quick };
+  schedule();
+}
+
 /** Gone, from memory and the browser. `hold`: they've just paid, so nothing
  *  is kept again until the next gift starts (releaseResume). */
 export function dropResume(opts?: { hold?: boolean }) {
@@ -225,6 +252,7 @@ export function dropResume(opts?: { hold?: boolean }) {
   loaded = true;
   held = !!opts?.hold;
   stepNow = "look";
+  quickNow = false;
   if (timer) clearTimeout(timer);
   timer = null;
   remove();
@@ -233,6 +261,7 @@ export function dropResume(opts?: { hold?: boolean }) {
 export const keptGift = (): KeptGift | null => current()?.gift ?? null;
 export const keptFields = (): KeptFields => current()?.fields ?? NO_FIELDS;
 export const keptStep = (): ResumeStep | null => current()?.step ?? null;
+export const keptQuick = (): boolean => current()?.quick ?? false;
 /** Whether there's anything of theirs in it worth saying so ("We kept your
  *  care package from earlier"): words, a photo, a pick of what plays, or a
  *  field. A background alone, or only a step, comes back without a word. */

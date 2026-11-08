@@ -2389,10 +2389,11 @@ button.tpg-env-link {
   }
 }
 
-/* The opening stage on a phone: the opened card's band runs to the screen's
-   foot, so no strip of the page's grey shows above the short drawer. */
+/* The look (where what plays is picked, Effort C) on a phone: the opened
+   card's band runs to the screen's foot, so no strip of the page's grey
+   shows above the drawer. */
 @media (max-width: 1023.98px) {
-  .gft-preview[data-builder][data-part="open"] .gft-a[data-state="open"] .gft-a-band {
+  .gft-preview[data-builder][data-part="look"] .gft-a[data-state="open"] .gft-a-band {
     min-height: 100svh;
   }
 }
@@ -2725,4 +2726,91 @@ button.tpg-env-link {
   outline: 3px solid #e5751f;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ══ THE EFFORT PICKS IN THE BUILDER (Sam, 7 Nov 2026: "these 4 look good";
+   previews in tapin-staging-work/lever-lab/effort) ═══════════════════════
+   B · Send as is: a grey button beside the dark one, on the phone's
+   collapsed bar ([←] Send as is · Make it yours) and on the look's foot (a
+   computer, or a phone back from Change). C · One look screen: three looks
+   and "+19", no names under them (the picked one's name beside the
+   heading), then four openings in one row. Flat fills, Gilroy 500/600, no
+   text under 14px. */
+.gft-pp-ghost {
+  height: 52px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 14px;
+  background: #f0f0f0;
+  color: #141618;
+  font: 600 16px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 120ms ease-out, background-color 160ms ease-out;
+}
+@media (hover: hover) {
+  .gft-pp-ghost:hover {
+    background: #e6e6e6;
+  }
+}
+.gft-pp-ghost:active {
+  transform: scale(0.98);
+}
+.gft-pp-ghost:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.gft-pp-foot .gft-pp-ghost-fit {
+  flex: none;
+}
+@media (max-width: 1023.98px) {
+  /* The collapsed bar: Send as is and Make it yours share the row evenly. */
+  .gft-pp-peekbar .gft-pp-ghost,
+  .gft-pp-peekbar .gft-pp-ghost ~ .gft-pp-cta {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gft-pp-ghost {
+    transition: none;
+  }
+}
+.gft-pp-look-h {
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.gft-pp-look-h > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+/* The looks' radio group sits in the grid beside "+19". */
+.gft-pp-looks {
+  display: contents;
+}
+.gft-pp-lookmore .scene-swatch {
+  background: #f0f0f0;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.06);
+  color: #141618;
+  font: 600 16px/1 "Gilroy", Arial, sans-serif;
+}
+.gft-pp-fx button {
+  font-size: 14px;
+  line-height: 18px;
+}
+/* No text under 14px on the builder's steps (labels, help, errors, the
+   kept line). */
+.gft-pp-field > span,
+.gft-pp-field > label,
+.gft-pp-error,
+.gft-pp-kept,
+.gft-pp-kept button {
+  font-size: 14px;
+  line-height: 18px;
 }
