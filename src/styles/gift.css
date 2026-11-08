@@ -2862,3 +2862,26 @@ button.tpg-env-link {
     transform-origin: 0 0;
   }
 }
+
+/* The look and "When they open it" tiles at one size (Sam, 8 Nov 2026: "can
+   we have the dimensions for these chips be roughly the same"): both rows
+   are four equal columns with the same gap, every tile fills its column at
+   the same height and corner. */
+.gft-pp-lookrows .gft-pp-grid,
+.gft-pp-fx {
+  gap: 8px;
+}
+.gft-pp-lookrows .gft-pp-swatch {
+  justify-items: stretch;
+}
+.gft-pp-lookrows .gft-pp-swatch .scene-swatch {
+  width: 100%;
+  height: 64px;
+  border-radius: 14px;
+}
+.gft-pp-fx button {
+  height: 64px;
+  align-content: center;
+  padding: 0 4px;
+  border-radius: 14px;
+}
