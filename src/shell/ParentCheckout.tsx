@@ -20,6 +20,7 @@ import {
   keptUtm,
   PARENT_CONSENT_VERSION,
   parentMock,
+  SUMMER_PAUSE_LIVE,
   startParentCheckout,
   toE164,
   type ParentCheckoutStarted,
@@ -286,6 +287,8 @@ function Sheet({
      for later: consent is given fresh. */
   const [mktSms, setMktSms] = useState(false);
   const [mktEmail, setMktEmail] = useState(false);
+  /* Summer break: billing paused over the summer if they tick it. */
+  const [summerPause, setSummerPause] = useState(false);
   /* The care package as the builder left it (step 1): the note and how it's
      signed, the background and the photo, all optional; whatever is filled
      in goes with the checkout. */
@@ -653,6 +656,7 @@ function Sheet({
       gift_scene: noteOpen ? giftScene : null,
       marketing_sms: mktSms,
       marketing_email: mktEmail,
+      summer_pause: summerPause,
       pay_path: path,
       send_as_is: quick,
     });
@@ -674,6 +678,7 @@ function Sheet({
       marketing_sms: mktSms,
       marketing_email: mktEmail,
       consent_text_version: PARENT_CONSENT_VERSION,
+      summer_pause: summerPause,
       utm: keptUtm(),
     });
     setStarted(res);
@@ -1102,6 +1107,11 @@ function Sheet({
             {theirs}
             {yours}
             {consents}
+            {SUMMER_PAUSE_LIVE || parentMock() ? (
+              <Consent id="summer" checked={summerPause} onChange={setSummerPause} label="Pause billing over summer break">
+                No charges over the summer. We text you before it pauses and before it starts again.
+              </Consent>
+            ) : null}
             {walletsShown ? (
               <div className="prc-e-due">
                 {rows}
