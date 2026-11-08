@@ -890,16 +890,57 @@
   line-height: 22px;
   letter-spacing: -0.02em;
 }
-/* The reminder text before each bill (step 4). */
-.tpp-hw-bill {
-  justify-self: start;
-  width: 88%;
-  padding: 8px 10px;
-  border-radius: 16px 16px 16px 6px;
-  background: #e9e9eb;
-  font-size: 12px;
-  line-height: 16px;
-  overflow-wrap: anywhere;
+/* The reminder before each bill (step 4), as an open email (8 Nov 2026):
+   the inbox's back link, the subject, the sender, a two-line body and the
+   address to write to. */
+.tpp-hw-em {
+  gap: 0;
+}
+.tpp-hw-em-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -4px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #861f41;
+}
+.tpp-hw-em-bar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tpp-hw-em-subj {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+.tpp-hw-em-from {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hair);
+}
+.tpp-hw-em-from img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+.tpp-hw-em-from b {
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpp .tpp-hw-em-body {
+  margin: 10px 0 12px;
+  font-size: 14px;
+  line-height: 19px;
 }
 .tpp-hw-mail {
   display: inline-flex;
