@@ -1,4 +1,3 @@
-import TapInIcon from "../shell/TapInIcon";
 import { takeKey } from "../model/redact";
 import { Link } from "react-router-dom";
 import {
@@ -22,6 +21,7 @@ import {
   FIRST,
   MONTHLY,
   PLACES,
+  PLACE_DEFS,
   reducedMotion,
   Chevron,
   Glyph,
@@ -74,6 +74,32 @@ const NAME_VT = false;
 const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
+/* The same line where a phone is too narrow for the whole of it (under
+   375): still says who (parents) and where (Blacksburg). */
+const EYEBROW_SHORT = NAME_VT
+  ? "Virginia Tech parents"
+  : "Parents of Blacksburg students";
+
+/* ══ THE TOP OF THE BAND ON A PHONE: three treatments (8 Nov 2026) ══════════
+   Sam picked header A · What's inside and asked for the top chips to be
+   redone ("they read as stock UI stuck on a photo"). The default is now
+   "b" (Sam's pick, below); "a" · Masthead: the Tapin logo and the line set straight on the photo,
+   white on a photo shade, the account a white ring. The other two are
+   development-only previews, ?hdr=b|c, never read in a production build:
+     "b" · Smoked plate: the app's one glass (plus-app.css .tpa-glass recipe,
+           no backdrop-filter), white type.
+     "c" · White bar: a solid white bar above the photo, ink type, the
+           account on a grey disc; the photo starts under it.
+   A computer keeps its paper label and button (parents.css scopes every
+   treatment to a phone). */
+type HeaderChips = "a" | "b" | "c";
+/* Sam, 8 Nov 2026, picking "b": "let's go with this one". ?hdr=a|c stay as
+   development-only previews. */
+const headerChips = (): HeaderChips => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return "b";
+  const v = new URLSearchParams(window.location.search).get("hdr");
+  return v === "a" || v === "c" ? v : "b";
+};
 
 /* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
    package they'll open every day", now everyone's; "b" and "c" stay as ?ph=
@@ -259,6 +285,7 @@ export default function ParentsHome() {
   useState(hydrateGiftDraft);
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
+  const [chips] = useState(headerChips);
   const headline = PARENT_HEROES[hero];
   const shot = PHOTOS[photo];
 
@@ -402,6 +429,7 @@ export default function ParentsHome() {
 
   /* The headline settles in over the band, once. */
   const titleRef = useRef<HTMLDivElement | null>(null);
+  const tagsRef = useRef<HTMLUListElement | null>(null);
   useEffect(() => {
     if (reducedMotion()) return;
     titleRef.current?.animate?.(
@@ -415,6 +443,21 @@ export default function ParentsHome() {
         easing: "cubic-bezier(.22,1,.36,1)",
         fill: "backwards",
       },
+    );
+    /* Then what's inside, one tag after another, out of the photo's foot. */
+    tagsRef.current?.querySelectorAll("li").forEach((t, i) =>
+      t.animate?.(
+        [
+          { opacity: 0, transform: "translateY(-14px)" },
+          { opacity: 1, transform: "none" },
+        ],
+        {
+          duration: 560,
+          delay: 380 + i * 90,
+          easing: "cubic-bezier(.16,1,.3,1)",
+          fill: "backwards",
+        },
+      ),
     );
   }, []);
 
@@ -466,6 +509,7 @@ export default function ParentsHome() {
         className="tpa-band tpp-band"
         data-hero="parents"
         data-photo={photo}
+        data-hdr={chips}
       >
         {photo === "split" ? (
           <div className="tpa-band-art tpp-split" aria-hidden="true">
@@ -494,9 +538,11 @@ export default function ParentsHome() {
               this"): the cream of the envelope's seal in the photo, ink type,
               the Plus mark in maroon; the account button matches it. */}
           <span className="tpp-label">
-            {/* The Tapin logo, not the Plus mark (Sam, 7 Nov 2026). */}
-            <TapInIcon className="tpp-label-mark" />
-            {EYEBROW}
+            {/* The Tapin Plus mark again (Sam, 8 Nov 2026: "we can replace the
+                tapin logo again with the tapin plus icon"). */}
+            <FlatMark className="tpp-label-mark" />
+            <span className="tpp-label-long">{EYEBROW}</span>
+            <span className="tpp-label-short">{EYEBROW_SHORT}</span>
           </span>
           <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -527,6 +573,25 @@ export default function ParentsHome() {
           </div>
         </div>
       </header>
+
+      {/* A · WHAT'S INSIDE (Sam's pick, 8 Nov 2026), a phone only: three
+          white tags tucked under the photo's foot, the offer card's own
+          white. They carry the 15% now, so the list under the offer
+          doesn't repeat it. */}
+      <ul ref={tagsRef} className="tpp-tags tnum" aria-label="What’s inside">
+        <li>
+          <b data-money="">${CREDIT} off</b>
+          <span>every week</span>
+        </li>
+        <li>
+          <b>{PERCENT}% off</b>
+          <span>once a day</span>
+        </li>
+        <li>
+          <b>{PLACE_DEFS.length} spots</b>
+          <span>in Blacksburg</span>
+        </li>
+      </ul>
 
       <main className="tpa-sheet">
         {/* THE OFFER: what it is, the price, the button. Right under the band
