@@ -132,7 +132,16 @@ export const GLYPHS = {
   shield: "M12 3 5 5.8v5.4c0 4.3 3 8 7 9.3 4-1.3 7-5 7-9.3V5.8L12 3ZM9 12l2 2 4-4.2",
   /* An arrow, left to right. */
   arrow: "M4 12h15M13 6l6 6-6 6",
+  /* A padlock: a price held (the student page's "locked in"). */
+  lock: "M7.5 10.5V8a4.5 4.5 0 0 1 9 0v2.5M6 10.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19v-7A1.5 1.5 0 0 1 6 10.5Z",
+  /* A circle with a cross: cancel. */
+  cancel: "M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17ZM9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6",
 } as const;
+
+/** Who a shared piece is speaking to: the parent page ("they", "your
+ *  student") or the student page ("you"). The parents' words are the
+ *  default, so /parents is unchanged. */
+export type Audience = "parent" | "student";
 
 /* The $60, an estimate, always with its asterisk and SAVES_NOTE in view. */
 export const SAVES = 60;

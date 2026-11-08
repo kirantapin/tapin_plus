@@ -4,8 +4,9 @@ import { logoField, venues } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
-import { PREVIEW_VOICES, VOICES } from "../model/voices";
-import { CREDIT, Chevron, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion } from "./parents_kit";
+import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
+import { AppLink } from "../shell/GetTheApp";
+import { CREDIT, Chevron, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion, type Audience } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -109,7 +110,58 @@ function LogoRow({ size }: { size: number }) {
        they don't claim it ... We still bill them"), so the line is the same
        on an ask link. (Not "manage it from your account": that page explains
        how to cancel, it isn't self-serve; Hormozi audit, 6 Nov 2026.) */
-export function UnderOffer() {
+/* The student page (plus.tapin.app, Sam, 8 Nov 2026) has the same list in
+   its own words: a third benefit, New places, so What you get's last fact
+   isn't lost; and its own promise: a refund asked for and auto-approved, the
+   price held, cancel in the app. No renewal email line: it isn't confirmed
+   that students get one. `monthly` is the price the student page shows. */
+export function UnderOffer({ audience = "parent", monthly = MONTHLY }: { audience?: Audience; monthly?: string }) {
+  if (audience === "student") {
+    return (
+      <div className="tpp-notes">
+        <ul aria-label="Also with Plus">
+          <li>
+            <Glyph d={GLYPHS.percent} />
+            <span>
+              <b>{PERCENT}% off</b> instead, once a day
+            </span>
+          </li>
+          <li>
+            <Glyph d={GLYPHS.star} />
+            <span>
+              <b>Points</b> on everything
+            </span>
+          </li>
+          <li>
+            <FlatMark className="tpp-glyph tpp-notes-mark" />
+            <span>
+              <b>New places</b> at no extra cost
+            </span>
+          </li>
+        </ul>
+        <ul aria-label="The Plus Promise">
+          <li>
+            <Glyph d={GLYPHS.refund} />
+            <span>
+              <b>Refund auto-approved</b> if Plus saved you less than you paid
+            </span>
+          </li>
+          <li>
+            <Glyph d={GLYPHS.lock} />
+            <span>
+              <b>Your {monthly} locked in</b> while you’re a member
+            </span>
+          </li>
+          <li>
+            <Glyph d={GLYPHS.phone} />
+            <span>
+              <b>Cancel anytime</b> in the Tapin app
+            </span>
+          </li>
+        </ul>
+      </div>
+    );
+  }
   return (
     <div className="tpp-notes">
       <ul aria-label="Also with Plus">
@@ -497,7 +549,61 @@ function holdTallest(list: HTMLOListElement) {
 }
 const APP_ICON = asset("/brand/tapin-app-icon.png");
 const HUG = asset("/parents/hero-hug.webp");
-export function HowPhone() {
+/* ── The student page's four steps (plus.tapin.app, round 2, Sam, 8 Nov
+   2026): the same player and phone, in "you". Join with your number, get the
+   app (sign in with the same number: the checkout signs you in by phone, and
+   the membership is kept on that account, which the app reads), save at each
+   place, cancel in the app. Step 3's screen is the five places alone, not a
+   week of saving: "$5 comes off" is What $5 back looks like's picture, and
+   the shorter screen lets the panel be shorter (data-audience in
+   parents.css). The refund is the module right under this one. `first` and
+   `monthly` are the prices the page shows; `free` a promo link's free first
+   month. */
+function studentSteps(first: string, free: boolean, appTab: number): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
+  return [
+    {
+      glyph: GLYPHS.card,
+      when: "Today",
+      title: "Join with your number",
+      line: free ? <>Enter your mobile number. Your first month is free.</> : <>Enter your mobile number and pay {first} for your first month.</>,
+    },
+    {
+      glyph: GLYPHS.phone,
+      when: "Next",
+      title: "Get the Tapin app",
+      line: (
+        <>
+          Sign in with the number you joined with. Your Plus is already there.{" "}
+          <AppLink where="home_how" className="tpp-hw-link" glyph tabIndex={appTab} />
+        </>
+      ),
+    },
+    {
+      glyph: GLYPHS.tag,
+      when: "Every week",
+      title: "Save at each place",
+      line: (
+        <>
+          {money0(CREDIT)} back every week at each place on a {money0(MIN_ORDER)}+ order of food or non-alcoholic drinks. Or {PERCENT}% off, once
+          a day.
+        </>
+      ),
+    },
+    { glyph: GLYPHS.cancel, when: "Anytime", title: "Cancel anytime", line: <>In the Tapin app, whenever you want.</> },
+  ];
+}
+export function HowPhone({
+  audience = "parent",
+  first = FIRST,
+  monthly = MONTHLY,
+  free = false,
+}: {
+  audience?: Audience;
+  first?: string;
+  monthly?: string;
+  free?: boolean;
+} = {}) {
+  const student = audience === "student";
   const [root, seen] = useSeen<HTMLDivElement>();
   const [cur, setCur] = useState(0);
   const [timed, setTimed] = useState<number | null>(null);
@@ -509,6 +615,8 @@ export function HowPhone() {
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   const renews = inAMonth();
+  /* The student's app link only takes focus while its step is open. */
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1) : STEPS;
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -522,6 +630,43 @@ export function HowPhone() {
   useLayoutEffect(() => {
     if (!reducedMotion() && num.current && typeof IntersectionObserver !== "undefined") num.current.textContent = "";
   }, []);
+  /* The student's screens: the app icon settles and "Plus is on" rises; the
+     five places pop in turn; the cancel button rises. */
+  const enterStudent = (el: HTMLElement, i: number) => {
+    const rise = (m: Element | null, delay: number): Animation | undefined =>
+      m?.animate?.(
+        [
+          { opacity: 0, transform: "translateY(10px)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 460, delay, easing: EASE_OUT, fill: "backwards" },
+      );
+    if (i === 1) {
+      el.querySelector(".tpp-hw-store img")?.animate?.(
+        [
+          { opacity: 0, transform: "scale(.82)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 520, delay: 160, easing: EASE_OUT, fill: "backwards" },
+      );
+      rise(el.querySelector(".tpp-hw-on"), 900);
+    }
+    if (i === 2) {
+      wk.current.forEach((a) => a.cancel());
+      wk.current = Array.from(el.querySelectorAll(".tpp-hw-places > span"))
+        .map((m, k) =>
+          m.animate?.(
+            [
+              { opacity: 0, transform: "scale(.7)" },
+              { opacity: 1, transform: "none" },
+            ],
+            { duration: 380, delay: 220 + k * 70, easing: POP, fill: "backwards" },
+          ),
+        )
+        .filter((a): a is Animation => !!a);
+    }
+    if (i === 3) rise(el.querySelector(".tpp-hw-cancel"), 300);
+  };
   const enter = (i: number) => {
     const el = root.current;
     if (!el || reducedMotion()) return;
@@ -537,6 +682,10 @@ export function HowPhone() {
     } else if (num.current) {
       window.clearInterval(typing.current);
       num.current.textContent = SAMPLE_NUMBER;
+    }
+    if (student) {
+      enterStudent(el, i);
+      return;
     }
     if (i === 1)
       el.querySelector(".tpp-hw-bub")?.animate?.(
@@ -612,7 +761,7 @@ export function HowPhone() {
     bar.current?.cancel();
     window.clearTimeout(timer.current);
     setTimed(null);
-    if (play && auto.current && i < STEPS.length - 1) {
+    if (play && auto.current && i < steps.length - 1) {
       setTimed(i);
       const fill = root.current?.querySelectorAll<HTMLElement>(".tpp-hw-timer i")[i];
       bar.current = fill?.animate?.([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], {
@@ -648,7 +797,7 @@ export function HowPhone() {
     go(i, false);
   };
   return (
-    <div ref={root} className="tpp-hw tnum">
+    <div ref={root} className="tpp-hw tnum" data-audience={student ? "student" : undefined}>
       <div className="tpp-hw-grid">
         <div className="tpp-hw-stage" aria-hidden="true">
           <span className="tpp-hw-sun" />
@@ -661,17 +810,74 @@ export function HowPhone() {
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
                   Tapin Plus
                 </div>
-                <span className="tpp-hw-lbl">Their mobile number</span>
+                <span className="tpp-hw-lbl">{student ? "Your mobile number" : "Their mobile number"}</span>
                 <div className="tpp-hw-field">
                   <span ref={num}>{SAMPLE_NUMBER}</span>
                   <span className="tpp-hw-caret" />
                 </div>
                 <div className="tpp-hw-row">
                   <span>First month</span>
-                  <b>{FIRST}</b>
+                  <b>{student ? first : FIRST}</b>
                 </div>
-                <div className="tpp-hw-pay">Pay {FIRST}</div>
+                <div className="tpp-hw-pay">{student && free ? "Join Tapin Plus" : `Pay ${student ? first : FIRST}`}</div>
               </div>
+              {student ? (
+                <>
+                  {/* Get the app, then sign in with the same number: Plus is on. */}
+                  <div className="tpp-hw-s" data-on={cur === 1 ? "" : undefined}>
+                    <div className="tpp-hw-store">
+                      <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                      <span>
+                        <b>Tapin</b>
+                        <small>Free on the App Store</small>
+                      </span>
+                    </div>
+                    <span className="tpp-hw-get">Get</span>
+                    <span className="tpp-hw-hr" />
+                    <span className="tpp-hw-lbl">Sign in with your number</span>
+                    <div className="tpp-hw-field">
+                      <span>{SAMPLE_NUMBER}</span>
+                    </div>
+                    <div className="tpp-hw-on">
+                      <i />
+                      Plus is on
+                    </div>
+                  </div>
+                  {/* The five places, nothing else: $5 back at each. */}
+                  <div className="tpp-hw-s" data-on={cur === 2 ? "" : undefined}>
+                    <div className="tpp-hw-app">
+                      <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                      Tapin Plus
+                    </div>
+                    <span className="tpp-hw-lbl tpp-hw-every">
+                      <b>{money0(CREDIT)} back</b> every week at
+                    </span>
+                    <div className="tpp-hw-places">
+                      {PLACES.map((p) => (
+                        <span key={p.id}>
+                          <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Your Plus in the app, and the way out. */}
+                  <div className="tpp-hw-s" data-on={cur === 3 ? "" : undefined}>
+                    <div className="tpp-hw-app">
+                      <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
+                      Your Plus
+                    </div>
+                    <div className="tpp-hw-plan">
+                      <b>
+                        <i />
+                        Plus is on
+                      </b>
+                      <span>{monthly}/month, locked in</span>
+                    </div>
+                    <span className="tpp-hw-cancel">Cancel Plus</span>
+                  </div>
+                </>
+              ) : (
+                <>
               <div className="tpp-hw-s" data-on={cur === 1 ? "" : undefined}>
                 <div className="tpp-hw-msg">
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
@@ -756,11 +962,13 @@ export function HowPhone() {
                   support@tapin.app
                 </span>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>
         <ol ref={list} className="tpp-hw-steps">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <li key={s.title} className="tpp-hw-step" data-on={cur === i ? "" : undefined} data-timed={timed === i ? "" : undefined}>
               <button type="button" aria-expanded={cur === i} aria-controls={`tpp-hw-more-${i}`} onClick={() => tap(i)}>
                 <span className="tpp-hw-ic">
@@ -806,9 +1014,13 @@ const MARK_FROM: ReadonlyArray<[number, number]> = [
   [2, 3],
   [-3, 2],
 ];
-export function CheckoutPhone() {
+/* The student page (plus.tapin.app, Sam, 8 Nov 2026) shows it as "your
+   phone", in place of its old order card, with its own caption; `start` is
+   the place to show first (/coffeeholics opens on Coffeeholics). */
+export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: Audience; start?: number } = {}) {
+  const student = audience === "student";
   const [stage, seen] = useSeen<HTMLDivElement>(0.5);
-  const [which, setWhich] = useState(0);
+  const [which, setWhich] = useState(start);
   const runs = useRef<Animation[]>([]);
   const played = useRef(false);
   const tapped = useRef(false);
@@ -934,7 +1146,7 @@ export function CheckoutPhone() {
           ref={stage}
           className="tpp-fb-stage"
           role="img"
-          aria-label={`Their phone at checkout at ${p.name}: ${p.order.label}, ${money(p.order.price)}. Plus credit, minus ${money(CREDIT)}. Total ${money(now)}.`}
+          aria-label={`${student ? "Your" : "Their"} phone at checkout at ${p.name}: ${p.order.label}, ${money(p.order.price)}. Plus credit, minus ${money(CREDIT)}. Total ${money(now)}.`}
         >
           <span className="tpp-fb-sun" />
           <div className="tpp-fb-phone">
@@ -1005,10 +1217,16 @@ export function CheckoutPhone() {
               </button>
             ))}
           </div>
-          <p className="tpp-math">
-            They earn the ${CREDIT} on a ${MIN_ORDER}+ meal, and it comes off their next order there. Two credits a month
-            cover the {MONTHLY}. Alcohol is never discounted.
-          </p>
+          {student ? (
+            <p className="tpp-math">
+              Earn <b>{money0(CREDIT)}</b> on a {money0(MIN_ORDER)}+ meal. It comes off your next order there.
+            </p>
+          ) : (
+            <p className="tpp-math">
+              They earn the ${CREDIT} on a ${MIN_ORDER}+ meal, and it comes off their next order there. Two credits a month
+              cover the {MONTHLY}. Alcohol is never discounted.
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -1030,8 +1248,27 @@ const EASE_IN_OUT = "cubic-bezier(0.16, 1, 0.3, 1)";
    7.99/12. When the bar is on screen the credits fill one after the other
    and the line nods as the second passes it. */
 const B_TRACK = 12;
-const MONTHLY_N = Number(MONTHLY.replace(/[^\d.]/g, ""));
-export function WhatIfUnused() {
+/* The student page (plus.tapin.app, Sam, 8 Nov 2026) asks it of itself,
+   "What if I don't save?", and answers with its own promise: the refund is
+   asked for and auto-approved (never "full"), the month-by-month rule one tap
+   down, word for word as that page has always said it. `monthly` is the price
+   it shows; until that price is in, or if it were ever $10 or more (two
+   credits would no longer cover it), the module stays out. */
+const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
+  parent: {
+    h: "What if they don\u2019t use it?",
+    row: "Full refund.",
+    fine: "Full refund if they don\u2019t save what you spent. Cancel anytime by emailing support@tapin.app.",
+  },
+  student: {
+    h: "What if I don\u2019t save?",
+    row: "Refund, auto-approved.",
+    fine: "Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it\u2019s auto-approved.",
+  },
+};
+export function WhatIfUnused({ audience = "parent", monthly = MONTHLY }: { audience?: Audience; monthly?: string } = {}) {
+  const words = WHAT_IF[audience];
+  const MONTHLY_N = Number(monthly.replace(/[^\d.]/g, ""));
   const [meter, seen] = useSeen<HTMLDivElement>(0.6);
   useStagger(meter, seen, ".tpp-b-seg", [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], 520, 700, 120, EASE_IN_OUT);
   useStagger(meter, seen, ".tpp-b-mark", [{ transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }], 0, 360, 1060, "ease-out");
@@ -1058,28 +1295,29 @@ export function WhatIfUnused() {
       show?.cancel();
     };
   }, [open]);
+  if (!(MONTHLY_N > 0 && MONTHLY_N < CREDIT * 2)) return null;
   const seg = `${((CREDIT / B_TRACK) * 100).toFixed(3)}%`;
   return (
     <section className="tpa-module tpp-b" aria-labelledby="tpp-b-h">
       <h2 id="tpp-b-h" className="tpa-h2">
-        What if they don’t use it?
+        {words.h}
       </h2>
       <button type="button" className="tpp-b-row" aria-expanded={open} aria-controls="tpp-b-fine" onClick={() => setOpen((o) => !o)}>
         <Glyph d={GLYPHS.refund} className="tpp-b-ico" />
-        <span>Full refund.</span>
+        <span>{words.row}</span>
         <span ref={chev} className="tpp-b-chev">
           <Chevron />
         </span>
       </button>
       {/* Word for word the promise under the offer (UnderOffer). */}
       <p ref={fine} id="tpp-b-fine" className="tpp-b-fine" hidden={!open}>
-        Full refund if they don’t save what you spent. Cancel anytime by emailing support@tapin.app.
+        {words.fine}
       </p>
       <div
         ref={meter}
         className="tpp-b-meter tnum"
         role="img"
-        aria-label={`Two ${money0(CREDIT)} credits make ${money0(CREDIT * 2)}, more than the ${MONTHLY} a month`}
+        aria-label={`Two ${money0(CREDIT)} credits make ${money0(CREDIT * 2)}, more than the ${monthly} a month`}
         style={{ ["--seg" as string]: seg, ["--at" as string]: `${((MONTHLY_N / B_TRACK) * 100).toFixed(3)}%` }}
       >
         <div className="tpp-b-track">
@@ -1087,7 +1325,7 @@ export function WhatIfUnused() {
           <span className="tpp-b-seg">{money0(CREDIT)}</span>
         </div>
         <span className="tpp-b-mark" aria-hidden="true">
-          <b>{MONTHLY} a month</b>
+          <b>{monthly} a month</b>
           <i />
         </span>
       </div>
@@ -1108,9 +1346,15 @@ export function WhatIfUnused() {
    quote follows with "Read more" running on after its last word, so a card
    is about two-thirds of its old height. The words are model/voices.ts's,
    untouched: `quote` at first glance, `full` one tap down. */
-export function Voices() {
-  const real = VOICES.length > 0;
-  const list = real ? VOICES : parentMock() ? PREVIEW_VOICES : [];
+/* The student page (plus.tapin.app, Sam, 8 Nov 2026) has its own list,
+   model/voices.ts STUDENT_VOICES, empty until real students' words are in;
+   local dev shows its three marked slots without a flag. `className` places
+   the rail (on a computer, three across under the places). */
+export function Voices({ audience = "parent", className }: { audience?: Audience; className?: string } = {}) {
+  const student = audience === "student";
+  const own = student ? STUDENT_VOICES : VOICES;
+  const real = own.length > 0;
+  const list = real ? own : student ? PREVIEW_STUDENT_VOICES : parentMock() ? PREVIEW_VOICES : [];
   const [box, seen] = useSeen<HTMLUListElement>(0.5);
   const runs = useRef<Array<Animation | undefined>>([]);
   /* One card's whole quote at a time (Sam: little text at first touch). */
@@ -1137,7 +1381,12 @@ export function Voices() {
   }, [seen]);
   if (!list.length) return null;
   return (
-    <ul ref={box} className="tpp-v" aria-label="From parents" data-placeholder={real ? undefined : ""}>
+    <ul
+      ref={box}
+      className={className ? `tpp-v ${className}` : "tpp-v"}
+      aria-label={student ? "From students" : "From parents"}
+      data-placeholder={real ? undefined : ""}
+    >
       {list.map((v, i) => (
         <li key={`${v.role}-${i}`}>
           <figure className="tpp-v-q" data-who={v.role === "Parent" ? "parent" : "student"}>
@@ -1194,22 +1443,30 @@ export function Voices() {
 type ProofKey = "students" | "refund" | "places";
 const TURN_MS = 3200;
 const ROLL_MS = 520;
+/* The student page (plus.tapin.app, Sam, 8 Nov 2026) turns through the
+   same three, in its own words: the members line as its band says it, and
+   its own promise (a refund asked for and auto-approved), asked the way its
+   What if I don't save? asks it. "Saved less than you paid? Refund
+   auto-approved." was 351px, wider than the dock on a 390 phone. */
 export function ProofTurn({
   className,
   start,
   paused,
+  audience = "parent",
 }: {
   className: string;
   start: ProofKey;
   paused: boolean;
+  audience?: Audience;
 }) {
+  const student = audience === "student";
   const lines: Array<{ key: ProofKey; body: ReactNode }> = [
     {
       key: "students",
       body: (
         <>
           <span className="tpp-pt-dot" aria-hidden="true" />
-          Over 500 Blacksburg students on Plus
+          {student ? "Over 500 Virginia Tech students on Plus" : "Over 500 Blacksburg students on Plus"}
         </>
       ),
     },
@@ -1218,7 +1475,7 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          Didn’t save what you spent? Full refund.
+          {student ? "Didn\u2019t save? Refund auto-approved." : "Didn\u2019t save what you spent? Full refund."}
         </>
       ),
     },

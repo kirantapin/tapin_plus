@@ -2,12 +2,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { BAR_IDS, covers, logoField, venueCovers, venues } from "../model/content";
+import { venues } from "../model/content";
 import { itemsFor } from "../model/menu";
-import { POINTS_PER_DOLLAR } from "../model/order";
 import { monthlyBack } from "../model/savings";
 import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE } from "../model/seats";
+import { useMedia } from "../shell/useMedia";
+import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
+import { PLACES as KIT_PLACES } from "./parents_kit";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
@@ -20,7 +22,6 @@ import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
-import { ComingTiles } from "../shell/Coming";
 import { HERO_LINES, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
@@ -273,28 +274,9 @@ function PaybackCounter() {
   );
 }
 
-/** Ink that reads on a place's brand colour (WCAG relative luminance). White
- *  wherever it holds about 2:1, as the app's sheets do (Sam, 3 Nov 2026:
- *  "should be white text on merchant color"); ink only on a pale colour. */
-function inkOn(hex: string): string {
-  const n = parseInt(hex.replace("#", ""), 16);
-  const ch = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
-  const l = 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
-  return l > 0.42 ? "#141618" : "#FFFFFF";
-}
-
 const money = (n: number) => `$${n.toFixed(2)}`;
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-function ShieldIcon() {
-  return (
-    <svg viewBox="0 0 24 24">
-      <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="m8.8 12.2 2.2 2.2 4.4-4.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /** The flat four-piece mark, for small places on photographs (the app's
  *  TapInGlyph, white on the glass). The paper mark is for the big moments. */
@@ -312,41 +294,12 @@ function FlatMark({ className }: { className?: string }) {
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const COLLAGE = asset("/collage/blacksburg.webp");
 
-/** Each place's order holds this long; a ring round its logo counts it down. */
-const HOLD_MS = 4500;
-/** How long a tapped place stays put before the cycle carries on (Sam, 3 Nov 2026). */
-const TAP_HOLD_MS = 5000;
-const RING = 2 * Math.PI * 22;
-/** The places' tabs and the next place's. */
-const TABS = EXAMPLES.length + 1;
-
 const Play = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-play">
     <path d="M8 5.6v12.8c0 .8.9 1.3 1.6.8l9.4-6.4c.6-.4.6-1.3 0-1.7L9.6 4.8C8.9 4.3 8 4.8 8 5.6Z" fill="currentColor" />
   </svg>
 );
 
-/* ══ THE PLACES AS TABS ON THE ORDER (Sam, 3 Nov 2026, from three versions:
-   "let's try this one") ═════════════════════════════════════════════════════
-   The five logos are tabs on the order card, at full colour. The playing tab
-   wears the place's colour and runs into the card's band, and a ring round
-   its logo counts its order down (Sam, 3 Nov 2026: a line on the tab's top
-   edge read as a notch). */
-/* THREE VARIATIONS ON THE TABS (Sam, 3 Nov 2026: "3 /impeccable redesign
-   variations of this section"). Preview with ?hiw=1|2|3; without it the card
-   is the Tabs version as picked.
-   1 · Plate: the dish leads. The place's colour panel holds a big photo of
-     the order, the way the app's item sheet opens on its picture.
-   2 · Colour: Plate's photo, and the whole order card wears the place's
-     colour, tab to total (Sam, 3 Nov 2026: "not the whole card, i meant
-     like the child container").
-   3 · Price tag: quiet grey tab and card, no band; what you pay is the
-     big number, the menu price struck beside it, the $5 and the next $5 as
-     two chips. */
-/* Grey (Sam, 3 Nov 2026: "i changed my mind about the color here, maybe
-   it's just the same gray background that the 'step through it' button
-   has"): Colour's layout, tab to total, in the button's grey with ink. The
-   default; the coloured version stays at ?hiw=2. */
 /* Counter is the offer (Sam, 3 Nov 2026, picked from the three). Sticker
    and Poster stay previewable at ?offer=1|3, the plain price at ?offer=0. */
 type OfferLook = "shipped" | "1" | "2" | "3";
@@ -355,304 +308,6 @@ const offerLook = (): OfferLook => {
   const v = new URLSearchParams(window.location.search).get("offer");
   return v === "0" ? "shipped" : v === "1" || v === "3" ? v : "2";
 };
-type OrderLook = "tabs" | "plate" | "colour" | "tag" | "grey";
-const orderLook = (): OrderLook => {
-  if (typeof window === "undefined") return "grey";
-  const v = new URLSearchParams(window.location.search).get("hiw");
-  return v === "0" ? "tabs" : v === "1" ? "plate" : v === "2" ? "colour" : v === "3" ? "tag" : "grey";
-};
-/* THE PLACE TABS, THREE VERSIONS (Sam, 3 Nov 2026: "now it looks too tight.
-   I think we need to revisit the how it works section - specifically the
-   tabs"). Preview with ?tabs=a|b|c; without it the tabs are as shipped.
-   A · Segmented: the logos sit in one grey track, and the playing one rides
-     a white pill that slides, iOS-style; the order card sits apart below.
-   B · Open row: no plate at all, the logos spaced out with room to breathe,
-     the countdown ring alone marks the playing one; the card sits apart.
-   C · Roomy tabs: today's tab joined to the card, at full size again (56px
-     tabs, 36px logos), with more air above and below.
-   A is the default (Sam, 3 Nov 2026: "I like option A"); the others, and the
-   old joined tab (?tabs=0), stay previewable. */
-type TabsLook = "shipped" | "a" | "b" | "c";
-const tabsLook = (): TabsLook => {
-  if (typeof window === "undefined") return "a";
-  const v = new URLSearchParams(window.location.search).get("tabs");
-  return v === "0" ? "shipped" : v === "b" || v === "c" ? v : "a";
-};
-
-function OrderCard({ start = 0, look = "tabs", monthly }: { start?: number; look?: OrderLook; monthly: string }) {
-  const card = useRef<HTMLDivElement | null>(null);
-  const rings = useRef<Array<SVGCircleElement | null>>([]);
-  const [inView, setInView] = useState(false);
-  const [which, setWhich] = useState(start);
-  /* The cycle never stops on its own: hovering or touching the card does
-     nothing to it (Sam, 3 Nov 2026: "the auto cycle shouldn't stop until I
-     click on one of these, and then when I click it stops for 5 seconds and
-     then resumes if I don't click on it again"). A tap shows that place and
-     holds it TAP_HOLD_MS; another tap starts the hold again. */
-  const [held, setHeld] = useState(false);
-  const [taps, setTaps] = useState(0);
-  const pick = (n: number) => {
-    setWhich(n);
-    setHeld(true);
-    setTaps((t) => t + 1);
-  };
-  useEffect(() => {
-    if (!held) return;
-    const t = window.setTimeout(() => setHeld(false), TAP_HOLD_MS);
-    return () => window.clearTimeout(t);
-  }, [held, taps]);
-  const still = reducedMotion();
-  /* Paused behind the checkout: its ring repainted the page every frame
-     under the scrim and made the checkout's close stutter. */
-  const covered = usePlusCheckoutOpen();
-  useEffect(() => {
-    const el = card.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.4 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  /* The playing tab's ring fills over HOLD_MS, and its end moves the card
-     on: one clock for what you see and what happens. A pointer or focus on
-     the card does nothing to it; tapping a tab shows that place, its ring
-     empty and still for TAP_HOLD_MS, then filling as usual. Reduced motion: a full ring, no
-     advance, the tabs still switch. */
-  useEffect(() => {
-    const ring = rings.current[which];
-    if (!ring || still || EXAMPLES.length < 2 || typeof ring.animate !== "function") return;
-    const run = ring.animate([{ strokeDashoffset: RING }, { strokeDashoffset: 0 }], { duration: HOLD_MS, easing: "linear", fill: "forwards" });
-    if (!inView || held || covered) run.pause();
-    run.onfinish = () => setWhich((n) => (n + 1) % TABS);
-    return () => {
-      run.onfinish = null;
-      run.cancel();
-    };
-  }, [which, inView, held, still, covered]);
-  /* THE ORIGINAL PAGE'S BEAT (Sam, 3 Nov 2026: "I like the old way the
-     numbers animated here on the original plus.tapin.app page"), its timings
-     from how.css: the order lands; at 500ms the credit row comes in; at
-     820ms the total swaps, the menu price lifting out as what you pay rises
-     in; at 1250ms the new $5 and the points arrive. The credit spent here is
-     one you already have, and this order earns the next one, so every row
-     is true. Reduced motion: the finished card, no movement. */
-  useEffect(() => {
-    const body = card.current;
-    if (!body || still) return;
-    const ease = "cubic-bezier(.22,1,.36,1)";
-    const q = (sel: string) => body.querySelector<HTMLElement>(sel);
-    q(".tpa-order-in")?.animate?.([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 420, easing: ease });
-    /* The credit drops in from above, onto the order it comes off (Sam,
-       3 Nov 2026: "the your credit should animate in downward"). */
-    q(".tpa-order-off")?.animate?.([{ opacity: 0, transform: "translateY(-12px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 500, easing: ease, fill: "backwards" });
-    q(".tpa-swap .was")?.animate?.([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-7px)" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
-    q(".tpa-swap .now")?.animate?.([{ opacity: 0, transform: "translateY(9px)" }, { opacity: 1, transform: "none" }], { duration: 300, delay: 820, easing: ease, fill: "both" });
-    q(".tpa-order-earn")?.animate?.([{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }], { duration: 340, delay: 1250, easing: ease, fill: "backwards" });
-  }, [which, still]);
-  /* The last tab is the next place to join (Sam, 3 Nov 2026: "a mystery
-     logo on the far right to show that as we add new spots the plus member
-     rates are locked in"). */
-  const mystery = which === EXAMPLES.length;
-  const ex = EXAMPLES[mystery ? 0 : which] ?? EXAMPLES[0];
-  if (!ex) return null;
-  const points = Math.floor((Math.round(ex.price * 100) * POINTS_PER_DOLLAR) / 100);
-  return (
-    <div
-      ref={card}
-      className="tpa-carousel"
-      data-tabs={tabsLook()}
-      data-look={look === "grey" ? "colour" : look}
-      data-grey={look === "grey" ? "" : undefined}
-      role="group"
-      aria-label="Example orders"
-      style={
-        look === "grey"
-          ? { ["--brand" as string]: "var(--well)", ["--brand-ink" as string]: "var(--ink)" }
-          : { ["--brand" as string]: ex.venue.brandColor, ["--brand-ink" as string]: inkOn(ex.venue.brandColor) }
-      }
-    >
-      {/* The places first, then their order (Sam, 3 Nov 2026: "these should
-          show up above the carousel"). */}
-      {EXAMPLES.length > 1 ? (
-        <div
-          className="tpa-tabs"
-          style={{ ["--i" as string]: which, ["--n" as string]: TABS }}
-        >
-          {/* One tab plate that slides to the playing place, rather than each
-              tab lighting up in place (Sam, 3 Nov 2026: "the tab selector
-              should slide"). */}
-          <span className="tpa-tab-plate" aria-hidden="true" />
-          {EXAMPLES.map((e, i) => (
-            <button
-              key={e.venue.id}
-              type="button"
-              aria-label={`Show an order at ${e.venue.name}`}
-              aria-pressed={i === which}
-              data-on={i === which ? "" : undefined}
-              onClick={() => pick(i)}
-            >
-              <svg className="tpa-tab-ring" viewBox="0 0 48 48" aria-hidden="true">
-                <circle className="tpa-tab-ring-track" cx="24" cy="24" r="22" />
-                <circle
-                  ref={(n) => {
-                    rings.current[i] = n;
-                  }}
-                  className="tpa-tab-ring-run"
-                  cx="24"
-                  cy="24"
-                  r="22"
-                  strokeDasharray={RING}
-                  strokeDashoffset={i === which && still ? 0 : RING}
-                />
-              </svg>
-              <span className="collar tpa-tab-logo" data-field={logoField(e.venue.id)}>
-                <img src={e.venue.logo} alt="" decoding="async" />
-              </span>
-              {/* The name beside the logo, on a computer only (the tabs
-                  stand as a list there). */}
-              <span className="tpa-tab-name" aria-hidden="true">
-                {e.venue.name}
-              </span>
-            </button>
-          ))}
-          <button
-            type="button"
-            aria-label="The next place to join Plus"
-            aria-pressed={mystery}
-            data-on={mystery ? "" : undefined}
-            onClick={() => pick(EXAMPLES.length)}
-          >
-            <svg className="tpa-tab-ring" viewBox="0 0 48 48" aria-hidden="true">
-              <circle className="tpa-tab-ring-track" cx="24" cy="24" r="22" />
-              <circle
-                ref={(n) => {
-                  rings.current[EXAMPLES.length] = n;
-                }}
-                className="tpa-tab-ring-run"
-                cx="24"
-                cy="24"
-                r="22"
-                strokeDasharray={RING}
-                strokeDashoffset={mystery && still ? 0 : RING}
-              />
-            </svg>
-            <span className="tpa-tab-logo tpa-mystery" aria-hidden="true">
-              ?
-            </span>
-            <span className="tpa-tab-name" aria-hidden="true">
-              More joining
-            </span>
-          </button>
-        </div>
-      ) : null}
-      <div
-        className="tpa-order"
-        data-edge={which === 0 ? "first" : which === TABS - 1 ? "last" : undefined}
-      >
-        {mystery ? (
-          <div className="tpa-order-in tpa-next" key="next">
-            {/* The kinds of place joining next, and the lock-in (Sam, 4 Nov
-                2026). */}
-            <p className="tpa-next-h">More places are joining</p>
-            <ComingTiles />
-            <p className="tpa-next-p">
-              Plus costs more for new members as they join. Join now and yours stays {monthly}.
-            </p>
-          </div>
-        ) : null}
-        {mystery || look === "tag" ? null : (
-          /* The name only: the tab above already shows the logo (Sam, 3 Nov
-             2026: "showing the logos twice is a bit unnecessary"). */
-          <p className="tpa-order-band">
-            <b>{ex.venue.name}</b>
-          </p>
-        )}
-        {/* Grey keeps the dish beside its name, not a strip across the card
-            (Sam, 3 Nov 2026: "this image takes up a lot of real estate"). */}
-        {!mystery && (look === "plate" || look === "colour") ? (
-          <div className="tpa-order-plate" key={`plate-${which}`}>
-            <img src={ex.img} alt="" decoding="async" />
-          </div>
-        ) : null}
-        {mystery ? null : look === "tag" ? (
-          <div className="tpa-order-in tpa-ptag" key={which}>
-            <p className="tpa-ptag-item">
-              <img src={ex.img} alt="" decoding="async" />
-              <span>
-                <b>{ex.label}</b>
-                <span>{ex.venue.name}</span>
-              </span>
-            </p>
-            <p className="tpa-ptag-pay">
-              <span className="tpa-swap">
-                <b className="was tnum">{money(ex.price)}</b>
-                <b className="now tnum">{money(ex.price - CREDIT)}</b>
-              </span>
-              <s className="tpa-order-off tnum" aria-label={`instead of ${money(ex.price)}`}>
-                {money(ex.price)}
-              </s>
-            </p>
-            <p className="tpa-order-earn tpa-ptag-chips">
-              <span className="tpa-ptag-chip tpa-ptag-off">&minus;${CREDIT} credit</span>
-              <span className="tpa-ptag-chip">+${CREDIT} back for next week</span>
-              <span className="tpa-ptag-pts">+{points} points</span>
-            </p>
-          </div>
-        ) : (
-          <div className="tpa-order-in" key={which}>
-            <p className="tpa-order-item">
-              {look === "plate" || look === "colour" ? null : (
-                <img src={ex.img} alt="" decoding="async" />
-              )}
-              <span>{ex.label}</span>
-              <b className="tnum">{money(ex.price)}</b>
-            </p>
-            <p className="tpa-order-off">
-              <span>Your ${CREDIT} credit</span>
-              <b className="tnum">&minus;{money(CREDIT)}</b>
-            </p>
-            <p className="tpa-order-total">
-              <span>You pay</span>
-              <span className="tpa-swap">
-                <b className="was tnum">{money(ex.price)}</b>
-                <b className="now tnum">{money(ex.price - CREDIT)}</b>
-              </span>
-            </p>
-            {/* The points it earns, last, a beat after the price drops (Sam,
-                5 Nov 2026: points "should be included in the carousel"; the
-                "+$5 back for next week" half stays out, as clutter, 3 Nov). */}
-            <p className="tpa-order-earn tpa-order-pts">
-              <span>Points earned</span>
-              <b className="tnum">+{points}</b>
-            </p>
-          </div>
-        )}
-        {/* What else it works on at this place (Sam, 4 Nov 2026: "a simple
-            design showing what else this works on at the currently selected
-            location"). One quiet row of words. */}
-        {mystery ? null : (
-          <p className="tpa-order-also" key={`also-${which}`}>
-            {/* "Works on", not "Also here" (Sam, 4 Nov 2026). */}
-            <span>Works on</span>
-            {covers
-              .filter((c) => (venueCovers[ex.venue.id] ?? []).includes(c.id))
-              .map((c) => (
-                <b key={c.id}>{c.label}</b>
-              ))}
-          </p>
-        )}
-        {/* At a bar, say what its drinks get (Sam, 4 Nov 2026: "People
-            probably thought they could earn credit from alcohol", then
-            "maybe not just the burg right?"). */}
-        {BAR_IDS.has(ex.venue.id) ? (
-          <p className="tpa-order-note" key={`note-${which}`}>
-            At {ex.venue.name}, your $5 and 15% go on anything but alcohol.
-          </p>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 /* A free month's own questions, first (5 Nov 2026): whether the free month
    charges anything, and who it's for. Said from the checkout's terms. */
 const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
@@ -724,14 +379,13 @@ const Chevron = () => (
    else, the offer, the promise, the places and Join, is the home page's. */
 export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
-  const startAt = place ? Math.max(0, EXAMPLES.findIndex((e) => e.venue.id === place.id)) : 0;
+  const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
   const { track } = useEventTracking();
   /* /how lands here with ?how and the walkthrough open. */
   const [how, setHow] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("how"));
   /* "Try it once for free" (Sam, 3 Nov 2026: "we should have the Try it once
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
-  const [look] = useState(orderLook);
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
@@ -823,65 +477,28 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     </button>
   );
   const [offer] = useState(offerLook);
-  /* THE PLUS PROMISE (Sam, 3 Nov 2026: "we probably also want to show the
-     plus promise guarantee - every month is refundable"). The app's own line
-     and the month-by-month check the presale terms carried. A refund is asked
-     for and auto-approved, never automatic. */
-  const promise = (
-    <section className="tpa-module tpa-promise" aria-labelledby="tpa-promise">
-      <span className="tpa-well tpa-promise-icon" aria-hidden="true">
-        <ShieldIcon />
-      </span>
-      <details className="tpa-more tpa-promise-more-d">
-        <summary>
-          <span>
-            <b id="tpa-promise" className="tpa-promise-h">
-              The Plus Promise
-            </b>
-            <span className="tpa-promise-line">Save more than Plus costs, or get your money back.</span>
-          </span>
-          <Chevron />
-        </summary>
-        <p>
-          Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it’s
-          auto-approved.
-        </p>
-      </details>
-    </section>
+  /* THE MAIN PAGE, WITH WHAT THE PARENTS PAGE TAUGHT US (Sam, 8 Nov 2026:
+     "push the round 2 changes, they look good, for the main plus.tapin.app
+     page"; previews in tapin-staging-work/main-from-parents). The two Plus
+     Promise cards went: the promise is now the list under the offer, the
+     proof line and What if I don't save?, lower down where reassurance
+     belongs. The "locked in" fold is a line of that list too.
+     Under Join, the wallet, said before the tap (the checkout is a number,
+     a code, then Apple Pay or Google Pay, with no card form). */
+  const wallet = member ? null : (
+    <p className="tpp-under tps-wallet">
+      Your number, then one tap with <b>Apple Pay</b> or <b>Google Pay</b>
+    </p>
   );
-  /* The same promise as hero A's first card (Sam, 4 Nov 2026: "save more
-     than the membership, or your money back automatically - it'd be auto
-     approved"). Said as "auto-approved": the refund is asked for, then
-     approved without a review, so "automatically" alone would promise
-     money nobody asked for. One line and a quieter one; the month-by-month
-     rule folds away. */
-  const promiseTop = (
-    <section className="tpa-module tpa-promise tpa-promise-top" aria-labelledby="tpa-promise-top">
-      <span className="tpa-promise-seal" aria-hidden="true">
-        <ShieldIcon />
-      </span>
-      {/* No fold: the two lines are the whole of it, and the column keeps the
-          width the chevron took, so the promise sits on two lines. */}
-      <p className="tpa-promise-copy">
-        <b id="tpa-promise-top" className="tpa-promise-h">
-          Save more than the membership, or your money back
-        </b>
-        <span className="tpa-promise-line">Refunds are auto-approved.</span>
-      </p>
-    </section>
-  );
-  const lockMore = (
-    <details className="tpa-more">
-      <summary>
-        Your {MONTHLY} is locked in
-        <Chevron />
-      </summary>
-      <p>
-        It goes up for new members as more places join, and to {PLUS_NEXT_PRICE} once these 100 spots are gone. Yours never
-        does while you’re a member, so it pays to get in early.
-      </p>
-    </details>
-  );
+  /* The proof line at the foot of the held offer card (a computer; on a
+     phone it rides on the dock). It starts on the places: the band already
+     says the 500+. Still while a pop-up is over the page. */
+  const covered = checkoutOpen || trial || how || !!placeOpen;
+  const proofCard = <ProofTurn className="tpp-pt-card" start="places" paused={covered} audience="student" />;
+  /* On a computer the voices sit three across under the places, so the
+     held column stays shorter than the window; on a phone, a rail under
+     the list. */
+  const desk = useMedia("(min-width: 1024px)");
   /* To Members and back, a fade with a very slight zoom (Sam, 3 Nov 2026:
      "a smooth fade. And like a zoom out / zoom in very subtle"): this page
      eases back a touch as it fades, Members arrives a touch large and
@@ -933,7 +550,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   }, []);
 
   return (
-    <div className="tpa tpa-home">
+    <div className="tpa tpa-home tps">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
       {member ? null : linked ? (
@@ -1020,18 +637,18 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </header>
 
       <main ref={sheetRef} className="tpa-sheet">
-        {/* Hero A's guarantee, in its own card above How it works (Sam,
-            4 Nov 2026). The control keeps it further down, as it was. */}
-        {hero !== "0" && !place && !invite ? promiseTop : null}
-        {/* The order earning its $5 comes first, right under the band (Sam,
-            3 Nov 2026: "I feel like this interactive animation should show
-            up at the top"); the offer and Join follow, and the dock keeps
-            Join on screen the whole way down. */}
-        <section className="tpa-module" aria-labelledby="tpa-how">
+        {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
+            the parents page's checkout phone, in "you", in place of the old
+            order card (the same $12 to $7 idea, so only one survives). It
+            stays right under the band, as the order card was (Sam, 3 Nov
+            2026: "this interactive animation should show up at the top"),
+            with Step through it and View FAQ under it. Every hero gets it;
+            the Promise card that sat above it on heroes m, s and p went. */}
+        <section className="tpa-module tps-fb" aria-labelledby="tpa-how">
           <h2 id="tpa-how" className="tpa-h2">
-            How it works
+            What ${CREDIT} back looks like
           </h2>
-          <OrderCard start={startAt} look={look} monthly={MONTHLY} />
+          <CheckoutPhone audience="student" start={startAt} />
           <button type="button" className="tpa-step-wide" onClick={openHow}>
             <Play />
             Step through it
@@ -1097,6 +714,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </ul>
         </section>
 
+        {/* Students' own words (round 1, Sam, 8 Nov 2026): nothing shows until
+            model/voices.ts STUDENT_VOICES has real ones; local dev shows the
+            marked slots. On a computer, three across here. */}
+        {desk ? <Voices audience="student" className="tps-voices-desk" /> : null}
+
+        {/* The offer card and, under it (not in it), one quiet list and the
+            voices, as the parents page has them: on a computer the held
+            right-hand column; on a phone the wrapper steps aside
+            (display: contents). */}
+        <div className="tpp-offer-col tps-offer-col">
         {/* THE OFFER, SIMPLE (Sam, 3 Nov 2026: "there's far too much text
             here. Make it way simpler, and if you have to nest that's fine"):
             the price, the clock, Join and Try. Where it works is the tabs
@@ -1138,8 +765,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
             {linked ? null : <WelcomeChip />}
             {joinCta("hero")}
+            {wallet}
             {tryCta}
-            {lockMore}
+            {proofCard}
           </section>
         ) : member ? (
           <section className="tpa-module tpa-offer tpa-member" aria-label="Tapin Plus">
@@ -1199,8 +827,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               )}
             </div>
             {joinCta("hero")}
+            {wallet}
             {tryCta}
-            {lockMore}
+            {proofCard}
           </section>
         ) : offer === "3" ? (
           <section className="tpa-s3" aria-label="Tapin Plus">
@@ -1226,8 +855,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               <p className="tpa-offer-then">Then {MONTHLY}/month.</p>
               {linked ? null : <WelcomeChip />}
               {joinCta("hero")}
+              {wallet}
               {tryCta}
-              {lockMore}
+              {proofCard}
             </div>
           </section>
         ) : (
@@ -1253,58 +883,34 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           </p>
           {linked ? null : <WelcomeChip />}
           {joinCta("hero")}
+          {wallet}
           {tryCta}
-          {lockMore}
+          {proofCard}
         </section>
         )}
 
-        {hero === "a" && !invite ? null : promise}
+        {/* Under the offer: the other benefits, then the promise (round 1
+            and 2, Sam, 8 Nov 2026), in place of the "locked in" fold. */}
+        <UnderOffer audience="student" monthly={MONTHLY} />
+        {desk ? null : <Voices audience="student" />}
+        </div>
 
-
-        <section className="tpa-module" aria-labelledby="tpa-get">
-          <h2 id="tpa-get" className="tpa-h2">
-            What you get
+        {/* HOW IT WORKS, FOUR STEPS ON A PHONE (round 2, Sam, 8 Nov 2026):
+            the parents page's maroon phone panel, in "you", in place of What
+            you get. Its four facts live on: the $5 in What $5 back looks
+            like and step 3, the 15% in step 3 and the list, points and new
+            places in the list, and in the proof line. */}
+        <section className="tpa-module" aria-labelledby="tpa-steps">
+          <h2 id="tpa-steps" className="tpa-h2">
+            How it works
           </h2>
-          <ul className="tpa-rows">
-            <li>
-              <span className="tpa-well tnum">$5</span>
-              <span>
-                <b>${CREDIT} back every week at each place</b>
-                <span>On orders of ${MIN_ORDER} or more of food or non-alcoholic drinks.</span>
-              </span>
-            </li>
-            <li>
-              <span className="tpa-well tnum">%</span>
-              <span>
-                <b>Or {PERCENT}% off, once a day</b>
-                <span>On anything but alcohol. One per order.</span>
-              </span>
-            </li>
-            {/* Sam, 3 Nov 2026: "should we have 'points on everything'". The
-                app's rule (credit-alcohol, 3 Nov): the $5 is earned on food
-                and non-alcoholic drinks, points on every order. */}
-            <li>
-              <span className="tpa-well" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="18" height="18">
-                  <path d="m12 3.6 2.5 5.2 5.7.8-4.1 4 1 5.6L12 16.5l-5.1 2.7 1-5.6-4.1-4 5.7-.8L12 3.6Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <span>
-                <b>Points on everything</b>
-                <span>{POINTS_PER_DOLLAR} points for every dollar, on every order, toward rewards.</span>
-              </span>
-            </li>
-            <li>
-              <span className="tpa-well">
-                <FlatMark className="tpa-well-mark" />
-              </span>
-              <span>
-                <b>New places, no extra cost</b>
-                <span>Every place that joins Plus is yours too.</span>
-              </span>
-            </li>
-          </ul>
+          <HowPhone audience="student" first={FIRST_MONTH} monthly={MONTHLY} free={free} />
         </section>
+
+        {/* What if I don't save? (round 1, Sam, 8 Nov 2026): replaces the
+            lower Plus Promise card. Mounted once the price is in, so its bar
+            is drawn against the price this visitor pays. */}
+        {price ? <WhatIfUnused audience="student" monthly={MONTHLY} /> : null}
 
         <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
@@ -1347,7 +953,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             15% off or $5 credit, one per order; credit you’ve earned works with the 15%. Credit and 15% off don’t go toward
             alcohol. Cancel anytime.
           </p>
-          <AccountLine where="home_foot" />
+          <AccountLine where="home_foot" app />
           <p className="tpa-links">
             {LEGAL.map((l) => (
               <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer">
@@ -1387,6 +993,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           used Step through it, and Join), so it went (Sam: "if the see how
           much I save button isn't getting click throughs maybe we hide it"). */}
       <div ref={dockRef} className="tpa-dock" data-shown="" data-island-origin="">
+        {/* The proof line, on the dock (round 1, Sam, 8 Nov 2026). */}
+        <ProofTurn className="tpp-pt-dock" start="places" paused={covered} audience="student" />
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
         ) : (
