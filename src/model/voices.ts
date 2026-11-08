@@ -19,6 +19,8 @@ export interface Voice {
   photo?: string;
   /** The whole quote, in their words, shown on a tap. */
   full?: string;
+  /** What shows under the name, if not the role (Sam, 7 Nov 2026: "VT parent"). */
+  label?: string;
 }
 
 export const VOICES: Voice[] = [
@@ -27,6 +29,7 @@ export const VOICES: Voice[] = [
     full: "I was worried it would be another subscription she forgot about. She\u2019s used it 10 times at 3 and saved $50 in 1 month. Those are places she was already going.",
     name: "Denise M.",
     role: "Parent",
+    label: "VT parent",
     photo: "/parents/voices/denise.webp",
   },
   {
@@ -34,6 +37,7 @@ export const VOICES: Voice[] = [
     full: "The last care package sat in the mailroom for three days. Tapin went straight to the coffee place she already visits. Apparently, the secret is sending something she doesn\u2019t have to pick up.",
     name: "Elaine C.",
     role: "Parent",
+    label: "VT parent",
     photo: "/parents/voices/elaine.webp",
   },
   {
@@ -41,6 +45,7 @@ export const VOICES: Voice[] = [
     full: "I figured I\u2019d try it for a month and probably have to remind him it existed. Then he asked me to keep it going. For once, he was reminding me about something.",
     name: "Laura B.",
     role: "Parent",
+    label: "VT parent",
     photo: "/parents/voices/laura.webp",
   },
 ];

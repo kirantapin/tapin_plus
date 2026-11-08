@@ -1181,7 +1181,7 @@ export function Voices() {
               )}
               <span>
                 {v.name}
-                <small>{v.role}</small>
+                <small>{v.label ?? v.role}</small>
               </span>
             </figcaption>
           </figure>
