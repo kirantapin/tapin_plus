@@ -812,14 +812,15 @@ export function Letter({
             {/* Their name first, and a family word as "your mom" (Sam, 6 Nov
                 2026: "maya, your mother got you tapin plus"). */}
             {to ? `${to}, ` : ""}
-            {whoInHeading(gift.from, !!to)}{" "}
             {state === "open" ? (
+              /* Opened: "name1, name2 got you a little surprise!" (Sam, 8 Nov
+                 2026), the sign-off as they wrote it ("Mom"). */
               <>
-                got you <span className="gft-nowrap">Tapin Plus</span>
+                {gift.from.trim() || "Someone"} got you a <span className="gft-nowrap">little surprise!</span>
               </>
             ) : (
               <>
-                sent you <span className="gft-nowrap">something</span>
+                {whoInHeading(gift.from, !!to)} sent you <span className="gft-nowrap">something</span>
               </>
             )}
           </span>
