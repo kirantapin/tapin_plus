@@ -1257,7 +1257,9 @@ export function ProofTurn({
               <img key={p.id} src={p.logo} alt="" decoding="async" />
             ))}
           </span>
-          Five Blacksburg spots
+          {/* Sam, 8 Nov 2026: "we should mention as well that more are on
+              the way". Short enough for the dock at 360. */}
+          Five spots, more on the way
         </>
       ),
     },
