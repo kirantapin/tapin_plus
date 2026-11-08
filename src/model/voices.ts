@@ -25,8 +25,8 @@ export interface Voice {
 
 export const VOICES: Voice[] = [
   {
-    quote: "She used it 10 times at 3 places and saved $50 in a month.",
-    full: "I was worried it would be another subscription she forgot about. She\u2019s used it 10 times at 3 and saved $50 in 1 month. Those are places she was already going.",
+    quote: "She used it 10 times at 3 spots she\u2019s already a regular at and saved $50 in a month.",
+    full: "I was worried it would be another subscription she forgot about. She\u2019s used it 10 times at 3 spots she\u2019s already a regular at and saved $50 in 1 month.",
     name: "Denise M.",
     role: "Parent",
     label: "VT parent",
