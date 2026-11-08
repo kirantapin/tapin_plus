@@ -30,7 +30,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, Guarantee, HowPhone, LunchBars, MoreBenefits, OfferPrice, ProofTurn, Voices, WhatIfUnused } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, LunchBars, OfferPrice, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -593,20 +593,18 @@ export default function ParentsHome() {
           <ProofTurn className="tpp-pt-card" start="places" paused={building} />
         </section>
 
-        <MoreBenefits className="tpp-more tpp-more-out" />
-        <Guarantee />
-        {/* C · a parent's and a student's own words (Sam's pick, 7 Nov
-            2026): nothing shows until model/voices.ts has real ones. */}
+        {/* The other two benefits and the promise, one quiet list (7 Nov
+            2026 polish: the chips and the promise lines were four objects
+            in two styles). */}
+        <UnderOffer />
+        {/* C · parents' own words (Sam's pick, 7 Nov 2026): nothing shows
+            until model/voices.ts has real ones. */}
         <Voices />
         </div>
 
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
-
-        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
-            parent's own question, answered, then as a picture. */}
-        <WhatIfUnused />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -713,6 +711,13 @@ export default function ParentsHome() {
           <HowPhone />
         </section>
 
+        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
+            parent's own question, answered, then as a picture. Moved down
+            from under the gift band to here, with the other reassurance,
+            just above No surprises (Sam, 7 Nov 2026: "it belongs much
+            farther down the page"). */}
+        <WhatIfUnused />
+
         {/* No surprises: a glyph and a few words per line, the full line one
             tap under it. */}
         <section className="tpa-module" aria-labelledby="tpp-sure">
@@ -726,6 +731,9 @@ export default function ParentsHome() {
               label={`${FIRST} today, then ${MONTHLY}/month`}
             >
               {FIRST} today for the first month, then {MONTHLY} a month.
+            </Fold>
+            <Fold className="tpp-sure-row" lead={<Glyph d={GLYPHS.text} />} label="A text before each bill">
+              A few days before each monthly charge, we text you the date and the amount.
             </Fold>
             <Fold
               className="tpp-sure-row"

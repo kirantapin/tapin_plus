@@ -92,65 +92,63 @@ function LogoRow({ size }: { size: number }) {
   );
 }
 
-/* ══ THE OTHER TWO BENEFITS (Sam, 6 Nov 2026: "maybe we visualize the other
-   two benefits right under this section", then "maybe [they] belong outside
-   of this container and below it instead in between this container and the
-   care package preview"): 15% off instead of the $5, once a day; points on
-   everything. Always under the offer card, never in it (ParentsHome
-   .tpp-offer-col): between the card and the gift band on a phone, under the
-   card in the held right-hand column on a computer. */
-/* ══ THE GUARANTEE, UNDER THE OFFER (Sam, 6 Nov 2026: "don't we need to
-   highlight the guarantee as well underneath, like refund if they don't use
-   it, easy cancel anytime"). Only what we do today: a month that didn't
-   save them what you spent, refunded on asking (support, by hand; Sam, 7 Nov
-   2026), and cancel by email. No refund for never signing in (Sam, 7 Nov
-   2026: "if someone doesn't claim it they don't claim it ... We still bill
-   them"), so the line is the same on an ask link. (Not
-   "manage it from your account": that page explains how to cancel, it
-   isn't self-serve; Hormozi audit, 6 Nov 2026.) */
-export function Guarantee() {
+/* ══ UNDER THE OFFER: THE OTHER TWO BENEFITS AND THE PROMISE, ONE LIST ══════
+   Always under the offer card, never in it (Sam, 6 Nov 2026: "the callouts
+   are underneath this parent container, not within it"): between the card
+   and the gift band on a phone, under the card in the held right-hand
+   column on a computer.
+   Polish, 7 Nov 2026 (Sam: "isn't this kind of busy?"): the two white chips
+   and the two promise lines were four objects in two styles; now they are
+   one quiet list on the ground, one row style (a glyph, the fact in ink, the
+   rest muted), in two groups: what else Plus gives, then what we promise.
+   The facts are the same:
+     · 15% off instead of the $5, once a day; points on everything;
+     · a month that didn't save them what you spent, refunded on asking
+       (support, by hand; Sam, 7 Nov 2026), and cancel by email. No refund
+       for never signing in (Sam, 7 Nov 2026: "if someone doesn't claim it
+       they don't claim it ... We still bill them"), so the line is the same
+       on an ask link. (Not "manage it from your account": that page explains
+       how to cancel, it isn't self-serve; Hormozi audit, 6 Nov 2026.) */
+export function UnderOffer() {
   return (
-    <ul className="tpp-promise" aria-label="Our promise">
-      <li>
-        <Glyph d={GLYPHS.refund} />
-        <span>
-          <b>Full refund</b> if they don’t save what you spent
-        </span>
-      </li>
-      <li>
-        <Glyph d={GLYPHS.mail} />
-        <span>
-          <b>Cancel anytime</b> by emailing support@tapin.app
-        </span>
-      </li>
-    </ul>
-  );
-}
-
-export function MoreBenefits({ className }: { className: string }) {
-  return (
-    <ul className={className} aria-label="Also with Plus">
-      <li>
-        <b className="tpp-more-fig">{PERCENT}%</b>
-        <span>
-          off instead,
-          <br />
-          once a day
-        </span>
-      </li>
-      <li>
-        <b className="tpp-more-fig" data-pts="">
-          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
-            <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5Z" fill="currentColor" />
-          </svg>
-        </b>
-        <span>
-          points on
-          <br />
-          everything
-        </span>
-      </li>
-    </ul>
+    <div className="tpp-notes">
+      <ul aria-label="Also with Plus">
+        <li>
+          <Glyph d={GLYPHS.percent} />
+          <span>
+            <b>{PERCENT}% off</b> instead, once a day
+          </span>
+        </li>
+        <li>
+          <Glyph d={GLYPHS.star} />
+          <span>
+            <b>Points</b> on everything
+          </span>
+        </li>
+      </ul>
+      <ul aria-label="Our promise">
+        <li>
+          <Glyph d={GLYPHS.refund} />
+          <span>
+            <b>Full refund</b> if they don’t save what you spent
+          </span>
+        </li>
+        {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
+            before their next bill" (the backend's renewal reminder). */}
+        <li>
+          <Glyph d={GLYPHS.text} />
+          <span>
+            <b>A text before each bill</b>, a few days ahead
+          </span>
+        </li>
+        <li>
+          <Glyph d={GLYPHS.mail} />
+          <span>
+            <b>Cancel anytime</b> by emailing support@tapin.app
+          </span>
+        </li>
+      </ul>
+    </div>
   );
 }
 
@@ -1099,7 +1097,7 @@ export function WhatIfUnused() {
           <Chevron />
         </span>
       </button>
-      {/* Word for word the promise under the offer (Guarantee). */}
+      {/* Word for word the promise under the offer (UnderOffer). */}
       <p ref={fine} id="tpp-b-fine" className="tpp-b-fine" hidden={!open}>
         Full refund if they don’t save what you spent. Cancel anytime by emailing support@tapin.app.
       </p>
@@ -1124,18 +1122,25 @@ export function WhatIfUnused() {
   );
 }
 
-/* ── C · Two voices by the first button ────────────────────────────────────
-   The split hero (the parent sends, the student opens) as two short quotes
-   under the promise: between it and the gift band on a phone, in the held
-   right column on a computer. Renders nothing until model/voices.ts VOICES
-   has real, permissioned quotes (how to add them is there). Local dev with
-   ?parentmock shows the marked placeholder slots instead, dashed. The two
-   meet from either side once, when first in view. */
+/* ── C · Parents' voices by the first button ───────────────────────────────
+   Three parents' own words under the promise: between it and the gift band
+   on a phone, in the held right column on a computer. Renders nothing until
+   model/voices.ts VOICES has real, permissioned quotes (how to add them is
+   there). Local dev with ?parentmock shows the marked placeholder slots
+   instead, dashed. The cards meet from either side once, when first in view.
+   Polish, 7 Nov 2026 (Sam: "isn't this kind of busy?"): a compact rail. Who
+   said it leads, on one line (the photo, the name, "VT parent") with a small
+   maroon mark at its end instead of a big one on a line of its own; the short
+   quote follows with "Read more" running on after its last word, so a card
+   is about two-thirds of its old height. The words are model/voices.ts's,
+   untouched: `quote` at first glance, `full` one tap down. */
 export function Voices() {
   const real = VOICES.length > 0;
   const list = real ? VOICES : parentMock() ? PREVIEW_VOICES : [];
   const [box, seen] = useSeen<HTMLUListElement>(0.5);
   const runs = useRef<Array<Animation | undefined>>([]);
+  /* One card's whole quote at a time (Sam: little text at first touch). */
+  const [open, setOpen] = useState<number | null>(null);
   useLayoutEffect(() => {
     const el = box.current;
     if (!el || reducedMotion()) return;
@@ -1158,25 +1163,41 @@ export function Voices() {
   }, [seen]);
   if (!list.length) return null;
   return (
-    <ul ref={box} className="tpp-v" aria-label="From parents and students" data-placeholder={real ? undefined : ""}>
+    <ul ref={box} className="tpp-v" aria-label="From parents" data-placeholder={real ? undefined : ""}>
       {list.map((v, i) => (
         <li key={`${v.role}-${i}`}>
           <figure className="tpp-v-q" data-who={v.role === "Parent" ? "parent" : "student"}>
-            <span className="tpp-v-mark" aria-hidden="true">
-              “
-            </span>
-            <blockquote className="tpp-v-quote">{v.quote}</blockquote>
             <figcaption className="tpp-v-by">
               {v.photo ? (
-                <img className="tpp-v-face" src={asset(v.photo)} alt="" decoding="async" loading="lazy" />
+                <img className="tpp-v-face" src={asset(v.photo)} alt="" width={28} height={28} decoding="async" loading="lazy" />
               ) : real ? null : (
                 <span className="tpp-v-face" aria-hidden="true" />
               )}
-              <span>
-                {v.name}
-                <small>{v.role}</small>
+              <span className="tpp-v-name">{v.name}</span>
+              <small>{v.label ?? v.role}</small>
+              <span className="tpp-v-mark" aria-hidden="true">
+                “
               </span>
             </figcaption>
+            <div className="tpp-v-body">
+              <blockquote id={`tpp-v-${i}`} className="tpp-v-quote">
+                {open === i && v.full ? v.full : v.quote}
+              </blockquote>
+              {v.full ? (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    className="tpp-v-more"
+                    aria-expanded={open === i}
+                    aria-controls={`tpp-v-${i}`}
+                    onClick={() => setOpen(open === i ? null : i)}
+                  >
+                    {open === i ? "Less" : "Read more"}
+                  </button>
+                </>
+              ) : null}
+            </div>
           </figure>
         </li>
       ))}
@@ -1191,9 +1212,14 @@ export function Voices() {
    places, since the hero's 500+ line shares that screen. It only turns
    while it's on screen, the page is showing and the builder is closed.
    Reduced motion: the first line, still. aria-hidden: the same facts are in
-   the page's own text, and a turning line isn't read aloud. */
+   the page's own text, and a turning line isn't read aloud.
+   7 Nov 2026: it used to fade the old line right out (200ms) and only then
+   bring the new one in, so for a beat at every turn the strip under the
+   card's divider stood empty. Now it rolls: the old line rises out as the
+   new one rises in under it, together, so a line is always there. */
 type ProofKey = "students" | "refund" | "places";
 const TURN_MS = 3200;
+const ROLL_MS = 520;
 export function ProofTurn({
   className,
   start,
@@ -1237,8 +1263,13 @@ export function ProofTurn({
     },
   ];
   const [k, setK] = useState(() => Math.max(0, lines.findIndex((l) => l.key === start)));
+  /* The line on its way out, drawn over the new one while they roll. */
+  const [leaving, setLeaving] = useState<number | null>(null);
+  const kNow = useRef(k);
+  kNow.current = k;
   const box = useRef<HTMLDivElement>(null);
   const line = useRef<HTMLSpanElement>(null);
+  const old = useRef<HTMLSpanElement>(null);
   const [onScreen, setOnScreen] = useState(false);
   const [pageOn, setPageOn] = useState(() => typeof document === "undefined" || document.visibilityState !== "hidden");
   useEffect(() => {
@@ -1253,50 +1284,44 @@ export function ProofTurn({
       document.removeEventListener("visibilitychange", vis);
     };
   }, []);
-  const out = useRef<Animation | null>(null);
-  const into = useRef<Animation | null>(null);
   const turning = !paused && onScreen && pageOn && !reducedMotion();
   useEffect(() => {
     if (!turning) return;
     const id = window.setInterval(() => {
-      const next = () => setK((n) => (n + 1) % lines.length);
-      const el = line.current;
-      if (!el?.animate) return next();
-      out.current?.cancel();
-      out.current = el.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(-10px)", opacity: 0 }], {
-        duration: 200,
-        easing: "ease-in",
-        fill: "forwards",
-      });
-      out.current.onfinish = next;
+      const was = kNow.current;
+      setLeaving(was);
+      setK((was + 1) % lines.length);
     }, TURN_MS);
     return () => window.clearInterval(id);
   }, [turning, lines.length]);
-  /* The new line rises in, before it's painted, as the old one's hold lets go. */
+  /* Both lines move in the same frame, before the new one is painted. */
   const drawn = useRef(k);
+  const runs = useRef<Array<Animation | undefined>>([]);
   useLayoutEffect(() => {
     if (drawn.current === k) return;
     drawn.current = k;
-    out.current?.cancel();
-    out.current = null;
-    into.current?.cancel();
-    into.current = line.current?.animate?.([{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], {
-      duration: 420,
-      easing: EASE_IN_OUT,
-    }) ?? null;
+    runs.current.forEach((r) => r?.cancel());
+    const opts = { duration: ROLL_MS, easing: EASE_IN_OUT };
+    const into = line.current?.animate?.([{ transform: "translateY(100%)", opacity: 0 }, { transform: "none", opacity: 1 }], opts);
+    const away = old.current?.animate?.([{ transform: "none", opacity: 1 }, { transform: "translateY(-100%)", opacity: 0 }], {
+      ...opts,
+      fill: "forwards",
+    });
+    runs.current = [into, away];
+    if (away) away.onfinish = () => setLeaving(null);
+    else setLeaving(null);
   }, [k]);
-  useEffect(
-    () => () => {
-      out.current?.cancel();
-      into.current?.cancel();
-    },
-    [],
-  );
+  useEffect(() => () => runs.current.forEach((r) => r?.cancel()), []);
   return (
     <div ref={box} className={`tpp-pt ${className}`} aria-hidden="true">
       <span ref={line} className="tpp-pt-line">
         {lines[k % lines.length]?.body}
       </span>
+      {leaving !== null && leaving !== k ? (
+        <span ref={old} className="tpp-pt-line">
+          {lines[leaving % lines.length]?.body}
+        </span>
+      ) : null}
     </div>
   );
 }
