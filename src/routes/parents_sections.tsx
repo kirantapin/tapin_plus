@@ -133,6 +133,14 @@ export function UnderOffer() {
             <b>Full refund</b> if they don’t save what you spent
           </span>
         </li>
+        {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
+            before their next bill" (the backend's renewal reminder). */}
+        <li>
+          <Glyph d={GLYPHS.text} />
+          <span>
+            <b>A text before each bill</b>, a few days ahead
+          </span>
+        </li>
         <li>
           <Glyph d={GLYPHS.mail} />
           <span>
