@@ -2814,3 +2814,31 @@ button.tpg-env-link {
   font-size: 14px;
   line-height: 18px;
 }
+
+/* The look screen's rows (8 Nov 2026): the seasonal looks lead, labelled
+   "Seasonal · Limited time" like the page's gift band; "+N" opens the rest
+   of the seasonal looks and then the everyday ones under "More looks". */
+.gft-pp-lookrows {
+  display: grid;
+  gap: 10px;
+}
+.gft-pp-lookrows .gft-pp-season:not(:first-child) {
+  margin-top: 6px;
+}
+.gft-pp-season {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.gft-pp-season-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fdecd9;
+  color: #9a4a0c;
+  font: 600 11px/16px "Gilroy", Arial, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
