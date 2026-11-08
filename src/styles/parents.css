@@ -2637,3 +2637,26 @@
     line-height: 24px;
   }
 }
+
+/* The smoked plate on a computer too (Sam, 8 Nov 2026: "can we update these
+   on desktop too?"): the label and the account button wear the phone's
+   pick b, the app's one glass with no backdrop-filter. */
+@media (min-width: 1024px) {
+  .tpp .tpp-band[data-hdr="b"] .tpp-label,
+  .tpp .tpp-band[data-hdr="b"] .tpp-account {
+    background: rgba(20, 20, 20, 0.65);
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 16px rgba(0, 0, 0, 0.15);
+  }
+  .tpp .tpp-band[data-hdr="b"] .tpp-label {
+    border-radius: 999px;
+    padding: 0 16px 0 14px;
+  }
+  .tpp .tpp-band[data-hdr="b"] .tpp-label-mark {
+    color: #ffffff;
+  }
+  .tpp .tpp-band[data-hdr="b"] .tpp-account:focus-visible,
+  .tpp .tpp-band[data-hdr="b"] .tpp-label:focus-visible {
+    outline: 2px solid #ffffff;
+  }
+}
