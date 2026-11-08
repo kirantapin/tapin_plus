@@ -189,7 +189,7 @@ const cap = (name: string) => (name ? name.charAt(0).toUpperCase() + name.slice(
 /* The done step's glyphs, in the page's family (parents_kit Glyph): an open
    eye, a bell, a speech bubble. */
 const EYE = "M3.5 12s3-6 8.5-6 8.5 6 8.5 6-3 6-8.5 6-8.5-6-8.5-6ZM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z";
-const BELL = "M18 15.5V11a6 6 0 0 0-12 0v4.5L4.5 17.5h15L18 15.5ZM10 20.5h4";
+const BELL = GLYPHS.bell;
 const TEXT_BUBBLE = "M20 11.5c0 4-3.6 7-8 7-1.1 0-2.2-.2-3.1-.5L4 19.5l1.4-3.6C4.5 14.7 4 13.2 4 11.5c0-4 3.6-7 8-7s8 3 8 7Z";
 
 /* The gift first (Sam, 6 Nov 2026: "we're not asking for them to add phone
@@ -1019,8 +1019,8 @@ function Sheet({
         </span>
       </li>
       <li>
-        <Glyph d={GLYPHS.text} />
-        <span>We’ll text you a few days before each renewal</span>
+        <Glyph d={GLYPHS.bell} />
+        <span>We’ll email you a few days before each renewal</span>
       </li>
     </ul>
   );
@@ -1227,7 +1227,7 @@ function Sheet({
           <div>
             <b>Before each bill</b>
             <p className="tnum">
-              We text you a few days before each {usd(monthly)} renewal. The first is {renewsOn()}.
+              We email you a few days before each {usd(monthly)} renewal. The first is {renewsOn()}.
             </p>
           </div>
         </li>

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { asset } from "../asset";
-import { logoField } from "../model/content";
+import { logoField, venues } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
@@ -136,11 +136,13 @@ export function UnderOffer() {
           </span>
         </li>
         {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
-            before their next bill" (the backend's renewal reminder). */}
+            before their next bill" (the backend's renewal reminder); an
+            email since 8 Nov ("Bill reminders → email"): a text "will lead
+            to more churn". The bell, so it doesn't twin the mail row under it. */}
         <li>
-          <Glyph d={GLYPHS.text} />
+          <Glyph d={GLYPHS.bell} />
           <span>
-            <b>A text before each bill</b>, a few days ahead
+            <b>An email before each bill</b>, a few days ahead
           </span>
         </li>
         <li>
@@ -396,8 +398,9 @@ export function LunchBars() {
    page), with the orange sun and a cream ridge; maroon also on the open
    step's glyph, its timer and the gift's small marks, money green on the
    savings. Four steps since 7 Nov: the last is how to skip, cancel or get a
-   refund, on the reminder text the parent gets before each bill. */
-/* One month from today, as a text says it ("Dec 7"): the reminder's example.
+   refund, on the reminder email the parent gets before each bill (an email,
+   not a text, since 8 Nov 2026). */
+/* One month from today, as the email says it ("Dec 7"): the reminder's example.
    The 31st of a month with no 31st next month lands on that month's last day. */
 function inAMonth(now = new Date()): string {
   const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -436,7 +439,7 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
     title: "Cancel, skip or get a refund",
     line: (
       <>
-        We text you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
+        We email you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
         support@tapin.app.
       </>
     ),
@@ -445,32 +448,38 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
 /* A made-up number (555-01xx is the range kept for fiction). */
 const SAMPLE_NUMBER = "(540) 555-0142";
 const STEP_MS = 3600;
-/* The week's screen (Sam's pick E, "the savings meter", 7 Nov 2026): what
-   Plus saved in one week, as one figure split by where it came from. The
-   week behind it: Monday's lunch at the first place is paid in full and
-   earns its credit; Wednesday the second place takes the percentage off;
-   Thursday the first place's credit comes off. Not five identical $5s,
-   which read as $25 free; the other four places' credit is still to earn.
-   Points on what was paid, per order, never more than they'd earn. Real
-   places, real menu prices; every number from the constants. */
-const WEEK = (() => {
-  const [a, b] = PLACES;
-  if (!a || !b) return null;
-  const pctOff = Math.round(b.order.price * PERCENT) / 100;
-  const paid = [a.order.price, b.order.price - pctOff, a.order.price - CREDIT];
-  const points = paid.reduce((n, d) => n + Math.floor((Math.round(d * 100) * POINTS_PER_DOLLAR) / 100), 0);
-  const pctC = Math.round(pctOff * 100);
-  const creditC = Math.round(CREDIT * 100);
-  return { a, b, pctOff, pctC, creditC, savedC: pctC + creditC, points, toEarn: PLACES.filter((p) => p.id !== a.id) };
+/* The week's screen (Sam's pick A, "In the app", 8 Nov 2026: "this is
+   perfect"): the real Tapin app at a size a parent can read. Home's photo
+   card for the first place, whose smoked strip carries the credit earned
+   there and the points from that order; then the place's checkout sheet
+   rises on the next order with that credit taken off ("Credit applied", as
+   checkout_summary.tsx says it) and the pay pill in the merchant's colour
+   ("Pay now", as the app labels it). The card's Plus pill is dropped (it
+   carries the Plus mark). Real place, real menu price; points on the price
+   paid, 10 per $1. */
+const INAPP = (() => {
+  const a = PLACES[0];
+  const v = a && venues.find((x) => x.id === a.id);
+  if (!a || !v) return null;
+  const points = Math.floor((Math.round(a.order.price * 100) * POINTS_PER_DOLLAR) / 100);
+  return { a, hero: v.hero, brand: v.brandColor, points };
 })();
-/* The saved figure as the screen draws it: a small "$", the dollars large,
-   the cents small. */
-function setSaved(root: HTMLElement, c: number) {
-  const whole = root.querySelector("[data-whole]");
-  const cents = root.querySelector("[data-cents]");
-  if (whole) whole.textContent = String(Math.floor(c / 100));
-  if (cents) cents.textContent = String(c % 100).padStart(2, "0");
-}
+/* Lucide's wallet and award, as the app's strip draws them. */
+const InAppIcon = ({ kind }: { kind: "wallet" | "award" }) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {kind === "wallet" ? (
+      <>
+        <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+        <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+      </>
+    ) : (
+      <>
+        <path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526" />
+        <circle cx="12" cy="8" r="6" />
+      </>
+    )}
+  </svg>
+);
 /* Hold the steps at their tallest open state, so the page under them never
    moves as they play (Sam, 7 Nov 2026: 22–44px of shift on a phone): every
    step's head, the gaps, and the longest line. Independent of what is open
@@ -500,7 +509,6 @@ export function HowPhone() {
   const bar = useRef<Animation | undefined>(undefined);
   const num = useRef<HTMLSpanElement | null>(null);
   const wk = useRef<Animation[]>([]);
-  const count = useRef<number | undefined>(undefined);
   const list = useRef<HTMLOListElement | null>(null);
   const renews = inAMonth();
   useLayoutEffect(() => {
@@ -541,85 +549,58 @@ export function HowPhone() {
         { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
       );
     if (i === 2) {
-      /* The meter fills as the week happened: Wednesday's percentage first,
-         then Thursday's credit, the figure counting with it in the same two
-         steps; the tiles last, the points counting up. Settled well inside
-         the step's time, so it can be read before the next one. */
+      /* The credit lands on the place's strip, the points beside it; then,
+         next time there, the checkout sheet rises and the credit comes off
+         on a pale green wash that fades. Done in about 2.8s. */
       const scr = el.querySelector<HTMLElement>(".tpp-e");
-      if (!scr || !WEEK) return;
       wk.current.forEach((a) => a.cancel());
-      window.cancelAnimationFrame(count.current ?? 0);
-      const T1 = 300;
-      const D1 = 560;
-      const T2 = T1 + D1 + 160;
-      const D2 = 700;
-      const T3 = T2 + D2 + 160;
+      wk.current = [];
+      if (!scr) return;
       const run: Animation[] = [];
-      const add = (a: Animation | undefined) => a && run.push(a);
-      const rise = (m: Element, delay: number, d = 460) =>
-        add(
-          m.animate?.(
-            [
-              { opacity: 0, transform: "translateY(6px)" },
-              { opacity: 1, transform: "none" },
-            ],
-            { duration: d, delay, easing: EASE_OUT, fill: "backwards" },
-          ),
-        );
-      const segs = scr.querySelectorAll(".tpp-e-meter b");
-      const parts = scr.querySelectorAll(".tpp-e-part");
-      [T1, T2].forEach((t, k) => {
-        const seg = segs[k];
-        if (seg)
-          add(
-            seg.animate?.([{ clipPath: "inset(0 100% 0 0 round 11px)" }, { clipPath: "inset(0 0 0 0 round 11px)" }], {
-              duration: k ? D2 : D1,
-              delay: t,
-              easing: EASE_OUT,
-              fill: "backwards",
-            }),
-          );
-        const part = parts[k];
-        if (part) rise(part, t + (k ? 380 : 300));
-      });
-      scr.querySelectorAll(".tpp-e-tile").forEach((m, k) => rise(m, T3 + k * 100, 480));
-      scr.querySelectorAll(".tpp-e-logos img").forEach((m, k) =>
-        add(
-          m.animate?.(
-            [
-              { opacity: 0, transform: "scale(.7)" },
-              { opacity: 1, transform: "none" },
-            ],
-            { duration: 340, delay: T3 + 180 + k * 60, easing: EASE_OUT, fill: "backwards" },
-          ),
-        ),
-      );
-      wk.current = run;
-      const out = scr.querySelector<HTMLElement>(".tpp-e-pts");
-      const ease = (k: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
-      const { pctC, creditC, points } = WEEK;
-      const P0 = T3 + 150;
-      const PD = 650;
-      const t0 = performance.now();
-      setSaved(scr, 0);
-      if (out) out.textContent = "0";
-      const tick = (now: number) => {
-        const t = now - t0;
-        setSaved(scr, Math.round(pctC * ease((t - T1) / D1) + creditC * ease((t - T2) / D2)));
-        if (out) out.textContent = String(Math.round(points * ease((t - P0) / PD)));
-        if (t < P0 + PD) count.current = window.requestAnimationFrame(tick);
+      const add = (m: Element | null, k: Keyframe[], o: KeyframeAnimationOptions) => {
+        const a = m?.animate?.(k, { easing: EASE_OUT, fill: "backwards", ...o });
+        if (a) run.push(a);
       };
-      count.current = window.requestAnimationFrame(tick);
-    }
-    if (i === 3) {
-      el.querySelector(".tpp-hw-bill")?.animate?.(
+      const up = (y: number): Keyframe[] => [
+        { opacity: 0, transform: `translateY(${y}px)` },
+        { opacity: 1, transform: "none" },
+      ];
+      add(
+        scr.querySelector(".tpp-e-cr"),
         [
-          { opacity: 0, transform: "translateY(14px) scale(.94)" },
+          { opacity: 0, transform: "translateY(6px) scale(.9)" },
           { opacity: 1, transform: "none" },
         ],
-        { duration: 520, delay: 180, easing: EASE_OUT, fill: "backwards" },
+        { duration: 460, delay: 250 },
       );
-      el.querySelector(".tpp-hw-mail")?.animate?.([{ opacity: 0 }, { opacity: 1 }], {
+      add(scr.querySelector(".tpp-e-pt"), [{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: 420 });
+      add(scr.querySelector(".tpp-e-sheet"), [{ transform: "translateY(160px)" }, { transform: "none" }], { duration: 620, delay: 800 });
+      const row = scr.querySelector(".tpp-e-credit");
+      add(row, up(8), { duration: 460, delay: 1300 });
+      add(
+        row,
+        [
+          { backgroundColor: "rgba(11, 122, 83, .12)" },
+          { backgroundColor: "rgba(11, 122, 83, .12)", offset: 0.45 },
+          { backgroundColor: "rgba(11, 122, 83, 0)" },
+        ],
+        { duration: 1300, delay: 1450, easing: "ease-out" },
+      );
+      wk.current = run;
+    }
+    if (i === 3) {
+      /* The email opens: subject, sender and body rise in turn, then the
+         address fades in. */
+      el.querySelectorAll(".tpp-hw-em-subj, .tpp-hw-em-from, .tpp-hw-em-body").forEach((m, k) =>
+        m.animate?.(
+          [
+            { opacity: 0, transform: "translateY(10px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 460, delay: 160 + k * 110, easing: EASE_OUT, fill: "backwards" },
+        ),
+      );
+      el.querySelector(".tpp-hw-em .tpp-hw-mail")?.animate?.([{ opacity: 0 }, { opacity: 1 }], {
         duration: 360,
         delay: 700,
         easing: EASE_OUT,
@@ -653,12 +634,17 @@ export function HowPhone() {
     () => () => {
       window.clearTimeout(timer.current);
       window.clearInterval(typing.current);
-      window.cancelAnimationFrame(count.current ?? 0);
       wk.current.forEach((a) => a.cancel());
       bar.current?.cancel();
     },
     [],
   );
+  /* Step 3's motion stops when another step opens. */
+  useEffect(() => {
+    if (cur === 2) return;
+    wk.current.forEach((a) => a.cancel());
+    wk.current = [];
+  }, [cur]);
   const tap = (i: number) => {
     auto.current = false;
     go(i, false);
@@ -705,80 +691,68 @@ export function HowPhone() {
                 <span className="tpp-hw-open">Open your gift</span>
               </div>
               <div className="tpp-hw-s tpp-e" data-on={cur === 2 ? "" : undefined}>
-                <div className="tpp-hw-app">
-                  <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
-                  {SAMPLE_GIFT.to}’s week
-                </div>
-                {WEEK ? (
+                {INAPP ? (
                   <>
-                    <p className="tpp-e-lead">Saved this week</p>
-                    <p className="tpp-e-sum">
-                      <span className="tpp-e-d">$</span>
-                      <span data-whole="">{Math.floor(WEEK.savedC / 100)}</span>
-                      <span className="tpp-e-c">
-                        .<span data-cents="">{String(WEEK.savedC % 100).padStart(2, "0")}</span>
-                      </span>
-                    </p>
-                    {/* The meter is the saved figure itself, split by where it
-                        came from: no ceiling, so nothing reads as a target. */}
-                    <div className="tpp-e-meter" style={{ gridTemplateColumns: `${WEEK.pctC}fr ${WEEK.creditC}fr` }}>
-                      <i>
-                        <b>
-                          <img src={WEEK.b.logo} alt="" decoding="async" loading="lazy" />
-                        </b>
-                      </i>
-                      <i>
-                        <b>
-                          <img src={WEEK.a.logo} alt="" decoding="async" loading="lazy" />
-                        </b>
-                      </i>
-                    </div>
-                    <div className="tpp-e-legend" style={{ gridTemplateColumns: `${WEEK.pctC}fr ${WEEK.creditC}fr` }}>
-                      <div className="tpp-e-part">
-                        <b>{money(WEEK.pctOff)}</b>
-                        <span>
-                          <em>{PERCENT}% off</em>
-                          <br />
-                          Wed
-                        </span>
+                    <div className="tpp-e-card">
+                      <img className="tpp-e-photo" src={INAPP.hero} alt="" decoding="async" loading="lazy" />
+                      <span className="tpp-e-shade" />
+                      <div className="tpp-e-id">
+                        <img src={INAPP.a.logo} alt="" decoding="async" loading="lazy" />
+                        <b>{INAPP.a.name}</b>
                       </div>
-                      <div className="tpp-e-part">
-                        <b>{money(CREDIT)}</b>
-                        <span>
-                          <em>{money0(CREDIT)} credit</em>
-                          <br />
-                          Thu, earned Mon
+                      <div className="tpp-e-strip">
+                        <span className="tpp-e-cr">
+                          <InAppIcon kind="wallet" />
+                          {money0(CREDIT)} credit
+                        </span>
+                        <i />
+                        <span className="tpp-e-pt">
+                          <InAppIcon kind="award" />
+                          {INAPP.points} pts
                         </span>
                       </div>
                     </div>
-                    <div className="tpp-e-tiles">
-                      <div className="tpp-e-tile">
-                        <b>{money0(CREDIT)} still to earn at</b>
-                        <span className="tpp-e-logos">
-                          {WEEK.toEarn.map((p) => (
-                            <img key={p.id} src={p.logo} alt="" decoding="async" loading="lazy" />
-                          ))}
+                    <div className="tpp-e-sheet">
+                      <span className="tpp-e-grab" />
+                      <div className="tpp-e-item">
+                        <img src={INAPP.a.order.img} alt="" decoding="async" loading="lazy" />
+                        <span>
+                          <b>{INAPP.a.order.label}</b>
+                          <span>{money(INAPP.a.order.price)}</span>
                         </span>
-                        <small>on a {money0(MIN_ORDER)}+ meal</small>
                       </div>
-                      <div className="tpp-e-tile">
-                        <b>Points</b>
-                        <span className="tpp-e-pts">{WEEK.points}</span>
-                        <small>{POINTS_PER_DOLLAR} per $1</small>
+                      <span className="tpp-e-rule" />
+                      <div className="tpp-e-credit">
+                        <span>Credit applied</span>
+                        <b>&minus;{money(CREDIT)}</b>
+                      </div>
+                      <div className="tpp-e-pay" style={{ background: INAPP.brand }}>
+                        Pay now
                       </div>
                     </div>
                   </>
                 ) : null}
               </div>
-              <div className="tpp-hw-s" data-on={cur === 3 ? "" : undefined}>
-                <div className="tpp-hw-msg">
+              {/* The reminder before each bill, as the email it is (Sam, 8 Nov
+                  2026: "Bill reminders → email"): the open message, from
+                  Tapin, the date and the price, and where to write. */}
+              <div className="tpp-hw-s tpp-hw-em" data-on={cur === 3 ? "" : undefined}>
+                <span className="tpp-hw-em-bar">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                  Inbox
+                </span>
+                <b className="tpp-hw-em-subj">
+                  {SAMPLE_GIFT.to}’s Tapin Plus renews {renews}
+                </b>
+                <div className="tpp-hw-em-from">
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
                   <b>Tapin</b>
                 </div>
-                <div className="tpp-hw-bill">
-                  Tapin: {SAMPLE_GIFT.to}’s Tapin Plus renews {renews} for {MONTHLY}. To skip a month or cancel, email
-                  support@tapin.app. Reply STOP to opt out
-                </div>
+                <p className="tpp-hw-em-body tnum">
+                  {MONTHLY} on {renews}. To skip a month, cancel or get a refund, email us.
+                </p>
                 <span className="tpp-hw-mail">
                   <Glyph d={GLYPHS.mail} />
                   support@tapin.app

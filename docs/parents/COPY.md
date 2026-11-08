@@ -308,3 +308,24 @@ student can cancel it in the tapin app." On the page: FAQ "How do I cancel?" →
 support@tapin.app any time and we’ll change or cancel it for you. Your student can also
 cancel in the Tapin app, and we’ll let you know if they do."; the assurance row "Change
 or cancel by email"; the checkout's terms and done screen say the same.
+
+## The reminder before each bill is an email (Sam, 8 Nov 2026)
+
+"let's not do the text notifications, I think that'll lead to more churn to be honest.
+Maybe email notifications?", and asked which: "Bill reminders → email". It goes to the
+parent's email (`parent_email`); the backend change is draft PR
+kirantapin/tapin_edge_functions#287. On the page:
+- Under the offer: "**An email before each bill**, a few days ahead" (a bell, so it
+  doesn't twin the "Cancel anytime" mail row under it).
+- No surprises: "An email before each bill" / "A few days before each monthly charge, we
+  email you the date and the amount."
+- How it works for you, step 4: "We email you before each monthly bill. To skip a month,
+  cancel, or get a full refund if they didn’t save what you spent, email
+  support@tapin.app." The phone shows the email open: "{Student}’s Tapin Plus renews
+  {Mon D}", from Tapin, "{price} on {Mon D}. To skip a month, cancel or get a refund,
+  email us.", support@tapin.app.
+- Checkout, who and pay steps: "We’ll email you a few days before each renewal".
+- Done, Before each bill: "We email you a few days before each {price} renewal. The
+  first is {date}."
+Still texts: the gift text to the student, the student's sign-in reminders, the receipt
+("We’ll text you a receipt").

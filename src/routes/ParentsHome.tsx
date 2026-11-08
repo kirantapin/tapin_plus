@@ -797,8 +797,8 @@ export default function ParentsHome() {
             >
               {FIRST} today for the first month, then {MONTHLY} a month.
             </Fold>
-            <Fold className="tpp-sure-row" lead={<Glyph d={GLYPHS.text} />} label="A text before each bill">
-              A few days before each monthly charge, we text you the date and the amount.
+            <Fold className="tpp-sure-row" lead={<Glyph d={GLYPHS.bell} />} label="An email before each bill">
+              A few days before each monthly charge, we email you the date and the amount.
             </Fold>
             <Fold
               className="tpp-sure-row"

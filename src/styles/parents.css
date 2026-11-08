@@ -758,148 +758,225 @@
   font-weight: 600;
   font-size: 12px;
 }
-/* The week (Sam's pick E, "the savings meter", 7 Nov 2026): the saved
-   figure, the meter that splits it by where it came from, and two tiles.
-   The lab drew it on a 262px screen; here every size is that drawing at the
-   live screen's width (210 / 262, about 0.8), so the two read the same. */
-.tpp-e {
-  gap: 0;
-  padding: 38px 13px 0;
-}
-.tpp .tpp-e-lead {
-  margin-top: 18px;
-  font-size: 12px;
-  line-height: 15px;
-  color: var(--muted);
-}
-.tpp .tpp-e-sum {
-  margin-top: 2px;
-  font-weight: 600;
-  font-size: 51px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--money);
-}
-.tpp-e-sum .tpp-e-c,
-.tpp-e-sum .tpp-e-d {
-  font-size: 0.5em;
-  vertical-align: 0.78em;
-}
-.tpp-e-sum .tpp-e-c {
-  margin-left: 2px;
-  letter-spacing: -0.01em;
-}
-.tpp-e-sum .tpp-e-d {
-  margin-right: 1px;
-  letter-spacing: 0;
-}
-.tpp-e-meter,
-.tpp-e-legend {
-  display: grid;
-  gap: 2px;
-}
-.tpp-e-meter {
-  height: 22px;
-  margin-top: 16px;
-}
-.tpp-e-meter i {
+/* The week (Sam's pick A, "In the app", 8 Nov 2026): the real app on the
+   app's own grey ground. Home's photo card with its smoked strip, then the
+   checkout sheet with the "Credit applied" row and the merchant's pay pill.
+   Drawn at the live screen's width (210px); nothing under 14px. */
+.tpp-hw-s.tpp-e {
   display: block;
-  overflow: hidden;
-  border-radius: 11px;
+  padding: 0;
+  background: #f2f2f4;
+  color: #141618;
+  font-weight: 500;
 }
-.tpp-e-meter b {
+.tpp-e img {
+  display: block;
+  object-fit: cover;
+}
+.tpp-e svg {
+  display: block;
+  flex: none;
+}
+.tpp-e-card {
+  position: absolute;
+  top: 36px;
+  left: 8px;
+  right: 8px;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #2a1d33;
+}
+.tpp-e .tpp-e-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-position: 50% 30%;
+}
+/* The photo's own shade, so the white name and strip read on it. */
+.tpp-e-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.62) 100%);
+}
+.tpp-e-id {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 46px;
   display: flex;
   align-items: center;
-  height: 100%;
-  padding-left: 2px;
-  border-radius: 11px;
-  background: #8cc5ad;
+  gap: 8px;
+  color: #ffffff;
 }
-.tpp-e-meter i + i b {
-  background: var(--money);
-}
-.tpp-e-meter img {
-  width: 18px;
-  height: 18px;
+.tpp-e-id img {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #ffffff;
-  object-fit: cover;
+  box-shadow: 0 0 0 2px #ffffff;
 }
-.tpp-e-part {
-  display: grid;
-  align-content: start;
-  padding: 8px 0 0 2px;
-}
-.tpp-e-part b {
+.tpp-e-id b {
+  overflow: hidden;
   font-weight: 600;
-  font-size: 13.5px;
-  line-height: 17px;
+  font-size: 18px;
+  line-height: 22px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.tpp-e-part span {
-  margin-top: 3px;
-  font-size: 10.5px;
-  line-height: 13px;
-  color: var(--muted);
+.tpp-e-strip {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-radius: 10px;
+  background: rgba(20, 22, 24, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpp-e-strip > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   white-space: nowrap;
 }
-.tpp-e-part em {
-  font-style: normal;
-  color: var(--ink);
+.tpp-e-strip > i {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.3);
 }
-.tpp-e-tiles {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 6px;
-  margin-top: 16px;
-}
-.tpp-e-tile {
-  display: grid;
-  align-content: start;
-  gap: 5px;
-  min-height: 74px;
-  padding: 10px 9px 9px 10px;
-  border-radius: 11px;
-  background: #f4f0e8;
-}
-.tpp-e-tile b {
-  font-weight: 600;
-  font-size: 10.5px;
-  line-height: 13px;
-}
-.tpp-e-tile small {
-  font-size: 10px;
-  line-height: 12px;
-  color: var(--muted);
-}
-.tpp-e-logos {
-  display: flex;
-  gap: 3px;
-}
-.tpp-e-logos img {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--hair);
+.tpp-e-sheet {
+  position: absolute;
+  top: 186px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 14px 0;
+  border-radius: 20px 20px 0 0;
   background: #ffffff;
-  object-fit: cover;
+  box-shadow: 0 -6px 18px -8px rgba(20, 22, 24, 0.28);
 }
-.tpp-e-pts {
+.tpp-e-grab {
+  display: block;
+  width: 32px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: 2px;
+  background: #d6d6db;
+}
+.tpp-e-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tpp-e-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+.tpp-e-item > span {
+  display: grid;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpp-e-item b {
   font-weight: 600;
-  font-size: 22px;
-  line-height: 22px;
-  letter-spacing: -0.02em;
 }
-/* The reminder text before each bill (step 4). */
-.tpp-hw-bill {
-  justify-self: start;
-  width: 88%;
-  padding: 8px 10px;
-  border-radius: 16px 16px 16px 6px;
-  background: #e9e9eb;
-  font-size: 12px;
-  line-height: 16px;
-  overflow-wrap: anywhere;
+.tpp-e-item > span > span {
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpp-e-rule {
+  display: block;
+  height: 1px;
+  margin: 9px 0 3px;
+  background: rgba(20, 22, 24, 0.08);
+}
+.tpp-e-credit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -6px;
+  padding: 7px 6px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 18px;
+}
+.tpp-e-credit b {
+  font-weight: 600;
+  color: var(--money);
+}
+/* Its colour is the merchant's (brandColor), set inline. */
+.tpp-e-pay {
+  display: grid;
+  place-items: center;
+  height: 40px;
+  margin-top: 8px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+}
+/* The reminder before each bill (step 4), as an open email (8 Nov 2026):
+   the inbox's back link, the subject, the sender, a two-line body and the
+   address to write to. */
+.tpp-hw-em {
+  gap: 0;
+}
+.tpp-hw-em-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: -4px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #861f41;
+}
+.tpp-hw-em-bar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tpp-hw-em-subj {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+.tpp-hw-em-from {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hair);
+}
+.tpp-hw-em-from img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+.tpp-hw-em-from b {
+  font-weight: 600;
+  font-size: 14px;
+}
+.tpp .tpp-hw-em-body {
+  margin: 10px 0 12px;
+  font-size: 14px;
+  line-height: 19px;
 }
 .tpp-hw-mail {
   display: inline-flex;
