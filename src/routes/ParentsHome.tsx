@@ -21,7 +21,6 @@ import {
   FIRST,
   MONTHLY,
   PLACES,
-  PLACE_DEFS,
   reducedMotion,
   Chevron,
   Glyph,
@@ -579,17 +578,15 @@ export default function ParentsHome() {
           white. They carry the 15% now, so the list under the offer
           doesn't repeat it. */}
       <ul ref={tagsRef} className="tpp-tags tnum" aria-label="What’s inside">
+        {/* Sam's pick D, 8 Nov 2026: "$5 credit" (not "$5 off"), and plain
+            that it's at each spot, every week; two tags, the credit wider. */}
         <li>
-          <b data-money="">${CREDIT} off</b>
-          <span>every week</span>
+          <b data-money="">${CREDIT} credit</b>
+          <span>at each spot, every week</span>
         </li>
         <li>
           <b>{PERCENT}% off</b>
           <span>once a day</span>
-        </li>
-        <li>
-          <b>{PLACE_DEFS.length} spots</b>
-          <span>in Blacksburg</span>
         </li>
       </ul>
 
