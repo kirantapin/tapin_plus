@@ -2024,13 +2024,42 @@
 
 /* C · two voices, under the promise (renders only with real quotes, or the
    dashed placeholder slots under ?parentmock in local dev). */
+/* A row that scrolls sideways, one card and the next one's edge in view
+   (three parents' quotes, 7 Nov 2026). */
 .tpp-v {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  align-items: stretch;
   gap: 8px;
-  margin: 16px var(--gutter) 0;
-  padding: 0;
+  margin: 16px 0 0;
+  padding: 0 var(--gutter);
   list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+.tpp-v::-webkit-scrollbar {
+  display: none;
+}
+.tpp-v > li {
+  flex: 0 0 min(82%, 300px);
+  scroll-snap-align: start;
+}
+.tpp-v-more {
+  align-self: flex-start;
+  margin: -4px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 .tpp-v-q {
   display: flex;
@@ -2097,6 +2126,8 @@
 @media (min-width: 1024px) {
   .tpp .tpp-offer-col > .tpp-v {
     margin: 16px 0 0;
+    padding: 0;
+    scroll-padding-inline: 0;
   }
 }
 

@@ -1136,6 +1136,8 @@ export function Voices() {
   const list = real ? VOICES : parentMock() ? PREVIEW_VOICES : [];
   const [box, seen] = useSeen<HTMLUListElement>(0.5);
   const runs = useRef<Array<Animation | undefined>>([]);
+  /* One card's whole quote at a time (Sam: little text at first touch). */
+  const [open, setOpen] = useState<number | null>(null);
   useLayoutEffect(() => {
     const el = box.current;
     if (!el || reducedMotion()) return;
@@ -1158,14 +1160,19 @@ export function Voices() {
   }, [seen]);
   if (!list.length) return null;
   return (
-    <ul ref={box} className="tpp-v" aria-label="From parents and students" data-placeholder={real ? undefined : ""}>
+    <ul ref={box} className="tpp-v" aria-label="From parents" data-placeholder={real ? undefined : ""}>
       {list.map((v, i) => (
         <li key={`${v.role}-${i}`}>
           <figure className="tpp-v-q" data-who={v.role === "Parent" ? "parent" : "student"}>
             <span className="tpp-v-mark" aria-hidden="true">
               “
             </span>
-            <blockquote className="tpp-v-quote">{v.quote}</blockquote>
+            <blockquote className="tpp-v-quote">{open === i && v.full ? v.full : v.quote}</blockquote>
+            {v.full ? (
+              <button type="button" className="tpp-v-more" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
+                {open === i ? "Less" : "Read more"}
+              </button>
+            ) : null}
             <figcaption className="tpp-v-by">
               {v.photo ? (
                 <img className="tpp-v-face" src={asset(v.photo)} alt="" decoding="async" loading="lazy" />
