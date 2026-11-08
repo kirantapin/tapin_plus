@@ -20,7 +20,7 @@ import {
   type Gift,
   type SceneId,
 } from "../model/gift";
-import { clearGiftDraft, defaultGiftScene, getGiftDraft, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
+import { clearGiftDraft, defaultGiftScene, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
 import { keepQuick, keepStep, keptQuick, keptSomething, type ResumeStep } from "../model/checkoutResume";
 import { ResumeContext, ResumeLine, type Resume } from "../shell/ResumeLine";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
@@ -1071,24 +1071,57 @@ function EffectPicker({ effect, onPick, labelled = true }: { effect: Delight | n
    notes: tapin-staging-work/lever-lab/effort.) */
 const LOOKS_UP_FRONT = 3;
 const FX_UP_FRONT: ReadonlyArray<Delight | null> = [null, "confetti", "hearts", "sparkles"];
+/* The seasonal looks lead, labelled as seasonal (Sam, 8 Nov 2026: "we
+   should still have the seasonal options, or have those listed or
+   identified as seasonal"): today's season first, then the calendar's
+   others; the religious holidays wait in the full list, as on the page's
+   gift band. */
+const SEASONAL: SceneId[] = (SCENE_GROUPS.find((g) => g.label === "Seasonal")?.scenes ?? []).map((s) => s.id as SceneId);
+const EVERYDAY: SceneId[] = SCENE_ORDER.map((s) => s.id as SceneId).filter((id) => !SEASONAL.includes(id));
 /** The three looks up front, worked out once as the builder opens (so a
  *  pick never reshuffles them). */
 function frontLooks(): SceneId[] {
   const out: SceneId[] = [];
-  for (const id of [defaultGiftScene(), getGiftDraft().scene, "leaves", "maroon", "snow", "thanksgiving"] as SceneId[])
-    if (!out.includes(id) && SCENE_ORDER.some((s) => s.id === id)) out.push(id);
+  for (const id of [defaultGiftScene(), "leaves", "thanksgiving", "newyear", "snow"] as SceneId[])
+    if (!out.includes(id) && SEASONAL.includes(id)) out.push(id);
   return out.slice(0, LOOKS_UP_FRONT);
+}
+
+/** One labelled row of looks. */
+function LookRow({ ids, scene, onPick, children }: { ids: SceneId[]; scene: SceneId; onPick: (id: SceneId) => void; children?: React.ReactNode }) {
+  return (
+    <div className="gft-pp-grid">
+      <div role="radiogroup" aria-label="Looks" className="gft-pp-looks">
+        {ids.map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={scene === id}
+            aria-label={SCENE_ORDER.find((s) => s.id === id)?.name}
+            className="gft-pp-swatch"
+            onClick={() => onPick(id)}
+          >
+            <span className="scene-swatch" data-scene={id} aria-hidden="true">
+              <i className="scene-swatch-env" />
+            </span>
+          </button>
+        ))}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function LookPicker({ scene, onPick, effect, onPickEffect }: { scene: SceneId; onPick: (id: SceneId) => void; effect: Delight | null; onPickEffect: (id: Delight | null) => void }) {
   const [front] = useState(frontLooks);
-  const [all, setAll] = useState(false);
+  /* A pick that isn't up front (a save from earlier, or "Change") opens the
+     full list, so the pick is always in view. */
+  const [all, setAll] = useState(() => !front.includes(scene));
   const group = useRef<HTMLDivElement | null>(null);
   const grid = useRef<HTMLDivElement | null>(null);
   const fromH = useRef<number | null>(null);
-  const looks = all
-    ? [...front, ...SCENE_ORDER.map((s) => s.id as SceneId).filter((id) => !front.includes(id))]
-    : front;
+  const seasonal = all ? [...front, ...SEASONAL.filter((id) => !front.includes(id))] : front;
   const more = SCENE_ORDER.length - front.length;
   const named = SCENE_ORDER.find((s) => s.id === scene)?.name ?? "";
   /* The rest open in place: the group eases from its height to the new one,
@@ -1118,40 +1151,34 @@ function LookPicker({ scene, onPick, effect, onPickEffect }: { scene: SceneId; o
           Pick a look
           <span aria-live="polite">{named}</span>
         </h2>
-        <div ref={grid} className="gft-pp-grid">
-          <div role="radiogroup" aria-labelledby="gft-pp-look" className="gft-pp-looks">
-            {looks.map((id) => (
+        <div ref={grid} className="gft-pp-lookrows">
+          <p className="gft-pp-season">
+            Seasonal <span className="gft-pp-season-tag">Limited time</span>
+          </p>
+          <LookRow ids={seasonal} scene={scene} onPick={onPick}>
+            {all ? null : (
               <button
-                key={id}
                 type="button"
-                role="radio"
-                aria-checked={scene === id}
-                aria-label={SCENE_ORDER.find((s) => s.id === id)?.name}
-                className="gft-pp-swatch"
-                onClick={() => onPick(id)}
+                className="gft-pp-swatch gft-pp-lookmore"
+                aria-expanded="false"
+                aria-label={`${more} more looks`}
+                onClick={() => {
+                  fromH.current = group.current?.getBoundingClientRect().height ?? null;
+                  setAll(true);
+                }}
               >
-                <span className="scene-swatch" data-scene={id} aria-hidden="true">
-                  <i className="scene-swatch-env" />
+                <span className="scene-swatch tnum" aria-hidden="true">
+                  +{more}
                 </span>
               </button>
-            ))}
-          </div>
-          {all ? null : (
-            <button
-              type="button"
-              className="gft-pp-swatch gft-pp-lookmore"
-              aria-expanded="false"
-              aria-label={`${more} more looks`}
-              onClick={() => {
-                fromH.current = group.current?.getBoundingClientRect().height ?? null;
-                setAll(true);
-              }}
-            >
-              <span className="scene-swatch tnum" aria-hidden="true">
-                +{more}
-              </span>
-            </button>
-          )}
+            )}
+          </LookRow>
+          {all ? (
+            <>
+              <p className="gft-pp-season">More looks</p>
+              <LookRow ids={EVERYDAY} scene={scene} onPick={onPick} />
+            </>
+          ) : null}
         </div>
       </div>
       <div className="gft-pp-group">
