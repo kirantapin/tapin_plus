@@ -1438,17 +1438,44 @@ fieldset.prc-module {
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* "Pay by card instead" in the sticky foot, on its own line above the back
-   arrow and the wallets (8 Nov 2026). */
+/* "Pay by card instead" in the sticky foot (8 Nov 2026): a container like
+   the back arrow's, to its right ("can we have the pay by card instead
+   button be in a container much like the back arrow to the right of the
+   back button"); the wallet buttons take the full row under them. */
 .gft-pp-foot:has(> .prc-e-bycard-foot),
 .prc-foot:has(> .prc-e-bycard-foot) {
   flex-wrap: wrap;
-  row-gap: 6px;
+  gap: 8px;
 }
-.prc-e-bycard-foot {
-  flex: 1 0 100%;
-  order: -1;
-  justify-self: auto;
-  padding: 2px 0 4px;
+.gft-pp-foot:has(> .prc-e-bycard-foot) > .gft-pp-backarrow,
+.prc-foot:has(> .prc-e-bycard-foot) > .prc-backarrow {
+  order: 0;
+}
+.prc-e-bycard.prc-e-bycard-foot {
+  order: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: #f0f0f0;
+  color: #141618;
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
   text-align: center;
+  text-decoration: none;
+  transition: background-color 160ms ease-out;
+}
+@media (hover: hover) {
+  .prc-e-bycard.prc-e-bycard-foot:hover {
+    background: #e7e7e7;
+  }
+}
+.prc-e-bycard.prc-e-bycard-foot:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
+.gft-pp-foot:has(> .prc-e-bycard-foot) > .prc-e-footmain,
+.prc-foot:has(> .prc-e-bycard-foot) > .prc-e-footmain {
+  order: 2;
+  flex: 1 0 100%;
 }
