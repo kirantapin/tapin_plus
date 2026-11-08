@@ -1,4 +1,3 @@
-import TapInIcon from "../shell/TapInIcon";
 import { takeKey } from "../model/redact";
 import { Link } from "react-router-dom";
 import {
@@ -83,8 +82,8 @@ const EYEBROW_SHORT = NAME_VT
 
 /* ══ THE TOP OF THE BAND ON A PHONE: three treatments (8 Nov 2026) ══════════
    Sam picked header A · What's inside and asked for the top chips to be
-   redone ("they read as stock UI stuck on a photo"). The default is
-   "a" · Masthead: the Tapin logo and the line set straight on the photo,
+   redone ("they read as stock UI stuck on a photo"). The default is now
+   "b" (Sam's pick, below); "a" · Masthead: the Tapin logo and the line set straight on the photo,
    white on a photo shade, the account a white ring. The other two are
    development-only previews, ?hdr=b|c, never read in a production build:
      "b" · Smoked plate: the app's one glass (plus-app.css .tpa-glass recipe,
@@ -94,10 +93,12 @@ const EYEBROW_SHORT = NAME_VT
    A computer keeps its paper label and button (parents.css scopes every
    treatment to a phone). */
 type HeaderChips = "a" | "b" | "c";
+/* Sam, 8 Nov 2026, picking "b": "let's go with this one". ?hdr=a|c stay as
+   development-only previews. */
 const headerChips = (): HeaderChips => {
-  if (!import.meta.env.DEV || typeof window === "undefined") return "a";
+  if (!import.meta.env.DEV || typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("hdr");
-  return v === "b" || v === "c" ? v : "a";
+  return v === "a" || v === "c" ? v : "b";
 };
 
 /* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
@@ -537,8 +538,9 @@ export default function ParentsHome() {
               this"): the cream of the envelope's seal in the photo, ink type,
               the Plus mark in maroon; the account button matches it. */}
           <span className="tpp-label">
-            {/* The Tapin logo, not the Plus mark (Sam, 7 Nov 2026). */}
-            <TapInIcon className="tpp-label-mark" />
+            {/* The Tapin Plus mark again (Sam, 8 Nov 2026: "we can replace the
+                tapin logo again with the tapin plus icon"). */}
+            <FlatMark className="tpp-label-mark" />
             <span className="tpp-label-long">{EYEBROW}</span>
             <span className="tpp-label-short">{EYEBROW_SHORT}</span>
           </span>
