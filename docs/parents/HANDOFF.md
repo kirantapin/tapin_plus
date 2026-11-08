@@ -111,7 +111,7 @@ ads run outside the 3-mile Drillfield radius).
 - The student gets one text after payment, activates with their own code, sees Plus
   active.
 - The parent's receipt email has a working manage/cancel link.
-- An unclaimed signup costs nothing (or is refunded automatically) after 14 days.
+- An unclaimed signup keeps billing (no automatic refund since 7 Nov 2026); the student gets reminder texts.
 - A student who already pays for Plus is never charged twice.
 - The "Ask a parent" link fills in the student without the number in the URL.
 - None of the "Do not carry over" or "Never say" claims appear on the parent page.

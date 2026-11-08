@@ -10,8 +10,9 @@ there). Nothing here works live until he ships it. Local dev runs the whole flow
   type the number twice yeah." The parent pays $3.99 for the first month at checkout,
   then $7.99/month. Plus goes on the student's number at once; the student just signs
   in to Tapin with that number and it's there. No activation link or claim page.
-- If the student hasn't signed in within **14 days**, the subscription is canceled and
-  the parent refunded automatically.
+- No unclaimed refund (Sam, 7 Nov 2026: "if someone doesn't claim it they don't claim
+  it it's not our fault. We still bill them"). The promise is "Full refund if they don't
+  save what you spent", on request, handled by support by hand.
 - The student is texted once at checkout (the research session's text, "The text to the
   student wouldn't have to change"), with up to two reminders if they haven't signed in.
 - A student **can cancel** a parent-paid membership in the app; that ends the parent's
@@ -213,9 +214,9 @@ number, no ids or prices. The first open sets `gift_opened_at`.
 For active parent subscriptions whose student hasn't signed in since checkout
 (`first_signed_in_at` null; set from auth.users.last_sign_in_at > created_at):
 - day 3 and day 7: re-text the student;
-- day 7: email the parent (resend, or change the number from the manage link);
-- day 14: cancel the subscription, refund the parent in full, remove the grant, email
-  the parent (`cancel_reason = 'unclaimed'`).
+- day 7: email the parent (resend, or change the number from the manage link).
+No day-14 cancel or refund any more (Sam, 7 Nov 2026: "if someone doesn't claim it they
+don't claim it it's not our fault. We still bill them"): an unclaimed gift keeps billing.
 
 ## Webhooks
 - The student cancels Plus in the app → the parent's Stripe Subscription is canceled
