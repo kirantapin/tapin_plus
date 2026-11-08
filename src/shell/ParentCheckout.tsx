@@ -1109,7 +1109,7 @@ function Sheet({
             {consents}
             {SUMMER_PAUSE_LIVE || parentMock() ? (
               <Consent id="summer" checked={summerPause} onChange={setSummerPause} label="Pause billing over summer break">
-                No charges over the summer. We text you before it pauses and before it starts again.
+                We’ll pause it for you over the summer, so there are no charges while they’re away.
               </Consent>
             ) : null}
             {walletsShown ? (
