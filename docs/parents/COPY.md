@@ -288,7 +288,7 @@ reads "Add a note or a photo for {Student}"; the section is "For {Student}, from
   on the parent's background; the parent's photo is printed at the top of the letter.
 - Sealed: "{Student}, {Who} sent you something" / "Open it".
 - The dock once it's open: "Claim my gift" (the app).
-- Open: "{Who} got you Tapin Plus", the letter ("For {Student}", the note, "— {Who}"; with
+- Open: "{Student}, {Who} got you a little surprise!" (Sam, 8 Nov 2026; was "{Who} got you Tapin Plus"), the letter ("For {Student}", the note, "— {Who}"; with
   no note: "{Who} signed you up for Tapin Plus."), "What’s in it" ($5 back every week at
   each place below, on a $10+ food order; 15% off instead, once a day, whenever that’s
   better; points on everything you order; the five logos), "Get the app", "Sign in with

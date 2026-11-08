@@ -1814,8 +1814,13 @@
     grid-template-columns: 330px minmax(0, 1fr);
     gap: 24px;
   }
+  /* The panel stretches to the list beside it (Sam, 8 Nov 2026: "make the
+     image on the left a bit taller to match the right"); the phone stays
+     anchored to its foot. */
   .tpp-fb-stage {
-    height: 400px;
+    align-self: stretch;
+    height: auto;
+    min-height: 400px;
     border-radius: 16px;
   }
   .tpp-fb-phone {
