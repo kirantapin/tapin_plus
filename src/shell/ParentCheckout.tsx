@@ -9,6 +9,7 @@ import {
   type Stripe,
   type StripeElements,
   type StripeElementsOptions,
+  type ClickResolveDetails,
   type StripeExpressCheckoutElementConfirmEvent,
   type StripeExpressCheckoutElementOptions,
 } from "@stripe/stripe-js";
@@ -1124,14 +1125,17 @@ function Sheet({
                 {walletsShown ? <Terms first={first} monthly={monthly} /> : null}
               </div>
             ) : null}
-            {walletsShown ? (
-              <button type="button" className="prc-e-bycard" onClick={() => void submit()} disabled={busy}>
-                Pay by card instead
-              </button>
-            ) : null}
             {errorLine(formError)}
           </>,
           <>
+            {/* Sticky, right above the wallets and the back arrow (Sam, 8 Nov
+                2026: "the pay by card instead be sticky, right above the
+                google pay and the back arrow"). */}
+            {walletsShown ? (
+              <button type="button" className="prc-e-bycard prc-e-bycard-foot" onClick={() => void submit()} disabled={busy}>
+                Pay by card instead
+              </button>
+            ) : null}
             {/* Back beside the buttons, as the builder's stages have it
                 (Sam, 6 Nov 2026): to the note, or with Send as is to where
                 it was chosen. */}
@@ -1141,7 +1145,7 @@ function Sheet({
                 <MockWallets onPay={() => walletReady() && void payByWallet()} disabled={busy} ready={!firstBad()} />
               ) : (
                 <Elements stripe={getStripe()} options={walletElementsOptions(walletCents)}>
-                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} />
+                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} cents={walletCents} monthlyCents={monthly} />
                 </Elements>
               )}
               {walletsShown ? null : (
@@ -1672,12 +1676,53 @@ const walletElementsOptions = (cents: number): StripeElementsOptions => ({
   fonts: FONTS,
 });
 
+/* What the wallet's own sheet shows (Sam, 8 Nov 2026: "google lets me pay
+   but it doesn't seem like a subscription?"): today's charge named as the
+   first month, a $0 line saying what follows, and for Apple Pay its
+   recurring-payment request, so the sheet itself says it renews monthly.
+   (Google Pay's sheet has no recurring field; the line items carry it.) */
+function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
+  const start = new Date();
+  const next = nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0], start);
+  const day = next.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return {
+    lineItems: [
+      { name: "Tapin Plus, first month", amount: cents },
+      { name: `Then ${usd(monthlyCents)}/month from ${day}, until canceled`, amount: 0 },
+    ],
+    applePay: {
+      recurringPaymentRequest: {
+        paymentDescription: "Tapin Plus, monthly",
+        managementURL: "https://plus.tapin.app/parents/account",
+        trialBilling: {
+          label: "First month",
+          amount: cents,
+          recurringPaymentStartDate: start,
+          recurringPaymentEndDate: next,
+          recurringPaymentIntervalUnit: "month",
+          recurringPaymentIntervalCount: 1,
+        },
+        regularBilling: {
+          label: "Tapin Plus",
+          amount: monthlyCents,
+          recurringPaymentStartDate: next,
+          recurringPaymentIntervalUnit: "month",
+          recurringPaymentIntervalCount: 1,
+        },
+        billingAgreement: `${usd(cents)} today, then ${usd(monthlyCents)} a month from ${day} until you cancel. Cancel anytime by emailing support@tapin.app.`,
+      },
+    },
+  };
+}
+
 function LiveWallets({
   state,
   ready,
   onState,
   onClick,
   onConfirm,
+  cents,
+  monthlyCents,
 }: {
   state: "pending" | "shown" | "none";
   /** The step's fields are all filled: the buttons at full strength. */
@@ -1686,6 +1731,9 @@ function LiveWallets({
   /** True to open the wallet's sheet; false shows what's missing instead. */
   onClick: () => boolean;
   onConfirm: (ev: StripeExpressCheckoutElementConfirmEvent, stripe: Stripe | null, elements: StripeElements | null) => void;
+  /** Today's charge and the monthly one after it, for the wallet's sheet. */
+  cents: number;
+  monthlyCents: number;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -1709,7 +1757,7 @@ function LiveWallets({
         options={WALLET_OPTIONS}
         onReady={({ availablePaymentMethods: m }) => onState(m && (m.applePay || m.googlePay) ? "shown" : "none")}
         onLoadError={() => onState("none")}
-        onClick={(e) => (onClick() ? e.resolve() : e.reject())}
+        onClick={(e) => (onClick() ? e.resolve(walletSheet(cents, monthlyCents)) : e.reject())}
         onConfirm={(e) => onConfirm(e, stripe, elements)}
       />
     </div>
