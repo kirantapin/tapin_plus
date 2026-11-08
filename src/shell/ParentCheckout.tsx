@@ -677,6 +677,10 @@ function Sheet({
       utm: keptUtm(),
     });
     setStarted(res);
+    /* The wallets' sheet shows the server's first charge from now on (a card
+       start that came back to who included); a wallet's own start is still
+       checked against the amount its sheet showed (payByWallet). */
+    setWalletCents(res.first_cents);
     /* A gift goes out with a note or a photo (API.md: an ask link's
        student is texted their gift link when there is either). */
     sentNoteRef.current = !!giftNoteSent || (noteOpen && !!giftPhoto);
@@ -721,7 +725,9 @@ function Sheet({
     const failSheet = () => {
       if (!confirming) ev?.paymentFailed({ reason: "fail" });
     };
-    if (paying.current || (!mock && (!stripe || !elements))) {
+    /* Not while a card's start is on its way either (a wallet sheet opened
+       just before "Pay by card instead" was pressed). */
+    if (paying.current || busy || (!mock && (!stripe || !elements))) {
       failSheet();
       return;
     }
@@ -850,7 +856,7 @@ function Sheet({
   /* ── Header ── */
   const title =
     step === "done"
-      ? `${possessive(done?.student_first_name || who)} Tapin Plus is on.`
+      ? `${possessive(cap(done?.student_first_name || who))} Tapin Plus is on.`
       : step === "pay"
         ? ask
           ? "Pay and turn on their Plus"
@@ -871,7 +877,7 @@ function Sheet({
         ? null
         : `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.`
       : step === "pay"
-        ? `For ${who}, ${masked}.`
+        ? `For ${cap(who)}, ${masked}.`
         : step === "done"
           ? `${usd(first)} paid today. We’ll text you a receipt.`
           : null;
@@ -1767,9 +1773,14 @@ function StripePay({
       <PaymentElement
         options={{ wallets: { applePay: "never", googlePay: "never", link: "never" }, layout: "tabs" }}
         onReady={() => setReady(true)}
-        onLoadError={() => setError("The payment form didn’t load. Close this and try again.")}
+        /* Already charged (a wallet's charge whose confirm failed, or a
+           reopen): the intent has succeeded and Finish only confirms, so the
+           reason it stopped stays on screen instead. */
+        onLoadError={() => {
+          if (!paidIntent.current) setError("The payment form didn’t load. Close this and try again.");
+        }}
       />
-      {!ready && !error ? <div className="prc-pay-wait" aria-busy="true" /> : null}
+      {!ready && !error && !paidIntent.current ? <div className="prc-pay-wait" aria-busy="true" /> : null}
     </div>
   );
   const terms = <Terms first={started.first_cents} monthly={started.monthly_cents} />;
