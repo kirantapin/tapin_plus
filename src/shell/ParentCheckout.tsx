@@ -1259,7 +1259,7 @@ function Sheet({
         {sms ? (
           <a className="prc-e-text" href={sms}>
             <Glyph d={TEXT_BUBBLE} />
-            Text {Who}
+            <span className="prc-e-text-name">Text {Who}</span>
           </a>
         ) : null}
         <button type="button" className={cta} onClick={close}>

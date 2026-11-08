@@ -1183,7 +1183,11 @@ fieldset.prc-module {
 }
 /* Text {who}: the quiet one beside Done, on the panel's light ground. */
 .prc-e-text {
-  flex: none;
+  /* A long name ("Text Alexandria-Maximiliana") shrinks and ends in an
+     ellipsis, never pushing Done out of the panel. */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1200,8 +1204,15 @@ fieldset.prc-module {
   transition: transform 120ms ease-out, background-color 160ms ease-out;
 }
 .prc-e-text svg {
+  flex: none;
   width: 20px;
   height: 20px;
+}
+.prc-e-text-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .prc-e-text:active {
   transform: scale(0.98);
@@ -1401,4 +1412,18 @@ fieldset.prc-module {
 .prc-embedded .prc-mock-tag {
   font-size: 14px;
   line-height: 18px;
+}
+
+/* A very long first name ("Alexandria-Maximiliana") wraps inside the done
+   step instead of widening the panel past the screen. */
+.prc-e-body,
+.prc-e-body .prc-tl li > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* The panel's single column never grows past the panel: a grid's implicit
+   column sizes to its widest unbreakable content otherwise. */
+.prc-embedded,
+.gft-pp-next {
+  grid-template-columns: minmax(0, 1fr);
 }
