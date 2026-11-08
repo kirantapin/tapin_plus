@@ -862,7 +862,6 @@ export function CheckoutPhone() {
         fill: "backwards",
       });
     else {
-      add(q(".tpp-fb-behind img"), [{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: EASE_OUT });
       el.querySelectorAll(".tpp-fb-head, .tpp-fb-items").forEach((n) =>
         add(
           n,
@@ -968,9 +967,9 @@ export function CheckoutPhone() {
           <span className="tpp-fb-sun" />
           <div className="tpp-fb-phone">
             <div className="tpp-fb-screen">
-              <div className="tpp-fb-behind">
-                <img src={p.order.img} alt="" decoding="async" />
-              </div>
+              {/* Blank behind the sheet (Sam, 7 Nov 2026: the dish photo
+                  there was "a bit busy"). */}
+              <div className="tpp-fb-behind" />
               <div className="tpp-fb-sheet">
                 <span className="tpp-fb-grab" />
                 <p className="tpp-fb-head">
