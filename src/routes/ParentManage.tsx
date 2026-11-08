@@ -7,13 +7,14 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { manageParent, toE164, type ManageInfo } from "../model/parents";
 
 /* ══ THE PARENT'S MANAGE PAGE (/parents/manage/:token) ══════════════════════
-   The link in the parent's receipt email (docs/parents/API.md, parent_manage).
+   The link in the parent's texts (docs/parents/API.md, parent_manage).
    No login: the token is the key. It says whose Plus this is, the masked
    number, and where it stands: waiting for the student to sign in (resend
    the text, change the number, entered twice), active with the next charge,
-   canceled, or refunded. Cancel has a confirm step; Plus stays until the end
-   of the paid month. Plain and calm, in the app's look (styles/plus-app.css
-   .tpa, styles/parent-pages.css .ppm).
+   canceled, or refunded. Under it, three rows (Rows below): skip a month and
+   request a refund email support; cancel has a confirm step, and Plus stays
+   until the end of the paid month. Plain and calm, in the app's look
+   (styles/plus-app.css .tpa, styles/parent-pages.css .ppm).
 
    Local dev: /parents/manage/mock?parentmock walks it with the mock
    (model/parents.ts); add &signedin for the signed-in state. */
@@ -144,7 +145,7 @@ export default function ParentManage() {
               This link didn’t open
             </h1>
             <p className="ppm-line">
-              Use the manage link in your receipt email. If it still doesn’t work, email support@tapin.app and a person will
+              Use the link in the text we sent you. If it still doesn’t work, email support@tapin.app and a person will
               help.
             </p>
             <p className="ppm-sub">{failed}</p>
@@ -265,41 +266,197 @@ function Status({
         ) : null}
       </section>
 
-      {active ? (
-        <section className="tpa-module ppm-card ppm-cancel" aria-label="Cancel">
-          {mode === "confirm-cancel" ? (
-            <div ref={panel} className="ppm-confirm">
-              <h2 className="ppm-h2">{`Cancel ${possessive(name)} Tapin Plus?`}</h2>
-              <p className="ppm-line">
-                {until
-                  ? `Plus stays on until ${until}, the end of the month you’ve paid for. You won’t be charged again.`
-                  : "Plus stays on until the end of the month you’ve paid for. You won’t be charged again."}
-              </p>
-              {error ? (
-                <p className="ppm-error" role="alert">
-                  {error}
-                </p>
-              ) : null}
-              <div className="ppm-acts">
-                <button type="button" className="tpa-cta ppm-btn ppm-yes" disabled={busy} onClick={() => act("cancel")}>
-                  {busy ? "Canceling…" : "Yes, cancel"}
-                </button>
-                <button type="button" className="tpa-try ppm-btn" disabled={busy} onClick={() => setMode("view")}>
-                  Keep it
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <p className="ppm-line">You can cancel anytime. {name} can cancel in the app too, and we’ll email you if they do.</p>
-              <button type="button" className="ppm-quiet" disabled={busy} onClick={() => setMode("confirm-cancel")}>
-                Cancel Tapin Plus
-              </button>
-            </>
-          )}
-        </section>
-      ) : null}
+      {active ? <Rows info={info} name={name} until={until} mode={mode} setMode={setMode} busy={busy} act={act} error={error} /> : null}
     </>
+  );
+}
+
+/* ══ THE THREE ROWS (Sam, 8 Nov 2026: "Fix 1 · A · Three rows") ════════════
+   Skip a month, Request my refund, Cancel Tapin Plus: at first glance just
+   three labels; each opens in place with one line and one button. Skip and
+   refund are a person today ("none of this works yet, but you can check a box
+   and we'll manually pause accounts"), so both open an email to support with
+   the subject filled in and only the student's first name in it. Cancel is
+   the page's own cancel (parent_manage "cancel"), unchanged. */
+const SUPPORT = "support@tapin.app";
+type RowKey = "skip" | "refund" | "cancel";
+
+/** A mailto with the subject and one line filled in. Straight apostrophes,
+ *  so every mail app shows them; nothing but the first name goes in. */
+const mailto = (subject: string, body: string) =>
+  `mailto:${SUPPORT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+const ICON: Record<RowKey, string> = {
+  skip: "M5 5.5h14A1.5 1.5 0 0 1 20.5 7v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19V7A1.5 1.5 0 0 1 5 5.5ZM3.5 10h17M8 3.5v4M16 3.5v4M9.5 13.5l5 4M14.5 13.5l-5 4",
+  refund: "M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v3.5H8",
+  cancel: "M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17ZM9 9l6 6M15 9l-6 6",
+};
+const Glyph = ({ d, className }: { d: string; className: string }) => (
+  <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+    <path d={d} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+function Rows({
+  info,
+  name,
+  until,
+  mode,
+  setMode,
+  busy,
+  act,
+  error,
+}: {
+  info: ManageInfo;
+  name: string;
+  until: string;
+  mode: Mode;
+  setMode: (m: Mode) => void;
+  busy: boolean;
+  act: (action: "cancel") => Promise<boolean>;
+  error: string | null;
+}) {
+  const { track } = useEventTracking();
+  /* Skip and refund open here; cancel is the page's confirm-cancel mode, so
+     its error shows in its own panel as before. One row open at a time. */
+  const [opened, setOpened] = useState<"skip" | "refund" | null>(null);
+  const current: RowKey | null = mode === "confirm-cancel" ? "cancel" : opened;
+  const toggle = (k: RowKey) => {
+    const on = current !== k;
+    if (k === "cancel") {
+      setOpened(null);
+      setMode(on ? "confirm-cancel" : "view");
+    } else {
+      setOpened(on ? k : null);
+      if (mode === "confirm-cancel") setMode("view");
+    }
+  };
+
+  const first = info.student_first_name?.trim() || "";
+  const theirs = first ? `${first}'s Tapin Plus` : "my student's Tapin Plus";
+  const when = info.next_charge_on ? new Date(info.next_charge_on) : null;
+  const month = when && !Number.isNaN(when.getTime()) ? when.toLocaleDateString("en-US", { month: "long" }) : "";
+  const chargeDay = day(info.next_charge_on);
+
+  const skipHref = mailto(
+    first ? `Skip a month: ${first}'s Tapin Plus` : "Skip a month: Tapin Plus",
+    `I'd like to skip ${month || "a month"} for ${theirs}.`,
+  );
+  const refundHref = mailto(
+    first ? `Refund request: ${first}'s Tapin Plus` : "Refund request: Tapin Plus",
+    `I'd like to request a refund for ${theirs}.`,
+  );
+
+  const rows: { k: RowKey; label: string; body: React.ReactNode }[] = [
+    {
+      k: "skip",
+      label: "Skip a month",
+      body: (
+        <>
+          <p className="ppm-more-line">
+            {chargeDay ? `A person skips the ${chargeDay} charge for you.` : "A person skips your next charge for you."}
+          </p>
+          <div className="ppm-row-acts">
+            <a className="tpa-cta ppm-btn" href={skipHref} onClick={() => track("parent_manage_skip_email", { signed_in: info.signed_in })}>
+              {month ? `Email support to skip ${month}` : "Email support to skip a month"}
+            </a>
+          </div>
+        </>
+      ),
+    },
+    {
+      k: "refund",
+      label: "Request my refund",
+      body: (
+        <>
+          <p className="ppm-more-line">{`Full refund if ${first || "your student"} doesn’t save what you spent.`}</p>
+          <div className="ppm-row-acts">
+            <a className="tpa-cta ppm-btn" href={refundHref} onClick={() => track("parent_manage_refund_email", { signed_in: info.signed_in })}>
+              Email support
+            </a>
+          </div>
+        </>
+      ),
+    },
+    {
+      k: "cancel",
+      label: "Cancel Tapin Plus",
+      body: (
+        <>
+          <p className="ppm-more-line tnum">
+            {until
+              ? `Plus stays on until ${until}, the end of the month you’ve paid for. You won’t be charged again.`
+              : "Plus stays on until the end of the month you’ve paid for. You won’t be charged again."}
+          </p>
+          {error ? (
+            <p className="ppm-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <div className="ppm-row-acts">
+            <button type="button" className="tpa-cta ppm-btn" disabled={busy} onClick={() => act("cancel")}>
+              {busy ? "Canceling…" : "Yes, cancel"}
+            </button>
+            <button type="button" className="tpa-try ppm-btn" disabled={busy} onClick={() => setMode("view")}>
+              Keep it
+            </button>
+          </div>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <section className="tpa-module ppm-card ppm-rows" aria-label={`Manage ${possessive(name)} Tapin Plus`}>
+      {rows.map((r) => (
+        <Row key={r.k} k={r.k} label={r.label} on={current === r.k} onToggle={() => toggle(r.k)} disabled={busy}>
+          {r.body}
+        </Row>
+      ))}
+    </section>
+  );
+}
+
+function Row({
+  k,
+  label,
+  on,
+  onToggle,
+  disabled,
+  children,
+}: {
+  k: RowKey;
+  label: string;
+  on: boolean;
+  onToggle: () => void;
+  disabled: boolean;
+  children: React.ReactNode;
+}) {
+  const chev = useRef<SVGSVGElement | null>(null);
+  const more = useRef<HTMLDivElement | null>(null);
+  const was = useRef(on);
+  useEffect(() => {
+    if (was.current === on) return;
+    was.current = on;
+    if (on) rise(more.current);
+    const el = chev.current;
+    if (el && !still() && typeof el.animate === "function")
+      el.animate([{ transform: on ? "none" : "rotate(90deg)" }, { transform: on ? "rotate(90deg)" : "none" }], { duration: 200, easing: ease });
+  }, [on]);
+  const id = `ppm-more-${k}`;
+  return (
+    <div className="ppm-row" data-k={k}>
+      <button type="button" className="ppm-row-head" aria-expanded={on} aria-controls={id} disabled={disabled && k === "cancel"} onClick={onToggle}>
+        <Glyph className="ppm-row-glyph" d={ICON[k]} />
+        <span>{label}</span>
+        <svg ref={chev} className="ppm-row-chev" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <div ref={more} id={id} className="ppm-more" hidden={!on}>
+        {children}
+      </div>
+    </div>
   );
 }
 
