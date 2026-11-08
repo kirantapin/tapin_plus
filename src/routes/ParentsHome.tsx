@@ -865,11 +865,13 @@ export default function ParentsHome() {
           action={{ label: "Continue", onClick: () => {} }}
           startNext={hasChargedParentCheckout()}
           resumeAt={resumeStep(!!asked)}
-          next={(back, close, collapse) => (
+          next={({ back, close, collapse, quick, change }) => (
             <ParentCheckout
               embedded
               open
               onEditGift={back}
+              onChangeLook={change}
+              quick={quick}
               onClose={close}
               onCollapse={collapse}
               ask={

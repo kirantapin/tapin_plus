@@ -38,6 +38,9 @@ const subs = new Set<() => void>();
 const changed = () => subs.forEach((f) => f());
 
 export const getGiftDraft = (): GiftDraft => draft;
+/** The page's own pick (the band's season), before any of theirs: the look
+ *  the builder puts first (Effort C, 7 Nov 2026). */
+export const defaultGiftScene = (): SceneId => base.scene;
 
 /** A parent's edit, kept for a day. `quiet`: the page's own default (the
  *  band's season), not theirs, so it isn't kept. */
