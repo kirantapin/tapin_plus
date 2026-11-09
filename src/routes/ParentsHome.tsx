@@ -680,10 +680,10 @@ export default function ParentsHome() {
           <p className="tpp-under">
             <span>Full refund if they don’t save what you spent.</span>
           </p>
-          {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):
-              a computer only here, at the foot of the held card; on a phone
-              it rides on the dock. */}
-          <ProofTurn className="tpp-pt-card" start="places" paused={building} />
+          {/* The turning proof line left the card (9 Nov 2026 polish, Sam:
+              "we could still clean it up a bit"): its places, refund and
+              students each already show nearby. A phone keeps it on the
+              dock. */}
         </section>
 
         {/* The other two benefits and the promise, one quiet list (7 Nov

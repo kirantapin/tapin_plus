@@ -104,12 +104,16 @@
 }
 /* "Then $7.99 ~~$14.99~~/month", under the first month (9 Nov 2026). */
 .tpp-price-then {
-  margin-top: 8px !important;
+  margin-top: 6px !important;
   font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpp-price-then b {
+  font-weight: 600;
   color: var(--ink);
 }
 .tpp-price-then s {
-  margin: 0 3px 0 6px;
+  margin-left: 8px;
   color: var(--muted);
   text-decoration-thickness: 1.5px;
 }
@@ -143,8 +147,8 @@
 .tpp-price-what {
   justify-self: stretch;
   text-wrap: pretty;
-  margin-top: 18px !important;
-  padding-top: 16px;
+  margin-top: 20px !important;
+  padding-top: 18px;
   border-top: 1px solid rgba(20, 22, 24, 0.08);
   font: 500 16px/22px "Gilroy", Arial, sans-serif;
   color: var(--muted);
