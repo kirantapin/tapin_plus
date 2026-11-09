@@ -505,7 +505,7 @@ export default function ParentsHome() {
                 <DockArrow />
               </button>
               <p className="tnum">
-                Nothing charged until they claim it. Then {FIRST}, {MONTHLY}/month.
+                {FIRST} the first month, then {MONTHLY}/month.
               </p>
             </div>
 
