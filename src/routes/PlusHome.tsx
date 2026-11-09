@@ -654,13 +654,22 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             for members. */}
         {member ? null : (
           <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
-            <h2 id="tps-unlock-h" className="tps-unlock-h">
-              <b>${CREDIT} credit unlocked</b> at each spot when you join
-            </h2>
+            {/* A computer lays it out as two sides (Sam, 9 Nov 2026:
+                "desktop just needs to look a bit more complete"): the words
+                on the left with the $25 total under them, the five places
+                named across the right. A phone keeps the one line and the
+                row. */}
+            <div className="tps-unlock-say">
+              <h2 id="tps-unlock-h" className="tps-unlock-h">
+                <b>${CREDIT} credit unlocked</b> at each spot<span className="tps-unlock-when"> when you join</span>
+              </h2>
+              <p className="tps-unlock-sub tnum">Ready the moment you join. ${KIT_PLACES.length * CREDIT} in&nbsp;all.</p>
+            </div>
             <ul className="tps-unlock-row">
               {KIT_PLACES.map((p) => (
                 <li key={p.id}>
                   <img src={p.logo} alt={p.name} decoding="async" />
+                  <small className="tps-unlock-name">{p.name}</small>
                   <span className="tnum" aria-hidden="true">
                     ${CREDIT}
                   </span>
