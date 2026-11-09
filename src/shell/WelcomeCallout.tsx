@@ -11,7 +11,9 @@ export function WelcomeCallout({ they = false }: { they?: boolean }) {
   return (
     <p className="wc" data-wc="1" data-ph-show="">
       <b className="tnum">+{total}</b>
-      <span>immediately added to {they ? "their" : "your"} account</span>
+      {/* A welcome bonus (Sam, 9 Nov 2026: "frame the $25 as a welcome
+          bonus"). */}
+      <span>welcome bonus when {they ? "they" : "you"} join</span>
     </p>
   );
 }

@@ -565,6 +565,13 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
 
   const offer = (
     <ul className={`pck-offer${look === "b" ? " pck-offer-quiet" : ""}${look === "c" ? " pck-offer-chips" : ""}`}>
+      {/* The welcome offer (Sam, 9 Nov 2026: "include something in
+          checkout on how their credit is added to the phone number they pay
+          with and they can cancel anytime"): first, and cancel stays below. */}
+      <li>
+        <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$25</span>
+        <b>{look === "c" ? "$25 welcome bonus" : "$25 welcome bonus on the number you join with"}</b>
+      </li>
       <li>
         <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
         <b>{look === "c" ? "$5 credit weekly" : "$5 credit every week, every place"}</b>

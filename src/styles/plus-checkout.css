@@ -1385,3 +1385,11 @@
   background: #d14245;
   color: #ffffff;
 }
+
+/* The welcome bonus's $25 (9 Nov 2026): the money disc grows to a pill. */
+.pck-offer .pck-ico.pck-ico-wide {
+  width: auto;
+  min-width: 26px;
+  padding: 0 6px;
+  border-radius: 999px;
+}
