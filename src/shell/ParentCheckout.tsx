@@ -16,20 +16,16 @@ import {
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import {
-  confirmParentCheckout,
-  keptUtm,
-  PARENT_CONSENT_VERSION,
-  parentMock,
-  SUMMER_PAUSE_LIVE,
-  startParentCheckout,
-  toE164,
-  type ParentCheckoutStarted,
-  type ParentConfirmed,
-} from "../model/parents";
+import { useAuth } from "../context/auth_context";
+import { supabase } from "../supabase";
+import { toE164 } from "../model/parents";
+import { buildPlusCart, type PlusCart } from "../model/checkout";
+import { createGift, saveGiftCard, uploadGiftPhoto, type GiftMetadata } from "../model/giftApi";
+import { sendCode, verifyCode } from "./authEnv";
 import { clearGiftDraft, getGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { dropResume, keepFields, keptFields, keptQuick, keptStep, type ResumeStep } from "../model/checkoutResume";
-import { SCENE_ORDER } from "../model/gift";
+import { SCENE_ORDER, giftWho } from "../model/gift";
+import { usePlusPrice } from "../model/plus";
 import { ResumeContext, ResumeLine } from "./ResumeLine";
 import { BackArrow } from "./BackArrow";
 import { GiftSentContext } from "./giftSent";
@@ -38,28 +34,21 @@ import { GLYPHS, Glyph } from "../routes/parents_kit";
 import { lockScroll } from "./scrollLock";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
-/* ══ THE PARENT CHECKOUT (Sam, 5 Nov 2026; docs/parents/API.md) ═════════════
-   A parent signs their student up and pays, in one sheet over /parents: a
+/* ══ THE PARENT CHECKOUT (Sam, 5 Nov 2026; wired to the real gift backend by
+   Kiran, 8 Nov 2026: model/giftApi.ts) ═══════════════════════════════════════
+   A parent sends their student Plus as a gift, in one sheet over /parents: a
    bottom sheet on a phone, a card in the middle on a computer.
 
-     1. The form: the student's first name and number (typed twice, Sam:
-        "we can have them type the number twice yeah"), then the parent's
-        name and mobile (no email for now, Sam, 6 Nov 2026: "let's not
-        capture parent emails and just do phone number for now since we
-        don't have automated emails hooked up yet"; the email is asked for
-        again since), and two marketing boxes, texts and email, unticked
-        until ticked (6 Nov 2026). From an Ask a parent link the student is
-        already known, so it shows who's covered.
-     2. The charge: the parent is charged now ($3.99 the first month, then
-        $7.99/month), with the terms right by the button that takes the
-        money (Virginia's auto-renewal rule). Stripe's Payment Element, so a
-        card always works and Apple Pay or Google Pay shows where it can.
-     3. Done: their Plus is on, and the text has gone.
-
-   Every backend call goes through model/parents.ts. With ?parentmock (local
-   dev only) there is no PaymentIntent, so a stand-in card panel takes the
-   Payment Element's place and Pay goes straight to the confirm. Copy is
-   docs/parents/COPY.md, with its "As built: charge at checkout" lines.
+     1. Who: the student's first name and number, then the parent signs in
+        with their own mobile (a code by text, shell/authEnv.ts), since a
+        gift is bought by a TapIn user.
+     2. The card: saved, not charged. The parent's normal Plus cart
+        (buildPlusCart, the welcome offer as usual) and a SetupIntent from
+        create_intent with gift: true; Stripe's Payment Element for a card,
+        Apple Pay or Google Pay on who it's for once signed in.
+     3. Done: create_gift stores the gift (the card's look in its metadata,
+        the photo uploaded first) and texts the student a link. Nothing is
+        charged until they claim it; unclaimed, it expires and costs nothing.
 
    THE EFFORT PICKS (Sam, 7 Nov 2026: "these 4 look good"; previews and
    notes in tapin-staging-work/lever-lab/effort):
@@ -70,11 +59,10 @@ import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrack
      D · One "who" step: their number, typed once, and yours on one step
          (it was "Where {name}'s gift goes" and "Last, you").
      E · Wallet first: Apple Pay and Google Pay at the foot of that step,
-         paying at once (Stripe's deferred intent: the PaymentIntent is made
-         by parent_checkout_start inside the wallet's confirm), with "Pay by
-         card instead" going on to the card step. */
+         saving the card at once (Stripe's deferred intent: the SetupIntent
+         is made inside the wallet's confirm), with "Use a card instead"
+         going on to the card step. */
 
-type Ask = { token: string; student_first_name: string; masked_phone: string };
 
 /* The expanding container (Sam, 6 Nov 2026: "would we not be able to use the
    same expanding and collapsing parent container animation we use here on
@@ -87,7 +75,6 @@ type Ask = { token: string; student_first_name: string; masked_phone: string };
 export default function ParentCheckout({
   open,
   onClose,
-  ask,
   from = null,
   onEditGift,
   onChangeLook,
@@ -97,7 +84,6 @@ export default function ParentCheckout({
 }: {
   open: boolean;
   onClose: () => void;
-  ask: Ask | null;
   from?: HTMLElement | null;
   /** Back to the care package (the builder on /parents, on its note; with
    *  Send as is, where that was chosen). */
@@ -135,7 +121,6 @@ export default function ParentCheckout({
   return (
     <Sheet
       key={session}
-      ask={ask}
       from={from}
       onEditGift={onEditGift}
       onChangeLook={onChangeLook ?? onEditGift}
@@ -152,11 +137,11 @@ export default function ParentCheckout({
   );
 }
 
-/* ── Prices, until the server says ───────────────────────────────────────── */
-/* The welcome offer (API.md): shown in the header before the start call;
-   the terms and the button use what parent_checkout_start returns. */
-const OFFER = { first_cents: 399, monthly_cents: 799 };
+/* ── Prices ──────────────────────────────────────────────────────────────── */
+/* Plus's price as the page shows it (usePlusPrice) until the parent's cart is
+   built; then the cart's own first charge, which is what the claim charges. */
 const usd = (cents: number) => (cents % 100 === 0 ? `$${cents / 100}` : `$${(cents / 100).toFixed(2)}`);
+const cents = (dollars: number | undefined) => (dollars === undefined ? 0 : Math.round(dollars * 100));
 
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
@@ -182,7 +167,6 @@ const maskDigits = (d: string) => `•••${d.slice(-4)}`;
  *  start 2 to 9. With the number typed once (Effort D), this and the
  *  read-back under it (OnTheirNumber) stand in for the confirm field. */
 const usNumber = (d: string) => /^[2-9]\d{2}[2-9]\d{6}$/.test(d);
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const possessive = (name: string) => `${name}’s`;
 /** A name starting a sentence ("maya" as typed: "Maya opens it"). */
 const cap = (name: string) => (name ? name.charAt(0).toUpperCase() + name.slice(1) : name);
@@ -199,39 +183,36 @@ const TEXT_BUBBLE = "M20 11.5c0 4-3.6 7-8 7-1.1 0-2.2-.2-3.1-.5L4 19.5l1.4-3.6C4
    way we only have one purchase funnel"). The care package is the builder
    on /parents (routes/GiftPage.tsx GiftPreview): the look (with what plays,
    Effort C), then the note. This sheet is the rest: who (their number, typed
-   once, and you, one step since Effort D; an ask link knows the student, so
-   there it's just you), then the card, which a wallet skips (Effort E). With
-   Send as is (Effort B) it's who and the card alone. */
+   once, and you signing in, one step since Effort D), then the card, which a
+   wallet skips (Effort E). With Send as is (Effort B) it's who and the card
+   alone. */
 type Step = "who" | "pay" | "done";
 
-/* Once a card has been charged, that checkout is kept for the page's life,
-   so closing and reopening the sheet picks it up again (it only needs
-   confirming) instead of starting a new one that would charge again. */
-let charged: { started: ParentCheckoutStarted; paymentIntent: string; who: string; masked: string; phone: string | null; hasNote: boolean } | null = null;
-/** A card already charged whose checkout still needs confirming: the
- *  builder goes straight to it (its gift went with the charge). */
-export const hasChargedParentCheckout = () => charged !== null;
-type Field = "student" | "phone" | "name" | "email" | "mobile";
+/* Once the card is saved, that gift is kept for the page's life, so closing
+   and reopening the sheet picks it up again (it only needs sending) instead
+   of asking for the card again. */
+let saved: { cart: PlusCart; setupIntentId: string; who: string; masked: string; phone: string; hasNote: boolean } | null = null;
+/** A card already saved whose gift still needs sending: the builder goes
+ *  straight to it. */
+export const hasSavedGiftCard = () => saved !== null;
+type Field = "student" | "phone" | "mobile" | "code";
 /** The who step's fields, in the order they're on screen. */
-const WHO_FIELDS: Field[] = ["student", "phone", "name", "mobile", "email"];
+const WHO_FIELDS: Field[] = ["student", "phone", "mobile", "code"];
 
 /** Where a save from earlier (model/checkoutResume.ts) comes back to: the
  *  step they left, or the note when who it's for would have no name (it
- *  asks for one itself only with Send as is, and an ask link knows it).
- *  Null with no save. */
-export function resumeStep(ask: boolean): ResumeStep | null {
-  /* Never back onto pay itself: that would start a checkout on load, and
-     with the consent boxes unticked again. Who comes back filled, with the
-     boxes in view, one tap from paying. */
+ *  asks for one itself only with Send as is). Null with no save. */
+export function resumeStep(): ResumeStep | null {
+  /* Never back onto the card itself: that would ask for a SetupIntent on
+     load. Who comes back filled, one tap from the card. */
   const kept = keptStep();
   if (!kept) return null;
   const at: ResumeStep = kept === "pay" ? "who" : kept;
   if (at !== "who") return at;
-  return ask || keptQuick() || getGiftDraft().to.trim() ? "who" : "note";
+  return keptQuick() || getGiftDraft().to.trim() ? "who" : "note";
 }
 
 function Sheet({
-  ask,
   from,
   onEditGift,
   onChangeLook,
@@ -242,7 +223,6 @@ function Sheet({
   onGone,
   onClose,
 }: {
-  ask: Ask | null;
   from: HTMLElement | null;
   onEditGift: () => void;
   onChangeLook: () => void;
@@ -254,13 +234,15 @@ function Sheet({
   onClose: () => void;
 }) {
   const { track } = useEventTracking();
-  const source = ask ? "ask_link" : "parent_page";
-  const mock = parentMock();
+  const source = "parent_page";
+  /* The parent's TapIn account: a gift is bought signed in. */
+  const { accessToken, userSession, displayName } = useAuth();
+  const signedIn = !!accessToken;
 
   /* It opens on who (a save from earlier comes back there too, never on
-     the charge: resumeStep), or on the charge when a card was taken and
-     only needs confirming. */
-  const [step, setStep] = useState<Step>(() => (charged ? "pay" : "who"));
+     the card: resumeStep), or on the card when one was saved and the gift
+     only needs sending. */
+  const [step, setStep] = useState<Step>(() => (saved ? "pay" : "who"));
   const resume = useContext(ResumeContext);
   /* The student's name, note, sign-off, background and photo are the gift
      draft (model/giftDraft.ts), shared with the preview on /parents, so what
@@ -270,42 +252,26 @@ function Sheet({
   const student = draft.to;
   const setStudent = (to: string) => setGiftDraft({ to });
   /* What they typed here before, kept in this browser for a day
-     (model/checkoutResume.ts). An ask link's student number is the link's,
-     so a saved one isn't put back. */
-  const [saved] = useState(keptFields);
-  const [phone, setPhone] = useState(ask ? "" : saved.phone);
-  const [name, setName] = useState(saved.name);
-  /* Kept, never emailed for now (Sam, 6 Nov 2026: "No email at all right
-     now. Although I think it'd make sense to capture their emails
-     regardless"); the parent is texted. */
-  const [email, setEmail] = useState(saved.email);
-  const [mobile, setMobile] = useState(saved.mobile);
+     (model/checkoutResume.ts). */
+  const [kept] = useState(keptFields);
+  const [phone, setPhone] = useState(kept.phone);
+  /* The parent's mobile, for their sign-in, and the code texted to it. */
+  const [mobile, setMobile] = useState(kept.mobile);
+  const [codeSentTo, setCodeSentTo] = useState<string | null>(null);
+  const [code, setCode] = useState("");
   useEffect(() => {
-    keepFields(ask ? { name, email, mobile } : { phone, name, email, mobile });
-  }, [ask, phone, name, email, mobile]);
-  /* Marketing, texts and email, each unticked until ticked (Sam, 6 Nov
-     2026); kept while they go back and forth between the steps, never kept
-     for later: consent is given fresh. */
-  const [mktSms, setMktSms] = useState(false);
-  const [mktEmail, setMktEmail] = useState(false);
-  /* Summer break: billing paused over the summer if they tick it. */
-  const [summerPause, setSummerPause] = useState(false);
+    keepFields({ phone, mobile });
+  }, [phone, mobile]);
   /* The care package as the builder left it (step 1): the note and how it's
-     signed, the background and the photo, all optional; whatever is filled
-     in goes with the checkout. */
-  const noteOpen = true;
+     signed, the background, the effect and the photo, all optional; they go
+     in the gift's metadata. */
   const giftNote = draft.note;
   const giftFrom = draft.from;
   const giftScene = draft.scene;
   const giftPhoto = draft.photo;
-  /* The photo is picked in the builder; nothing here is still loading it. */
-  const photoBusy = false;
-  /* Whether a note went to parent_checkout_start: what the done screen says,
-     kept across a resumed payment (the fields start empty again then). */
-  const [sentNote, setSentNote] = useState(() => charged?.hasNote ?? false);
-  /* The same, for the wallet's confirm, which reads it in the same tick it
-     sets it. */
-  const sentNoteRef = useRef(sentNote);
+  /* Whether the gift has a note or a photo: what the done screen says, kept
+     across a resumed gift (the fields start empty again then). */
+  const [sentNote, setSentNote] = useState(() => saved?.hasNote ?? false);
   /* Their first name on who it's for: with Send as is (the note, where it's
      asked, was skipped), or if it's missing however they got here. Once
      shown it stays while they type. */
@@ -314,20 +280,25 @@ function Sheet({
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [started, setStarted] = useState<ParentCheckoutStarted | null>(() => charged?.started ?? null);
-  /* The card went through: no going back to change details. */
-  const [paid, setPaid] = useState(() => !!charged);
+  /* The parent's cart (built once they're signed in) and, for the card step,
+     the SetupIntent that saves the card for it. */
+  const [cart, setCart] = useState<PlusCart | null>(() => saved?.cart ?? null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  /* The card is saved: no going back to change details. */
+  const [cardSaved, setCardSaved] = useState(() => !!saved);
   /* E · Wallet first: whether Apple Pay or Google Pay can show on this
-     device. Until Stripe says, and if neither can, the foot is "Continue to
-     payment" as before. ?parentmock's stand-ins always show. */
-  const [wallets, setWallets] = useState<"pending" | "shown" | "none">(() => (mock ? "shown" : "pending"));
-  const walletsShown = wallets === "shown";
-  /* The charge went through on a wallet but the backend's confirm didn't:
-     the card step carries on from there, only confirming (Finish). */
+     device. Until Stripe says, and if neither can, the foot is "Continue"
+     as before. Only once signed in: a wallet can't sign the parent in. */
+  const [wallets, setWallets] = useState<"pending" | "shown" | "none">("pending");
+  const walletsShown = signedIn && wallets === "shown";
+  /* The card was saved on a wallet but the gift wasn't sent: the card step
+     carries on from there, only sending (Finish). */
   const [payError, setPayError] = useState<string | null>(null);
-  const [done, setDone] = useState<ParentConfirmed | null>(null);
-  /* While money is moving, the sheet can't be closed. */
+  const [done, setDone] = useState<{ giftId: string; expiresAt: string } | null>(null);
+  /* While the card is being saved or the gift sent, the sheet can't be
+     closed. */
   const paying = useRef(false);
+  const price = usePlusPrice();
 
   const layer = useRef<HTMLDivElement | null>(null);
   const scrim = useRef<HTMLDivElement | null>(null);
@@ -603,27 +574,29 @@ function Sheet({
   /* ── The form ── */
   const phoneD = digitsOf(phone);
   const mobileD = digitsOf(mobile);
+  /* The signed-in parent's own number (Supabase keeps it as digits). */
+  const ownD = digitsOf(userSession?.user?.phone ?? "");
+  const codeD = code.replace(/\D/g, "").slice(0, 6);
   /* Their first name is asked here with Send as is (the note was skipped),
-     or if it's missing; an ask link's is the link's. */
-  const showName = !ask && (quick || nameAsked);
+     or if it's missing. */
+  const showName = quick || nameAsked;
   const Name = cap(student.trim());
   const errors: Partial<Record<Field, string>> = {};
-  if (!ask) {
-    if (!student.trim()) errors.student = "Add your student’s first name.";
-    /* Typed once (Effort D): a full US number, not one no phone can have,
-       and not the parent's own (the easiest slip with two numbers on one
-       screen). */
-    if (phoneD.length < 10) errors.phone = "Enter a 10-digit US mobile number.";
-    else if (!usNumber(phoneD)) errors.phone = "That isn’t a US mobile number. Check the area code.";
-    else if (phoneD === mobileD) errors.phone = `That’s your number. Enter ${Name ? possessive(Name) : "theirs"}.`;
+  if (!student.trim()) errors.student = "Add your student’s first name.";
+  /* Typed once (Effort D): a full US number, not one no phone can have,
+     and not the parent's own (a gift to yourself is refused anyway). */
+  if (phoneD.length < 10) errors.phone = "Enter a 10-digit US mobile number.";
+  else if (!usNumber(phoneD)) errors.phone = "That isn’t a US mobile number. Check the area code.";
+  else if (phoneD === (signedIn ? ownD : mobileD)) errors.phone = `That’s your number. Enter ${Name ? possessive(Name) : "theirs"}.`;
+  /* Signed out: their mobile, then the code texted to it. */
+  if (!signedIn) {
+    if (mobileD.length < 10 || !usNumber(mobileD)) errors.mobile = "Enter your 10-digit US mobile number.";
+    else if (codeSentTo && codeD.length < 6) errors.code = "Enter the 6-digit code we texted you.";
   }
-  if (!name.trim()) errors.name = "Add your name.";
-  if (!EMAIL.test(email.trim())) errors.email = "Enter your email.";
-  if (mobileD.length < 10 || !usNumber(mobileD)) errors.mobile = "Enter your 10-digit US mobile number.";
   const shown = (f: Field) => (tried ? errors[f] : undefined);
   /* Their number is a real one: the "on their number" card under it, with
      the number read back. */
-  const numberOk = !ask && !errors.phone;
+  const numberOk = !errors.phone;
   /* The first field that still needs something, shown and focused; null
      when the step is ready. Their name only counts where it's asked. */
   const firstBad = (): Field | null => WHO_FIELDS.find((f) => errors[f] && (f !== "student" || showName)) ?? null;
@@ -633,70 +606,96 @@ function Sheet({
     document.getElementById(`prc-${bad}`)?.focus();
   };
 
-  /* Continue to payment, or "Pay by card instead": on to the card step. */
-  const submit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (busy || photoBusy || paying.current) return;
-    setFormError(null);
-    const bad = firstBad();
-    if (bad) return showErrors(bad);
-    await start();
+  /* Someone else signs in ("Not you?"): the cart was signed for the last
+     one, so it's built again for them. A saved card's gift stays as it is. */
+  const signedInId = userSession?.user?.id ?? null;
+  const cartFor = useRef(signedInId);
+  useEffect(() => {
+    if (cartFor.current === signedInId) return;
+    cartFor.current = signedInId;
+    if (cardSaved) return;
+    setCart(null);
+    setClientSecret(null);
+  }, [signedInId, cardSaved]);
+
+  /* The code goes to their mobile: its field comes up, ready to type. */
+  useEffect(() => {
+    if (codeSentTo) document.getElementById("prc-code")?.focus();
+  }, [codeSentTo]);
+
+  /* Signed in, or on the way: the parent's access token, or null right
+     after a code was texted (Continue again with the code checks it). */
+  const signIn = async (): Promise<string | null> => {
+    if (accessToken) return accessToken;
+    const to = toE164(mobileD) as string;
+    if (codeSentTo !== to) {
+      const err = await sendCode(to);
+      if (err) throw new Error(err);
+      setCode("");
+      setCodeSentTo(to);
+      track("parent_code_sent", { source });
+      return null;
+    }
+    const err = await verifyCode(to, codeD);
+    if (err) throw new Error(err);
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw new Error("We couldn’t sign you in. Please try again.");
+    track("parent_signed_in", { source });
+    return data.session.access_token;
   };
 
-  /* The checkout, made (parent_checkout_start), from what's on this step
-     and the care package. The same call for the card and the wallets: the
-     card's goes on to the card step; a wallet's pays on its PaymentIntent
-     at once (payByWallet). Nothing about a payment is ever kept. */
-  const begin = async (path: "card" | "wallet"): Promise<ParentCheckoutStarted> => {
-    const giftNoteSent = noteOpen && giftNote.trim() ? giftNote.trim() : null;
-    const giftFromSent = noteOpen && giftFrom.trim() ? giftFrom.trim().replace(/\s+/g, " ") : null;
+  /* Another code to the same mobile. */
+  const resendCode = async () => {
+    if (busy || !codeSentTo) return;
+    setBusy(true);
+    setFormError(null);
+    try {
+      const err = await sendCode(codeSentTo);
+      if (err) throw new Error(err);
+      setCode("");
+      document.getElementById("prc-code")?.focus();
+    } catch (err) {
+      setFormError((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /* Their Plus cart, built once for the signed-in parent (the welcome offer
+     as usual); the claim rebuilds it for the student. */
+  const ensureCart = async (token: string): Promise<PlusCart> => {
+    if (cart) return cart;
+    const built = await buildPlusCart(token);
+    setCart(built);
+    return built;
+  };
+
+  const startTracking = (path: "card" | "wallet") =>
     track("parent_checkout_started", {
       source,
-      has_note: !!giftNoteSent,
-      has_photo: noteOpen && !!giftPhoto,
-      gift_scene: noteOpen ? giftScene : null,
-      marketing_sms: mktSms,
-      marketing_email: mktEmail,
-      summer_pause: summerPause,
+      has_note: !!giftNote.trim(),
+      has_photo: !!giftPhoto,
+      gift_scene: giftScene,
       pay_path: path,
       send_as_is: quick,
     });
-    const res = await startParentCheckout({
-      student_first_name: ask ? ask.student_first_name : student.trim(),
-      student_phone: ask ? "" : (toE164(phoneD) as string),
-      parent_name: name.trim(),
-      parent_phone: toE164(mobileD) as string,
-      parent_email: email.trim(),
-      ask_token: ask?.token ?? null,
-      /* A blank note is null (Send as is, or nothing written): the gift page
-         shows the letter's own warm line then (parent_checkout_start
-         cleanGiftNote takes null). */
-      gift_note: giftNoteSent,
-      gift_from: giftFromSent,
-      gift_scene: noteOpen ? giftScene : null,
-      gift_photo: noteOpen ? giftPhoto : null,
-      gift_effect: draft.effect,
-      marketing_sms: mktSms,
-      marketing_email: mktEmail,
-      consent_text_version: PARENT_CONSENT_VERSION,
-      summer_pause: summerPause,
-      utm: keptUtm(),
-    });
-    setStarted(res);
-    /* The wallets' sheet shows the server's first charge from now on (a card
-       start that came back to who included); a wallet's own start is still
-       checked against the amount its sheet showed (payByWallet). */
-    setWalletCents(res.first_cents);
-    /* A gift goes out with a note or a photo (API.md: an ask link's
-       student is texted their gift link when there is either). */
-    sentNoteRef.current = !!giftNoteSent || (noteOpen && !!giftPhoto);
-    setSentNote(sentNoteRef.current);
-    return res;
-  };
-  const start = async () => {
+
+  /* Continue (or "Use a card instead"): signs the parent in if they aren't
+     (a code first, then Continue again with it), then on to the card step
+     with the SetupIntent that saves their card. */
+  const submit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (busy || paying.current) return;
+    setFormError(null);
+    const bad = firstBad();
+    if (bad) return showErrors(bad);
     setBusy(true);
     try {
-      await begin("card");
+      const token = await signIn();
+      if (!token) return;
+      const built = await ensureCart(token);
+      startTracking("card");
+      setClientSecret(await saveGiftCard(built, token));
       setPayError(null);
       toStep("pay");
     } catch (err) {
@@ -720,20 +719,19 @@ function Sheet({
     return true;
   };
   /* The wallet's sheet was confirmed: Stripe's deferred intent (the Elements
-     on this step have no PaymentIntent yet). Check the wallet's details
-     (elements.submit), make the checkout as Continue to payment does
-     (begin), pay on its PaymentIntent, then the same confirm as the card,
-     under the same guards (paying; once charged, only confirming). In
-     ?parentmock there is no Stripe: the stand-ins run the mock pay. */
-  const payByWallet = async (ev?: StripeExpressCheckoutElementConfirmEvent, stripe?: Stripe | null, elements?: StripeElements | null) => {
+     on this step have no SetupIntent yet). Check the wallet's details
+     (elements.submit), get the SetupIntent as Continue does, save the card
+     on it, then send the gift, under the same guards (paying; once saved,
+     only sending). Wallets only show signed in. */
+  const payByWallet = async (ev: StripeExpressCheckoutElementConfirmEvent, stripe: Stripe | null, elements: StripeElements | null) => {
     let confirming = false;
-    let intent: string | null = null;
+    let cardIsSaved = false;
     const failSheet = () => {
-      if (!confirming) ev?.paymentFailed({ reason: "fail" });
+      if (!confirming) ev.paymentFailed({ reason: "fail" });
     };
     /* Not while a card's start is on its way either (a wallet sheet opened
-       just before "Pay by card instead" was pressed). */
-    if (paying.current || busy || (!mock && (!stripe || !elements))) {
+       just before "Use a card instead" was pressed). */
+    if (paying.current || busy || !stripe || !elements || !accessToken) {
       failSheet();
       return;
     }
@@ -741,38 +739,29 @@ function Sheet({
     setBusy(true);
     setFormError(null);
     try {
-      if (!mock && elements) {
-        const { error } = await elements.submit();
-        if (error) throw new Error(error.message || "Your payment didn’t go through. Please try again.");
-      }
-      const res = await begin("wallet");
-      if (!mock && stripe && elements) {
-        /* Never charge an amount the parent wasn't shown: the wallet's sheet
-           showed the price these Elements were made with. */
-        if (res.first_cents !== walletCents) {
-          setWalletCents(res.first_cents);
-          throw new Error(`Today’s price is ${usd(res.first_cents)}. Check it and pay again.`);
-        }
-        confirming = true;
-        const { error, paymentIntent } = await stripe.confirmPayment({
-          elements,
-          clientSecret: res.client_secret,
-          confirmParams: { return_url: window.location.href },
-          redirect: "if_required",
-        });
-        if (error) throw new Error(error.message || "Your payment didn’t go through. Please try again.");
-        if (!paymentIntent || (paymentIntent.status !== "succeeded" && paymentIntent.status !== "processing"))
-          throw new Error("Your payment didn’t go through. Please try again.");
-        intent = paymentIntent.id;
-        onCharged(paymentIntent.id, res);
-      }
-      onPaid(await confirmParentCheckout(mock ? "mock" : res.checkout_id, intent ?? "pi_mock"), res);
+      const { error: submitError } = await elements.submit();
+      if (submitError) throw new Error(submitError.message || "Your card couldn’t be saved. Please try again.");
+      const built = await ensureCart(accessToken);
+      startTracking("wallet");
+      const secret = await saveGiftCard(built, accessToken);
+      confirming = true;
+      const { error, setupIntent } = await stripe.confirmSetup({
+        elements,
+        clientSecret: secret,
+        confirmParams: { return_url: window.location.href },
+        redirect: "if_required",
+      });
+      if (error) throw new Error(error.message || "Your card couldn’t be saved. Please try again.");
+      if (setupIntent?.status !== "succeeded") throw new Error("Your card couldn’t be saved. Please try again.");
+      onCardSaved(setupIntent.id, built);
+      cardIsSaved = true;
+      await sendGift();
     } catch (err) {
       const msg = (err as Error).message || "Something went wrong. Please try again.";
       console.error("Parent wallet checkout failed", err);
       failSheet();
-      if (intent) {
-        /* Charged, not confirmed: the card step's Finish only confirms. */
+      if (cardIsSaved) {
+        /* Saved, not sent: the card step's Finish only sends. */
         setPayError(msg);
         toStep("pay");
       } else setFormError(msg);
@@ -781,31 +770,60 @@ function Sheet({
       setBusy(false);
     }
   };
-  /* What the deferred Elements are made with: the first charge, as the
-     header says until parent_checkout_start answers. */
-  const [walletCents, setWalletCents] = useState(() => charged?.started.first_cents ?? OFFER.first_cents);
 
-  /* The builder keeps the step for the save. A card taken but not yet
-     confirmed comes back no further than who, so a reload never makes a
-     second charge by itself. */
+  /* The builder keeps the step for the save. A card saved but whose gift
+     isn't sent comes back no further than who. */
   useEffect(() => {
     if (step === "done") return;
-    resume?.report(step === "pay" && paid ? "who" : step);
-    // On the step changing, and the card being taken.
+    resume?.report(step === "pay" && cardSaved ? "who" : step);
+    // On the step changing, and the card being saved.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, paid]);
+  }, [step, cardSaved]);
 
-  const onCharged = (paymentIntent: string, st: ParentCheckoutStarted | null = started) => {
-    if (st)
-      charged = {
-        started: st,
-        paymentIntent,
-        who: ask ? ask.student_first_name : student.trim(),
-        masked: ask ? ask.masked_phone : maskDigits(phoneD),
-        phone: ask ? null : toE164(phoneD) || null,
-        hasNote: sentNoteRef.current,
-      };
-    setPaid(true);
+  const onCardSaved = (setupIntentId: string, built: PlusCart) => {
+    const hasNote = !!giftNote.trim() || !!giftPhoto;
+    saved = {
+      cart: built,
+      setupIntentId,
+      who: student.trim(),
+      masked: maskDigits(phoneD),
+      phone: toE164(phoneD) as string,
+      hasNote,
+    };
+    setSentNote(hasNote);
+    setCardSaved(true);
+  };
+
+  /* The gift, once its card is saved: the photo uploaded into the parent's
+     folder (kept on `saved`, so a retry doesn't upload it twice), then
+     create_gift with the card's look as its metadata. Throws with a message
+     to show. */
+  const photoPath = useRef<string | null>(null);
+  const sendGift = async () => {
+    const s = saved;
+    if (!s) throw new Error("Something went wrong. Please try again.");
+    const { data } = await supabase.auth.getSession();
+    const session = data.session;
+    if (!session) throw new Error("Sign in again to send your gift.");
+    if (giftPhoto && !photoPath.current) photoPath.current = await uploadGiftPhoto(session.user.id, giftPhoto);
+    const metadata: GiftMetadata = {
+      v: 1,
+      from: giftWho(giftFrom, displayName ?? ""),
+      note: giftNote.trim() || null,
+      scene: giftScene,
+      effect: draft.effect,
+      photo: photoPath.current ? { path: photoPath.current } : null,
+    };
+    onSent(
+      await createGift({
+        cart: s.cart,
+        accessToken: session.access_token,
+        setupIntentId: s.setupIntentId,
+        recipientPhone: s.phone,
+        recipientFirstName: s.who,
+        metadata,
+      }),
+    );
   };
   /* The gift preview this sits in (GiftPreview), which sends the envelope
      off as this step arrives; null on its own. */
@@ -815,26 +833,20 @@ function Sheet({
   /* Who it went to, kept as the charge cleared (a resumed payment's fields
      are empty). The student's number is only known when the parent typed it:
      an ask link's is masked. */
-  const [sentTo, setSentTo] = useState<{ who: string; masked: string; phone: string | null; texted: boolean } | null>(null);
+  const [sentTo, setSentTo] = useState<{ who: string; masked: string; phone: string } | null>(null);
   const finished = useRef(false);
-  const onPaid = (res: ParentConfirmed, st: ParentCheckoutStarted | null = started) => {
-    /* Paid: the save from this browser goes now (not just as the builder
+  const onSent = (res: { giftId: string; expiresAt: string }) => {
+    /* Sent: the save from this browser goes now (not just as the builder
        closes), and nothing is kept again until the next gift. */
     dropResume({ hold: true });
-    const first = st?.first_cents ?? OFFER.first_cents;
-    const to = {
-      who: res.student_first_name || who,
-      masked: res.masked_phone || masked,
-      phone: ask ? null : charged?.phone ?? (toE164(phoneD) || null),
-      /* An ask link's student is texted only for a note or a photo (API.md). */
-      texted: !ask || sentNoteRef.current,
-    };
-    charged = null;
-    track("parent_purchase", { value: first / 100, currency: "USD", source, checkout_id: st?.checkout_id });
-    if (ask) track("ask_paid", { source });
+    const s = saved;
+    const to = { who: s?.who ?? who, masked: s?.masked ?? masked, phone: s?.phone ?? (toE164(phoneD) as string) };
+    saved = null;
+    photoPath.current = null;
+    track("parent_gift_sent", { source, gift_id: res.giftId, value: first / 100, currency: "USD" });
     finished.current = true;
     /* The preview measures the drawer before it moves, so first. */
-    tickAt.current = host ? host.sent({ who: cap(to.who), texted: to.texted }) : null;
+    tickAt.current = host ? host.sent({ who: cap(to.who), texted: true }) : null;
     setSentTo(to);
     setDone(res);
     toStep("done");
@@ -850,28 +862,25 @@ function Sheet({
     [],
   );
 
-  const who = charged?.who ?? (ask ? ask.student_first_name : student.trim());
-  const masked = charged?.masked ?? (ask ? ask.masked_phone : maskDigits(phoneD));
-  const first = started?.first_cents ?? OFFER.first_cents;
-  const monthly = started?.monthly_cents ?? OFFER.monthly_cents;
+  const who = saved?.who ?? student.trim();
+  const masked = saved?.masked ?? maskDigits(phoneD);
+  /* What the claim will charge first: the cart's own total once it's built,
+     the page's price before. */
+  const first = (saved?.cart ?? cart)?.dueTodayCents ?? cents(price?.first);
+  const monthly = cents(price?.monthly);
 
-  /* An ask link's student isn't texted (they asked), so its button doesn't
-     say so. */
-  const payLabel = ask ? `Pay ${usd(first)}` : `Pay ${usd(first)} and send their text`;
+  /* Nothing is charged here: the card is saved and the gift sent. */
+  const payLabel = "Save card and send the gift";
 
   /* ── Header ── */
   const title =
     step === "done"
-      ? `${possessive(cap(done?.student_first_name || who))} Tapin Plus is on.`
+      ? `${possessive(cap(sentTo?.who || who))} gift is on its way.`
       : step === "pay"
-        ? ask
-          ? "Pay and turn on their Plus"
-          : "Pay and send their text"
-        : ask
-          ? "Last, you"
-          : quick
-            ? "Who it’s for"
-            : "Their number, then yours";
+        ? "Add your card"
+        : quick
+          ? "Who it’s for"
+          : "Their number, then yours";
   /* Every step has its line under the title, as the builder's stages do
      (Sam, 6 Nov 2026: "consistent across every single step of the modal"):
      the price on who it's for (unless the wallets' rows under it say it,
@@ -881,11 +890,11 @@ function Sheet({
     step === "who"
       ? walletsShown
         ? null
-        : `${usd(first)} the first month, then ${usd(monthly)}/month. Cancel anytime.`
+        : `Nothing is charged until they claim it. Then ${usd(first)} the first month, ${usd(monthly)}/month after.`
       : step === "pay"
-        ? `For ${cap(who)}, ${masked}.`
+        ? `For ${cap(who)}, ${masked}. Nothing is charged today.`
         : step === "done"
-          ? `${usd(first)} paid today. We’ll text you a receipt.`
+          ? "Nothing is charged until they claim it."
           : null;
   /* The builder's stages count as the first bars (GiftPreview's stepsTotal),
      so the count is the same across the whole flow; Send as is counts only
@@ -992,36 +1001,30 @@ function Sheet({
     <div className={flat ? "prc-e-rows" : "prc-module prc-rows"}>
       <div className="prc-row">
         <span>Due today</span>
-        <b className="tnum">{usd(first)}</b>
+        <b className="tnum">$0</b>
       </div>
       <div className="prc-row">
-        <span>Then</span>
-        {/* The date the next charge comes (Sam, 7 Nov 2026). */}
-        <b className="tnum">{`${usd(monthly)} a month from ${renewsOn()}`}</b>
+        <span>When they claim it</span>
+        <b className="tnum">{`${usd(first)}, then ${usd(monthly)} a month`}</b>
       </div>
     </div>
   );
-  /* The promise, right above Pay (Sam, 7 Nov 2026: "go for it"): what a
-     hesitating parent needs at the button. No refund for not signing in
-     (Sam, 7 Nov 2026: "if someone doesn't claim it they don't claim it");
-     the refund is for not saving what they spent, ask link or not. */
+  /* The promise, right above the button (Sam, 7 Nov 2026: "go for it"):
+     what a hesitating parent needs at it. A gift nobody claims costs
+     nothing; cancelling is by support until the account page does it. */
   const promise = (
     <ul className="prc-promise" aria-label="Our promise">
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
-          <b>Full refund</b> if they don’t save what you spent
+          <b>Not charged until they claim it.</b> Unclaimed after 30 days, it expires.
         </span>
       </li>
       <li>
         <Glyph d={GLYPHS.mail} />
         <span>
-          <b>Cancel or skip anytime</b> by emailing support@tapin.app
+          <b>Cancel anytime</b> by emailing support@tapin.app
         </span>
-      </li>
-      <li>
-        <Glyph d={GLYPHS.bell} />
-        <span>We’ll email you a few days before each renewal</span>
       </li>
     </ul>
   );
@@ -1035,7 +1038,7 @@ function Sheet({
        due, the promise and the terms under the boxes, and "Pay by card
        instead" going on to the card step. */
     const sceneName = SCENE_ORDER.find((sc) => sc.id === giftScene)?.name ?? "Your";
-    const theirs = ask ? null : (
+    const theirs = (
       group(
         "Their number",
         <>
@@ -1055,37 +1058,62 @@ function Sheet({
         </>,
       )
     );
-    const yours = (
-      /* The mobile above the email, so the texts box under them can say
-         "the number above" and mean it. */
-      group(
-        "From you",
+    /* From you: the parent signs in with their mobile (a code by text), or
+       is already signed in. */
+    const yours = group(
+      "From you",
+      signedIn ? (
+        <p className="prc-e-consent tnum">
+          Signed in as {formatPhone(ownD)}.{" "}
+          <button type="button" className="prc-e-bycard" onClick={() => void supabase.auth.signOut()} disabled={busy}>
+            Not you?
+          </button>
+        </p>
+      ) : (
         <>
-          <Input id="name" label="Your name" value={name} onChange={setName} error={shown("name")} autoComplete="name" autoCapitalize="words" maxLength={80} />
-          <Input id="mobile" label="Your mobile" value={mobile.trim() ? formatPhone(mobileD) : mobile} onChange={(v) => setMobile(digitsOf(v))} error={shown("mobile")} tel autoComplete="tel-national" />
-          <Input id="email" label="Your email" value={email} onChange={setEmail} error={shown("email")} autoComplete="email" type="email" inputMode="email" />
-        </>,
-        /* "From you" heads it when their number is above it; an ask link's
-           step is only this. */
-        !ask,
-      )
-    );
-    /* Marketing, each its own box, both unticked until they tick them (Sam,
-       6 Nov 2026), with the texts' disclosure under its box, word for word.
-       Sent with the checkout (PARENT_CONSENT_VERSION). */
-    const consents = (
-      <div className="prc-consents">
-        <Consent id="mkt-sms" checked={mktSms} onChange={setMktSms} label="Text me about free gifts and offers for my student">
-          By checking this, you agree to get recurring automated marketing texts from Tapin at the number above. Consent isn’t a condition of purchase. Msg frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.{" "}
-          <Legal />
-        </Consent>
-        <Consent id="mkt-email" checked={mktEmail} onChange={setMktEmail} label="Email me about free gifts and offers for my student" />
-      </div>
+          <Input
+            id="mobile"
+            label="Your mobile"
+            value={mobile.trim() ? formatPhone(mobileD) : mobile}
+            onChange={(v) => {
+              setMobile(digitsOf(v));
+              setCodeSentTo(null);
+            }}
+            error={shown("mobile")}
+            tel
+            autoComplete="tel-national"
+            help="We text you a code to sign in. You’ll manage the gift from here."
+          />
+          {codeSentTo ? (
+            <>
+              <Input
+                id="code"
+                label="The code we texted you"
+                value={codeD}
+                onChange={setCode}
+                error={shown("code")}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                maxLength={6}
+              />
+              <button
+                type="button"
+                className="prc-e-bycard"
+                disabled={busy}
+                onClick={() => void resendCode()}
+              >
+                Send a new code
+              </button>
+            </>
+          ) : null}
+        </>
+      ),
+      true,
     );
     /* The student's consent (it was the end of their number's help, Sam,
        5 Nov 2026), shorter and by the buttons it applies to. Counsel to OK
        the wording and the move (lever-lab/effort/notes.md, D). */
-    const studentConsent = ask ? null : (
+    const studentConsent = (
       <p className="prc-e-consent">
         By continuing you confirm it’s {Name ? possessive(Name) : "your student’s"} number and they’re OK getting texts from Tapin about it.
       </p>
@@ -1107,12 +1135,6 @@ function Sheet({
             ) : null}
             {theirs}
             {yours}
-            {consents}
-            {SUMMER_PAUSE_LIVE || parentMock() ? (
-              <Consent id="summer" checked={summerPause} onChange={setSummerPause} label="Pause billing over summer break">
-                We’ll pause it for you over the summer, so there are no charges while they’re away.
-              </Consent>
-            ) : null}
             {walletsShown ? (
               <div className="prc-e-due">
                 {rows}
@@ -1133,7 +1155,7 @@ function Sheet({
                 google pay and the back arrow"). */}
             {walletsShown ? (
               <button type="button" className="prc-e-bycard prc-e-bycard-foot" onClick={() => void submit()} disabled={busy}>
-                Pay by card instead
+                Use a card instead
               </button>
             ) : null}
             {/* Back beside the buttons, as the builder's stages have it
@@ -1141,16 +1163,24 @@ function Sheet({
                 it was chosen. */}
             <BackArrow className={arrowClass} onClick={onEditGift} disabled={busy} />
             <div className="prc-e-footmain">
-              {mock ? (
-                <MockWallets onPay={() => walletReady() && void payByWallet()} disabled={busy} ready={!firstBad()} />
-              ) : (
-                <Elements stripe={getStripe()} options={walletElementsOptions(walletCents)}>
-                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} cents={walletCents} monthlyCents={monthly} />
+              {/* The wallets only once signed in: a wallet's sheet can't sign
+                  the parent in. */}
+              {signedIn ? (
+                <Elements stripe={getStripe()} options={WALLET_ELEMENTS}>
+                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} cents={first} monthlyCents={monthly} />
                 </Elements>
-              )}
+              ) : null}
               {walletsShown ? null : (
-                <button type="submit" className={cta} data-island-cta="" disabled={busy || photoBusy}>
-                  {busy ? "One moment…" : formError ? "Try again" : "Continue to payment"}
+                <button type="submit" className={cta} data-island-cta="" disabled={busy}>
+                  {busy
+                    ? "One moment…"
+                    : formError
+                      ? "Try again"
+                      : signedIn
+                        ? "Continue to your card"
+                        : codeSentTo
+                          ? "Sign in and continue"
+                          : "Text me a code"}
                 </button>
               )}
             </div>
@@ -1158,65 +1188,46 @@ function Sheet({
         )}
       </form>
     );
-  } else if (step === "pay" && started) {
-    /* The card (Pay by card instead, or no wallet on this device): what's
-       due, straight on the panel. Back to who beside Pay (Sam, 6 Nov 2026:
-       "wouldn't we want a back button here?"), with everything kept; once
-       the card is charged there's no going back. */
-    const pay = { paying, onBusy: setBusy, onPaid, onDone: close, label: payLabel, frame, rows, promise, onBack: () => toStep("who"), backDisabled: paid || busy };
-    view = mock ? (
-      <MockPay first={first} monthly={monthly} {...pay} />
-    ) : (
-      <Elements stripe={getStripe()} options={{ clientSecret: started.client_secret, appearance: APPEARANCE, fonts: FONTS }}>
-        <StripePay started={started} onCharged={onCharged} resumeIntent={charged?.paymentIntent ?? null} startError={payError} {...pay} />
-      </Elements>
-    );
+  } else if (step === "pay" && (clientSecret || cardSaved)) {
+    /* The card (Use a card instead, or no wallet on this device): what's
+       due, straight on the panel. Back to who beside the button (Sam, 6 Nov
+       2026: "wouldn't we want a back button here?"), with everything kept;
+       once the card is saved there's no going back. A card saved earlier
+       (a wallet's, or a reopen) only needs the gift sent. */
+    const pay = { paying, onBusy: setBusy, send: sendGift, onDone: close, label: payLabel, frame, rows, promise, onBack: () => toStep("who"), backDisabled: cardSaved || busy, first, monthly, startError: payError };
+    view =
+      clientSecret && cart ? (
+        <Elements stripe={getStripe()} options={{ clientSecret, appearance: APPEARANCE, fonts: FONTS }}>
+          <StripePay onCardSaved={(id) => onCardSaved(id, cart)} alreadySaved={cardSaved} {...pay} />
+        </Elements>
+      ) : (
+        <SendOnly {...pay} />
+      );
   } else if (step === "done" && done) {
     /* A · It's on its way (Sam, 7 Nov 2026: "lets do A on its way for after
        they pay"): what happens next, three moments on one line, then the
        pay step's promise on paper, then a quiet way to give them a heads-up
        beside Done. Never she or he for the student: their name, or they. */
-    const to = sentTo ?? { who: done.student_first_name || who, masked: done.masked_phone || masked, phone: null, texted: !ask || sentNote };
+    const to = sentTo ?? { who, masked, phone: toE164(phoneD) as string };
     const Who = cap(to.who);
-    /* The student is texted their gift link at checkout; an ask link's only
-       for a note or a photo (API.md step 4), and an ask link's student has
-       signed in to Tapin already (they asked from the app). */
-    const first = to.texted ? (
+    const expires = new Date(done.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const texted = (
       <>
         <b>We texted {Who}</b>
-        <p className="tnum">A link to your gift, sent to {to.masked} just now.</p>
-      </>
-    ) : (
-      <>
-        <b>It’s on their account now</b>
-        <p className="tnum">
-          Plus is on {possessive(Who)} number, {to.masked}. They asked for it, so there’s no text.
-        </p>
+        <p className="tnum">A link to {sentNote ? "your gift and note" : "your gift"}, sent to {to.masked} just now.</p>
       </>
     );
-    const second = ask ? (
-      to.texted ? (
-        <>
-          <b>{Who} opens it</b>
-          <p>Plus is already on their Tapin account.</p>
-        </>
-      ) : (
-        <>
-          <b>{Who} opens Tapin</b>
-          <p>Plus is there the next time they do.</p>
-        </>
-      )
-    ) : (
+    const second = (
       <>
-        <b>{Who} opens it</b>
-        <p>They sign in to Tapin, and Plus is there.</p>
+        <b>{Who} claims it</b>
+        <p className="tnum">They sign in with {to.masked} and their Plus starts. That’s when your card is charged {usd(first)}.</p>
       </>
     );
     const timeline = (
       <ol className="prc-tl" aria-label="What happens next">
         <li data-now="">
           <RingTick at={tickAt.current} />
-          <div>{first}</div>
+          <div>{texted}</div>
         </li>
         <li>
           <span className="prc-tl-mk" aria-hidden="true">
@@ -1229,10 +1240,8 @@ function Sheet({
             <Glyph d={BELL} />
           </span>
           <div>
-            <b>Before each bill</b>
-            <p className="tnum">
-              We email you a few days before each {usd(monthly)} renewal. The first is {renewsOn()}.
-            </p>
+            <b>If they don’t claim it</b>
+            <p className="tnum">It expires on {expires} and you’re never charged.</p>
           </div>
         </li>
       </ol>
@@ -1241,15 +1250,9 @@ function Sheet({
     const promise = (
       <ul className="prc-promise prc-done-promise" aria-label="Our promise">
         <li>
-          <Glyph d={GLYPHS.refund} />
-          <span className="tnum">
-            <b>Full refund</b> if they don’t save what you spent
-          </span>
-        </li>
-        <li>
           <Glyph d={GLYPHS.mail} />
           <span>
-            <b>Cancel or skip anytime</b> by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
+            <b>Cancel anytime</b> by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
           </span>
         </li>
         <li className="prc-done-how-row">
@@ -1471,42 +1474,6 @@ function Input({
   );
 }
 
-/* ── A consent box (Sam, 6 Nov 2026): unticked until ticked ─────────────── */
-function Consent({
-  id,
-  checked,
-  onChange,
-  label,
-  children,
-}: {
-  id: string;
-  checked: boolean;
-  onChange: (on: boolean) => void;
-  label: string;
-  /** What ticking it agrees to, under it. */
-  children?: React.ReactNode;
-}) {
-  const fid = `prc-${id}`;
-  return (
-    <div className="prc-consent">
-      <label className="prc-check" htmlFor={fid}>
-        <input id={fid} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} aria-describedby={children ? `${fid}-fine` : undefined} />
-        <span className="prc-check-box" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <span className="prc-check-text">{label}</span>
-      </label>
-      {children ? (
-        <p id={`${fid}-fine`} className="prc-fine">
-          {children}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
 /* ── Terms and Privacy, linked the same way everywhere ───────────────────── */
 function Legal() {
   return (
@@ -1523,19 +1490,14 @@ function Legal() {
 }
 
 /* ── The terms, right by the button that charges ─────────────────────────── */
-/** "Dec 7": a month from today, placed as Stripe places it. */
-const renewsOn = () =>
-  nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0])
-    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-    .replace(" ", "\u00a0");
 
 function Terms({ first, monthly }: { first: number; monthly: number }) {
   const flat = useContext(FlatLook);
   return (
     <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"}>
-      {/* Short: the promise above Pay carries cancelling (Sam, 7 Nov 2026);
-          this keeps the price, the renewal and the links. */}
-      {`${usd(first)} today, then ${usd(monthly)}/month until you cancel. `}
+      {/* Short: the promise above the button carries cancelling (Sam, 7 Nov
+          2026); this keeps the price, the renewal and the links. */}
+      {`Nothing today. When they claim it, ${usd(first)}, then ${usd(monthly)}/month until you cancel. `}
       <Legal />
     </p>
   );
@@ -1581,10 +1543,17 @@ const FONTS =
 type PayProps = {
   paying: React.MutableRefObject<boolean>;
   onBusy: (b: boolean) => void;
-  onPaid: (res: ParentConfirmed) => void;
-  /** Closes the sheet (after a refusal that's final). */
+  /** Sends the gift once the card is saved (the Sheet's sendGift); throws
+   *  with a message to show. */
+  send: () => Promise<void>;
+  /** Closes the sheet. */
   onDone: () => void;
   label: string;
+  /** What the claim charges first, and monthly after. */
+  first: number;
+  monthly: number;
+  /** Why the gift wasn't sent last time, if a wallet saved the card. */
+  startError: string | null;
   /** Lays the body and the foot out for where the sheet is. */
   frame: Frame;
   /** What's due, above the card. */
@@ -1596,21 +1565,11 @@ type PayProps = {
   backDisabled: boolean;
 };
 
-/* The backend refused after taking the money and refunded it (someone else
-   already covers this number): nothing to retry. */
-const isFinalRefusal = (msg: string) => /refunded you/i.test(msg);
-
-/* The pay step's foot: the back arrow, then Pay filling the rest, as every
-   other step's Continue; Done alone once a refusal is final. */
-function PayFoot({ error, busy, disabled, label, onPay, onDone, onBack, backDisabled }: { error: string | null; busy: boolean; disabled: boolean; label: string; onPay: () => void; onDone: () => void; onBack: () => void; backDisabled: boolean }) {
+/* The card step's foot: the back arrow, then the button filling the rest, as
+   every other step's Continue. */
+function PayFoot({ busy, disabled, label, onPay, onBack, backDisabled }: { busy: boolean; disabled: boolean; label: string; onPay: () => void; onBack: () => void; backDisabled: boolean }) {
   const flat = useContext(FlatLook);
   const cta = flat ? "gft-pp-cta" : "prc-cta";
-  if (error && isFinalRefusal(error))
-    return (
-      <button type="button" className={cta} onClick={onDone}>
-        Done
-      </button>
-    );
   return (
     <>
       <BackArrow className={flat ? "gft-pp-backarrow" : "prc-backarrow"} onClick={onBack} disabled={backDisabled || busy} />
@@ -1624,10 +1583,10 @@ function PayFoot({ error, busy, disabled, label, onPay, onDone, onBack, backDisa
 /* ── E · Wallet first: Apple Pay and Google Pay on who it's for (Sam's pick,
    7 Nov 2026) ───────────────────────────────────────────────────────────────
    The wallets are Stripe's Express Checkout Element at the foot of the who
-   step, before any PaymentIntent exists: Elements in deferred mode, made
-   with what the subscription's first-invoice PaymentIntent will carry, so
-   Stripe can confirm on it once parent_checkout_start has made it (the
-   Sheet's payByWallet). */
+   step, before any SetupIntent exists: Elements in deferred setup mode, so
+   Stripe can confirm on the SetupIntent create_intent (gift: true) makes
+   inside the wallet's confirm (the Sheet's payByWallet). Nothing is charged:
+   the card is saved, and the claim charges it. */
 const WALLET_OPTIONS: StripeExpressCheckoutElementOptions = {
   paymentMethods: { applePay: "auto", googlePay: "auto", link: "never", amazonPay: "never", paypal: "never", klarna: "never" },
   buttonType: { applePay: "plain", googlePay: "plain" },
@@ -1636,24 +1595,11 @@ const WALLET_OPTIONS: StripeExpressCheckoutElementOptions = {
   layout: { maxColumns: 2, overflow: "never" },
 };
 
-/* NOTE FOR KIRAN (Sam, 7 Nov 2026; docs/parents/API.md, "Paying: wallets and
-   card"). Deferred intent creation, matched to parent_checkout_start's
-   subscription (_shared/billing/user_subscription_api.ts createSubscription
-   with cardOnly, on feature/parents-flow):
-   - mode "payment", amount = the first charge (first_cents, 399 today),
-     currency "usd": the first invoice's PaymentIntent. If the start call
-     answers another first_cents, the wallet is failed and the Elements
-     remade with it (never a charge the sheet didn't show).
-   - paymentMethodTypes ["card"]: the subscription's payment_settings
-     payment_method_types ["card"] (cardOnly). Apple Pay and Google Pay are
-     cards.
-   - setupFutureUsage "off_session": payment_settings
-     save_default_payment_method "on_subscription" (requiredCreateParams)
-     puts setup_future_usage off_session on that PaymentIntent, and the
-     renewals charge the saved card.
-   Stripe refuses the confirm if the intent's currency, payment method types
-   or setup_future_usage differ from these, so a change to any of them in
-   createSubscription needs the same change here.
+/* Deferred setup, matched to the SetupIntent create_intent makes for a gift
+   (GiftApi.saveCard: usage off_session, automatic payment methods, no
+   redirects): mode "setup", currency "usd", cards only (Apple Pay and Google
+   Pay are cards). Stripe refuses the confirm if these differ from the
+   intent's, so a change to one needs the same change in the other.
    For the buttons to show in production:
    - Apple Pay: register plus.tapin.app (and every staging/preview host) in
      Stripe, Settings → Payment methods → Payment method domains (Apple Pay
@@ -1663,39 +1609,31 @@ const WALLET_OPTIONS: StripeExpressCheckoutElementOptions = {
      settings.
    - HTTPS only (localhost is exempt for Google Pay, not for Apple Pay), and
      Apple Pay needs Safari with a card in Wallet.
-   - Optional: pass `applePay.recurringPaymentRequest` (monthly amount, label,
-     managementURL) in the click's resolve so Apple's sheet shows the
-     renewal. */
-const walletElementsOptions = (cents: number): StripeElementsOptions => ({
-  mode: "payment",
-  amount: cents,
+   - Apple's sheet shows the renewal from `applePay.recurringPaymentRequest`
+     (walletSheet). */
+const WALLET_ELEMENTS: StripeElementsOptions = {
+  mode: "setup",
   currency: "usd",
   paymentMethodTypes: ["card"],
-  setupFutureUsage: "off_session",
   appearance: APPEARANCE,
   fonts: FONTS,
-});
+};
 
 /* What the wallet's own sheet shows (Sam, 8 Nov 2026: "google lets me pay
-   but it doesn't seem like a subscription?"): today's charge named as the
-   first month, a $0 line saying what follows, and for Apple Pay its
-   recurring-payment request, so the sheet itself says it renews monthly.
-   (Google Pay's sheet has no recurring field; the line items carry it.) */
+   but it doesn't seem like a subscription?"): nothing today, and for Apple
+   Pay its recurring-payment request, so the sheet itself says what the claim
+   charges and that it renews monthly. Google Pay's sheet has no recurring
+   field; the step's own rows say it. */
 function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
   const start = new Date();
   const next = nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0], start);
-  const day = next.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return {
-    lineItems: [
-      { name: "Tapin Plus, first month", amount: cents },
-      { name: `Then ${usd(monthlyCents)}/month from ${day}, until canceled`, amount: 0 },
-    ],
     applePay: {
       recurringPaymentRequest: {
-        paymentDescription: "Tapin Plus, monthly",
+        paymentDescription: "Tapin Plus, a gift",
         managementURL: "https://plus.tapin.app/parents/account",
         trialBilling: {
-          label: "First month",
+          label: "First month, when they claim it",
           amount: cents,
           recurringPaymentStartDate: start,
           recurringPaymentEndDate: next,
@@ -1709,7 +1647,7 @@ function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
           recurringPaymentIntervalUnit: "month",
           recurringPaymentIntervalCount: 1,
         },
-        billingAgreement: `${usd(cents)} today, then ${usd(monthlyCents)} a month from ${day} until you cancel. Cancel anytime by emailing support@tapin.app.`,
+        billingAgreement: `Nothing today. When they claim it, ${usd(cents)}, then ${usd(monthlyCents)} a month until you cancel. Unclaimed after 30 days, it expires. Cancel anytime by emailing support@tapin.app.`,
       },
     },
   };
@@ -1764,33 +1702,33 @@ function LiveWallets({
   );
 }
 
-/* ── Stripe: the card on the first invoice's PaymentIntent ───────────────── */
+/* ── Stripe: the card, saved on the gift's SetupIntent ───────────────────── */
 function StripePay({
-  started,
   paying,
   onBusy,
-  onPaid,
-  onCharged,
-  onDone,
+  send,
+  onCardSaved,
+  alreadySaved,
   label,
-  resumeIntent,
-  startError = null,
+  first,
+  monthly,
+  startError,
   frame,
   rows,
   promise,
   onBack,
   backDisabled,
-}: PayProps & { started: ParentCheckoutStarted; onCharged: (paymentIntent: string) => void; resumeIntent: string | null; startError?: string | null }) {
+}: PayProps & { onCardSaved: (setupIntentId: string) => void; alreadySaved: boolean }) {
   const flat = useContext(FlatLook);
   const stripe = useStripe();
   const elements = useElements();
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  /* A wallet took the money but the confirm after it failed: said here,
-     with Finish to try the confirm again. */
+  /* The card was saved but the gift wasn't sent: said here, with Finish to
+     send it again. */
   const [error, setError] = useState<string | null>(startError);
-  /* Once the card has been charged, a retry only confirms: never pay twice. */
-  const paidIntent = useRef<string | null>(resumeIntent);
+  /* Once the card is saved, a retry only sends: never save it twice. */
+  const isSaved = useRef(alreadySaved);
 
   const confirm = async () => {
     if (!stripe || !elements || paying.current) return;
@@ -1799,20 +1737,18 @@ function StripePay({
     onBusy(true);
     setError(null);
     try {
-      if (!paidIntent.current) {
-        const { error: payError, paymentIntent } = await stripe.confirmPayment({
+      if (!isSaved.current) {
+        const { error: setupError, setupIntent } = await stripe.confirmSetup({
           elements,
           redirect: "if_required",
           confirmParams: { return_url: window.location.href },
         });
-        if (payError) throw new Error(payError.message || "Your payment didn’t go through. Please try again.");
-        if (!paymentIntent || (paymentIntent.status !== "succeeded" && paymentIntent.status !== "processing"))
-          throw new Error("Your payment didn’t go through. Please try again.");
-        paidIntent.current = paymentIntent.id;
-        onCharged(paymentIntent.id);
+        if (setupError) throw new Error(setupError.message || "Your card couldn’t be saved. Please try again.");
+        if (setupIntent?.status !== "succeeded") throw new Error("Your card couldn’t be saved. Please try again.");
+        isSaved.current = true;
+        onCardSaved(setupIntent.id);
       }
-      const res = await confirmParentCheckout(started.checkout_id, paidIntent.current);
-      onPaid(res);
+      await send();
     } catch (e) {
       console.error("Parent checkout failed", e);
       setError((e as Error).message || "Something went wrong. Please try again.");
@@ -1822,26 +1758,24 @@ function StripePay({
       onBusy(false);
     }
   };
-  const pay = () => confirm();
 
   /* The card only: the wallets were on who it's for (Effort E), and this is
-     "Pay by card instead" (or no wallet on this device). */
+     "Use a card instead" (or no wallet on this device). */
   const element = (
     <div className={flat ? "prc-e-pay" : "prc-module prc-pay"}>
       <PaymentElement
         options={{ wallets: { applePay: "never", googlePay: "never", link: "never" }, layout: "tabs" }}
         onReady={() => setReady(true)}
-        /* Already charged (a wallet's charge whose confirm failed, or a
-           reopen): the intent has succeeded and Finish only confirms, so the
-           reason it stopped stays on screen instead. */
+        /* Already saved: Finish only sends, so the reason it stopped stays
+           on screen instead. */
         onLoadError={() => {
-          if (!paidIntent.current) setError("The payment form didn’t load. Close this and try again.");
+          if (!isSaved.current) setError("The card form didn’t load. Close this and try again.");
         }}
       />
-      {!ready && !error && !paidIntent.current ? <div className="prc-pay-wait" aria-busy="true" /> : null}
+      {!ready && !error && !isSaved.current ? <div className="prc-pay-wait" aria-busy="true" /> : null}
     </div>
   );
-  const terms = <Terms first={started.first_cents} monthly={started.monthly_cents} />;
+  const terms = <Terms first={first} monthly={monthly} />;
   const errorLine = error ? (
     <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
       {error}
@@ -1867,60 +1801,34 @@ function StripePay({
           {errorLine}
         </>,
         <PayFoot
-          error={error}
           busy={busy}
-          disabled={busy || (!paidIntent.current && (!ready || !stripe))}
-          label={busy ? "Paying…" : paidIntent.current ? "Finish" : label}
-          onPay={pay}
-          onDone={onDone}
+          disabled={busy || (!isSaved.current && (!ready || !stripe))}
+          label={busy ? "Sending…" : isSaved.current ? "Finish" : label}
+          onPay={() => void confirm()}
           onBack={onBack}
-          backDisabled={backDisabled || !!paidIntent.current}
+          backDisabled={backDisabled || isSaved.current}
         />,
       )}
     </>
   );
 }
 
-/* ── ?parentmock: the wallets and a card panel's look, as stand-ins ──────── */
-const APPLE_D =
-  "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z";
-const GOOGLE_D =
-  "M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z";
-
-/** The wallet buttons' look on who it's for, in ?parentmock. Tapped before
- *  the step is ready, they show what's missing (as the live ones do). */
-function MockWallets({ onPay, disabled, ready }: { onPay: () => void; disabled: boolean; ready: boolean }) {
-  return (
-    <div className="prc-e-wallets prc-wallet-mock" data-ready={ready ? "" : undefined}>
-      <button type="button" className="prc-wallet prc-wallet-apple" onClick={onPay} disabled={disabled} aria-label="Pay with Apple Pay (preview)">
-        <svg viewBox="0 0 384 512" width="17" height="21" aria-hidden="true">
-          <path d={APPLE_D} fill="currentColor" />
-        </svg>
-        <span>Pay</span>
-      </button>
-      <button type="button" className="prc-wallet prc-wallet-google" onClick={onPay} disabled={disabled} aria-label="Pay with Google Pay (preview)">
-        <svg viewBox="0 0 488 512" width="18" height="19" aria-hidden="true">
-          <path d={GOOGLE_D} fill="currentColor" />
-        </svg>
-        <span>Pay</span>
-      </button>
-    </div>
-  );
-}
-
-function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame, rows, promise, onBack, backDisabled }: PayProps & { first: number; monthly: number }) {
+/* A card saved earlier (a wallet's whose gift didn't send, or a reopen):
+   only the gift is left to send. */
+function SendOnly({ paying, onBusy, send, first, monthly, startError, frame, rows, promise, onBack }: PayProps) {
   const flat = useContext(FlatLook);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const pay = async () => {
+  const [error, setError] = useState<string | null>(startError);
+  const finish = async () => {
     if (paying.current) return;
     paying.current = true;
     setBusy(true);
     onBusy(true);
     setError(null);
     try {
-      onPaid(await confirmParentCheckout("mock", "pi_mock"));
+      await send();
     } catch (e) {
+      console.error("Sending the gift failed", e);
       setError((e as Error).message || "Something went wrong. Please try again.");
     } finally {
       paying.current = false;
@@ -1928,73 +1836,18 @@ function MockPay({ first, monthly, paying, onBusy, onPaid, onDone, label, frame,
       onBusy(false);
     }
   };
-  const tag = <p className="prc-mock-tag">Preview: no card is charged</p>;
-  const card = flat ? (
-    <div className="prc-e-mock" aria-label="Card (preview, nothing is charged)">
-      <div className="gft-pp-field">
-        <span>Card number</span>
-        <div className="prc-e-fake tnum">1234 1234 1234 1234</div>
-      </div>
-      <div className="prc-e-pair">
-        <div className="gft-pp-field">
-          <span>Expiration</span>
-          <div className="prc-e-fake tnum">MM / YY</div>
-        </div>
-        <div className="gft-pp-field">
-          <span>CVC</span>
-          <div className="prc-e-fake tnum">CVC</div>
-        </div>
-      </div>
-    </div>
-  ) : (
-    <div className="prc-module prc-pay prc-mock" aria-label="Card (preview, nothing is charged)">
-      <span className="prc-label">Card number</span>
-      <div className="prc-mock-field tnum">1234 1234 1234 1234</div>
-      <div className="prc-mock-pair">
-        <div>
-          <span className="prc-label">Expiration</span>
-          <div className="prc-mock-field tnum">MM / YY</div>
-        </div>
-        <div>
-          <span className="prc-label">CVC</span>
-          <div className="prc-mock-field tnum">CVC</div>
-        </div>
-      </div>
-    </div>
-  );
-  const methods = (
+  return frame(
     <>
-      {tag}
-      {card}
-    </>
-  );
-  const terms = <Terms first={first} monthly={monthly} />;
-  return (
-    <>
-      {frame(
-        <>
-          {rows}
-          {flat ? (
-            <div className="gft-pp-group">
-              {methods}
-              {terms}
-            </div>
-          ) : (
-            <>
-              {methods}
-              {terms}
-            </>
-          )}
-          {promise}
-          {error ? (
-            <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
-              {error}
-            </p>
-          ) : null}
-        </>,
-        <PayFoot error={error} busy={busy} disabled={busy} label={busy ? "Paying…" : error ? "Try again" : label} onPay={pay} onDone={onDone} onBack={onBack} backDisabled={backDisabled} />,
-      )}
-    </>
+      {rows}
+      <Terms first={first} monthly={monthly} />
+      {promise}
+      {error ? (
+        <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
+          {error}
+        </p>
+      ) : null}
+    </>,
+    <PayFoot busy={busy} disabled={busy} label={busy ? "Sending…" : "Finish"} onPay={() => void finish()} onBack={onBack} backDisabled />,
   );
 }
 

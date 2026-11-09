@@ -32,7 +32,7 @@ export interface PlusCart {
 
 /** The backend's own message where it gave one (already a member, an offer
  *  used before), else ours. */
-async function messageOf(error: unknown): Promise<string> {
+export async function messageOf(error: unknown): Promise<string> {
   const res = (error as { context?: Response } | null)?.context;
   if (!res?.clone) return GENERIC_ERROR;
   try {

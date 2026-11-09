@@ -7,7 +7,6 @@ import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
-import ParentManage from "./routes/ParentManage";
 import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
@@ -102,19 +101,18 @@ export default function App() {
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
         <Route path="/in" element={<Members />} />
-        {/* THE PARENTS FLOW (Sam, 5 Nov 2026; docs/parents/API.md): the
-            parents' landing page and the parent's manage link. The student
-            just signs in with the number (/in). Outside the shell, in the
-            app's own look. */}
+        {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
+            2026): the parents' landing page, where a parent sends Plus as a
+            gift, and their account, signed in. Outside the shell, in the
+            app's own look. The old manage-by-link addresses go to the
+            account. */}
         <Route path="/parents" element={<ParentsHome />} />
-        <Route path="/parents/manage/:token" element={<ParentManage />} />
-        {/* Where the manage page sits once its key is out of the address. */}
-        <Route path="/parents/manage" element={<ParentManage />} />
-        {/* The parents' account button (6 Nov 2026): how to change or cancel. */}
+        <Route path="/parents/manage/:token" element={<Navigate to="/parents/account" replace />} />
+        <Route path="/parents/manage" element={<Navigate to="/parents/account" replace />} />
         <Route path="/parents/account" element={<ParentAccount />} />
         {/* THE GIFT PAGE (Sam, 6 Nov 2026): what a student opens from their
-            text when a parent sends Plus with a note (routes/GiftPage.tsx).
-            /gift/sample is the sample; /gift is where it sits once its key
+            text, by the gift's id (routes/GiftPage.tsx), and claims.
+            /gift/sample is the sample; /gift is where it sits once its id
             is out of the address. */}
         <Route path="/gift/:token" element={<GiftPage />} />
         <Route path="/gift" element={<GiftPage />} />

@@ -122,12 +122,13 @@ const MIRRORED: Record<
      2026), and a signup counted as both doubled it. PostHog still records
      `purchase`. The order id goes as the eventID, so the server's Subscribe
      for the same order can be matched to this one and counted once. */
-  /* A parent signing up their student (Sam, 5 Nov 2026; docs/parents/API.md)
-     is a Subscribe too, deduplicated by its checkout id. */
-  parent_purchase: {
+  /* A parent sending their student Plus (ParentCheckout) is a Subscribe too,
+     deduplicated by the gift's id. The value is what the claim will charge
+     first: nothing is charged until the student claims it. */
+  parent_gift_sent: {
     name: "Subscribe",
     props: (p) => ({ value: typeof p.value === "number" ? p.value : undefined, currency: "USD" }),
-    eventId: (p) => (typeof p.checkout_id === "string" && p.checkout_id ? `parent_${p.checkout_id}` : undefined),
+    eventId: (p) => (typeof p.gift_id === "string" && p.gift_id ? `gift_${p.gift_id}` : undefined),
   },
   subscription_purchase: {
     name: "Subscribe",

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { asset } from "../asset";
 import { venues } from "../model/content";
 import { itemNamed } from "../model/menu";
+import { usd, usePlusPrice } from "../model/plus";
 
 /* The parents page's shared figures, places and small pieces, so the page
    (ParentsHome.tsx) and its design variations (parents_variants.tsx) read
@@ -10,12 +11,15 @@ import { itemNamed } from "../model/menu";
 export const CREDIT = 5;
 export const MIN_ORDER = 10;
 export const PERCENT = 15;
-/* The parent offer's figures, fixed: they must match what ParentCheckout
-   charges (its OFFER, 399 / 799 cents in shell/ParentCheckout.tsx). Not the
-   student offer (usePlusPrice): a promo link (?l=) can change that one, and
-   the page would then quote a price the parent isn't charged. */
-export const FIRST = "$3.99";
-export const MONTHLY = "$7.99";
+/* The parent offer's figures: Plus's price as the page has it (usePlusPrice:
+   a promo link's offer, else the welcome offer). That is the cart a parent's
+   gift is built from (ParentCheckout, buildPlusCart), so a link (?l=) gives a
+   group of parents its own price here and at the claim. "$–" while it
+   loads. */
+export function useParentPrice(): { FIRST: string; MONTHLY: string } {
+  const price = usePlusPrice();
+  return { FIRST: usd(price?.first), MONTHLY: usd(price?.monthly) };
+}
 
 /* ══ WHAT A LUNCH COSTS (COPY.md v2) ═════════════════════════════════════════
    One meal priced four ways, never a plan. The door rate is VT Dining's

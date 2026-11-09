@@ -7,8 +7,6 @@ import {
   DELIGHTS,
   FROM_MAX,
   giftWho,
-  isDelight,
-  isScene,
   NOTE_MAX,
   previewGift,
   SAMPLE_GIFT,
@@ -26,7 +24,10 @@ import { ResumeContext, ResumeLine, type Resume } from "../shell/ResumeLine";
 import { PhotoError, shrinkPhoto } from "../model/giftPhoto";
 import { playDelight } from "./giftDelight";
 import { GiftAfter } from "./giftAfter";
-import { GIFT_NOT_FOUND, lookupGift, parentMock } from "../model/parents";
+import { claimGift, giftOf, lookupGift } from "../model/giftApi";
+import { useAuth } from "../context/auth_context";
+import { supabase } from "../supabase";
+import { openPlusSignIn } from "../shell/PlusCheckout";
 import { takeKey } from "../model/redact";
 import { appHref } from "../shell/GetTheApp";
 import { useDockPulse } from "../shell/dockPulse";
@@ -112,11 +113,16 @@ export { SAMPLE_PHOTO_SRC };
 type Load =
   | { state: "loading" }
   | { state: "ok"; gift: Gift; sample: boolean }
-  | { state: "ended"; to: string | null; from: string }
+  /* Claimed, cancelled by the parent, or expired unclaimed (gift_lookup). */
+  | { state: "ended"; to: string | null; from: string; why: "claimed" | "cancelled" | "expired" }
   | { state: "missing" }
   /* The lookup failed for another reason (offline, busy): the link may be
      fine, so it's worth another try. */
   | { state: "retry" };
+
+/* Claiming (claim_gift): signed in with the number it was sent to, the
+   parent's card is charged and their Plus starts. */
+type Claim = { state: "idle" } | { state: "signing_in" } | { state: "working" } | { state: "done" } | { state: "error"; message: string };
 
 export default function GiftPage() {
   const { token: fromPath } = useParams();
@@ -132,8 +138,8 @@ export default function GiftPage() {
   );
   const [load, setLoad] = useState<Load>(() => {
     if (isSample) return { state: "ok", gift: previewGift(search, SAMPLE_PHOTO_SRC), sample: true };
-    /* Local dev with no key and no mock: the sample, so the page can be seen. */
-    if (!token && import.meta.env.DEV && !parentMock()) return { state: "ok", gift: previewGift(search, SAMPLE_PHOTO_SRC), sample: true };
+    /* Local dev with no key: the sample, so the page can be seen. */
+    if (!token && import.meta.env.DEV) return { state: "ok", gift: previewGift(search, SAMPLE_PHOTO_SRC), sample: true };
     return token ? { state: "loading" } : { state: "missing" };
   });
 
@@ -141,33 +147,48 @@ export default function GiftPage() {
     if (!token || load.state !== "loading") return;
     let live = true;
     lookupGift(token).then(
-      (g) => {
+      (found) => {
         if (!live) return;
-        if (g.state === "ok") {
-          setLoad({
-            state: "ok",
-            sample: false,
-            gift: {
-              to: g.to,
-              from: g.from,
-              note: g.note,
-              masked: g.masked_phone,
-              scene: isScene(g.scene) ? g.scene : "maroon",
-              photo: g.photo_url ?? null,
-              effect: isDelight(g.effect) ? g.effect : null,
-            },
-          });
-        } else setLoad({ state: "ended", to: g.to, from: g.from });
+        if (!found) return setLoad({ state: "missing" });
+        const gift = giftOf(found);
+        setLoad(found.state === "open" ? { state: "ok", sample: false, gift } : { state: "ended", to: gift.to, from: gift.from, why: found.state });
       },
-      (err: unknown) => {
-        if (!live) return;
-        setLoad({ state: err instanceof Error && err.message.replace(/’/g, "'") === GIFT_NOT_FOUND ? "missing" : "retry" });
+      () => {
+        if (live) setLoad({ state: "retry" });
       },
     );
     return () => {
       live = false;
     };
   }, [token, load.state]);
+
+  /* Claim my gift: signed out, the Plus sign-in sheet first (it closes once
+     signed in), then the claim. */
+  const { accessToken } = useAuth();
+  const [claim, setClaim] = useState<Claim>({ state: "idle" });
+  const runClaim = async (giftToken: string, access: string) => {
+    setClaim({ state: "working" });
+    try {
+      await claimGift(giftToken, access);
+      track("gift_claimed", {});
+      setClaim({ state: "done" });
+    } catch (err) {
+      track("gift_claim_failed", { error: (err as Error).message });
+      setClaim({ state: "error", message: (err as Error).message });
+    }
+  };
+  const startClaim = () => {
+    if (!token) return;
+    track("gift_claim", { sample: false });
+    if (accessToken) return void runClaim(token, accessToken);
+    setClaim({ state: "signing_in" });
+    openPlusSignIn("gift_claim");
+  };
+  useEffect(() => {
+    if (claim.state === "signing_in" && accessToken && token) void runClaim(token, accessToken);
+    // On signing in.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, claim.state]);
 
   /* One view per page, with what it showed (never the key or the note). */
   const viewed = useRef(false);
@@ -192,11 +213,17 @@ export default function GiftPage() {
 
   /* ph-no-capture: the note, the names and the masked number are a family's
      own words, so session replay and autocapture skip this page's content. */
+  if (load.state === "ok" && !load.sample && (claim.state === "done" || claim.state === "error"))
+    return <ClaimResult claim={claim} gift={load.gift} onBack={() => setClaim({ state: "idle" })} />;
   if (load.state === "ok") {
     if (!load.sample)
       return (
         <div className="gft-wrap">
-          <Letter gift={load.gift} sample={false} />
+          <Letter
+            gift={load.gift}
+            sample={false}
+            cta={{ label: claim.state === "working" ? "Claiming…" : "Claim my gift", onClick: () => claim.state !== "working" && startClaim() }}
+          />
         </div>
       );
     return (
@@ -235,13 +262,23 @@ export default function GiftPage() {
               </div>
             </div>
           </>
+        ) : load.state === "ended" && load.why === "claimed" ? (
+          <div className="gft-plain">
+            <h1 className="gft-h1">
+              {load.from}’s gift <span className="gft-nowrap">is claimed</span>
+            </h1>
+            <p className="gft-plain-line">Tapin Plus is on. Sign in to the Tapin app with the number it was sent to.</p>
+            <a className="gft-open" href={appHref()} onClick={() => track("gift_get_app", { state: "claimed" })}>
+              Get the app
+            </a>
+          </div>
         ) : load.state === "ended" ? (
           <div className="gft-plain">
             <h1 className="gft-h1">
-              {load.from}’s gift <span className="gft-nowrap">has ended</span>
+              {load.from}’s gift <span className="gft-nowrap">{load.why === "expired" ? "has expired" : "was cancelled"}</span>
             </h1>
             <p className="gft-plain-line">
-              Tapin Plus isn’t on {load.to ? `${load.to}’s` : "this"} number anymore. You can still join on your own.
+              {load.why === "expired" ? "It wasn’t claimed in time, so nothing was charged." : "It can’t be claimed anymore."} You can still join on your own.
             </p>
             <Link className="gft-open" to="/">
               See Tapin Plus
@@ -262,17 +299,108 @@ export default function GiftPage() {
             <h1 className="gft-h1">
               We couldn’t open <span className="gft-nowrap">this gift</span>
             </h1>
-            <p className="gft-plain-line">
-              The link may be old. If someone signed you up for Tapin Plus, it’s on your number: sign in with it.
-            </p>
-            <a className="gft-open" href={appHref()} onClick={() => track("gift_get_app", { state: "missing" })}>
-              Get the app
-            </a>
-            <Link className="gft-plain-link" to="/in">
-              Sign in on the web
+            <p className="gft-plain-line">Check the link in your text. If it still doesn’t open, ask whoever sent it.</p>
+            <Link className="gft-open" to="/">
+              See Tapin Plus
             </Link>
           </div>
         )}
+      </header>
+    </div>
+  );
+}
+
+/* ── After Claim my gift ─────────────────────────────────────────────────────
+   Claimed: Plus is on, so the app. Refused: what happened, in the backend's
+   words, and the way on from there. A different number signs out, to sign
+   in again with the one it was sent to. */
+function ClaimResult({ claim, gift, onBack }: { claim: Claim; gift: Gift; onBack: () => void }) {
+  const { track } = useEventTracking();
+  const from = gift.from === "Your parent" ? "your parent" : gift.from;
+  let title: React.ReactNode;
+  let line: string;
+  let action: React.ReactNode;
+  const back = (
+    <button type="button" className="gft-plain-link" onClick={onBack}>
+      Back to your gift
+    </button>
+  );
+  if (claim.state === "done") {
+    title = (
+      <>
+        Your Tapin Plus <span className="gft-nowrap">is on</span>
+      </>
+    );
+    line = `A gift from ${gift.from}. Sign in to the Tapin app with ${gift.masked} to use it.`;
+    action = (
+      <a className="gft-open" href={appHref()} onClick={() => track("gift_get_app", { state: "claimed_now" })}>
+        Get the app
+      </a>
+    );
+  } else {
+    const message = claim.state === "error" ? claim.message : "";
+    if (/different number/i.test(message)) {
+      title = (
+        <>
+          This gift is for <span className="gft-nowrap">{gift.masked}</span>
+        </>
+      );
+      line = `You’re signed in with another number. Sign out, then claim it signed in with ${gift.masked}.`;
+      action = (
+        <button
+          type="button"
+          className="gft-open"
+          onClick={() => {
+            void supabase.auth.signOut();
+            onBack();
+          }}
+        >
+          Sign out
+        </button>
+      );
+    } else if (/payment/i.test(message)) {
+      title = (
+        <>
+          The gift’s payment <span className="gft-nowrap">didn’t go through</span>
+        </>
+      );
+      line = `Let ${from} know, so they can check their card. Then try again.`;
+      action = (
+        <button type="button" className="gft-open" onClick={onBack}>
+          Try again
+        </button>
+      );
+    } else if (/no longer valid/i.test(message)) {
+      title = (
+        <>
+          This gift can’t <span className="gft-nowrap">be claimed</span>
+        </>
+      );
+      line = `You may already have Tapin Plus, or its offer may have ended or be one you’ve had before. Nothing was charged. Let ${from} know.`;
+      action = (
+        <Link className="gft-open" to="/">
+          See Tapin Plus
+        </Link>
+      );
+    } else {
+      title = message || "Something went wrong";
+      line = "Nothing was charged.";
+      action = (
+        <button type="button" className="gft-open" onClick={onBack}>
+          Try again
+        </button>
+      );
+    }
+  }
+  return (
+    <div className="gft gft-a ph-no-capture" data-state="plain">
+      <header className="gft-a-band">
+        <div className="gft-plain" role="status">
+          <h1 className="gft-h1">{title}</h1>
+          <p className="gft-plain-line tnum">{line}</p>
+          {action}
+          {claim.state === "done" ? null : back}
+        </div>
       </header>
     </div>
   );

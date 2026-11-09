@@ -6,7 +6,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
-import { CREDIT, Chevron, DOOR, FIRST, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, MONTHLY, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion, type Audience } from "./parents_kit";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -115,7 +115,9 @@ function LogoRow({ size }: { size: number }) {
    isn't lost; and its own promise: a refund asked for and auto-approved, the
    price held, cancel in the app. No renewal email line: it isn't confirmed
    that students get one. `monthly` is the price the student page shows. */
-export function UnderOffer({ audience = "parent", monthly = MONTHLY }: { audience?: Audience; monthly?: string }) {
+export function UnderOffer({ audience = "parent", monthly: monthlyProp }: { audience?: Audience; monthly?: string }) {
+  const prices = useParentPrice();
+  const monthly = monthlyProp ?? prices.MONTHLY;
   if (audience === "student") {
     return (
       <div className="tpp-notes">
@@ -245,6 +247,7 @@ export function OfferPrice() {
    short enough that its line shows without a tap. No total anywhere, no
    points value. The dots follow the swipe and jump to a card. */
 export function BenefitCards() {
+  const { FIRST, MONTHLY } = useParentPrice();
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean }> = [
@@ -268,8 +271,8 @@ export function BenefitCards() {
     {
       key: "phone",
       art: <Glyph d={GLYPHS.phone} className="tpp-card-glyph" />,
-      label: "On their number right away",
-      line: "You pay, they sign in with their number, and it’s there.",
+      label: "On their number when they claim it",
+      line: "You send it, they sign in with their number, and it’s on. Nothing is charged until then.",
     },
     /* What it costs against what it saves (Sam, 6 Nov 2026: "$7.99 saves an
        average of $60 a month for your kiddo"), not how many lunches cover it. */
@@ -449,29 +452,20 @@ export function LunchBars() {
    card, we can have the background color"; the one coloured ground on the
    page), with the orange sun and a cream ridge; maroon also on the open
    step's glyph, its timer and the gift's small marks, money green on the
-   savings. Four steps since 7 Nov: the last is how to skip, cancel or get a
-   refund, on the reminder email the parent gets before each bill (an email,
-   not a text, since 8 Nov 2026). */
-/* One month from today, as the email says it ("Dec 7"): the reminder's example.
-   The 31st of a month with no 31st next month lands on that month's last day. */
-function inAMonth(now = new Date()): string {
-  const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(now.getDate(), last));
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode }> = [
+   savings. Four steps since 7 Nov: the last is how to cancel, and that an
+   unclaimed gift expires uncharged (the gift backend, 8 Nov 2026). */
+const parentSteps = (first: string): Array<{ glyph: string; when: string; title: string; line: ReactNode }> => [
   {
     glyph: GLYPHS.card,
     when: "Today",
     title: "You add their number",
-    line: <>Enter your student’s mobile number and pay {FIRST} for the first month.</>,
+    line: <>Enter your student’s mobile number and save your card. Nothing is charged yet.</>,
   },
   {
     glyph: GLYPHS.text,
     when: "Next",
-    title: "They sign in",
-    line: <>They get one text from Tapin with your gift. They open it and sign in with their own number. Their Plus is already there.</>,
+    title: "They claim it",
+    line: <>They get one text from Tapin with your gift. They open it and sign in with their own number, and their Plus starts. That’s when your card is charged {first} for the first month.</>,
   },
   {
     glyph: GLYPHS.tag,
@@ -488,13 +482,8 @@ const STEPS: Array<{ glyph: string; when: string; title: string; line: ReactNode
   {
     glyph: GLYPHS.mail,
     when: "Anytime",
-    title: "Cancel, skip or get a refund",
-    line: (
-      <>
-        We email you before each monthly bill. To skip a month, cancel, or get a full refund if they didn’t save what you spent, email
-        support@tapin.app.
-      </>
-    ),
+    title: "Cancel anytime",
+    line: <>Email support@tapin.app and we’ll cancel it for you. If they don’t claim it within 30 days, it expires and you’re never charged.</>,
   },
 ];
 /* A made-up number (555-01xx is the range kept for fiction). */
@@ -596,8 +585,8 @@ function studentSteps(first: string, free: boolean, appTab: number): Array<{ gly
 }
 export function HowPhone({
   audience = "parent",
-  first = FIRST,
-  monthly = MONTHLY,
+  first: firstProp,
+  monthly: monthlyProp,
   free = false,
 }: {
   audience?: Audience;
@@ -605,6 +594,10 @@ export function HowPhone({
   monthly?: string;
   free?: boolean;
 } = {}) {
+  const prices = useParentPrice();
+  const first = firstProp ?? prices.FIRST;
+  const monthly = monthlyProp ?? prices.MONTHLY;
+  const MONTHLY = prices.MONTHLY;
   const student = audience === "student";
   const [root, seen] = useSeen<HTMLDivElement>();
   const [cur, setCur] = useState(0);
@@ -616,9 +609,8 @@ export function HowPhone({
   const num = useRef<HTMLSpanElement | null>(null);
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
-  const renews = inAMonth();
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1) : STEPS;
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1) : parentSteps(first);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -818,10 +810,10 @@ export function HowPhone({
                   <span className="tpp-hw-caret" />
                 </div>
                 <div className="tpp-hw-row">
-                  <span>First month</span>
-                  <b>{student ? first : FIRST}</b>
+                  <span>{student ? "First month" : "Due today"}</span>
+                  <b>{student ? first : "$0"}</b>
                 </div>
-                <div className="tpp-hw-pay">{student && free ? "Join Tapin Plus" : `Pay ${student ? first : FIRST}`}</div>
+                <div className="tpp-hw-pay">{student ? (free ? "Join Tapin Plus" : `Pay ${first}`) : "Send the gift"}</div>
               </div>
               {student ? (
                 <>
@@ -949,15 +941,13 @@ export function HowPhone({
                   </svg>
                   Inbox
                 </span>
-                <b className="tpp-hw-em-subj">
-                  {SAMPLE_GIFT.to}’s Tapin Plus renews {renews}
-                </b>
+                <b className="tpp-hw-em-subj">Cancel {SAMPLE_GIFT.to}’s Tapin Plus</b>
                 <div className="tpp-hw-em-from">
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
                   <b>Tapin</b>
                 </div>
                 <p className="tpp-hw-em-body tnum">
-                  {MONTHLY} on {renews}. To skip a month, cancel or get a refund, email us.
+                  {MONTHLY} a month until you cancel. To cancel, email us and a person does it for you.
                 </p>
                 <span className="tpp-hw-mail">
                   <Glyph d={GLYPHS.mail} />
@@ -1020,6 +1010,7 @@ const MARK_FROM: ReadonlyArray<[number, number]> = [
    phone", in place of its old order card, with its own caption; `start` is
    the place to show first (/coffeeholics opens on Coffeeholics). */
 export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: Audience; start?: number } = {}) {
+  const { MONTHLY } = useParentPrice();
   const student = audience === "student";
   const [stage, seen] = useSeen<HTMLDivElement>(0.5);
   const [which, setWhich] = useState(start);
@@ -1268,7 +1259,9 @@ const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
     fine: "Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it\u2019s auto-approved.",
   },
 };
-export function WhatIfUnused({ audience = "parent", monthly = MONTHLY }: { audience?: Audience; monthly?: string } = {}) {
+export function WhatIfUnused({ audience = "parent", monthly: monthlyProp }: { audience?: Audience; monthly?: string } = {}) {
+  const prices = useParentPrice();
+  const monthly = monthlyProp ?? prices.MONTHLY;
   const words = WHAT_IF[audience];
   const MONTHLY_N = Number(monthly.replace(/[^\d.]/g, ""));
   const [meter, seen] = useSeen<HTMLDivElement>(0.6);

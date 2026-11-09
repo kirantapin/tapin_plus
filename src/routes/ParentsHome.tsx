@@ -1,4 +1,3 @@
-import { takeKey } from "../model/redact";
 import { Link } from "react-router-dom";
 import {
   useEffect,
@@ -9,8 +8,8 @@ import {
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { logoField } from "../model/content";
-import { captureUtm, lookupAskLink } from "../model/parents";
-import ParentCheckout, { hasChargedParentCheckout, resumeStep } from "../shell/ParentCheckout";
+import { captureUtm } from "../model/parents";
+import ParentCheckout, { hasSavedGiftCard, resumeStep } from "../shell/ParentCheckout";
 import { hydrateGiftDraft } from "../model/giftDraft";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
@@ -18,8 +17,7 @@ import {
   CREDIT,
   MIN_ORDER,
   PERCENT,
-  FIRST,
-  MONTHLY,
+  useParentPrice,
   PLACES,
   reducedMotion,
   Chevron,
@@ -248,33 +246,6 @@ function Proof() {
   );
 }
 
-/* ── An "Ask a parent" link (?ask=TOKEN) ─────────────────────────────────── */
-type Ask =
-  | { state: "none" }
-  | { state: "loading"; token: string }
-  | {
-      state: "ok" | "expired" | "covered";
-      token: string;
-      name: string;
-      masked: string;
-    }
-  | { state: "error"; token: string };
-
-const askToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  const q = new URLSearchParams(window.location.search);
-  const t = q.get("ask")?.trim() || null;
-  /* The key out of the address before anything reads the URL, kept for this
-     tab (model/redact.ts). */
-  if (t) q.delete("ask");
-  const rest = q.toString();
-  return takeKey(
-    "tp_parent_ask_v1",
-    t,
-    `${window.location.pathname}${rest ? `?${rest}` : ""}`,
-  );
-};
-
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
 
@@ -287,11 +258,9 @@ export default function ParentsHome() {
   const [chips] = useState(headerChips);
   const headline = PARENT_HEROES[hero];
   const shot = PHOTOS[photo];
-
-  const [token] = useState(askToken);
-  const [ask, setAsk] = useState<Ask>(() =>
-    token ? { state: "loading", token } : { state: "none" },
-  );
+  /* Plus's price for this page (a promo link's offer, else the welcome
+     offer): what the parent's gift will charge when it's claimed. */
+  const { FIRST, MONTHLY } = useParentPrice();
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -305,47 +274,14 @@ export default function ParentsHome() {
     captureUtm();
     /* The headline's variant first, so the page view carries it too. */
     registerForSession(parentHeroProps(hero));
-    track("parent_page_view", { ask: !!token, parent_hero_variant: hero });
+    track("parent_page_view", { parent_hero_variant: hero });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
-    let live = true;
-    lookupAskLink(token)
-      .then((info) => {
-        if (!live) return;
-        const state = info.already_covered
-          ? "covered"
-          : info.expired
-            ? "expired"
-            : "ok";
-        setAsk({
-          state,
-          token,
-          name: info.student_first_name,
-          masked: info.masked_phone,
-        });
-        track("ask_link_opened", {
-          expired: info.expired,
-          already_covered: info.already_covered,
-        });
-      })
-      .catch(() => {
-        if (!live) return;
-        setAsk({ state: "error", token });
-        track("ask_link_opened", { failed: true });
-      });
-    return () => {
-      live = false;
-    };
-  }, [token, track]);
-
-  const asked = ask.state === "ok" ? ask : null;
   /* The gift before the ask (Sam, 6 Nov 2026: "the CTA should be "build
      their care package" or something like that. Instead of going right for
      the ask"): every button here opens the checkout on the care package. */
-  const cta = asked ? `Build ${asked.name}’s care package` : "Build their care package";
+  const cta = "Build their care package";
   /* One funnel (Sam, 6 Nov 2026: "the preview we already have is the first
      step. that way we only have one purchase funnel not conflicting ones"):
      every button opens the builder, and its Continue carries on to their
@@ -356,7 +292,7 @@ export default function ParentsHome() {
      button itself. */
   const [origin, setOrigin] = useState<HTMLElement | null>(null);
   const signUp = (where: string, el: HTMLElement) => {
-    track("parent_signup_clicked", { where, ask: !!asked });
+    track("parent_signup_clicked", { where });
     setOrigin(el.closest<HTMLElement>("[data-island-origin]") ?? el);
     setBuilding(true);
   };
@@ -467,7 +403,7 @@ export default function ParentsHome() {
     },
     {
       q: "What if they don’t use it?",
-      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If they don’t save what you spent, ask for a full refund. You or your student can cancel anytime.`,
+      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. And nothing is charged until they claim it: if they don’t within 30 days, it expires and you’re never charged. Cancel anytime.`,
     },
     {
       q: "Can I see what they order?",
@@ -479,7 +415,7 @@ export default function ParentsHome() {
     },
     {
       q: "What do you text my student?",
-      a: "One text to let them know, and up to two reminders if they haven’t signed in. We don’t send them marketing texts unless they sign up for them.",
+      a: "One text with a link to your gift. We don’t send them marketing texts unless they sign up for them.",
     },
     {
       q: "What phone do they need?",
@@ -487,14 +423,11 @@ export default function ParentsHome() {
     },
     {
       q: "My student already has Tapin Plus. What happens?",
-      a: "Billing moves to you and their own subscription ends. No one is charged twice.",
+      a: "They can’t claim a second one while theirs is on, so nothing is charged. If they don’t claim it within 30 days, it expires.",
     },
     {
       q: "How do I cancel?",
-      /* Sam, 6 Nov 2026: "parents can manage their subscription any time by
-         emailing support@tapin.app - or their student can cancel it in the
-         tapin app". */
-      a: "Email support@tapin.app any time and we’ll change or cancel it for you. Your student can also cancel in the Tapin app, and we’ll let you know if they do.",
+      a: "Email support@tapin.app any time and we’ll cancel it for you. You can see your gifts any time from Your account, signed in with your mobile.",
     },
     {
       q: "Who do I contact with questions?",
@@ -606,32 +539,6 @@ export default function ParentsHome() {
         >
           {/* No mark on the offer card (Sam, 6 Nov 2026: "can we remove the
               tapin logo from this callout"): the price leads. */}
-          {ask.state === "ok" ? (
-            <div className="tpp-ask" role="status">
-              <span className="tpa-well" aria-hidden="true">
-                <FlatMark className="tpa-well-mark" />
-              </span>
-              <p>
-                <b>{ask.name} asked you to cover their Tapin Plus</b>
-                <span className="tnum">Their number: {ask.masked}</span>
-              </p>
-            </div>
-          ) : ask.state === "expired" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              {ask.name}’s link has expired. You can still sign them up here
-              with their number.
-            </p>
-          ) : ask.state === "covered" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              {ask.name}’s Tapin Plus is already covered. To sign up a different
-              student, use their number below.
-            </p>
-          ) : ask.state === "error" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              We couldn’t open that link. You can still sign your student up
-              here with their number.
-            </p>
-          ) : null}
           {/* The hero's sub (COPY.md v2 final, with Sam's $60, 5 Nov 2026) as a
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
@@ -647,7 +554,7 @@ export default function ParentsHome() {
           </button>
           {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"). */}
           <p className="tpp-under tnum">
-            {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
+            Nothing charged until they claim it. Then {FIRST} the first month, {MONTHLY}/month after. Cancel anytime.
           </p>
           {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):
               a computer only here, at the foot of the held card; on a phone
@@ -790,42 +697,30 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.calendar} />}
-              label={`${FIRST} today, then ${MONTHLY}/month`}
+              label={`Nothing today. ${FIRST} when they claim it`}
             >
-              {FIRST} today for the first month, then {MONTHLY} a month.
-            </Fold>
-            <Fold className="tpp-sure-row" lead={<Glyph d={GLYPHS.bell} />} label="An email before each bill">
-              A few days before each monthly charge, we email you the date and the amount.
+              Your card is saved, not charged. When they claim it, {FIRST} for the first month, then {MONTHLY} a month.
             </Fold>
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.refund} />}
-              label="Full refund if they don’t save what you spent"
+              label="Unclaimed, it costs nothing"
             >
-              Email support@tapin.app and we’ll refund you in full.
+              If they don’t claim it within 30 days, it expires and you’re never charged.
             </Fold>
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.mail} />}
-              label="Change or cancel by email"
+              label="Cancel by email"
             >
-              Email support@tapin.app any time and we’ll change or cancel it for
-              you.
-            </Fold>
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.phone} />}
-              label="They can cancel in the app"
-            >
-              They can cancel in the app too. If they do, your billing stops and we’ll text you.
+              Email support@tapin.app any time and we’ll cancel it for you.
             </Fold>
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.shield} />}
               label="No one is charged twice"
             >
-              If they already have Tapin Plus, billing moves to you and their
-              own subscription ends. No one is charged twice.
+              If they already have Tapin Plus, they can’t claim a second one, so nothing is charged.
             </Fold>
           </div>
         </section>
@@ -868,10 +763,10 @@ export default function ParentsHome() {
             loading="lazy"
           />
           <h2 id="tpp-close-h" className="tpa-close-h tnum">
-            {FIRST} today for the first month
+            Nothing charged until they claim it
           </h2>
           <p className="tpa-close-line tnum">
-            Then {MONTHLY}/month. Cancel anytime.
+            Then {FIRST} the first month, {MONTHLY}/month after. Cancel anytime.
           </p>
           <button
             type="button"
@@ -887,11 +782,11 @@ export default function ParentsHome() {
           <p>
             ${CREDIT} credit every 7 days per Plus place on ${MIN_ORDER}+ orders
             of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
-            off once a day. One benefit per order. Alcohol excluded. {FIRST}{" "}
-            first month, then {MONTHLY}/month. Billed today, then every month
-            until cancelled. Refunded in full on request if your student
-            doesn’t save what you spent. Tapin is not affiliated with Virginia
-            Tech.
+            off once a day. One benefit per order. Alcohol excluded. Nothing is
+            charged until your student claims the gift; then {FIRST} the first
+            month, then {MONTHLY}/month, billed every month until cancelled. A
+            gift not claimed within 30 days expires and is never charged. Tapin
+            is not affiliated with Virginia Tech.
           </p>
           <p className="tpa-links">
             {LEGAL.map((l) => (
@@ -928,32 +823,13 @@ export default function ParentsHome() {
         <GiftPreview
           builder
           sample
-          fixedTo={asked ? asked.name : null}
-          masked={asked ? asked.masked : undefined}
           origin={origin}
           onClose={() => setBuilding(false)}
           action={{ label: "Continue", onClick: () => {} }}
-          startNext={hasChargedParentCheckout()}
-          resumeAt={resumeStep(!!asked)}
+          startNext={hasSavedGiftCard()}
+          resumeAt={resumeStep()}
           next={({ back, close, collapse, quick, change }) => (
-            <ParentCheckout
-              embedded
-              open
-              onEditGift={back}
-              onChangeLook={change}
-              quick={quick}
-              onClose={close}
-              onCollapse={collapse}
-              ask={
-                asked
-                  ? {
-                      token: asked.token,
-                      student_first_name: asked.name,
-                      masked_phone: asked.masked,
-                    }
-                  : null
-              }
-            />
+            <ParentCheckout embedded open onEditGift={back} onChangeLook={change} quick={quick} onClose={close} onCollapse={collapse} />
           )}
         />
       ) : null}
