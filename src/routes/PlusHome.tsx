@@ -26,7 +26,7 @@ import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { InviteClock, LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 
@@ -557,7 +557,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {member ? null : linked ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
-        <WelcomeBar price={FIRST_MONTH} />
+        /* The bar carries the students line now (Sam, 9 Nov 2026: "for the
+           main landing page, we can remove the current announcement bar and
+           replace it with this"); the countdown went. */
+        <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus members">
+          <i className="tpa-pbar-dot" aria-hidden="true" />
+          {MEMBERS_LINE}
+        </aside>
       )}
       <header
         ref={bandRef}
@@ -642,7 +648,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 model/proof.ts. */}
             {/* Not under the invitation's header: one thing fewer there
                 (Sam, 5 Nov 2026: "still a bit too busy"). */}
-            {invite && !place ? null : <SocialProof text={MEMBERS_LINE} />}
+            {/* In the bar above when it shows (not for members, not on a
+                promo link), so it isn't said twice. */}
+            {(invite && !place) || (!member && !linked) ? null : <SocialProof text={MEMBERS_LINE} />}
           </div>
         </div>
       </header>
@@ -661,7 +669,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 row. */}
             <div className="tps-unlock-say">
               <h2 id="tps-unlock-h" className="tps-unlock-h">
-                <b>${CREDIT} credit unlocked</b> at each spot<span className="tps-unlock-when"> when you join</span>
+                <b>${CREDIT} bonus credit</b> at each spot<span className="tps-unlock-when"> when you join</span>
               </h2>
               <p className="tps-unlock-sub tnum">Ready the moment you join. ${KIT_PLACES.length * CREDIT} in&nbsp;all.</p>
             </div>
