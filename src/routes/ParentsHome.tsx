@@ -27,7 +27,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, OfferPrice, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -608,7 +608,7 @@ export default function ParentsHome() {
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
               $3.99, then $7.99). */}
-          <OfferPrice />
+          <PriceLead />
           <button
             type="button"
             className="tpa-cta tpp-cta"
@@ -617,9 +617,14 @@ export default function ParentsHome() {
           >
             {cta}
           </button>
-          {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"). */}
+          {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"), with
+              the parents' guarantee beside it (Sam, 9 Nov 2026, the Dara
+              Denney audit's fix 2). On request, so never "auto". */}
           <p className="tpp-under tnum">
-            {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
+            {/* The monthly is in the holiday line just above (Sam, 9 Nov
+                2026: "a lot of numbers"), so only the first month here. */}
+            <span>{FIRST} the first month.</span>
+            <span>Full refund if they don’t save what you spent.</span>
           </p>
           {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):
               a computer only here, at the foot of the held card; on a phone
