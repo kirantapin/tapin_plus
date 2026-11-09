@@ -602,7 +602,7 @@ export default function ParentsHome() {
           </button>
           {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"). */}
           <p className="tpp-under tnum">
-            Nothing charged until they claim it. Then {FIRST} the first month, {MONTHLY}/month after. Cancel anytime.
+            {FIRST} the first month, then {MONTHLY}/month. Cancel anytime.
           </p>
           {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):
               a computer only here, at the foot of the held card; on a phone
