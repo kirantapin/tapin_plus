@@ -373,6 +373,28 @@ a.gft-open {
   object-fit: cover;
   background: #ece5d5;
 }
+/* The builder's empty photo (Sam, 9 Nov 2026): the print's own frame in the
+   paper's cream, a camera and "Add a photo"; tapping it picks one. */
+button.gft-a-photo-add {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 1.5px dashed rgba(20, 22, 24, 0.22);
+  color: rgba(20, 22, 24, 0.62);
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button.gft-a-photo-add:hover {
+  border-color: rgba(20, 22, 24, 0.4);
+  color: rgba(20, 22, 24, 0.8);
+}
+button.gft-a-photo-add:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+}
 .gft-a-note {
   white-space: pre-line;
   overflow-wrap: anywhere;

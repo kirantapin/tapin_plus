@@ -639,6 +639,7 @@ export function Letter({
   onReseal,
   autoOpen = false,
   onStateChange,
+  onAddPhoto,
 }: {
   gift: Gift;
   sample: boolean;
@@ -651,6 +652,10 @@ export function Letter({
   autoOpen?: boolean;
   /** Told when it's sealed, opening or open (the builder's replay icon). */
   onStateChange?: (s: "sealed" | "opening" | "open") => void;
+  /** The builder: with no photo yet, a placeholder where it would print,
+   *  and tapping it picks one (Sam, 9 Nov 2026: "there should be a place
+   *  holder image maybe?"). Never on the gift that's sent. */
+  onAddPhoto?: () => void;
 }) {
   const { track } = useEventTracking();
   const [state, setState] = useState<"sealed" | "opening" | "open">("sealed");
@@ -993,6 +998,19 @@ export function Letter({
                 first thing that rises out of the envelope. */}
             {gift.photo ? (
               <img className="gft-a-photo ph-no-capture" src={gift.photo} alt={`A photo from ${gift.from}`} decoding="async" />
+            ) : onAddPhoto ? (
+              <button
+                type="button"
+                className="gft-a-photo gft-a-photo-add"
+                onClick={onAddPhoto}
+                tabIndex={state === "open" ? 0 : -1}
+                data-ph-show=""
+              >
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                  <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9ZM12 16a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                </svg>
+                Add a photo
+              </button>
             ) : null}
             {/* No note: a short warm line, signed, instead of "signed you up
                 for Tapin Plus" (Sam, 6 Nov 2026: "more of a heartfelt short
@@ -2131,6 +2149,20 @@ export function GiftPreview({
         } as React.CSSProperties)
       : undefined;
 
+  /* Their note on the card as they write it (Sam, 9 Nov 2026, the UX
+     audit's "the parent never sees their own note before paying"): arriving
+     on the note step opens the card by itself, so what they type shows on
+     the letter. Only on the way in; closing it there again stays closed. */
+  const notePartWas = useRef(part);
+  useEffect(() => {
+    const was = notePartWas.current;
+    notePartWas.current = part;
+    if (!builder || sent || stage !== "gift" || part !== "note" || was === "note") return;
+    if (cardState !== "sealed") return;
+    setReplay((r) => ({ n: r.n + 1, auto: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [part, stage]);
+
   /* The photo: after the sign-off, on the builder's note and in the plain
      preview's fields alike. */
   const photoParts = (
@@ -2290,7 +2322,17 @@ export function GiftPreview({
             style={scaled}
             {...(!wide && builder && !peek ? { inert: "" } : {})}
           >
-            <Letter key={replay.n} gift={gift} sample preview cta={pageCta} onReseal={reseal} autoOpen={replay.auto} onStateChange={setCardState} />
+            <Letter
+              key={replay.n}
+              gift={gift}
+              sample
+              preview
+              cta={pageCta}
+              onReseal={reseal}
+              autoOpen={replay.auto}
+              onStateChange={setCardState}
+              onAddPhoto={builder && !sent ? () => photoInput.current?.click() : undefined}
+            />
           </div>
           {/* Sent, on a computer: the strip where the envelope was. */}
           {sent && wide ? (
