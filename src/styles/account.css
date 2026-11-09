@@ -1,0 +1,505 @@
+/* ══ THE ACCOUNT PAGES (shell/AccountPage.tsx; Sam, 9 Nov 2026) ═════════════
+   /in and /parents/account, one design. A short strip of the Blacksburg
+   collage with the way back; the account card over its lower edge; "In the
+   app" and "Good to know" as grouped panels, headed on the ground like a
+   phone's settings; the terms at the foot. One column, 640 wide on a
+   computer. White grounds, ink type, money green only for "on", maroon only
+   for a payment that didn't go through. */
+
+.acc {
+  --acc-radius: 16px;
+  --acc-pad: 20px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+}
+.acc-col {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* The strip. */
+.acc-band {
+  position: relative;
+  overflow: hidden;
+  height: calc(env(safe-area-inset-top) + 168px);
+  background: #716a62;
+}
+.acc-band-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 34%;
+}
+.acc-back {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 14px);
+  left: var(--gutter);
+  z-index: 1;
+}
+
+/* The column under the strip. */
+.acc-main {
+  position: relative;
+  display: grid;
+  gap: 28px;
+  margin-top: -56px;
+  padding: 0 var(--gutter);
+}
+
+/* The account card. */
+.acc-card {
+  display: grid;
+  gap: 16px;
+  padding: var(--acc-pad);
+  border-radius: var(--acc-radius);
+  background: var(--module);
+  box-shadow: 0 10px 30px -14px rgba(20, 22, 24, 0.28);
+}
+.acc-who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.acc-mark {
+  flex: none;
+  width: 56px;
+  height: auto;
+}
+.acc-who-words {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.acc-card h1 {
+  margin: 0;
+  font: 600 26px/30px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.acc-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.acc-status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.acc-status[data-tone="good"] {
+  color: #0b7a53;
+}
+.acc-line {
+  margin: 0;
+  max-width: 52ch;
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.acc-quiet {
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.acc-error {
+  color: #861f41;
+}
+.acc-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Buttons: dark for the one thing to do, quiet for a stop. */
+.acc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), filter 160ms ease-out, background-color 160ms ease-out;
+}
+.acc-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.92);
+  transition-duration: 70ms;
+}
+.acc-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.acc-btn:focus-visible,
+.acc-signed button:focus-visible,
+.acc-link:focus-visible,
+.acc-mail a:focus-visible,
+.acc-app-qr:focus-visible,
+.acc-foot a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.acc-btn-dark {
+  background: var(--ink);
+  color: #ffffff;
+}
+.acc-btn-quiet {
+  justify-self: start;
+  min-height: 36px;
+  margin-top: 6px;
+  padding: 0 14px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(20, 22, 24, 0.16);
+  color: var(--ink);
+  font-size: 14px;
+}
+@media (hover: hover) {
+  .acc-btn-dark:hover {
+    background: #2a2d30;
+  }
+  .acc-btn-quiet:hover {
+    background: rgba(20, 22, 24, 0.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acc-btn:active {
+    transform: none;
+  }
+}
+@media (max-width: 1023.98px) {
+  .acc-card > .acc-acts .acc-btn,
+  .acc-empty .acc-btn {
+    width: 100%;
+  }
+}
+
+/* Who is signed in, at the card's foot. */
+.acc-signed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 4px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.acc-signed button {
+  margin-left: auto;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(20, 22, 24, 0.3);
+  cursor: pointer;
+}
+
+/* The parents' gifts. */
+.acc-gifts-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+.acc-h3 {
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.acc-link {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(20, 22, 24, 0.3);
+}
+.acc-empty {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+.acc-gifts {
+  display: grid;
+  margin: -4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.acc-gift {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  padding: 14px 0;
+}
+.acc-gift + .acc-gift {
+  border-top: 1px solid var(--hair);
+}
+.acc-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3ece4;
+  color: #861f41;
+  font: 600 18px/1 "Gilroy", Arial, sans-serif;
+}
+.acc-gift-words {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.acc-gift-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.acc-gift-name span {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--muted);
+}
+.acc-gift-line {
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.acc-chip {
+  margin-top: 1px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f0f0f0;
+  color: rgba(20, 22, 24, 0.7);
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.acc-chip[data-tone="good"] {
+  background: #e8f4ee;
+  color: #0b7a53;
+}
+.acc-chip[data-tone="wait"] {
+  background: #fbefe4;
+  color: #8a4210;
+}
+.acc-chip[data-tone="warn"] {
+  background: #f6e8ed;
+  color: #861f41;
+}
+
+/* The grouped panels, headed on the ground. */
+.acc-section {
+  display: grid;
+  gap: 10px;
+}
+.acc-h2 {
+  margin: 0;
+  padding: 0 4px;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.acc-panel {
+  margin: 0;
+  border-radius: var(--acc-radius);
+  background: var(--module);
+}
+
+/* In the app. */
+.acc-app {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px 16px;
+  padding: 18px var(--acc-pad);
+}
+.acc-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 13px;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.acc-app-words {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.acc-app-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.acc-app-name span {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--muted);
+}
+.acc-app-line {
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.acc-app-get {
+  grid-column: 1 / -1;
+}
+.acc-app-qr {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: 128px;
+  color: var(--muted);
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+}
+.acc-app-qr img {
+  display: block;
+  width: 88px;
+  height: 88px;
+}
+.acc-app[data-device="desktop"] {
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+}
+
+/* Good to know. */
+.acc-list {
+  padding: 4px var(--acc-pad);
+  list-style: none;
+}
+.acc-list > li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 14px 0;
+}
+.acc-list > li + li {
+  border-top: 1px solid var(--hair);
+}
+.acc-ico {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f4f4f5;
+  color: var(--ink);
+}
+.acc-ico svg,
+.acc-glyph {
+  width: 18px;
+  height: 18px;
+}
+.acc-list-words {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.acc-list-words b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 21px;
+  color: var(--ink);
+}
+.acc-list > li.acc-mail {
+  display: block;
+  padding: 0;
+}
+.acc-mail a {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  color: inherit;
+  text-decoration: none;
+}
+.acc-go {
+  color: rgba(20, 22, 24, 0.4);
+  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@media (hover: hover) {
+  .acc-mail a:hover .acc-go {
+    transform: translateX(2px);
+  }
+}
+
+/* The foot. */
+.acc-foot {
+  display: flex;
+  gap: 18px;
+  padding: 0 4px;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+}
+.acc-foot a {
+  color: var(--muted);
+  text-underline-offset: 3px;
+}
+
+/* A computer: the strip and the column share one 640 width, the strip a
+   rounded card of its own. */
+@media (min-width: 768px) {
+  .acc-band {
+    height: 200px;
+    margin-top: 24px;
+    border-radius: var(--acc-radius);
+  }
+  .acc-back {
+    top: 16px;
+    left: 16px;
+  }
+  .acc-main {
+    gap: 32px;
+    margin-top: -64px;
+    padding: 0 24px;
+  }
+  .acc {
+    --acc-pad: 28px;
+  }
+  .acc-card {
+    gap: 18px;
+  }
+  .acc-card h1 {
+    font-size: 30px;
+    line-height: 34px;
+  }
+  .acc-mark {
+    width: 64px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .acc-col {
+    padding: 0 16px;
+  }
+  .acc-main {
+    padding: 0 16px;
+  }
+}
