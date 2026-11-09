@@ -2841,3 +2841,147 @@
     scroll-padding-inline: 0;
   }
 }
+
+/* ══ THE PHONE HEADER, THE PHOTO IN ITS OWN BOX (Sam, 9 Nov 2026: "I think
+   the image should be in it's own container, there's just too much going on
+   on this page") ════════════════════════════════════════════════════════════
+   A phone only (data-phone="box"; a computer keeps its band). The label and
+   the account on white at the top, the split photo in a rounded box with the
+   care package on its seam, then on white: the headline in ink, the five
+   favourites and what they give, the button in ink, the students line. No
+   shade, no shadows on the words: nothing sits on the photo but the seal. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="box"] {
+    justify-content: flex-start;
+    min-height: 0;
+    padding: env(safe-area-inset-top) var(--gutter) 28px;
+    overflow: visible;
+    background: #ffffff;
+    color: var(--ink);
+  }
+  .tpp .tpa-band.tpp-band[data-phone="box"]::after {
+    display: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpa-band-top {
+    position: static;
+    order: 1;
+    height: 60px;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-label {
+    gap: 8px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-label-mark {
+    width: 18px;
+    height: 18px;
+    color: #861f41;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-account {
+    width: 40px;
+    height: 40px;
+    background: var(--ground);
+    color: var(--ink);
+    box-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-account:focus-visible {
+    outline: 2px solid var(--ink);
+  }
+  .tpp .tpp-band[data-phone="box"] .tpa-band-art {
+    position: relative;
+    inset: auto;
+    order: 2;
+    width: 100%;
+    height: clamp(190px, 56vw, 236px);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-split-seal {
+    display: grid;
+    top: 50%;
+    bottom: auto;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpa-band-title {
+    order: 3;
+    margin: 22px 0 0;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpa-band-title h1 {
+    max-width: 20ch;
+    color: var(--ink);
+    font-weight: 600;
+    text-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-act {
+    margin-top: 16px;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-cta {
+    background: var(--ink);
+    color: #ffffff;
+    box-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-cta:focus-visible {
+    outline-color: #e5751f;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpa-proof {
+    color: var(--ink);
+    text-shadow: none;
+    font-weight: 500;
+  }
+  /* The favourites: no plate, a row of rounded squares, then the line. */
+  .tpp .tpp-band[data-phone="box"] .tpp-band-inside {
+    display: grid;
+    gap: 10px;
+    width: auto;
+    margin: 0 0 6px;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-logos {
+    display: flex;
+    gap: 8px;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-fav {
+    position: relative;
+    display: block;
+    flex: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-fav img {
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: var(--ground);
+  }
+  .tpp .tpp-band[data-phone="box"] [data-fav="logos"] .tpp-fav img {
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--hair);
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-fav .tpp-fav-logo {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px #ffffff;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-inside p {
+    color: var(--muted);
+    font: 500 16px/22px "Gilroy", Arial, sans-serif;
+    text-wrap: balance;
+  }
+  .tpp .tpp-band[data-phone="box"] .tpp-band-inside b {
+    font-weight: 600;
+    color: #0b7a53;
+  }
+}

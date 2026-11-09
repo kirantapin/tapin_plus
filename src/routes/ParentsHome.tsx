@@ -93,6 +93,17 @@ const EYEBROW_SHORT = NAME_VT
 type HeaderChips = "a" | "b" | "c";
 /* Sam, 8 Nov 2026, picking "b": "let's go with this one". ?hdr=a|c stay as
    development-only previews. */
+/* The favourites row on a phone (Sam, 9 Nov 2026: "Not sure if it's clear
+   to the parents that these are the logos of blacksburg favorites, with
+   amazing food"): their logos, their food, or their food with the logo on
+   its corner. ?fav= in dev only, while Sam picks. */
+type Fav = "logos" | "food" | "both";
+const favRow = (): Fav => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return "both";
+  const v = new URLSearchParams(window.location.search).get("fav");
+  return v === "logos" || v === "food" ? v : "both";
+};
+
 const headerChips = (): HeaderChips => {
   if (!import.meta.env.DEV || typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("hdr");
@@ -126,15 +137,22 @@ const headerChips = (): HeaderChips => {
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b" | "c";
+type ParentHero = "a" | "b" | "c" | "d" | "e" | "f";
 const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
   a: ["A care package", "they’ll open every day."],
   b: ["Lunch is on you.", "Even from home."],
   c: ["Send them Tapin Plus,", "with a note from you."],
+  /* Rob's round (Sam, 9 Nov 2026: "the copy at the beginning should be less
+     about the care package and more like your kid is already spending at
+     all of these spots every week, this helps them save"); the care package
+     moves down to the envelope's heading. ?ph=d|e|f while Sam picks. */
+  d: ["Help them save", "where they already eat."],
+  e: ["They already eat here.", "Now they save every week."],
+  f: ["$5 credit every week", "where they already eat."],
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b" || v === "c";
+  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
@@ -264,6 +282,7 @@ export default function ParentsHome() {
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
+  const [fav] = useState(favRow);
   const headline = PARENT_HEROES[hero];
   const shot = PHOTOS[photo];
   /* Plus's price for this page (a promo link's offer, else the welcome
@@ -434,6 +453,7 @@ export default function ParentsHome() {
         data-hero="parents"
         data-photo={photo}
         data-hdr={chips}
+        data-phone="box"
       >
         {photo === "split" ? (
           <div className="tpa-band-art tpp-split" aria-hidden="true">
@@ -507,16 +527,23 @@ export default function ParentsHome() {
                   C of three: "the five logos + one line"; both audits ranked
                   it first). The price line under the button is gone; the
                   students line takes its place. */}
-              <div className="tpp-band-inside">
+              <div className="tpp-band-inside" data-fav={fav}>
                 <span className="tpp-band-logos" aria-hidden="true">
                   {PLACES.map((p) => (
-                    <img key={p.id} src={p.logo} alt="" decoding="async" />
+                    <span key={p.id} className="tpp-fav">
+                      <img src={fav === "logos" ? p.logo : p.photo} alt="" decoding="async" />
+                      {fav === "both" ? <img className="tpp-fav-logo" src={p.logo} alt="" decoding="async" /> : null}
+                    </span>
                   ))}
                 </span>
                 <p>
-                  <b>$5 credit</b> at each,
-                  <br />
-                  every week
+                  {hero === "f" ? (
+                    "At each of 5 Blacksburg favorites"
+                  ) : (
+                    <>
+                      <b>$5 credit</b> every week at each of 5 Blacksburg favorites
+                    </>
+                  )}
                 </p>
               </div>
               <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
