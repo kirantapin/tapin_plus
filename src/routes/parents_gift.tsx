@@ -120,8 +120,11 @@ export function GiftEnvelope({ onSend }: { onSend: (el: HTMLElement) => void }) 
         />
       </div>
       <div className="tpg-env-copy">
+        {/* The care package lives here now (Sam, 9 Nov 2026, Rob's note: the
+            opening is about saving where they already eat; this section
+            does the care package). */}
         <h2 id="tpg-env-h" className="tpg-env-h">
-          Send it with a note
+          A care package they’ll open every day
         </h2>
         <p>
           Write them a few words and add a photo when you sign up. They get

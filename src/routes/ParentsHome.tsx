@@ -126,20 +126,38 @@ const headerChips = (): HeaderChips => {
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b" | "c";
+type ParentHero = "a" | "b" | "c" | "d" | "e" | "f" | "r" | "s";
 const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
   a: ["A care package", "they’ll open every day."],
   b: ["Lunch is on you.", "Even from home."],
   c: ["Send them Tapin Plus,", "with a note from you."],
+  /* Rob's round (Sam, 9 Nov 2026: "the copy at the beginning should be less
+     about the care package and more like your kid is already spending at
+     all of these spots every week, this helps them save"); the care package
+     moves down to the envelope's heading. ?ph=d|e|f while Sam picks. */
+  d: ["Help them save", "where they already eat."],
+  e: ["They already eat here.", "Now they save every week."],
+  f: ["$5 credit every week", "where they already eat."],
+  /* Rob's header (Sam, 9 Nov 2026), with its line under it (PARENT_SUBS):
+     "r" in his words, "s" with the line held to what Plus gives ($5 credit,
+     not money back; 15% off once a day). */
+  r: ["Make every dollar they spend", "in Blacksburg go further."],
+  s: ["Make every dollar they spend", "in Blacksburg go further."],
+};
+/** A line under the headline, for the headlines that carry one; it says the
+ *  offer, so the favourites row then shows the places alone. */
+const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
+  r: "Tapin Plus gives your Virginia Tech student money back at their favorite local spots every week, plus 15% off a meal every day.",
+  s: "$5 credit every week at each of their favorite Blacksburg spots, plus 15% off once a day.",
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b" || v === "c";
+  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
   if (parentHeroCached) return parentHeroCached;
-  if (typeof window === "undefined") return "a";
+  if (typeof window === "undefined") return "s";
   const asked = new URLSearchParams(window.location.search).get("ph");
   if (isParentHero(asked)) return (parentHeroCached = asked);
   try {
@@ -147,10 +165,12 @@ function parentHero(): ParentHero {
   } catch {
     /* Storage blocked: a draw per page load is the best there is. */
   }
-  /* The test is over (Sam, 6 Nov 2026, picking "A care package they'll
-     open every day"): everyone gets "a"; ?ph= still previews the others, and
-     an earlier draw is cleared. */
-  return (parentHeroCached = "a");
+  /* The test is over (Sam, 6 Nov 2026); since 9 Nov everyone gets "s",
+     Rob's "Make every dollar they spend in Blacksburg go further" with its
+     line held to the offer ("A care package they'll open every day" heads
+     the envelope now). ?ph= still previews the others, and an earlier draw
+     is cleared. */
+  return (parentHeroCached = "s");
 }
 /* The experiment's flag isn't registered any more (the test is over); the
    variant still is, so events say which headline was showing. */
@@ -434,6 +454,7 @@ export default function ParentsHome() {
         data-hero="parents"
         data-photo={photo}
         data-hdr={chips}
+        data-phone="box"
       >
         {photo === "split" ? (
           <div className="tpa-band-art tpp-split" aria-hidden="true">
@@ -507,16 +528,28 @@ export default function ParentsHome() {
                   C of three: "the five logos + one line"; both audits ranked
                   it first). The price line under the button is gone; the
                   students line takes its place. */}
+              {PARENT_SUBS[hero] ? <p className="tpp-band-sub">{PARENT_SUBS[hero]}</p> : null}
+              {/* The five favourites as their food, each place's logo on its
+                  corner (Sam, 9 Nov 2026, pick C: "Not sure if it's clear to
+                  the parents that these are the logos of blacksburg
+                  favorites, with amazing food"). */}
               <div className="tpp-band-inside">
                 <span className="tpp-band-logos" aria-hidden="true">
                   {PLACES.map((p) => (
-                    <img key={p.id} src={p.logo} alt="" decoding="async" />
+                    <span key={p.id} className="tpp-fav">
+                      <img src={p.photo} alt="" decoding="async" />
+                      <img className="tpp-fav-logo" src={p.logo} alt="" decoding="async" />
+                    </span>
                   ))}
                 </span>
-                <p>
-                  <b>$5 credit</b> at each,
-                  <br />
-                  every week
+                <p hidden={!!PARENT_SUBS[hero]}>
+                  {hero === "f" ? (
+                    "At each of 5 Blacksburg favorites"
+                  ) : (
+                    <>
+                      <b>$5 credit</b> every week at each of 5 Blacksburg favorites
+                    </>
+                  )}
                 </p>
               </div>
               <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
