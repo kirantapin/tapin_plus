@@ -29,7 +29,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, LunchBars, OfferPrice, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, OfferPrice, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -98,6 +98,26 @@ const headerChips = (): HeaderChips => {
   if (!import.meta.env.DEV || typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("hdr");
   return v === "a" || v === "c" ? v : "b";
+};
+
+/* ══ A CALMER PHONE HEADER: five previews (Sam, 8 Nov 2026) ═══════════════════
+   His parents found the phone's first screen "too confusing ... a lot of text
+   they didn't get", but his mom loved "A care package they'll open every
+   day" and the envelope. Every preview keeps that headline, drops the
+   students line and the two tags from the first screen (the envelope's
+   section now follows the header), and differs in what joins it:
+     1 · the headline alone, over the photo
+     2 · one plain line on what it is
+     3 · the mail room (Sam's parents: care packages "just sit in the mail
+         room for years")
+     4 · no photo: a white top, the envelope's section straight after
+     5 · the button and the price on the photo
+   ?mh=1..5, development only; a computer is untouched. */
+type MobileHeader = 1 | 2 | 3 | 4 | 5;
+const mobileHeader = (): MobileHeader | null => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return null;
+  const v = Number(new URLSearchParams(window.location.search).get("mh"));
+  return v >= 1 && v <= 5 ? (v as MobileHeader) : null;
 };
 
 /* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
@@ -285,6 +305,7 @@ export default function ParentsHome() {
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
+  const [mh] = useState(mobileHeader);
   const headline = PARENT_HEROES[hero];
   const shot = PHOTOS[photo];
 
@@ -503,7 +524,35 @@ export default function ParentsHome() {
   ];
 
   return (
-    <div className="tpa tpa-home tpp">
+    <div className="tpa tpa-home tpp" data-mh={mh ?? undefined}>
+      {/* 4 · No photo (a phone only): who it's for, the headline on white,
+          then the envelope's section. */}
+      {mh === 4 ? (
+        <div className="tpp-mh4">
+          <div className="tpp-mh4-top">
+            <span className="tpp-label">
+              <FlatMark className="tpp-label-mark" />
+              <span className="tpp-label-long">{EYEBROW}</span>
+              <span className="tpp-label-short">{EYEBROW_SHORT}</span>
+            </span>
+            <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path
+                  d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2ZM4.5 20.2c.8-3.6 3.9-5.6 7.5-5.6s6.7 2 7.5 5.6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+          </div>
+          <p className="tpp-mh4-h">
+            {headline[0]} <span className="tpp-nowrap">{headline[1]}</span>
+          </p>
+        </div>
+      ) : null}
       <header
         className="tpa-band tpp-band"
         data-hero="parents"
@@ -567,6 +616,23 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
+            {/* The phone header previews' one extra piece (?mh, a phone only). */}
+            {mh === 2 ? (
+              <p className="tpp-mh-line tnum">
+                ${CREDIT} credit every week at each of five Blacksburg spots.
+              </p>
+            ) : mh === 3 ? (
+              <p className="tpp-mh-line">Not another box in the mail room. It lives on their phone.</p>
+            ) : mh === 5 ? (
+              <div className="tpp-mh-act">
+                <button type="button" className="tpp-mh-cta" data-page-cta="" onClick={(e) => signUp("hero", e.currentTarget)}>
+                  {cta}
+                </button>
+                <p className="tnum">
+                  {FIRST} the first month, then {MONTHLY}/month.
+                </p>
+              </div>
+            ) : null}
 
             <Proof />
           </div>
@@ -591,6 +657,59 @@ export default function ParentsHome() {
       </ul>
 
       <main className="tpa-sheet">
+        {/* Sam's mom, 8 Nov 2026: the care package first, then what they get,
+            then the places; "What a lunch costs" and "What if they don't use
+            it?" are gone. The offer card follows the places on a phone; a
+            computer still holds it in the right-hand column. */}
+        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
+            their student opens. */}
+        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
+
+        {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
+            a few words each, the approved line one tap under it. No total
+            anywhere, no points value. */}
+        <section
+          className="tpa-module"
+          aria-labelledby="tpp-get"
+        >
+          <h2 id="tpp-get" className="tpa-h2">
+            What they get
+          </h2>
+          <BenefitCards />
+          <p className="tpp-note">{SAVES_NOTE}</p>
+        </section>
+
+        <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
+          <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
+            Places they already go
+          </h2>
+          <ul className="tpa-rail">
+            {PLACES.map((p) => (
+              <li key={p.id} className="tpa-place">
+                <img
+                  className="tpa-place-photo"
+                  src={p.photo}
+                  alt=""
+                  decoding="async"
+                  loading="lazy"
+                />
+                <span
+                  className="tpp-place-logo collar"
+                  data-field={logoField(p.id)}
+                  aria-hidden="true"
+                >
+                  <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                </span>
+                <span className="tpa-place-name">
+                  <b>{p.name}</b>
+                  <small>{p.what}</small>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="tpp-more">More places are joining.</p>
+        </section>
+
         {/* THE OFFER: what it is, the price, the button. Right under the band
             on a phone; on a computer, the card held on the right
             (plus-app.css keys that on aria-label="Tapin Plus"). */}
@@ -664,62 +783,6 @@ export default function ParentsHome() {
         <Voices />
         </div>
 
-        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
-            their student opens. */}
-        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
-
-        {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
-            a few words each, the approved line one tap under it. No total
-            anywhere, no points value. */}
-        <section
-          className="tpa-module"
-          aria-labelledby="tpp-get"
-        >
-          <h2 id="tpp-get" className="tpa-h2">
-            What they get
-          </h2>
-          <BenefitCards />
-          <p className="tpp-note">{SAVES_NOTE}</p>
-        </section>
-
-        {/* WHAT A LUNCH COSTS (COPY.md v2 final: under the value stack, the
-            $12 to $7 first and the door price as context). One meal priced
-            four ways to one scale, never the plan, the Plus bar shedding its
-            $5 (Sam's pick A, toned down to the white module, 7 Nov 2026).
-            The footnotes, word for word, under Sources. */}
-        <section
-          className="tpa-module"
-          aria-labelledby="tpp-lunch"
-        >
-          <h2 id="tpp-lunch" className="tpa-h2">
-            What a lunch costs
-          </h2>
-          <LunchBars />
-          <p className="tpp-keep">
-            <b>Keep their dining plan.</b> Tapin Plus is for the meals they buy
-            off campus.
-          </p>
-          <details className="tpa-more tpp-sources">
-            <summary>
-              Sources
-              <Chevron />
-            </summary>
-            <div className="tpp-notes">
-              <p>
-                ¹ VT Dining’s posted door rate for lunch and dinner at D2 and
-                Owens Food Court, Nov 2026
-                (dining.vt.edu/dining_centers/dietrick-hall.html, owens.html).
-              </p>
-              <p>
-                ² Menu prices before tax (Coffeeholics’ California Club,
-                $12.00). $5 credit every 7 days per Plus place on $10+ orders of
-                food or non-alcoholic drinks, or 15% off once a day. One per
-                order. Tapin is not affiliated with Virginia Tech.
-              </p>
-            </div>
-          </details>
-        </section>
-
         {/* What a week looks like, in one order, on their phone (Sam's pick
             D, 7 Nov 2026). */}
         <section className="tpa-module" aria-labelledby="tpp-save">
@@ -727,37 +790,6 @@ export default function ParentsHome() {
             What ${CREDIT} back looks like
           </h2>
           <CheckoutPhone />
-        </section>
-
-        <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
-          <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
-            Places they already go
-          </h2>
-          <ul className="tpa-rail">
-            {PLACES.map((p) => (
-              <li key={p.id} className="tpa-place">
-                <img
-                  className="tpa-place-photo"
-                  src={p.photo}
-                  alt=""
-                  decoding="async"
-                  loading="lazy"
-                />
-                <span
-                  className="tpp-place-logo collar"
-                  data-field={logoField(p.id)}
-                  aria-hidden="true"
-                >
-                  <img src={p.logo} alt="" decoding="async" loading="lazy" />
-                </span>
-                <span className="tpa-place-name">
-                  <b>{p.name}</b>
-                  <small>{p.what}</small>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="tpp-more">More places are joining.</p>
         </section>
 
         {/* Answering the parent (Elevate's "for parents" section, in our own
@@ -772,13 +804,6 @@ export default function ParentsHome() {
           </h2>
           <HowPhone />
         </section>
-
-        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
-            parent's own question, answered, then as a picture. Moved down
-            from under the gift band to here, with the other reassurance,
-            just above No surprises (Sam, 7 Nov 2026: "it belongs much
-            farther down the page"). */}
-        <WhatIfUnused />
 
         {/* No surprises: a glyph and a few words per line, the full line one
             tap under it. */}
@@ -885,6 +910,7 @@ export default function ParentsHome() {
 
         <footer className="tpa-foot tpp-foot">
           <p>
+            The $12 lunch is Coffeeholics’ California Club, $12.00 before tax.{" "}
             ${CREDIT} credit every 7 days per Plus place on ${MIN_ORDER}+ orders
             of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
             off once a day. One benefit per order. Alcohol excluded. {FIRST}{" "}

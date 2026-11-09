@@ -2670,3 +2670,98 @@
     white-space: nowrap;
   }
 }
+
+/* ══ A CALMER PHONE HEADER: five previews (?mh, Sam, 8 Nov 2026) ══════════════
+   ParentsHome mobileHeader. A phone only: the students line and the two tags
+   leave the first screen; each preview adds at most one thing under the
+   headline. A computer never shows any of it. */
+.tpp-mh-line,
+.tpp-mh-act,
+.tpp-mh4 {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .tpp[data-mh] .tpp-band .tpp-proof,
+  .tpp[data-mh] > .tpp-tags {
+    display: none;
+  }
+  /* 2 and 3: one line, white on the photo, under the headline. */
+  .tpp-mh-line {
+    display: block;
+    max-width: 330px;
+    margin: 10px 0 0;
+    color: #ffffff;
+    font: 600 17px/23px "Gilroy", Arial, sans-serif;
+    text-wrap: balance;
+  }
+  /* 5: the button and the price on the photo. */
+  .tpp-mh-act {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .tpp-mh-cta {
+    height: 52px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #141618;
+    font: 600 16px/20px "Gilroy", Arial, sans-serif;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 120ms ease;
+  }
+  .tpp-mh-cta:active {
+    transform: scale(0.98);
+  }
+  .tpp-mh-cta:focus-visible {
+    outline: 3px solid #f7f3ea;
+    outline-offset: 3px;
+  }
+  .tpp-mh-act p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  }
+  /* 4: no photo. Who it's for and the headline on white; the envelope's
+     section starts right under it. */
+  .tpp[data-mh="4"] > .tpp-band {
+    display: none;
+  }
+  .tpp-mh4 {
+    display: block;
+    padding: calc(env(safe-area-inset-top) + 14px) 16px 28px;
+    background: #ffffff;
+  }
+  .tpp-mh4-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .tpp-mh4 .tpp-label,
+  .tpp-mh4 .tpp-account {
+    box-shadow: none;
+  }
+  .tpp-mh4-h {
+    margin: 30px 0 0;
+    color: #141618;
+    font: 600 32px/37px "Gilroy", Arial, sans-serif;
+    letter-spacing: -0.02em;
+  }
+  .tpp-mh4-h .tpp-nowrap {
+    white-space: nowrap;
+  }
+  /* 5: the button and price make the title tall enough to meet the seal on
+     the seam, so the seal steps aside. */
+  .tpp[data-mh="5"] .tpp-split-seal {
+    display: none;
+  }
+  .tpp[data-mh="4"] .tpa-sheet {
+    margin-top: 0;
+    border-radius: 0;
+  }
+}
