@@ -2964,3 +2964,15 @@ button.tpg-env-link {
     outline-offset: 2px;
   }
 }
+
+/* Under the note: blank, the prebuilt note goes (Sam, 9 Nov 2026). The
+   placeholder is the greyed note itself. */
+.gft-pp-hint {
+  display: block;
+  margin-top: 6px;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.6);
+}
+.gft-pp-field textarea::placeholder {
+  color: rgba(20, 22, 24, 0.42);
+}

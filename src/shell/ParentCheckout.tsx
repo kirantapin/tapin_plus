@@ -27,7 +27,7 @@ import { createGift, saveGiftCard, uploadGiftPhoto, type GiftMetadata } from "..
 import { sendCode, verifyCode } from "./authEnv";
 import { clearGiftDraft, getGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { dropResume, keepFields, keptFields, keptQuick, keptStep, type ResumeStep } from "../model/checkoutResume";
-import { SCENE_ORDER, giftWho } from "../model/gift";
+import { DEFAULT_NOTE, SCENE_ORDER, giftWho } from "../model/gift";
 import { usePlusPrice } from "../model/plus";
 import { ResumeContext, ResumeLine } from "./ResumeLine";
 import { BackArrow } from "./BackArrow";
@@ -813,7 +813,8 @@ function Sheet({
     const metadata: GiftMetadata = {
       v: 1,
       from: giftWho(giftFrom, displayName ?? ""),
-      note: giftNote.trim() || null,
+      /* No note written: the prebuilt one goes (Sam, 9 Nov 2026). */
+      note: giftNote.trim() || DEFAULT_NOTE,
       scene: giftScene,
       effect: draft.effect,
       photo: photoPath.current ? { path: photoPath.current } : null,

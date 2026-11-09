@@ -16,8 +16,7 @@ import {
   SCENES,
   type Delight,
   type Gift,
-  type SceneId,
-} from "../model/gift";
+  type SceneId, DEFAULT_NOTE } from "../model/gift";
 import { clearGiftDraft, defaultGiftScene, setGiftDraft, startGiftOver, useGiftDraft } from "../model/giftDraft";
 import { keepQuick, keepStep, keptQuick, keptSomething, type ResumeStep } from "../model/checkoutResume";
 import { ResumeContext, ResumeLine, type Resume } from "../shell/ResumeLine";
@@ -59,8 +58,9 @@ import { GiftSentContext, type GiftSent, type GiftSentHost } from "../shell/gift
    it straight to the letter. */
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-/** The letter's words when the parent wrote no note. */
-const NO_NOTE = "Thinking of you! Here’s a little something to treat yourself.";
+/** The letter's words when a gift came with no note (older gifts; new ones
+    save DEFAULT_NOTE). */
+const NO_NOTE = DEFAULT_NOTE;
 /** Family words read as "your mom" in the heading; a name stays a name. */
 const FAMILY = /^(mom|mum|mommy|mama|mother|dad|daddy|papa|father|grandma|grandpa|granny|nana|grandmother|grandfather|your parent|parents|mom and dad|mom & dad|dad and mom)$/i;
 function whoInHeading(from: string, afterName: boolean): string {
@@ -1615,7 +1615,8 @@ export function GiftPreview({
        line, which is what's sent. */
     to: fixedTo ?? (d.to.trim() || (sample ? SAMPLE_GIFT.to : null)),
     from: d.from.trim() || !sample ? giftWho(d.from, parentName) : SAMPLE_GIFT.from,
-    note: d.note.trim() || (showSample ? SAMPLE_GIFT.note : null),
+    /* Blank, the card shows the note that will go (DEFAULT_NOTE). */
+    note: d.note.trim() || DEFAULT_NOTE,
     masked: masked ?? SAMPLE_GIFT.masked,
     scene,
     photo: d.photo ?? (showSample && samplePhoto ? SAMPLE_PHOTO_SRC : null),
@@ -2285,9 +2286,14 @@ export function GiftPreview({
           rows={4}
           value={d.note}
           onChange={(e) => setGiftDraft({ note: e.target.value })}
-          placeholder={sample ? SAMPLE_GIFT.note ?? "" : "Thinking of you!"}
+          placeholder={DEFAULT_NOTE}
           maxLength={NOTE_MAX}
+          aria-describedby="gft-pp-note-hint"
         />
+        {/* Not a step to get through: blank, this one goes. */}
+        <small id="gft-pp-note-hint" className="gft-pp-hint" data-ph-show="">
+          {d.note.trim() ? "Your words go on the card." : "Leave it blank and this note goes on the card."}
+        </small>
       </label>
       <label className="gft-pp-field">
         <span data-ph-show="">Sign it</span>

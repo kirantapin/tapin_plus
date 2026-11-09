@@ -103,12 +103,20 @@ export const isScene = (v: unknown): v is SceneId => SCENES.some((e) => e.id ===
 export const NOTE_MAX = 240;
 export const FROM_MAX = 24;
 
+/* The note that goes when they write none (Sam, 9 Nov 2026: "allow someone
+   to fill out their own note or use a prebuilt one ... from the perspective
+   of a mother ... not a blocker or another step ... grayed out text, but if
+   someone doesn't add their own message that text is what's used"). The
+   note field's placeholder, the card's words while the field is empty, what
+   the checkout saves, and the student's page's fallback, all one line. */
+export const DEFAULT_NOTE = "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!";
+
 export const SAMPLE_GIFT: Gift = {
   /* Maya, with a sample photo of Maya and her parents (Sam, 6 Nov 2026:
      "instead of jake we should do maya, and just update the image"). */
   to: "Maya",
   from: "Mom",
-  note: "Thinking of you, my love! Here’s a little something to treat yourself. Hang in there! Proud of you!",
+  note: DEFAULT_NOTE,
   masked: "•••0123",
   scene: "maroon",
   photo: null,
