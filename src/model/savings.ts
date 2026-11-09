@@ -236,7 +236,7 @@ export function weeklyBack(weeklySpendUsd: number): WeeklyBack {
   const condition =
     places > 0
       ? `With a $10+ order at ${places} ${places === 1 ? "place" : "places"} every week. An estimate.`
-      : "An order of $10 or more earns $5 back. An estimate.";
+      : "An order of $10 or more earns $5 credit. An estimate.";
   return { weeklySpendUsd, places, monthlyUsd, condition };
 }
 

@@ -29,10 +29,10 @@ export interface WwHero {
  *    c · Invitation: why this reached them, on the same offer as "a", so it
  *        measures what the Welcome Week framing adds. */
 export const WW_HEROES: Record<WwHeroVariant, WwHero> = {
-  a: { h1: "$5 back every week at each of 5 spots", strip: "First month free" },
-  b: { h1: "Join by Sunday, pay nothing for a month", strip: "Get $5 back every week" },
+  a: { h1: "$5 credit every week at each of 5 spots", strip: "First month free" },
+  b: { h1: "Join by Sunday, pay nothing for a month", strip: "Get $5 credit every week" },
   /* Unbroken "Welcome Week" and "$5 back", so it breaks after the colon. */
-  c: { h1: "A Welcome\u00a0Week invite: $5\u00a0back every week", strip: "First month free" },
+  c: { h1: "A Welcome\u00a0Week invite: $5\u00a0credit every week", strip: "First month free" },
 };
 
 export const WW_HERO_TEST = "plus-ww-hero";

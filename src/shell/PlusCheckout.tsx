@@ -567,7 +567,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     <ul className={`pck-offer${look === "b" ? " pck-offer-quiet" : ""}${look === "c" ? " pck-offer-chips" : ""}`}>
       <li>
         <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
-        <b>{look === "c" ? "$5 back weekly" : "$5 back every week, every place"}</b>
+        <b>{look === "c" ? "$5 credit weekly" : "$5 credit every week, every place"}</b>
       </li>
       {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
           anytime", moved here from the page ("it'd be one of these"), right under

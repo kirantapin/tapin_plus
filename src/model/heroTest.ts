@@ -33,45 +33,50 @@
            already know).
    The key moved to v3, so everyone is drawn again among the three. "a",
    "b" and "0" stay previewable with ?hero=. */
-export type HeroVariant = "a" | "b" | "0" | "m" | "s" | "p";
+/* ══ ENDED (Sam, 9 Nov 2026: "End test, use Rob's line") ═══════════════════
+   Everyone gets "r", Rob's headline in a student's words with its line
+   under it (HERO_SUBS), the same as /parents. Round 3's draw is cleared;
+   ?hero= still previews every one. The variant is still registered as
+   hero_variant so events say which headline showed, but not as the
+   experiment's flag, so the ended experiment's numbers stay as they were. */
+export type HeroVariant = "a" | "b" | "0" | "m" | "s" | "p" | "r";
 
 /** The new round's headlines. */
 export const HERO_LINES: Partial<Record<HeroVariant, string>> = {
   m: "A membership to all your favorite Blacksburg spots",
   s: "The average member saves $60 a month",
-  p: "Spend $10 at Coffeeholics, get $5 back weekly",
+  p: "Spend $10 at Coffeeholics, get $5 credit weekly",
+  r: "Make every dollar you spend in Blacksburg go further.",
+};
+
+/** A line under the headline, for the ones that carry one. */
+export const HERO_SUBS: Partial<Record<HeroVariant, string>> = {
+  r: "$5 credit every week at each of your favorite Blacksburg spots, plus 15% off once a day.",
 };
 
 export const HERO_TEST = "plus-hero";
 const KEY = "tp_hero_v3";
-const DRAW: HeroVariant[] = ["m", "s", "p"];
-const ALL: HeroVariant[] = ["a", "b", "0", "m", "s", "p"];
+const ALL: HeroVariant[] = ["a", "b", "0", "m", "s", "p", "r"];
 const isVariant = (v: string | null): v is HeroVariant => !!v && (ALL as string[]).includes(v);
 
 let cached: HeroVariant | null = null;
 
 export function heroVariant(): HeroVariant {
   if (cached) return cached;
-  if (typeof window === "undefined") return "0";
+  if (typeof window === "undefined") return "r";
   const asked = new URLSearchParams(window.location.search).get("hero");
   if (isVariant(asked)) return (cached = asked);
+  /* The test is over (above): an earlier draw is cleared. */
   try {
-    const kept = window.localStorage.getItem(KEY);
-    if (kept === "m" || kept === "s" || kept === "p") return (cached = kept);
+    window.localStorage.removeItem(KEY);
   } catch {
-    /* Storage blocked: a draw per page load is the best there is. */
+    /* Storage blocked: nothing kept to clear. */
   }
-  const drawn = DRAW[Math.floor(Math.random() * DRAW.length)] ?? "m";
-  try {
-    window.localStorage.setItem(KEY, drawn);
-  } catch {
-    /* As above. */
-  }
-  return (cached = drawn);
+  return (cached = "r");
 }
 
 /** The super properties that tag every event with the visitor's hero. */
 export const heroTestProps = () => {
   const v = heroVariant();
-  return { hero_variant: v, [`$feature/${HERO_TEST}`]: v };
+  return { hero_variant: v };
 };
