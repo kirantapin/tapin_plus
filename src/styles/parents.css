@@ -306,8 +306,8 @@
 
 .tpp-note {
   margin-top: 10px;
-  font-size: 13px;
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 19px;
   color: var(--muted);
   text-wrap: pretty;
 }
@@ -2694,4 +2694,20 @@
     display: block;
     color: rgba(20, 22, 24, 0.66);
   }
+}
+
+/* ══ WHAT'S IN THEIR CARE PACKAGE (Sam, 8 Nov 2026) ═════════════════════════════
+   One line under the heading, then the cards; the note's card draws the look
+   picker's envelope chip as its picture. */
+.tpp-get-intro {
+  margin: 6px 0 0;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--muted);
+  text-wrap: balance;
+}
+.tpp-card-art .tpp-card-env {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
 }
