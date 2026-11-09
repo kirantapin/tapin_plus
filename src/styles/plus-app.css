@@ -4217,3 +4217,62 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   display: flex;
   width: fit-content;
 }
+
+/* ══ $5 UNLOCKED AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════════
+   A small section right under the band: one line, then the five places'
+   logos each with its $5 under it in money green. White card, no tag, no
+   paper, no animation. */
+.tps-unlock {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.tps-unlock-h {
+  margin: 0;
+  font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: balance;
+}
+.tps-unlock-h b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tps-unlock-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 420px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-unlock-row li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.tps-unlock-row img {
+  width: min(48px, 100%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-unlock-row span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f4ee;
+  color: #0b7a53;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
+@media (min-width: 1024px) {
+  .tps-unlock-h {
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .tps-unlock-row img {
+    width: 52px;
+  }
+}

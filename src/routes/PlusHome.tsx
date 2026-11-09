@@ -8,7 +8,7 @@ import { monthlyBack } from "../model/savings";
 import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
-import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
+import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES } from "./parents_kit";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
@@ -648,10 +648,27 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </header>
 
       <main ref={sheetRef} className="tpa-sheet">
-        {/* THE WELCOME OFFER (Sam, 9 Nov 2026: "a welcome offer card -
-            immediate $25 added to your account, $5 at each spot for your
-            first month. cancel anytime in the app"): the first thing under
-            the band, for anyone not on Plus yet. */}
+        {/* $5 UNLOCKED AT EACH SPOT (Sam, 9 Nov 2026: "a small section right
+            under the header for the main tapin callout for the $5 credit
+            unlocked at each spot"): the welcome bonus, place by place. Not
+            for members. */}
+        {member ? null : (
+          <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
+            <h2 id="tps-unlock-h" className="tps-unlock-h">
+              <b>${CREDIT} credit unlocked</b> at each spot when you join
+            </h2>
+            <ul className="tps-unlock-row">
+              {KIT_PLACES.map((p) => (
+                <li key={p.id}>
+                  <img src={p.logo} alt={p.name} decoding="async" />
+                  <span className="tnum" aria-hidden="true">
+                    ${CREDIT}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
@@ -925,10 +942,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <HowPhone audience="student" first={FIRST_MONTH} monthly={MONTHLY} free={free} />
         </section>
 
-        {/* What if I don't save? (round 1, Sam, 8 Nov 2026): replaces the
-            lower Plus Promise card. Mounted once the price is in, so its bar
-            is drawn against the price this visitor pays. */}
-        {price ? <WhatIfUnused audience="student" monthly={MONTHLY} /> : null}
+        {/* What if I don't save? went (Sam, 9 Nov 2026: "get rid of this too
+            please"); the refund is a row under the offer and in the FAQ. */}
 
         <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
