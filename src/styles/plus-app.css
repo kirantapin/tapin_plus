@@ -4338,3 +4338,29 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   border-radius: 50%;
   background: #5fcf98;
 }
+
+/* A press on the members buttons (Sam, 9 Nov 2026: "can we give the member
+   buttons a button press animation"): the main page's Members pill and the
+   parents' account button sink a little under the finger and spring back.
+   A transition, so it eases both ways and nothing is held by a fill. */
+.tpa-signin,
+.tpp-account {
+  transition: transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1), filter 160ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.tpa-signin:active,
+.tpp-account:active {
+  transform: scale(0.93);
+  filter: brightness(0.92);
+  transition-duration: 70ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-signin,
+  .tpp-account {
+    transition: filter 120ms ease-out;
+  }
+  .tpa-signin:active,
+  .tpp-account:active {
+    transform: none;
+  }
+}
