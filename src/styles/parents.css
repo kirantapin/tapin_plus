@@ -3210,3 +3210,11 @@
     white-space: normal;
   }
 }
+
+/* With the students bar above it (9 Nov 2026), the bar takes the safe area;
+   the phone's photo card needs only its own gap. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-wbar + .tpa-band.tpp-band[data-phone="card"] {
+    padding-top: 10px;
+  }
+}
