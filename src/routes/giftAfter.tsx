@@ -41,7 +41,7 @@ function useLinks({ sample, preview }: Props) {
 
 function StoreLink({ className, onClick, label = "Get it on the App Store" }: { className: string; onClick: (e: { preventDefault: () => void }) => void; label?: string }) {
   return (
-    <a className={className} href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={onClick}>
+    <a className={className} href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" onClick={onClick} data-ph-show="">
       <Apple />
       {label}
     </a>
@@ -52,7 +52,7 @@ function StoreLink({ className, onClick, label = "Get it on the App Store" }: { 
 function WideClaim(p: Props) {
   const { onClaim } = useLinks(p);
   return (
-    <div className="gav-desk gav-claim">
+    <div className="gav-desk gav-claim" data-ph-show="">
       {p.cta ? (
         <button type="button" className="gft-cta-inline" onClick={(e) => p.cta?.onClick(e.currentTarget)}>
           {p.cta.label}
@@ -91,7 +91,7 @@ function Places(p: Props) {
   const { onStore } = useLinks(p);
   return (
     <>
-      <section className="gav-d" aria-labelledby="gav-h">
+      <section className="gav-d" aria-labelledby="gav-h" data-ph-show="">
         <h2 id="gav-h" className="gav-d-lede">
           <span data-k="credit">${CREDIT} credit</span> every week at each place, on a ${MIN_ORDER}+ meal. Or{" "}
           <span data-k="pct">{PERCENT}% off</span>, once a day. Points on everything.
@@ -112,11 +112,11 @@ function Places(p: Props) {
       <section className="gav-d-app" aria-label="The Tapin app">
         <img className="gav-icon" src={APP_ICON} alt="" width="44" height="44" />
         <p className="tnum">
-          <b>In the Tapin app</b>
+          <b data-ph-show="">In the Tapin app</b>
           Sign in with {p.gift.masked}
         </p>
         <StoreLink className="gav-phone gav-d-store" onClick={onStore} label="Get it" />
-        <img className="gav-desk gav-qr" src={QR} alt="QR code for the Tapin app" width="72" height="72" />
+        <img className="gav-desk gav-qr" src={QR} alt="QR code for the Tapin app" width="72" height="72" data-ph-show="" />
       </section>
       <WideClaim {...p} />
       <Thanks {...p} />
@@ -127,9 +127,10 @@ function Places(p: Props) {
 export function GiftAfter(p: Props) {
   return (
     <div className="gav">
+      {/* data-ph-show: fixed copy, readable in session replay (model/replayPrivacy.ts). */}
       {/* Whose this is (Sam, 6 Nov 2026: "maybe we have a section right above
           this which is 'Tapin plus blacksburg' with the tapin logo"). */}
-      <div className="gav-brand">
+      <div className="gav-brand" data-ph-show="">
         {/* The Plus mark, not the app icon (Sam, 7 Nov 2026). */}
         <span className="gav-brand-mark" aria-hidden="true">
           <FlatMark />

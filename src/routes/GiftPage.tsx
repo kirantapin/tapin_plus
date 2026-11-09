@@ -923,7 +923,7 @@ export function Letter({
   }, [state, held, still]);
   return (
     <div
-      className="gft gft-a ph-no-capture"
+      className={preview ? "gft gft-a ph-no-autocapture ph-no-deadclick ph-no-rageclick" : "gft gft-a ph-no-capture"}
       data-state={state}
       data-scene={gift.scene}
     >
@@ -944,11 +944,11 @@ export function Letter({
               /* Opened: "name1, name2 got you a little surprise!" (Sam, 8 Nov
                  2026), the sign-off as they wrote it ("Mom"). */
               <>
-                {gift.from.trim() || "Someone"} got you a <span className="gft-nowrap">little surprise!</span>
+                {gift.from.trim() || "Someone"} got you a <span className="gft-nowrap" data-ph-show="">little surprise!</span>
               </>
             ) : (
               <>
-                {whoInHeading(gift.from, !!to)} sent you <span className="gft-nowrap">something</span>
+                {whoInHeading(gift.from, !!to)} sent you <span className="gft-nowrap" data-ph-show="">something</span>
               </>
             )}
           </span>
@@ -983,14 +983,14 @@ export function Letter({
           <div ref={sleeve} className="gft-a-sleeve">
           <div ref={letter} className="gft-a-letter" aria-hidden={state === "sealed" ? true : undefined}>
             <div className="gft-a-head">
-              <span>For {to ?? "you"}</span>
+              <span data-ph-show="">For <span className="ph-mask">{to ?? "you"}</span></span>
               {/* No mark on the card (Sam, 6 Nov 2026: "you can remove the
                   tapin plus icon from the card too"): it's their letter. */}
             </div>
             {/* The parent's photo, printed at the top of the letter: the
                 first thing that rises out of the envelope. */}
             {gift.photo ? (
-              <img className="gft-a-photo" src={gift.photo} alt={`A photo from ${gift.from}`} decoding="async" />
+              <img className="gft-a-photo ph-no-capture" src={gift.photo} alt={`A photo from ${gift.from}`} decoding="async" />
             ) : null}
             {/* No note: a short warm line, signed, instead of "signed you up
                 for Tapin Plus" (Sam, 6 Nov 2026: "more of a heartfelt short
@@ -1009,6 +1009,7 @@ export function Letter({
             onClick={open}
             disabled={state !== "sealed"}
             aria-hidden={state !== "sealed" ? true : undefined}
+            data-ph-show=""
           >
             Open it
           </button>
@@ -1016,7 +1017,7 @@ export function Letter({
           /* Its own element (key): React would otherwise reuse "Open it"'s,
              still faded out at opacity 0 from the opening (Sam, 7 Nov 2026:
              "the close it button isn't showing"). It fades in instead. */
-          <button key="reseal" ref={resealBtn} type="button" className="gft-open gft-reseal" onClick={onReseal}>
+          <button key="reseal" ref={resealBtn} type="button" className="gft-open gft-reseal" onClick={onReseal} data-ph-show="">
             <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
               <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4.5v4h4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -1030,7 +1031,7 @@ export function Letter({
         </main>
       ) : null}
       {state === "open" ? (
-        <div ref={dock} className="gft-dock">
+        <div ref={dock} className="gft-dock" data-ph-show="">
           {cta ? (
             <button type="button" className="gft-dock-cta tpa-dock-cta" onClick={(e) => cta.onClick(e.currentTarget)}>
               {cta.label}
@@ -1701,12 +1702,19 @@ export function GiftPreview({
     const from = originFrame();
     if (origin) origin.style.visibility = "hidden";
     veilTint();
-    if (reducedMotion()) veil.current?.style.setProperty("opacity", "0");
-    else if (from) {
+    /* The veil's end state is its own style, set before any fade runs over
+       it: session replay records styles, never Web Animations, and a veil
+       held off by a fill alone replayed at full strength over the whole
+       builder (Sam, 9 Nov 2026: the PostHog replay "completely cuts off"
+       at "Build their care package"). The fade's keyframes give both ends,
+       so what a parent sees is unchanged. */
+    veil.current?.style.setProperty("opacity", "0");
+    if (reducedMotion()) {
+      /* No motion: the builder is simply there. */
+    } else if (from) {
       root.current?.animate?.([{ clipPath: from }, { clipPath: "inset(0px 0px 0px 0px round 0px)" }], GROW);
-      veil.current?.animate?.([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], { duration: GROW.duration, easing: "ease-out", fill: "forwards" });
+      veil.current?.animate?.([{ opacity: 1 }, { opacity: 1, offset: 0.25 }, { opacity: 0 }], { duration: GROW.duration, easing: "ease-out" });
     } else {
-      veil.current?.style.setProperty("opacity", "0");
       root.current?.animate?.(RISE, { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
     }
     return () => {
@@ -2080,9 +2088,19 @@ export function GiftPreview({
     [],
   );
   const sentLine = sent ? (
-    <div className="gft-sent">
-      <h2 className="gft-h1 gft-sent-h">
-        <span className="gft-sent-strip">{sent.texted ? `On its way to ${sent.who}` : `On ${sent.who}’s account now`}</span>
+    <div className="gft-sent ph-no-autocapture ph-no-deadclick ph-no-rageclick">
+      <h2 className="gft-h1 gft-sent-h" data-ph-show="">
+        <span className="gft-sent-strip">
+          {sent.texted ? (
+            <>
+              On its way to <span className="ph-mask">{sent.who}</span>
+            </>
+          ) : (
+            <>
+              On <span className="ph-mask">{sent.who}</span>’s account now
+            </>
+          )}
+        </span>
       </h2>
       {sent.texted ? (
         <button type="button" className="gft-open gft-sent-see" onClick={seeIt}>
@@ -2116,8 +2134,8 @@ export function GiftPreview({
   const photoParts = (
     <>
       {d.photo ? (
-        <div className="gft-pp-photo">
-          <img src={d.photo} alt="Your photo" />
+        <div className="gft-pp-photo" data-ph-show="">
+          <img className="ph-no-capture" src={d.photo} alt="Your photo" />
           <button type="button" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
             Change
           </button>
@@ -2127,14 +2145,14 @@ export function GiftPreview({
         </div>
       ) : (
         <>
-          <button type="button" className="gft-pp-add" onClick={() => photoInput.current?.click()} disabled={photoBusy}>
+          <button type="button" className="gft-pp-add" onClick={() => photoInput.current?.click()} disabled={photoBusy} data-ph-show="">
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-9ZM12 16a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
             </svg>
             {photoBusy ? "One moment…" : "Add your photo"}
           </button>
           {showSample ? (
-            <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one">
+            <div className="gft-pp-seg" role="radiogroup" aria-label="Until you add one" data-ph-show="">
               {[true, false].map((on) => (
                 <button key={String(on)} type="button" role="radio" aria-checked={samplePhoto === on} onClick={() => setSamplePhoto(on)}>
                   {on ? "Sample photo" : "No photo"}
@@ -2144,15 +2162,18 @@ export function GiftPreview({
           ) : null}
         </>
       )}
+      {/* Blocked from replay: maskAllInputs skips file inputs, and the file's
+          name ("maya-graduation.jpg") would be recorded as typed. */}
       <input
         ref={photoInput}
+        className="ph-no-capture"
         type="file"
         accept="image/*"
         hidden
         onChange={(e) => void pickPhoto(e.target.files?.[0])}
       />
       {photoError ? (
-        <p className="gft-pp-error" role="alert">
+        <p className="gft-pp-error" role="alert" data-ph-show="">
           {photoError}
         </p>
       ) : null}
@@ -2165,7 +2186,7 @@ export function GiftPreview({
     <>
       {fixedTo ? null : (
         <label className="gft-pp-field" data-error={nameErr && !d.to.trim() ? "" : undefined}>
-          <span>Your student’s first name</span>
+          <span data-ph-show="">Your student’s first name</span>
           <input
             ref={nameInput}
             value={d.to}
@@ -2178,14 +2199,14 @@ export function GiftPreview({
             autoCapitalize="words"
           />
           {nameErr && !d.to.trim() ? (
-            <small id="gft-pp-name-err" className="gft-pp-error" role="alert">
+            <small id="gft-pp-name-err" className="gft-pp-error" role="alert" data-ph-show="">
               Add your student’s first name.
             </small>
           ) : null}
         </label>
       )}
       <label className="gft-pp-field">
-        <span className="gft-pp-count">
+        <span className="gft-pp-count" data-ph-show="">
           Your note
           <small className="tnum" aria-hidden="true">
             {d.note.length}/{NOTE_MAX}
@@ -2200,7 +2221,7 @@ export function GiftPreview({
         />
       </label>
       <label className="gft-pp-field">
-        <span>Sign it</span>
+        <span data-ph-show="">Sign it</span>
         <input
           value={d.from}
           onChange={(e) => setGiftDraft({ from: e.target.value })}
@@ -2216,7 +2237,7 @@ export function GiftPreview({
   return createPortal(
     <div
       ref={root}
-      className="gft-preview"
+      className="gft-preview ph-mask"
       data-device={desk ? "computer" : "phone"}
       data-builder={builder ? "" : undefined}
       data-part={builder ? part : undefined}
@@ -2230,7 +2251,8 @@ export function GiftPreview({
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
     >
       <div className="gft-preview-scrim" onClick={shut} aria-hidden="true" />
-      <div className="gft-preview-bar">
+      {/* data-ph-show: fixed copy, readable in session replay (model/replayPrivacy.ts). */}
+      <div className="gft-preview-bar" data-ph-show="">
         <div className="gft-preview-bg" role="group" aria-label="Background">
           <button type="button" aria-label="Previous background" onClick={() => cycle.current(-1)}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -2253,7 +2275,7 @@ export function GiftPreview({
       <div className="gft-preview-left">
         {/* Close: the builder's own, at its top left (Sam, 6 Nov 2026), not
             part of the student's page; on a phone, the screen's top left. */}
-        <button ref={back} type="button" className="gft-preview-back" onClick={shut}>
+        <button ref={back} type="button" className="gft-preview-back" onClick={shut} data-ph-show="">
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -2279,7 +2301,7 @@ export function GiftPreview({
             "the phone computer toggle should be on the bottom of the left
             column of the builder"). A computer only. */}
         {wide ? (
-          <div className="gft-preview-tools">
+          <div className="gft-preview-tools" data-ph-show="">
             <div className="gft-preview-device gft-pp-seg" role="radiogroup" aria-label="See it on">
               {(["phone", "computer"] as const).map((dv) => (
                 <button key={dv} type="button" role="radio" aria-checked={device === dv} onClick={() => setDevice(dv)}>
@@ -2319,7 +2341,7 @@ export function GiftPreview({
           data-stage={stage}
         >
           {wide ? null : (
-            <div className="gft-pp-grab">
+            <div className="gft-pp-grab" data-ph-show="">
               {/* On a phone the drawer's own way out, on the care package
                   (the checkout steps carry theirs); the Close and background
                   pills over the page are gone (Sam, 6 Nov 2026: "on mobile
@@ -2337,7 +2359,7 @@ export function GiftPreview({
           )}
           {/* Collapsed: the one button that opens it. */}
           {!wide ? (
-            <div className="gft-pp-peekbar" hidden={!peek}>
+            <div className="gft-pp-peekbar" hidden={!peek} data-ph-show="">
               {/* The way out on a phone (Sam, 6 Nov 2026): the back arrow
                   beside it leaves the builder, as Close did at the top
                   left, which is gone on a phone. */}
@@ -2366,19 +2388,27 @@ export function GiftPreview({
           {stage === "next" ? null : (
           <>
           {builder ? (
-            <div className="gft-pp-head" {...(!wide && peek ? { inert: "" } : {})}>
+            <div className="gft-pp-head" data-ph-show="" {...(!wide && peek ? { inert: "" } : {})}>
               {/* One head for every step, the checkout's too (Sam, 6 Nov
                   2026: "consistent across every single step of the modal"):
                   the title with the phone drawer's × at its right, the line
                   under it, then the bars (gift.css). */}
               <h2 className="gft-pp-title" tabIndex={-1}>
-                {part === "note"
-                  ? fixedTo
-                    ? `Write ${fixedTo}’s note`
-                    : "Write their note"
-                  : fixedTo
-                      ? `Build ${fixedTo}’s care package`
-                      : "Build their care package"}
+                {part === "note" ? (
+                  fixedTo ? (
+                    <>
+                      Write <span className="ph-mask">{fixedTo}</span>’s note
+                    </>
+                  ) : (
+                    "Write their note"
+                  )
+                ) : fixedTo ? (
+                  <>
+                    Build <span className="ph-mask">{fixedTo}</span>’s care package
+                  </>
+                ) : (
+                  "Build their care package"
+                )}
               </h2>
               {/* The drawer's button lowers it ("it should collapse the modal
                   not close out the designer page"): a down arrow, not an ×,
@@ -2402,7 +2432,13 @@ export function GiftPreview({
               <StepBars className="gft-pp-steps" total={stepsTotal} lit={stepAt} label={`Step ${stepAt} of ${stepsTotal}`} />
             </div>
           ) : null}
-          <div ref={body} className="gft-pp-body" data-part={builder ? part : undefined} {...(!wide && peek ? { inert: "" } : {})}>
+          <div
+            ref={body}
+            className="gft-pp-body"
+            data-part={builder ? part : undefined}
+            data-ph-show={builder && part === "look" ? "" : undefined}
+            {...(!wide && peek ? { inert: "" } : {})}
+          >
             {/* Stage 1, the look and what plays when they open it, on one
                 screen (C · One look screen, 7 Nov 2026). Stage 2, the note:
                 their name, the note, how it's signed, then the photo.
@@ -2414,7 +2450,7 @@ export function GiftPreview({
                 <div className="gft-pp-group">
                   {noteFields}
                   <div className="gft-pp-field">
-                    <span>Photo</span>
+                    <span data-ph-show="">Photo</span>
                     {photoParts}
                   </div>
                 </div>
@@ -2422,10 +2458,10 @@ export function GiftPreview({
             ) : (
               <>
                 <div className="gft-pp-group">
-                  <h2 className="gft-pp-h">Make it theirs</h2>
+                  <h2 className="gft-pp-h" data-ph-show="">Make it theirs</h2>
                   {noteFields}
                   <div className="gft-pp-field">
-                    <span>Photo</span>
+                    <span data-ph-show="">Photo</span>
                     {photoParts}
                   </div>
                 </div>
@@ -2434,7 +2470,7 @@ export function GiftPreview({
               </>
             )}
           </div>
-          <div className="gft-pp-foot" {...(!wide && peek ? { inert: "" } : {})}>
+          <div className="gft-pp-foot" data-ph-show="" {...(!wide && peek ? { inert: "" } : {})}>
             {/* Back a stage, beside Continue, from the second stage on (Sam,
                 6 Nov 2026: "a back arrow next to the 'continue' button ...
                 its own container with the same corner radius"). */}
@@ -2466,7 +2502,7 @@ export function GiftPreview({
           package preview builder to close that editor"), drawer up or down;
           the drawer's own x still only lowers it. A computer keeps Close. */}
       {!wide && builder ? (
-        <button type="button" className="gft-preview-x" aria-label="Close" onClick={shut}>
+        <button type="button" className="gft-preview-x" aria-label="Close" onClick={shut} data-ph-show="">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
             <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
