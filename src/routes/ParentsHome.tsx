@@ -27,7 +27,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, LunchBars, OfferPrice, ProofTurn, UnderOffer, Voices, WhatIfUnused } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, OfferPrice, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -64,10 +64,11 @@ import { GiftPreview } from "./GiftPage";
    asterisk; the footnote (SAVES_NOTE) sits under the tiles. */
 
 /* ══ THE EYEBROW ═════════════════════════════════════════════════════════════
-   COPY.md wants "For Virginia Tech parents", but naming the school waits on
-   legal clearing it for paid traffic. Until then the pill says Blacksburg;
-   flip NAME_VT to true once legal says yes, and nothing else changes. */
-const NAME_VT = false;
+   COPY.md wants "For Virginia Tech parents"; it waited on legal clearing the
+   school's name for paid traffic. Sam, 8 Nov 2026: "it needs to say "for
+   virginia tech parents" intead of "for parents on blacksburg students"",
+   and "500 Vtech students are on Tapin plus": named now. */
+const NAME_VT = true;
 const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
@@ -97,6 +98,13 @@ const headerChips = (): HeaderChips => {
   const v = new URLSearchParams(window.location.search).get("hdr");
   return v === "a" || v === "c" ? v : "b";
 };
+
+/* ══ THE PHONE HEADER (Sam, 8 Nov 2026, picking preview 1 of five) ═══════════
+   His parents found the phone's first screen "too confusing ... a lot of text
+   they didn't get"; his mom loved "A care package they'll open every day"
+   and the envelope. So a phone shows the photo and the headline alone: the
+   students line steps back (parents.css) and the two tags are gone, and the
+   envelope's section comes straight after. A computer keeps its band. */
 
 /* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
    package they'll open every day", now everyone's; "b" and "c" stay as ?ph=
@@ -364,7 +372,6 @@ export default function ParentsHome() {
 
   /* The headline settles in over the band, once. */
   const titleRef = useRef<HTMLDivElement | null>(null);
-  const tagsRef = useRef<HTMLUListElement | null>(null);
   useEffect(() => {
     if (reducedMotion()) return;
     titleRef.current?.animate?.(
@@ -378,21 +385,6 @@ export default function ParentsHome() {
         easing: "cubic-bezier(.22,1,.36,1)",
         fill: "backwards",
       },
-    );
-    /* Then what's inside, one tag after another, out of the photo's foot. */
-    tagsRef.current?.querySelectorAll("li").forEach((t, i) =>
-      t.animate?.(
-        [
-          { opacity: 0, transform: "translateY(-14px)" },
-          { opacity: 1, transform: "none" },
-        ],
-        {
-          duration: 560,
-          delay: 380 + i * 90,
-          easing: "cubic-bezier(.16,1,.3,1)",
-          fill: "backwards",
-        },
-      ),
     );
   }, []);
 
@@ -500,30 +492,86 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
-
+            {/* Who else is on it, straight under the headline (Sam, 8 Nov
+                2026: "we still need to say "500 Vtech students are on Tapin
+                plus""). */}
             <Proof />
+            {/* A phone: the button and the price on the photo (Sam, 8 Nov
+                2026, picking preview 5, "just a bit more refined"); a
+                computer keeps them on the held card. */}
+            <div className="tpp-band-act">
+              <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
+                {cta}
+                <DockArrow />
+              </button>
+              <p className="tnum">
+                Nothing charged until they claim it. Then {FIRST}, {MONTHLY}/month.
+              </p>
+            </div>
+
           </div>
         </div>
       </header>
 
-      {/* A · WHAT'S INSIDE (Sam's pick, 8 Nov 2026), a phone only: three
-          white tags tucked under the photo's foot, the offer card's own
-          white. They carry the 15% now, so the list under the offer
-          doesn't repeat it. */}
-      <ul ref={tagsRef} className="tpp-tags tnum" aria-label="What’s inside">
-        {/* Sam's pick D, 8 Nov 2026: "$5 credit" (not "$5 off"), and plain
-            that it's at each spot, every week; two tags, the credit wider. */}
-        <li>
-          <b data-money="">${CREDIT} credit</b>
-          <span>at each spot, every week</span>
-        </li>
-        <li>
-          <b>{PERCENT}% off</b>
-          <span>once a day</span>
-        </li>
-      </ul>
-
       <main className="tpa-sheet">
+        {/* Sam's mom, 8 Nov 2026: the care package first, then what they get,
+            then the places; "What a lunch costs" and "What if they don't use
+            it?" are gone. The offer card follows the places on a phone; a
+            computer still holds it in the right-hand column. */}
+        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
+            their student opens. */}
+        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
+
+        {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
+            a few words each, the approved line one tap under it. No total
+            anywhere, no points value. */}
+        <section
+          className="tpa-module"
+          aria-labelledby="tpp-get"
+        >
+          {/* What's in it, said as a care package (Sam, 8 Nov 2026: "it just
+              needs to be more abundantly clear what's actually in it and how
+              this acts like a care package"; the cards stay, his mom liked
+              them). */}
+          <h2 id="tpp-get" className="tpa-h2">
+            What’s in their care package
+          </h2>
+          <p className="tpp-get-intro">Like a box from home that lives on their phone instead of the mail room.</p>
+          <BenefitCards />
+          <p className="tpp-note">{SAVES_NOTE}</p>
+        </section>
+
+        <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
+          <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
+            Places they already go
+          </h2>
+          <ul className="tpa-rail">
+            {PLACES.map((p) => (
+              <li key={p.id} className="tpa-place">
+                <img
+                  className="tpa-place-photo"
+                  src={p.photo}
+                  alt=""
+                  decoding="async"
+                  loading="lazy"
+                />
+                <span
+                  className="tpp-place-logo collar"
+                  data-field={logoField(p.id)}
+                  aria-hidden="true"
+                >
+                  <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                </span>
+                <span className="tpa-place-name">
+                  <b>{p.name}</b>
+                  <small>{p.what}</small>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="tpp-more">More places are joining.</p>
+        </section>
+
         {/* THE OFFER: what it is, the price, the button. Right under the band
             on a phone; on a computer, the card held on the right
             (plus-app.css keys that on aria-label="Tapin Plus"). */}
@@ -571,62 +619,6 @@ export default function ParentsHome() {
         <Voices />
         </div>
 
-        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
-            their student opens. */}
-        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
-
-        {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
-            a few words each, the approved line one tap under it. No total
-            anywhere, no points value. */}
-        <section
-          className="tpa-module"
-          aria-labelledby="tpp-get"
-        >
-          <h2 id="tpp-get" className="tpa-h2">
-            What they get
-          </h2>
-          <BenefitCards />
-          <p className="tpp-note">{SAVES_NOTE}</p>
-        </section>
-
-        {/* WHAT A LUNCH COSTS (COPY.md v2 final: under the value stack, the
-            $12 to $7 first and the door price as context). One meal priced
-            four ways to one scale, never the plan, the Plus bar shedding its
-            $5 (Sam's pick A, toned down to the white module, 7 Nov 2026).
-            The footnotes, word for word, under Sources. */}
-        <section
-          className="tpa-module"
-          aria-labelledby="tpp-lunch"
-        >
-          <h2 id="tpp-lunch" className="tpa-h2">
-            What a lunch costs
-          </h2>
-          <LunchBars />
-          <p className="tpp-keep">
-            <b>Keep their dining plan.</b> Tapin Plus is for the meals they buy
-            off campus.
-          </p>
-          <details className="tpa-more tpp-sources">
-            <summary>
-              Sources
-              <Chevron />
-            </summary>
-            <div className="tpp-notes">
-              <p>
-                ¹ VT Dining’s posted door rate for lunch and dinner at D2 and
-                Owens Food Court, Nov 2026
-                (dining.vt.edu/dining_centers/dietrick-hall.html, owens.html).
-              </p>
-              <p>
-                ² Menu prices before tax (Coffeeholics’ California Club,
-                $12.00). $5 credit every 7 days per Plus place on $10+ orders of
-                food or non-alcoholic drinks, or 15% off once a day. One per
-                order. Tapin is not affiliated with Virginia Tech.
-              </p>
-            </div>
-          </details>
-        </section>
-
         {/* What a week looks like, in one order, on their phone (Sam's pick
             D, 7 Nov 2026). */}
         <section className="tpa-module" aria-labelledby="tpp-save">
@@ -634,37 +626,6 @@ export default function ParentsHome() {
             What ${CREDIT} back looks like
           </h2>
           <CheckoutPhone />
-        </section>
-
-        <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
-          <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
-            Places they already go
-          </h2>
-          <ul className="tpa-rail">
-            {PLACES.map((p) => (
-              <li key={p.id} className="tpa-place">
-                <img
-                  className="tpa-place-photo"
-                  src={p.photo}
-                  alt=""
-                  decoding="async"
-                  loading="lazy"
-                />
-                <span
-                  className="tpp-place-logo collar"
-                  data-field={logoField(p.id)}
-                  aria-hidden="true"
-                >
-                  <img src={p.logo} alt="" decoding="async" loading="lazy" />
-                </span>
-                <span className="tpa-place-name">
-                  <b>{p.name}</b>
-                  <small>{p.what}</small>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="tpp-more">More places are joining.</p>
         </section>
 
         {/* Answering the parent (Elevate's "for parents" section, in our own
@@ -679,13 +640,6 @@ export default function ParentsHome() {
           </h2>
           <HowPhone />
         </section>
-
-        {/* B · "What if they don't use it?" (Sam's pick, 7 Nov 2026): the
-            parent's own question, answered, then as a picture. Moved down
-            from under the gift band to here, with the other reassurance,
-            just above No surprises (Sam, 7 Nov 2026: "it belongs much
-            farther down the page"). */}
-        <WhatIfUnused />
 
         {/* No surprises: a glyph and a few words per line, the full line one
             tap under it. */}
@@ -780,6 +734,7 @@ export default function ParentsHome() {
 
         <footer className="tpa-foot tpp-foot">
           <p>
+            The $12 lunch is Coffeeholics’ California Club, $12.00 before tax.{" "}
             ${CREDIT} credit every 7 days per Plus place on ${MIN_ORDER}+ orders
             of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
             off once a day. One benefit per order. Alcohol excluded. Nothing is
