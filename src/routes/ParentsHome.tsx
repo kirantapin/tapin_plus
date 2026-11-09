@@ -66,10 +66,11 @@ import { GiftPreview } from "./GiftPage";
    asterisk; the footnote (SAVES_NOTE) sits under the tiles. */
 
 /* ══ THE EYEBROW ═════════════════════════════════════════════════════════════
-   COPY.md wants "For Virginia Tech parents", but naming the school waits on
-   legal clearing it for paid traffic. Until then the pill says Blacksburg;
-   flip NAME_VT to true once legal says yes, and nothing else changes. */
-const NAME_VT = false;
+   COPY.md wants "For Virginia Tech parents"; it waited on legal clearing the
+   school's name for paid traffic. Sam, 8 Nov 2026: "it needs to say "for
+   virginia tech parents" intead of "for parents on blacksburg students"",
+   and "500 Vtech students are on Tapin plus": named now. */
+const NAME_VT = true;
 const EYEBROW = NAME_VT
   ? "For Virginia Tech parents"
   : "For parents of Blacksburg students";
@@ -591,6 +592,10 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
+            {/* Who else is on it, straight under the headline (Sam, 8 Nov
+                2026: "we still need to say "500 Vtech students are on Tapin
+                plus""). */}
+            <Proof />
             {/* A phone: the button and the price on the photo (Sam, 8 Nov
                 2026, picking preview 5, "just a bit more refined"); a
                 computer keeps them on the held card. */}
@@ -605,7 +610,6 @@ export default function ParentsHome() {
               </p>
             </div>
 
-            <Proof />
           </div>
         </div>
       </header>

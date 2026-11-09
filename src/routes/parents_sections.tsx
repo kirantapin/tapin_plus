@@ -1469,7 +1469,7 @@ export function ProofTurn({
       body: (
         <>
           <span className="tpp-pt-dot" aria-hidden="true" />
-          {student ? "Over 500 Virginia Tech students on Plus" : "Over 500 Blacksburg students on Plus"}
+          Over 500 Virginia Tech students on Plus
         </>
       ),
     },

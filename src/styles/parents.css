@@ -2619,18 +2619,6 @@
   .tpp .tpp-band .tpp-split-seal {
     display: none;
   }
-  /* Out of the picture, still read aloud (the .tpp-sr pattern). */
-  .tpp .tpp-band .tpp-proof {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
   /* The title's own box takes the band's width, so the button can (the
      headline keeps its measure). */
   .tpp .tpp-band .tpa-band-title > div {
