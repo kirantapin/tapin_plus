@@ -144,7 +144,9 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
      "r" in his words, "s" with the line held to what Plus gives ($5 credit,
      not money back; 15% off once a day). */
   r: ["Make every dollar they spend", "in Blacksburg go further."],
-  s: ["Make every dollar they spend", "in Blacksburg go further."],
+  /* "spend" on the second line, so it's the longer one (Sam, 9 Nov 2026:
+     "can we have spend be in the second line of text"). */
+  s: ["Make every dollar they", "spend in Blacksburg go further."],
   /* The welcome offer (Sam, 9 Nov 2026: "Gift your student $25 at
      Blacksburg's best spots. $5 to spend at each spot the moment they join,
      then $5 back every week at each spot when they spend $10"; credit, not
