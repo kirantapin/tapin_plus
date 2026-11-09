@@ -91,6 +91,12 @@
   font: 600 56px/1 "Gilroy", Arial, sans-serif;
   letter-spacing: -0.03em;
 }
+.tpp-price-fig s {
+  margin-left: 8px;
+  font: 500 22px/1 "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-decoration-thickness: 2px;
+}
 .tpp-price-fig span {
   font: 500 18px/1 "Gilroy", Arial, sans-serif;
   color: var(--muted);
