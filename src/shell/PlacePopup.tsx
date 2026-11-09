@@ -153,7 +153,7 @@ export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePop
                 $5
               </span>
               <span>
-                <b>$5 back a week, or 15% off a day</b>
+                <b>$5 credit a week, or 15% off a day</b>
                 <span>On anything but alcohol</span>
               </span>
             </li>

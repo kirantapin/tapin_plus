@@ -42,7 +42,7 @@ const HEADS: Record<string, string> = {
  *  page's What you get, questions and fine print. */
 const LINES: Record<string, string> = {
   spend: "Food, drinks, event tickets, cover and line skips.",
-  order: "Or pay full price on $10+ and get $5 back.",
+  order: "Or pay full price on $10+ and get $5 credit.",
   myspot: "Order now, pick it up later.",
   offers: "From each place, for members.",
   entry: "Points, and 15% off once a day.",

@@ -22,7 +22,7 @@ import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
-import { HERO_LINES, heroVariant } from "../model/heroTest";
+import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
@@ -246,7 +246,7 @@ function PaybackCounter() {
           </li>
           <li>
             <span>
-              ${CREDIT} back on {back.creditOrders === back.ordersPerMonth && back.creditOrders > 1 ? `all ${back.creditOrders}` : back.creditOrders}
+              ${CREDIT} credit on {back.creditOrders === back.ordersPerMonth && back.creditOrders > 1 ? `all ${back.creditOrders}` : back.creditOrders}
             </span>
             <b className="tnum">${back.creditUsdMonth}</b>
           </li>
@@ -268,7 +268,7 @@ function PaybackCounter() {
             <b className="tnum">${back.monthlyUsd}</b>
           </li>
         </ul>
-        <p className="tpa-s2-fine">At Plus places. $5 back and 15% off on food and non-alcoholic drinks, $5 once a week at each place. 10 points for every dollar, about $1 per 100. An estimate.</p>
+        <p className="tpa-s2-fine">At Plus places. $5 credit and 15% off on food and non-alcoholic drinks, $5 once a week at each place. 10 points for every dollar, about $1 per 100. An estimate.</p>
       </details>
     </div>
   );
@@ -335,22 +335,22 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   {
     /* The rule is the same at every bar, not just The Burg (Sam, 4 Nov 2026). */
     q: "Are the bars included? How does credit work there?",
-    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} back, and your credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
+    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} credit, and your credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
   },
   {
     q: "Does credit stack? Can I earn credit on an order where I use it?",
-    a: `Yes to both. Credit you haven’t spent adds up, and an order where you use credit still earns new $${CREDIT} back, as long as it’s $${MIN_ORDER} or more.`,
+    a: `Yes to both. Credit you haven’t spent adds up, and an order where you use credit still earns a new $${CREDIT} credit, as long as it’s $${MIN_ORDER} or more.`,
   },
   {
     q: "How often can I use it?",
-    a: `$${CREDIT} back at each of the ${PLACES.length} places on an order of $${MIN_ORDER} or more. Once you’ve used it at a place, it’s ready there again 7 days later. Or take ${PERCENT}% off your order instead, once a day.`,
+    a: `$${CREDIT} credit at each of the ${PLACES.length} places on an order of $${MIN_ORDER} or more. Once you’ve used it at a place, it’s ready there again 7 days later. Or take ${PERCENT}% off your order instead, once a day.`,
   },
   {
     q: "What does it work on?",
     /* Names what the credit buys besides food (Sam, 4 Nov 2026: "shouldn't
        we update this to include events, cover, lineskips"). Earning stays
        food and non-alcoholic drinks (the 3 Nov rule). */
-    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets at every Plus place, plus cover and line skips at select places. Not on alcohol. You earn the $${CREDIT} back on food and non-alcoholic drinks.`,
+    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets at every Plus place, plus cover and line skips at select places. Not on alcohol. You earn the $${CREDIT} credit on food and non-alcoholic drinks.`,
   },
   {
     q: "Will my price go up?",
@@ -596,24 +596,27 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 invite={invite}
                 free={free}
                 line={`${firstMonthLine(price)} of Tapin Plus`}
-                h1={wwHero?.h1 ?? `$${CREDIT} back every week at ${PLACES.length} Blacksburg spots`}
+                h1={wwHero?.h1 ?? `$${CREDIT} credit every week at ${PLACES.length} Blacksburg spots`}
                 strip={wwHero?.strip ?? "First month free"}
               />
             ) : place || hero === "0" ? (
               <h1>
                 {place
-                  ? `$${CREDIT} back every week at ${place.name}`
-                  : `$${CREDIT} back at every place you already go in Blacksburg`}
+                  ? `$${CREDIT} credit every week at ${place.name}`
+                  : `$${CREDIT} credit at every place you already go in Blacksburg`}
               </h1>
             ) : HERO_LINES[hero] ? (
               /* Round 3 of the hero test (model/heroTest.ts). */
-              <h1>{HERO_LINES[hero]}</h1>
+              <>
+                <h1>{HERO_LINES[hero]}</h1>
+                {HERO_SUBS[hero] ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
+              </>
             ) : hero === "a" ? (
               <>
                 {/* The headline alone (Sam, 4 Nov 2026: "there's so much text
                     now"; "still busy, maybe it belongs in it's own container
                     above 'how it works'"). The Promise is that container. */}
-                <h1>${CREDIT} back every week at {PLACES.length} Blacksburg spots</h1>
+                <h1>${CREDIT} credit every week at {PLACES.length} Blacksburg spots</h1>
               </>
             ) : (
               <>
@@ -646,7 +649,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             the Promise card that sat above it on heroes m, s and p went. */}
         <section className="tpa-module tps-fb" aria-labelledby="tpa-how">
           <h2 id="tpa-how" className="tpa-h2">
-            What ${CREDIT} back looks like
+            What ${CREDIT} credit looks like
           </h2>
           <CheckoutPhone audience="student" start={startAt} />
           <button type="button" className="tpa-step-wide" onClick={openHow}>
@@ -751,9 +754,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                   <span>{FIRST_ORDER.label}</span>
                   <span className="tnum">{money(FIRST_ORDER.price)}</span>
                 </figcaption>
-                <span className="tpa-s1-sticker" aria-label={`$${CREDIT} back`}>
+                <span className="tpa-s1-sticker" aria-label={`$${CREDIT} credit`}>
                   <b className="tnum">+${CREDIT}</b>
-                  <small>back</small>
+                  <small>credit</small>
                 </span>
               </figure>
               <p className="tpa-s1-tag">
@@ -778,7 +781,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             <h2 className="tpa-h2">
               You’re a Plus member
             </h2>
-            <AppCard where="home_member" line="Your $5 back, 15% off and points are in the app. Sign in with the number you joined with." />
+            <AppCard where="home_member" line="Your $5 credit, 15% off and points are in the app. Sign in with the number you joined with." />
           </section>
         ) : offer === "2" ? (
           <section className="tpa-module tpa-offer tpa-s2" aria-label="Tapin Plus">
@@ -789,7 +792,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 The countdown is a quiet line, not the black pill ("I also
                 don't like the way the countdown looks specifically on this
                 card"). */}
-            <h2 className="tpa-h2">See what you’d get back</h2>
+            <h2 className="tpa-h2">See what you’d save</h2>
             <PaybackCounter />
             {/* ONE PRICE, ONE BAR, ONE ACTION (Sam, 3 Nov 2026: "a lot is going
                 on here"). The price on one line, big figure first; the spots
@@ -839,9 +842,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               <h2 className="tpa-s3-h">Your first ${MIN_ORDER} order covers the&nbsp;month.</h2>
             </div>
             <div className="tpa-s3-body">
-              <p className="tpa-s3-sum" aria-label={`$${CREDIT} back on your first order is more than ${FIRST_MONTH} for your first month`}>
+              <p className="tpa-s3-sum" aria-label={`$${CREDIT} credit on your first order is more than ${FIRST_MONTH} for your first month`}>
                 <span aria-hidden="true">
-                  <b className="tnum">${CREDIT} back</b>
+                  <b className="tnum">${CREDIT} credit</b>
                   <small>on your first order</small>
                 </span>
                 <span className="tpa-s3-gt" aria-hidden="true">
@@ -878,7 +881,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               <path d="m7.6 12.3 3 3 5.8-6.1" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>
-              Your first ${MIN_ORDER} order earns ${CREDIT} back. That’s more than your first month.
+              Your first ${MIN_ORDER} order earns ${CREDIT} credit. That’s more than your first month.
             </span>
           </p>
           {linked ? null : <WelcomeChip />}
@@ -949,7 +952,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         <footer className="tpa-foot">
           <p>
-            $5 back is credit, once a week at each place, earned on food and non-alcoholic drinks. Or 15% off once a day.
+            $5 credit, once a week at each place, earned on food and non-alcoholic drinks. Or 15% off once a day.
             15% off or $5 credit, one per order; credit you’ve earned works with the 15%. Credit and 15% off don’t go toward
             alcohol. Cancel anytime.
           </p>

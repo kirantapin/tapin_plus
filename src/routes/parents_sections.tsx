@@ -647,7 +647,7 @@ function studentSteps(first: string, free: boolean, appTab: number): Array<{ gly
       title: "Save at each place",
       line: (
         <>
-          {money0(CREDIT)} back every week at each place on a {money0(MIN_ORDER)}+ order of food or non-alcoholic drinks. Or {PERCENT}% off, once
+          {money0(CREDIT)} credit every week at each place on a {money0(MIN_ORDER)}+ order of food or non-alcoholic drinks. Or {PERCENT}% off, once
           a day.
         </>
       ),
@@ -916,7 +916,7 @@ export function HowPhone({
                       Tapin Plus
                     </div>
                     <span className="tpp-hw-lbl tpp-hw-every">
-                      <b>{money0(CREDIT)} back</b> every week at
+                      <b>{money0(CREDIT)} credit</b> every week at
                     </span>
                     <div className="tpp-hw-places">
                       {PLACES.map((p) => (

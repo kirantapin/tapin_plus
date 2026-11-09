@@ -122,7 +122,7 @@ export default function Members() {
         </section>
 
         <section className="tpa-module tpa-members-app" aria-label="Get the Tapin app">
-          <AppCard where="members" line="Your $5 back, 15% off and points are in the app. Sign in with the number you joined with." />
+          <AppCard where="members" line="Your $5 credit, 15% off and points are in the app. Sign in with the number you joined with." />
           {/* www.tapin.app stays, quieter: the app card leads now. */}
           <a className="tpa-members-web" href={TAPIN_HOME}>
             Or order on www.tapin.app

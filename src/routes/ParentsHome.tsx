@@ -680,7 +680,7 @@ export default function ParentsHome() {
             D, 7 Nov 2026). */}
         <section className="tpa-module" aria-labelledby="tpp-save">
           <h2 id="tpp-save" className="tpa-h2">
-            What ${CREDIT} back looks like
+            What ${CREDIT} credit looks like
           </h2>
           <CheckoutPhone />
         </section>
