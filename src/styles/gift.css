@@ -2391,9 +2391,13 @@ button.tpg-env-link {
 
 /* The look (where what plays is picked, Effort C) on a phone: the opened
    card's band runs to the screen's foot, so no strip of the page's grey
-   shows above the drawer. */
+   shows above the drawer. Only while the drawer is up: lowered to preview,
+   the opened card is as tall as its content on every step, as the student's
+   page is (Sam, 8 Nov 2026: "the height of the background for each
+   background seems to be a bit different?"; it was the look step's band
+   staying full height under the lowered drawer). */
 @media (max-width: 1023.98px) {
-  .gft-preview[data-builder][data-part="look"] .gft-a[data-state="open"] .gft-a-band {
+  .gft-preview[data-builder][data-part="look"]:not([data-peek]) .gft-a[data-state="open"] .gft-a-band {
     min-height: 100svh;
   }
 }
