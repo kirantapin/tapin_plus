@@ -842,10 +842,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
               )}
             </div>
+            {/* Less on the card (Sam, 9 Nov 2026: "there's just way too much
+                going on here"): Join and Try alone under the price; the
+                wallet line (the checkout says it) and the turning proof line
+                (the band says the 500+) went. */}
             {joinCta("hero")}
-            {wallet}
             {tryCta}
-            {proofCard}
           </section>
         ) : offer === "3" ? (
           <section className="tpa-s3" aria-label="Tapin Plus">
