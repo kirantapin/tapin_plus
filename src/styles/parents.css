@@ -102,6 +102,17 @@
   font: 500 16px/1 "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
+/* "Then $7.99 ~~$14.99~~/month", under the first month (9 Nov 2026). */
+.tpp-price-then {
+  margin-top: 8px !important;
+  font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpp-price-then s {
+  margin: 0 3px 0 6px;
+  color: var(--muted);
+  text-decoration-thickness: 1.5px;
+}
 .tpp-price-tag {
   display: inline-flex;
   align-items: center;
