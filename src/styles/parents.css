@@ -3196,3 +3196,17 @@
   font-size: 15px;
   line-height: 20px;
 }
+
+/* Three lines on a computer too, as on the main page (Sam, 9 Nov 2026: "also
+   maybe we make this 3 lines?"): "Make every dollar / they spend in /
+   Blacksburg go further.", the last the longest. */
+@media (min-width: 1024px) {
+  .tpp .tpa-band-title h1 {
+    max-width: 17ch;
+    text-wrap: balance;
+  }
+  .tpp .tpa-band-title h1 .tpp-nowrap {
+    display: inline;
+    white-space: normal;
+  }
+}
