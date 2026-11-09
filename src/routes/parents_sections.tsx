@@ -238,17 +238,19 @@ export function OfferPrice() {
   );
 }
 
-/* ══ WHAT THEY GET: SWIPE CARDS ══════════════════════════════════════════════
-   One benefit a card, swiped sideways (the $5 first, the $60 last on ink); each card is
-   short enough that its line shows without a tap. No total anywhere, no
-   points value. The dots follow the swipe and jump to a card. */
+/* ══ WHAT'S IN THEIR CARE PACKAGE: SWIPE CARDS ══════════════════════════════
+   One thing in the box a card, swiped sideways, in the order a parent asks:
+   what's inside, where, how it gets to them, what it saves, what it costs
+   (Sam, 8 Nov 2026: "more abundantly clear what's actually in it and how this
+   acts like a care package"; his mom liked the cards, not that she couldn't
+   tell what they were). Drafted by three writers, judged for a parent who has
+   never heard of Tapin, every line held to the offer. Each card is short
+   enough that its line shows without a tap. No total, no points value. The
+   dots follow the swipe and jump to a card. */
 export function BenefitCards() {
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean }> = [
-    /* Each card one plain thought, the $5 first (Sam's mom, 8 Nov 2026: she
-       liked how these are set up but couldn't tell what they were). The $60
-       moves to the end, said of a student, not a "member". */
     {
       key: "credit",
       art: (
@@ -259,22 +261,53 @@ export function BenefitCards() {
       /* A credit, not money off (Sam, 6 Nov 2026: "this needs to be a $5
          credit on every meal instead of $5 off - it's $5 off after the
          credit has been earned"). */
-      label: "Credit every week, at each place",
-      line: `Spend ${money0(MIN_ORDER)} or more on a meal there, and ${money0(CREDIT)} comes off their next one.`,
+      label: `${money0(CREDIT)} credit every week, at each place`,
+      line: `At five Blacksburg places, a ${money0(MIN_ORDER)}+ order takes ${money0(CREDIT)} off their next order there.`,
     },
-    { key: "pct", art: <b className="tpp-card-fig">{PERCENT}%</b>, label: "Off another order, once a day", line: "Food and non-alcoholic drinks." },
-    { key: "places", art: <LogoRow size={34} />, label: "Five places they already go", line: `${PLACES.map((p) => p.name).join(", ")}.` },
+    {
+      key: "places",
+      art: <LogoRow size={32} />,
+      label: "These five places, with more joining",
+      line: "Coffee and breakfast, ice cream, pizza and burgers, tacos and sandwiches.",
+    },
+    {
+      key: "pct",
+      art: <b className="tpp-card-fig">{PERCENT}%</b>,
+      label: `Or ${PERCENT}% off, once a day`,
+      line: `One per order: this or the ${money0(CREDIT)} credit. Alcohol excluded.`,
+    },
+    {
+      key: "note",
+      /* The care package's own envelope, as the look picker draws it. */
+      art: (
+        <span className="scene-swatch tpp-card-env" data-scene="maroon" aria-hidden="true">
+          <i className="scene-swatch-env" />
+        </span>
+      ),
+      label: "Your note and photo, on top",
+      line: "They open it like a present, from a text on their phone.",
+    },
     {
       key: "phone",
       art: <Glyph d={GLYPHS.phone} className="tpp-card-glyph" />,
-      label: "On their phone, not in the mail room",
-      line: "You pay, they sign in with their number, and it’s there.",
+      label: "You pay. They sign in. It’s there.",
+      line: "In the Tapin app, with their phone number. Nothing to pick up.",
     },
-    { key: "points", art: <Glyph d={GLYPHS.star} className="tpp-card-glyph" />, label: "Points on every order", line: "Toward free food at each place." },
-    /* What it costs (Sam, 6 Nov 2026: "$7.99 saves an average of $60 a month
-       for your kiddo"), then what it saves, last. */
-    { key: "first", art: <b className="tpp-card-fig">{MONTHLY}</b>, label: "A month. Cancel anytime.", line: `The first month is ${FIRST}.` },
-    { key: "saves", art: <b className="tpp-card-fig">${SAVES}</b>, label: "Saved a month by the average student on Plus*", ink: true },
+    {
+      key: "saves",
+      art: <b className="tpp-card-fig">${SAVES}</b>,
+      label: "Saved a month by the average student*",
+      line: `From the weekly ${money0(CREDIT)} credits, and points on every order toward free food.`,
+      ink: true,
+    },
+    /* What it costs, last (Sam, 6 Nov 2026: "$7.99 saves an average of $60 a
+       month for your kiddo"), with the parents' refund, as it is everywhere. */
+    {
+      key: "price",
+      art: <b className="tpp-card-fig">{FIRST}</b>,
+      label: `First month, then ${MONTHLY} a month`,
+      line: "Cancel anytime. If they don’t save what you spent, ask for a full refund.",
+    },
   ];
   /* One dot per place the rail can stop, not per card: on a computer three
      cards show at once, so the last few cards share the rail's end (review,

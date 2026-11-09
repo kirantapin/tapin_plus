@@ -630,9 +630,14 @@ export default function ParentsHome() {
           className="tpa-module"
           aria-labelledby="tpp-get"
         >
+          {/* What's in it, said as a care package (Sam, 8 Nov 2026: "it just
+              needs to be more abundantly clear what's actually in it and how
+              this acts like a care package"; the cards stay, his mom liked
+              them). */}
           <h2 id="tpp-get" className="tpa-h2">
-            What they get
+            What’s in their care package
           </h2>
+          <p className="tpp-get-intro">Like a box from home that lives on their phone instead of the mail room.</p>
           <BenefitCards />
           <p className="tpp-note">{SAVES_NOTE}</p>
         </section>
