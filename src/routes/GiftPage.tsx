@@ -202,10 +202,12 @@ export default function GiftPage() {
     });
   }, [load, track]);
 
+  /* A fixed title, never the sign-off (Sam, 9 Nov 2026): document.title is
+     recorded by session replay and sent with $pageview, so a family's own
+     words ("A gift from Mom Sarah") must not be in it. */
   useEffect(() => {
     const was = document.title;
-    const from = load.state === "ok" ? load.gift.from : load.state === "ended" ? load.from : null;
-    document.title = from ? `A gift from ${from} · Tapin Plus` : "Tapin Plus";
+    document.title = load.state === "ok" || load.state === "ended" ? "A gift for you · Tapin Plus" : "Tapin Plus";
     return () => {
       document.title = was;
     };
