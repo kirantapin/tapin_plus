@@ -2445,15 +2445,13 @@ export function GiftPreview({
               <BackArrow className="gft-pp-backarrow" label="Close" onClick={shut} />
               {/* While previewing it's always "Back to editing" (Sam, 6 Nov
                   2026), on any step. The first time, before they've begun,
-                  the card is already a finished gift (B · Send as is, 7 Nov
-                  2026): send it as it is, or make it theirs. */}
-              {!sent && !designed && next ? (
-                <button type="button" className="gft-pp-ghost" onClick={sendAsIs}>
-                  Send as is
-                </button>
-              ) : null}
+                  the gift whole and one button (Sam, 9 Nov 2026: "when
+                  someone first opens the care package thing, the first thing
+                  they see is this unless they've already been working on it.
+                  The CTA would be build my carepackage"); Send as is waits
+                  on the look, beside Continue, as on a computer. */}
               <button ref={peekCta} type="button" className="gft-pp-cta" onClick={expand}>
-                {sent ? "Back" : designed ? "Back to editing" : next ? "Make it yours" : "Start designing"}
+                {sent ? "Back" : designed ? "Back to editing" : next ? "Build my care package" : "Start designing"}
               </button>
             </div>
           ) : null}
@@ -2557,7 +2555,7 @@ export function GiftPreview({
             {/* B · Send as is beside Continue on the look: always on a
                 computer (its builder opens here, with no card first), and
                 on a phone once they've chosen it and come back to Change. */}
-            {builder && next && part === "look" && (wide || quick) ? (
+            {builder && next && part === "look" ? (
               <button type="button" className="gft-pp-ghost gft-pp-ghost-fit" onClick={sendAsIs}>
                 Send as is
               </button>
