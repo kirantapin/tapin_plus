@@ -244,49 +244,6 @@ const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const PROOF_STUDENTS = NAME_VT
   ? "Over 500 Virginia Tech students are on Tapin Plus"
   : "Over 500 Blacksburg students are on Tapin Plus";
-function Proof() {
-  const box = useRef<HTMLDivElement | null>(null);
-  const ring = useRef<HTMLElement | null>(null);
-  useEffect(() => {
-    if (reducedMotion()) return;
-    box.current?.animate?.(
-      [
-        { opacity: 0, transform: "translateY(6px)" },
-        { opacity: 1, transform: "none" },
-      ],
-      {
-        duration: 520,
-        delay: 260,
-        easing: "cubic-bezier(.22,1,.36,1)",
-        fill: "backwards",
-      },
-    );
-    const pulse = ring.current?.animate?.(
-      [
-        { transform: "scale(1)", opacity: 0.55 },
-        { transform: "scale(2.6)", opacity: 0 },
-      ],
-      {
-        duration: 1800,
-        delay: 900,
-        easing: "cubic-bezier(.2,.6,.3,1)",
-        iterations: Infinity,
-      },
-    );
-    return () => pulse?.cancel();
-  }, []);
-  return (
-    <div ref={box} className="tpp-proof">
-      <p className="tpa-proof">
-        <span className="tpa-proof-dot" aria-hidden="true">
-          <i ref={ring} />
-        </span>
-        {PROOF_STUDENTS}
-      </p>
-    </div>
-  );
-}
-
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
 
@@ -462,6 +419,14 @@ export default function ParentsHome() {
 
   return (
     <div className="tpa tpa-home tpp">
+      {/* The students line as the page's announcement bar, as on the main
+          page (Sam, 9 Nov 2026: "for parents, I think we can have the 500
+          credit be an announcement banner like on the main, instead of on
+          this hero container - for desktop and mobile"). */}
+      <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus students">
+        <i className="tpa-pbar-dot" aria-hidden="true" />
+        {PROOF_STUDENTS}
+      </aside>
       <header
         className="tpa-band tpp-band"
         data-hero="parents"
@@ -529,13 +494,6 @@ export default function ParentsHome() {
             {/* The welcome offer, in the header (Sam, 9 Nov 2026): the $25
                 the moment they join, then the weekly line under it. */}
             <WelcomeCallout they />
-            {/* Who else is on it, straight under the headline (Sam, 8 Nov
-                2026: "we still need to say "500 Vtech students are on Tapin
-                plus""). A computer keeps it here; a phone moves it under the
-                button (below). */}
-            <div className="tpp-proof-desk">
-              <Proof />
-            </div>
             {/* A phone: the button and the price on the photo (Sam, 8 Nov
                 2026, picking preview 5, "just a bit more refined"); a
                 computer keeps them on the held card. */}
@@ -574,7 +532,6 @@ export default function ParentsHome() {
                 {cta}
                 <DockArrow />
               </button>
-              <Proof />
             </div>
 
           </div>
