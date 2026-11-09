@@ -4324,3 +4324,17 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     gap: 24px;
   }
 }
+
+/* The top bar as the students line (Sam, 9 Nov 2026): the same black bar,
+   a lighter weight, a small green dot. */
+.tpa-pbar {
+  font-weight: 500;
+}
+.tpa-pbar-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #5fcf98;
+}

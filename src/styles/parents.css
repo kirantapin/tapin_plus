@@ -3032,6 +3032,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(150px, 1fr) auto auto auto auto;
+    /* The students line under the button (Sam, 9 Nov 2026: "I think this
+       callout can live below the CTA"): the card is rows 1-4. */
     min-height: 0;
     padding: calc(env(safe-area-inset-top) + 10px) 0 24px;
     overflow: visible;
@@ -3049,7 +3051,7 @@
   .tpp .tpp-band[data-phone="card"] .tpa-band-art,
   .tpp .tpa-band.tpp-band[data-phone="card"]::after {
     grid-column: 1;
-    grid-row: 1 / 6;
+    grid-row: 1 / 5;
     position: relative;
     inset: auto;
     width: auto;
@@ -3090,12 +3092,18 @@
   .tpp .tpp-band[data-phone="card"] .wc {
     grid-row: 4;
     justify-self: start;
-    margin: 14px 24px 0;
+    margin: 14px 24px 24px;
   }
   .tpp .tpp-band[data-phone="card"] .tpp-proof-desk {
     display: block;
-    grid-row: 5;
-    margin: 0 24px 22px;
+    grid-row: 6;
+    justify-self: center;
+    margin: 0 var(--gutter);
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-proof-desk .tpa-proof {
+    color: var(--muted);
+    text-shadow: none;
+    text-align: center;
   }
   .tpp .tpp-band[data-phone="card"] .tpp-proof-desk .tpa-proof {
     margin-top: 12px;
@@ -3104,7 +3112,7 @@
     display: none;
   }
   .tpp .tpp-band[data-phone="card"] .tpp-band-cta {
-    grid-row: 6;
+    grid-row: 5;
     width: auto;
     margin: 18px var(--gutter) 0;
     background: var(--ink);
