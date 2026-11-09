@@ -17,6 +17,12 @@
     -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/tapin_icon_white.png" />
+    <!-- Speed (PageSpeed, 9 Nov 2026): the two Gilroy weights the first
+         screen sets, fetched with the page; the first screen's photograph
+         asked for before the app's code runs (hero-preload.js, async). -->
+    <link rel="preload" href="/fonts/Gilroy-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Gilroy-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <script async src="/hero-preload.js"></script>
     <!--
       DIRECTION · desktop, 14 Sep 2026
       THESIS: one argument in four movements — statement, evidence, decision,

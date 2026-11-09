@@ -3,15 +3,18 @@ import { StepBars } from "./StepBars";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { Elements, ExpressCheckoutElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import {
-  loadStripe,
-  type Appearance,
-  type Stripe,
-  type StripeElements,
-  type StripeElementsOptions,
-  type ClickResolveDetails,
-  type StripeExpressCheckoutElementConfirmEvent,
-  type StripeExpressCheckoutElementOptions,
+/* /pure: Stripe.js loads only when loadStripe is called, not on import
+   (PageSpeed, 9 Nov 2026). The types come from the main entry, type-only,
+   so nothing of it is bundled. */
+import { loadStripe } from "@stripe/stripe-js/pure";
+import type {
+  Appearance,
+  Stripe,
+  StripeElements,
+  StripeElementsOptions,
+  ClickResolveDetails,
+  StripeExpressCheckoutElementConfirmEvent,
+  StripeExpressCheckoutElementOptions,
 } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { asset } from "../asset";

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Elements, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe, type StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
+import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "../constants";
 import { useAuth } from "../context/auth_context";
 /* The parents flow (5 Nov 2026): "Ask a parent to cover it" on the pay step. */
@@ -101,7 +102,18 @@ export function PlusCheckoutMount() {
 }
 
 /* ── The sheet ───────────────────────────────────────────────────────────── */
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+/* Stripe off the first load (PageSpeed, 9 Nov 2026: js.stripe.com was
+   fetched on every page view, before anyone tapped Join). It starts a
+   couple of seconds after the page has loaded, or the moment the checkout
+   asks for it, whichever comes first, so the wallet button is still ready
+   when the sheet opens. */
+let stripeOnce: ReturnType<typeof loadStripe> | null = null;
+const getStripe = () => (stripeOnce ??= loadStripe(STRIPE_PUBLISHABLE_KEY));
+if (typeof window !== "undefined") {
+  const warm = () => window.setTimeout(() => void getStripe(), 2500);
+  if (document.readyState === "complete") warm();
+  else window.addEventListener("load", warm, { once: true });
+}
 const still = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
 const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
@@ -975,7 +987,7 @@ function Review({
       ) : (
       <Elements
         key={cart.dueTodayCents}
-        stripe={stripePromise}
+        stripe={getStripe()}
         options={{
           // The first invoice, or for a free first period only saving the card.
           ...(cart.dueTodayCents > 0
