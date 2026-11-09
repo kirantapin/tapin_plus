@@ -30,7 +30,7 @@ import {
 import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
-import { WelcomeCallout, welcomeVariant } from "../shell/WelcomeCallout";
+import { WelcomeCallout } from "../shell/WelcomeCallout";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -293,7 +293,6 @@ export default function ParentsHome() {
      builder open on their pick. */
   useState(hydrateGiftDraft);
   const [hero] = useState(parentHero);
-  const [wc] = useState(welcomeVariant);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
   const headline = PARENT_HEROES[hero];
@@ -527,7 +526,7 @@ export default function ParentsHome() {
             </h1>
             {/* The welcome offer, in the header (Sam, 9 Nov 2026): the $25
                 the moment they join, then the weekly line under it. */}
-            <WelcomeCallout variant={wc} they />
+            <WelcomeCallout they />
             {/* Who else is on it, straight under the headline (Sam, 8 Nov
                 2026: "we still need to say "500 Vtech students are on Tapin
                 plus""). A computer keeps it here; a phone moves it under the
@@ -543,7 +542,9 @@ export default function ParentsHome() {
                   C of three: "the five logos + one line"; both audits ranked
                   it first). The price line under the button is gone; the
                   students line takes its place. */}
-              {PARENT_SUBS[hero] ? <p className="tpp-band-sub">{PARENT_SUBS[hero]}</p> : null}
+              {/* No line under the callout on Rob's headline (Sam, 9 Nov
+                  2026: "just remove the sub text"). */}
+              {PARENT_SUBS[hero] && hero !== "s" ? <p className="tpp-band-sub">{PARENT_SUBS[hero]}</p> : null}
               {/* The five favourites as their food, each place's logo on its
                   corner (Sam, 9 Nov 2026, pick C: "Not sure if it's clear to
                   the parents that these are the logos of blacksburg

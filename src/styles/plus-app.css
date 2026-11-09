@@ -4132,8 +4132,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 
 /* ══ THE WELCOME OFFER CALLOUT (shell/WelcomeCallout.tsx, 9 Nov 2026) ═══════
-   Under the headline on both pages. On a photo by default (white type, the
-   smoked plate or white chips); on white for a phone's /parents (ink). */
+   Under the headline on both pages (Sam's pick: 1 · Pill). White on a
+   photo; a pale green on a phone's white /parents header. */
 .wc {
   margin: 14px 0 0;
   font: 500 15px/20px "Gilroy", Arial, sans-serif;
@@ -4163,125 +4163,11 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-size: 16px;
   line-height: 20px;
 }
-/* 2 · Line */
-.wc[data-wc="2"] {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  color: #ffffff;
-  font-size: 16px;
-  line-height: 21px;
-}
-.wc[data-wc="2"] svg {
-  flex: none;
-  margin-top: 1px;
-}
-/* 3 · Split */
-.wc[data-wc="3"] {
-  display: inline-flex;
-  align-items: stretch;
-  max-width: 100%;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #ffffff;
-  color: #141618;
-  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.4);
-}
-.wc[data-wc="3"] > b {
-  display: grid;
-  place-items: center;
-  padding: 0 14px;
-  background: #0b7a53;
-  color: #ffffff;
-  font-size: 26px;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-.wc[data-wc="3"] > span {
-  display: grid;
-  padding: 8px 14px;
-}
-.wc[data-wc="3"] > span span {
-  font-weight: 600;
-}
-.wc[data-wc="3"] small {
-  font-size: 14px;
-  line-height: 18px;
-  color: rgba(20, 22, 24, 0.62);
-}
-/* 4 · Logos */
-.wc[data-wc="4"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 100%;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  background: rgba(20, 20, 20, 0.65);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-}
-.wc-logos {
-  display: flex;
-  flex: none;
-}
-.wc-logos img {
-  width: 26px;
-  height: 26px;
-  margin-left: -7px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(30, 30, 30, 0.9);
-}
-.wc-logos img:first-child {
-  margin-left: 0;
-}
-.wc[data-wc="4"] b {
-  color: #9fe3c2;
-}
-/* 5 · Bar */
-.wc[data-wc="5"] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 2px 12px;
-  padding: 11px 16px;
-  border-radius: 14px;
-  background: #0b7a53;
-  color: #ffffff;
-  font-size: 16px;
-  line-height: 21px;
-}
-.wc[data-wc="5"] small {
-  flex: none;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.82);
-}
-
 /* On white: a phone's /parents header (the boxed photo). */
 @media (max-width: 1023.98px) {
   .tpp .tpp-band[data-phone="box"] .wc[data-wc="1"] {
     background: #e8f4ee;
     box-shadow: none;
-  }
-  .tpp .tpp-band[data-phone="box"] .wc[data-wc="2"] {
-    color: #141618;
-  }
-  .tpp .tpp-band[data-phone="box"] .wc[data-wc="3"] {
-    box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
-  }
-  .tpp .tpp-band[data-phone="box"] .wc[data-wc="4"] {
-    background: #f0f0f0;
-    box-shadow: none;
-    color: #141618;
-  }
-  .tpp .tpp-band[data-phone="box"] .wc[data-wc="4"] b {
-    color: #0b7a53;
-  }
-  .tpp .tpp-band[data-phone="box"] .wc-logos img {
-    box-shadow: 0 0 0 2px #f0f0f0;
   }
 }
 @media (min-width: 1024px) {
@@ -4303,7 +4189,4 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   line-height: inherit;
   font-weight: inherit;
   text-shadow: none;
-}
-.tpa-band-title .wc-logos {
-  flex: none;
 }

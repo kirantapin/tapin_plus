@@ -28,7 +28,7 @@ import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
-import { WelcomeCallout, welcomeVariant } from "../shell/WelcomeCallout";
+import { WelcomeCallout } from "../shell/WelcomeCallout";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -390,7 +390,6 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
-  const [wc] = useState(welcomeVariant);
   const { price, failed: priceFailed } = usePlusPriceLoad();
   const FIRST_MONTH = firstFigure(price);
   const MONTHLY = usd(price?.monthly);
@@ -614,8 +613,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 {/* The welcome offer, in the header (Sam, 9 Nov 2026: "wouldn't
                     it go on the header of both?"): the $25 now, then the
                     weekly $5 under it. Not for members. */}
-                {member ? null : <WelcomeCallout variant={wc} />}
-                {HERO_SUBS[hero] ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
+                {member ? null : <WelcomeCallout />}
+                {/* No line under the callout on Rob's headline (Sam, 9 Nov
+                    2026: "just remove the sub text"); other headlines
+                    previewed with ?hero= keep theirs. */}
+                {HERO_SUBS[hero] && hero !== "r" ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
               </>
             ) : hero === "a" ? (
               <>
