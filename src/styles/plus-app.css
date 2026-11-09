@@ -4130,3 +4130,63 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     min-width: 0;
   }
 }
+
+/* ══ THE WELCOME OFFER CALLOUT (shell/WelcomeCallout.tsx, 9 Nov 2026) ═══════
+   Under the headline on both pages (Sam's pick: 1 · Pill). White on a
+   photo; a pale green on a phone's white /parents header. */
+.wc {
+  margin: 14px 0 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  text-shadow: none;
+}
+.wc b {
+  font-weight: 600;
+}
+/* 1 · Pill */
+.wc[data-wc="1"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 5px 16px 5px 5px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141618;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.4);
+}
+.wc[data-wc="1"] b {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #0b7a53;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 20px;
+}
+/* On white: a phone's /parents header (the boxed photo). */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="1"] {
+    background: #e8f4ee;
+    box-shadow: none;
+  }
+}
+@media (min-width: 1024px) {
+  .wc {
+    margin-top: 18px;
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .wc[data-wc="1"] b {
+    font-size: 18px;
+  }
+}
+/* `.tpa-band-title span` (the old proof line's rule) sizes every span in the
+   band at 13px: the callout's words take its own size back. */
+.tpa-band-title .wc span {
+  flex: initial;
+  padding-bottom: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  text-shadow: none;
+}

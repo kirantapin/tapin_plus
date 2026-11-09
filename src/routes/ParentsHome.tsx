@@ -30,6 +30,7 @@ import {
 import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
+import { WelcomeCallout } from "../shell/WelcomeCallout";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -126,7 +127,7 @@ const headerChips = (): HeaderChips => {
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b" | "c" | "d" | "e" | "f" | "r" | "s";
+type ParentHero = "a" | "b" | "c" | "d" | "e" | "f" | "r" | "s" | "w";
 const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
   a: ["A care package", "they’ll open every day."],
@@ -144,15 +145,22 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
      not money back; 15% off once a day). */
   r: ["Make every dollar they spend", "in Blacksburg go further."],
   s: ["Make every dollar they spend", "in Blacksburg go further."],
+  /* The welcome offer (Sam, 9 Nov 2026: "Gift your student $25 at
+     Blacksburg's best spots. $5 to spend at each spot the moment they join,
+     then $5 back every week at each spot when they spend $10"; credit, not
+     back, as everywhere). The $25 doesn't expire; $3.99 the first month
+     still stands. */
+  w: ["Gift your student $25 at", "Blacksburg’s best spots."],
 };
 /** A line under the headline, for the headlines that carry one; it says the
  *  offer, so the favourites row then shows the places alone. */
 const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
   r: "Tapin Plus gives your Virginia Tech student money back at their favorite local spots every week, plus 15% off a meal every day.",
   s: "$5 credit every week at each of their favorite Blacksburg spots, plus 15% off once a day.",
+  w: "$5 to spend at each spot the moment they join, then $5 credit every week at each spot when they spend $10.",
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s";
+  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s" || v === "w";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
@@ -170,6 +178,9 @@ function parentHero(): ParentHero {
      line held to the offer ("A care package they'll open every day" heads
      the envelope now). ?ph= still previews the others, and an earlier draw
      is cleared. */
+  /* Rob's headline, with the welcome offer as its own callout under it
+     (Sam, 9 Nov 2026: "wouldn't it go on the header of both?"); "w", the
+     $25 headline, stays a preview so the $25 isn't said twice. */
   return (parentHeroCached = "s");
 }
 /* The experiment's flag isn't registered any more (the test is over); the
@@ -513,6 +524,9 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
+            {/* The welcome offer, in the header (Sam, 9 Nov 2026): the $25
+                the moment they join, then the weekly line under it. */}
+            <WelcomeCallout they />
             {/* Who else is on it, straight under the headline (Sam, 8 Nov
                 2026: "we still need to say "500 Vtech students are on Tapin
                 plus""). A computer keeps it here; a phone moves it under the
@@ -528,7 +542,9 @@ export default function ParentsHome() {
                   C of three: "the five logos + one line"; both audits ranked
                   it first). The price line under the button is gone; the
                   students line takes its place. */}
-              {PARENT_SUBS[hero] ? <p className="tpp-band-sub">{PARENT_SUBS[hero]}</p> : null}
+              {/* No line under the callout on Rob's headline (Sam, 9 Nov
+                  2026: "just remove the sub text"). */}
+              {PARENT_SUBS[hero] && hero !== "s" ? <p className="tpp-band-sub">{PARENT_SUBS[hero]}</p> : null}
               {/* The five favourites as their food, each place's logo on its
                   corner (Sam, 9 Nov 2026, pick C: "Not sure if it's clear to
                   the parents that these are the logos of blacksburg

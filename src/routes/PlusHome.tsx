@@ -28,6 +28,7 @@ import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
+import { WelcomeCallout } from "../shell/WelcomeCallout";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -609,7 +610,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               /* Round 3 of the hero test (model/heroTest.ts). */
               <>
                 <h1>{HERO_LINES[hero]}</h1>
-                {HERO_SUBS[hero] ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
+                {/* The welcome offer, in the header (Sam, 9 Nov 2026: "wouldn't
+                    it go on the header of both?"): the $25 now, then the
+                    weekly $5 under it. Not for members. */}
+                {member ? null : <WelcomeCallout />}
+                {/* No line under the callout on Rob's headline (Sam, 9 Nov
+                    2026: "just remove the sub text"); other headlines
+                    previewed with ?hero= keep theirs. */}
+                {HERO_SUBS[hero] && hero !== "r" ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
               </>
             ) : hero === "a" ? (
               <>
@@ -640,6 +648,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </header>
 
       <main ref={sheetRef} className="tpa-sheet">
+        {/* THE WELCOME OFFER (Sam, 9 Nov 2026: "a welcome offer card -
+            immediate $25 added to your account, $5 at each spot for your
+            first month. cancel anytime in the app"): the first thing under
+            the band, for anyone not on Plus yet. */}
+
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
             order card (the same $12 to $7 idea, so only one survives). It
