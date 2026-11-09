@@ -2885,3 +2885,40 @@ button.tpg-env-link {
   padding: 0 4px;
   border-radius: 14px;
 }
+
+/* ══ CLOSE ON A PHONE (Sam, 8 Nov 2026) ════════════════════════════════════════
+   An X at the screen's top left closes the builder, drawer up or down: over
+   the tap-to-collapse layer (69), the drawer (70) and the preview's Back pill
+   (71). White with the page pills' shadow, so it reads on any background. A
+   computer keeps its Close. */
+.gft-preview-x {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .gft-preview-x {
+    position: fixed;
+    z-index: 72;
+    top: calc(12px + env(safe-area-inset-top));
+    left: 12px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #141618;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 120ms ease;
+  }
+  .gft-preview-x:active {
+    transform: scale(0.94);
+  }
+  .gft-preview-x:focus-visible {
+    outline: 3px solid #e5751f;
+    outline-offset: 2px;
+  }
+}
