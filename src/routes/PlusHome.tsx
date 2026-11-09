@@ -29,6 +29,7 @@ import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
+import { BonusSpots } from "../shell/BonusSpots";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -660,32 +661,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             under the header for the main tapin callout for the $5 credit
             unlocked at each spot"): the welcome bonus, place by place. Not
             for members. */}
-        {member ? null : (
-          <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
-            {/* A computer lays it out as two sides (Sam, 9 Nov 2026:
-                "desktop just needs to look a bit more complete"): the words
-                on the left with the $25 total under them, the five places
-                named across the right. A phone keeps the one line and the
-                row. */}
-            <div className="tps-unlock-say">
-              <h2 id="tps-unlock-h" className="tps-unlock-h">
-                <b>${CREDIT} bonus credit</b> at each spot<span className="tps-unlock-when"> when you join</span>
-              </h2>
-              <p className="tps-unlock-sub tnum">Ready the moment you join. ${KIT_PLACES.length * CREDIT} in&nbsp;all.</p>
-            </div>
-            <ul className="tps-unlock-row">
-              {KIT_PLACES.map((p) => (
-                <li key={p.id}>
-                  <img src={p.logo} alt={p.name} decoding="async" />
-                  <small className="tps-unlock-name">{p.name}</small>
-                  <span className="tnum" aria-hidden="true">
-                    ${CREDIT}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
+            /parents). */}
+        {member ? null : <BonusSpots />}
 
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old

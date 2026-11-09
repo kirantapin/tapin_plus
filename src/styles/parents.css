@@ -3218,3 +3218,23 @@
     padding-top: 10px;
   }
 }
+
+/* B · Two lines, low (Sam, 9 Nov 2026: "do b"): on a computer the headline
+   is two lines, "Make every dollar they / spend in Blacksburg go further.",
+   a size down so the second fits whole, and it sits below the seal, which
+   moves up out of its way. */
+@media (min-width: 1024px) {
+  .tpp .tpa-band-title h1 {
+    font-size: clamp(40px, 3.6vw, 52px);
+    line-height: 1.08;
+    max-width: none;
+    text-wrap: wrap;
+  }
+  .tpp .tpa-band-title h1 .tpp-nowrap {
+    display: block;
+    white-space: nowrap;
+  }
+  .tpp .tpp-band .tpp-split-seal {
+    top: 22%;
+  }
+}
