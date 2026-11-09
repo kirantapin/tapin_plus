@@ -1398,9 +1398,11 @@ function OnTheirNumber({ show, who, number }: { show: boolean; who: React.ReactN
         <img src={TAPIN_ICON_WHITE} alt="" width="20" height="20" decoding="async" />
       </span>
       <span className="prc-on-text">
-        <b>On {who} number once they sign in</b>
+        {/* The welcome bonus (Sam, 9 Nov 2026: "can you mention this"): it
+            lands on the student's number when they claim the gift. */}
+        <b>+$25 welcome bonus on {who} number</b>
         <span className="tnum">
-          We’ll text <span className="ph-mask">{number}</span>
+          It lands when they claim it. We’ll text <span className="ph-mask">{number}</span>
         </span>
       </span>
     </div>
