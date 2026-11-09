@@ -1390,6 +1390,8 @@ const DESK_W = 1280;
  *  C), then the note. */
 type Part = "look" | "note";
 const PARTS: readonly Part[] = ["look", "note"];
+/** The builder's four steps in order (the parent_builder_step event). */
+const BUILDER_STEPS: readonly ResumeStep[] = ["look", "note", "who", "pay"];
 
 
 function useWide(query = "(min-width: 1024px)") {
@@ -1517,10 +1519,40 @@ export function GiftPreview({
   const stageNow = useRef(stage);
   stageNow.current = stage;
   const checkoutAt = useRef<ResumeStep | null>(null);
+  /* Where parents stop (Sam, 9 Nov 2026, the Dara Denney audit's "add a
+     parent_builder_step event"): one event each time the step changes,
+     the care package's two and the checkout's two, so a PostHog funnel on
+     step shows the drop-off. `back` is a return to an earlier step;
+     `send_as_is` is the path that skips the note. */
+  const { track: trackBuilder } = useEventTracking();
+  const quickRef = useRef(quick);
+  quickRef.current = quick;
+  const stepWas = useRef<ResumeStep | null>(null);
+  const stepFar = useRef(0);
+  const stepTo = useRef<(step: ResumeStep) => void>(() => {});
+  stepTo.current = (step) => {
+    if (!builder || sentRef.current || stepWas.current === step) return;
+    const n = BUILDER_STEPS.indexOf(step) + 1;
+    trackBuilder("parent_builder_step", {
+      source: "parent_page",
+      step,
+      step_number: n,
+      back: n < stepFar.current,
+      send_as_is: quickRef.current,
+      resumed: !!resumed,
+    });
+    stepWas.current = step;
+    stepFar.current = Math.max(stepFar.current, n);
+  };
   useEffect(() => {
     if (!builder || sentRef.current) return;
-    if (stage === "gift") keepStep(part);
-    else if (checkoutAt.current) keepStep(checkoutAt.current);
+    if (stage === "gift") {
+      keepStep(part);
+      stepTo.current(part);
+    } else if (checkoutAt.current) {
+      keepStep(checkoutAt.current);
+      stepTo.current(checkoutAt.current);
+    }
   }, [builder, stage, part]);
   /* "We kept your care package from earlier", on the step it came back to,
      when there's something of theirs in it. */
@@ -1534,7 +1566,10 @@ export function GiftPreview({
       left: () => setKept(false),
       report: (step) => {
         checkoutAt.current = step;
-        if (stageNow.current === "next" && !sentRef.current) keepStep(step);
+        if (stageNow.current === "next" && !sentRef.current) {
+          keepStep(step);
+          stepTo.current(step);
+        }
       },
     }),
     [resumed, kept],
