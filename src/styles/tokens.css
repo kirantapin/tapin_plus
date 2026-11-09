@@ -37,11 +37,11 @@
    a single value, never a `100 900` range — a browser that cannot parse the
    range drops the rule and falls back to plain Gilroy. That happened on Sam's
    phone (~/desktop-ui/src/index.css:80-92). */
-@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Medium.woff") format("woff");font-weight:500;font-style:normal;font-display:swap}
-@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-SemiBold.woff") format("woff");font-weight:600;font-style:normal;font-display:swap}
-@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Bold.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
-@font-face{font-family:"Gilroy Heavy";src:url("/fonts/Gilroy-Heavy.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Regular.woff2") format("woff2"),url("/fonts/Gilroy-Regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Medium.woff2") format("woff2"),url("/fonts/Gilroy-Medium.woff") format("woff");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-SemiBold.woff2") format("woff2"),url("/fonts/Gilroy-SemiBold.woff") format("woff");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy";src:url("/fonts/Gilroy-Bold.woff2") format("woff2"),url("/fonts/Gilroy-Bold.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Gilroy Heavy";src:url("/fonts/Gilroy-Heavy.woff2") format("woff2"),url("/fonts/Gilroy-Heavy.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
 
 :root{
   /* Tells the UA which world its own paint belongs to — form controls, the
