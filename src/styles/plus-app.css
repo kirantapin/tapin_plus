@@ -4267,12 +4267,60 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: #0b7a53;
   font: 600 14px/18px "Gilroy", Arial, sans-serif;
 }
+.tps-unlock-sub,
+.tps-unlock-name {
+  display: none;
+}
+/* A computer: two sides (Sam, 9 Nov 2026: "desktop just needs to look a bit
+   more complete"). */
 @media (min-width: 1024px) {
+  .tps-unlock {
+    gap: 18px;
+    padding: 24px 28px;
+  }
   .tps-unlock-h {
-    font-size: 17px;
-    line-height: 22px;
+    font: 600 22px/27px "Gilroy", Arial, sans-serif;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .tps-unlock-h b {
+    color: #0b7a53;
+  }
+  .tps-unlock-when {
+    display: none;
+  }
+  .tps-unlock-sub {
+    display: block;
+    margin: 6px 0 0;
+    text-wrap: balance;
+    font: 500 15px/20px "Gilroy", Arial, sans-serif;
+    color: var(--muted);
+  }
+  .tps-unlock-row {
+    max-width: none;
+    gap: 10px;
+  }
+  .tps-unlock-row li {
+    align-content: start;
+    gap: 6px;
   }
   .tps-unlock-row img {
-    width: 52px;
+    width: 56px;
+  }
+  .tps-unlock-name {
+    display: block;
+    min-height: 36px;
+    font: 500 14px/18px "Gilroy", Arial, sans-serif;
+    color: var(--ink);
+    text-align: center;
+    text-wrap: balance;
+  }
+}
+/* Side by side once the column is wide enough for the five names. */
+@media (min-width: 1240px) {
+  .tps-unlock {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr);
+    align-items: center;
+    gap: 24px;
   }
 }
