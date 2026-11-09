@@ -2411,7 +2411,6 @@
    is gone from a phone, so cream, grey and white no longer meet at the
    photo's edge). The photo's own shade carries the headline and the proof
    line; no other gradient. A computer keeps its band as it was. */
-.tpp-tags,
 .tpp-label-short {
   display: none;
 }
@@ -2450,53 +2449,12 @@
       linear-gradient(0deg, rgba(0, 0, 0, 0.74) 0, rgba(0, 0, 0, 0.44) 38%, rgba(0, 0, 0, 0) 66%);
   }
 
-  /* The tags: the offer card's white, a crisp edge on the photo and a short
-     offset shadow on the ground. Figure over cadence, money green on the $5
-     only, maroon on the other two. */
-  .tpp .tpp-tags {
-    position: relative;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin: -38px var(--gutter) 0;
-    padding: 0;
-    list-style: none;
-  }
-  .tpp-tags li {
-    display: grid;
-    gap: 2px;
-    padding: 12px 8px 13px;
-    border-radius: 14px;
-    background: #ffffff;
-    text-align: center;
-    box-shadow: 0 1px 2px rgba(20, 22, 24, 0.1), 0 10px 22px -10px rgba(20, 22, 24, 0.4);
-  }
-  .tpp-tags b {
-    font-weight: 600;
-    font-size: 22px;
-    line-height: 26px;
-    letter-spacing: -0.01em;
-    color: #861f41;
-  }
-  .tpp-tags b[data-money] {
-    color: var(--money);
-  }
-  .tpp-tags span {
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 18px;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-  /* The ground meets the tags flat: no lip, the offer card a step under. */
-  .tpp .tpp-tags + .tpa-sheet {
+  /* The ground meets the photo flat: no lip (the tags that used to sit
+     here are gone, Sam, 8 Nov 2026). */
+  .tpp .tpp-band + .tpa-sheet {
     margin-top: 0;
     padding-top: 0;
     border-radius: 0;
-  }
-  .tpp .tpp-tags + .tpa-sheet > .tpp-offer-col:first-child > .tpa-module:first-child {
-    margin-top: 12px;
   }
 
   /* ── The top of the band, three ways (ParentsHome.tsx headerChips) ──── */
@@ -2626,16 +2584,6 @@
   .tpp .tpp-band .tpa-proof {
     font-size: 14px;
   }
-  .tpp .tpp-tags {
-    gap: 6px;
-  }
-  .tpp-tags li {
-    padding: 11px 4px 12px;
-  }
-  .tpp-tags b {
-    font-size: 20px;
-    line-height: 24px;
-  }
 }
 
 /* The smoked plate on a computer too (Sam, 8 Nov 2026: "can we update these
@@ -2661,107 +2609,62 @@
   }
 }
 
-/* Two tags (pick D, 8 Nov 2026): the $5 credit wider than the 15%. */
-@media (max-width: 1023.98px) {
-  .tpp .tpp-tags {
-    grid-template-columns: 1.55fr 1fr;
-  }
-  .tpp .tpp-tags b {
-    white-space: nowrap;
-  }
-}
-
-/* ══ A CALMER PHONE HEADER: five previews (?mh, Sam, 8 Nov 2026) ══════════════
-   ParentsHome mobileHeader. A phone only: the students line and the two tags
-   leave the first screen; each preview adds at most one thing under the
-   headline. A computer never shows any of it. */
-.tpp-mh-line,
-.tpp-mh-act,
-.tpp-mh4 {
+/* ══ THE PHONE HEADER (Sam, 8 Nov 2026: preview 5 of five, "just a bit more
+   refined") ══════════════════════════════════════════════════════════════════
+   The photo, the headline, then the button and the price on the photo
+   (ParentsHome.tsx). The students line and the seal on the seam step back on
+   a phone; a computer keeps its band and its held card as they were. The
+   button is the page's white on the photo, full width, with the dock's
+   arrow, so the first thing to press reads the same as the last. */
+.tpp-band-act {
   display: none;
 }
 @media (max-width: 1023.98px) {
-  .tpp[data-mh] .tpp-band .tpp-proof,
-  .tpp[data-mh] > .tpp-tags {
+  .tpp .tpp-band .tpp-proof,
+  .tpp .tpp-band .tpp-split-seal {
     display: none;
   }
-  /* 2 and 3: one line, white on the photo, under the headline. */
-  .tpp-mh-line {
-    display: block;
-    max-width: 330px;
-    margin: 10px 0 0;
-    color: #ffffff;
-    font: 600 17px/23px "Gilroy", Arial, sans-serif;
-    text-wrap: balance;
+  /* The title's own box takes the band's width, so the button can (the
+     headline keeps its measure). */
+  .tpp .tpp-band .tpa-band-title > div {
+    width: 100%;
   }
-  /* 5: the button and the price on the photo. */
-  .tpp-mh-act {
+  .tpp-band-act {
     display: grid;
-    justify-items: start;
-    gap: 8px;
-    margin-top: 16px;
+    gap: 10px;
+    margin-top: 18px;
   }
-  .tpp-mh-cta {
+  .tpp-band-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     height: 52px;
-    padding: 0 24px;
+    padding: 0 20px;
     border: 0;
     border-radius: 14px;
     background: #ffffff;
     color: #141618;
     font: 600 16px/20px "Gilroy", Arial, sans-serif;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: transform 120ms ease;
   }
-  .tpp-mh-cta:active {
+  .tpp-band-cta .tpa-dock-arrow {
+    flex: none;
+    margin-left: 8px;
+  }
+  .tpp-band-cta:active {
     transform: scale(0.98);
   }
-  .tpp-mh-cta:focus-visible {
+  .tpp-band-cta:focus-visible {
     outline: 3px solid #f7f3ea;
     outline-offset: 3px;
   }
-  .tpp-mh-act p {
+  .tpp-band-act p {
     margin: 0;
     color: rgba(255, 255, 255, 0.9);
     font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  }
-  /* 4: no photo. Who it's for and the headline on white; the envelope's
-     section starts right under it. */
-  .tpp[data-mh="4"] > .tpp-band {
-    display: none;
-  }
-  .tpp-mh4 {
-    display: block;
-    padding: calc(env(safe-area-inset-top) + 14px) 16px 28px;
-    background: #ffffff;
-  }
-  .tpp-mh4-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .tpp-mh4 .tpp-label,
-  .tpp-mh4 .tpp-account {
-    box-shadow: none;
-  }
-  .tpp-mh4-h {
-    margin: 30px 0 0;
-    color: #141618;
-    font: 600 32px/37px "Gilroy", Arial, sans-serif;
-    letter-spacing: -0.02em;
-  }
-  .tpp-mh4-h .tpp-nowrap {
-    white-space: nowrap;
-  }
-  /* 5: the button and price make the title tall enough to meet the seal on
-     the seam, so the seal steps aside. */
-  .tpp[data-mh="5"] .tpp-split-seal {
-    display: none;
-  }
-  .tpp[data-mh="4"] .tpa-sheet {
-    margin-top: 0;
-    border-radius: 0;
   }
 }

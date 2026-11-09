@@ -2252,12 +2252,14 @@ export function GiftPreview({
                       ? `Build ${fixedTo}’s care package`
                       : "Build their care package"}
               </h2>
-              {/* The drawer's × collapses it ("it should collapse the modal
-                  not close out the designer page"). */}
+              {/* The drawer's button lowers it ("it should collapse the modal
+                  not close out the designer page"): a down arrow, not an ×,
+                  now the screen's top left has the × that closes (Sam, 8 Nov
+                  2026: "Can we have the "X" here be a down arrow"). */}
               {wide ? null : (
                 <button type="button" className="gft-pp-x" aria-label="Collapse" onClick={() => setPeek(true)}>
                   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
+                    <path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               )}

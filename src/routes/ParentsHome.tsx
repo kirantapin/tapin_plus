@@ -100,25 +100,12 @@ const headerChips = (): HeaderChips => {
   return v === "a" || v === "c" ? v : "b";
 };
 
-/* ══ A CALMER PHONE HEADER: five previews (Sam, 8 Nov 2026) ═══════════════════
+/* ══ THE PHONE HEADER (Sam, 8 Nov 2026, picking preview 1 of five) ═══════════
    His parents found the phone's first screen "too confusing ... a lot of text
-   they didn't get", but his mom loved "A care package they'll open every
-   day" and the envelope. Every preview keeps that headline, drops the
-   students line and the two tags from the first screen (the envelope's
-   section now follows the header), and differs in what joins it:
-     1 · the headline alone, over the photo
-     2 · one plain line on what it is
-     3 · the mail room (Sam's parents: care packages "just sit in the mail
-         room for years")
-     4 · no photo: a white top, the envelope's section straight after
-     5 · the button and the price on the photo
-   ?mh=1..5, development only; a computer is untouched. */
-type MobileHeader = 1 | 2 | 3 | 4 | 5;
-const mobileHeader = (): MobileHeader | null => {
-  if (!import.meta.env.DEV || typeof window === "undefined") return null;
-  const v = Number(new URLSearchParams(window.location.search).get("mh"));
-  return v >= 1 && v <= 5 ? (v as MobileHeader) : null;
-};
+   they didn't get"; his mom loved "A care package they'll open every day"
+   and the envelope. So a phone shows the photo and the headline alone: the
+   students line steps back (parents.css) and the two tags are gone, and the
+   envelope's section comes straight after. A computer keeps its band. */
 
 /* ══ THE HERO (the A/B round below ended 6 Nov 2026: Sam picked "A care
    package they'll open every day", now everyone's; "b" and "c" stay as ?ph=
@@ -305,7 +292,6 @@ export default function ParentsHome() {
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
-  const [mh] = useState(mobileHeader);
   const headline = PARENT_HEROES[hero];
   const shot = PHOTOS[photo];
 
@@ -449,7 +435,6 @@ export default function ParentsHome() {
 
   /* The headline settles in over the band, once. */
   const titleRef = useRef<HTMLDivElement | null>(null);
-  const tagsRef = useRef<HTMLUListElement | null>(null);
   useEffect(() => {
     if (reducedMotion()) return;
     titleRef.current?.animate?.(
@@ -463,21 +448,6 @@ export default function ParentsHome() {
         easing: "cubic-bezier(.22,1,.36,1)",
         fill: "backwards",
       },
-    );
-    /* Then what's inside, one tag after another, out of the photo's foot. */
-    tagsRef.current?.querySelectorAll("li").forEach((t, i) =>
-      t.animate?.(
-        [
-          { opacity: 0, transform: "translateY(-14px)" },
-          { opacity: 1, transform: "none" },
-        ],
-        {
-          duration: 560,
-          delay: 380 + i * 90,
-          easing: "cubic-bezier(.16,1,.3,1)",
-          fill: "backwards",
-        },
-      ),
     );
   }, []);
 
@@ -524,35 +494,7 @@ export default function ParentsHome() {
   ];
 
   return (
-    <div className="tpa tpa-home tpp" data-mh={mh ?? undefined}>
-      {/* 4 · No photo (a phone only): who it's for, the headline on white,
-          then the envelope's section. */}
-      {mh === 4 ? (
-        <div className="tpp-mh4">
-          <div className="tpp-mh4-top">
-            <span className="tpp-label">
-              <FlatMark className="tpp-label-mark" />
-              <span className="tpp-label-long">{EYEBROW}</span>
-              <span className="tpp-label-short">{EYEBROW_SHORT}</span>
-            </span>
-            <Link className="tpp-account" to="/parents/account" aria-label="Your account: manage your student’s Plus">
-              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                <path
-                  d="M12 12.2a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2ZM4.5 20.2c.8-3.6 3.9-5.6 7.5-5.6s6.7 2 7.5 5.6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-          </div>
-          <p className="tpp-mh4-h">
-            {headline[0]} <span className="tpp-nowrap">{headline[1]}</span>
-          </p>
-        </div>
-      ) : null}
+    <div className="tpa tpa-home tpp">
       <header
         className="tpa-band tpp-band"
         data-hero="parents"
@@ -616,45 +558,23 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
-            {/* The phone header previews' one extra piece (?mh, a phone only). */}
-            {mh === 2 ? (
-              <p className="tpp-mh-line tnum">
-                ${CREDIT} credit every week at each of five Blacksburg spots.
+            {/* A phone: the button and the price on the photo (Sam, 8 Nov
+                2026, picking preview 5, "just a bit more refined"); a
+                computer keeps them on the held card. */}
+            <div className="tpp-band-act">
+              <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
+                {cta}
+                <DockArrow />
+              </button>
+              <p className="tnum">
+                {FIRST} the first month, then {MONTHLY}/month.
               </p>
-            ) : mh === 3 ? (
-              <p className="tpp-mh-line">Not another box in the mail room. It lives on their phone.</p>
-            ) : mh === 5 ? (
-              <div className="tpp-mh-act">
-                <button type="button" className="tpp-mh-cta" data-page-cta="" onClick={(e) => signUp("hero", e.currentTarget)}>
-                  {cta}
-                </button>
-                <p className="tnum">
-                  {FIRST} the first month, then {MONTHLY}/month.
-                </p>
-              </div>
-            ) : null}
+            </div>
 
             <Proof />
           </div>
         </div>
       </header>
-
-      {/* A · WHAT'S INSIDE (Sam's pick, 8 Nov 2026), a phone only: three
-          white tags tucked under the photo's foot, the offer card's own
-          white. They carry the 15% now, so the list under the offer
-          doesn't repeat it. */}
-      <ul ref={tagsRef} className="tpp-tags tnum" aria-label="What’s inside">
-        {/* Sam's pick D, 8 Nov 2026: "$5 credit" (not "$5 off"), and plain
-            that it's at each spot, every week; two tags, the credit wider. */}
-        <li>
-          <b data-money="">${CREDIT} credit</b>
-          <span>at each spot, every week</span>
-        </li>
-        <li>
-          <b>{PERCENT}% off</b>
-          <span>once a day</span>
-        </li>
-      </ul>
 
       <main className="tpa-sheet">
         {/* Sam's mom, 8 Nov 2026: the care package first, then what they get,
