@@ -4131,22 +4131,29 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
 }
 
-/* ══ THE WELCOME OFFER CARD (Sam, 9 Nov 2026) ══════════════════════════════
-   The first card under the band: a small orange tag, the $25 in money
-   green with what it is beside it, the five places each with its $5, one
-   quiet line. White ground, no gradient. */
+/* ══ THE WELCOME OFFER CARD (Sam, 9 Nov 2026; /impeccable design) ══════════
+   The collage's materials (the collage skill's look.md, as the Welcome Week
+   headline uses them): cream paper #ECE5D5 and ink, the white deckle rim
+   #F7F3EA behind it, Gilroy 600; the green $5 sticker from "Your first $10
+   order covers it". On the page's white card; no gradient, no glow. */
 .tps-welcome {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 .tps-welcome-tag {
   justify-self: start;
   margin: 0;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #fdecd9;
-  color: #9a4a0c;
-  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  padding: 3px 5px;
+  background: #f7f3ea;
+  rotate: -2.5deg;
+  filter: drop-shadow(0 2px 3px rgba(20, 22, 24, 0.12));
+}
+.tps-welcome-tag span {
+  display: block;
+  padding: 3px 14px 4px;
+  background: #ece5d5;
+  color: #141618;
+  font: 600 15px/19px "Gilroy", Arial, sans-serif;
 }
 .tps-welcome-h {
   display: flex;
@@ -4156,44 +4163,75 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 .tps-welcome-h b {
   flex: none;
-  font: 600 56px/1 "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.03em;
+  font: 600 64px/0.9 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.04em;
   color: #0b7a53;
 }
 .tps-welcome-h span {
-  font: 600 18px/23px "Gilroy", Arial, sans-serif;
+  font: 600 19px/24px "Gilroy", Arial, sans-serif;
   color: var(--ink);
   text-wrap: balance;
 }
 .tps-welcome-places {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 12px;
-  border-radius: 14px;
-  background: var(--ground);
+  gap: 6px;
+  max-width: 420px;
+  margin: 2px 0 6px;
+  padding: 0;
   list-style: none;
 }
 .tps-welcome-places li {
+  position: relative;
   display: grid;
   justify-items: center;
-  gap: 6px;
 }
 .tps-welcome-places img {
-  width: 44px;
-  height: 44px;
+  width: min(56px, 100%);
+  aspect-ratio: 1;
   border-radius: 50%;
   object-fit: cover;
   background: #ffffff;
-  box-shadow: 0 0 0 1px var(--hair);
+  box-shadow: 0 0 0 1px var(--hair), 0 4px 10px -6px rgba(20, 22, 24, 0.35);
 }
-.tps-welcome-places span {
-  font: 600 15px/18px "Gilroy", Arial, sans-serif;
-  color: #0b7a53;
+/* The green $5 sticker, a white rim and a soft lift, pressed on the
+   disc's lower right. */
+.tps-welcome-five {
+  position: absolute;
+  right: calc(50% - 38px);
+  bottom: -10px;
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #0b7a53;
+  color: #ffffff;
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  box-shadow: 0 0 0 2.5px #ffffff, 0 4px 8px rgba(20, 22, 24, 0.22);
 }
 .tps-welcome-fine {
-  margin: 0;
+  margin: 6px 0 0;
   font: 500 14px/19px "Gilroy", Arial, sans-serif;
   color: var(--muted);
+  text-wrap: pretty;
+}
+@media (max-width: 374px) {
+  .tps-welcome-h span {
+    font-size: 17px;
+    line-height: 22px;
+  }
+}
+@media (min-width: 1024px) {
+  .tps-welcome-h b {
+    font-size: 72px;
+  }
+  .tps-welcome-places img {
+    width: 64px;
+  }
+  .tps-welcome-five {
+    right: calc(50% - 44px);
+  }
 }

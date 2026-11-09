@@ -13,7 +13,7 @@ import { PLACES as KIT_PLACES } from "./parents_kit";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
-import InviteHero from "../shell/InviteHero";
+import InviteHero, { tornSides } from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
@@ -377,26 +377,66 @@ const Chevron = () => (
    band, its name in the headline, its order first in the carousel, and the
    try-it-once window (which already leads with Coffeeholics). Everything
    else, the offer, the promise, the places and Join, is the home page's. */
-/* The welcome offer: $25 in the account the moment they join, shown as the
-   five places with $5 under each. */
+/* ══ THE WELCOME OFFER CARD (Sam, 9 Nov 2026; /impeccable design) ══════════
+   In the page's own collage language (the band, the Welcome Week sticker,
+   the "first order covers it" sticker): "Welcome offer" on a torn cream
+   strip turned a couple of degrees, the $25 in money green, and the five
+   places as white discs each with its own green $5 sticker pressed on its
+   corner, every one a little crooked. The one moment: as the card comes into
+   view the five stickers press on in turn, a little large then flat. Their
+   resting state is their own style, so session replay shows them; reduced
+   motion shows them already on. */
+const STICKER_TILT = [-8, 6, -4, 7, -6];
 function WelcomeCard() {
+  const box = useRef<HTMLUListElement | null>(null);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || reducedMotion() || typeof IntersectionObserver === "undefined") return;
+    const stickers = Array.from(el.querySelectorAll<HTMLElement>(".tps-welcome-five"));
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e?.isIntersecting) return;
+        io.disconnect();
+        stickers.forEach((st, i) =>
+          st.animate?.(
+            [
+              { transform: `rotate(${STICKER_TILT[i % 5] - 14}deg) scale(1.55)`, opacity: 0 },
+              { transform: `rotate(${STICKER_TILT[i % 5]}deg) scale(0.94)`, opacity: 1, offset: 0.7 },
+              { transform: `rotate(${STICKER_TILT[i % 5]}deg) scale(1)`, opacity: 1 },
+            ],
+            { duration: 420, delay: 160 + i * 90, easing: "cubic-bezier(.2,.9,.3,1)", fill: "backwards" },
+          ),
+        );
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return (
     <section className="tpa-module tps-welcome" aria-labelledby="tps-welcome-h">
-      <p className="tps-welcome-tag">Welcome offer</p>
+      <p className="tps-welcome-tag" style={{ clipPath: tornSides(7, 4) }}>
+        <span style={{ clipPath: tornSides(3, 3) }}>Welcome offer</span>
+      </p>
+      {/* Sam, 9 Nov 2026: "It'd be like get $25 immediately added to your
+          account, cancel anytime". */}
       <h2 id="tps-welcome-h" className="tps-welcome-h">
+        <span className="tpp-sr">Get </span>
         <b className="tnum">${KIT_PLACES.length * CREDIT}</b>
-        <span>added to your account the moment you join</span>
+        <span>immediately added to your&nbsp;account</span>
       </h2>
-      <ul className="tps-welcome-places" aria-label={`$${CREDIT} at each of ${KIT_PLACES.length} places`}>
-        {KIT_PLACES.map((p) => (
+      <ul ref={box} className="tps-welcome-places" aria-label={`$${CREDIT} at each of ${KIT_PLACES.length} places`}>
+        {KIT_PLACES.map((p, i) => (
           <li key={p.id}>
             <img src={p.logo} alt={p.name} decoding="async" />
-            <span className="tnum">${CREDIT}</span>
+            <span className="tps-welcome-five tnum" style={{ transform: `rotate(${STICKER_TILT[i % 5]}deg)` }} aria-hidden="true">
+              ${CREDIT}
+            </span>
           </li>
         ))}
       </ul>
       <p className="tps-welcome-fine">
-        ${CREDIT} at each spot for your first month. Cancel anytime in the app.
+        ${CREDIT} to spend at each spot. Cancel anytime.
       </p>
     </section>
   );
