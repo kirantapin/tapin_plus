@@ -253,15 +253,16 @@ export function PriceLead() {
         <b>{FIRST}</b>
         <span>first month</span>
       </p>
+      {/* The monthly whole ("$7.99/month"), the compare-at price after it
+          (9 Nov 2026 polish). */}
       <p className="tpp-price-then tnum">
-        Then {MONTHLY}
+        Then <b>{MONTHLY}/month</b>
         {when ? (
           <s>
             <span className="tpp-sr">was </span>
             {money(AFTER_HOLIDAY)}
           </s>
         ) : null}
-        /month
       </p>
       {when ? (
         <p className="tpp-price-tag tnum">
