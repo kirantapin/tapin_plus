@@ -247,22 +247,27 @@ export function PriceLead() {
           through price next to the $7.99"); true because new gifts go to it
           on Jan 1, which the tag says. The first month under it ("aren't we
           still doing the $3.99/month to start?"). */}
+      {/* The first month leads (Sam, 9 Nov 2026: "let's have the $3.99 be
+          the big one here, and the $7.99 be below"). */}
       <p className="tpp-price-fig tnum">
-        <b>{MONTHLY}</b>
+        <b>{FIRST}</b>
+        <span>first month</span>
+      </p>
+      <p className="tpp-price-then tnum">
+        Then {MONTHLY}
         {when ? (
           <s>
             <span className="tpp-sr">was </span>
             {money(AFTER_HOLIDAY)}
           </s>
         ) : null}
-        <span>/month</span>
+        /month
       </p>
       {when ? (
         <p className="tpp-price-tag tnum">
           Holiday price, locked in <i aria-hidden="true" /> <b>{when}</b>
         </p>
       ) : null}
-      <p className="tpp-price-line tnum">{FIRST} the first month.</p>
       <p className="tpp-price-what">
         <b>${CREDIT} credit</b> every week at each of five{"\u00a0"}spots.
       </p>
