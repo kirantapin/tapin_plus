@@ -2662,6 +2662,48 @@
     color: rgba(255, 255, 255, 0.9);
     font: 500 14px/18px "Gilroy", Arial, sans-serif;
   }
+  /* What's inside (Sam, 9 Nov 2026, pick C): the five places' logos and one
+     line on the app's smoked plate, above the button. The students line
+     moves under the button; the price waits for the offer card. */
+  .tpp .tpp-band .tpp-proof-desk {
+    display: none;
+  }
+  .tpp-band-act .tpp-proof .tpa-proof {
+    margin-top: 2px;
+  }
+  .tpp-band-inside {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+    max-width: 100%;
+    margin-bottom: 4px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 16px;
+    background: rgba(20, 20, 20, 0.65);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  }
+  .tpp-band-logos {
+    display: flex;
+    flex: none;
+    gap: 4px;
+  }
+  .tpp-band-logos img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #ffffff;
+  }
+  .tpp-band-inside p {
+    margin: 0;
+    color: #ffffff;
+    font: 500 15px/19px "Gilroy", Arial, sans-serif;
+  }
+  .tpp-band-inside b {
+    font-weight: 600;
+    color: #9fe3c2;
+  }
   /* A student's ask link, on a phone: on cream paper above the button, where
      the parent arriving from the link sees it first; the offer card's copy
      steps aside so there's one. */

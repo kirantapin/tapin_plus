@@ -494,19 +494,36 @@ export default function ParentsHome() {
             </h1>
             {/* Who else is on it, straight under the headline (Sam, 8 Nov
                 2026: "we still need to say "500 Vtech students are on Tapin
-                plus""). */}
-            <Proof />
+                plus""). A computer keeps it here; a phone moves it under the
+                button (below). */}
+            <div className="tpp-proof-desk">
+              <Proof />
+            </div>
             {/* A phone: the button and the price on the photo (Sam, 8 Nov
                 2026, picking preview 5, "just a bit more refined"); a
                 computer keeps them on the held card. */}
             <div className="tpp-band-act">
+              {/* What's inside, on the first screen (Sam, 9 Nov 2026, picking
+                  C of three: "the five logos + one line"; both audits ranked
+                  it first). The price line under the button is gone; the
+                  students line takes its place. */}
+              <div className="tpp-band-inside">
+                <span className="tpp-band-logos" aria-hidden="true">
+                  {PLACES.map((p) => (
+                    <img key={p.id} src={p.logo} alt="" decoding="async" />
+                  ))}
+                </span>
+                <p>
+                  <b>$5 credit</b> at each,
+                  <br />
+                  every week
+                </p>
+              </div>
               <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
                 {cta}
                 <DockArrow />
               </button>
-              <p className="tnum">
-                {FIRST} the first month, then {MONTHLY}/month.
-              </p>
+              <Proof />
             </div>
 
           </div>
