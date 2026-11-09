@@ -31,6 +31,7 @@ import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
+import { BonusSpots } from "../shell/BonusSpots";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -545,6 +546,10 @@ export default function ParentsHome() {
             computer still holds it in the right-hand column. */}
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
+        {/* $5 bonus credit at each spot, right under the band, as on the
+            main page (Sam, 9 Nov 2026: "should include this on the parent
+            plus page too I think"). */}
+        <BonusSpots they />
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
         {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
             2026, the Dara Denney audit's fix 4: "move the parent quotes up";
