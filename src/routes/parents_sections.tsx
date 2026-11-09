@@ -283,7 +283,7 @@ export function BenefitCards() {
   const { FIRST, MONTHLY } = useParentPrice();
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
-  const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean }> = [
+  const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean; green?: boolean }> = [
     /* The welcome bonus first (Sam, 9 Nov 2026: "include ... the welcome
        offer $25 credit in the what's in their care package"). */
     {
@@ -295,6 +295,9 @@ export function BenefitCards() {
       ),
       label: `A ${money0(CREDIT * PLACES.length)} welcome bonus`,
       line: `${money0(CREDIT)} to spend at each spot the moment they join.`,
+      /* On money green (Sam, 9 Nov 2026: "I think we give this a green
+         background"). */
+      green: true,
     },
     {
       key: "credit",
@@ -399,7 +402,7 @@ export function BenefitCards() {
     <div className="tpp-cards tnum">
       <ul ref={rail} className="tpp-cards-rail" aria-label="What they get">
         {cards.map((c) => (
-          <li key={c.key} className="tpp-card" data-ink={c.ink ? "" : undefined}>
+          <li key={c.key} className="tpp-card" data-ink={c.ink ? "" : undefined} data-green={c.green ? "" : undefined}>
             <span className="tpp-card-art">{c.art}</span>
             <b className="tpp-card-label">{c.label}</b>
             {c.line ? <p>{c.line}</p> : null}

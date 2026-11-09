@@ -450,6 +450,17 @@
 .tpp-card[data-ink] .tpp-card-label {
   color: rgba(255, 255, 255, 0.86);
 }
+/* The welcome bonus card, on money green (Sam, 9 Nov 2026). */
+.tpp-card[data-green] {
+  background: #0b7a53;
+  color: #ffffff;
+}
+.tpp .tpp-card[data-green] [data-money] {
+  color: #ffffff;
+}
+.tpp-card[data-green] p {
+  color: rgba(255, 255, 255, 0.86);
+}
 .tpp-card p {
   font-size: 14px;
   line-height: 19px;
