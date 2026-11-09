@@ -115,9 +115,10 @@ function LogoRow({ size }: { size: number }) {
    isn't lost; and its own promise: a refund asked for and auto-approved, the
    price held, cancel in the app. No renewal email line: it isn't confirmed
    that students get one. `monthly` is the price the student page shows. */
-export function UnderOffer({ audience = "parent", monthly: monthlyProp }: { audience?: Audience; monthly?: string }) {
-  const prices = useParentPrice();
-  const monthly = monthlyProp ?? prices.MONTHLY;
+export function UnderOffer({ audience = "parent" }: { audience?: Audience; monthly?: string }) {
+  /* Three rows (Sam, 9 Nov 2026: "there's just way too much going on
+     here"): the other benefit, the promise, the way out. Points, new places
+     and the locked price went. */
   if (audience === "student") {
     return (
       <div className="tpp-notes">
@@ -128,30 +129,12 @@ export function UnderOffer({ audience = "parent", monthly: monthlyProp }: { audi
               <b>{PERCENT}% off</b> instead, once a day
             </span>
           </li>
-          <li>
-            <Glyph d={GLYPHS.star} />
-            <span>
-              <b>Points</b> on everything
-            </span>
-          </li>
-          <li>
-            <FlatMark className="tpp-glyph tpp-notes-mark" />
-            <span>
-              <b>New places</b> at no extra cost
-            </span>
-          </li>
         </ul>
         <ul aria-label="The Plus Promise">
           <li>
             <Glyph d={GLYPHS.refund} />
             <span>
               <b>Refund auto-approved</b> if Plus saved you less than you paid
-            </span>
-          </li>
-          <li>
-            <Glyph d={GLYPHS.lock} />
-            <span>
-              <b>Your {monthly} locked in</b> while you’re a member
             </span>
           </li>
           <li>

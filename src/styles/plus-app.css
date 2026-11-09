@@ -4190,3 +4190,30 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-weight: inherit;
   text-shadow: none;
 }
+
+/* The spots, one quiet line on the main page's offer card (Sam, 9 Nov 2026:
+   "way too much going on here"): no bar. */
+.tpa-s2 .tpa-buy-seats .plus-seats-bar {
+  display: none;
+}
+.tpa-s2 .tpa-buy-seats .plus-seats-line {
+  display: block;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.tpa-s2 .tpa-buy-seats .plus-seats-line b {
+  font-weight: 500;
+  color: var(--muted);
+}
+.tpa-s2 .tpa-buy-seats .plus-seats-line span::before {
+  content: " \00b7  ";
+}
+
+/* The pill is a block of its own (Sam, 9 Nov 2026: "this still clashes"):
+   on a wide band it sat inline beside the students line. Now the students
+   line always sits under it, with air between. */
+.wc[data-wc="1"] {
+  display: flex;
+  width: fit-content;
+}
