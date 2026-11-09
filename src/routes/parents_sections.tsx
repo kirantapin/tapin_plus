@@ -181,12 +181,7 @@ export function UnderOffer({ audience = "parent", monthly: monthlyProp }: { audi
         </li>
       </ul>
       <ul aria-label="Our promise">
-        <li>
-          <Glyph d={GLYPHS.refund} />
-          <span>
-            <b>Full refund</b> if they don’t save what you spent
-          </span>
-        </li>
+        {/* The refund moved up beside the price (Sam, 9 Nov 2026). */}
         {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
             before their next bill" (the backend's renewal reminder); an
             email since 8 Nov ("Bill reminders → email"): a text "will lead
@@ -235,6 +230,51 @@ export function OfferPrice() {
             spots"), so the $7 never reads as every lunch. */}
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
         <small aria-hidden="true">every week, at each of five spots</small>
+      </p>
+    </div>
+  );
+}
+
+/* ══ THE HOLIDAY PRICE (Sam, 9 Nov 2026: "a holiday countdown of some kind
+   to show urgency - like the price at the end of this year jumps up to
+   $14.99 a month, $7.99 is locked in though") ════════════════════════════════
+   A clock to midnight Eastern as 2026 ends, ticking each second, on a cream
+   well in the offer card. The monthly price comes from the cart (a promo
+   link's stays its own); the after price is the list price. Gone once the
+   year turns, so it never counts past zero. */
+export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
+export const AFTER_HOLIDAY = 14.99;
+const pad2 = (n: number) => String(n).padStart(2, "0");
+export function HolidayClock() {
+  const { MONTHLY } = useParentPrice();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, []);
+  const left = HOLIDAY_ENDS - now;
+  if (left <= 0) return null;
+  const s = Math.floor(left / 1000);
+  const parts: Array<[number, string]> = [
+    [Math.floor(s / 86400), "days"],
+    [Math.floor((s % 86400) / 3600), "hrs"],
+    [Math.floor((s % 3600) / 60), "min"],
+    [s % 60, "sec"],
+  ];
+  return (
+    <div className="tpp-hol" data-ph-show="">
+      <p className="tpp-hol-h">Holiday price ends in</p>
+      <p className="tpp-hol-clock tnum" role="timer" aria-label={`${parts[0][0]} days, ${parts[1][0]} hours left`}>
+        {parts.map(([n, unit], i) => (
+          <span key={unit} aria-hidden="true">
+            <b>{i === 0 ? n : pad2(n)}</b>
+            <small>{unit}</small>
+          </span>
+        ))}
+      </p>
+      <p className="tpp-hol-line tnum">
+        <b>{MONTHLY}/month, locked in.</b>
+        <span>{money(AFTER_HOLIDAY)}/month from Jan 1.</span>
       </p>
     </div>
   );
