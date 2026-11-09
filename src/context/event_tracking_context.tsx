@@ -1,4 +1,5 @@
 import { redactUrl } from "../model/redact";
+import { replayMaskAttribute, replayMaskText } from "../model/replayPrivacy";
 import {
   createContext,
   useContext,
@@ -152,6 +153,10 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
            the address it loaded with, before takeKey cleans it: a gift,
            manage or ask link's key would ride along. Redact them all. */
         maskCapturedNetworkRequestFn: (r) => ({ ...r, name: redactUrl(r.name) }),
+        /* The parents' builder and checkout are recorded with their words
+           masked unless marked as fixed copy (model/replayPrivacy.ts). */
+        maskTextFn: replayMaskText,
+        maskAttributeFn: replayMaskAttribute,
       },
       capture_performance: { web_vitals: false },
       /* A parent's manage link and an Ask a parent link are keys: no URL

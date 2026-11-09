@@ -581,13 +581,14 @@ function Sheet({
      or if it's missing. */
   const showName = quick || nameAsked;
   const Name = cap(student.trim());
-  const errors: Partial<Record<Field, string>> = {};
+  const errors: Partial<Record<Field, React.ReactNode>> = {};
   if (!student.trim()) errors.student = "Add your student’s first name.";
   /* Typed once (Effort D): a full US number, not one no phone can have,
      and not the parent's own (a gift to yourself is refused anyway). */
   if (phoneD.length < 10) errors.phone = "Enter a 10-digit US mobile number.";
   else if (!usNumber(phoneD)) errors.phone = "That isn’t a US mobile number. Check the area code.";
-  else if (phoneD === (signedIn ? ownD : mobileD)) errors.phone = `That’s your number. Enter ${Name ? possessive(Name) : "theirs"}.`;
+  else if (phoneD === (signedIn ? ownD : mobileD))
+    errors.phone = <>That’s your number. Enter {Name ? <span className="ph-mask">{possessive(Name)}</span> : "theirs"}.</>;
   /* Signed out: their mobile, then the code texted to it. */
   if (!signedIn) {
     if (mobileD.length < 10 || !usNumber(mobileD)) errors.mobile = "Enter your 10-digit US mobile number.";
@@ -873,26 +874,34 @@ function Sheet({
   const payLabel = "Save card and send the gift";
 
   /* ── Header ── */
-  const title =
-    step === "done"
-      ? `${possessive(cap(sentTo?.who || who))} gift is on its way.`
-      : step === "pay"
-        ? "Add your card"
-        : quick
-          ? "Who it’s for"
-          : "Their number, then yours";
+  const title: React.ReactNode =
+    step === "done" ? (
+      <>
+        <span className="ph-mask">{possessive(cap(sentTo?.who || who))}</span> gift is on its way.
+      </>
+    ) : step === "pay" ? (
+      "Add your card"
+    ) : quick ? (
+      "Who it’s for"
+    ) : (
+      "Their number, then yours"
+    );
   /* Every step has its line under the title, as the builder's stages do
      (Sam, 6 Nov 2026: "consistent across every single step of the modal"):
      the price on who it's for (unless the wallets' rows under it say it,
      Effort E), who it's for on the charge (its rows and terms say the
      money), the receipt once it's done. */
-  const sub =
+  const sub: React.ReactNode =
     step === "who"
       ? walletsShown
         ? null
         : `Nothing is charged until they claim it. Then ${usd(first)} the first month, ${usd(monthly)}/month after.`
       : step === "pay"
-        ? `For ${cap(who)}, ${masked}. Nothing is charged today.`
+        ? (
+            <>
+              For <span className="ph-mask">{cap(who)}</span>, <span className="ph-mask">{masked}</span>. Nothing is charged today.
+            </>
+          )
         : step === "done"
           ? "Nothing is charged until they claim it."
           : null;
@@ -922,7 +931,11 @@ function Sheet({
   const group = (legend: string, kids: React.ReactNode, heading = false) =>
     flat ? (
       <div className="gft-pp-group">
-        {heading ? <h2 className="gft-pp-h">{legend}</h2> : null}
+        {heading ? (
+          <h2 className="gft-pp-h" data-ph-show="">
+            {legend}
+          </h2>
+        ) : null}
         {kids}
       </div>
     ) : (
@@ -958,8 +971,9 @@ function Sheet({
       </div>
     );
 
+  /* Replays show the head (model/replayPrivacy.ts); names and numbers in it are .ph-mask spans. */
   const head = flat ? (
-    <div className="gft-pp-head">
+    <div className="gft-pp-head" data-ph-show="">
       <h2 id="prc-title" className="gft-pp-title" tabIndex={-1}>
         {title}
       </h2>
@@ -998,7 +1012,7 @@ function Sheet({
   /* What's due, and the promise: on the card step above the card, and on
      who it's for under the wallets' step (Effort E), where a wallet pays. */
   const rows = (
-    <div className={flat ? "prc-e-rows" : "prc-module prc-rows"}>
+    <div className={flat ? "prc-e-rows" : "prc-module prc-rows"} data-ph-show="">
       <div className="prc-row">
         <span>Due today</span>
         <b className="tnum">$0</b>
@@ -1013,7 +1027,7 @@ function Sheet({
      what a hesitating parent needs at it. A gift nobody claims costs
      nothing; cancelling is by support until the account page does it. */
   const promise = (
-    <ul className="prc-promise" aria-label="Our promise">
+    <ul className="prc-promise" aria-label="Our promise" data-ph-show="">
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
@@ -1043,18 +1057,27 @@ function Sheet({
         "Their number",
         <>
           {showName ? (
-            <Input id="student" label="Their first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} />
+            <Input id="student" label="Their first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} show />
           ) : null}
           <Input
             id="phone"
-            label={Name ? `${possessive(Name)} mobile number` : "Their mobile number"}
+            label={
+              Name ? (
+                <>
+                  <span className="ph-mask">{possessive(Name)}</span> mobile number
+                </>
+              ) : (
+                "Their mobile number"
+              )
+            }
             value={formatPhone(phoneD)}
             onChange={(v) => setPhone(digitsOf(v))}
             error={shown("phone")}
             tel
-            help={`We text ${Name || "them"} once. Their Plus is tied to this number.`}
+            help={<>We text {Name ? <span className="ph-mask">{Name}</span> : "them"} once. Their Plus is tied to this number.</>}
+            show
           />
-          <OnTheirNumber show={numberOk} who={Name ? possessive(Name) : "their"} number={formatPhone(phoneD)} />
+          <OnTheirNumber show={numberOk} who={Name ? <span className="ph-mask">{possessive(Name)}</span> : "their"} number={formatPhone(phoneD)} />
         </>,
       )
     );
@@ -1063,8 +1086,8 @@ function Sheet({
     const yours = group(
       "From you",
       signedIn ? (
-        <p className="prc-e-consent tnum">
-          Signed in as {formatPhone(ownD)}.{" "}
+        <p className="prc-e-consent tnum" data-ph-show="">
+          Signed in as <span className="ph-mask">{formatPhone(ownD)}</span>.{" "}
           <button type="button" className="prc-e-bycard" onClick={() => void supabase.auth.signOut()} disabled={busy}>
             Not you?
           </button>
@@ -1083,6 +1106,7 @@ function Sheet({
             tel
             autoComplete="tel-national"
             help="We text you a code to sign in. You’ll manage the gift from here."
+            show
           />
           {codeSentTo ? (
             <>
@@ -1095,10 +1119,12 @@ function Sheet({
                 autoComplete="one-time-code"
                 inputMode="numeric"
                 maxLength={6}
+                show
               />
               <button
                 type="button"
                 className="prc-e-bycard"
+                data-ph-show=""
                 disabled={busy}
                 onClick={() => void resendCode()}
               >
@@ -1114,8 +1140,8 @@ function Sheet({
        5 Nov 2026), shorter and by the buttons it applies to. Counsel to OK
        the wording and the move (lever-lab/effort/notes.md, D). */
     const studentConsent = (
-      <p className="prc-e-consent">
-        By continuing you confirm it’s {Name ? possessive(Name) : "your student’s"} number and they’re OK getting texts from Tapin about it.
+      <p className="prc-e-consent" data-ph-show="">
+        By continuing you confirm it’s {Name ? <span className="ph-mask">{possessive(Name)}</span> : "your student’s"} number and they’re OK getting texts from Tapin about it.
       </p>
     );
     view = (
@@ -1123,7 +1149,7 @@ function Sheet({
         {frame(
           <>
             {quick ? (
-              <div className="prc-e-card">
+              <div className="prc-e-card" data-ph-show="">
                 <span className="scene-swatch" data-scene={giftScene} aria-hidden="true">
                   <i className="scene-swatch-env" />
                 </span>
@@ -1154,7 +1180,7 @@ function Sheet({
                 2026: "the pay by card instead be sticky, right above the
                 google pay and the back arrow"). */}
             {walletsShown ? (
-              <button type="button" className="prc-e-bycard prc-e-bycard-foot" onClick={() => void submit()} disabled={busy}>
+              <button type="button" className="prc-e-bycard prc-e-bycard-foot" data-ph-show="" onClick={() => void submit()} disabled={busy}>
                 Use a card instead
               </button>
             ) : null}
@@ -1162,7 +1188,7 @@ function Sheet({
                 (Sam, 6 Nov 2026): to the note, or with Send as is to where
                 it was chosen. */}
             <BackArrow className={arrowClass} onClick={onEditGift} disabled={busy} />
-            <div className="prc-e-footmain">
+            <div className="prc-e-footmain" data-ph-show="">
               {/* The wallets only once signed in: a wallet's sheet can't sign
                   the parent in. */}
               {signedIn ? (
@@ -1213,14 +1239,22 @@ function Sheet({
     const expires = new Date(done.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     const texted = (
       <>
-        <b>We texted {Who}</b>
-        <p className="tnum">A link to {sentNote ? "your gift and note" : "your gift"}, sent to {to.masked} just now.</p>
+        <b>
+          We texted <span className="ph-mask">{Who}</span>
+        </b>
+        <p className="tnum">
+          A link to {sentNote ? "your gift and note" : "your gift"}, sent to <span className="ph-mask">{to.masked}</span> just now.
+        </p>
       </>
     );
     const second = (
       <>
-        <b>{Who} claims it</b>
-        <p className="tnum">They sign in with {to.masked} and their Plus starts. That’s when your card is charged {usd(first)}.</p>
+        <b>
+          <span className="ph-mask">{Who}</span> claims it
+        </b>
+        <p className="tnum">
+          They sign in with <span className="ph-mask">{to.masked}</span> and their Plus starts. That’s when your card is charged {usd(first)}.
+        </p>
       </>
     );
     const timeline = (
@@ -1268,7 +1302,7 @@ function Sheet({
        and Android alike. */
     const sms = to.phone ? `sms:${to.phone}?&body=${encodeURIComponent(`${Who}, I sent you something! Look for a text from Tapin.`)}` : null;
     view = frame(
-      <div className={flat ? "prc-e-done" : "prc-module prc-done"} role="status">
+      <div className={flat ? "prc-e-done" : "prc-module prc-done"} role="status" data-ph-show="">
         {timeline}
         {promise}
       </div>,
@@ -1276,10 +1310,12 @@ function Sheet({
         {sms ? (
           <a className="prc-e-text" href={sms}>
             <Glyph d={TEXT_BUBBLE} />
-            <span className="prc-e-text-name">Text {Who}</span>
+            <span className="prc-e-text-name" data-ph-show="">
+              Text <span className="ph-mask">{Who}</span>
+            </span>
           </a>
         ) : null}
-        <button type="button" className={cta} onClick={close}>
+        <button type="button" className={cta} data-ph-show="" onClick={close}>
           Done
         </button>
       </>,
@@ -1289,7 +1325,7 @@ function Sheet({
   if (embedded)
     return (
       <FlatLook.Provider value>
-        <div className="prc-embedded ph-no-capture" ref={sheet} aria-labelledby="prc-title" role="group" tabIndex={-1}>
+        <div className="prc-embedded ph-mask ph-no-autocapture ph-no-deadclick ph-no-rageclick" ref={sheet} aria-labelledby="prc-title" role="group" tabIndex={-1}>
           {head}
           {view}
         </div>
@@ -1331,7 +1367,7 @@ type Frame = (kids: React.ReactNode, foot: React.ReactNode) => React.ReactNode;
    the number stops being one. Reduced motion: it's simply there. (Preview
    and notes: tapin-staging-work/lever-lab/likelihood.) */
 const TAPIN_ICON_WHITE = asset("/tapin_icon_white.png");
-function OnTheirNumber({ show, who, number }: { show: boolean; who: string; number: string }) {
+function OnTheirNumber({ show, who, number }: { show: boolean; who: React.ReactNode; number: string }) {
   const card = useRef<HTMLDivElement | null>(null);
   const icon = useRef<HTMLSpanElement | null>(null);
   /* Only a match made here animates; a step that opens matched (a save
@@ -1357,13 +1393,15 @@ function OnTheirNumber({ show, who, number }: { show: boolean; who: string; numb
     };
   }, [show]);
   return (
-    <div ref={card} className="prc-on" role="status" hidden={!show}>
+    <div ref={card} className="prc-on" role="status" hidden={!show} data-ph-show="">
       <span ref={icon} className="prc-on-icon" aria-hidden="true">
         <img src={TAPIN_ICON_WHITE} alt="" width="20" height="20" decoding="async" />
       </span>
       <span className="prc-on-text">
         <b>On {who} number once they sign in</b>
-        <span className="tnum">We’ll text {number}</span>
+        <span className="tnum">
+          We’ll text <span className="ph-mask">{number}</span>
+        </span>
       </span>
     </div>
   );
@@ -1385,13 +1423,14 @@ function Input({
   autoCapitalize,
   maxLength,
   placeholder,
+  show = false,
 }: {
   id: Field;
-  label: string;
+  label: React.ReactNode;
   value: string;
   onChange: (v: string) => void;
-  error?: string;
-  help?: string;
+  error?: React.ReactNode;
+  help?: React.ReactNode;
   tel?: boolean;
   ok?: boolean;
   type?: string;
@@ -1400,9 +1439,13 @@ function Input({
   autoCapitalize?: string;
   maxLength?: number;
   placeholder?: string;
+  /** Label, error and help are fixed copy (any name inside is a .ph-mask
+   *  span): shown in session replays (model/replayPrivacy.ts). */
+  show?: boolean;
 }) {
   const flat = useContext(FlatLook);
   const fid = `prc-${id}`;
+  const seen = show ? "" : undefined;
   const described = [help ? `${fid}-help` : null, error ? `${fid}-error` : null].filter(Boolean).join(" ") || undefined;
   const input = (
     <input
@@ -1434,18 +1477,20 @@ function Input({
   if (flat)
     return (
       <div className="gft-pp-field" data-error={error ? "" : undefined}>
-        <label htmlFor={fid}>{label}</label>
+        <label htmlFor={fid} data-ph-show={seen}>
+          {label}
+        </label>
         <div className="prc-e-box">
           {input}
           {tick}
         </div>
         {error ? (
-          <small id={`${fid}-error`} className="gft-pp-error">
+          <small id={`${fid}-error`} className="gft-pp-error" data-ph-show={seen}>
             {error}
           </small>
         ) : null}
         {help ? (
-          <p id={`${fid}-help`} className="prc-e-help">
+          <p id={`${fid}-help`} className="prc-e-help" data-ph-show={seen}>
             {help}
           </p>
         ) : null}
@@ -1494,7 +1539,7 @@ function Legal() {
 function Terms({ first, monthly }: { first: number; monthly: number }) {
   const flat = useContext(FlatLook);
   return (
-    <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"}>
+    <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"} data-ph-show="">
       {/* Short: the promise above the button carries cancelling (Sam, 7 Nov
           2026); this keeps the price, the renewal and the links. */}
       {`Nothing today. When they claim it, ${usd(first)}, then ${usd(monthly)}/month until you cancel. `}
@@ -1573,7 +1618,7 @@ function PayFoot({ busy, disabled, label, onPay, onBack, backDisabled }: { busy:
   return (
     <>
       <BackArrow className={flat ? "gft-pp-backarrow" : "prc-backarrow"} onClick={onBack} disabled={backDisabled || busy} />
-      <button type="button" className={cta} data-island-cta="" onClick={onPay} disabled={disabled}>
+      <button type="button" className={cta} data-island-cta="" data-ph-show="" onClick={onPay} disabled={disabled}>
         {label}
       </button>
     </>
