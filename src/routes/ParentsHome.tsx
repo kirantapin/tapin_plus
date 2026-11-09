@@ -658,10 +658,8 @@ export default function ParentsHome() {
           {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"), with
               the parents' guarantee beside it (Sam, 9 Nov 2026, the Dara
               Denney audit's fix 2). On request, so never "auto". */}
-          <p className="tpp-under tnum">
-            {/* The monthly is in the holiday line just above (Sam, 9 Nov
-                2026: "a lot of numbers"), so only the first month here. */}
-            <span>{FIRST} the first month.</span>
+          {/* The first month moved up under the price (Sam, 9 Nov 2026). */}
+          <p className="tpp-under">
             <span>Full refund if they don’t save what you spent.</span>
           </p>
           {/* E · one proof line that turns over (Sam's pick, 7 Nov 2026):

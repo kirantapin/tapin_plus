@@ -247,7 +247,7 @@ export function OfferPrice() {
 export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 export const AFTER_HOLIDAY = 14.99;
 export function PriceLead() {
-  const { MONTHLY } = useParentPrice();
+  const { FIRST, MONTHLY } = useParentPrice();
   /* Checked each minute so the days turn over at midnight. */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -259,18 +259,27 @@ export function PriceLead() {
   const when = left <= 0 ? null : days < 1 ? "Ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
   return (
     <div className="tpp-price" data-ph-show="">
+      {/* The price after Jan 1 struck beside it, as a compare-at price
+          (Sam, 9 Nov 2026: "we should just have a compare at price, strike
+          through price next to the $7.99"); true because new gifts go to it
+          on Jan 1, which the tag says. The first month under it ("aren't we
+          still doing the $3.99/month to start?"). */}
       <p className="tpp-price-fig tnum">
         <b>{MONTHLY}</b>
+        {when ? (
+          <s>
+            <span className="tpp-sr">was </span>
+            {money(AFTER_HOLIDAY)}
+          </s>
+        ) : null}
         <span>/month</span>
       </p>
       {when ? (
-        <>
-          <p className="tpp-price-tag tnum">
-            Holiday price <i aria-hidden="true" /> <b>{when}</b>
-          </p>
-          <p className="tpp-price-line tnum">Locked in. New gifts go to {money(AFTER_HOLIDAY)} on {"Jan\u00a01"}.</p>
-        </>
+        <p className="tpp-price-tag tnum">
+          Holiday price, locked in <i aria-hidden="true" /> <b>{when}</b>
+        </p>
       ) : null}
+      <p className="tpp-price-line tnum">{FIRST} the first month.</p>
       <p className="tpp-price-what">
         <b>${CREDIT} credit</b> every week at each of five{"\u00a0"}spots.
       </p>
