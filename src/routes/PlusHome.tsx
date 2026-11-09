@@ -13,7 +13,7 @@ import { PLACES as KIT_PLACES } from "./parents_kit";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
-import InviteHero, { tornSides } from "../shell/InviteHero";
+import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
@@ -28,6 +28,7 @@ import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
+import { WelcomeCallout, welcomeVariant } from "../shell/WelcomeCallout";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -377,71 +378,6 @@ const Chevron = () => (
    band, its name in the headline, its order first in the carousel, and the
    try-it-once window (which already leads with Coffeeholics). Everything
    else, the offer, the promise, the places and Join, is the home page's. */
-/* ══ THE WELCOME OFFER CARD (Sam, 9 Nov 2026; /impeccable design) ══════════
-   In the page's own collage language (the band, the Welcome Week sticker,
-   the "first order covers it" sticker): "Welcome offer" on a torn cream
-   strip turned a couple of degrees, the $25 in money green, and the five
-   places as white discs each with its own green $5 sticker pressed on its
-   corner, every one a little crooked. The one moment: as the card comes into
-   view the five stickers press on in turn, a little large then flat. Their
-   resting state is their own style, so session replay shows them; reduced
-   motion shows them already on. */
-const STICKER_TILT = [-8, 6, -4, 7, -6];
-function WelcomeCard() {
-  const box = useRef<HTMLUListElement | null>(null);
-  useEffect(() => {
-    const el = box.current;
-    if (!el || reducedMotion() || typeof IntersectionObserver === "undefined") return;
-    const stickers = Array.from(el.querySelectorAll<HTMLElement>(".tps-welcome-five"));
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (!e?.isIntersecting) return;
-        io.disconnect();
-        stickers.forEach((st, i) =>
-          st.animate?.(
-            [
-              { transform: `rotate(${STICKER_TILT[i % 5] - 14}deg) scale(1.55)`, opacity: 0 },
-              { transform: `rotate(${STICKER_TILT[i % 5]}deg) scale(0.94)`, opacity: 1, offset: 0.7 },
-              { transform: `rotate(${STICKER_TILT[i % 5]}deg) scale(1)`, opacity: 1 },
-            ],
-            { duration: 420, delay: 160 + i * 90, easing: "cubic-bezier(.2,.9,.3,1)", fill: "backwards" },
-          ),
-        );
-      },
-      { threshold: 0.6 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return (
-    <section className="tpa-module tps-welcome" aria-labelledby="tps-welcome-h">
-      <p className="tps-welcome-tag" style={{ clipPath: tornSides(7, 4) }}>
-        <span style={{ clipPath: tornSides(3, 3) }}>Welcome offer</span>
-      </p>
-      {/* Sam, 9 Nov 2026: "It'd be like get $25 immediately added to your
-          account, cancel anytime". */}
-      <h2 id="tps-welcome-h" className="tps-welcome-h">
-        <span className="tpp-sr">Get </span>
-        <b className="tnum">${KIT_PLACES.length * CREDIT}</b>
-        <span>immediately added to your&nbsp;account</span>
-      </h2>
-      <ul ref={box} className="tps-welcome-places" aria-label={`$${CREDIT} at each of ${KIT_PLACES.length} places`}>
-        {KIT_PLACES.map((p, i) => (
-          <li key={p.id}>
-            <img src={p.logo} alt={p.name} decoding="async" />
-            <span className="tps-welcome-five tnum" style={{ transform: `rotate(${STICKER_TILT[i % 5]}deg)` }} aria-hidden="true">
-              ${CREDIT}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="tps-welcome-fine">
-        ${CREDIT} to spend at each spot. Cancel anytime.
-      </p>
-    </section>
-  );
-}
-
 export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
@@ -454,6 +390,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
+  const [wc] = useState(welcomeVariant);
   const { price, failed: priceFailed } = usePlusPriceLoad();
   const FIRST_MONTH = firstFigure(price);
   const MONTHLY = usd(price?.monthly);
@@ -674,6 +611,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               /* Round 3 of the hero test (model/heroTest.ts). */
               <>
                 <h1>{HERO_LINES[hero]}</h1>
+                {/* The welcome offer, in the header (Sam, 9 Nov 2026: "wouldn't
+                    it go on the header of both?"): the $25 now, then the
+                    weekly $5 under it. Not for members. */}
+                {member ? null : <WelcomeCallout variant={wc} />}
                 {HERO_SUBS[hero] ? <p className="tpa-hero-sub">{HERO_SUBS[hero]}</p> : null}
               </>
             ) : hero === "a" ? (
@@ -709,7 +650,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             immediate $25 added to your account, $5 at each spot for your
             first month. cancel anytime in the app"): the first thing under
             the band, for anyone not on Plus yet. */}
-        {member ? null : <WelcomeCard />}
+
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
             order card (the same $12 to $7 idea, so only one survives). It

@@ -30,6 +30,7 @@ import {
 import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
+import { WelcomeCallout, welcomeVariant } from "../shell/WelcomeCallout";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -164,7 +165,7 @@ const isParentHero = (v: string | null): v is ParentHero =>
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
   if (parentHeroCached) return parentHeroCached;
-  if (typeof window === "undefined") return "w";
+  if (typeof window === "undefined") return "s";
   const asked = new URLSearchParams(window.location.search).get("ph");
   if (isParentHero(asked)) return (parentHeroCached = asked);
   try {
@@ -177,8 +178,10 @@ function parentHero(): ParentHero {
      line held to the offer ("A care package they'll open every day" heads
      the envelope now). ?ph= still previews the others, and an earlier draw
      is cleared. */
-  /* Since the welcome offer (9 Nov 2026, late): "w". */
-  return (parentHeroCached = "w");
+  /* Rob's headline, with the welcome offer as its own callout under it
+     (Sam, 9 Nov 2026: "wouldn't it go on the header of both?"); "w", the
+     $25 headline, stays a preview so the $25 isn't said twice. */
+  return (parentHeroCached = "s");
 }
 /* The experiment's flag isn't registered any more (the test is over); the
    variant still is, so events say which headline was showing. */
@@ -290,6 +293,7 @@ export default function ParentsHome() {
      builder open on their pick. */
   useState(hydrateGiftDraft);
   const [hero] = useState(parentHero);
+  const [wc] = useState(welcomeVariant);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
   const headline = PARENT_HEROES[hero];
@@ -521,6 +525,9 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
+            {/* The welcome offer, in the header (Sam, 9 Nov 2026): the $25
+                the moment they join, then the weekly line under it. */}
+            <WelcomeCallout variant={wc} they />
             {/* Who else is on it, straight under the headline (Sam, 8 Nov
                 2026: "we still need to say "500 Vtech students are on Tapin
                 plus""). A computer keeps it here; a phone moves it under the

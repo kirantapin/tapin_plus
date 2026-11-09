@@ -13,7 +13,7 @@ import { reducedMotion } from "./island";
 /** A torn edge down both sides, as a clip-path: a slow wander plus fibre,
  *  seeded so the strip always tears the same way. Amplitude in px, so it
  *  holds at any size. */
-export function tornSides(seed: number, amp: number): string {
+function tornSides(seed: number, amp: number): string {
   let s = seed * 9301 + 49297;
   const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
   const n = 9;

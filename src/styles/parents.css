@@ -2997,3 +2997,11 @@
     text-wrap: pretty;
   }
 }
+
+/* The welcome callout makes a computer's headline taller: the seal moves up
+   so the words never cross it (9 Nov 2026). */
+@media (min-width: 1024px) {
+  .tpp .tpp-band .tpp-split-seal {
+    top: 28%;
+  }
+}

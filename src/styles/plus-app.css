@@ -4131,107 +4131,179 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
 }
 
-/* ══ THE WELCOME OFFER CARD (Sam, 9 Nov 2026; /impeccable design) ══════════
-   The collage's materials (the collage skill's look.md, as the Welcome Week
-   headline uses them): cream paper #ECE5D5 and ink, the white deckle rim
-   #F7F3EA behind it, Gilroy 600; the green $5 sticker from "Your first $10
-   order covers it". On the page's white card; no gradient, no glow. */
-.tps-welcome {
-  display: grid;
-  gap: 16px;
+/* ══ THE WELCOME OFFER CALLOUT (shell/WelcomeCallout.tsx, 9 Nov 2026) ═══════
+   Under the headline on both pages. On a photo by default (white type, the
+   smoked plate or white chips); on white for a phone's /parents (ink). */
+.wc {
+  margin: 14px 0 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  text-shadow: none;
 }
-.tps-welcome-tag {
-  justify-self: start;
-  margin: 0;
-  padding: 3px 5px;
-  background: #f7f3ea;
-  rotate: -2.5deg;
-  filter: drop-shadow(0 2px 3px rgba(20, 22, 24, 0.12));
+.wc b {
+  font-weight: 600;
 }
-.tps-welcome-tag span {
-  display: block;
-  padding: 3px 14px 4px;
-  background: #ece5d5;
-  color: #141618;
-  font: 600 15px/19px "Gilroy", Arial, sans-serif;
-}
-.tps-welcome-h {
-  display: flex;
+/* 1 · Pill */
+.wc[data-wc="1"] {
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  margin: 0;
-}
-.tps-welcome-h b {
-  flex: none;
-  font: 600 64px/0.9 "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.04em;
-  color: #0b7a53;
-}
-.tps-welcome-h span {
-  font: 600 19px/24px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-  text-wrap: balance;
-}
-.tps-welcome-places {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  max-width: 420px;
-  margin: 2px 0 6px;
-  padding: 0;
-  list-style: none;
-}
-.tps-welcome-places li {
-  position: relative;
-  display: grid;
-  justify-items: center;
-}
-.tps-welcome-places img {
-  width: min(56px, 100%);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  object-fit: cover;
+  gap: 10px;
+  max-width: 100%;
+  padding: 5px 16px 5px 5px;
+  border-radius: 999px;
   background: #ffffff;
-  box-shadow: 0 0 0 1px var(--hair), 0 4px 10px -6px rgba(20, 22, 24, 0.35);
+  color: #141618;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.4);
 }
-/* The green $5 sticker, a white rim and a soft lift, pressed on the
-   disc's lower right. */
-.tps-welcome-five {
-  position: absolute;
-  right: calc(50% - 38px);
-  bottom: -10px;
-  display: grid;
-  place-items: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 4px;
+.wc[data-wc="1"] b {
+  flex: none;
+  padding: 5px 10px;
   border-radius: 999px;
   background: #0b7a53;
   color: #ffffff;
-  font: 600 14px/1 "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.02em;
-  box-shadow: 0 0 0 2.5px #ffffff, 0 4px 8px rgba(20, 22, 24, 0.22);
+  font-size: 16px;
+  line-height: 20px;
 }
-.tps-welcome-fine {
-  margin: 6px 0 0;
-  font: 500 14px/19px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-  text-wrap: pretty;
+/* 2 · Line */
+.wc[data-wc="2"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 21px;
 }
-@media (max-width: 374px) {
-  .tps-welcome-h span {
-    font-size: 17px;
-    line-height: 22px;
+.wc[data-wc="2"] svg {
+  flex: none;
+  margin-top: 1px;
+}
+/* 3 · Split */
+.wc[data-wc="3"] {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  color: #141618;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.4);
+}
+.wc[data-wc="3"] > b {
+  display: grid;
+  place-items: center;
+  padding: 0 14px;
+  background: #0b7a53;
+  color: #ffffff;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.wc[data-wc="3"] > span {
+  display: grid;
+  padding: 8px 14px;
+}
+.wc[data-wc="3"] > span span {
+  font-weight: 600;
+}
+.wc[data-wc="3"] small {
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+/* 4 · Logos */
+.wc[data-wc="4"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+.wc-logos {
+  display: flex;
+  flex: none;
+}
+.wc-logos img {
+  width: 26px;
+  height: 26px;
+  margin-left: -7px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(30, 30, 30, 0.9);
+}
+.wc-logos img:first-child {
+  margin-left: 0;
+}
+.wc[data-wc="4"] b {
+  color: #9fe3c2;
+}
+/* 5 · Bar */
+.wc[data-wc="5"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding: 11px 16px;
+  border-radius: 14px;
+  background: #0b7a53;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 21px;
+}
+.wc[data-wc="5"] small {
+  flex: none;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* On white: a phone's /parents header (the boxed photo). */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="1"] {
+    background: #e8f4ee;
+    box-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="2"] {
+    color: #141618;
+  }
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="3"] {
+    box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+  }
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="4"] {
+    background: #f0f0f0;
+    box-shadow: none;
+    color: #141618;
+  }
+  .tpp .tpp-band[data-phone="box"] .wc[data-wc="4"] b {
+    color: #0b7a53;
+  }
+  .tpp .tpp-band[data-phone="box"] .wc-logos img {
+    box-shadow: 0 0 0 2px #f0f0f0;
   }
 }
 @media (min-width: 1024px) {
-  .tps-welcome-h b {
-    font-size: 72px;
+  .wc {
+    margin-top: 18px;
+    font-size: 17px;
+    line-height: 22px;
   }
-  .tps-welcome-places img {
-    width: 64px;
+  .wc[data-wc="1"] b {
+    font-size: 18px;
   }
-  .tps-welcome-five {
-    right: calc(50% - 44px);
-  }
+}
+/* `.tpa-band-title span` (the old proof line's rule) sizes every span in the
+   band at 13px: the callout's words take its own size back. */
+.tpa-band-title .wc span {
+  flex: initial;
+  padding-bottom: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  text-shadow: none;
+}
+.tpa-band-title .wc-logos {
+  flex: none;
 }
