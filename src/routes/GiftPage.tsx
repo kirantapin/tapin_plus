@@ -2331,6 +2331,17 @@ export function GiftPreview({
           the modal ... instead of being able to drag the modal"); the
           drawer no longer drags. */}
       {!wide && builder && !peek && !sent ? <div className="gft-pp-above" aria-hidden="true" onClick={() => setPeek(true)} /> : null}
+      {/* An X at the screen's top left closes the builder on a phone (Sam,
+          8 Nov 2026: "on mobile add an "X" to the top left of the care
+          package preview builder to close that editor"), drawer up or down;
+          the drawer's own x still only lowers it. A computer keeps Close. */}
+      {!wide && builder ? (
+        <button type="button" className="gft-preview-x" aria-label="Close" onClick={shut}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        </button>
+      ) : null}
       {/* Sent, on a phone: the band of background above the done drawer,
           clipped at its top edge, that the envelope rises through and the
           strip lands in. */}
