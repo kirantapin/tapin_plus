@@ -493,6 +493,39 @@ export default function ParentsHome() {
     },
   ];
 
+  /* What a student's ask link says, once: in the offer card on a computer,
+     and at the top of a phone's band, where a parent arriving from the link
+     sees it before anything else (review, 8 Nov 2026: with the offer card
+     moved below the places it sat two screens down on a phone). Each place
+     hides the other's copy, so there is only one status at a time. */
+  const askNote =
+    ask.state === "ok" ? (
+      <div className="tpp-ask" role="status">
+        <span className="tpa-well" aria-hidden="true">
+          <FlatMark className="tpa-well-mark" />
+        </span>
+        <p>
+          <b>{ask.name} asked you to cover their Tapin Plus</b>
+          <span className="tnum">Their number: {ask.masked}</span>
+        </p>
+      </div>
+    ) : ask.state === "expired" ? (
+      <p className="tpp-ask tpp-ask-plain" role="status">
+        {ask.name}’s link has expired. You can still sign them up here
+        with their number.
+      </p>
+    ) : ask.state === "covered" ? (
+      <p className="tpp-ask tpp-ask-plain" role="status">
+        {ask.name}’s Tapin Plus is already covered. To sign up a different
+        student, use their number below.
+      </p>
+    ) : ask.state === "error" ? (
+      <p className="tpp-ask tpp-ask-plain" role="status">
+        We couldn’t open that link. You can still sign your student up
+        here with their number.
+      </p>
+    ) : null;
+
   return (
     <div className="tpa tpa-home tpp">
       <header
@@ -562,6 +595,7 @@ export default function ParentsHome() {
                 2026, picking preview 5, "just a bit more refined"); a
                 computer keeps them on the held card. */}
             <div className="tpp-band-act">
+              {askNote}
               <button type="button" className="tpp-band-cta" data-page-cta="" onClick={(e) => signUp("header", e.currentTarget)}>
                 {cta}
                 <DockArrow />
@@ -645,32 +679,7 @@ export default function ParentsHome() {
         >
           {/* No mark on the offer card (Sam, 6 Nov 2026: "can we remove the
               tapin logo from this callout"): the price leads. */}
-          {ask.state === "ok" ? (
-            <div className="tpp-ask" role="status">
-              <span className="tpa-well" aria-hidden="true">
-                <FlatMark className="tpa-well-mark" />
-              </span>
-              <p>
-                <b>{ask.name} asked you to cover their Tapin Plus</b>
-                <span className="tnum">Their number: {ask.masked}</span>
-              </p>
-            </div>
-          ) : ask.state === "expired" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              {ask.name}’s link has expired. You can still sign them up here
-              with their number.
-            </p>
-          ) : ask.state === "covered" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              {ask.name}’s Tapin Plus is already covered. To sign up a different
-              student, use their number below.
-            </p>
-          ) : ask.state === "error" ? (
-            <p className="tpp-ask tpp-ask-plain" role="status">
-              We couldn’t open that link. You can still sign your student up
-              here with their number.
-            </p>
-          ) : null}
+          {askNote}
           {/* The hero's sub (COPY.md v2 final, with Sam's $60, 5 Nov 2026) as a
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month

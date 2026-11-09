@@ -165,9 +165,7 @@ export function UnderOffer({ audience = "parent", monthly = MONTHLY }: { audienc
   return (
     <div className="tpp-notes">
       <ul aria-label="Also with Plus">
-        {/* A computer only (8 Nov 2026): on a phone the band's tags carry
-            the 15%, so the row would say it twice. */}
-        <li className="tpp-notes-desk">
+        <li>
           <Glyph d={GLYPHS.percent} />
           <span>
             <b>{PERCENT}% off</b> instead, once a day
