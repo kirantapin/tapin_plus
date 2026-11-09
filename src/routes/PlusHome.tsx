@@ -849,6 +849,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 <span className="tpa-buy-then tnum">then {MONTHLY}/mo</span>
               </p>
               )}
+              {/* The welcome bonus by the price (Sam, 9 Nov 2026: "here we
+                  should show $25 credit added to account immediately after
+                  purchase"): the header's green chip, as a line of the
+                  offer. Not on an invitation, whose offer is its own. */}
+              {invite ? null : (
+                <p className="tpa-buy-bonus" data-ph-show="">
+                  <b className="tnum">+${KIT_PLACES.length * CREDIT}</b>
+                  <span>credit added the moment you join</span>
+                </p>
+              )}
               {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026); an
                   invitation with an end counts down to it instead (Sam,
                   5 Nov 2026: "a countdown until sunday"). */}

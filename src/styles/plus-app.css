@@ -4397,3 +4397,28 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     display: none;
   }
 }
+
+/* The welcome bonus on the offer card, under the price (Sam, 9 Nov 2026):
+   the header pill's green chip and one plain line. */
+.tpa-buy-bonus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpa-buy-bonus b {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #e8f4ee;
+  color: #0b7a53;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+}
+.tpa-buy-bonus + .tpa-buy-seats {
+  margin-top: 10px;
+}
+.tpa-buy-bonus span {
+  text-wrap: balance;
+}
