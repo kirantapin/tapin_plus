@@ -3158,3 +3158,26 @@
     text-wrap: balance;
   }
 }
+
+/* A phone lets the headline's second piece flow with the first (it is the
+   longer line now, 9 Nov 2026, and won't fit a phone's width whole); a
+   computer keeps it on a line of its own. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band-title h1 .tpp-nowrap {
+    display: inline;
+    white-space: normal;
+  }
+}
+
+/* The parents' words a size up (Sam, 9 Nov 2026: "we can make the text here
+   slightly larger for the reviews"). */
+.tpp-v-body {
+  font-size: 17px;
+  line-height: 24px;
+}
+.tpp-v-by,
+.tpp-v-by small,
+.tpp-v-more {
+  font-size: 15px;
+  line-height: 20px;
+}
