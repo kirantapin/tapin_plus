@@ -87,18 +87,19 @@
   gap: 4px;
   color: #141618;
 }
+/* A size down (Sam, 9 Nov 2026: "the price screams a bit too loud"). */
 .tpp-price-fig b {
-  font: 600 56px/1 "Gilroy", Arial, sans-serif;
+  font: 600 40px/1 "Gilroy", Arial, sans-serif;
   letter-spacing: -0.03em;
 }
 .tpp-price-fig s {
   margin-left: 8px;
-  font: 500 22px/1 "Gilroy", Arial, sans-serif;
+  font: 500 18px/1 "Gilroy", Arial, sans-serif;
   color: var(--muted);
   text-decoration-thickness: 2px;
 }
 .tpp-price-fig span {
-  font: 500 18px/1 "Gilroy", Arial, sans-serif;
+  font: 500 16px/1 "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
 .tpp-price-tag {
@@ -3003,5 +3004,138 @@
 @media (min-width: 1024px) {
   .tpp .tpp-band .tpp-split-seal {
     top: 28%;
+  }
+}
+
+/* ══ THE PHONE HEADER AS THE COMPUTER'S CARD (Sam, 9 Nov 2026: "can we have
+   mobile header look more like desktop? I like the bold header text on
+   desktop") ═══════════════════════════════════════════════════════════════
+   The split photo is one rounded card with everything on it the computer
+   puts there: the label and the account, the headline in white and bold,
+   the +$25 welcome pill, the students line. Under the card on white: the
+   button alone (the favourites row and the line went). The band is a grid;
+   the title, its box and the action row step aside (display: contents) so
+   the photo spans exactly the rows it should. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="card"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(150px, 1fr) auto auto auto auto;
+    min-height: 0;
+    padding: calc(env(safe-area-inset-top) + 10px) 0 24px;
+    overflow: visible;
+    background: #ffffff;
+    color: #ffffff;
+  }
+  .tpp .tpp-band[data-phone="card"] :is(.tpa-band-title, .tpa-band-title > div, .tpp-band-act) {
+    display: contents;
+  }
+  .tpp .tpp-band[data-phone="card"] :is(.tpa-band-art, .tpa-band-top, h1, .wc, .tpp-proof-desk, .tpp-band-cta) {
+    position: relative;
+    inset: auto;
+    grid-column: 1;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpa-band-art,
+  .tpp .tpa-band.tpp-band[data-phone="card"]::after {
+    grid-column: 1;
+    grid-row: 1 / 6;
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    min-height: 100%;
+    margin: 0 10px;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .tpp .tpa-band.tpp-band[data-phone="card"]::after {
+    display: block;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .tpp .tpp-band[data-phone="card"] :is(.tpa-band-top, h1, .wc, .tpp-proof-desk) {
+    z-index: 2;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-split-seal {
+    display: grid;
+    top: 27%;
+    bottom: auto;
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpa-band-top {
+    grid-row: 1;
+    margin: 12px 22px 0;
+  }
+  .tpp .tpp-band[data-phone="card"] h1 {
+    grid-row: 3;
+    max-width: none;
+    margin: 0 24px;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 36px;
+  }
+  .tpp .tpp-band[data-phone="card"] .wc {
+    grid-row: 4;
+    justify-self: start;
+    margin: 14px 24px 0;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-proof-desk {
+    display: block;
+    grid-row: 5;
+    margin: 0 24px 22px;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-proof-desk .tpa-proof {
+    margin-top: 12px;
+  }
+  .tpp .tpp-band[data-phone="card"] :is(.tpp-band-sub, .tpp-band-inside, .tpp-band-act > .tpp-proof) {
+    display: none;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-band-cta {
+    grid-row: 6;
+    width: auto;
+    margin: 18px var(--gutter) 0;
+    background: var(--ink);
+    color: #ffffff;
+    box-shadow: none;
+  }
+  .tpp .tpp-band[data-phone="card"] + .tpa-sheet {
+    margin-top: 0;
+  }
+}
+
+/* The students line under the +$25 pill, quieter (Sam, 9 Nov 2026: "don't
+   these clash a bit?"): a step smaller, a softer white, a small solid dot
+   instead of the ringed, pulsing one, and air above it. The header only, on
+   both pages. */
+.tpa-band .tpa-proof {
+  margin-top: 16px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: rgba(255, 255, 255, 0.84);
+}
+.tpa-band .tpa-proof-dot {
+  width: 7px;
+  height: 7px;
+  box-shadow: none;
+  background: #5fcf98;
+}
+.tpa-band .tpa-proof-dot i {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band .tpa-proof {
+    margin-top: 18px;
+    font-size: 16px;
+    line-height: 21px;
+  }
+}
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band[data-phone="card"] .tpp-proof-desk .tpa-proof {
+    margin-top: 14px;
+    white-space: normal;
+    text-wrap: balance;
   }
 }

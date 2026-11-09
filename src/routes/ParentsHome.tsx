@@ -465,7 +465,7 @@ export default function ParentsHome() {
         data-hero="parents"
         data-photo={photo}
         data-hdr={chips}
-        data-phone="box"
+        data-phone="card"
       >
         {photo === "split" ? (
           <div className="tpa-band-art tpp-split" aria-hidden="true">
