@@ -1,12 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { asset } from "../asset";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useEventTracking } from "../context/event_tracking_context";
 import { useAuth } from "../context/auth_context";
 import { supabase } from "../supabase";
 import { openPlusSignIn } from "../shell/PlusCheckout";
 import { cancelGiftedPlus, revokeGift } from "../model/giftApi";
-import { AppCard } from "../shell/GetTheApp";
+import { AccountCard, AccountFrame, AppPanel, InfoPanel, type Tone } from "../shell/AccountPage";
 import { GLYPHS, Glyph } from "./parents_kit";
 
 /* ══ THE PARENT'S ACCOUNT PAGE (/parents/account; Sam, 6 Nov 2026: "add a
@@ -17,26 +16,18 @@ import { GLYPHS, Glyph } from "./parents_kit";
    (ownership.payer_user_id): waiting to be claimed, on, cancelled, expired.
    Cancelling is here too (revoke_gift, manage_subscription). Signed out, the Plus
    sign-in sheet.
-   In the students' Members page's look (Sam, 8 Nov 2026: "can it look
-   somewhat like this"): the same band, sheet, modules and two-column frame
-   (routes/Members.tsx, styles/plus-app.css .tpa-members), with the parents'
-   facts and glyphs; parent-pages.css .ppa holds the few differences. */
+   Since 9 Nov 2026 (Sam: "redesign the account page for both ... relatively
+   consistent"), the same frame as the students' account (/in), from
+   shell/AccountPage.tsx: the account card holds the gifts, each with its
+   status chip and the one thing that can still be stopped. */
 
-const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
-const COLLAGE = asset("/collage/blacksburg.webp");
-const TERMS_URL = "https://go.tapin.app/terms-and-conditions";
-const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 const MAIL = `mailto:support@tapin.app?subject=${encodeURIComponent("My student’s Tapin Plus")}&body=${encodeURIComponent(
   "Hi Tapin,\n\nI’d like to change / cancel my student’s Tapin Plus.\n\nMy mobile:\nMy student’s first name:\n\nThanks!",
 )}`;
 
-const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-const ease = "cubic-bezier(.22,1,.36,1)";
-
 const ROWS: ReadonlyArray<{ glyph: keyof typeof GLYPHS; title: string; line?: string }> = [
   { glyph: "refund", title: "Not charged until they claim it", line: "Unclaimed after 30 days, it expires." },
-  { glyph: "mail", title: "Cancel anytime, here", line: "A gift before it’s claimed, or their Plus after." },
-  { glyph: "phone", title: "Their Plus is in the Tapin app", line: "They sign in with the number you gave us." },
+  { glyph: "calendar", title: "Cancel anytime, here", line: "A gift before it’s claimed, or their Plus after." },
 ];
 
 type SentGift = {
@@ -61,49 +52,26 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: 
 const usd = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 const masked = (phone: string) => `•••${phone.replace(/\D/g, "").slice(-4)}`;
 
-/** One gift's status line. */
-function statusOf(gift: SentGift, membership: PaidMembership | undefined): { label: string; line: string } {
-  if (gift.revoked_at) return { label: "Cancelled", line: "It can’t be claimed, and nothing was charged." };
+/** One gift's status: its chip (label and tone) and its line. */
+function statusOf(gift: SentGift, membership: PaidMembership | undefined): { label: string; tone: Tone; line: string } {
+  if (gift.revoked_at) return { label: "Cancelled", tone: "off", line: "It can’t be claimed, and nothing was charged." };
   if (!gift.claimed_at) {
-    if (new Date(gift.expires_at) <= new Date()) return { label: "Expired", line: "It wasn’t claimed, so nothing was charged." };
-    return { label: "Waiting to be claimed", line: `Nothing is charged until they claim it. It expires ${day(gift.expires_at)}.` };
+    if (new Date(gift.expires_at) <= new Date()) return { label: "Expired", tone: "off", line: "It wasn’t claimed, so nothing was charged." };
+    return { label: "Waiting", tone: "wait", line: `Not claimed yet. Nothing is charged until they do. It expires ${day(gift.expires_at)}.` };
   }
-  if (!membership) return { label: "Claimed", line: `Claimed ${day(gift.claimed_at)}.` };
+  if (!membership) return { label: "Claimed", tone: "good", line: `Claimed ${day(gift.claimed_at)}.` };
   if (membership.subscription_status === "canceled" || new Date(membership.ends_at) <= new Date())
-    return { label: "Ended", line: `Their Plus ended ${day(membership.ends_at)}.` };
-  if (membership.subscription_status === "past_due") return { label: "Payment due", line: "The last charge to your card didn’t go through." };
-  if (!membership.next_period) return { label: "On, ending", line: `Their Plus ends ${day(membership.ends_at)}.` };
+    return { label: "Ended", tone: "off", line: `Their Plus ended ${day(membership.ends_at)}.` };
+  if (membership.subscription_status === "past_due") return { label: "Payment due", tone: "warn", line: "The last charge to your card didn’t go through." };
+  if (!membership.next_period) return { label: "Ending", tone: "wait", line: `Their Plus ends ${day(membership.ends_at)}.` };
   const next = membership.next_period.discounted_amount ?? membership.next_period.amount;
-  return { label: "On", line: `Claimed ${day(gift.claimed_at)}. Next charge ${usd(next)} on ${day(membership.next_period.starts_at)}.` };
+  return { label: "Plus is on", tone: "good", line: `Claimed ${day(gift.claimed_at)}. Next charge ${usd(next)} on ${day(membership.next_period.starts_at)}.` };
 }
 
 export default function ParentAccount() {
   const { track } = useEventTracking();
   const { userSession, accessToken } = useAuth();
   const userId = userSession?.user?.id ?? null;
-  const navigate = useNavigate();
-  const page = useRef<HTMLDivElement | null>(null);
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    root.dataset.surface = "tpa";
-    window.scrollTo(0, 0);
-    const title = document.title;
-    document.title = "Your account · Tapin Plus";
-    /* Members' arrival: a fade with a very slight settle. */
-    if (!still()) page.current?.animate?.([{ opacity: 0, transform: "scale(1.02)" }, { opacity: 1, transform: "none" }], { duration: 340, easing: ease });
-    return () => {
-      delete root.dataset.surface;
-      document.title = title;
-    };
-  }, []);
-  const back = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const el = page.current;
-    if (!el || still() || typeof el.animate !== "function" || e.metaKey || e.ctrlKey) return;
-    e.preventDefault();
-    const run = el.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(1.02)" }], { duration: 200, easing: "ease-in", fill: "forwards" });
-    run.onfinish = () => navigate("/parents");
-  };
-
   /* The gifts this parent sent, newest first, and the memberships they pay
      for. Only their own: RLS also lets them read gifts sent to their number. */
   const [gifts, setGifts] = useState<{ sent: SentGift[]; paid: PaidMembership[] } | "loading" | "failed">("loading");
@@ -158,20 +126,20 @@ export default function ParentAccount() {
 
   const list =
     gifts === "loading" ? (
-      <p className="tpa-price-then">Loading your gifts…</p>
+      <p className="acc-quiet">Loading your gifts…</p>
     ) : gifts === "failed" ? (
-      <p className="tpa-price-then">Your gifts didn’t load. Refresh to try again.</p>
+      <p className="acc-quiet" role="alert">
+        Your gifts didn’t load. Refresh to try again.
+      </p>
     ) : gifts.sent.length === 0 ? (
-      <>
-        <p className="tpa-price-then">No gifts yet.</p>
-        <div className="tpa-members-acts">
-          <Link className="tpa-try tpa-members-mail" to="/parents">
-            Send one
-          </Link>
-        </div>
-      </>
+      <div className="acc-empty">
+        <p className="acc-quiet">No gifts sent from this number yet.</p>
+        <Link className="acc-btn acc-btn-dark" to="/parents">
+          Send a gift
+        </Link>
+      </div>
     ) : (
-      <ul className="tpa-rows">
+      <ul className="acc-gifts">
         {gifts.sent.map((g) => {
           const membership = gifts.paid.find((m) => m.ownership_id === g.ownership_id);
           const status = statusOf(g, membership);
@@ -180,19 +148,20 @@ export default function ParentAccount() {
           const waiting = !g.revoked_at && !g.claimed_at && new Date(g.expires_at) > new Date();
           const renewing = !!membership?.next_period && membership.subscription_status !== "canceled" && new Date(membership.ends_at) > new Date();
           return (
-            <li key={g.gift_id}>
-              <span className="tpa-well" aria-hidden="true">
-                <Glyph d={GLYPHS.phone} className="tpa-well-mark" />
+            <li key={g.gift_id} className="acc-gift">
+              <span className="acc-avatar" aria-hidden="true">
+                {g.recipient_first_name.trim().charAt(0).toUpperCase() || "?"}
               </span>
-              <span className="tnum">
-                <b>
-                  {g.recipient_first_name}, {masked(g.recipient_phone)} · {status.label}
-                </b>
-                <span>{status.line}</span>
+              <div className="acc-gift-words">
+                <p className="acc-gift-name">
+                  <b>{g.recipient_first_name}</b>
+                  <span className="tnum">{masked(g.recipient_phone)}</span>
+                </p>
+                <p className="acc-gift-line tnum">{status.line}</p>
                 {waiting ? (
                   <button
                     type="button"
-                    className="tpa-signin"
+                    className="acc-btn acc-btn-quiet"
                     disabled={!!acting}
                     onClick={() =>
                       void act(g.gift_id, `Cancel the gift to ${g.recipient_first_name}? Nothing has been charged.`, (t) => revokeGift(g.gift_id, t), "parent_gift_revoked")
@@ -203,7 +172,7 @@ export default function ParentAccount() {
                 ) : renewing && membership ? (
                   <button
                     type="button"
-                    className="tpa-signin"
+                    className="acc-btn acc-btn-quiet"
                     disabled={!!acting}
                     onClick={() =>
                       void act(
@@ -217,6 +186,9 @@ export default function ParentAccount() {
                     {acting === membership.ownership_id ? "Cancelling…" : "Cancel their Plus"}
                   </button>
                 ) : null}
+              </div>
+              <span className="acc-chip" data-tone={status.tone}>
+                {status.label}
               </span>
             </li>
           );
@@ -224,99 +196,48 @@ export default function ParentAccount() {
       </ul>
     );
 
+  const rows = ROWS.map((r) => ({ key: r.glyph, icon: <Glyph d={GLYPHS[r.glyph]} className="acc-glyph" />, title: r.title, line: r.line }));
+
   return (
-    <div ref={page} className="tpa tpa-members ppa">
-      <header className="tpa-band">
-        <img className="tpa-band-art" src={COLLAGE} alt="" decoding="async" />
-        <div className="tpa-band-top">
-          <Link className="tpa-glass tpa-signin" to="/parents" onClick={back}>
-            <svg className="tpa-back" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Tapin Plus
-          </Link>
-        </div>
-        <div className="tpa-band-title">
-          <h1>Your account</h1>
-        </div>
-      </header>
+    <AccountFrame back="/parents" docTitle="Your account · Tapin Plus">
+      {accessToken ? (
+        <AccountCard title="Your account">
+          <div className="acc-gifts-head">
+            <h2 className="acc-h3">Gifts you’ve sent</h2>
+            {gifts !== "loading" && gifts !== "failed" && gifts.sent.length ? (
+              <Link className="acc-link" to="/parents">
+                Send another
+              </Link>
+            ) : null}
+          </div>
+          {list}
+          {actionError ? (
+            <p className="acc-quiet acc-error" role="alert">
+              {actionError}
+            </p>
+          ) : null}
+        </AccountCard>
+      ) : (
+        <AccountCard title="Your account" line="Sent a gift? Sign in with the mobile number you used to send it.">
+          <div className="acc-acts">
+            <button
+              type="button"
+              className="acc-btn acc-btn-dark"
+              onClick={() => {
+                track("parent_account_signin");
+                openPlusSignIn("parent_account");
+              }}
+            >
+              Sign in with your mobile
+            </button>
+          </div>
+        </AccountCard>
+      )}
 
-      <main className="tpa-sheet">
-        <section className="tpa-module tpa-offer tpa-members-status" aria-label="Your gifts">
-          <img className="tpa-paper" src={PAPER_MARK} alt="" width="112" height="89" decoding="async" />
-          {accessToken ? (
-            <>
-              <p className="tpa-lead">Your gifts</p>
-              {list}
-              {actionError ? (
-                <p className="tpa-price-then" role="alert">
-                  {actionError}
-                </p>
-              ) : null}
-              <div className="tpa-members-acts">
-                <a className="tpa-try tpa-members-mail" href={MAIL} onClick={() => track("parent_account_email")}>
-                  Questions? Email us
-                </a>
-                <button type="button" className="tpa-try tpa-members-mail" onClick={() => void supabase.auth.signOut()}>
-                  Sign out
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="tpa-lead">Sent a gift? Sign in to see it.</p>
-              <p className="tpa-price-then">Use the mobile number you signed in with when you sent it.</p>
-              <div className="tpa-members-acts">
-                <button
-                  type="button"
-                  className="tpa-try tpa-members-mail"
-                  onClick={() => {
-                    track("parent_account_signin");
-                    openPlusSignIn("parent_account");
-                  }}
-                >
-                  Sign in with your mobile
-                </button>
-              </div>
-            </>
-          )}
-        </section>
+      {/* The app is the student's: their Plus lives there. */}
+      <AppPanel where="parent_account" line="Their Plus is in the Tapin app. They sign in with the number you gave us." />
 
-        {/* The app is the student's: their Plus lives there. */}
-        <section className="tpa-module tpa-members-app" aria-label="Their Plus is in the Tapin app">
-          <AppCard where="parent_account" line="Their Plus is in the Tapin app. They sign in with the number you gave us." />
-        </section>
-
-        <section className="tpa-module" aria-labelledby="ppa-help">
-          <h2 id="ppa-help" className="tpa-h2">
-            Good to know
-          </h2>
-          <ul className="tpa-rows">
-            {ROWS.map((r) => (
-              <li key={r.glyph}>
-                <span className="tpa-well" aria-hidden="true">
-                  <Glyph d={GLYPHS[r.glyph]} className="tpa-well-mark" />
-                </span>
-                <span>
-                  <b>{r.title}</b>
-                  {r.line ? <span>{r.line}</span> : null}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <footer className="tpa-foot">
-          <p className="tpa-links">
-            <a href={TERMS_URL} target="_blank" rel="noopener noreferrer">
-              Terms
-            </a>
-            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
-              Privacy
-            </a>
-          </p>
-        </footer>
-      </main>
-    </div>
+      <InfoPanel rows={rows} mail={MAIL} onMail={() => track("parent_account_email")} />
+    </AccountFrame>
   );
 }
