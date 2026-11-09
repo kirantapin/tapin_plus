@@ -125,7 +125,9 @@ export const seatLine = (now: Date = new Date()): string => {
    changes by hand, in the app. At about 9 a day it reaches the floor around
    13 November; Sam decides what happens then. */
 export const PLUS_SEAT_CAP = 100;
-export const PLUS_NEXT_PRICE = "$9.99";
+/* $14.99 once the spots are gone (Sam, 9 Nov 2026, via the content session:
+   "once the $7.99 spots are gone, the price goes up to $14.99, not $9.99"). */
+export const PLUS_NEXT_PRICE = "$14.99";
 const PLUS_START_MS = Date.UTC(2026, 10, 4, 2, 0, 0); // 3 Nov, 9pm EST
 const PLUS_START_LEFT = 91;
 const PLUS_FLOOR = 3;
