@@ -538,6 +538,11 @@ export default function ParentsHome() {
         {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
             their student opens. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
+        {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
+            2026, the Dara Denney audit's fix 4: "move the parent quotes up";
+            they sat under the offer card). Nothing shows until
+            model/voices.ts has real ones. */}
+        <Voices className="tpp-v-up" />
 
         {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
             a few words each, the approved line one tap under it. No total
@@ -636,9 +641,6 @@ export default function ParentsHome() {
             2026 polish: the chips and the promise lines were four objects
             in two styles). */}
         <UnderOffer />
-        {/* C · parents' own words (Sam's pick, 7 Nov 2026): nothing shows
-            until model/voices.ts has real ones. */}
-        <Voices />
         </div>
 
         {/* What a week looks like, in one order, on their phone (Sam's pick
