@@ -4364,3 +4364,36 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     transform: none;
   }
 }
+
+/* ══ A SHORT, NARROW PHONE (Sam, 9 Nov 2026: "this looks a bit strange on
+   this shorter screen no?") ═══════════════════════════════════════════════
+   A session replay from a phone that makes text about a fifth larger: the
+   top bar wrapped to two lines, the +$25 pill wrapped, and the dock with its
+   proof line sat over the pill. On a phone the bar takes a shorter line; the
+   pill can wrap into a rounded box with its words balanced; on a short
+   screen the dock is the button alone. */
+.tpa-pbar-short {
+  display: none;
+}
+@media (max-width: 430px) {
+  .tpa-pbar-long {
+    display: none;
+  }
+  .tpa-pbar-short {
+    display: inline;
+  }
+  .tpa-pbar {
+    text-wrap: balance;
+  }
+  .wc[data-wc="1"] {
+    border-radius: 22px;
+  }
+  .wc[data-wc="1"] span {
+    text-wrap: balance;
+  }
+}
+@media (max-height: 760px) {
+  :is(.tpp, .tps) .tpa-dock .tpp-pt-dock {
+    display: none;
+  }
+}
