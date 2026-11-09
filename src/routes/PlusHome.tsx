@@ -377,6 +377,31 @@ const Chevron = () => (
    band, its name in the headline, its order first in the carousel, and the
    try-it-once window (which already leads with Coffeeholics). Everything
    else, the offer, the promise, the places and Join, is the home page's. */
+/* The welcome offer: $25 in the account the moment they join, shown as the
+   five places with $5 under each. */
+function WelcomeCard() {
+  return (
+    <section className="tpa-module tps-welcome" aria-labelledby="tps-welcome-h">
+      <p className="tps-welcome-tag">Welcome offer</p>
+      <h2 id="tps-welcome-h" className="tps-welcome-h">
+        <b className="tnum">${KIT_PLACES.length * CREDIT}</b>
+        <span>added to your account the moment you join</span>
+      </h2>
+      <ul className="tps-welcome-places" aria-label={`$${CREDIT} at each of ${KIT_PLACES.length} places`}>
+        {KIT_PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt={p.name} decoding="async" />
+            <span className="tnum">${CREDIT}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="tps-welcome-fine">
+        ${CREDIT} at each spot for your first month. Cancel anytime in the app.
+      </p>
+    </section>
+  );
+}
+
 export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
@@ -640,6 +665,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       </header>
 
       <main ref={sheetRef} className="tpa-sheet">
+        {/* THE WELCOME OFFER (Sam, 9 Nov 2026: "a welcome offer card -
+            immediate $25 added to your account, $5 at each spot for your
+            first month. cancel anytime in the app"): the first thing under
+            the band, for anyone not on Plus yet. */}
+        {member ? null : <WelcomeCard />}
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
             order card (the same $12 to $7 idea, so only one survives). It

@@ -69,7 +69,7 @@ let cached: HeroVariant | null = null;
 
 export function heroVariant(): HeroVariant {
   if (cached) return cached;
-  if (typeof window === "undefined") return "w";
+  if (typeof window === "undefined") return "r";
   const asked = new URLSearchParams(window.location.search).get("hero");
   if (isVariant(asked)) return (cached = asked);
   /* The test is over (above): an earlier draw is cleared. */
@@ -78,7 +78,9 @@ export function heroVariant(): HeroVariant {
   } catch {
     /* Storage blocked: nothing kept to clear. */
   }
-  return (cached = "w");
+  /* Rob's line stays (Sam, 9 Nov 2026, late: "it should be the old copy,
+     with a welcome offer card"); the offer is its own card under the band. */
+  return (cached = "r");
 }
 
 /** The super properties that tag every event with the visitor's hero. */
