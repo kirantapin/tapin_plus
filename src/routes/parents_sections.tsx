@@ -284,6 +284,18 @@ export function BenefitCards() {
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean }> = [
+    /* The welcome bonus first (Sam, 9 Nov 2026: "include ... the welcome
+       offer $25 credit in the what's in their care package"). */
+    {
+      key: "welcome",
+      art: (
+        <b className="tpp-card-fig" data-money="">
+          +{money0(CREDIT * PLACES.length)}
+        </b>
+      ),
+      label: `A ${money0(CREDIT * PLACES.length)} welcome bonus`,
+      line: `${money0(CREDIT)} to spend at each spot the moment they join.`,
+    },
     {
       key: "credit",
       art: (
