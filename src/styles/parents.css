@@ -68,40 +68,76 @@
   height: 52px;
   margin-top: 14px;
 }
-/* The holiday price (Sam, 9 Nov 2026): a cream well over the button, two
-   short lines; the days left in maroon. */
-.tpp-hol {
-  display: grid;
-  gap: 4px;
-  margin-top: 16px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: #f7f3ea;
-  text-align: center;
+/* The price card (Sam, 9 Nov 2026, /impeccable redesign: the price leads).
+   Left-aligned throughout, the figure large in ink (600, never heavier), the
+   holiday tag in maroon on cream, a hairline before what it buys. */
+.tpp .tpp-offer {
+  text-align: left;
 }
-.tpp-hol p {
+.tpp-price {
+  display: grid;
+  justify-items: start;
+}
+.tpp-price p {
   margin: 0;
 }
-.tpp-hol-h {
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+.tpp-price-fig {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: #141618;
+}
+.tpp-price-fig b {
+  font: 600 56px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.tpp-price-fig span {
+  font: 500 18px/1 "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
-.tpp-hol-h b {
-  font-weight: 600;
+.tpp-price-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px !important;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f7f3ea;
   color: #861f41;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
 }
-.tpp-hol-line {
-  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+.tpp-price-tag i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.tpp-price-tag b {
+  font-weight: 600;
+}
+.tpp-price-line {
+  margin-top: 10px !important;
+  text-wrap: pretty;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
   color: var(--muted);
-  text-wrap: balance;
 }
-.tpp-hol-line b,
-.tpp-hol-line span {
-  display: block;
+.tpp-price-what {
+  justify-self: stretch;
+  text-wrap: pretty;
+  margin-top: 18px !important;
+  padding-top: 16px;
+  border-top: 1px solid rgba(20, 22, 24, 0.08);
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
 }
-.tpp-hol-line b {
+.tpp-price-what b {
   font-weight: 600;
   color: #141618;
+}
+.tpp .tpp-offer .tpp-under {
+  text-align: left;
+  justify-items: start;
 }
 .tpp-under {
   margin-top: 10px;
@@ -2787,4 +2823,10 @@
   width: 56px;
   height: 56px;
   border-radius: 14px;
+}
+
+/* The price card is left-aligned (Sam, 9 Nov 2026 redesign): its turning
+   proof line too. */
+.tpp .tpp-offer .tpp-pt-card {
+  place-items: center start;
 }

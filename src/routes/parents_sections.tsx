@@ -235,36 +235,44 @@ export function OfferPrice() {
   );
 }
 
-/* ══ THE HOLIDAY PRICE (Sam, 9 Nov 2026: "a holiday countdown of some kind
-   to show urgency - like the price at the end of this year jumps up to
-   $14.99 a month, $7.99 is locked in though") ════════════════════════════════
-   A clock to midnight Eastern as 2026 ends, ticking each second, on a cream
-   well in the offer card. The monthly price comes from the cart (a promo
-   link's stays its own); the after price is the list price. Gone once the
-   year turns, so it never counts past zero. */
+/* ══ THE PRICE CARD (Sam, 9 Nov 2026: "a holiday countdown ... the price
+   at the end of this year jumps up to $14.99 a month, $7.99 is locked in",
+   then "there are a lot of numbers here" and /impeccable redesign, picking
+   "the price leads", the countdown in the card) ═══════════════════════════════
+   The monthly price leads, set large; under it the holiday tag with the days
+   left, and one line on what locked in means. $14.99 is a future price, so
+   it is said, never struck through as if it were the old one. The monthly
+   comes from the cart (a promo link's stays its own). After the year turns
+   the tag and the line go and the price stands alone. */
 export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 export const AFTER_HOLIDAY = 14.99;
-export function HolidayClock() {
+export function PriceLead() {
   const { MONTHLY } = useParentPrice();
-  /* Days, not a ticking clock (Sam, 9 Nov 2026: "there are a lot of numbers
-     here"). Checked each minute so it turns over at midnight. */
+  /* Checked each minute so the days turn over at midnight. */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(t);
   }, []);
   const left = HOLIDAY_ENDS - now;
-  if (left <= 0) return null;
   const days = Math.floor(left / 86_400_000);
-  const when = days < 1 ? "Ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
+  const when = left <= 0 ? null : days < 1 ? "Ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
   return (
-    <div className="tpp-hol" data-ph-show="">
-      <p className="tpp-hol-h">
-        Holiday price <span aria-hidden="true">·</span> <b className="tnum">{when}</b>
+    <div className="tpp-price" data-ph-show="">
+      <p className="tpp-price-fig tnum">
+        <b>{MONTHLY}</b>
+        <span>/month</span>
       </p>
-      <p className="tpp-hol-line tnum">
-        <b>{MONTHLY}/month, locked in.</b>
-        <span>{money(AFTER_HOLIDAY)} after Dec 31.</span>
+      {when ? (
+        <>
+          <p className="tpp-price-tag tnum">
+            Holiday price <i aria-hidden="true" /> <b>{when}</b>
+          </p>
+          <p className="tpp-price-line tnum">Locked in. New gifts go to {money(AFTER_HOLIDAY)} on {"Jan\u00a01"}.</p>
+        </>
+      ) : null}
+      <p className="tpp-price-what">
+        <b>${CREDIT} credit</b> every week at each of five{"\u00a0"}spots.
       </p>
     </div>
   );

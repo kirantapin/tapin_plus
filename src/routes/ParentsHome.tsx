@@ -27,7 +27,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HolidayClock, HowPhone, OfferPrice, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 
@@ -608,8 +608,7 @@ export default function ParentsHome() {
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
               $3.99, then $7.99). */}
-          <OfferPrice />
-          <HolidayClock />
+          <PriceLead />
           <button
             type="button"
             className="tpa-cta tpp-cta"
