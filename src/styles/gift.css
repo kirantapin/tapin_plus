@@ -463,12 +463,28 @@ button.tpg-env-link {
   outline: 3px solid var(--orange);
   outline-offset: 3px;
 }
-/* Side by side only once the sheet is the desk layout's wide column. */
+/* The envelope's column never squeezes the art: a phone's 320 included. */
+.tpg-env {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tpg-env-art {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
 @media (min-width: 1024px) {
   .tpp .tpa-sheet > .tpp-offer + .tpg-env,
   .tpp .tpa-sheet > .tpp-offer-col + .tpg-env {
     margin-top: 0;
   }
+  .tpg-env {
+    border-radius: 20px;
+  }
+}
+/* Side by side only once the column has room for the 300px envelope and the
+   copy's swatch row (Sam, 9 Nov 2026: at 1024 to about 1110 the card's
+   button, tag and View more ran off its right edge). Below this a computer
+   stacks them, as a phone does. */
+@media (min-width: 1140px) {
   .tpg-env {
     border-radius: 20px;
     grid-template-columns: auto minmax(0, 1fr);
@@ -1956,7 +1972,7 @@ button.tpg-env-link {
   outline: 3px solid #e5751f;
   outline-offset: 2px;
 }
-@media (min-width: 1024px) {
+@media (min-width: 1140px) {
   .tpg-env-pick {
     justify-items: start;
   }
