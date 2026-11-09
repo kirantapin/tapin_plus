@@ -68,14 +68,13 @@
   height: 52px;
   margin-top: 14px;
 }
-/* The holiday price (Sam, 9 Nov 2026): a cream well over the button, the
-   clock in maroon, the price after it in ink. */
+/* The holiday price (Sam, 9 Nov 2026): a cream well over the button, two
+   short lines; the days left in maroon. */
 .tpp-hol {
   display: grid;
-  justify-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 16px;
-  padding: 14px 12px 12px;
+  padding: 12px 14px;
   border-radius: 14px;
   background: #f7f3ea;
   text-align: center;
@@ -84,28 +83,15 @@
   margin: 0;
 }
 .tpp-hol-h {
-  font: 600 14px/18px "Gilroy", Arial, sans-serif;
-  color: #861f41;
-}
-.tpp-hol-clock {
-  display: flex;
-  gap: 14px;
-}
-.tpp-hol-clock span {
-  display: grid;
-  justify-items: center;
-  min-width: 38px;
-}
-.tpp-hol-clock b {
-  font: 600 26px/30px "Gilroy", Arial, sans-serif;
-  color: #141618;
-}
-.tpp-hol-clock small {
-  font: 500 14px/16px "Gilroy", Arial, sans-serif;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
+.tpp-hol-h b {
+  font-weight: 600;
+  color: #861f41;
+}
 .tpp-hol-line {
-  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
   color: var(--muted);
   text-wrap: balance;
 }

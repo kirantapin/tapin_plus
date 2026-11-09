@@ -244,37 +244,27 @@ export function OfferPrice() {
    year turns, so it never counts past zero. */
 export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 export const AFTER_HOLIDAY = 14.99;
-const pad2 = (n: number) => String(n).padStart(2, "0");
 export function HolidayClock() {
   const { MONTHLY } = useParentPrice();
+  /* Days, not a ticking clock (Sam, 9 Nov 2026: "there are a lot of numbers
+     here"). Checked each minute so it turns over at midnight. */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    const t = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(t);
   }, []);
   const left = HOLIDAY_ENDS - now;
   if (left <= 0) return null;
-  const s = Math.floor(left / 1000);
-  const parts: Array<[number, string]> = [
-    [Math.floor(s / 86400), "days"],
-    [Math.floor((s % 86400) / 3600), "hrs"],
-    [Math.floor((s % 3600) / 60), "min"],
-    [s % 60, "sec"],
-  ];
+  const days = Math.floor(left / 86_400_000);
+  const when = days < 1 ? "Ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
   return (
     <div className="tpp-hol" data-ph-show="">
-      <p className="tpp-hol-h">Holiday price ends in</p>
-      <p className="tpp-hol-clock tnum" role="timer" aria-label={`${parts[0][0]} days, ${parts[1][0]} hours left`}>
-        {parts.map(([n, unit], i) => (
-          <span key={unit} aria-hidden="true">
-            <b>{i === 0 ? n : pad2(n)}</b>
-            <small>{unit}</small>
-          </span>
-        ))}
+      <p className="tpp-hol-h">
+        Holiday price <span aria-hidden="true">·</span> <b className="tnum">{when}</b>
       </p>
       <p className="tpp-hol-line tnum">
         <b>{MONTHLY}/month, locked in.</b>
-        <span>{money(AFTER_HOLIDAY)}/month from Jan 1.</span>
+        <span>{money(AFTER_HOLIDAY)} after Dec 31.</span>
       </p>
     </div>
   );
