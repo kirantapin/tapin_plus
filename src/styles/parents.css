@@ -2961,10 +2961,6 @@
     object-fit: cover;
     background: var(--ground);
   }
-  .tpp .tpp-band[data-phone="box"] [data-fav="logos"] .tpp-fav img {
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px var(--hair);
-  }
   .tpp .tpp-band[data-phone="box"] .tpp-fav .tpp-fav-logo {
     position: absolute;
     right: -5px;
@@ -2983,5 +2979,15 @@
   .tpp .tpp-band[data-phone="box"] .tpp-band-inside b {
     font-weight: 600;
     color: #0b7a53;
+  }
+}
+
+/* The line under Rob's headline (Sam, 9 Nov 2026), on a phone. */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band[data-phone="box"] .tpp-band-sub {
+    margin: -4px 0 4px;
+    color: var(--muted);
+    font: 500 16px/22px "Gilroy", Arial, sans-serif;
+    text-wrap: pretty;
   }
 }
