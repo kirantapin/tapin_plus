@@ -39,7 +39,7 @@
    ?hero= still previews every one. The variant is still registered as
    hero_variant so events say which headline showed, but not as the
    experiment's flag, so the ended experiment's numbers stay as they were. */
-export type HeroVariant = "a" | "b" | "0" | "m" | "s" | "p" | "r";
+export type HeroVariant = "a" | "b" | "0" | "m" | "s" | "p" | "r" | "w";
 
 /** The new round's headlines. */
 export const HERO_LINES: Partial<Record<HeroVariant, string>> = {
@@ -47,23 +47,29 @@ export const HERO_LINES: Partial<Record<HeroVariant, string>> = {
   s: "The average member saves $60 a month",
   p: "Spend $10 at Coffeeholics, get $5 credit weekly",
   r: "Make every dollar you spend in Blacksburg go further.",
+  /* The welcome offer leads (Sam, 9 Nov 2026: "a welcome offer of $5 credit
+     at each plus spot ... so $25 immediately available after first
+     purchase ... I think that'd be the focus"): no expiry, on top of the
+     $3.99 first month. */
+  w: "Get $25 at Blacksburg’s best spots.",
 };
 
 /** A line under the headline, for the ones that carry one. */
 export const HERO_SUBS: Partial<Record<HeroVariant, string>> = {
   r: "$5 credit every week at each of your favorite Blacksburg spots, plus 15% off once a day.",
+  w: "$5 to spend at each spot the moment you join, then $5 credit every week at each spot when you spend $10.",
 };
 
 export const HERO_TEST = "plus-hero";
 const KEY = "tp_hero_v3";
-const ALL: HeroVariant[] = ["a", "b", "0", "m", "s", "p", "r"];
+const ALL: HeroVariant[] = ["a", "b", "0", "m", "s", "p", "r", "w"];
 const isVariant = (v: string | null): v is HeroVariant => !!v && (ALL as string[]).includes(v);
 
 let cached: HeroVariant | null = null;
 
 export function heroVariant(): HeroVariant {
   if (cached) return cached;
-  if (typeof window === "undefined") return "r";
+  if (typeof window === "undefined") return "w";
   const asked = new URLSearchParams(window.location.search).get("hero");
   if (isVariant(asked)) return (cached = asked);
   /* The test is over (above): an earlier draw is cleared. */
@@ -72,7 +78,7 @@ export function heroVariant(): HeroVariant {
   } catch {
     /* Storage blocked: nothing kept to clear. */
   }
-  return (cached = "r");
+  return (cached = "w");
 }
 
 /** The super properties that tag every event with the visitor's hero. */

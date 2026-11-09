@@ -126,7 +126,7 @@ const headerChips = (): HeaderChips => {
    for PostHog's experiment and breakdown views), so compare sign-up clicks
    and checkouts per variant. A second piece, when there is one, holds
    together on a line of its own. */
-type ParentHero = "a" | "b" | "c" | "d" | "e" | "f" | "r" | "s";
+type ParentHero = "a" | "b" | "c" | "d" | "e" | "f" | "r" | "s" | "w";
 const PARENT_HERO_KEY = "tp_parent_hero_v2";
 const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
   a: ["A care package", "they’ll open every day."],
@@ -144,20 +144,27 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
      not money back; 15% off once a day). */
   r: ["Make every dollar they spend", "in Blacksburg go further."],
   s: ["Make every dollar they spend", "in Blacksburg go further."],
+  /* The welcome offer (Sam, 9 Nov 2026: "Gift your student $25 at
+     Blacksburg's best spots. $5 to spend at each spot the moment they join,
+     then $5 back every week at each spot when they spend $10"; credit, not
+     back, as everywhere). The $25 doesn't expire; $3.99 the first month
+     still stands. */
+  w: ["Gift your student $25 at", "Blacksburg’s best spots."],
 };
 /** A line under the headline, for the headlines that carry one; it says the
  *  offer, so the favourites row then shows the places alone. */
 const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
   r: "Tapin Plus gives your Virginia Tech student money back at their favorite local spots every week, plus 15% off a meal every day.",
   s: "$5 credit every week at each of their favorite Blacksburg spots, plus 15% off once a day.",
+  w: "$5 to spend at each spot the moment they join, then $5 credit every week at each spot when they spend $10.",
 };
 const isParentHero = (v: string | null): v is ParentHero =>
-  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s";
+  v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s" || v === "w";
 
 let parentHeroCached: ParentHero | null = null;
 function parentHero(): ParentHero {
   if (parentHeroCached) return parentHeroCached;
-  if (typeof window === "undefined") return "s";
+  if (typeof window === "undefined") return "w";
   const asked = new URLSearchParams(window.location.search).get("ph");
   if (isParentHero(asked)) return (parentHeroCached = asked);
   try {
@@ -170,7 +177,8 @@ function parentHero(): ParentHero {
      line held to the offer ("A care package they'll open every day" heads
      the envelope now). ?ph= still previews the others, and an earlier draw
      is cleared. */
-  return (parentHeroCached = "s");
+  /* Since the welcome offer (9 Nov 2026, late): "w". */
+  return (parentHeroCached = "w");
 }
 /* The experiment's flag isn't registered any more (the test is over); the
    variant still is, so events say which headline was showing. */
