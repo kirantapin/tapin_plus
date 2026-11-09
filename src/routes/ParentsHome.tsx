@@ -426,7 +426,10 @@ export default function ParentsHome() {
           this hero container - for desktop and mobile"). */}
       <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus students">
         <i className="tpa-pbar-dot" aria-hidden="true" />
-        {PROOF_STUDENTS}
+        {/* The short line on a phone (Sam, 9 Nov 2026: "this looks a bit
+            strange on this shorter screen"). */}
+        <span className="tpa-pbar-long">{PROOF_STUDENTS}</span>
+        <span className="tpa-pbar-short">{NAME_VT ? "500+ Virginia Tech students on Plus" : "500+ Blacksburg students on Plus"}</span>
       </aside>
       <header
         className="tpa-band tpp-band"
@@ -795,7 +798,9 @@ export default function ParentsHome() {
       </main>
 
       <div ref={dockRef} className="tpa-dock tpp-dock" data-island-origin="" hidden>
-        <ProofTurn className="tpp-pt-dock" start="students" paused={building} />
+        {/* The bar above says the students line, so the dock starts on the
+            promise. */}
+        <ProofTurn className="tpp-pt-dock" start="refund" paused={building} />
         <button
           type="button"
           className="tpa-cta tpa-dock-cta"

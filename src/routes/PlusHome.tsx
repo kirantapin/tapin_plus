@@ -563,7 +563,11 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
            replace it with this"); the countdown went. */
         <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus members">
           <i className="tpa-pbar-dot" aria-hidden="true" />
-          {MEMBERS_LINE}
+          {/* A phone gets the short line, so it stays one line even with the
+              text made larger (Sam, 9 Nov 2026: "this looks a bit strange on
+              this shorter screen"). */}
+          <span className="tpa-pbar-long">{MEMBERS_LINE}</span>
+          <span className="tpa-pbar-short">Join 500+ Virginia Tech students on Plus</span>
         </aside>
       )}
       <header
