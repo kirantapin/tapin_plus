@@ -2830,3 +2830,14 @@
 .tpp .tpp-offer .tpp-pt-card {
   place-items: center start;
 }
+
+/* The voices under the envelope (Sam, 9 Nov 2026): in the page's own
+   column now, on a computer too, where the rail runs to the column's edges
+   like the places above it. */
+@media (min-width: 1024px) {
+  .tpp .tpa-sheet > .tpp-v-up {
+    margin: 18px 0 0;
+    padding: 0;
+    scroll-padding-inline: 0;
+  }
+}
