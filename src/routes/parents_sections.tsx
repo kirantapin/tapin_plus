@@ -169,16 +169,18 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
             before their next bill" (the backend's renewal reminder); an
             email since 8 Nov ("Bill reminders → email"): a text "will lead
             to more churn". The bell, so it doesn't twin the mail row under it. */}
+        {/* A text again (Sam, 9 Nov 2026: "we text them before every
+            billing, and they can cancel via text"). */}
         <li>
           <Glyph d={GLYPHS.bell} />
           <span>
-            <b>An email before each bill</b>, a few days ahead
+            <b>A text before every bill</b>
           </span>
         </li>
         <li>
           <Glyph d={GLYPHS.mail} />
           <span>
-            <b>Cancel anytime</b> by emailing support@tapin.app
+            <b>Cancel anytime</b>, right from that text
           </span>
         </li>
       </ul>
@@ -345,7 +347,7 @@ export function BenefitCards() {
       key: "phone",
       art: <Glyph d={GLYPHS.phone} className="tpp-card-glyph" />,
       label: "You send it. They claim it. It’s on.",
-      line: "In the Tapin app, with their phone number. Nothing is charged until they claim it.",
+      line: "In the Tapin app, with their phone number.",
     },
     {
       key: "saves",
@@ -360,7 +362,7 @@ export function BenefitCards() {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
       label: `First month, then ${MONTHLY} a month`,
-      line: "Charged when they claim it. Cancel anytime. If they don’t save what you spent, ask for a full refund.",
+      line: "A text before every bill. Cancel anytime. If they don’t save what you spent, ask for a full refund.",
     },
   ];
   /* One dot per place the rail can stop, not per card: on a computer three
@@ -544,13 +546,13 @@ const parentSteps = (first: string): Array<{ glyph: string; when: string; title:
     glyph: GLYPHS.card,
     when: "Today",
     title: "You add their number",
-    line: <>Enter your student’s mobile number and save your card. Nothing is charged yet.</>,
+    line: <>Enter your student’s mobile number and add your card: {first} for the first month.</>,
   },
   {
     glyph: GLYPHS.text,
     when: "Next",
     title: "They claim it",
-    line: <>They get one text from Tapin with your gift. They open it and sign in with their own number, and their Plus starts. That’s when your card is charged {first} for the first month.</>,
+    line: <>They get one text from Tapin with your gift. They open it and sign in with their own number, and their Plus starts.</>,
   },
   {
     glyph: GLYPHS.tag,
@@ -565,10 +567,10 @@ const parentSteps = (first: string): Array<{ glyph: string; when: string; title:
     ),
   },
   {
-    glyph: GLYPHS.mail,
+    glyph: GLYPHS.bell,
     when: "Anytime",
-    title: "Cancel anytime",
-    line: <>Email support@tapin.app and we’ll cancel it for you. If they don’t claim it within 30 days, it expires and you’re never charged.</>,
+    title: "A text before every bill",
+    line: <>We text you before each monthly bill. Cancel right from that text, or email support@tapin.app and we’ll do it for you.</>,
   },
 ];
 /* A made-up number (555-01xx is the range kept for fiction). */
@@ -895,8 +897,9 @@ export function HowPhone({
                   <span className="tpp-hw-caret" />
                 </div>
                 <div className="tpp-hw-row">
-                  <span>{student ? "First month" : "Due today"}</span>
-                  <b>{student ? first : "$0"}</b>
+                  {/* "Due today $0" went (Sam, 9 Nov 2026: "its $3.99 today"). */}
+                  <span>First month</span>
+                  <b>{first}</b>
                 </div>
                 <div className="tpp-hw-pay">{student ? (free ? "Join Tapin Plus" : `Pay ${first}`) : "Send the gift"}</div>
               </div>
@@ -1016,28 +1019,24 @@ export function HowPhone({
                   </>
                 ) : null}
               </div>
-              {/* The reminder before each bill, as the email it is (Sam, 8 Nov
-                  2026: "Bill reminders → email"): the open message, from
-                  Tapin, the date and the price, and where to write. */}
-              <div className="tpp-hw-s tpp-hw-em" data-on={cur === 3 ? "" : undefined}>
+              {/* The reminder before each bill, as the text it is again
+                  (Sam, 9 Nov 2026: "we text them before every billing, and
+                  they can cancel via text"): from Tapin, the price, and
+                  cancelling by replying. */}
+              <div className="tpp-hw-s tpp-hw-em tpp-hw-sms" data-on={cur === 3 ? "" : undefined}>
                 <span className="tpp-hw-em-bar">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M15 5l-7 7 7 7" />
                   </svg>
-                  Inbox
+                  Messages
                 </span>
-                <b className="tpp-hw-em-subj">Cancel {SAMPLE_GIFT.to}’s Tapin Plus</b>
                 <div className="tpp-hw-em-from">
                   <img src={APP_ICON} alt="" decoding="async" loading="lazy" />
                   <b>Tapin</b>
                 </div>
-                <p className="tpp-hw-em-body tnum">
-                  {MONTHLY} a month until you cancel. To cancel, email us and a person does it for you.
+                <p className="tpp-hw-em-body tpp-hw-bubble tnum">
+                  {SAMPLE_GIFT.to}’s Tapin Plus renews soon at {MONTHLY}. Want to cancel? Just reply to this text.
                 </p>
-                <span className="tpp-hw-mail">
-                  <Glyph d={GLYPHS.mail} />
-                  support@tapin.app
-                </span>
               </div>
                 </>
               )}
@@ -1336,7 +1335,7 @@ const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
   parent: {
     h: "What if they don\u2019t use it?",
     row: "Full refund.",
-    fine: "Full refund if they don\u2019t save what you spent. Cancel anytime by emailing support@tapin.app.",
+    fine: "Full refund if they don\u2019t save what you spent. Cancel anytime, right from the text we send before every bill.",
   },
   student: {
     h: "What if I don\u2019t save?",
