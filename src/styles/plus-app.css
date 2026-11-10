@@ -5158,3 +5158,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpa .tpa-module.tpf-c {
   padding-bottom: 0;
 }
+
+@media (min-width: 1024px) {
+  .tpf p.tpf-alums {
+    font-size: 17px;
+    line-height: 25px;
+  }
+}
