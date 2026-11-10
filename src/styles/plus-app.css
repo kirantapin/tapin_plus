@@ -4271,6 +4271,19 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-unlock-name {
   display: none;
 }
+/* "Or 15% off once a day": the card's foot, under a hairline, in the
+   heading's voice (Sam, 10 Nov 2026). */
+.tps-unlock-or {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tps-unlock-or b {
+  font-weight: 600;
+  color: var(--ink);
+}
 /* A computer: two sides (Sam, 9 Nov 2026: "desktop just needs to look a bit
    more complete"). */
 @media (min-width: 1024px) {
@@ -4307,6 +4320,14 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   .tps-unlock-row img {
     width: 56px;
   }
+  .tps-unlock-or {
+    padding-top: 18px;
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .tps-unlock-or b {
+    color: #0b7a53;
+  }
   .tps-unlock-name {
     display: block;
     min-height: 36px;
@@ -4322,6 +4343,9 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr);
     align-items: center;
     gap: 24px;
+  }
+  .tps-unlock-or {
+    grid-column: 1 / -1;
   }
 }
 
