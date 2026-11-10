@@ -2219,16 +2219,6 @@ export function GiftPreview({
           ) : null}
         </>
       )}
-      {/* Blocked from replay: maskAllInputs skips file inputs, and the file's
-          name ("maya-graduation.jpg") would be recorded as typed. */}
-      <input
-        ref={photoInput}
-        className="ph-no-capture"
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(e) => void pickPhoto(e.target.files?.[0])}
-      />
       {photoError ? (
         <p className="gft-pp-error" role="alert" data-ph-show="">
           {photoError}
@@ -2316,6 +2306,20 @@ export function GiftPreview({
       aria-label={builder ? "Build their care package" : "Preview of their gift"}
     >
       <div className="gft-preview-scrim" onClick={shut} aria-hidden="true" />
+      {/* The photo picker, out here so it's always mounted and never inert:
+          the card's "Add a photo" opens it with the drawer down or on any
+          step (Sam, 10 Nov 2026: "when I click on this on mobile it lets me
+          add a photo"), not only the note step's button. Blocked from
+          replay: maskAllInputs skips file inputs, and the file's name
+          ("maya-graduation.jpg") would be recorded as typed. */}
+      <input
+        ref={photoInput}
+        className="ph-no-capture"
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => void pickPhoto(e.target.files?.[0])}
+      />
       {/* data-ph-show: fixed copy, readable in session replay (model/replayPrivacy.ts). */}
       <div className="gft-preview-bar" data-ph-show="">
         <div className="gft-preview-bg" role="group" aria-label="Background">
