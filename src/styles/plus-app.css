@@ -4974,3 +4974,211 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpa-s2 .tpa-buy[hidden] {
   display: none;
 }
+
+/* ══ WHY WE BROUGHT PLUS TO BLACKSBURG (shell/Founders.tsx, 10 Nov 2026;
+   three takes at ?founders&fv=a|b|c) ══════════════════════════════════════ */
+.tpf {
+  display: grid;
+  gap: 20px;
+  padding: 20px 20px 22px;
+  overflow: hidden;
+}
+.tpf-words {
+  display: grid;
+  gap: 12px;
+}
+.tpf-words .tpa-h2 {
+  margin: 0 0 2px;
+  text-wrap: balance;
+}
+.tpf-words p {
+  margin: 0;
+  font: 500 16px/23px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.78);
+  text-wrap: pretty;
+}
+.tpf p.tpf-sign {
+  display: grid;
+  gap: 0;
+  margin: 6px 0 0;
+  font: 600 19px/24px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpf-sign span {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+}
+/* The two cut-outs side by side, shoulders overlapping, heads level. */
+.tpf-pair {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.tpf-pair img {
+  display: block;
+  height: 100%;
+  width: auto;
+  filter: drop-shadow(0 10px 14px rgba(20, 22, 24, 0.22));
+}
+.tpf-pair .tpf-tee {
+  position: relative;
+  z-index: 1;
+  height: 92%;
+  margin-right: -9%;
+}
+
+/* A · Pasted into town. */
+.tpf-a {
+  padding-top: 0;
+  padding-inline: 0;
+}
+.tpf-a-town {
+  position: relative;
+  height: 250px;
+  overflow: hidden;
+}
+.tpf-a-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+.tpf-a .tpf-pair {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 218px;
+}
+.tpf-a .tpf-words {
+  padding: 0 20px;
+}
+
+/* B · The line. */
+.tpf-b {
+  gap: 16px;
+  padding: 24px 20px 22px;
+}
+.tpf-b-line {
+  margin: 0;
+}
+.tpf-b-line p {
+  margin: 0;
+  font: 600 30px/34px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.tpf-b-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+.tpf-b-faces {
+  display: flex;
+  flex: none;
+}
+.tpf-b-faces span {
+  display: block;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f0f0f0;
+  box-shadow: 0 0 0 3px #ffffff;
+}
+.tpf-b-faces span + span {
+  margin-left: -12px;
+}
+.tpf-b-faces img {
+  display: block;
+  width: 118%;
+  margin: 6% 0 0 -9%;
+}
+.tpf-b p.tpf-sign {
+  margin: 0;
+}
+
+/* C · The letter. */
+.tpf-c {
+  padding-bottom: 0;
+}
+.tpf-c-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 196px;
+  align-items: end;
+  gap: 12px;
+  margin: 0 -20px;
+  padding: 0 0 0 20px;
+  background: #f0f0f0;
+}
+.tpf-c p.tpf-sign {
+  align-self: center;
+  margin: 0;
+  padding: 16px 0;
+}
+.tpf-c .tpf-pair {
+  height: auto;
+  margin-top: -34px;
+  padding-right: 6px;
+}
+/* By width on a phone, so the pair never pushes the card wider. */
+.tpf-c .tpf-pair img {
+  height: auto;
+  width: 54%;
+}
+.tpf-c .tpf-pair .tpf-tee {
+  width: 50%;
+}
+
+@media (min-width: 1024px) {
+  .tpf {
+    padding: 32px 36px;
+  }
+  .tpf-words p {
+    font-size: 17px;
+    line-height: 25px;
+    max-width: 56ch;
+  }
+  .tpf-a {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: 36px;
+    padding: 0 36px 0 0;
+  }
+  .tpf-a-town {
+    height: 100%;
+    min-height: 420px;
+  }
+  .tpf-a .tpf-pair {
+    height: 272px;
+  }
+  .tpf-a .tpf-words {
+    padding: 32px 0;
+  }
+  .tpf-b-line p {
+    font-size: 40px;
+    line-height: 44px;
+    max-width: 20ch;
+  }
+  .tpf-c {
+    padding-bottom: 0;
+  }
+  .tpf-c-foot {
+    margin: 0 -36px;
+    padding-left: 36px;
+  }
+  .tpf-c-foot {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .tpf-c .tpf-pair {
+    margin-top: -60px;
+    padding-right: 28px;
+  }
+}

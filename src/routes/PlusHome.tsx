@@ -11,6 +11,7 @@ import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parent
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
+import { Founders } from "../shell/Founders";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
@@ -1021,6 +1022,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         {/* What if I don't save? went (Sam, 9 Nov 2026: "get rid of this too
             please"); the refund is a row under the offer and in the FAQ. */}
+
+        {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026). */}
+        <Founders />
 
         <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
