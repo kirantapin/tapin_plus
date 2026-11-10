@@ -1,7 +1,7 @@
 /* ══ WHAT'S IN IT + THE APP, UNDER THE OPENED LETTER (Sam, 6 Nov 2026: five
    designed, "lets do D": the places) ═════════════════════════════════════════
-   The facts: $5 credit every week at each place on a $10+ meal, 15% off
-   instead once a day, points on everything, the five places, the Tapin app,
+   The facts: $5 credit every month at each place, no minimum, then 15% off
+   once a day, points on everything, the five places, the Tapin app,
    the number to sign in with, a thank-you to the parent. One primary action
    per screen: on a phone the dock's "Claim my gift", so the App Store link in
    these is secondary; on a computer the inline button, with the QR for the
@@ -10,7 +10,7 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { thanksHref, type Gift } from "../model/gift";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
-import { CREDIT, FlatMark, MIN_ORDER, PERCENT, PLACES } from "./parents_kit";
+import { CREDIT, FlatMark, PERCENT, PLACES } from "./parents_kit";
 import type { DockCta } from "./GiftPage";
 import "../styles/gift-after.css";
 
@@ -93,7 +93,9 @@ function Places(p: Props) {
     <>
       <section className="gav-d" aria-labelledby="gav-h" data-ph-show="">
         <h2 id="gav-h" className="gav-d-lede">
-          <span data-k="credit">${CREDIT} credit</span> every week at each place, on a ${MIN_ORDER}+ meal. Or{" "}
+          {/* The monthly offer, the 15% after the credit (Sam, 9 and 10 Nov
+              2026); the weekly $5-on-$10 isn't marketed. */}
+          <span data-k="credit">${CREDIT} credit</span> every month at each place, no minimum. Then{" "}
           <span data-k="pct">{PERCENT}% off</span>, once a day. Points on everything.
         </h2>
         <ul className="gav-d-rail" aria-label="Where it works">

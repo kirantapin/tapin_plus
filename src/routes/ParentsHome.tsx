@@ -156,8 +156,8 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
 /** A line under the headline, for the headlines that carry one; it says the
  *  offer, so the favourites row then shows the places alone. */
 const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
-  r: "Tapin Plus gives your Virginia Tech student $5 credit every month at each of their favorite local spots, or 15% off a meal every day.",
-  s: "$5 credit every month at each of their favorite Blacksburg spots, or 15% off once a day.",
+  r: "Tapin Plus gives your Virginia Tech student $5 credit every month at each of their favorite local spots, then 15% off a meal every day.",
+  s: "$5 credit every month at each of their favorite Blacksburg spots, then 15% off once a day.",
   w: "$5 to spend at each spot the moment they join, and again every month, with no minimum spend.",
 };
 const isParentHero = (v: string | null): v is ParentHero =>
@@ -789,7 +789,7 @@ export default function ParentsHome() {
             The $12 lunch is Coffeeholics’ California Club, $12.00 before tax.{" "}
             ${CREDIT} credit every month at each Plus place on orders placed
             through Tapin, no minimum spend; credit resets each month and
-            doesn’t roll over. Or {PERCENT}% off once a day. One benefit per
+            doesn’t roll over. Then {PERCENT}% off once a day. One benefit per
             order. Alcohol excluded. {FIRST} the
             first month, then {MONTHLY}/month, billed every month until
             cancelled, with a text before each bill. Tapin is not affiliated
