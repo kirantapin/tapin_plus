@@ -4701,3 +4701,266 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     line-height: 22px;
   }
 }
+
+/* ══ THE OFFER CARD, THREE TAKES (shell/OfferVersions.tsx, ?offv=a|b|c;
+   Sam, 10 Nov 2026: "Still don't love it"). White card, ink type, money
+   green for what you get, nothing said twice. ═════════════════════════════ */
+.ov {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.ov-h {
+  margin: 0;
+  font: 600 26px/30px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.ov-logos {
+  display: flex;
+}
+.ov-logos img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 2.5px rgba(20, 22, 24, 0.1);
+}
+.ov-logos img + img {
+  margin-left: -7px;
+}
+.ov-ends {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-ends .tpa-clock {
+  width: 17px;
+  height: 17px;
+  color: #861f41;
+}
+.ov-spots {
+  display: grid;
+  gap: 7px;
+  margin-top: -6px;
+}
+.ov-spots p {
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-spots b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ov-spots > span {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: #e5e5ea;
+  overflow: hidden;
+}
+.ov-spots > span i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+}
+
+/* A · Every month: two rows on the well, then the price. */
+.ov-a-rows {
+  display: grid;
+  margin: 0;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: #e8f4ee;
+  list-style: none;
+}
+.ov-a-rows li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+}
+.ov-a-rows li + li {
+  border-top: 1px solid rgba(11, 122, 83, 0.16);
+}
+.ov-a-rows .ov-logos {
+  width: 108px;
+}
+.ov-a-ico {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 28px;
+  color: #0b7a53;
+}
+.ov-a-ico svg {
+  width: 24px;
+  height: 24px;
+}
+.ov-a-rows p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+.ov-a-rows b {
+  font: 600 19px/24px "Gilroy", Arial, sans-serif;
+  color: #0b7a53;
+}
+.ov-a-rows span {
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: #2d5a48;
+}
+.ov-a-price {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ov-a-price b {
+  font: 600 44px/44px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.ov-a-price p {
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+
+/* B · The stack: the five spots, $5 each, adding up. */
+.ov-b-rows {
+  display: grid;
+  margin: 0;
+  padding: 4px 16px;
+  border-radius: 14px;
+  background: #f4f4f5;
+  list-style: none;
+}
+.ov-b-rows li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  font: 500 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-b-rows img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+}
+.ov-b-rows li > b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.ov-b-rows .ov-b-total {
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 4px;
+  padding: 12px 0;
+  border-top: 1.5px solid rgba(20, 22, 24, 0.14);
+  font-weight: 600;
+}
+.ov-b-total b {
+  font-size: 22px;
+  line-height: 26px;
+}
+.ov-b-then {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-b-then svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: #0b7a53;
+}
+.ov-b-then b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.ov-b-cost {
+  margin: 4px 0 0;
+  font: 500 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-b-cost b {
+  margin-right: 4px;
+  font-size: 30px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* C · Pay / get: two full rows. */
+.ov-c-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 16px 18px;
+  border-radius: 14px;
+}
+.ov-c-row > span {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+}
+.ov-c-row > b {
+  grid-row: span 2;
+  align-self: center;
+  font: 600 40px/42px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.ov-c-row > small {
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+}
+.ov-c-pay {
+  background: #f4f4f5;
+  color: var(--ink);
+}
+.ov-c-pay > small {
+  color: var(--muted);
+}
+.ov-c-get {
+  margin-top: -8px;
+  background: #e8f4ee;
+  color: #0b7a53;
+}
+.ov-c-get > small {
+  color: #2d5a48;
+}
+.ov-c-plus {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(11, 122, 83, 0.16);
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+}
+.ov-c-plus svg {
+  width: 20px;
+  height: 20px;
+}
+.ov-c > .ov-logos {
+  justify-content: center;
+}
+
+.tpa-s2 .tpa-buy[hidden] {
+  display: none;
+}
