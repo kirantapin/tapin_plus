@@ -385,6 +385,11 @@ export default function ParentsHome() {
       a: "No. Students living on campus have to have a VT dining plan. Tapin Plus is for the meals they buy off campus at our Plus places. Many students living off campus have no plan at all, and that’s where it helps most.",
     },
     {
+      /* The credit is there at once (Sam, 9 Nov 2026). */
+      q: "When does their credit start?",
+      a: `Right away. The moment they claim your gift, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app.`,
+    },
+    {
       q: "What if they don’t use it?",
       a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. And nothing is charged until they claim it: if they don’t within 30 days, it expires and you’re never charged. Cancel anytime.`,
     },

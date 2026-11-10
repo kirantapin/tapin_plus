@@ -335,6 +335,13 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
   },
   {
+    /* The welcome credit is there at once (Sam, 9 Nov 2026: "the FAQ needs
+       to reflect that the $5 credit is added to someones account
+       immediately"). */
+    q: "When do I get my credit?",
+    a: `Right away. The moment you join, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app.`,
+  },
+  {
     /* The rule is the same at every bar, not just The Burg (Sam, 4 Nov 2026). */
     q: "Are the bars included? How does credit work there?",
     a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} credit, and your credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
@@ -345,7 +352,7 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   },
   {
     q: "How often can I use it?",
-    a: `$${CREDIT} credit at each of the ${PLACES.length} places on an order of $${MIN_ORDER} or more. Once you’ve used it at a place, it’s ready there again 7 days later. Or take ${PERCENT}% off your order instead, once a day.`,
+    a: `$${CREDIT} credit at each of the ${PLACES.length} places on an order of $${MIN_ORDER} or more, there from the moment you join. Once you’ve used it at a place, it’s ready there again 7 days later. Or take ${PERCENT}% off your order instead, once a day.`,
   },
   {
     q: "What does it work on?",
