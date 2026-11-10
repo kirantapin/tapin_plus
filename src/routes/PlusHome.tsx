@@ -234,11 +234,11 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     /* The monthly credit (Sam, 9 Nov 2026): "they don't stack, and credit
        doesn't roll over". */
     q: "Does my credit roll over? Can I use it with the 15%?",
-    a: `No to both. Your $${CREDIT} at each place resets every month, so use it that month. And it’s one or the other on an order: your credit, or ${PERCENT}% off.`,
+    a: `No to both. Your $${CREDIT} at each place resets every month, so use it that month. And it’s one per order: your credit on one, then ${PERCENT}% off the others.`,
   },
   {
     q: "How often can I use it?",
-    a: `$${CREDIT} credit at each of the ${PLACES.length} places every month, with no minimum spend, there from the moment you join. Or take ${PERCENT}% off your order instead, once a day.`,
+    a: `$${CREDIT} credit at each of the ${PLACES.length} places every month, with no minimum spend, there from the moment you join. Then ${PERCENT}% off your other orders, once a day.`,
   },
   {
     q: "What does it work on?",
@@ -901,8 +901,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         <footer className="tpa-foot">
           <p>
-            $5 credit every month at each place, no minimum spend; it resets each month and doesn’t roll over. Or 15% off
-            once a day. One per order: credit or 15% off, not both. Credit and 15% off don’t go toward alcohol. Cancel
+            $5 credit every month at each place, no minimum spend; it resets each month and doesn’t roll over. Then 15% off
+            your other orders, once a day. One per order: credit or 15% off, not both. Credit and 15% off don’t go toward alcohol. Cancel
             anytime.
           </p>
           <AccountLine where="home_foot" app />

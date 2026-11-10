@@ -103,7 +103,8 @@ function LogoRow({ size }: { size: number }) {
    one quiet list on the ground, one row style (a glyph, the fact in ink, the
    rest muted), in two groups: what else Plus gives, then what we promise.
    The facts are the same:
-     · 15% off instead of the $5, once a day; points on everything;
+     · 15% off after the $5, once a day (Sam, 10 Nov 2026: then, not
+       instead); points on everything;
      · a month that didn't save them what you spent, refunded on asking
        (support, by hand; Sam, 7 Nov 2026), and cancel by email. No refund
        for never signing in (Sam, 7 Nov 2026: "if someone doesn't claim it
@@ -126,7 +127,7 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
           <li>
             <Glyph d={GLYPHS.percent} />
             <span>
-              <b>{PERCENT}% off</b> instead, once a day
+              <b>{PERCENT}% off</b> after your credit, once a day
             </span>
           </li>
         </ul>
@@ -153,7 +154,7 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
         <li>
           <Glyph d={GLYPHS.percent} />
           <span>
-            <b>{PERCENT}% off</b> instead, once a day
+            <b>{PERCENT}% off</b> after their credit, once a day
           </span>
         </li>
         <li>
@@ -318,8 +319,8 @@ export function BenefitCards() {
     {
       key: "pct",
       art: <b className="tpp-card-fig">{PERCENT}%</b>,
-      label: `Or ${PERCENT}% off, once a day`,
-      line: "One per order: this or their credit. Alcohol excluded.",
+      label: `Then ${PERCENT}% off, once a day`,
+      line: "On their other orders, after the credit. Alcohol excluded.",
     },
     {
       key: "note",
@@ -543,7 +544,7 @@ const parentSteps = (first: string): Array<{ glyph: string; when: string; title:
     /* The monthly credit (Sam, 9 Nov 2026). */
     line: (
       <>
-        {money0(CREDIT)} in credit every month at each Plus place, no minimum spend. Or {PERCENT}% off, once a day.
+        {money0(CREDIT)} in credit every month at each Plus place, no minimum spend. Then {PERCENT}% off, once a day.
       </>
     ),
   },
@@ -643,7 +644,7 @@ function studentSteps(first: string, free: boolean, appTab: number): Array<{ gly
       title: "Save at each place",
       line: (
         <>
-          {money0(CREDIT)} credit every month at each place, no minimum spend. Or {PERCENT}% off, once a day.
+          {money0(CREDIT)} credit every month at each place, no minimum spend. Then {PERCENT}% off, once a day.
         </>
       ),
     },

@@ -7,7 +7,7 @@ import { PERCENT, PLACES } from "../routes/parents_kit";
    sides, the words with the $25 total on the left, the five places named on
    the right. Styles: .tps-unlock* in plus-app.css. */
 const CREDIT = 5;
-export function BonusSpots(_: { they?: boolean }) {
+export function BonusSpots({ they = false }: { they?: boolean }) {
   return (
     <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
       <div className="tps-unlock-say">
@@ -34,9 +34,11 @@ export function BonusSpots(_: { they?: boolean }) {
         ))}
       </ul>
       {/* The other half of the offer (Sam, 10 Nov 2026: "can we also add
-          15% off daily here too"), across the card's foot. */}
+          15% off daily here too"), across the card's foot. It follows the
+          credit, not instead of it (Sam, 10 Nov 2026: "being able to use the
+          $5 credit, and then everything else is covered by the 15% off"). */}
       <p className="tps-unlock-or">
-        <b>Or {PERCENT}% off</b> once a day
+        <b>Then {PERCENT}% off</b> {they ? "their" : "your"} other orders, once&nbsp;a&nbsp;day
       </p>
     </section>
   );

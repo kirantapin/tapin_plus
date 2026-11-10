@@ -588,7 +588,8 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
       </li>
       <li>
         <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">15%</span>
-        <b>{look === "c" ? "Or 15% off daily" : "Or 15% off, once a day"}</b>
+        {/* After the credit, not instead of it (Sam, 10 Nov 2026). */}
+        <b>{look === "c" ? "Then 15% off daily" : "Then 15% off, once a day"}</b>
       </li>
       {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
           anytime", moved here from the page ("it'd be one of these"), right under
