@@ -391,7 +391,9 @@ export default function ParentsHome() {
     },
     {
       q: "What if they don’t use it?",
-      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. And nothing is charged until they claim it: if they don’t within 30 days, it expires and you’re never charged. Cancel anytime.`,
+      /* No "unclaimed costs nothing" (Sam, 9 Nov 2026: "we have to remove
+         the 'if it's unclaimed it costs nothing' thing"). */
+      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If they don’t save what you spent, ask for a full refund. Cancel anytime.`,
     },
     {
       q: "Can I see what they order?",
@@ -411,11 +413,12 @@ export default function ParentsHome() {
     },
     {
       q: "My student already has Tapin Plus. What happens?",
-      a: "They can’t claim a second one while theirs is on, so nothing is charged. If they don’t claim it within 30 days, it expires.",
+      a: "They can’t claim a second one while theirs is on. Email support@tapin.app and we’ll sort it out.",
     },
     {
       q: "How do I cancel?",
-      a: "Email support@tapin.app any time and we’ll cancel it for you. You can see your gifts any time from Your account, signed in with your mobile.",
+      /* A text before every bill, and cancel by text (Sam, 9 Nov 2026). */
+      a: "We text you before every bill, and you can cancel right from that text. Or cancel from Your account, signed in with your mobile, or email support@tapin.app any time and we’ll do it for you.",
     },
     {
       q: "Who do I contact with questions?",
@@ -694,30 +697,33 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.calendar} />}
-              label={`Nothing today. ${FIRST} when they claim it`}
+              label={`${FIRST} the first month, then ${MONTHLY}`}
             >
-              Your card is saved, not charged. When they claim it, {FIRST} for the first month, then {MONTHLY} a month.
+              {FIRST} for the first month, then {MONTHLY} a month, billed monthly until you cancel.
+            </Fold>
+            {/* A text before every bill, and cancel by text (Sam, 9 Nov
+                2026); "unclaimed, it costs nothing" and "no one is charged
+                twice" went with the charge at purchase. */}
+            <Fold
+              className="tpp-sure-row"
+              lead={<Glyph d={GLYPHS.bell} />}
+              label="A text before every bill"
+            >
+              We text you before each monthly bill, and you can cancel right from that text.
             </Fold>
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.refund} />}
-              label="Unclaimed, it costs nothing"
+              label="Didn’t save what you spent? Full refund"
             >
-              If they don’t claim it within 30 days, it expires and you’re never charged.
+              Ask support@tapin.app and you get a full refund.
             </Fold>
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.mail} />}
-              label="Cancel by email"
+              label="Cancel anytime"
             >
-              Email support@tapin.app any time and we’ll cancel it for you.
-            </Fold>
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.shield} />}
-              label="No one is charged twice"
-            >
-              If they already have Tapin Plus, they can’t claim a second one, so nothing is charged.
+              Reply to our text, cancel from Your account, or email support@tapin.app and we’ll do it for you.
             </Fold>
           </div>
         </section>
@@ -760,10 +766,10 @@ export default function ParentsHome() {
             loading="lazy"
           />
           <h2 id="tpp-close-h" className="tpa-close-h tnum">
-            Nothing charged until they claim it
+            {FIRST} the first month
           </h2>
           <p className="tpa-close-line tnum">
-            Then {FIRST} the first month, {MONTHLY}/month after. Cancel anytime.
+            Then {MONTHLY}/month. We text you before every bill. Cancel anytime.
           </p>
           <button
             type="button"
@@ -780,11 +786,10 @@ export default function ParentsHome() {
             The $12 lunch is Coffeeholics’ California Club, $12.00 before tax.{" "}
             ${CREDIT} credit every 7 days per Plus place on ${MIN_ORDER}+ orders
             of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
-            off once a day. One benefit per order. Alcohol excluded. Nothing is
-            charged until your student claims the gift; then {FIRST} the first
-            month, then {MONTHLY}/month, billed every month until cancelled. A
-            gift not claimed within 30 days expires and is never charged. Tapin
-            is not affiliated with Virginia Tech.
+            off once a day. One benefit per order. Alcohol excluded. {FIRST} the
+            first month, then {MONTHLY}/month, billed every month until
+            cancelled, with a text before each bill. Tapin is not affiliated
+            with Virginia Tech.
           </p>
           <p className="tpa-links">
             {LEGAL.map((l) => (

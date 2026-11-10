@@ -874,8 +874,9 @@ function Sheet({
   const first = (saved?.cart ?? cart)?.dueTodayCents ?? cents(price?.first);
   const monthly = cents(price?.monthly);
 
-  /* Nothing is charged here: the card is saved and the gift sent. */
-  const payLabel = "Save card and send the gift";
+  /* No "save card" (Sam, 9 Nov 2026: "its $3.99 today, not when they
+     claim it"). */
+  const payLabel = "Send the gift";
 
   /* ── Header ── */
   const title: React.ReactNode =
@@ -899,16 +900,14 @@ function Sheet({
     step === "who"
       ? walletsShown
         ? null
-        : `Nothing is charged until they claim it. Then ${usd(first)} the first month, ${usd(monthly)}/month after.`
+        : `${usd(first)} the first month, then ${usd(monthly)}/month.`
       : step === "pay"
         ? (
             <>
-              For <span className="ph-mask">{cap(who)}</span>, <span className="ph-mask">{masked}</span>. Nothing is charged today.
+              For <span className="ph-mask">{cap(who)}</span>, <span className="ph-mask">{masked}</span>.
             </>
           )
-        : step === "done"
-          ? "Nothing is charged until they claim it."
-          : null;
+        : null;
   /* The builder's stages count as the first bars (GiftPreview's stepsTotal),
      so the count is the same across the whole flow; Send as is counts only
      these two. */
@@ -1018,12 +1017,12 @@ function Sheet({
   const rows = (
     <div className={flat ? "prc-e-rows" : "prc-module prc-rows"} data-ph-show="">
       <div className="prc-row">
-        <span>Due today</span>
-        <b className="tnum">$0</b>
+        <span>First month</span>
+        <b className="tnum">{usd(first)}</b>
       </div>
       <div className="prc-row">
-        <span>When they claim it</span>
-        <b className="tnum">{`${usd(first)}, then ${usd(monthly)} a month`}</b>
+        <span>Then</span>
+        <b className="tnum">{`${usd(monthly)} a month`}</b>
       </div>
     </div>
   );
@@ -1035,13 +1034,13 @@ function Sheet({
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
-          <b>Not charged until they claim it.</b> Unclaimed after 30 days, it expires.
+          <b>Didn’t save what you spent?</b> Ask for a full refund.
         </span>
       </li>
       <li>
-        <Glyph d={GLYPHS.mail} />
+        <Glyph d={GLYPHS.bell} />
         <span>
-          <b>Cancel anytime</b> by emailing support@tapin.app
+          <b>A text before every bill.</b> Cancel right from it.
         </span>
       </li>
     </ul>
@@ -1279,7 +1278,7 @@ function Sheet({
           </span>
           <div>
             <b>If they don’t claim it</b>
-            <p className="tnum">It expires on {expires} and you’re never charged.</p>
+            <p className="tnum">Their link works until {expires}.</p>
           </div>
         </li>
       </ol>
@@ -1290,7 +1289,7 @@ function Sheet({
         <li>
           <Glyph d={GLYPHS.mail} />
           <span>
-            <b>Cancel anytime</b> by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
+            <b>Cancel anytime</b>, right from the text we send before every bill, or by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
           </span>
         </li>
         <li className="prc-done-how-row">
@@ -1548,7 +1547,7 @@ function Terms({ first, monthly }: { first: number; monthly: number }) {
     <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"} data-ph-show="">
       {/* Short: the promise above the button carries cancelling (Sam, 7 Nov
           2026); this keeps the price, the renewal and the links. */}
-      {`Nothing today. When they claim it, ${usd(first)}, then ${usd(monthly)}/month until you cancel. `}
+      {`${usd(first)} the first month, then ${usd(monthly)}/month until you cancel. `}
       <Legal />
     </p>
   );
@@ -1684,7 +1683,7 @@ function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
         paymentDescription: "Tapin Plus, a gift",
         managementURL: "https://plus.tapin.app/parents/account",
         trialBilling: {
-          label: "First month, when they claim it",
+          label: "First month",
           amount: cents,
           recurringPaymentStartDate: start,
           recurringPaymentEndDate: next,
@@ -1698,7 +1697,7 @@ function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
           recurringPaymentIntervalUnit: "month",
           recurringPaymentIntervalCount: 1,
         },
-        billingAgreement: `Nothing today. When they claim it, ${usd(cents)}, then ${usd(monthlyCents)} a month until you cancel. Unclaimed after 30 days, it expires. Cancel anytime by emailing support@tapin.app.`,
+        billingAgreement: `${usd(cents)} the first month, then ${usd(monthlyCents)} a month until you cancel. We text you before every bill; cancel anytime by replying, or by emailing support@tapin.app.`,
       },
     },
   };

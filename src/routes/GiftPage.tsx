@@ -280,7 +280,7 @@ export default function GiftPage() {
               {load.from}’s gift <span className="gft-nowrap">{load.why === "expired" ? "has expired" : "was cancelled"}</span>
             </h1>
             <p className="gft-plain-line">
-              {load.why === "expired" ? "It wasn’t claimed in time, so nothing was charged." : "It can’t be claimed anymore."} You can still join on your own.
+              {load.why === "expired" ? "It wasn’t claimed in time." : "It can’t be claimed anymore."} You can still join on your own.
             </p>
             <Link className="gft-open" to="/">
               See Tapin Plus
@@ -378,7 +378,7 @@ function ClaimResult({ claim, gift, onBack }: { claim: Claim; gift: Gift; onBack
           This gift can’t <span className="gft-nowrap">be claimed</span>
         </>
       );
-      line = `You may already have Tapin Plus, or its offer may have ended or be one you’ve had before. Nothing was charged. Let ${from} know.`;
+      line = `You may already have Tapin Plus, or its offer may have ended or be one you’ve had before. Let ${from} know.`;
       action = (
         <Link className="gft-open" to="/">
           See Tapin Plus
@@ -386,7 +386,7 @@ function ClaimResult({ claim, gift, onBack }: { claim: Claim; gift: Gift; onBack
       );
     } else {
       title = message || "Something went wrong";
-      line = "Nothing was charged.";
+      line = "Try again in a moment.";
       action = (
         <button type="button" className="gft-open" onClick={onBack}>
           Try again

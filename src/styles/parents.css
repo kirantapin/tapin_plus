@@ -3238,3 +3238,38 @@
     top: 22%;
   }
 }
+
+/* The bill reminder is a text again (Sam, 9 Nov 2026): Tapin's message as a
+   grey bubble, under the sender. */
+.tpp .tpp-hw-sms .tpp-hw-bubble {
+  justify-self: start;
+  max-width: 92%;
+  margin: 10px 0 4px;
+  padding: 10px 13px;
+  border-radius: 18px 18px 18px 6px;
+  background: #e9e9eb;
+  color: #141618;
+}
+
+/* A narrow phone (Sam, 9 Nov 2026: "some of these sections on thinner view
+   ports look a bit weird"): the five discs were 5 x 48 + 4 x 10 = 280px at
+   least, wider than the module under about 340, so the row pushed the whole
+   section (the maroon panel too) past the card's edge. They share the width
+   now, up to 48px each. */
+@container (max-width: 599.98px) {
+  .tpp-fb-picks {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 48px));
+    justify-content: center;
+    gap: min(10px, 2.5cqi);
+  }
+  .tpp-fb-pick {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .tpp-fb-pick .collar {
+    width: 84%;
+    height: 84%;
+  }
+}

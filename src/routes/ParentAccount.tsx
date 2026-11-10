@@ -26,7 +26,8 @@ const MAIL = `mailto:support@tapin.app?subject=${encodeURIComponent("My student�
 )}`;
 
 const ROWS: ReadonlyArray<{ glyph: keyof typeof GLYPHS; title: string; line?: string }> = [
-  { glyph: "refund", title: "Not charged until they claim it", line: "Unclaimed after 30 days, it expires." },
+  { glyph: "bell", title: "A text before every bill", line: "Cancel right from it, or here." },
+  { glyph: "refund", title: "Didn’t save what you spent?", line: "Ask support@tapin.app for a full refund." },
   { glyph: "calendar", title: "Cancel anytime, here", line: "A gift before it’s claimed, or their Plus after." },
 ];
 
@@ -54,10 +55,10 @@ const masked = (phone: string) => `•••${phone.replace(/\D/g, "").slice(-4)
 
 /** One gift's status: its chip (label and tone) and its line. */
 function statusOf(gift: SentGift, membership: PaidMembership | undefined): { label: string; tone: Tone; line: string } {
-  if (gift.revoked_at) return { label: "Cancelled", tone: "off", line: "It can’t be claimed, and nothing was charged." };
+  if (gift.revoked_at) return { label: "Cancelled", tone: "off", line: "It can’t be claimed." };
   if (!gift.claimed_at) {
-    if (new Date(gift.expires_at) <= new Date()) return { label: "Expired", tone: "off", line: "It wasn’t claimed, so nothing was charged." };
-    return { label: "Waiting", tone: "wait", line: `Not claimed yet. Nothing is charged until they do. It expires ${day(gift.expires_at)}.` };
+    if (new Date(gift.expires_at) <= new Date()) return { label: "Expired", tone: "off", line: "It wasn’t claimed in time." };
+    return { label: "Waiting", tone: "wait", line: `Not claimed yet. Their link works until ${day(gift.expires_at)}.` };
   }
   if (!membership) return { label: "Claimed", tone: "good", line: `Claimed ${day(gift.claimed_at)}.` };
   if (membership.subscription_status === "canceled" || new Date(membership.ends_at) <= new Date())
@@ -164,7 +165,7 @@ export default function ParentAccount() {
                     className="acc-btn acc-btn-quiet"
                     disabled={!!acting}
                     onClick={() =>
-                      void act(g.gift_id, `Cancel the gift to ${g.recipient_first_name}? Nothing has been charged.`, (t) => revokeGift(g.gift_id, t), "parent_gift_revoked")
+                      void act(g.gift_id, `Cancel the gift to ${g.recipient_first_name}? They won’t be able to claim it.`, (t) => revokeGift(g.gift_id, t), "parent_gift_revoked")
                     }
                   >
                     {acting === g.gift_id ? "Cancelling…" : "Cancel gift"}
