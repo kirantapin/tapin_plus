@@ -19,11 +19,42 @@ import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP } from "../model/seats";
        said twice. */
 
 export type OfferV = "a" | "b" | "c";
+/** C · Pay / get is the card (Sam, 10 Nov 2026: "this is great, for both the
+ *  moms and regular page"). ?offv=a or b still previews the others, and
+ *  ?offv=0 the card as it was. */
 export const offerVersion = (): OfferV | null => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return "c";
   const v = new URLSearchParams(window.location.search).get("offv");
-  return v === "a" || v === "b" || v === "c" ? v : null;
+  if (v === "0") return null;
+  return v === "a" || v === "b" ? v : "c";
 };
+
+/** C's two rows, shared with /parents: what you pay, and what you (or they)
+ *  get, with the 15% inside it. `foot` is what follows: the student page's
+ *  Nov 30 end and spots, the parents page's holiday price. */
+export function PayGet({ first, monthly, they = false }: { first: string; monthly: string; they?: boolean }) {
+  const total = `$${PLACES.length * CREDIT}`;
+  return (
+    <>
+      <div className="ov-c-row ov-c-pay">
+        <span>You pay</span>
+        <b className="tnum">{first}</b>
+        <small className="tnum">first month, then {monthly}</small>
+      </div>
+      <div className="ov-c-row ov-c-get">
+        <span>{they ? "They get" : "You get"}</span>
+        <b className="tnum">{total}</b>
+        <small className="tnum">
+          in credit every month, ${CREDIT} at each spot
+        </small>
+        <p className="ov-c-plus tnum">
+          <Percent />
+          Then {PERCENT}% off, every day
+        </p>
+      </div>
+    </>
+  );
+}
 
 /** "Offer ends November 30 · 20 days left"; nothing once it's over. */
 function Ends() {
@@ -143,22 +174,7 @@ export function OfferVersion({ v, first, monthly }: { v: OfferV; first: string; 
   }
   return (
     <div className="ov ov-c" data-ph-show="">
-      <div className="ov-c-row ov-c-pay">
-        <span>You pay</span>
-        <b className="tnum">{first}</b>
-        <small className="tnum">first month, then {monthly}</small>
-      </div>
-      <div className="ov-c-row ov-c-get">
-        <span>You get</span>
-        <b className="tnum">{total}</b>
-        <small className="tnum">
-          in credit every month, ${CREDIT} at each spot
-        </small>
-        <p className="ov-c-plus tnum">
-          <Percent />
-          Then {PERCENT}% off, every day
-        </p>
-      </div>
+      <PayGet first={first} monthly={monthly} />
       <Ends />
       <Spots monthly={monthly} />
     </div>

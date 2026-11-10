@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { PayGet } from "../shell/OfferVersions";
+import { Clock } from "../shell/WelcomeOffer";
 import { asset } from "../asset";
 import { logoField, venues } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
@@ -231,6 +233,42 @@ export function OfferPrice() {
    comes from the cart (a promo link's stays its own). After the year turns
    the tag and the line go and the price stands alone. */
 export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
+
+/* ══ THE PRICE CARD, PAY / GET (Sam, 10 Nov 2026, of the student page's C:
+   "this is great, for both the moms and regular page") ═══════════════════════
+   What you pay and what they get as two rows (shell/OfferVersions.tsx), then
+   the holiday price the old card carried: $MONTHLY locked in, $14.99 for new
+   gifts from January 1, the days left. After the year turns, the two rows
+   alone. */
+export function PayGetLead() {
+  const { FIRST, MONTHLY } = useParentPrice();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(t);
+  }, []);
+  const left = HOLIDAY_ENDS - now;
+  const days = Math.floor(left / 86_400_000);
+  const when = left <= 0 ? null : days < 1 ? "ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
+  return (
+    <div className="ov ov-c" data-ph-show="">
+      <PayGet first={FIRST} monthly={MONTHLY} they />
+      {when ? (
+        <>
+          <p className="ov-ends">
+            <Clock />
+            <span className="tnum">Holiday price locked in · {when}</span>
+          </p>
+          <div className="ov-spots">
+            <p className="tnum">
+              <b>{MONTHLY} a month</b> for as long as they’re on it, {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1
+            </p>
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
 export const AFTER_HOLIDAY = 14.99;
 export function PriceLead() {
   const { FIRST, MONTHLY } = useParentPrice();
