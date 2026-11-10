@@ -5205,3 +5205,70 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     object-position: 50% 24%;
   }
 }
+
+/* D · Two portraits (shell/Founders.tsx Tiles, ?fv=d, 10 Nov 2026): each
+   founder on a tile in his school's colour, the cut-out standing on its
+   floor; names under. A phone stacks the pair over the words; a computer
+   sets them side by side. */
+.tpf-d {
+  gap: 20px;
+}
+.tpf-d-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tpf-d-pair li {
+  display: grid;
+  gap: 10px;
+}
+.tpf-d-tile {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+}
+.tpf-d-tile[data-school="vt"] {
+  background: #861f41;
+}
+.tpf-d-tile[data-school="uva"] {
+  background: #232d4b;
+}
+.tpf-d-tile img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 112%;
+  height: auto;
+  transform: translateX(-50%);
+}
+/* Sam's photo is cropped closer than Rob's, so it sits a touch smaller to
+   keep their heads the same size. */
+.tpf-d-tile[data-school="uva"] img {
+  width: 110%;
+}
+.tpf-d-pair p {
+  display: grid;
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpf-d-pair p span {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .tpf-d {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 40px;
+  }
+  .tpf-d-pair {
+    gap: 14px;
+  }
+}
