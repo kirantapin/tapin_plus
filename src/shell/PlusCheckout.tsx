@@ -576,7 +576,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   };
 
   const offer = (
-    <ul className={`pck-offer${look === "b" ? " pck-offer-quiet" : ""}${look === "c" ? " pck-offer-chips" : ""}`}>
+    <ul className={`pck-offer${look === "b" ? " pck-offer-quiet" : ""}${look === "c" ? " pck-offer-chips" : " pck-offer-money"}`}>
       {/* The welcome offer (Sam, 9 Nov 2026: "include something in
           checkout on how their credit is added to the phone number they pay
           with and they can cancel anytime"): first, and cancel stays below. */}
