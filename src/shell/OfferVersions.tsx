@@ -103,7 +103,22 @@ const Logos = ({ size = 28 }: { size?: number }) => (
   </span>
 );
 
-export function OfferVersion({ v, first, monthly, term, spots }: { v: OfferV; first: string; monthly: string; term?: string; spots?: ReactNode }) {
+export function OfferVersion({
+  v,
+  first,
+  monthly,
+  term,
+  spots,
+  noEnds = false,
+}: {
+  v: OfferV;
+  first: string;
+  monthly: string;
+  term?: string;
+  spots?: ReactNode;
+  /** A group's page: its offer is counted in spots, not to November 30. */
+  noEnds?: boolean;
+}) {
   const total = `$${PLACES.length * CREDIT}`;
   if (v === "a") {
     return (
@@ -180,7 +195,7 @@ export function OfferVersion({ v, first, monthly, term, spots }: { v: OfferV; fi
       <PayGet first={first} monthly={monthly} term={term} />
       {/* A promo link's own price (a group's year at $3.99) has no end
           date: the November 30 clock is the welcome offer's. */}
-      {term ? null : <Ends />}
+      {term || noEnds ? null : <Ends />}
       {/* A group's own spots (shell/GroupBits.tsx) in place of the $7.99
           ones, which lead to $14.99. */}
       {spots ?? <Spots monthly={monthly} />}
