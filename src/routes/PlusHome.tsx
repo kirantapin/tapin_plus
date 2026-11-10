@@ -10,6 +10,7 @@ import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
+import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
@@ -494,6 +495,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     </button>
   );
   const [offer] = useState(offerLook);
+  /* The offer card's new takes, preview only (?offv=a|b|c, 10 Nov 2026). */
+  const [offv] = useState(offerVersion);
   /* THE MAIN PAGE, WITH WHAT THE PARENTS PAGE TAUGHT US (Sam, 8 Nov 2026:
      "push the round 2 changes, they look good, for the main plus.tapin.app
      page"; previews in tapin-staging-work/main-from-parents). The two Plus
@@ -859,6 +862,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 weekly $5-on-$10, so it went with it. */}
             {place && placeMonth(place.id) ? (
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} />
+            ) : offv && !place && !invite && !free ? (
+              <OfferVersion v={offv} first={FIRST_MONTH} monthly={MONTHLY} />
             ) : (
             <>
                 {/* Both halves of what it turns into (Sam, 10 Nov 2026: "it's
@@ -903,7 +908,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 bar thin, its words small under it; Join; Try as a quiet
                 second. The "offer ends" line went: the black bar pinned to
                 the top of the page already counts down to November 30. */}
-            <div className="tpa-buy" data-math="">
+            <div className="tpa-buy" data-math="" hidden={!!(offv && !place && !invite && !free)}>
               {invite ? (
                 /* The mark beside the price it unlocks: the offer is the
                    invitation's, so they sit as one line, not a badge stuck
