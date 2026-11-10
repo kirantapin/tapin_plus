@@ -1386,10 +1386,25 @@
   color: #ffffff;
 }
 
-/* The welcome bonus's $25 (9 Nov 2026): the money disc grows to a pill. */
+/* The money pills (9 Nov 2026: "the money disc grows to a pill"; polished
+   10 Nov 2026). "$25" and "15%" were squeezed into the 26px icon column at
+   11px, and "15%" spilled out of its disc. Now two equal pills at 14px, and
+   the list's marker column is their width: every label starts on one line,
+   the icon discs centred under the pills. */
+.pck-offer-money li {
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+}
+.pck-offer-money .pck-ico {
+  justify-self: center;
+}
 .pck-offer .pck-ico.pck-ico-wide {
-  width: auto;
-  min-width: 26px;
-  padding: 0 6px;
+  width: 46px;
+  height: 26px;
+  padding: 0;
   border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
