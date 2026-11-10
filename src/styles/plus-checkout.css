@@ -1408,3 +1408,16 @@
   line-height: 1;
   letter-spacing: -0.01em;
 }
+
+/* While the keyboard is up on a phone (island.ts sets data-kb), the benefits
+   panel steps aside (Sam, 10 Nov 2026: "when someone starts filling this out
+   on mobile it looks a bit strange"): the island shrank to the room above
+   the keyboard and scrolled to the number, so its top showed the list cut
+   mid-row with the title gone. They've just read it; now the title and
+   price, the opt-in, the number and Continue fit above the keyboard. It
+   comes back when the keyboard goes. */
+@media (max-width: 639.98px) {
+  .pck-layer[data-kb] .pck-island .pck-why {
+    display: none;
+  }
+}
