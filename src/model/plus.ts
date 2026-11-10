@@ -126,6 +126,8 @@ const devPrice = (): PlusPrice | null => {
   const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null, firstFor: null };
   if (q.has("wwpreview") || q.get("l") === WELCOME_WEEK_LINK_ID) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
+  /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
+  if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: { periods: 12 }, linkId: "slpreview" };
   return null;
 };
 
@@ -225,6 +227,20 @@ export const firstThen = (price: PlusPrice | null): string =>
   price?.first === 0
     ? `Your first month free, then ${usd(price.monthly)}.`
     : `${usd(price?.first)} your first month, then ${usd(price?.monthly)}.`;
+
+/** How long the first price lasts, said after its figure: "first month",
+ *  or for a promo link that lasts, "a month for your first year" (12) or
+ *  "a month for 6 months". The checkout says the same (PlusCheckout). */
+export const firstTerm = (price: PlusPrice | null): string => {
+  const f = price?.firstFor;
+  if (!f || f === "forever" || f.periods <= 1) return "first month";
+  return f.periods === 12 ? "a month for your first year" : `a month for ${f.periods} months`;
+};
+/** A promo link's price that lasts more than the first month. */
+export const firstLasts = (price: PlusPrice | null): boolean => {
+  const f = price?.firstFor;
+  return !!f && f !== "forever" && f.periods > 1;
+};
 
 /** "Free first month" or "$3.99 first month". */
 export const firstMonthLine = (price: PlusPrice | null): string =>

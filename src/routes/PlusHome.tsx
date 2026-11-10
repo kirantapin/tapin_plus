@@ -12,7 +12,7 @@ import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { Founders } from "../shell/Founders";
-import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
+import { firstFigure, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
@@ -31,6 +31,8 @@ import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcome
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
+import type { Group } from "../model/groups";
+import { GroupBar, GroupHeadline, GroupOffer, GroupSpots, useGroupSeats } from "../shell/GroupBits";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -407,7 +409,25 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
    its $5 card, its own orders on the phone, what a month there saves, How it
    works, the questions and the fine print; the five-spot rail, the $25 and
    the Blacksburg-wide walkthrough stay on the home page. */
-export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
+/* A GROUP'S PAGE (/smiths-landing, Sam, 10 Nov 2026): the home page said to
+   the people at one address (model/groups.ts). Its own header words, the
+   group's own price; the offer, checkout, dock, founders and questions are
+   the home page's. */
+/* Said only while the group's own price is the one that applies (its link),
+   so the page never promises a year the checkout won't give. Sam, 10 Nov
+   2026: the year at $3.99 is agreed with Smith's Landing. */
+const groupPriceFaq = (first: string, monthly: string, year: boolean): { q: string; a: string } => ({
+  q: "Will my price go up?",
+  a: year
+    ? `Not for your first year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`
+    : `No. Your ${monthly} a month is locked in for as long as you’re a member, even as more places join.`,
+});
+const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } => ({
+  q: `Why is it ${first} for ${g.name}?`,
+  a: `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for your first 12 months, then ${monthly} a month. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
+});
+
+export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string; bandSrc?: string; group?: Group }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
   /* Its own orders on the phone, the $5 credit then the 15% (parents_kit). */
@@ -454,6 +474,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   /* Any link's offer, with or without a look: the November 30 clock is the
      welcome offer's, not the link's. */
   const linked = price ? !!price.linkId : !!expected;
+  /* A group's year at $3.99 (model/groups.ts): on only when its link's
+     price is the one that applied, so without the link the page is the
+     ordinary offer. */
+  const groupOffer = !!group && !member && !!price?.linkId && firstLasts(price);
+  const groupSeats = useGroupSeats(group);
+  const TERM = firstTerm(price);
   /* View FAQ: a smooth scroll to the questions, landing them a little below
      the countdown bar, and focus there so a keyboard follows. */
   const faqRef = useRef<HTMLElement | null>(null);
@@ -464,20 +490,50 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      a promo link or an invitation, whose offers are their own. */
   const welcomeLead = useWelcomeLead(FIRST_MONTH);
   const seatsLeft = usePlusSeats();
-  const dockLead =
-    member || linked || invite || free
+  const dockLead = groupOffer && group
+    ? [
+        {
+          key: "group",
+          body: (
+            <>
+              <span className="tpp-pt-dot" aria-hidden="true" />
+              <span className="tnum">
+                {group.name} exclusive · {FIRST_MONTH}/mo for a year
+              </span>
+            </>
+          ),
+        },
+        {
+          key: "spots",
+          body: (
+            <>
+              <span className="tpp-pt-dot" aria-hidden="true" />
+              <span className="tnum">
+                {groupSeats} of {group.seats.cap} {group.name} spots left
+              </span>
+            </>
+          ),
+        },
+      ]
+    : member || linked || invite || free
       ? []
       : [
           ...(welcomeLead ? [{ key: "ends", body: welcomeLead }] : []),
-          {
-            key: "spots",
-            body: (
-              <>
-                <span className="tpp-pt-dot" aria-hidden="true" />
-                <span className="tnum">{plusSeatLine(seatsLeft, MONTHLY)}</span>
-              </>
-            ),
-          },
+          /* Not on a group's page: its own spots replace these (Sam, 10
+             Nov 2026), and show only with its own price. */
+          ...(group
+            ? []
+            : [
+                {
+                  key: "spots",
+                  body: (
+                    <>
+                      <span className="tpp-pt-dot" aria-hidden="true" />
+                      <span className="tnum">{plusSeatLine(seatsLeft, MONTHLY)}</span>
+                    </>
+                  ),
+                },
+              ]),
         ];
   const checkoutOpen = usePlusCheckoutOpen();
   useDockPulse(dockRef, !checkoutOpen, member);
@@ -509,6 +565,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   useEffect(() => {
     if (invite) registerForSession(wwHeroProps());
   }, [invite, registerForSession]);
+  /* Every event on a group's page says which group. */
+  useEffect(() => {
+    if (group) registerForSession({ landing_group: group.id });
+  }, [group, registerForSession]);
   const joinCta = (where: string, white = false) =>
     member ? (
       getApp(where, white)
@@ -611,7 +671,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
       {/* Members get the same bar, with their own line, so the header above
           is the same card signed in or out (Sam, 10 Nov 2026: "the page
           header looks different when signed in??"). */}
-      {linked && !member ? (
+      {groupOffer && group ? (
+        <GroupBar group={group} line={`${FIRST_MONTH} a month for your first year`} short={`${FIRST_MONTH}/mo for a year`} />
+      ) : linked && !member ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
         /* The bar carries the students line now (Sam, 9 Nov 2026: "for the
@@ -632,7 +694,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         data-hero={place || invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
       >
-        <img className="tpa-band-art" src={bandSrc ?? COLLAGE} alt="" decoding="async" />
+        <img className={`tpa-band-art${group ? " tpg-band-art" : ""}`} src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         {/* A Welcome Week student is here for the offer: no town badge, no
             Members (Sam, 5 Nov 2026: "not sure if for the welcome week kids it
             makes sense"). Sign in stays in the foot for anyone who needs it. */}
@@ -667,6 +729,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 h1={wwHero?.h1 ?? `$${CREDIT} credit every month at ${PLACES.length} Blacksburg spots`}
                 strip={wwHero?.strip ?? "First month free"}
               />
+            ) : group && !place ? (
+              <>
+                <GroupHeadline group={group} />
+                {member ? null : <WelcomeCallout />}
+                {groupOffer ? <GroupOffer first={FIRST_MONTH} /> : null}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
+              </>
             ) : place || hero === "0" ? (
               <h1>
                 {place
@@ -715,7 +784,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 (Sam, 5 Nov 2026: "still a bit too busy"). */}
             {/* In the bar above when it shows (not for members, not on a
                 promo link), so it isn't said twice. */}
-            {(invite && !place) || member || !linked ? null : <SocialProof text={MEMBERS_LINE} />}
+            {/* Not on a group's page: its bar and header already carry its offer,
+                and one line fewer there. */}
+            {(invite && !place) || member || !linked || groupOffer ? null : <SocialProof text={MEMBERS_LINE} />}
           </div>
         </div>
       </header>
@@ -898,7 +969,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             {place && placeMonth(place.id) ? (
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} />
             ) : offv && !place && !invite && !free ? (
-              <OfferVersion v={offv} first={FIRST_MONTH} monthly={MONTHLY} />
+              <OfferVersion
+                v={offv}
+                first={FIRST_MONTH}
+                monthly={MONTHLY}
+                term={groupOffer ? TERM : undefined}
+                spots={group ? groupOffer ? <GroupSpots group={group} left={groupSeats} /> : <></> : undefined}
+              />
             ) : (
             <>
                 {/* Both halves of what it turns into (Sam, 10 Nov 2026: "it's
@@ -1064,7 +1141,14 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
-          {[...(invite ? inviteFaq(invite, MONTHLY) : []), ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY))].map((f) => (
+          {[
+            ...(invite ? inviteFaq(invite, MONTHLY) : []),
+            ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
+            ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY)).map((f) =>
+              /* A group's price doesn't climb to $14.99 with the 100 spots. */
+              group && f.q === "Will my price go up?" ? groupPriceFaq(FIRST_MONTH, MONTHLY, groupOffer) : f,
+            ),
+          ].map((f) => (
             <details key={f.q} className="tpa-qa">
               <summary>
                 <span>{f.q}</span>
@@ -1084,7 +1168,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{free ? "Your first month free" : `${FIRST_MONTH} your first month`}</h2>
+              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} a month for your first year` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
                 {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
               </p>

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { CREDIT, PERCENT, PLACES } from "../routes/parents_kit";
 import { Clock } from "./WelcomeOffer";
 import { useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
@@ -32,14 +33,16 @@ export const offerVersion = (): OfferV | null => {
 /** C's two rows, shared with /parents: what you pay, and what you (or they)
  *  get, with the 15% inside it. `foot` is what follows: the student page's
  *  Nov 30 end and spots, the parents page's holiday price. */
-export function PayGet({ first, monthly, they = false }: { first: string; monthly: string; they?: boolean }) {
+export function PayGet({ first, monthly, they = false, term = "first month" }: { first: string; monthly: string; they?: boolean; term?: string }) {
   const total = `$${PLACES.length * CREDIT}`;
   return (
     <>
       <div className="ov-c-row ov-c-pay">
         <span>You pay</span>
         <b className="tnum">{first}</b>
-        <small className="tnum">first month, then {monthly}</small>
+        <small className="tnum">
+          {term}, then {monthly}
+        </small>
       </div>
       <div className="ov-c-row ov-c-get">
         <span>{they ? "They get" : "You get"}</span>
@@ -100,7 +103,7 @@ const Logos = ({ size = 28 }: { size?: number }) => (
   </span>
 );
 
-export function OfferVersion({ v, first, monthly }: { v: OfferV; first: string; monthly: string }) {
+export function OfferVersion({ v, first, monthly, term, spots }: { v: OfferV; first: string; monthly: string; term?: string; spots?: ReactNode }) {
   const total = `$${PLACES.length * CREDIT}`;
   if (v === "a") {
     return (
@@ -174,9 +177,13 @@ export function OfferVersion({ v, first, monthly }: { v: OfferV; first: string; 
   }
   return (
     <div className="ov ov-c" data-ph-show="">
-      <PayGet first={first} monthly={monthly} />
-      <Ends />
-      <Spots monthly={monthly} />
+      <PayGet first={first} monthly={monthly} term={term} />
+      {/* A promo link's own price (a group's year at $3.99) has no end
+          date: the November 30 clock is the welcome offer's. */}
+      {term ? null : <Ends />}
+      {/* A group's own spots (shell/GroupBits.tsx) in place of the $7.99
+          ones, which lead to $14.99. */}
+      {spots ?? <Spots monthly={monthly} />}
     </div>
   );
 }

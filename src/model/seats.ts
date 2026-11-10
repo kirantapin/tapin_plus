@@ -182,3 +182,43 @@ export function plusSeatsLeft(now: number = Date.now()): number {
 export const plusSeatLine = (left: number, monthly: string): string =>
   `${left} of ${PLUS_SEAT_CAP} spots left at ${monthly}`;
 
+
+/* ══ A GROUP'S OWN SPOTS (Sam, 10 Nov 2026) ═════════════════════════════════
+   "we can remove the $7.99 to $14.99 countdown for smith landing. It'd just
+   be the number of spots at smiths landing that we're allowing. I think we
+   cap it at 300 seats, with 10-20 decreasing daily."
+
+   Invented, like the count above, and for the same reasons worked from the
+   clock: the same figure for everyone at the same moment, nothing stored.
+   Each Eastern day loses `min` to `max` (seeded by the day and the group),
+   one at a time between 9am and 1am. It floors at `floor` and never reaches
+   zero: the offer has no end date, and closing it is a decision, not a
+   date. At about 15 a day, 300 reaches the floor in about three weeks. */
+export interface SeatSchedule {
+  cap: number;
+  /** When the count starts at `cap`. */
+  startMs: number;
+  min: number;
+  max: number;
+  floor: number;
+  /** Keeps one group's days from drawing another's numbers. */
+  seed: number;
+}
+
+export function scheduleSeatsLeft(s: SeatSchedule, now: number = Date.now()): number {
+  if (now <= s.startMs) return s.cap;
+  /* Midnight Eastern (EST) on the start's day: day 0. */
+  const day0 = Math.floor((s.startMs - 5 * HOUR_MS) / DAY_MS) * DAY_MS + 5 * HOUR_MS;
+  let gone = 0;
+  const lastDay = Math.floor((now - day0) / DAY_MS) + 1;
+  for (let day = 0; day <= lastDay; day++) {
+    const rand = seeded(s.seed * 7919 + day);
+    const count = s.min + Math.floor(rand() * (s.max - s.min + 1));
+    const start = day0 + day * DAY_MS + 9 * HOUR_MS;
+    for (let i = 0; i < count; i++) {
+      const at = start + rand() * 16 * HOUR_MS;
+      if (at > s.startMs && at <= now) gone++;
+    }
+  }
+  return Math.max(s.floor, s.cap - gone);
+}
