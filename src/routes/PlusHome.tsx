@@ -834,16 +834,20 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} />
             ) : (
             <>
+                {/* Both halves of what it turns into (Sam, 10 Nov 2026: "it's
+                    not just the $3.99 turning into $25 but also the 15% off
+                    every single day at each spot"): the $25 a month, then the
+                    15% every day, stacked beside the price. */}
                 <h2 className="tpa-h2 tpa-math-h">
                   {free ? (
-                    <>A free month, with ${PLACES.length * CREDIT} in&nbsp;credit</>
+                    <>A free month, with ${PLACES.length * CREDIT} and {PERCENT}%&nbsp;off</>
                   ) : (
                     <>
-                      {FIRST_MONTH} turns into ${PLACES.length * CREDIT}
+                      {FIRST_MONTH} turns into ${PLACES.length * CREDIT} and {PERCENT}%&nbsp;off
                     </>
                   )}
                 </h2>
-                <div className="tpa-math" data-ph-show="">
+                <div className="tpa-math" data-stack="" data-ph-show="">
                   <p>
                     <b className="tnum">{FIRST_MONTH}</b>
                     <span>your first month</span>
@@ -851,13 +855,19 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                   <svg className="tpa-math-arrow" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 12h15m-5.5-6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p className="tpa-math-get">
-                    <b className="tnum">${PLACES.length * CREDIT}</b>
-                    <span>every month</span>
-                  </p>
+                  <div className="tpa-math-gets">
+                    <p className="tpa-math-get">
+                      <b className="tnum">${PLACES.length * CREDIT}</b>
+                      <span>every month</span>
+                    </p>
+                    <p className="tpa-math-get">
+                      <b className="tnum">{PERCENT}% off</b>
+                      <span>every day</span>
+                    </p>
+                  </div>
                 </div>
                 <p className="tpa-math-then tnum">
-                  ${CREDIT} at each of the {PLACES.length} spots, no minimum spend. Then {MONTHLY} a month, and the ${PLACES.length * CREDIT} comes back every&nbsp;month.
+                  ${CREDIT} at each of the {PLACES.length} spots every month, no minimum spend, then {PERCENT}% off your other orders there, once a day. After the first month, {MONTHLY} a&nbsp;month.
                 </p>
             </>
             )}
