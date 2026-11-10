@@ -3396,7 +3396,7 @@ html[data-surface="tpa"] .hs-scene > * {
 }
 /* The Burg's line under its example order (PlusHome OrderCard). */
 .tpa-order-note {
-  margin: -4px 0 0;
+  margin: 6px 0 0;
   padding: 0 16px 14px;
   font-size: 13px;
   line-height: 18px;
@@ -4267,9 +4267,17 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: #0b7a53;
   font: 600 14px/18px "Gilroy", Arial, sans-serif;
 }
-.tps-unlock-sub,
-.tps-unlock-name {
+.tps-unlock-name,
+.tps-unlock-desk {
   display: none;
+}
+/* "Use it twice and the month's paid for" under the heading, a phone too
+   (Sam, 9 Nov 2026). */
+.tps-unlock-sub {
+  margin: 6px 0 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: #0b7a53;
+  text-wrap: balance;
 }
 /* A computer: two sides (Sam, 9 Nov 2026: "desktop just needs to look a bit
    more complete"). */
@@ -4288,6 +4296,9 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   .tps-unlock-when {
     display: none;
+  }
+  .tps-unlock-desk {
+    display: inline;
   }
   .tps-unlock-sub {
     display: block;
