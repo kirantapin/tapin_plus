@@ -3273,3 +3273,18 @@
     height: 84%;
   }
 }
+
+/* One ground under the phone's header (Sam, 9 Nov 2026: "spacing here seems
+   a bit off"): the band was white and the sheet grey, so a seam ran 24px
+   under the button and the first card sat 4px below it. The band takes the
+   sheet's grey, and the button, the photo card and the cards below keep one
+   18px rhythm. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="card"] {
+    padding-bottom: 0;
+    background: var(--ground);
+  }
+  .tpp .tpp-band[data-phone="card"] + .tpa-sheet > :first-child {
+    margin-top: 18px;
+  }
+}
