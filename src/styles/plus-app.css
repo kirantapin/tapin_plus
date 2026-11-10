@@ -4422,3 +4422,20 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpa-buy-bonus span {
   text-wrap: balance;
 }
+
+/* The main page's headline set like the parents' (Sam, 9 Nov 2026: "can the
+   header text on the main plus page be like the header text on the parents
+   plus page please, i like the bolder look"): no 15ch cap on a phone, so it
+   reads in three wide lines, not four narrow ones. A computer keeps its own
+   60px headline, already the larger of the two. */
+@media (max-width: 1023.98px) {
+  .tps .tpa-band[data-hero] .tpa-band-title h1 {
+    max-width: none;
+  }
+}
+@media (max-width: 374px) {
+  .tps .tpa-band[data-hero] .tpa-band-title h1 {
+    font-size: 28px;
+    line-height: 32px;
+  }
+}
