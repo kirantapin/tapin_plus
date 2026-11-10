@@ -1,26 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
-  <title>TapIn</title>
+  <title>Tapin Plus</title>
   <!--
-    The TapIn mark on its own dark plate, with the dot in Chicago Maroon
-    (#861F41, the maroon token). Paths are public/tapin_icon.svg unchanged,
-    scaled and centred; only the fills differ.
+    The Tapin Plus mark (Sam, 10 Nov 2026: "update the favicon for both pages
+    to the tapin plus logo"): the flat four-piece mark (FlatMark in
+    routes/parents_kit.tsx, the app's TapInGlyph), white on a maroon plate,
+    as in the parents header. Maroon is #861F41, the maroon token.
 
-    WHY A PLATE RATHER THAN A TRANSPARENT MARK: the mark is white, and a tab
-    strip is white in every light mode browser, so a transparent version would
-    vanish there. The plate is #120A0E, the canvas token, the same field the
-    site renders on and the same value as the theme-color meta in index.html.
-
-    NO ORANGE, including the dot (PRODUCT.md: "No orange anywhere, including
-    the wordmark dot"). The dot is the one place maroon is spent here.
-
-    THIS FILE IS XML. A comment may not contain two hyphens in a row, so CSS
-    custom properties cannot be named here in their real form. Writing one cost
-    an afternoon of a favicon that silently never loaded.
+    THIS FILE IS XML. A comment may not contain two hyphens in a row.
   -->
-  <rect width="96" height="96" rx="21" fill="#120A0E"/>
-  <g transform="translate(18 17.6) scale(0.714)">
-    <path d="M69.3056 29.2633C77.3245 29.2633 83.8252 22.7125 83.8252 14.6317C83.8252 6.55082 77.3245 0 69.3056 0C61.2867 0 54.7861 6.55082 54.7861 14.6317C54.7861 22.7125 61.2867 29.2633 69.3056 29.2633Z" fill="#861F41"/>
-    <path d="M48.32 36.2534V11.9067H0V36.2534H48.32Z" fill="#FFFFFF"/>
-    <path d="M48.32 60.6C34.9761 60.6 24.16 71.4997 24.16 84.9466H0V84.295C0.352701 57.8158 21.6323 36.4311 47.9673 36.2534H72.4212V84.9466H48.32V60.6Z" fill="#FFFFFF"/>
+  <rect width="96" height="96" rx="21" fill="#861F41"/>
+  <g fill="#FFFFFF" transform="translate(48 48) scale(6.2) translate(-5.485 -4.237)">
+    <path d="M5.96461 0H8.01572L7.42303 1.69488H5.37196L4.77927 3.38981H2.7282L3.32085 1.69488L3.32891 1.6719L3.32938 1.67159C3.66805 0.746268 4.84127 0 5.96461 0Z"/>
+    <path d="M10.9325 3.38981L10.3398 5.08473H8.28874L8.88144 3.38981H6.83033L7.42303 1.69488H9.50194L9.50217 1.69519C10.6176 1.70766 11.2571 2.46151 10.9325 3.38981Z"/>
+    <path d="M5.05231 8.47458H3.0012L3.5939 6.77966H5.64496L6.23766 5.08477H8.28872L7.69607 6.77966L7.68801 6.80268L7.68755 6.80299C7.34889 7.72827 6.17567 8.47458 5.05231 8.47458Z"/>
+    <path d="M0.0844383 5.08473L0.677134 3.38981H2.7282L2.1355 5.08473H4.18661L3.59392 6.77961H1.51501L1.51478 6.77935C0.399363 6.76688 -0.240155 6.01303 0.0844603 5.08473Z"/>
   </g>
 </svg>

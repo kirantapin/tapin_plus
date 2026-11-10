@@ -7,16 +7,18 @@
     <meta name="theme-color" content="#120A0E" />
     <title>TapIn · Blacksburg</title>
     <!--
-      THE MARK, WITH THE DOT IN MAROON. public/favicon.svg — the production
-      icon on a --canvas plate, because the mark is white and a light-mode tab
-      strip would swallow a transparent one.
+      THE TAPIN PLUS MARK (Sam, 10 Nov 2026: "update the favicon for both
+      pages to the tapin plus logo"). public/favicon.svg is the four-piece
+      Plus mark in white on a maroon plate, as in the parents header;
+      tapin_plus_icon.png is the same, full bleed, for iOS. "?v=plus" makes
+      browsers drop the old TapIn icon they have cached.
 
       Vite rewrites these absolute paths with the build's base, so they follow
       VITE_BASE_PATH rather than 404ing under a path prefix. `apple-touch-icon`
       is the PNG: iOS ignores SVG when a page is saved to the home screen.
     -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/tapin_icon_white.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=plus" />
+    <link rel="apple-touch-icon" href="/tapin_plus_icon.png" />
     <!-- Speed (PageSpeed, 9 Nov 2026): the two Gilroy weights the first
          screen sets, fetched with the page; the first screen's photograph
          asked for before the app's code runs (hero-preload.js, async). -->
