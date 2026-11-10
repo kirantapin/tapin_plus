@@ -7,18 +7,16 @@
     <meta name="theme-color" content="#120A0E" />
     <title>TapIn · Blacksburg</title>
     <!--
-      THE TAPIN PLUS MARK (Sam, 10 Nov 2026: "update the favicon for both
-      pages to the tapin plus logo"). public/favicon.svg is the four-piece
-      Plus mark in white on a maroon plate, as in the parents header;
-      tapin_plus_icon.png is the same, full bleed, for iOS. "?v=plus" makes
-      browsers drop the old TapIn icon they have cached.
-
-      Vite rewrites these absolute paths with the build's base, so they follow
-      VITE_BASE_PATH rather than 404ing under a path prefix. `apple-touch-icon`
-      is the PNG: iOS ignores SVG when a page is saved to the home screen.
+      THE TAPIN PLUS PAPER MARK (Sam, 10 Nov 2026), the collage mark in
+      public/brand/plus-paper-mark.svg, rendered to PNG: the SVG's paper
+      filters, and Safari, which ignores SVG favicons, both need a bitmap.
+      Transparent for the tab; tapin_plus_icon.png sits on white for the iOS
+      home screen, which fills a transparent icon with black. Re-render all
+      three from the SVG if it changes. "?v=paper" drops cached icons.
     -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=plus" />
-    <link rel="apple-touch-icon" href="/tapin_plus_icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=paper" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=paper" />
+    <link rel="apple-touch-icon" href="/tapin_plus_icon.png?v=paper" />
     <!-- Speed (PageSpeed, 9 Nov 2026): the two Gilroy weights the first
          screen sets, fetched with the page; the first screen's photograph
          asked for before the app's code runs (hero-preload.js, async). -->
