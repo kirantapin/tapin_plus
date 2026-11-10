@@ -25,7 +25,7 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, PriceLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
@@ -640,7 +640,9 @@ export default function ParentsHome() {
               picture: the $12 lunch dropping to $7, then its two facts as
               figure-and-label rows ($60 a month on average*; first month
               $3.99, then $7.99). */}
-          <PriceLead />
+          {/* Pay / get, the student page's card in their voice (Sam, 10 Nov
+              2026: "this is great, for both the moms and regular page"). */}
+          <PayGetLead />
           <button
             type="button"
             className="tpa-cta tpp-cta"
