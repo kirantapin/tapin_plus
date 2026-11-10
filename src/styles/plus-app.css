@@ -4641,6 +4641,22 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   height: 20px;
   color: var(--muted);
 }
+/* The price beside both things it turns into (10 Nov 2026): the $25 and the
+   15% stacked on the right, the price as tall as the two. */
+.tpa-math[data-stack] {
+  grid-template-columns: minmax(0, 0.95fr) auto minmax(0, 1.05fr);
+}
+.tpa-math-gets {
+  display: grid;
+  gap: 8px;
+}
+.tpa-math[data-stack] .tpa-math-get {
+  padding: 11px 14px 10px;
+}
+.tpa-math[data-stack] .tpa-math-get b {
+  font-size: 26px;
+  line-height: 28px;
+}
 .tpa-math-then {
   margin: 12px 0 0;
   font: 500 15px/21px "Gilroy", Arial, sans-serif;
