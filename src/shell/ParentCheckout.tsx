@@ -1058,7 +1058,7 @@ function Sheet({
         "Their number",
         <>
           {showName ? (
-            <Input id="student" label="Their first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} show />
+            <Input id="student" label="Their first name" value={student} onChange={setStudent} error={shown("student")} autoComplete="off" autoCapitalize="words" maxLength={40} show typed />
           ) : null}
           <Input
             id="phone"
@@ -1427,6 +1427,7 @@ function Input({
   maxLength,
   placeholder,
   show = false,
+  typed = false,
 }: {
   id: Field;
   label: React.ReactNode;
@@ -1445,6 +1446,9 @@ function Input({
   /** Label, error and help are fixed copy (any name inside is a .ph-mask
    *  span): shown in session replays (model/replayPrivacy.ts). */
   show?: boolean;
+  /** What's typed is recorded in session replays (the student's first name
+   *  only; model/replayPrivacy.ts). Never a number, email or code. */
+  typed?: boolean;
 }) {
   const flat = useContext(FlatLook);
   const fid = `prc-${id}`;
@@ -1466,6 +1470,7 @@ function Input({
       aria-invalid={error ? true : undefined}
       aria-describedby={described}
       className={tel ? "tnum" : undefined}
+      data-ph-typed={typed && !tel ? "" : undefined}
     />
   );
   const tick = ok ? (

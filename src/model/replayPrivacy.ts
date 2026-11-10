@@ -22,8 +22,16 @@
      ph-no-autocapture ph-no-deadclick ph-no-rageclick, as ph-no-capture
      kept them out of it before.
 
-   Wired into posthog.init's session_recording as maskTextFn and
-   maskAttributeFn. Session replay calls maskTextFn only for text inside a
+   - Typed values are masked too, EXCEPT the care package's own words
+     (Sam, 9 Nov 2026, choosing "unmask the care package text: the
+     student's first name, the note and the sign-off ... phone numbers stay
+     hidden"): an input or textarea marked `[data-ph-typed]` is recorded as
+     typed. Only those three fields carry it (the builder's, and the first
+     name the checkout asks for with Send as is). Never put it on a phone
+     number, an email, a code or the parent's own name.
+
+   Wired into posthog.init's session_recording as maskTextFn,
+   maskAttributeFn and maskInputFn. Session replay calls maskTextFn only for text inside a
    `.ph-mask` area, so nothing outside these areas changes. */
 
 const SHOW = "[data-ph-show]";
@@ -39,6 +47,13 @@ function shown(el: Element | null | undefined): boolean {
 
 export function replayMaskText(text: string, el?: HTMLElement | null): string {
   return shown(el) ? text : stars(text);
+}
+
+/** Typed values: stars, unless the field is one of the care package's
+ *  own (`[data-ph-typed]`). rrweb calls this for every input, since
+ *  maskAllInputs is on. */
+export function replayMaskInput(text: string, el?: HTMLElement | null): string {
+  return el?.matches?.("[data-ph-typed]") ? text : "*".repeat(text.length);
 }
 
 const WORDY = new Set(["aria-label", "aria-description", "aria-valuetext", "aria-roledescription", "alt", "title", "placeholder", "label"]);

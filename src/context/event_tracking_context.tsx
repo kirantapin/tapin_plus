@@ -1,5 +1,5 @@
 import { redactUrl } from "../model/redact";
-import { replayMaskAttribute, replayMaskText } from "../model/replayPrivacy";
+import { replayMaskAttribute, replayMaskInput, replayMaskText } from "../model/replayPrivacy";
 import {
   createContext,
   useContext,
@@ -157,6 +157,9 @@ export const EventTrackingProvider: FC<{ children: ReactNode }> = ({
            masked unless marked as fixed copy (model/replayPrivacy.ts). */
         maskTextFn: replayMaskText,
         maskAttributeFn: replayMaskAttribute,
+        /* Typed values stay masked, but for the care package's name, note
+           and sign-off (Sam, 9 Nov 2026). */
+        maskInputFn: replayMaskInput,
       },
       capture_performance: { web_vitals: false },
       /* A parent's manage link and an Ask a parent link are keys: no URL
