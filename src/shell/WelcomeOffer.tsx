@@ -10,8 +10,8 @@ import { useState } from "react";
    Each one is its own small component so only it ticks, and each renders
    nothing once the offer has ended. */
 
-const Clock = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-clock">
+export const Clock = ({ className = "tpa-clock" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
     <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
     <path d="M12 7.6V12l3 2" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -39,6 +39,36 @@ export function WelcomeEnds({ className }: { className?: string }) {
   const r = useWelcomeEnds();
   if (!r) return null;
   return <p className={className}>Welcome offer ends {welcomeEndsDay}.</p>;
+}
+
+/** The deadline, quietly, under the header's $25 (Sam, 10 Nov 2026: "there's
+ *  really no urgency or scarcity here right?"): "$3.99 first month · ends
+ *  November 30". A real date (model/deadline.ts); nothing once it passes. */
+export function WelcomeLine({ first }: { first: string }) {
+  const r = useWelcomeEnds();
+  if (!r) return null;
+  return (
+    <p className="tpa-wline" data-ph-show="">
+      <Clock />
+      <span className="tnum">
+        {first} first month · ends {welcomeEndsDay}
+      </span>
+    </p>
+  );
+}
+
+/** The same, for the dock's turning line: a body, or null once it ends. */
+export function useWelcomeLead(first: string) {
+  const r = useWelcomeEnds();
+  if (!r) return null;
+  return (
+    <>
+      <Clock className="tpp-pt-ico" />
+      <span className="tnum">
+        {first} first month, ends {welcomeEndsDay}
+      </span>
+    </>
+  );
 }
 
 /** One line in a pill: "Ends November 30 · 27d 07h 50m 11s". */

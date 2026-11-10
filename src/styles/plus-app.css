@@ -4677,3 +4677,27 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpa-s2 .tpa-buy[data-math] .tpa-buy-seats .plus-seats-line span::before {
   content: none;
 }
+
+/* The deadline under the header's $25 (Sam, 10 Nov 2026: "there's really no
+   urgency or scarcity here right?"): one quiet line, the clock and the date,
+   white on the photo. */
+.tpa-wline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.92);
+}
+.tpa-wline .tpa-clock {
+  flex: none;
+  width: 17px;
+  height: 17px;
+}
+@media (min-width: 1024px) {
+  .tpa-wline {
+    margin-top: 14px;
+    font-size: 17px;
+    line-height: 22px;
+  }
+}

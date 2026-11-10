@@ -5,11 +5,11 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { MEMBERS_LINE } from "../model/proof";
-import { PLUS_NEXT_PRICE } from "../model/seats";
+import { PLUS_NEXT_PRICE, plusSeatLine } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
-import { PlusSeats } from "../shell/PlusSeats";
+import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
@@ -25,7 +25,7 @@ import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds } from "../shell/WelcomeOffer";
+import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
@@ -423,6 +423,26 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
   const faqRef = useRef<HTMLElement | null>(null);
   /* The docked Join pulses gently while the checkout is closed (shell/dockPulse.ts). */
   const dockRef = useRef<HTMLDivElement | null>(null);
+  /* The dock's first lines (Sam, 10 Nov 2026, urgency and scarcity): when
+     the $3.99 first month ends, then the $7.99 spots left. Not for members,
+     a promo link or an invitation, whose offers are their own. */
+  const welcomeLead = useWelcomeLead(FIRST_MONTH);
+  const seatsLeft = usePlusSeats();
+  const dockLead =
+    member || linked || invite || free
+      ? []
+      : [
+          ...(welcomeLead ? [{ key: "ends", body: welcomeLead }] : []),
+          {
+            key: "spots",
+            body: (
+              <>
+                <span className="tpp-pt-dot" aria-hidden="true" />
+                <span className="tnum">{plusSeatLine(seatsLeft, MONTHLY)}</span>
+              </>
+            ),
+          },
+        ];
   const checkoutOpen = usePlusCheckoutOpen();
   useDockPulse(dockRef, !checkoutOpen, member);
   const toFaq = () => {
@@ -623,6 +643,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                     it go on the header of both?"): the $25 now, then the
                     weekly $5 under it. Not for members. */}
                 {member ? null : <WelcomeCallout />}
+                {/* The real deadline, quietly, under the $25 (Sam, 10 Nov
+                    2026: "there's really no urgency or scarcity here"). Not
+                    on a promo link, whose bar says its own offer. */}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
                 {/* No line under the callout on Rob's headline (Sam, 9 Nov
                     2026: "just remove the sub text"); other headlines
                     previewed with ?hero= keep theirs. */}
@@ -1075,7 +1099,16 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           much I save button isn't getting click throughs maybe we hide it"). */}
       <div ref={dockRef} className="tpa-dock" data-shown="" data-island-origin="">
         {/* The proof line, on the dock (round 1, Sam, 8 Nov 2026). */}
-        <ProofTurn className="tpp-pt-dock" start={place ? "refund" : "places"} paused={covered} audience="student" noPlaces={!!place} />
+        {/* The deadline and the spots lead the turn (Sam, 10 Nov 2026), so
+            on a phone they're on screen the whole way down. */}
+        <ProofTurn
+          className="tpp-pt-dock"
+          start={dockLead.length ? dockLead[0]!.key : place ? "refund" : "places"}
+          paused={covered}
+          audience="student"
+          noPlaces={!!place}
+          lead={dockLead}
+        />
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
         ) : (
