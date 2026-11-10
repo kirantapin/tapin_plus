@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Founders } from "../shell/Founders";
 import {
   useEffect,
   useLayoutEffect,
@@ -732,6 +733,10 @@ export default function ParentsHome() {
             </Fold>
           </div>
         </section>
+
+        {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026:
+            "for all landing pages"), in the parents' voice. */}
+        <Founders they />
 
         <section className="tpa-module" aria-labelledby="tpp-faq">
           <h2 id="tpp-faq" className="tpa-h2">
