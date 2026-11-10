@@ -8,7 +8,7 @@ import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
-import { PLACES as KIT_PLACES } from "./parents_kit";
+import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
 import { PlusSeats } from "../shell/PlusSeats";
 import { firstFigure, firstMonthLine, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
@@ -201,6 +201,40 @@ const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; 
   },
 ];
 
+/* A place's own page (/coffeeholics, Sam, 10 Nov 2026: "scoped specifically
+   to the Coffeeholics brand"): the same questions about that place alone. The
+   bars question goes; it isn't about this place. */
+const placeFaq = (MONTHLY: string, name: string): ReadonlyArray<{ q: string; a: string }> => [
+  {
+    q: "What’s the catch?",
+    a: `There isn’t one. ${name} is in it for the exposure: every Plus member gets $${CREDIT} to spend there every month. That’s how they win new regulars, so there’s no minimum spend and no marked-up menu. Cancel anytime.`,
+  },
+  {
+    q: "How do I cancel and get a refund?",
+    a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
+  },
+  {
+    q: "When do I get my credit?",
+    a: `Right away. The moment you join, $${CREDIT} credit is added at ${name}, ready to use in the Tapin app. It comes back every month you’re a member.`,
+  },
+  {
+    q: "Does my credit roll over? Can I use it with the 15%?",
+    a: `No to both. Your $${CREDIT} at ${name} resets every month, so use it that month. And it’s one per order: your credit on one, then ${PERCENT}% off the others.`,
+  },
+  {
+    q: "How often can I use it?",
+    a: `$${CREDIT} credit at ${name} every month, with no minimum spend, there from the moment you join. Then ${PERCENT}% off your other orders, once a day.`,
+  },
+  {
+    q: "What does it work on?",
+    a: `Use your credit and the ${PERCENT}% on food and non-alcoholic drinks at ${name}.`,
+  },
+  {
+    q: "Will my price go up?",
+    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and to ${PLUS_NEXT_PRICE} once these 100 spots are gone. It pays to get in early.`,
+  },
+];
+
 const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
      support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
@@ -267,14 +301,82 @@ const Chevron = () => (
   </svg>
 );
 
+/* ══ WHAT A MONTH AT ONE PLACE SAVES (Sam, 10 Nov 2026: "we should still
+   show what someone can save") ═════════════════════════════════════════════
+   The offer card's math on a place's own page: how often you go (one tap),
+   then the first month's price against what that month saves there, the $5
+   credit on one visit and 15% off the rest (parents_kit placeMonth). The
+   figure eases in on a new answer; still with reduced motion. */
+function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: string; first: string; monthly: string }) {
+  const m = placeMonth(placeId);
+  const { track } = useEventTracking();
+  const [at, setAt] = useState(1);
+  const fig = useRef<HTMLElement | null>(null);
+  const shown = useRef(at);
+  useLayoutEffect(() => {
+    if (shown.current === at) return;
+    shown.current = at;
+    if (reducedMotion()) return;
+    fig.current?.animate?.([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
+  }, [at]);
+  if (!m) return null;
+  const v = VISITS[at] ?? VISITS[1];
+  const save = m.save(v.visits);
+  return (
+    <>
+      <h2 className="tpa-h2 tpa-math-h">What you’d save at {name}</h2>
+      <div className="tpa-freq" role="radiogroup" aria-label={`How often you go to ${name}`}>
+        {VISITS.map((x, i) => (
+          <button
+            key={x.id}
+            type="button"
+            role="radio"
+            aria-checked={i === at}
+            onClick={() => {
+              setAt(i);
+              track("plus_place_visits_picked", { place: placeId, visits: x.visits });
+            }}
+          >
+            {x.label}
+          </button>
+        ))}
+      </div>
+      <div className="tpa-math" data-ph-show="">
+        <p>
+          <b className="tnum">{first}</b>
+          <span>your first month</span>
+        </p>
+        <svg className="tpa-math-arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h15m-5.5-6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <p className="tpa-math-get" aria-live="polite">
+          <b className="tnum" ref={fig}>
+            {money(save)}
+          </b>
+          <span>saved a month</span>
+        </p>
+      </div>
+      <p className="tpa-math-then tnum">
+        {v.visits} visits a month for {m.what} ({money(m.price)}): your ${CREDIT} credit on one, {PERCENT}% off the other {v.visits - 1}. After the first month, {monthly} a month.
+      </p>
+    </>
+  );
+}
+
 /* ══ ONE PLACE'S PAGE (Sam, 3 Nov 2026: "redirect + rebuild") ════════════════
    /coffeeholics is the same page about one place: its own photograph in the
-   band, its name in the headline, its order first in the carousel, and the
-   try-it-once window (which already leads with Coffeeholics). Everything
-   else, the offer, the promise, the places and Join, is the home page's. */
+   band, its name in the headline and the try-it-once window (which already
+   leads with Coffeeholics). Since 10 Nov 2026 it is scoped to that place
+   alone (Sam: "needs to be scoped specifically to the Coffeeholics brand"):
+   its $5 card, its own orders on the phone, what a month there saves, How it
+   works, the questions and the fine print; the five-spot rail, the $25 and
+   the Blacksburg-wide walkthrough stay on the home page. */
 export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandSrc?: string }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
+  /* Its own orders on the phone, the $5 credit then the 15% (parents_kit). */
+  const kitPlace = place ? KIT_PLACES.find((p) => p.id === place.id) : undefined;
+  const placeOrderList = kitPlace ? placeOrders(kitPlace.id) : [];
   const { track } = useEventTracking();
   /* /how lands here with ?how and the walkthrough open. */
   const [how, setHow] = useState(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("how"));
@@ -389,7 +491,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
      phone it rides on the dock). It starts on the places: the band already
      says the 500+. Still while a pop-up is over the page. */
   const covered = checkoutOpen || trial || how || !!placeOpen;
-  const proofCard = <ProofTurn className="tpp-pt-card" start="places" paused={covered} audience="student" />;
+  const proofCard = <ProofTurn className="tpp-pt-card" start={place ? "refund" : "places"} paused={covered} audience="student" noPlaces={!!place} />;
   /* On a computer the voices sit three across under the places, so the
      held column stays shorter than the window; on a phone, a rail under
      the list. */
@@ -560,7 +662,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
-        {member ? null : <BonusSpots />}
+        {member ? null : <BonusSpots only={place?.id} />}
 
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
@@ -571,13 +673,21 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             the Promise card that sat above it on heroes m, s and p went. */}
         <section className="tpa-module tps-fb" aria-labelledby="tpa-how">
           <h2 id="tpa-how" className="tpa-h2">
-            What ${CREDIT} credit looks like
+            {place ? `What Plus looks like at ${place.name}` : `What $${CREDIT} credit looks like`}
           </h2>
-          <CheckoutPhone audience="student" start={startAt} />
-          <button type="button" className="tpa-step-wide" onClick={openHow}>
-            <Play />
-            Step through it
-          </button>
+          {kitPlace && placeOrderList.length ? (
+            <CheckoutPhone audience="student" orders={placeOrderList} place={kitPlace} />
+          ) : (
+            <CheckoutPhone audience="student" start={startAt} />
+          )}
+          {/* Step through it walks through a month's spend across
+              Blacksburg, so a place's own page goes without it. */}
+          {place ? null : (
+            <button type="button" className="tpa-step-wide" onClick={openHow}>
+              <Play />
+              Step through it
+            </button>
+          )}
           {/* Straight to the questions (Sam, 4 Nov 2026: "there should be a
               view FAQ button right below the 'step through it' button"). A
               quiet text button, so Step through it stays the one action here. */}
@@ -590,6 +700,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             "should we have the every plus place higher?"): on a phone they
             top the second screen, under the example order. Not above the
             Promise card, which would push How it works off the first. */}
+        {place ? null : (
         <section className="tpa-places" aria-labelledby="tpa-every">
           <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
             Every Plus place
@@ -638,6 +749,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
             ))}
           </ul>
         </section>
+        )}
 
         {/* Students' own words (round 1, Sam, 8 Nov 2026): nothing shows until
             model/voices.ts STUDENT_VOICES has real ones; local dev shows the
@@ -718,6 +830,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 "we can remove the calculator, and just show that $3.99 turns
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
+            {place && placeMonth(place.id) ? (
+              <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} />
+            ) : (
             <>
                 <h2 className="tpa-h2 tpa-math-h">
                   {free ? (
@@ -745,6 +860,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                   ${CREDIT} at each of the {PLACES.length} spots, no minimum spend. Then {MONTHLY} a month, and the ${PLACES.length * CREDIT} comes back every&nbsp;month.
                 </p>
             </>
+            )}
             {/* ONE PRICE, ONE BAR, ONE ACTION (Sam, 3 Nov 2026: "a lot is going
                 on here"). The price on one line, big figure first; the spots
                 bar thin, its words small under it; Join; Try as a quiet
@@ -858,7 +974,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-steps" className="tpa-h2">
             How it works
           </h2>
-          <HowPhone audience="student" first={FIRST_MONTH} monthly={MONTHLY} free={free} />
+          <HowPhone audience="student" first={FIRST_MONTH} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
 
         {/* What if I don't save? went (Sam, 9 Nov 2026: "get rid of this too
@@ -868,7 +984,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
-          {[...(invite ? inviteFaq(invite, MONTHLY) : []), ...faqFor(MONTHLY)].map((f) => (
+          {[...(invite ? inviteFaq(invite, MONTHLY) : []), ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY))].map((f) => (
             <details key={f.q} className="tpa-qa">
               <summary>
                 <span>{f.q}</span>
@@ -901,8 +1017,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         <footer className="tpa-foot">
           <p>
-            $5 credit every month at each place, no minimum spend; it resets each month and doesn’t roll over. Then 15% off
-            your other orders, once a day. One per order: credit or 15% off, not both. Credit and 15% off don’t go toward alcohol. Cancel
+            ${CREDIT} credit every month {place ? `at ${place.name}` : "at each place"}, no minimum spend; it resets each month and doesn’t roll over. Then {PERCENT}% off
+            your other orders, once a day. One per order: credit or {PERCENT}% off, not both. Credit and {PERCENT}% off don’t go toward alcohol. Cancel
             anytime.
           </p>
           <AccountLine where="home_foot" app />
@@ -946,7 +1062,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           much I save button isn't getting click throughs maybe we hide it"). */}
       <div ref={dockRef} className="tpa-dock" data-shown="" data-island-origin="">
         {/* The proof line, on the dock (round 1, Sam, 8 Nov 2026). */}
-        <ProofTurn className="tpp-pt-dock" start="places" paused={covered} audience="student" />
+        <ProofTurn className="tpp-pt-dock" start={place ? "refund" : "places"} paused={covered} audience="student" noPlaces={!!place} />
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
         ) : (

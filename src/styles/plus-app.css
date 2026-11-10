@@ -4501,6 +4501,98 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
 }
 
+/* ══ ONE PLACE'S CARD (/coffeeholics, Sam, 10 Nov 2026) ══════════════════
+   The five-spots card with one spot: the place's logo beside its $5 and the
+   two lines, the 15% across the foot as on the home page's card. One column
+   at every width. */
+.tps-unlock-one .tps-unlock-say {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+.tps-unlock-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-unlock-one .tps-unlock-h {
+  font-size: 17px;
+  line-height: 22px;
+}
+.tps-unlock-one .tps-unlock-sub {
+  display: block;
+  margin: 2px 0 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .tps-unlock-one .tps-unlock-say {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .tps-unlock-one .tps-unlock-logo {
+    width: 64px;
+    height: 64px;
+  }
+  .tps-unlock-one .tps-unlock-h {
+    font-size: 22px;
+    line-height: 27px;
+  }
+  .tps-unlock-one .tps-unlock-sub {
+    margin-top: 4px;
+  }
+}
+@media (min-width: 1240px) {
+  .tps-unlock.tps-unlock-one {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* How often you go, on a place's own offer card: three equal choices, one
+   tap. The chosen one is ink; the others a hairline. */
+.tpa-freq {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+.tpa-freq button {
+  min-height: 40px;
+  padding: 0 6px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink);
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.tpa-freq button:hover {
+  background: var(--ground);
+}
+.tpa-freq button[aria-checked="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+.tpa-freq button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tpa-freq + .tpa-math {
+  margin-top: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-freq button {
+    transition: none;
+  }
+}
+
 /* ══ $3.99 TURNS INTO $25 (Sam, 9 Nov 2026, reworking the offer: "just
    show that $3.99 turns into $25 every month") ═══════════════════════════
    Two figures and an arrow on the offer card, where the calculator was:

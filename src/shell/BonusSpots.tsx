@@ -7,7 +7,28 @@ import { PERCENT, PLACES } from "../routes/parents_kit";
    sides, the words with the $25 total on the left, the five places named on
    the right. Styles: .tps-unlock* in plus-app.css. */
 const CREDIT = 5;
-export function BonusSpots({ they = false }: { they?: boolean }) {
+export function BonusSpots({ they = false, only }: { they?: boolean; only?: string }) {
+  /* A place's own page (/coffeeholics, Sam, 10 Nov 2026: "scoped
+     specifically to the Coffeeholics brand"): that place alone, its logo
+     beside its $5, the 15% under it. */
+  const one = only ? PLACES.find((p) => p.id === only) : undefined;
+  if (one)
+    return (
+      <section className="tpa-module tps-unlock tps-unlock-one" aria-labelledby="tps-unlock-h">
+        <div className="tps-unlock-say">
+          <img className="tps-unlock-logo" src={one.logo} alt="" decoding="async" />
+          <div>
+            <h2 id="tps-unlock-h" className="tps-unlock-h">
+              <b>${CREDIT} credit</b> every month at {one.name}
+            </h2>
+            <p className="tps-unlock-sub">No minimum spend, no&nbsp;markup.</p>
+          </div>
+        </div>
+        <p className="tps-unlock-or">
+          <b>Then {PERCENT}% off</b> your other orders, once&nbsp;a&nbsp;day
+        </p>
+      </section>
+    );
   return (
     <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
       <div className="tps-unlock-say">

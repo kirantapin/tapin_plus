@@ -6,7 +6,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
-import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience } from "./parents_kit";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -619,7 +619,7 @@ const HUG = asset("/parents/hero-hug.webp");
    parents.css). The refund is the module right under this one. `first` and
    `monthly` are the prices the page shows; `free` a promo link's free first
    month. */
-function studentSteps(first: string, free: boolean, appTab: number): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
+function studentSteps(first: string, free: boolean, appTab: number, place?: string): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
   return [
     {
       glyph: GLYPHS.card,
@@ -641,8 +641,12 @@ function studentSteps(first: string, free: boolean, appTab: number): Array<{ gly
     {
       glyph: GLYPHS.tag,
       when: "Every month",
-      title: "Save at each place",
-      line: (
+      title: place ? `Save at ${place}` : "Save at each place",
+      line: place ? (
+        <>
+          {money0(CREDIT)} credit every month, no minimum spend. Then {PERCENT}% off, once a day.
+        </>
+      ) : (
         <>
           {money0(CREDIT)} credit every month at each place, no minimum spend. Then {PERCENT}% off, once a day.
         </>
@@ -656,13 +660,19 @@ export function HowPhone({
   first: firstProp,
   monthly: monthlyProp,
   free = false,
+  only,
 }: {
   audience?: Audience;
   first?: string;
   monthly?: string;
   free?: boolean;
+  /** A place's own page (/coffeeholics): its name in step 3 and its logo
+   *  alone on that step's screen. */
+  only?: string;
 } = {}) {
   const prices = useParentPrice();
+  const onlyPlace = only ? PLACES.find((p) => p.id === only) : undefined;
+  const shownPlaces = onlyPlace ? [onlyPlace] : PLACES;
   const first = firstProp ?? prices.FIRST;
   const monthly = monthlyProp ?? prices.MONTHLY;
   const MONTHLY = prices.MONTHLY;
@@ -678,7 +688,7 @@ export function HowPhone({
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1) : parentSteps(first);
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name) : parentSteps(first);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -915,8 +925,8 @@ export function HowPhone({
                     <span className="tpp-hw-lbl tpp-hw-every">
                       <b>{money0(CREDIT)} credit</b> every month at
                     </span>
-                    <div className="tpp-hw-places">
-                      {PLACES.map((p) => (
+                    <div className="tpp-hw-places" data-one={onlyPlace ? "" : undefined}>
+                      {shownPlaces.map((p) => (
                         <span key={p.id}>
                           <img src={p.logo} alt="" decoding="async" loading="lazy" />
                         </span>
@@ -1074,8 +1084,36 @@ const MARK_FROM: ReadonlyArray<[number, number]> = [
 /* The student page (plus.tapin.app, Sam, 8 Nov 2026) shows it as "your
    phone", in place of its old order card, with its own caption; `start` is
    the place to show first (/coffeeholics opens on Coffeeholics). */
-export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: Audience; start?: number } = {}) {
+export function CheckoutPhone({
+  audience = "parent",
+  start = 0,
+  orders: ordersProp,
+  place,
+}: {
+  audience?: Audience;
+  start?: number;
+  /** One place's own orders (parents_kit placeOrders), switched by order
+   *  rather than by place; the five places' examples without it. */
+  orders?: PhoneOrder[];
+  place?: { name: string; logo: string; id: string };
+} = {}) {
   const student = audience === "student";
+  const one = !!ordersProp?.length && !!place;
+  const orders: Array<PhoneOrder & { name: string; logo: string; placeId: string }> = one
+    ? ordersProp!.map((o) => ({ ...o, name: place!.name, logo: place!.logo, placeId: place!.id }))
+    : PLACES.map((x) => ({
+        id: x.id,
+        title: x.name,
+        sub: x.order.label,
+        img: x.logo,
+        lines: x.lines,
+        price: x.order.price,
+        off: CREDIT,
+        offLabel: "Plus credit",
+        name: x.name,
+        logo: x.logo,
+        placeId: x.id,
+      }));
   const [stage, seen] = useSeen<HTMLDivElement>(0.5);
   const [which, setWhich] = useState(start);
   const runs = useRef<Animation[]>([]);
@@ -1193,9 +1231,9 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
     tapped.current = true;
     setWhich(i);
   };
-  const p = PLACES[which] ?? PLACES[0];
+  const p = orders[which] ?? orders[0];
   if (!p) return null;
-  const now = Math.max(0, p.order.price - CREDIT);
+  const now = Math.max(0, Math.round((p.price - p.off) * 100) / 100);
   return (
     <div className="tpp-fb tnum">
       <div className="tpp-fb-grid">
@@ -1203,7 +1241,7 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
           ref={stage}
           className="tpp-fb-stage"
           role="img"
-          aria-label={`${student ? "Your" : "Their"} phone at checkout at ${p.name}: ${p.order.label}, ${money(p.order.price)}. Plus credit, minus ${money(CREDIT)}. Total ${money(now)}.`}
+          aria-label={`${student ? "Your" : "Their"} phone at checkout at ${p.name}: ${p.sub}, ${money(p.price)}. ${p.offLabel}, minus ${money(p.off)}. Total ${money(now)}.`}
         >
           <span className="tpp-fb-sun" />
           <div className="tpp-fb-phone">
@@ -1214,7 +1252,7 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
               <div className="tpp-fb-sheet">
                 <span className="tpp-fb-grab" />
                 <p className="tpp-fb-head">
-                  <span className="collar" data-field={logoField(p.id)}>
+                  <span className="collar" data-field={logoField(p.placeId)}>
                     <img src={p.logo} alt="" decoding="async" />
                   </span>
                   {p.name}
@@ -1231,20 +1269,20 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
                 <div className="tpp-fb-credit">
                   <p>
                     <FlatMark />
-                    <span>Plus credit</span>
-                    <b className="tpp-fb-off">&minus;{money(CREDIT)}</b>
+                    <span>{p.offLabel}</span>
+                    <b className="tpp-fb-off">&minus;{money(p.off)}</b>
                   </p>
                 </div>
                 <p className="tpp-fb-total">
                   <span>Total</span>
                   <span className="tpp-fb-swap">
-                    <b className="was">{money(p.order.price)}</b>
+                    <b className="was">{money(p.price)}</b>
                     <b className="now">{money(now)}</b>
                   </span>
                 </p>
                 <p className="tpp-fb-pay">
                   <span className="tpp-fb-swap">
-                    <b className="was">Pay {money(p.order.price)}</b>
+                    <b className="was">Pay {money(p.price)}</b>
                     <b className="now">Pay {money(now)}</b>
                   </span>
                 </p>
@@ -1254,27 +1292,31 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
           </div>
         </div>
         <div className="tpp-fb-side">
-          <div className="tpp-fb-picks" role="group" aria-label="Example orders">
-            {PLACES.map((x, i) => (
+          <div className="tpp-fb-picks" role="group" aria-label="Example orders" style={{ ["--n" as string]: orders.length }}>
+            {orders.map((x, i) => (
               <button
                 key={x.id}
                 type="button"
                 className="tpp-fb-pick"
-                aria-label={`Show an order at ${x.name}`}
+                aria-label={one ? `${x.title}: ${x.sub}` : `Show an order at ${x.name}`}
                 aria-pressed={i === which}
                 onClick={() => pick(i)}
               >
-                <span className="collar" data-field={logoField(x.id)}>
-                  <img src={x.logo} alt="" decoding="async" />
+                <span className="collar" data-field={one ? undefined : logoField(x.placeId)}>
+                  <img src={x.img} alt="" decoding="async" />
                 </span>
                 <span className="tpp-fb-pick-text" aria-hidden="true">
-                  <b>{x.name}</b>
-                  <small>{x.order.label}</small>
+                  <b>{x.title}</b>
+                  <small>{x.sub}</small>
                 </span>
               </button>
             ))}
           </div>
-          {student ? (
+          {one ? (
+            <p className="tpp-math">
+              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum. Then {PERCENT}% off your other orders, once a day.
+            </p>
+          ) : student ? (
             <p className="tpp-math">
               <b>{money0(CREDIT)}</b> at each place every month, on any order. It resets each month, so use it.
             </p>
@@ -1511,14 +1553,17 @@ export function ProofTurn({
   start,
   paused,
   audience = "parent",
+  noPlaces = false,
 }: {
   className: string;
   start: ProofKey;
   paused: boolean;
   audience?: Audience;
+  /** A place's own page: not the five spots. */
+  noPlaces?: boolean;
 }) {
   const student = audience === "student";
-  const lines: Array<{ key: ProofKey; body: ReactNode }> = [
+  const allLines: Array<{ key: ProofKey; body: ReactNode }> = [
     {
       key: "students",
       body: (
@@ -1553,6 +1598,7 @@ export function ProofTurn({
       ),
     },
   ];
+  const lines = noPlaces ? allLines.filter((l) => l.key !== "places") : allLines;
   const [k, setK] = useState(() => Math.max(0, lines.findIndex((l) => l.key === start)));
   /* The line on its way out, drawn over the new one while they roll. */
   const [leaving, setLeaving] = useState<number | null>(null);
