@@ -22,12 +22,12 @@ import { CREDIT, PLACES } from "../routes/parents_kit";
 const TEE = asset("/brand/founder-tee.webp");
 const BLAZER = asset("/brand/founder-blazer.webp");
 
+/** C is the section (Sam, 10 Nov 2026: "let's do this one"), shown on
+ *  every page; ?fv=b still previews B. */
 export type FounderV = "b" | "c";
-const version = (): FounderV | null => {
-  if (typeof window === "undefined") return null;
-  const q = new URLSearchParams(window.location.search);
-  if (!q.has("founders")) return null;
-  return q.get("fv") === "c" ? "c" : "b";
+const version = (): FounderV => {
+  if (typeof window === "undefined") return "c";
+  return new URLSearchParams(window.location.search).get("fv") === "b" ? "b" : "c";
 };
 
 const count = PLACES.length === 5 ? "five" : String(PLACES.length);
@@ -69,7 +69,7 @@ function More({ children }: { children: React.ReactNode }) {
    alum, this is our contribution to world peace". */
 const ALUMS = "Rob’s a Hokie alum, Sam’s a UVA alum. Tapin is our contribution to world peace.";
 
-const Story = ({ line = false }: { line?: boolean }) => (
+const Story = ({ line = false, they = false }: { line?: boolean; they?: boolean }) => (
   <>
     <p>
       We’re regulars all over town. Coffee here, lunch there, dinner somewhere else.
@@ -79,7 +79,10 @@ const Story = ({ line = false }: { line?: boolean }) => (
       The places we love share the same regulars, but each one is on its own, up against chains with bigger budgets. So we put them together: one
       membership, {count} local spots, no&nbsp;chains.
     </p>
-    <p className="tnum">You get ${CREDIT} at each of them every month. They get new regulars. That’s the whole&nbsp;idea.</p>
+    <p className="tnum">
+      {they ? `Your student gets $${CREDIT} at each of them every month. The places get new regulars.` : `You get $${CREDIT} at each of them every month. They get new regulars.`}{" "}
+      That’s the whole&nbsp;idea.
+    </p>
   </>
 );
 
@@ -90,9 +93,9 @@ const Sign = () => (
   </p>
 );
 
-export function Founders() {
+/** `they`: the parents page, where it's their student who gets the $5. */
+export function Founders({ they = false }: { they?: boolean }) {
   const v = version();
-  if (!v) return null;
   if (v === "b") {
     return (
       <section className="tpa-module tpf tpf-b" aria-labelledby="tpf-h" data-ph-show="">
@@ -115,7 +118,7 @@ export function Founders() {
           <Sign />
         </div>
         <More>
-          <Story />
+          <Story they={they} />
         </More>
       </section>
     );
@@ -128,7 +131,7 @@ export function Founders() {
         </h2>
         <p>{ALUMS}</p>
         <More>
-          <Story line />
+          <Story line they={they} />
         </More>
       </div>
       <div className="tpf-c-foot">
