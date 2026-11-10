@@ -2,7 +2,7 @@ import { shortClock, spokenClock, useEndsAt, useWelcomeEnds, welcomeEndsDay } fr
 import { inviteFor, type Invite } from "../model/invite";
 import { firstFigure, firstMonthLine, usePlusPrice, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected } from "../model/invite";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ══ THE WELCOME OFFER'S CLOCK, THREE PLACES (Sam, 3 Nov 2026) ═════════════════
    model/deadline.ts holds the date. The bar pinned over the page, a pill in
@@ -41,6 +41,39 @@ export function WelcomeEnds({ className }: { className?: string }) {
   return <p className={className}>Welcome offer ends {welcomeEndsDay}.</p>;
 }
 
+/* The header's clock, with its minute hand going round (Sam, 10 Nov 2026:
+   "animate the minute hand to give it a bit of life"): time passing, which is
+   the line's point. One slow, steady turn every 8 seconds about the face's
+   centre; the hour hand stays. A loop, so it stops when the line is off
+   screen or the page is hidden, and never runs with reduced motion. */
+const TURN_MS = 8000;
+function TickingClock() {
+  const hand = useRef<SVGPathElement | null>(null);
+  useEffect(() => {
+    const el = hand.current;
+    if (!el || typeof el.animate !== "function") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const run = el.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: TURN_MS, iterations: Infinity, easing: "linear" });
+    let seen = true;
+    const sync = () => (seen && document.visibilityState !== "hidden" ? run.play() : run.pause());
+    const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([e]) => ((seen = !!e?.isIntersecting), sync()));
+    io?.observe(el);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      io?.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      run.cancel();
+    };
+  }, []);
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-clock">
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M12 12l3 2" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+      <path ref={hand} className="tpa-clock-min" d="M12 12V7.6" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** The deadline, quietly, under the header's $25 (Sam, 10 Nov 2026: "there's
  *  really no urgency or scarcity here right?"): "$3.99 first month · ends
  *  November 30". A real date (model/deadline.ts); nothing once it passes. */
@@ -49,7 +82,7 @@ export function WelcomeLine({ first }: { first: string }) {
   if (!r) return null;
   return (
     <p className="tpa-wline" data-ph-show="">
-      <Clock />
+      <TickingClock />
       <span className="tnum">
         {first} first month · ends {welcomeEndsDay}
       </span>
