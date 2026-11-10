@@ -2250,6 +2250,7 @@ export function GiftPreview({
             aria-invalid={nameErr && !d.to.trim() ? true : undefined}
             aria-describedby={nameErr && !d.to.trim() ? "gft-pp-name-err" : undefined}
             onChange={(e) => setGiftDraft({ to: e.target.value })}
+            data-ph-typed=""
             placeholder={sample ? SAMPLE_GIFT.to ?? "" : ""}
             maxLength={40}
             autoComplete="off"
@@ -2273,6 +2274,7 @@ export function GiftPreview({
           rows={4}
           value={d.note}
           onChange={(e) => setGiftDraft({ note: e.target.value })}
+          data-ph-typed=""
           placeholder={DEFAULT_NOTE}
           maxLength={NOTE_MAX}
           aria-describedby="gft-pp-note-hint"
@@ -2287,6 +2289,7 @@ export function GiftPreview({
         <input
           value={d.from}
           onChange={(e) => setGiftDraft({ from: e.target.value })}
+          data-ph-typed=""
           placeholder="Mom"
           maxLength={FROM_MAX}
           autoComplete="off"
