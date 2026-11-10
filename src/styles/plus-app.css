@@ -4439,3 +4439,40 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     line-height: 32px;
   }
 }
+
+/* ══ THE MAIN PAGE'S PHONE HEADER AS A CARD, LIKE THE PARENTS' (Sam, 9 Nov
+   2026: "honestly I like the style of the parent one quite a bit, can we use
+   something like that for the main one?") ═══════════════════════════════════
+   The collage in one rounded card on the page's grey, 10px in from the
+   edges and the bar above, the pills and the headline inside it as before;
+   the sheet stops rising over it, and the first card sits 18px under it,
+   the page's rhythm. Under the students bar only (a promo link's bar too);
+   members and a place's page keep the full-bleed band. */
+@media (max-width: 1023.98px) {
+  .tps .tpa-wbar + .tpa-band[data-hero] {
+    /* A tablet: as wide as the cards under it, not the window. */
+    width: calc(100% - 20px);
+    max-width: calc(var(--column) - 2 * var(--gutter));
+    margin: 10px auto 0;
+    min-height: clamp(300px, 84vw, 360px);
+    padding: 96px 0 24px;
+    border-radius: 24px;
+    isolation: isolate;
+  }
+  .tps .tpa-wbar + .tpa-band[data-hero] .tpa-band-top {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+  .tps .tpa-wbar + .tpa-band[data-hero] .tpa-band-title {
+    margin: 0 14px;
+  }
+  .tps .tpa-wbar + .tpa-band[data-hero] + .tpa-sheet {
+    margin-top: 0;
+    padding-top: 0;
+    border-radius: 0;
+  }
+  .tps .tpa-wbar + .tpa-band[data-hero] + .tpa-sheet > :first-child {
+    margin-top: 18px;
+  }
+}
