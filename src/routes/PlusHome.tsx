@@ -155,14 +155,48 @@ function SocialProof({ text }: { text: string }) {
 }
 
 const money = (n: number) => `$${n.toFixed(2)}`;
+
+/* THE LIVE MARK (Sam, 10 Nov 2026: "can we have the perpetual animation on
+   the tapin logo, the same one that [the app] used"): the app's PlusBoltLive
+   lap, as is. Every 4.2 s a light goes round the mark: each piece in turn,
+   clockwise from the top, dips to 30% and comes back, 120 ms behind the one
+   before, so it reads as one thing turning over. WAAPI on its own pieces;
+   paused off screen or in a hidden tab; still under Reduce Motion. */
+const LAP_MS = 4200;
+const STEP_MS = 120;
+function LiveMark({ className }: { className?: string }) {
+  const svg = useRef<SVGSVGElement | null>(null);
+  useEffect(() => {
+    const el = svg.current;
+    const pieces = Array.from(el?.querySelectorAll<SVGPathElement>("path") ?? []);
+    if (!el || !pieces.length || typeof pieces[0]!.animate !== "function" || reducedMotion()) return;
+    const laps = pieces.map((piece, i) =>
+      piece.animate(
+        [{ opacity: 1 }, { opacity: 0.3, offset: 0.06, easing: "cubic-bezier(.2,0,0,1)" }, { opacity: 1, offset: 0.16 }, { opacity: 1 }],
+        { duration: LAP_MS, delay: 900 + i * STEP_MS, iterations: Infinity },
+      ),
+    );
+    let seen = true;
+    const sync = () => laps.forEach((a) => (seen && !document.hidden ? a.play() : a.pause()));
+    const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([e]) => ((seen = !!e?.isIntersecting), sync()));
+    io?.observe(el);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      io?.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      laps.forEach((a) => a.cancel());
+    };
+  }, []);
+  return <FlatMark className={className} svgRef={svg} />;
+}
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /** The flat four-piece mark, for small places on photographs (the app's
  *  TapInGlyph, white on the glass). The paper mark is for the big moments. */
-function FlatMark({ className }: { className?: string }) {
+function FlatMark({ className, svgRef }: { className?: string; svgRef?: React.Ref<SVGSVGElement> }) {
   return (
-    <svg className={className} viewBox="-0.4790 -1.7502 11.9749 11.9749" aria-hidden="true" focusable="false">
+    <svg ref={svgRef} className={className} viewBox="-0.4790 -1.7502 11.9749 11.9749" aria-hidden="true" focusable="false">
       <path fill="currentColor" d="M5.96461 0H8.01572L7.42303 1.69488H5.37196L4.77927 3.38981H2.7282L3.32085 1.69488L3.32891 1.6719L3.32938 1.67159C3.66805 0.746268 4.84127 0 5.96461 0Z" />
       <path fill="currentColor" d="M10.9325 3.38981L10.3398 5.08473H8.28874L8.88144 3.38981H6.83033L7.42303 1.69488H9.50194L9.50217 1.69519C10.6176 1.70766 11.2571 2.46151 10.9325 3.38981Z" />
       <path fill="currentColor" d="M5.05231 8.47458H3.0012L3.5939 6.77966H5.64496L6.23766 5.08477H8.28872L7.69607 6.77966L7.68801 6.80268L7.68755 6.80299C7.34889 7.72827 6.17567 8.47458 5.05231 8.47458Z" />
@@ -605,7 +639,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
         {invite ? null : (
           <div className="tpa-band-top">
             <span className="tpa-glass tpa-badge">
-              <FlatMark className="tpa-badge-mark" />
+              <LiveMark className="tpa-badge-mark" />
               {/* The app's pill (Sam, 3 Nov 2026: "plus blacksburg"). */}
               Plus Blacksburg
             </span>
