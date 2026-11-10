@@ -550,7 +550,10 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
     <div className="tpa tpa-home tps">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
           countdown, ends at end of month"), pinned so it stays on screen. */}
-      {member ? null : linked ? (
+      {/* Members get the same bar, with their own line, so the header above
+          is the same card signed in or out (Sam, 10 Nov 2026: "the page
+          header looks different when signed in??"). */}
+      {linked && !member ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
         /* The bar carries the students line now (Sam, 9 Nov 2026: "for the
@@ -561,8 +564,8 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
           {/* A phone gets the short line, so it stays one line even with the
               text made larger (Sam, 9 Nov 2026: "this looks a bit strange on
               this shorter screen"). */}
-          <span className="tpa-pbar-long">{MEMBERS_LINE}</span>
-          <span className="tpa-pbar-short">Join 500+ Virginia Tech students on Plus</span>
+          <span className="tpa-pbar-long">{member ? "You’re one of 500+ Virginia Tech students on Tapin Plus" : MEMBERS_LINE}</span>
+          <span className="tpa-pbar-short">{member ? "You’re one of 500+ VT students on Plus" : "Join 500+ Virginia Tech students on Plus"}</span>
         </aside>
       )}
       <header
@@ -650,7 +653,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 (Sam, 5 Nov 2026: "still a bit too busy"). */}
             {/* In the bar above when it shows (not for members, not on a
                 promo link), so it isn't said twice. */}
-            {(invite && !place) || (!member && !linked) ? null : <SocialProof text={MEMBERS_LINE} />}
+            {(invite && !place) || member || !linked ? null : <SocialProof text={MEMBERS_LINE} />}
           </div>
         </div>
       </header>
