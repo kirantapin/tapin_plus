@@ -119,73 +119,37 @@ function LogoRow({ size }: { size: number }) {
    price held, cancel in the app. No renewal email line: it isn't confirmed
    that students get one. `monthly` is the price the student page shows. */
 export function UnderOffer({ audience = "parent" }: { audience?: Audience; monthly?: string }) {
-  /* Three rows (Sam, 9 Nov 2026: "there's just way too much going on
-     here"): the other benefit, the promise, the way out. Points, new places
-     and the locked price went. */
-  if (audience === "student") {
-    return (
-      <div className="tpp-notes">
-        <ul aria-label="Also with Plus">
-          <li>
-            <Glyph d={GLYPHS.percent} />
-            <span>
-              <b>{PERCENT}% off</b> after your credit, once a day
-            </span>
-          </li>
-        </ul>
-        <ul aria-label="The Plus Promise">
-          <li>
-            <Glyph d={GLYPHS.refund} />
-            <span>
-              <b>Refund auto-approved</b> if Plus saved you less than you paid
-            </span>
-          </li>
-          <li>
-            <Glyph d={GLYPHS.phone} />
-            <span>
-              <b>Cancel anytime</b> in the Tapin app
-            </span>
-          </li>
-        </ul>
-      </div>
-    );
-  }
+  /* One even list under the card (Sam, 10 Nov 2026: "/impeccable polish
+     this"). The 15% row went: the card right above now says "Then 15% off,
+     every day". Points first, then the promise. The parents' way out is a
+     reply to that text, so it wears the text bubble, not the envelope. */
+  const rows =
+    audience === "student"
+      ? [
+          { key: "points", d: GLYPHS.star, b: "Points", rest: " on everything" },
+          { key: "refund", d: GLYPHS.refund, b: "Refund auto-approved", rest: " if Plus saved you less than you paid" },
+          { key: "cancel", d: GLYPHS.phone, b: "Cancel anytime", rest: " in the Tapin app" },
+        ]
+      : [
+          { key: "points", d: GLYPHS.star, b: "Points", rest: " on everything" },
+          /* A text before each bill, and cancel by replying (Sam, 9 Nov
+             2026: "we text them before every billing, and they can cancel
+             via text"). */
+          { key: "text", d: GLYPHS.bell, b: "A text before every bill", rest: "" },
+          { key: "cancel", d: GLYPHS.text, b: "Cancel anytime", rest: ", right from that text" },
+        ];
   return (
     <div className="tpp-notes">
-      <ul aria-label="Also with Plus">
-        <li>
-          <Glyph d={GLYPHS.percent} />
-          <span>
-            <b>{PERCENT}% off</b> after their credit, once a day
-          </span>
-        </li>
-        <li>
-          <Glyph d={GLYPHS.star} />
-          <span>
-            <b>Points</b> on everything
-          </span>
-        </li>
-      </ul>
-      <ul aria-label="Our promise">
-        {/* The refund moved up beside the price (Sam, 9 Nov 2026). */}
-        {/* Sam, 7 Nov 2026: "let moms know that they'll get monthly texts
-            before their next bill" (the backend's renewal reminder); an
-            email since 8 Nov ("Bill reminders → email"): a text "will lead
-            to more churn". The bell, so it doesn't twin the mail row under it. */}
-        {/* A text again (Sam, 9 Nov 2026: "we text them before every
-            billing, and they can cancel via text"). */}
-        <li>
-          <Glyph d={GLYPHS.bell} />
-          <span>
-            <b>A text before every bill</b>
-          </span>
-        </li>
-        <li>
-          <Glyph d={GLYPHS.mail} />
-          <span>
-            <b>Cancel anytime</b>, right from that text
-          </span>
-        </li>
+      <ul aria-label={audience === "student" ? "Also with Plus" : "Also with Plus, and our promise"}>
+        {rows.map((r) => (
+          <li key={r.key}>
+            <Glyph d={r.d} />
+            <span>
+              <b>{r.b}</b>
+              {r.rest}
+            </span>
+          </li>
+        ))}
       </ul>
     </div>
   );
