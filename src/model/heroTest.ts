@@ -56,8 +56,8 @@ export const HERO_LINES: Partial<Record<HeroVariant, string>> = {
 
 /** A line under the headline, for the ones that carry one. */
 export const HERO_SUBS: Partial<Record<HeroVariant, string>> = {
-  r: "$5 credit every week at each of your favorite Blacksburg spots, plus 15% off once a day.",
-  w: "$5 to spend at each spot the moment you join, then $5 credit every week at each spot when you spend $10.",
+  r: "$5 credit every month at each of your favorite Blacksburg spots, or 15% off once a day.",
+  w: "$5 to spend at each spot the moment you join, and again every month, with no minimum spend.",
 };
 
 export const HERO_TEST = "plus-hero";

@@ -8,15 +8,17 @@ import { PLACES } from "../routes/parents_kit";
    the right. Styles: .tps-unlock* in plus-app.css. */
 const CREDIT = 5;
 export function BonusSpots({ they = false }: { they?: boolean }) {
-  const who = they ? "they" : "you";
   return (
     <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
       <div className="tps-unlock-say">
+        {/* The offer itself now (Sam, 9 Nov 2026: "$5 monthly credit at
+            each spot on tapin plus with no minimum spend ... Credit doesn't
+            roll over, so you have to use it"). */}
         <h2 id="tps-unlock-h" className="tps-unlock-h">
-          <b>${CREDIT} bonus credit</b> at each spot<span className="tps-unlock-when"> when {who} join</span>
+          <b>${CREDIT} credit</b> every month at each spot<span className="tps-unlock-when">, no minimum</span>
         </h2>
         <p className="tps-unlock-sub tnum">
-          Ready the moment {who} join. ${PLACES.length * CREDIT} in&nbsp;all.
+          ${PLACES.length * CREDIT} a month in all. It resets each month, so {they ? "they use" : "use"}&nbsp;it.
         </p>
       </div>
       <ul className="tps-unlock-row">
