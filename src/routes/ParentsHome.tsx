@@ -379,19 +379,25 @@ export default function ParentsHome() {
 
   const faq: ReadonlyArray<{ q: string; a: string }> = [
     {
+      /* Why the places are on board (Sam, 9 Nov 2026: "it's for exclusive
+         exposure"). */
+      q: "What’s the catch?",
+      a: `There isn’t one. The places are in it for the exposure: Plus is an exclusive group of Blacksburg spots, and every member gets $${CREDIT} to try each one, every month. That’s how they win new regulars, so there’s no minimum spend and no marked-up menu. Cancel anytime.`,
+    },
+    {
       q: "Does this replace their meal plan?",
       a: "No. Students living on campus have to have a VT dining plan. Tapin Plus is for the meals they buy off campus at our Plus places. Many students living off campus have no plan at all, and that’s where it helps most.",
     },
     {
       /* The credit is there at once (Sam, 9 Nov 2026). */
       q: "When does their credit start?",
-      a: `Right away. The moment they claim your gift, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app.`,
+      a: `Right away. The moment they claim your gift, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app. It comes back every month.`,
     },
     {
       q: "What if they don’t use it?",
       /* No "unclaimed costs nothing" (Sam, 9 Nov 2026: "we have to remove
          the 'if it's unclaimed it costs nothing' thing"). */
-      a: `Two $${CREDIT} credits used in a month cover the ${MONTHLY}. If they don’t save what you spent, ask for a full refund. Cancel anytime.`,
+      a: `Their credit resets each month, so what they don’t use that month doesn’t carry over. If they don’t save what you spent, ask for a full refund. Cancel anytime.`,
     },
     {
       q: "Can I see what they order?",
