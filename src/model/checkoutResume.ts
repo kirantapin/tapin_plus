@@ -23,15 +23,14 @@ import type { GiftDraft } from "./giftDraft";
 import { PHOTO_MAX_CHARS } from "./giftPhoto";
 
 /** The builder's stages, then the checkout's steps (ParentCheckout Step):
- *  the look (and what plays, one screen since Effort C, 7 Nov 2026), the
- *  note, who it's for and who it's from (one step since Effort D), the
- *  charge. */
-export type ResumeStep = "look" | "note" | "who" | "pay";
-const STEPS: readonly ResumeStep[] = ["look", "note", "who", "pay"];
+ *  the look, what plays when they open it (its own step again since 9 Nov
+ *  2026, so the opening can be seen as it's picked), the note, who it's for
+ *  and who it's from (one step since Effort D), the charge. */
+export type ResumeStep = "look" | "open" | "note" | "who" | "pay";
+const STEPS: readonly ResumeStep[] = ["look", "open", "note", "who", "pay"];
 /** A save from before the steps were merged (v1, 7 Nov 2026) comes back on
- *  the step its old one became: the opening is on the look now, and their
- *  number and you are one step. */
-const OLD_STEPS: Record<string, ResumeStep> = { look: "look", open: "look", note: "note", student: "who", you: "who", pay: "who" };
+ *  the step its old one became: their number and you are one step. */
+const OLD_STEPS: Record<string, ResumeStep> = { look: "look", open: "open", note: "note", student: "who", you: "who", pay: "who" };
 
 /** What they typed in the checkout. Phone numbers are digits only. (Their
  *  number is typed once since Effort D; a v1 save's confirm is dropped.) */
