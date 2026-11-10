@@ -419,7 +419,7 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
 const groupPriceFaq = (first: string, monthly: string, year: boolean): { q: string; a: string } => ({
   q: "Will my price go up?",
   a: year
-    ? `Not for your first year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`
+    ? `Not for your first full year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`
     : `No. Your ${monthly} a month is locked in for as long as you’re a member, even as more places join.`,
 });
 const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } => ({
@@ -672,7 +672,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
           is the same card signed in or out (Sam, 10 Nov 2026: "the page
           header looks different when signed in??"). */}
       {groupOffer && group ? (
-        <GroupBar group={group} line={`${FIRST_MONTH} a month for your first year`} short={`${FIRST_MONTH}/mo for a year`} />
+        <GroupBar group={group} line={`${FIRST_MONTH} a month for your first full year`} short={`${FIRST_MONTH}/mo for a year`} />
       ) : linked && !member ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
@@ -1168,7 +1168,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} a month for your first year` : `${FIRST_MONTH} your first month`}</h2>
+              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} a month for your first full year` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
                 {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
               </p>
