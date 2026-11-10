@@ -5045,6 +5045,12 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: var(--muted);
 }
 
+.tpf p.tpf-alums {
+  margin: -4px 0 0;
+  font: 500 16px/23px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.78);
+  text-wrap: pretty;
+}
 /* B · The line. */
 .tpf-b-line {
   margin: 0;

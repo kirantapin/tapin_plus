@@ -65,9 +65,16 @@ function More({ children }: { children: React.ReactNode }) {
   );
 }
 
-const Story = () => (
+/* Sam, 10 Nov 2026: "we should mention that rob is a hokie alum, sam a uva
+   alum, this is our contribution to world peace". */
+const ALUMS = "Rob’s a Hokie alum, Sam’s a UVA alum. Tapin is our contribution to world peace.";
+
+const Story = ({ line = false }: { line?: boolean }) => (
   <>
-    <p>We’re regulars all over town. Coffee here, lunch there, dinner somewhere else.</p>
+    <p>
+      We’re regulars all over town. Coffee here, lunch there, dinner somewhere else.
+      {line ? " And a regular everywhere is a member nowhere." : ""}
+    </p>
     <p>
       The places we love share the same regulars, but each one is on its own, up against chains with bigger budgets. So we put them together: one
       membership, {count} local spots, no&nbsp;chains.
@@ -95,6 +102,7 @@ export function Founders() {
         <blockquote className="tpf-b-line">
           <p>“A regular everywhere is a member nowhere.”</p>
         </blockquote>
+        <p className="tpf-alums">{ALUMS}</p>
         <div className="tpf-b-foot">
           <div className="tpf-b-faces" role="img" aria-label="Rob and Sam, Tapin’s founders">
             <span>
@@ -118,9 +126,9 @@ export function Founders() {
         <h2 id="tpf-h" className="tpa-h2">
           Why we brought Plus to Blacksburg
         </h2>
-        <p>A regular everywhere is a member nowhere. So we put the places we love together, in one membership.</p>
+        <p>{ALUMS}</p>
         <More>
-          <Story />
+          <Story line />
         </More>
       </div>
       <div className="tpf-c-foot">
