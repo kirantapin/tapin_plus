@@ -32,7 +32,7 @@ export function appHref(d: Device = device()) {
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-function AppleGlyph() {
+export function AppleGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
       <path
