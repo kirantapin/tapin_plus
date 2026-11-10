@@ -45,16 +45,17 @@ export function useGroupSeats(group: Group | undefined): number {
   return left;
 }
 
-/** "286 of 300 Smith's Landing spots left", one line and a thin bar, in the
- *  offer card's own spots shape (ov-spots), with no next price after it. */
-export function GroupSpots({ group, left }: { group: Group; left: number }) {
+/** "286 of 300 Smith's Landing spots left at $3.99/mo", one line and a thin
+ *  bar, in the offer card's own spots shape (ov-spots): the residents' 300
+ *  at their price (Sam, 10 Nov 2026), with no next price after it. */
+export function GroupSpots({ group, left, first }: { group: Group; left: number; first: string }) {
   return (
     <div className="ov-spots">
       <p className="tnum">
         <b>
           {left} of {group.seats.cap}
         </b>{" "}
-        {group.name} spots left
+        {group.name} spots left at {first}/mo
       </p>
       <span aria-hidden="true">
         <i style={{ transform: `scaleX(${left / group.seats.cap})` }} />

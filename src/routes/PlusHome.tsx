@@ -509,7 +509,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             <>
               <span className="tpp-pt-dot" aria-hidden="true" />
               <span className="tnum">
-                {groupSeats} of {group.seats.cap} {group.name} spots left
+                {groupSeats} of {group.seats.cap} spots left at {FIRST_MONTH}/mo
               </span>
             </>
           ),
@@ -518,7 +518,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
     : member || linked || invite || free
       ? []
       : [
-          ...(welcomeLead ? [{ key: "ends", body: welcomeLead }] : []),
+          ...(welcomeLead && !group ? [{ key: "ends", body: welcomeLead }] : []),
           /* Not on a group's page: its own spots replace these (Sam, 10
              Nov 2026), and show only with its own price. */
           ...(group
@@ -734,7 +734,8 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 <GroupHeadline group={group} />
                 {member ? null : <WelcomeCallout />}
                 {groupOffer ? <GroupOffer first={FIRST_MONTH} /> : null}
-                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
+                {/* No November 30 clock: the residents' offer is its own,
+                    counted in spots (Sam, 10 Nov 2026). */}
               </>
             ) : place || hero === "0" ? (
               <h1>
@@ -974,7 +975,8 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 first={FIRST_MONTH}
                 monthly={MONTHLY}
                 term={groupOffer ? TERM : undefined}
-                spots={group ? groupOffer ? <GroupSpots group={group} left={groupSeats} /> : <></> : undefined}
+                noEnds={!!group}
+                spots={group ? groupOffer ? <GroupSpots group={group} left={groupSeats} first={FIRST_MONTH} /> : <></> : undefined}
               />
             ) : (
             <>
@@ -1173,7 +1175,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
               </p>
               {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
-              {linked ? null : <WelcomeEnds className="tpa-close-ends" />}
+              {linked || group ? null : <WelcomeEnds className="tpa-close-ends" />}
             </>
           )}
           {joinCta("close", true)}
