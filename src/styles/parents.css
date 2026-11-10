@@ -1339,6 +1339,11 @@
   outline: 1px solid rgba(20, 22, 24, 0.1);
   outline-offset: -1px;
 }
+/* A place's own page: its logo alone, larger. */
+.tpp-hw-places[data-one] > span {
+  width: 72px;
+  height: 72px;
+}
 .tpp-hw-places img {
   display: block;
   width: 100%;
@@ -3259,7 +3264,8 @@
 @container (max-width: 599.98px) {
   .tpp-fb-picks {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 48px));
+    /* As many as there are: five places, or a place's own orders. */
+    grid-template-columns: repeat(var(--n, 5), minmax(0, 48px));
     justify-content: center;
     gap: min(10px, 2.5cqi);
   }

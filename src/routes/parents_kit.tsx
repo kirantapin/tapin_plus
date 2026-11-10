@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { asset } from "../asset";
 import { venues } from "../model/content";
-import { itemNamed } from "../model/menu";
+import { itemNamed, itemsFor } from "../model/menu";
 import { usd, usePlusPrice } from "../model/plus";
 
 /* The parents page's shared figures, places and small pieces, so the page
@@ -91,6 +91,90 @@ export const PLACES: Place[] = PLACE_DEFS.map((d): Place | null => {
 export const money = (n: number) => `$${n.toFixed(2)}`;
 /** Whole dollars, for prose ("a $12 lunch"). */
 export const money0 = (n: number) => `$${Math.round(n)}`;
+
+/* ══ ONE PLACE'S OWN PAGE (Sam, 10 Nov 2026: /coffeeholics "needs to be
+   scoped specifically to the Coffeeholics brand ... we should still show what
+   someone can save") ═══════════════════════════════════════════════════════
+   Real orders from the place's own menu at their menu prices, in the order
+   Plus is used: the month's $5 credit on the first, then 15% off the others
+   ("being able to use the $5 credit, and then everything else is covered by
+   the 15% off"). By item id, as model/campaign.ts picks them; an order with
+   an item missing or unpriced is dropped, never repriced. */
+export interface PhoneOrder {
+  id: string;
+  /** The switcher's two lines: which benefit, then the order. */
+  title: string;
+  sub: string;
+  img: string;
+  lines: OrderLine[];
+  price: number;
+  /** What Plus takes off, and what the phone calls it. */
+  off: number;
+  offLabel: string;
+}
+const PLACE_ORDERS: Record<string, Array<{ ids: string[]; credit: boolean }>> = {
+  coffeeholicsva: [
+    /* California Club, $12. */
+    { ids: ["coffeeholicsva-160-35"], credit: true },
+    /* Cappuccino and Butter Croissant, $7.75. */
+    { ids: ["coffeeholicsva-157-37", "coffeeholicsva-163-33"], credit: false },
+    /* The turkey melt, $12 (by id: its name trips scripts/guards.py, as
+       model/campaign.ts says). */
+    { ids: ["coffeeholicsva-160-49"], credit: false },
+  ],
+};
+/** 15% of an order, to the cent. */
+export const percentOff = (price: number) => Math.round(price * PERCENT) / 100;
+const pick = (placeId: string, ids: string[]) => {
+  const menu = itemsFor(placeId);
+  const items = ids.map((id) => menu.find((i) => i.id === id));
+  if (!items.length || items.some((i) => !i || !i.price)) return null;
+  return items as NonNullable<(typeof items)[number]>[];
+};
+const total = (items: Array<{ price: number }>) => Math.round(items.reduce((s, i) => s + i.price, 0) * 100) / 100;
+export function placeOrders(placeId: string): PhoneOrder[] {
+  return (PLACE_ORDERS[placeId] ?? []).flatMap(({ ids, credit }) => {
+    const found = pick(placeId, ids);
+    if (!found) return [];
+    const price = total(found);
+    return [
+      {
+        id: ids.join("+"),
+        title: credit ? `Your ${money0(CREDIT)} credit` : `Then ${PERCENT}% off`,
+        sub: found.map((i) => i.name).join(" + "),
+        img: found[0].img ?? "",
+        lines: found.map((i) => ({ name: i.name, price: i.price, img: i.img ?? "", qty: 1 })),
+        price,
+        off: credit ? Math.min(CREDIT, price) : percentOff(price),
+        offLabel: credit ? "Plus credit" : `${PERCENT}% off`,
+      },
+    ];
+  });
+}
+/* What a month there saves, by how often you go: one order a visit, the
+   place's everyday order (a cappuccino and a butter croissant at
+   Coffeeholics), the $5 credit on the first and 15% off the rest. The 15% is
+   once a day, so no choice counts more than one visit a day. Four weeks to
+   the month, as everywhere else on the site. */
+const EVERYDAY: Record<string, string[]> = {
+  coffeeholicsva: ["coffeeholicsva-157-37", "coffeeholicsva-163-33"],
+};
+export const VISITS = [
+  { id: "1", label: "1× a week", visits: 4 },
+  { id: "2", label: "2× a week", visits: 8 },
+  { id: "5", label: "5× a week", visits: 20 },
+] as const;
+export function placeMonth(placeId: string): { what: string; price: number; save: (visits: number) => number } | null {
+  const found = pick(placeId, EVERYDAY[placeId] ?? []);
+  if (!found) return null;
+  const price = total(found);
+  const each = percentOff(price);
+  return {
+    what: found.map((i) => `a ${i.name.toLowerCase()}`).join(" and "),
+    price,
+    save: (visits) => Math.round((Math.min(CREDIT, price) + Math.max(0, visits - 1) * each) * 100) / 100,
+  };
+}
 export const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
