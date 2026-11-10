@@ -4267,17 +4267,9 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: #0b7a53;
   font: 600 14px/18px "Gilroy", Arial, sans-serif;
 }
-.tps-unlock-name,
-.tps-unlock-desk {
+.tps-unlock-sub,
+.tps-unlock-name {
   display: none;
-}
-/* "Use it twice and the month's paid for" under the heading, a phone too
-   (Sam, 9 Nov 2026). */
-.tps-unlock-sub {
-  margin: 6px 0 0;
-  font: 600 15px/20px "Gilroy", Arial, sans-serif;
-  color: #0b7a53;
-  text-wrap: balance;
 }
 /* A computer: two sides (Sam, 9 Nov 2026: "desktop just needs to look a bit
    more complete"). */
@@ -4296,9 +4288,6 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   .tps-unlock-when {
     display: none;
-  }
-  .tps-unlock-desk {
-    display: inline;
   }
   .tps-unlock-sub {
     display: block;

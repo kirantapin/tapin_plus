@@ -207,6 +207,14 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
      cancelled; stacking 1). Cancel is in the app, refunds by email (Sam,
      same day). */
   {
+    /* Why the places are on board (Sam, 9 Nov 2026: "we need a what's the
+       catch section. Like why are the merchants on board with this. To that,
+       it's for exclusive exposure"). First: it's the question under all the
+       others. */
+    q: "What’s the catch?",
+    a: `There isn’t one. The places are in it for the exposure: Plus is an exclusive group of Blacksburg spots, and every member gets $${CREDIT} to try each one, every month. That’s how they win new regulars, so there’s no minimum spend and no marked-up menu. Cancel anytime.`,
+  },
+  {
     q: "How do I cancel and get a refund?",
     a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
   },

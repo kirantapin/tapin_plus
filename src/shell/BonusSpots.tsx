@@ -7,7 +7,7 @@ import { PLACES } from "../routes/parents_kit";
    sides, the words with the $25 total on the left, the five places named on
    the right. Styles: .tps-unlock* in plus-app.css. */
 const CREDIT = 5;
-export function BonusSpots({ they = false }: { they?: boolean }) {
+export function BonusSpots(_: { they?: boolean }) {
   return (
     <section className="tpa-module tps-unlock" aria-labelledby="tps-unlock-h">
       <div className="tps-unlock-say">
@@ -17,14 +17,10 @@ export function BonusSpots({ they = false }: { they?: boolean }) {
         <h2 id="tps-unlock-h" className="tps-unlock-h">
           <b>${CREDIT} credit</b> every month at each spot<span className="tps-unlock-when">, no minimum, no&nbsp;markup</span>
         </h2>
-        {/* Sam, 9 Nov 2026: "add 'use it twice and the month's paid for'",
-            then "no minimum, no mark up" on the heading. */}
-        <p className="tps-unlock-sub tnum">
-          {they ? "They use it" : "Use it"} twice and the month’s paid&nbsp;for.
-          {/* A computer's heading drops ", no minimum, no markup"; it's said
-              here instead. */}
-          <span className="tps-unlock-desk"> No minimum, no&nbsp;markup.</span>
-        </p>
+        {/* A computer's heading drops ", no minimum, no markup" (Sam, 9 Nov
+            2026); it's said here instead. "Use it twice and the month's paid
+            for" was here and went ("sounds weird and I don't like it"). */}
+        <p className="tps-unlock-sub">No minimum spend, no&nbsp;markup.</p>
       </div>
       <ul className="tps-unlock-row">
         {PLACES.map((p) => (

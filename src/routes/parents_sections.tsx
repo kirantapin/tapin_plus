@@ -1074,7 +1074,6 @@ const MARK_FROM: ReadonlyArray<[number, number]> = [
    phone", in place of its old order card, with its own caption; `start` is
    the place to show first (/coffeeholics opens on Coffeeholics). */
 export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: Audience; start?: number } = {}) {
-  const { MONTHLY } = useParentPrice();
   const student = audience === "student";
   const [stage, seen] = useSeen<HTMLDivElement>(0.5);
   const [which, setWhich] = useState(start);
@@ -1280,8 +1279,7 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
             </p>
           ) : (
             <p className="tpp-math">
-              ${CREDIT} at each place every month, on any order, no minimum. Two credits cover the {MONTHLY}. Alcohol is
-              never discounted.
+              ${CREDIT} at each place every month, on any order, no minimum. Alcohol is never discounted.
             </p>
           )}
         </div>
