@@ -15,10 +15,15 @@ export function BonusSpots({ they = false }: { they?: boolean }) {
             each spot on tapin plus with no minimum spend ... Credit doesn't
             roll over, so you have to use it"). */}
         <h2 id="tps-unlock-h" className="tps-unlock-h">
-          <b>${CREDIT} credit</b> every month at each spot<span className="tps-unlock-when">, no minimum</span>
+          <b>${CREDIT} credit</b> every month at each spot<span className="tps-unlock-when">, no minimum, no&nbsp;markup</span>
         </h2>
+        {/* Sam, 9 Nov 2026: "add 'use it twice and the month's paid for'",
+            then "no minimum, no mark up" on the heading. */}
         <p className="tps-unlock-sub tnum">
-          ${PLACES.length * CREDIT} a month in all. It resets each month, so {they ? "they use" : "use"}&nbsp;it.
+          {they ? "They use it" : "Use it"} twice and the month’s paid&nbsp;for.
+          {/* A computer's heading drops ", no minimum, no markup"; it's said
+              here instead. */}
+          <span className="tps-unlock-desk"> No minimum, no&nbsp;markup.</span>
         </p>
       </div>
       <ul className="tps-unlock-row">
