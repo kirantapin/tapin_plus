@@ -2435,7 +2435,7 @@ button.tpg-env-link {
    background seems to be a bit different?"; it was the look step's band
    staying full height under the lowered drawer). */
 @media (max-width: 1023.98px) {
-  .gft-preview[data-builder][data-part="look"]:not([data-peek]) .gft-a[data-state="open"] .gft-a-band {
+  .gft-preview[data-builder]:is([data-part="look"], [data-part="open"]):not([data-peek]) .gft-a[data-state="open"] .gft-a-band {
     min-height: 100svh;
   }
 }

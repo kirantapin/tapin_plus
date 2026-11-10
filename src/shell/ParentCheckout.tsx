@@ -893,15 +893,13 @@ function Sheet({
     );
   /* Every step has its line under the title, as the builder's stages do
      (Sam, 6 Nov 2026: "consistent across every single step of the modal"):
-     the price on who it's for (unless the wallets' rows under it say it,
-     Effort E), who it's for on the charge (its rows and terms say the
-     money), the receipt once it's done. */
+     who it's for on the charge (its rows and terms say the money), the
+     receipt once it's done. No price on who it's for (Sam, 9 Nov 2026: "we
+     shouldn't be mentioning price here, people bounce right as they're about
+     to sign up and give us their phone number"): the wallets' rows and terms
+     say it there only once they're signed in, as the card step does. */
   const sub: React.ReactNode =
-    step === "who"
-      ? walletsShown
-        ? null
-        : `${usd(first)} the first month, then ${usd(monthly)}/month.`
-      : step === "pay"
+    step === "pay"
         ? (
             <>
               For <span className="ph-mask">{cap(who)}</span>, <span className="ph-mask">{masked}</span>.
@@ -911,7 +909,7 @@ function Sheet({
   /* The builder's stages count as the first bars (GiftPreview's stepsTotal),
      so the count is the same across the whole flow; Send as is counts only
      these two. */
-  const STEPS: string[] = quick ? ["who", "pay"] : ["look", "note", "who", "pay"];
+  const STEPS: string[] = quick ? ["who", "pay"] : ["look", "open", "note", "who", "pay"];
   const barsOn = step === "done" ? STEPS.length : STEPS.indexOf(step) + 1;
   const bars = (className: string) => (
     <StepBars
@@ -1256,7 +1254,7 @@ function Sheet({
           <span className="ph-mask">{Who}</span> claims it
         </b>
         <p className="tnum">
-          They sign in with <span className="ph-mask">{to.masked}</span> and their Plus starts. That’s when your card is charged {usd(first)}.
+          They sign in with <span className="ph-mask">{to.masked}</span> and their Plus starts, with $25 credit ready.
         </p>
       </>
     );
