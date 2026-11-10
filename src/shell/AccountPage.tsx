@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
-import { AppQr, appHref, device } from "./GetTheApp";
+import { AppQr, AppleGlyph, appHref, device } from "./GetTheApp";
+import { CREDIT, GLYPHS, Glyph, PERCENT, PLACES } from "../routes/parents_kit";
 
 /* ══ THE ACCOUNT PAGE, ONE FRAME FOR BOTH (Sam, 9 Nov 2026: "redesign the
    account page for both the parent page and the main page ... relatively
@@ -153,9 +154,12 @@ function SignedIn() {
   );
 }
 
-/** "In the app": the app's icon and what is in it; a QR on a computer, a
-    button on a phone. */
-export function AppPanel({ where, line }: { where: string; line: string }) {
+/** "In the app" (Sam, 10 Nov 2026: "redesign this on the member page ... for
+    parents and regular"). What's waiting in the app, shown, not said: the
+    five spots with their $5 each, then 15% off and points. Then the way in:
+    a scan tile on a computer, the button on a phone, and the one thing to
+    know when they open it (`signIn`). */
+export function AppPanel({ where, signIn, they = false }: { where: string; signIn: string; they?: boolean }) {
   const { track } = useEventTracking();
   const d = device();
   const tap = () => track("plus_get_app_clicked", { where, device: d });
@@ -165,24 +169,57 @@ export function AppPanel({ where, line }: { where: string; line: string }) {
         In the app
       </h2>
       <div className="acc-panel acc-app" data-device={d}>
-        <img className="acc-app-icon" src={APP_ICON} alt="" width="56" height="56" decoding="async" />
-        <div className="acc-app-words">
-          <p className="acc-app-name">
-            <b>Tapin</b>
-            <span>{d === "android" ? "On the web for Android" : "Free on the App Store"}</span>
-          </p>
-          <p className="acc-app-line">{line}</p>
+        <div className="acc-app-main">
+          <div className="acc-app-head">
+            <img className="acc-app-icon" src={APP_ICON} alt="" width="48" height="48" decoding="async" />
+            <p className="acc-app-name">
+              <b>Tapin</b>
+              <span>{d === "android" ? "On the web for Android" : "Free on the App Store"}</span>
+            </p>
+          </div>
+          <ul className="acc-app-spots" aria-label={`$${CREDIT} credit at each of ${PLACES.length} spots, every month`}>
+            {PLACES.map((p) => (
+              <li key={p.id}>
+                <img src={p.logo} alt="" width="44" height="44" decoding="async" loading="lazy" />
+                <b className="tnum" aria-hidden="true">
+                  ${CREDIT}
+                </b>
+              </li>
+            ))}
+          </ul>
+          <ul className="acc-app-perks">
+            <li>
+              <b className="tnum">${CREDIT} credit</b> at each spot, every month
+            </li>
+            <li>
+              <b className="tnum">{PERCENT}% off</b> {they ? "their" : "your"} other orders, once a day
+            </li>
+            <li>
+              <b>Points</b> on everything
+            </li>
+          </ul>
         </div>
         {d === "desktop" ? (
-          <a className="acc-app-qr" href={appHref(d)} target="_blank" rel="noopener noreferrer" onClick={tap}>
-            <AppQr size={88} />
-            <span>Scan with your iPhone’s camera</span>
-          </a>
+          <div className="acc-app-scan">
+            <AppQr className="acc-app-qr" size={112} />
+            <p>Scan with {they ? "an" : "your"} iPhone’s camera</p>
+            <a href={appHref(d)} target="_blank" rel="noopener noreferrer" onClick={tap}>
+              Or open the App Store
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </div>
         ) : (
           <a className="acc-btn acc-btn-dark acc-app-get" href={appHref(d)} rel="noopener noreferrer" onClick={tap}>
+            {d === "android" ? null : <AppleGlyph />}
             {d === "android" ? "Open Tapin" : "Get the app"}
           </a>
         )}
+        <p className="acc-app-sign">
+          <Glyph d={GLYPHS.phone} className="acc-glyph" />
+          {signIn}
+        </p>
       </div>
     </section>
   );

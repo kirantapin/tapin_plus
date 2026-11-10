@@ -80,7 +80,7 @@ export default function Members() {
         </AccountCard>
       )}
 
-      <AppPanel where="members" line="Your $5 credit, 15% off and points. Sign in with the number you joined with." />
+      <AppPanel where="members" signIn="Sign in with the number you joined with." />
 
       <InfoPanel rows={rows} mail={MAIL} onMail={() => track("members_email")} />
     </AccountFrame>

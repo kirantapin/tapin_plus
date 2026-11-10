@@ -326,30 +326,35 @@
   background: var(--module);
 }
 
-/* In the app. */
+/* In the app (Sam, 10 Nov 2026: "redesign this"). What's waiting, shown:
+   the five spots' logos each over its $5 on the well, three plain lines,
+   then the way in. A phone stacks it with the button; a computer puts the
+   scan tile in its own column, the sign-in line across the foot. */
 .acc-app {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  align-items: center;
-  gap: 14px 16px;
-  padding: 18px var(--acc-pad);
+  gap: 18px;
+  padding: 20px var(--acc-pad);
 }
-.acc-app-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 13px;
-  box-shadow: 0 0 0 1px var(--hair);
-}
-.acc-app-words {
+.acc-app-main {
   display: grid;
-  gap: 6px;
+  gap: 16px;
   min-width: 0;
 }
-.acc-app-name {
+.acc-app-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
+  align-items: center;
+  gap: 12px;
+}
+.acc-app-icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.acc-app-name {
+  display: grid;
+  gap: 1px;
   margin: 0;
   font: 600 17px/22px "Gilroy", Arial, sans-serif;
   color: var(--ink);
@@ -357,34 +362,118 @@
 .acc-app-name span {
   font-weight: 500;
   font-size: 15px;
+  line-height: 20px;
   color: var(--muted);
 }
-.acc-app-line {
+.acc-app-spots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
   margin: 0;
-  font: 500 15px/20px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-  text-wrap: pretty;
+  padding: 14px 8px 12px;
+  border-radius: 12px;
+  background: #f4f4f5;
+  list-style: none;
 }
-.acc-app-get {
-  grid-column: 1 / -1;
-}
-.acc-app-qr {
+.acc-app-spots li {
   display: grid;
   justify-items: center;
+  gap: 8px;
+}
+.acc-app-spots img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.acc-app-spots b {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #e8f4ee;
+  color: #0b7a53;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
+.acc-app-perks {
+  display: grid;
   gap: 6px;
-  width: 128px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
   color: var(--muted);
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+}
+.acc-app-perks b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.acc-app-get {
+  gap: 8px;
+}
+.acc-app-sign {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.acc-app-sign .acc-glyph {
+  flex: none;
+  color: var(--muted);
+}
+/* A computer: the scan tile beside what's waiting. */
+.acc-app[data-device="desktop"] {
+  grid-template-columns: minmax(0, 1fr) 200px;
+  column-gap: 20px;
+}
+.acc-app[data-device="desktop"] .acc-app-sign {
+  grid-column: 1 / -1;
+}
+.acc-app-scan {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  background: #f4f4f5;
   text-align: center;
+}
+.acc-app-scan .acc-app-qr {
+  display: block;
+  width: 112px;
+  height: 112px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-sizing: content-box;
+}
+.acc-app-scan p {
+  margin: 4px 0 0;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.acc-app-scan a {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 4px;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
   text-decoration: none;
 }
-.acc-app-qr img {
-  display: block;
-  width: 88px;
-  height: 88px;
+.acc-app-scan a:hover {
+  color: var(--ink);
 }
-.acc-app[data-device="desktop"] {
-  grid-template-columns: 56px minmax(0, 1fr) auto;
+.acc-app-scan a:focus-visible {
+  outline: 3px solid #e5751f;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Good to know. */

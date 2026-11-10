@@ -236,7 +236,7 @@ export default function ParentAccount() {
       )}
 
       {/* The app is the student's: their Plus lives there. */}
-      <AppPanel where="parent_account" line="Their Plus is in the Tapin app. They sign in with the number you gave us." />
+      <AppPanel where="parent_account" they signIn="They sign in with the number you gave us." />
 
       <InfoPanel rows={rows} mail={MAIL} onMail={() => track("parent_account_email")} />
     </AccountFrame>
