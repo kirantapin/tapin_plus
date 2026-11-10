@@ -1,4 +1,4 @@
-import { PLACES } from "../routes/parents_kit";
+import { PERCENT, PLACES } from "../routes/parents_kit";
 
 /* ══ $5 BONUS CREDIT AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════
    The small section right under the band on plus.tapin.app, and on /parents
@@ -33,6 +33,11 @@ export function BonusSpots(_: { they?: boolean }) {
           </li>
         ))}
       </ul>
+      {/* The other half of the offer (Sam, 10 Nov 2026: "can we also add
+          15% off daily here too"), across the card's foot. */}
+      <p className="tps-unlock-or">
+        <b>Or {PERCENT}% off</b> once a day
+      </p>
     </section>
   );
 }
