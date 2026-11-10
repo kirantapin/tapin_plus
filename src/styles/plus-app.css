@@ -4693,6 +4693,16 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   flex: none;
   width: 17px;
   height: 17px;
+  /* Centred on the capitals, not the line box: Gilroy sets its text high,
+     so the icon sat 2.5px low at 15px (measured, 10 Nov 2026). In em so it
+     holds at the computer's 17px. */
+  position: relative;
+  top: -0.16em;
+}
+/* The minute hand turns about the face's centre (shell/WelcomeOffer.tsx). */
+.tpa-clock-min {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
 }
 @media (min-width: 1024px) {
   .tpa-wline {
