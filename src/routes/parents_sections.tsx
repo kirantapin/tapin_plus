@@ -1554,16 +1554,21 @@ export function ProofTurn({
   paused,
   audience = "parent",
   noPlaces = false,
+  lead = [],
 }: {
   className: string;
-  start: ProofKey;
+  start: ProofKey | string;
   paused: boolean;
   audience?: Audience;
   /** A place's own page: not the five spots. */
   noPlaces?: boolean;
+  /** Lines that go first, before the usual three (the student dock's
+   *  deadline and spots, 10 Nov 2026). */
+  lead?: ReadonlyArray<{ key: string; body: ReactNode }>;
 }) {
   const student = audience === "student";
-  const allLines: Array<{ key: ProofKey; body: ReactNode }> = [
+  const allLines: Array<{ key: string; body: ReactNode }> = [
+    ...lead,
     {
       key: "students",
       body: (
