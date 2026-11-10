@@ -25,10 +25,11 @@ const BLAZER = asset("/brand/founder-blazer.webp");
 /** B is the section, on every page (Sam, 10 Nov 2026, after a look at C
  *  live: "actually let's do the other version, rob and I floating there just
  *  looks a bit weird"); ?fv=c still previews C. */
-export type FounderV = "b" | "c";
+export type FounderV = "b" | "c" | "d";
 const version = (): FounderV => {
   if (typeof window === "undefined") return "b";
-  return new URLSearchParams(window.location.search).get("fv") === "c" ? "c" : "b";
+  const v = new URLSearchParams(window.location.search).get("fv");
+  return v === "c" || v === "d" ? v : "b";
 };
 
 const count = PLACES.length === 5 ? "five" : String(PLACES.length);
@@ -95,8 +96,51 @@ const Sign = () => (
 );
 
 /** `they`: the parents page, where it's their student who gets the $5. */
+/* D · TWO PORTRAITS (Sam, 10 Nov 2026, of B live: "still don't love the
+   way this looks"). The two of them are the picture: each on a portrait tile
+   in his school's colour, Rob on Virginia Tech maroon, Sam on UVA navy,
+   side by side, so the rivalry is the joke without saying it twice. Who is
+   whom is Sam's answer (Rob is the blazer). One heading, one line, Read
+   more; the founder film's line opens the story. */
+function Tiles({ they }: { they: boolean }) {
+  return (
+    <section className="tpa-module tpf tpf-d" aria-labelledby="tpf-h" data-ph-show="">
+      <ul className="tpf-d-pair" aria-label="Tapin’s founders">
+        <li>
+          <div className="tpf-d-tile" data-school="vt">
+            <img src={BLAZER} alt="Rob" decoding="async" loading="lazy" />
+          </div>
+          <p>
+            <b>Rob</b>
+            <span>Virginia Tech alum</span>
+          </p>
+        </li>
+        <li>
+          <div className="tpf-d-tile" data-school="uva">
+            <img src={TEE} alt="Sam" decoding="async" loading="lazy" />
+          </div>
+          <p>
+            <b>Sam</b>
+            <span>UVA alum</span>
+          </p>
+        </li>
+      </ul>
+      <div className="tpf-words">
+        <h2 id="tpf-h" className="tpa-h2">
+          Why we brought Plus to Blacksburg
+        </h2>
+        <p>A Hokie and a Wahoo. Tapin is our contribution to world&nbsp;peace.</p>
+        <More>
+          <Story line they={they} />
+        </More>
+      </div>
+    </section>
+  );
+}
+
 export function Founders({ they = false }: { they?: boolean }) {
   const v = version();
+  if (v === "d") return <Tiles they={they} />;
   if (v === "b") {
     return (
       <section className="tpa-module tpf tpf-b" aria-labelledby="tpf-h" data-ph-show="">
