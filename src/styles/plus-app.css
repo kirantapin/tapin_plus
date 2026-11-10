@@ -5165,3 +5165,43 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     line-height: 25px;
   }
 }
+
+/* ══ A GROUP'S PAGE (/smiths-landing, shell/GroupBits.tsx, 10 Nov 2026) ═════
+   The home page's band and sheet; only the headline and the exclusive
+   price are new. Gilroy 500/600. */
+.tpa-band-title .tpg-h1 {
+  font-weight: 600;
+}
+/* The group's exclusive price (shell/GroupBits.tsx): the bar names whose it
+   is; the header line says it under the $25. */
+.tpg-bar b {
+  font-weight: 600;
+}
+.tpg-offer b {
+  font-weight: 600;
+  color: #ffffff;
+}
+.tpg-offer .tpg-offer-ico {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  position: relative;
+  top: 0.08em;
+}
+.tpa-band-title .tpg-offer span {
+  flex: initial;
+  padding-bottom: 0;
+  font-size: inherit;
+  line-height: inherit;
+  text-shadow: none;
+}
+.tpg-offer {
+  align-items: flex-start;
+}
+/* Sam's Lodge collage (public/groups/smiths-landing.webp): on a computer's
+   wide band, sit higher so the sun's whole disc shows over the roofline. */
+@media (min-width: 1024px) {
+  .tpa-home .tpg-band-art {
+    object-position: 50% 24%;
+  }
+}

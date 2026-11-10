@@ -5,6 +5,7 @@ import Arrival from "./shell/Arrival";
 import { PlusCheckoutMount } from "./shell/PlusCheckout";
 import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
+import { SMITHS_LANDING, type Group } from "./model/groups";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
 import ParentAccount from "./routes/ParentAccount";
@@ -100,6 +101,7 @@ export default function App() {
             the shell: it paints the app's light ground edge to edge. */}
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
+        <Route path="/smiths-landing" element={<GroupPage group={SMITHS_LANDING} bandSrc={asset("/groups/smiths-landing.webp")} />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
@@ -152,4 +154,18 @@ export default function App() {
       {arrive ? <Arrival /> : null}
     </>
   );
+}
+
+/* A group's page carries its promo link (model/groups.ts) in the address, so
+   the price, the checkout and analytics all apply it as they would any ?l=
+   link. Put there before the page's first render reads it. */
+function GroupPage({ group, bandSrc }: { group: Group; bandSrc: string }) {
+  useState(() => {
+    if (!group.linkId || typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("l")) return;
+    url.searchParams.set("l", group.linkId);
+    window.history.replaceState(window.history.state, "", url);
+  });
+  return <PlusHome group={group} bandSrc={bandSrc} />;
 }

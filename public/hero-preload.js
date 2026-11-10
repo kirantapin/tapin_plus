@@ -9,7 +9,9 @@
       ? ["/collage/blacksburg.webp"]
       : path === "/parents"
         ? ["/parents/hero-split-parent.webp", "/parents/hero-split-student.webp"]
-        : [];
+        : path === "/smiths-landing"
+          ? ["/groups/smiths-landing.webp"]
+          : [];
   for (var i = 0; i < urls.length; i++) {
     var l = document.createElement("link");
     l.rel = "preload";
