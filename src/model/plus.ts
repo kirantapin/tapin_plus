@@ -229,12 +229,12 @@ export const firstThen = (price: PlusPrice | null): string =>
     : `${usd(price?.first)} your first month, then ${usd(price?.monthly)}.`;
 
 /** How long the first price lasts, said after its figure: "first month",
- *  or for a promo link that lasts, "a month for your first year" (12) or
+ *  or for a promo link that lasts, "a month for your first full year" (12) or
  *  "a month for 6 months". The checkout says the same (PlusCheckout). */
 export const firstTerm = (price: PlusPrice | null): string => {
   const f = price?.firstFor;
   if (!f || f === "forever" || f.periods <= 1) return "first month";
-  return f.periods === 12 ? "a month for your first year" : `a month for ${f.periods} months`;
+  return f.periods === 12 ? "a month for your first full year" : `a month for ${f.periods} months`;
 };
 /** A promo link's price that lasts more than the first month. */
 export const firstLasts = (price: PlusPrice | null): boolean => {

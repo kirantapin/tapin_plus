@@ -5,16 +5,15 @@ import { scheduleSeatsLeft } from "../model/seats";
 /* ══ A GROUP'S OWN PIECES (Sam, 10 Nov 2026) ════════════════════════════════
    What a group landing page (model/groups.ts) says that the home page
    doesn't: the headline, and the group's exclusive price in the bar and the
-   header. Everything else is the home page's, the founders section too. Sam picked B of three (the distance is the headline; A
-   was a hello and a drive map, C named them over the $25). */
+   header. Everything else is the home page's, the founders section too.
+   The headline was the distance ("about 1.5 miles from Smith's Landing",
+   Sam's pick of three) until Sam asked for it to be about a more rewarding
+   Blacksburg. */
 
-/** The headline: the places, and how far they are from the group. */
+/** The headline (Sam, 10 Nov 2026: "should be about making blacksburg
+ *  more rewarding"), said to the group. */
 export function GroupHeadline({ group }: { group: Group }) {
-  return (
-    <h1 className="tpg-h1">
-      Blacksburg’s best spots, about {group.miles}&nbsp;miles from {group.name}.
-    </h1>
-  );
+  return <h1 className="tpg-h1">A more rewarding Blacksburg, for {group.name}.</h1>;
 }
 
 /** The bar across the top while the group's own price applies: whose
@@ -73,7 +72,7 @@ export function GroupOffer({ first }: { first: string }) {
         <circle cx="8.2" cy="8.2" r="1.6" fill="currentColor" />
       </svg>
       <span className="tnum">
-        <b>Resident exclusive</b> · {first} a month for your first year
+        <b>Resident exclusive</b> · {first} a month for your first full year
       </span>
     </p>
   );
