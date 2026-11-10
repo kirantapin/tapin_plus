@@ -582,11 +582,13 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
           with and they can cancel anytime"): first, and cancel stays below. */}
       <li>
         <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$25</span>
-        <b>{look === "c" ? "$25 welcome bonus" : "$25 welcome bonus on the number you join with"}</b>
+        {/* The offer itself now (Sam, 9 Nov 2026): $5 at each of five
+            places, every month, from the moment you join. */}
+        <b>{look === "c" ? "$25 credit every month" : "$25 in credit every month, $5 at each spot"}</b>
       </li>
       <li>
-        <span className="pck-ico pck-ico-money tnum" aria-hidden="true">$5</span>
-        <b>{look === "c" ? "$5 credit weekly" : "$5 credit every week, every place"}</b>
+        <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">15%</span>
+        <b>{look === "c" ? "Or 15% off daily" : "Or 15% off, once a day"}</b>
       </li>
       {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
           anytime", moved here from the page ("it'd be one of these"), right under

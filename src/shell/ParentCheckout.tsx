@@ -1401,7 +1401,7 @@ function OnTheirNumber({ show, who, number }: { show: boolean; who: React.ReactN
       <span className="prc-on-text">
         {/* The welcome bonus (Sam, 9 Nov 2026: "can you mention this"): it
             lands on the student's number when they claim the gift. */}
-        <b>+$25 welcome bonus on {who} number</b>
+        <b>$25 in credit every month on {who} number</b>
         <span className="tnum">
           It lands when they claim it. We’ll text <span className="ph-mask">{number}</span>
         </span>

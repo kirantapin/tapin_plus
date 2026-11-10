@@ -4476,3 +4476,72 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     margin-top: 18px;
   }
 }
+
+/* ══ $3.99 TURNS INTO $25 (Sam, 9 Nov 2026, reworking the offer: "just
+   show that $3.99 turns into $25 every month") ═══════════════════════════
+   Two figures and an arrow on the offer card, where the calculator was:
+   what the first month costs, on the page's grey, and the credit it turns
+   into, on the money green's pale ground. One line under it says how. */
+.tpa-math-h {
+  text-wrap: balance;
+}
+.tpa-math {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 16px;
+}
+.tpa-math p {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  margin: 0;
+  padding: 14px 14px 13px;
+  border-radius: 14px;
+  background: var(--ground);
+}
+.tpa-math b {
+  font: 600 32px/34px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.tpa-math span {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpa-math .tpa-math-get {
+  background: #e8f4ee;
+}
+.tpa-math .tpa-math-get b {
+  color: #0b7a53;
+}
+.tpa-math .tpa-math-get span {
+  color: #0b5c3f;
+}
+.tpa-math-arrow {
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+}
+.tpa-math-then {
+  margin: 12px 0 0;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+/* Under the math, only the spots: no rule above them, and their two
+   halves on two whole lines (the "·" join left "gone" alone on a phone). */
+.tpa-s2 .tpa-buy[data-math] {
+  margin-top: 16px;
+  padding-top: 0;
+  border-top: 0;
+}
+.tpa-s2 .tpa-buy[data-math] .tpa-buy-seats .plus-seats-line {
+  display: grid;
+  gap: 2px;
+}
+.tpa-s2 .tpa-buy[data-math] .tpa-buy-seats .plus-seats-line span::before {
+  content: none;
+}

@@ -6,7 +6,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
-import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, MIN_ORDER, PERCENT, PLACES, SAVES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience } from "./parents_kit";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -209,12 +209,12 @@ export function OfferPrice() {
       </div>
       <p className="tpp-vs-label">
         <span className="tpp-sr">
-          With Tapin Plus, a {money0(LUNCH)} lunch downtown is {money0(LUNCH - CREDIT)}, every week, at each of five spots.
+          With Tapin Plus, a {money0(LUNCH)} lunch downtown is {money0(LUNCH - CREDIT)}, once a month, at each of five spots.
         </span>
         {/* The approved limit (COPY.md v2 final: "every week, at each of five
             spots"), so the $7 never reads as every lunch. */}
         <span aria-hidden="true">A {money0(LUNCH)} lunch downtown</span>
-        <small aria-hidden="true">every week, at each of five spots</small>
+        <small aria-hidden="true">once a month, at each of five spots</small>
       </p>
     </div>
   );
@@ -272,7 +272,7 @@ export function PriceLead() {
         </p>
       ) : null}
       <p className="tpp-price-what">
-        <b>${CREDIT} credit</b> every week at each of five{"\u00a0"}spots.
+        <b>${CREDIT} credit</b> every month at each of five{"\u00a0"}spots.
       </p>
     </div>
   );
@@ -292,33 +292,22 @@ export function BenefitCards() {
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean; green?: boolean }> = [
-    /* The welcome bonus first (Sam, 9 Nov 2026: "include ... the welcome
-       offer $25 credit in the what's in their care package"). */
+    /* The $25 a month first, the offer itself (Sam, 9 Nov 2026, reworking
+       the offer: "$5 monthly credit at each spot on tapin plus with no
+       minimum spend ... Credit doesn't roll over"). The weekly $5-on-$10
+       card and the $60 estimate built on it went: still true, not marketed. */
     {
       key: "welcome",
       art: (
         <b className="tpp-card-fig" data-money="">
-          +{money0(CREDIT * PLACES.length)}
+          {money0(CREDIT * PLACES.length)}
         </b>
       ),
-      label: `A ${money0(CREDIT * PLACES.length)} welcome bonus`,
-      line: `${money0(CREDIT)} to spend at each spot the moment they join.`,
+      label: "In credit every month",
+      line: `${money0(CREDIT)} at each of five spots, no minimum spend. It resets each month, so they use it.`,
       /* On money green (Sam, 9 Nov 2026: "I think we give this a green
          background"). */
       green: true,
-    },
-    {
-      key: "credit",
-      art: (
-        <b className="tpp-card-fig" data-money="">
-          {money0(CREDIT)}
-        </b>
-      ),
-      /* A credit, not money off (Sam, 6 Nov 2026: "this needs to be a $5
-         credit on every meal instead of $5 off - it's $5 off after the
-         credit has been earned"). */
-      label: `${money0(CREDIT)} credit every week, at each place`,
-      line: `At five Blacksburg places, a ${money0(MIN_ORDER)}+ order takes ${money0(CREDIT)} off their next order there.`,
     },
     {
       key: "places",
@@ -330,7 +319,7 @@ export function BenefitCards() {
       key: "pct",
       art: <b className="tpp-card-fig">{PERCENT}%</b>,
       label: `Or ${PERCENT}% off, once a day`,
-      line: `One per order: this or the ${money0(CREDIT)} credit. Alcohol excluded.`,
+      line: "One per order: this or their credit. Alcohol excluded.",
     },
     {
       key: "note",
@@ -348,13 +337,6 @@ export function BenefitCards() {
       art: <Glyph d={GLYPHS.phone} className="tpp-card-glyph" />,
       label: "You send it. They claim it. It’s on.",
       line: "In the Tapin app, with their phone number.",
-    },
-    {
-      key: "saves",
-      art: <b className="tpp-card-fig">${SAVES}</b>,
-      label: "Saved a month by the average student*",
-      line: `From the weekly ${money0(CREDIT)} credits, and points on every order toward free food.`,
-      ink: true,
     },
     /* What it costs, last (Sam, 6 Nov 2026: "$7.99 saves an average of $60 a
        month for your kiddo"), with the parents' refund, as it is everywhere. */
@@ -557,12 +539,11 @@ const parentSteps = (first: string): Array<{ glyph: string; when: string; title:
   {
     glyph: GLYPHS.tag,
     when: "After that",
-    title: "They save every week",
-    /* One $5 a place a week, not "every time" (Sam, 7 Nov 2026). */
+    title: "They save every month",
+    /* The monthly credit (Sam, 9 Nov 2026). */
     line: (
       <>
-        {money0(CREDIT)} in credit every week at each Plus place, earned on a {money0(MIN_ORDER)}+ order of food. Or {PERCENT}% off,
-        once a day.
+        {money0(CREDIT)} in credit every month at each Plus place, no minimum spend. Or {PERCENT}% off, once a day.
       </>
     ),
   },
@@ -658,12 +639,11 @@ function studentSteps(first: string, free: boolean, appTab: number): Array<{ gly
     },
     {
       glyph: GLYPHS.tag,
-      when: "Every week",
+      when: "Every month",
       title: "Save at each place",
       line: (
         <>
-          {money0(CREDIT)} credit every week at each place on a {money0(MIN_ORDER)}+ order of food or non-alcoholic drinks. Or {PERCENT}% off, once
-          a day.
+          {money0(CREDIT)} credit every month at each place, no minimum spend. Or {PERCENT}% off, once a day.
         </>
       ),
     },
@@ -932,7 +912,7 @@ export function HowPhone({
                       Tapin Plus
                     </div>
                     <span className="tpp-hw-lbl tpp-hw-every">
-                      <b>{money0(CREDIT)} credit</b> every week at
+                      <b>{money0(CREDIT)} credit</b> every month at
                     </span>
                     <div className="tpp-hw-places">
                       {PLACES.map((p) => (
@@ -1296,12 +1276,12 @@ export function CheckoutPhone({ audience = "parent", start = 0 }: { audience?: A
           </div>
           {student ? (
             <p className="tpp-math">
-              Earn <b>{money0(CREDIT)}</b> on a {money0(MIN_ORDER)}+ meal. It comes off your next order there.
+              <b>{money0(CREDIT)}</b> at each place every month, on any order. It resets each month, so use it.
             </p>
           ) : (
             <p className="tpp-math">
-              They earn the ${CREDIT} on a ${MIN_ORDER}+ meal, and it comes off their next order there. Two credits a month
-              cover the {MONTHLY}. Alcohol is never discounted.
+              ${CREDIT} at each place every month, on any order, no minimum. Two credits cover the {MONTHLY}. Alcohol is
+              never discounted.
             </p>
           )}
         </div>

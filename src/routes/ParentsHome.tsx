@@ -15,7 +15,6 @@ import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import {
   CREDIT,
-  MIN_ORDER,
   PERCENT,
   useParentPrice,
   PLACES,
@@ -23,7 +22,6 @@ import {
   Chevron,
   Glyph,
   GLYPHS,
-  SAVES_NOTE,
   Fold,
   FlatMark,
 } from "./parents_kit";
@@ -140,7 +138,7 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
      moves down to the envelope's heading. ?ph=d|e|f while Sam picks. */
   d: ["Help them save", "where they already eat."],
   e: ["They already eat here.", "Now they save every week."],
-  f: ["$5 credit every week", "where they already eat."],
+  f: ["$5 credit every month", "where they already eat."],
   /* Rob's header (Sam, 9 Nov 2026), with its line under it (PARENT_SUBS):
      "r" in his words, "s" with the line held to what Plus gives ($5 credit,
      not money back; 15% off once a day). */
@@ -158,9 +156,9 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
 /** A line under the headline, for the headlines that carry one; it says the
  *  offer, so the favourites row then shows the places alone. */
 const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
-  r: "Tapin Plus gives your Virginia Tech student money back at their favorite local spots every week, plus 15% off a meal every day.",
-  s: "$5 credit every week at each of their favorite Blacksburg spots, plus 15% off once a day.",
-  w: "$5 to spend at each spot the moment they join, then $5 credit every week at each spot when they spend $10.",
+  r: "Tapin Plus gives your Virginia Tech student $5 credit every month at each of their favorite local spots, or 15% off a meal every day.",
+  s: "$5 credit every month at each of their favorite Blacksburg spots, or 15% off once a day.",
+  w: "$5 to spend at each spot the moment they join, and again every month, with no minimum spend.",
 };
 const isParentHero = (v: string | null): v is ParentHero =>
   v === "a" || v === "b" || v === "c" || v === "d" || v === "e" || v === "f" || v === "r" || v === "s" || v === "w";
@@ -535,7 +533,7 @@ export default function ParentsHome() {
                     "At each of 5 Blacksburg favorites"
                   ) : (
                     <>
-                      <b>$5 credit</b> every week at each of 5 Blacksburg favorites
+                      <b>$5 credit</b> every month at each of 5 Blacksburg favorites
                     </>
                   )}
                 </p>
@@ -584,7 +582,6 @@ export default function ParentsHome() {
           </h2>
           <p className="tpp-get-intro">Like a box from home that lives on their phone instead of the mail room.</p>
           <BenefitCards />
-          <p className="tpp-note">{SAVES_NOTE}</p>
         </section>
 
         <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
@@ -784,9 +781,10 @@ export default function ParentsHome() {
         <footer className="tpa-foot tpp-foot">
           <p>
             The $12 lunch is Coffeeholics’ California Club, $12.00 before tax.{" "}
-            ${CREDIT} credit every 7 days per Plus place on ${MIN_ORDER}+ orders
-            of food or non-alcoholic drinks placed through Tapin, or {PERCENT}%
-            off once a day. One benefit per order. Alcohol excluded. {FIRST} the
+            ${CREDIT} credit every month at each Plus place on orders placed
+            through Tapin, no minimum spend; credit resets each month and
+            doesn’t roll over. Or {PERCENT}% off once a day. One benefit per
+            order. Alcohol excluded. {FIRST} the
             first month, then {MONTHLY}/month, billed every month until
             cancelled, with a text before each bill. Tapin is not affiliated
             with Virginia Tech.

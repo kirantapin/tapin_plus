@@ -4,7 +4,6 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { venues } from "../model/content";
 import { itemsFor } from "../model/menu";
-import { monthlyBack } from "../model/savings";
 import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
@@ -119,58 +118,6 @@ const EXAMPLES: Example[] = PLACES.map((venue): Example | null => {
 /** The Sticker's first order: the first place's example, a real dish. */
 const FIRST_ORDER = EXAMPLES[0];
 
-/* WHAT YOU SPEND, WHAT COMES BACK, AS ONE SENTENCE (Sam, 3 Nov 2026: "a mad
-   lib style, when i select the amount i spend in a month i think it should
-   populate in the sentence", and "a month and a month, not a week and a
-   month"). Pick a month's spend; it drops into the sentence, and the back a
-   month beside it comes from the same order-by-order sum as the
-   walkthrough (savings.ts monthlyBack). */
-const SPEND_BANDS = [50, 100, 200, 300] as const;
-
-/** A figure that rolls when it changes, like an odometer: the old value
- *  lifts out of a clipped slot as the new one rises in, and the slot eases
- *  to the new width so the words beside it glide rather than jump. Nothing
- *  else in the sentence moves. Reduced motion: the new value, at once. */
-function RollFigure({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
-  const slot = useRef<HTMLSpanElement | null>(null);
-  const prev = useRef(text);
-  useLayoutEffect(() => {
-    const el = slot.current;
-    const was = prev.current;
-    prev.current = text;
-    if (!el || was === text || reducedMotion() || typeof el.animate !== "function") return;
-    const ease = "cubic-bezier(.22,1,.36,1)";
-    const next = el.querySelector<HTMLElement>(".tpa-roll-now");
-    const ghost = document.createElement("span");
-    ghost.className = "tpa-roll-was";
-    ghost.setAttribute("aria-hidden", "true");
-    ghost.textContent = was;
-    el.appendChild(ghost);
-    const to = el.getBoundingClientRect().width;
-    const from = ghost.getBoundingClientRect().width;
-    el.animate([{ width: `${from}px` }, { width: `${to}px` }], { duration: 360, delay, easing: ease, fill: "backwards" });
-    next?.animate([{ transform: "translateY(85%)", opacity: 0 }, { transform: "none", opacity: 1 }], {
-      duration: 360,
-      delay,
-      easing: ease,
-      fill: "backwards",
-    });
-    const out = ghost.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(-85%)", opacity: 0 }], {
-      duration: 300,
-      delay,
-      easing: ease,
-      fill: "forwards",
-    });
-    out.onfinish = () => ghost.remove();
-    return () => ghost.remove();
-  }, [text, delay]);
-  return (
-    <b ref={slot} className={`tpa-roll tnum ${className ?? ""}`}>
-      <span className="tpa-roll-now">{text}</span>
-    </b>
-  );
-}
-
 /** The social-proof line, with a little life (Sam, 3 Nov 2026: "slight
  *  animate for this"): it rises in just after the headline, and its green
  *  dot breathes, a ring easing out from it every couple of seconds, the way
@@ -202,77 +149,6 @@ function SocialProof({ text }: { text: string }) {
       </span>
       {text}
     </p>
-  );
-}
-
-function PaybackCounter() {
-  const [m, setM] = useState<number>(200);
-  const back = monthlyBack(m);
-  const top = m === SPEND_BANDS[SPEND_BANDS.length - 1];
-  /* Only the two figures move when the spend changes, the words around them
-     stay put (Sam, 3 Nov 2026: "only the numbers that change based on my
-     selection should actually animate"). They roll (RollFigure), the amount
-     back a beat after the spend it comes from. */
-  const pick = (k: number) => setM(k);
-  return (
-    <div className="tpa-s2-calc">
-      <div className="tpa-s2-picks" role="radiogroup" aria-label="What you spend a month on food and drinks">
-        {SPEND_BANDS.map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={m === k} data-on={m === k ? "" : undefined} onClick={() => pick(k)}>
-            <span className="tnum">
-              ${k}
-              {k === SPEND_BANDS[SPEND_BANDS.length - 1] ? "+" : ""}
-            </span>
-          </button>
-        ))}
-      </div>
-      {/* Short, with the working folded away (Sam, 3 Nov 2026: "a lot of
-          text ... a little accordion ... that would show you what that number
-          is coming from"). */}
-      <p className="tpa-s2-lib" aria-live="polite">
-        <span>
-          Spend about <RollFigure className="tpa-s2-blank" text={`$${m}${top ? "+" : ""}`} /> a month at these places, get
-          about <RollFigure className="tpa-s2-back" text={`$${back.monthlyUsd}`} delay={90} /> back.
-        </span>
-      </p>
-      <details className="tpa-more tpa-s2-how">
-        <summary>
-          How we got ${back.monthlyUsd}
-          <Chevron />
-        </summary>
-        <ul className="tpa-s2-rows">
-          <li>
-            <span>
-              {back.ordersPerMonth} {back.ordersPerMonth === 1 ? "order" : "orders"} a month, about ${back.orderUsd} each
-            </span>
-          </li>
-          <li>
-            <span>
-              ${CREDIT} credit on {back.creditOrders === back.ordersPerMonth && back.creditOrders > 1 ? `all ${back.creditOrders}` : back.creditOrders}
-            </span>
-            <b className="tnum">${back.creditUsdMonth}</b>
-          </li>
-          {back.percentOrders > 0 ? (
-            <li>
-              <span>15% off the other {back.percentOrders}</span>
-              <b className="tnum">${back.percentUsdMonth}</b>
-            </li>
-          ) : null}
-          {/* Points count in what you get back (Sam, 5 Nov 2026). */}
-          {back.pointsMonth > 0 ? (
-            <li>
-              <span>{back.pointsMonth.toLocaleString("en-US")} points in rewards</span>
-              <b className="tnum">${back.pointsUsdMonth}</b>
-            </li>
-          ) : null}
-          <li className="tpa-s2-sum">
-            <span>A month, about</span>
-            <b className="tnum">${back.monthlyUsd}</b>
-          </li>
-        </ul>
-        <p className="tpa-s2-fine">At Plus places. $5 credit and 15% off on food and non-alcoholic drinks, $5 once a week at each place. 10 points for every dollar, about $1 per 100. An estimate.</p>
-      </details>
-    </div>
   );
 }
 
@@ -339,27 +215,29 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
        to reflect that the $5 credit is added to someones account
        immediately"). */
     q: "When do I get my credit?",
-    a: `Right away. The moment you join, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app.`,
+    a: `Right away. The moment you join, $${CREDIT} credit is added at each of the ${PLACES.length} places, $${PLACES.length * CREDIT} in all, ready to use in the Tapin app. It comes back every month you’re a member.`,
   },
   {
     /* The rule is the same at every bar, not just The Burg (Sam, 4 Nov 2026). */
     q: "Are the bars included? How does credit work there?",
-    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. A $${MIN_ORDER}+ order of food or non-alcoholic drinks earns your $${CREDIT} credit, and your credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
+    a: `Yes. At The Burg, The Milk Parlor and Olaika, order on Tapin and show your phone. Your $${CREDIT} credit and the ${PERCENT}% go on anything but alcohol. Everything you order earns points, which you can trade for rewards.`,
   },
   {
-    q: "Does credit stack? Can I earn credit on an order where I use it?",
-    a: `Yes to both. Credit you haven’t spent adds up, and an order where you use credit still earns a new $${CREDIT} credit, as long as it’s $${MIN_ORDER} or more.`,
+    /* The monthly credit (Sam, 9 Nov 2026): "they don't stack, and credit
+       doesn't roll over". */
+    q: "Does my credit roll over? Can I use it with the 15%?",
+    a: `No to both. Your $${CREDIT} at each place resets every month, so use it that month. And it’s one or the other on an order: your credit, or ${PERCENT}% off.`,
   },
   {
     q: "How often can I use it?",
-    a: `$${CREDIT} credit at each of the ${PLACES.length} places on an order of $${MIN_ORDER} or more, there from the moment you join. Once you’ve used it at a place, it’s ready there again 7 days later. Or take ${PERCENT}% off your order instead, once a day.`,
+    a: `$${CREDIT} credit at each of the ${PLACES.length} places every month, with no minimum spend, there from the moment you join. Or take ${PERCENT}% off your order instead, once a day.`,
   },
   {
     q: "What does it work on?",
     /* Names what the credit buys besides food (Sam, 4 Nov 2026: "shouldn't
        we update this to include events, cover, lineskips"). Earning stays
        food and non-alcoholic drinks (the 3 Nov rule). */
-    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets at every Plus place, plus cover and line skips at select places. Not on alcohol. You earn the $${CREDIT} credit on food and non-alcoholic drinks.`,
+    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks and event tickets at every Plus place, plus cover and line skips at select places. Not on alcohol.`,
   },
   {
     q: "Will my price go up?",
@@ -615,13 +493,13 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 invite={invite}
                 free={free}
                 line={`${firstMonthLine(price)} of Tapin Plus`}
-                h1={wwHero?.h1 ?? `$${CREDIT} credit every week at ${PLACES.length} Blacksburg spots`}
+                h1={wwHero?.h1 ?? `$${CREDIT} credit every month at ${PLACES.length} Blacksburg spots`}
                 strip={wwHero?.strip ?? "First month free"}
               />
             ) : place || hero === "0" ? (
               <h1>
                 {place
-                  ? `$${CREDIT} credit every week at ${place.name}`
+                  ? `$${CREDIT} credit every month at ${place.name}`
                   : `$${CREDIT} credit at every place you already go in Blacksburg`}
               </h1>
             ) : HERO_LINES[hero] ? (
@@ -642,7 +520,7 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 {/* The headline alone (Sam, 4 Nov 2026: "there's so much text
                     now"; "still busy, maybe it belongs in it's own container
                     above 'how it works'"). The Promise is that container. */}
-                <h1>${CREDIT} credit every week at {PLACES.length} Blacksburg spots</h1>
+                <h1>${CREDIT} credit every month at {PLACES.length} Blacksburg spots</h1>
               </>
             ) : (
               <>
@@ -828,14 +706,43 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                 The countdown is a quiet line, not the black pill ("I also
                 don't like the way the countdown looks specifically on this
                 card"). */}
-            <h2 className="tpa-h2">See what you’d save</h2>
-            <PaybackCounter />
+            {/* $3.99 TURNS INTO $25 (Sam, 9 Nov 2026, reworking the offer:
+                "we can remove the calculator, and just show that $3.99 turns
+                into $25 every month"). The calculator was built on the old
+                weekly $5-on-$10, so it went with it. */}
+            <>
+                <h2 className="tpa-h2 tpa-math-h">
+                  {free ? (
+                    <>A free month, with ${PLACES.length * CREDIT} in&nbsp;credit</>
+                  ) : (
+                    <>
+                      {FIRST_MONTH} turns into ${PLACES.length * CREDIT}
+                    </>
+                  )}
+                </h2>
+                <div className="tpa-math" data-ph-show="">
+                  <p>
+                    <b className="tnum">{FIRST_MONTH}</b>
+                    <span>your first month</span>
+                  </p>
+                  <svg className="tpa-math-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 12h15m-5.5-6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <p className="tpa-math-get">
+                    <b className="tnum">${PLACES.length * CREDIT}</b>
+                    <span>every month</span>
+                  </p>
+                </div>
+                <p className="tpa-math-then tnum">
+                  ${CREDIT} at each of the {PLACES.length} spots, no minimum spend. Then {MONTHLY} a month, and the ${PLACES.length * CREDIT} comes back every&nbsp;month.
+                </p>
+            </>
             {/* ONE PRICE, ONE BAR, ONE ACTION (Sam, 3 Nov 2026: "a lot is going
                 on here"). The price on one line, big figure first; the spots
                 bar thin, its words small under it; Join; Try as a quiet
                 second. The "offer ends" line went: the black bar pinned to
                 the top of the page already counts down to November 30. */}
-            <div className="tpa-buy">
+            <div className="tpa-buy" data-math="">
               {invite ? (
                 /* The mark beside the price it unlocks: the offer is the
                    invitation's, so they sit as one line, not a badge stuck
@@ -848,24 +755,12 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
                     <span className="tnum">Then {MONTHLY}/mo. Cancel anytime in the app.</span>
                   </p>
                 </div>
-              ) : (
-              <p className="tpa-buy-price">
-                <span>
-                  <b className="tnum">{FIRST_MONTH}</b> first month
-                </span>
-                <span className="tpa-buy-then tnum">then {MONTHLY}/mo</span>
-              </p>
-              )}
+              ) : null}
               {/* The welcome bonus by the price (Sam, 9 Nov 2026: "here we
                   should show $25 credit added to account immediately after
                   purchase"): the header's green chip, as a line of the
                   offer. Not on an invitation, whose offer is its own. */}
-              {invite ? null : (
-                <p className="tpa-buy-bonus" data-ph-show="">
-                  <b className="tnum">+${KIT_PLACES.length * CREDIT}</b>
-                  <span>credit added the moment you join</span>
-                </p>
-              )}
+              {/* The +$25 row went into the math above (9 Nov 2026). */}
               {/* The next 100 at $7.99, then $9.99 (Sam, 3 Nov 2026); an
                   invitation with an end counts down to it instead (Sam,
                   5 Nov 2026: "a countdown until sunday"). */}
@@ -998,9 +893,9 @@ export default function PlusHome({ placeId, bandSrc }: { placeId?: string; bandS
 
         <footer className="tpa-foot">
           <p>
-            $5 credit, once a week at each place, earned on food and non-alcoholic drinks. Or 15% off once a day.
-            15% off or $5 credit, one per order; credit you’ve earned works with the 15%. Credit and 15% off don’t go toward
-            alcohol. Cancel anytime.
+            $5 credit every month at each place, no minimum spend; it resets each month and doesn’t roll over. Or 15% off
+            once a day. One per order: credit or 15% off, not both. Credit and 15% off don’t go toward alcohol. Cancel
+            anytime.
           </p>
           <AccountLine where="home_foot" app />
           <p className="tpa-links">
