@@ -22,12 +22,13 @@ import { CREDIT, PLACES } from "../routes/parents_kit";
 const TEE = asset("/brand/founder-tee.webp");
 const BLAZER = asset("/brand/founder-blazer.webp");
 
-/** C is the section (Sam, 10 Nov 2026: "let's do this one"), shown on
- *  every page; ?fv=b still previews B. */
+/** B is the section, on every page (Sam, 10 Nov 2026, after a look at C
+ *  live: "actually let's do the other version, rob and I floating there just
+ *  looks a bit weird"); ?fv=c still previews C. */
 export type FounderV = "b" | "c";
 const version = (): FounderV => {
-  if (typeof window === "undefined") return "c";
-  return new URLSearchParams(window.location.search).get("fv") === "b" ? "b" : "c";
+  if (typeof window === "undefined") return "b";
+  return new URLSearchParams(window.location.search).get("fv") === "c" ? "c" : "b";
 };
 
 const count = PLACES.length === 5 ? "five" : String(PLACES.length);
