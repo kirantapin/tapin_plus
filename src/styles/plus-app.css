@@ -5707,6 +5707,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpf-e-face[data-school="uva"] img {
   width: 132%;
   top: 6%;
+  /* Sam's face sits 62% across his photo (Rob's at the middle of his), so
+     his is pulled left by that much to centre it in the circle (11 Nov 2026:
+     "sam's photo seems a bit off center"). */
+  transform: translateX(-62%);
 }
 .tpf-e-people p {
   display: grid;
