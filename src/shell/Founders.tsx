@@ -25,11 +25,11 @@ const BLAZER = asset("/brand/founder-blazer.webp");
 /** B is the section, on every page (Sam, 10 Nov 2026, after a look at C
  *  live: "actually let's do the other version, rob and I floating there just
  *  looks a bit weird"); ?fv=c still previews C. */
-export type FounderV = "b" | "c" | "d";
+export type FounderV = "b" | "c" | "d" | "e";
 const version = (): FounderV => {
   if (typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("fv");
-  return v === "c" || v === "d" ? v : "b";
+  return v === "c" || v === "d" || v === "e" ? v : "b";
 };
 
 const count = PLACES.length === 5 ? "five" : String(PLACES.length);
@@ -138,8 +138,63 @@ function Tiles({ they }: { they: boolean }) {
   );
 }
 
+/* E · THE NOTE (Sam, 11 Nov 2026, of B: "I don't like the layout of the
+   current, the text feels disorganized"). B stacked five kinds of text at
+   four sizes (heading, a quote bigger than the heading, the alumni line,
+   the signature, Read more) with nothing saying which led. E reads in one
+   order, top to bottom, like a short signed note: the heading, one lead
+   paragraph, then who signed it, each founder named with his school on his
+   school's colour, the Hokie-and-Wahoo line under the two of them, and Read
+   more last for the rest. A computer puts the note on the left and the two
+   of them on the right. */
+const People = () => (
+  <ul className="tpf-e-people" aria-label="Tapin’s founders">
+    <li>
+      <span className="tpf-e-face" data-school="vt">
+        <img src={BLAZER} alt="" decoding="async" loading="lazy" />
+      </span>
+      <p>
+        <b>Rob</b>
+        <span>Virginia Tech alum</span>
+      </p>
+    </li>
+    <li>
+      <span className="tpf-e-face" data-school="uva">
+        <img src={TEE} alt="" decoding="async" loading="lazy" />
+      </span>
+      <p>
+        <b>Sam</b>
+        <span>UVA alum</span>
+      </p>
+    </li>
+  </ul>
+);
+
+function Note({ they }: { they: boolean }) {
+  return (
+    <section className="tpa-module tpf tpf-e" aria-labelledby="tpf-h" data-ph-show="">
+      <div className="tpf-e-note">
+        <h2 id="tpf-h" className="tpa-h2">
+          Why we brought Plus to Blacksburg
+        </h2>
+        <p className="tpf-e-lead">
+          A regular everywhere is a member nowhere. So we put the places we love together, in one&nbsp;membership.
+        </p>
+        <More>
+          <Story they={they} />
+        </More>
+      </div>
+      <div className="tpf-e-who">
+        <People />
+        <p className="tpf-e-peace">A Hokie and a Wahoo. Tapin is our contribution to world&nbsp;peace.</p>
+      </div>
+    </section>
+  );
+}
+
 export function Founders({ they = false }: { they?: boolean }) {
   const v = version();
+  if (v === "e") return <Note they={they} />;
   if (v === "d") return <Tiles they={they} />;
   if (v === "b") {
     return (

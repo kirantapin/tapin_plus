@@ -5639,3 +5639,116 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     line-height: 36px;
   }
 }
+
+/* ══ FOUNDERS E · THE NOTE (shell/Founders.tsx Note, ?fv=e, 11 Nov 2026) ═══
+   One reading order: heading, lead, Read more; then who signed it, a
+   hairline above. A phone: Read more sits with the note, the two founders
+   under it side by side. A computer: the note left, the founders right. */
+.tpf-e {
+  gap: 18px;
+}
+.tpf-e-note {
+  display: grid;
+  gap: 10px;
+}
+.tpf p.tpf-e-lead {
+  margin: 0;
+  font: 500 18px/26px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.tpf-e .tpf-more {
+  margin-top: 4px;
+}
+.tpf-e .tpf-toggle {
+  margin: -4px 0 -10px;
+}
+.tpf-e-who {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hair);
+}
+.tpf-e-people {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tpf-e-people li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.tpf-e-face {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.tpf-e-face[data-school="vt"] {
+  background: #861f41;
+}
+.tpf-e-face[data-school="uva"] {
+  background: #232d4b;
+}
+.tpf-e-face img {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 150%;
+  transform: translateX(-50%);
+}
+.tpf-e-face[data-school="uva"] img {
+  width: 132%;
+  top: 6%;
+}
+.tpf-e-people p {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpf-e-people p span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.tpf p.tpf-e-peace {
+  margin: 0;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+@media (min-width: 1024px) {
+  .tpf-e {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 40px;
+    padding: 28px;
+  }
+  .tpf p.tpf-e-lead {
+    font-size: 20px;
+    line-height: 29px;
+  }
+  .tpf-e-who {
+    padding: 4px 0 0 40px;
+    border-top: 0;
+    border-left: 1px solid var(--hair);
+  }
+  .tpf-e-people {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .tpf-e-face {
+    width: 64px;
+    height: 64px;
+  }
+}
