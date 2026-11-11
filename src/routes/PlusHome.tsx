@@ -30,7 +30,7 @@ import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
-import { BonusSpots } from "../shell/BonusSpots";
+import { BonusSpots, UseItOn } from "../shell/BonusSpots";
 import type { Group } from "../model/groups";
 import { GroupBar, GroupHeadline, GroupOffer, GroupSpots, useGroupSeats } from "../shell/GroupBits";
 
@@ -801,6 +801,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
         {member ? null : <BonusSpots only={place?.id} />}
+        {/* What the $5 and the 15% go on (Sam, 11 Nov 2026). Not on a
+            place's own page, which is about that place. */}
+        {member || place ? null : <UseItOn />}
 
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old

@@ -179,3 +179,74 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
     </section>
   );
 }
+
+/* ══ WHAT CAN I USE IT ON (Sam, 11 Nov 2026: "A question I imagine people
+   have is what can I use these benefits on... so that needs to be
+   answered") ═══════════════════════════════════════════════════════════════
+   Straight after the ladder, on both pages: each place with what it sells,
+   then what else the $5 and the 15% cover, and the one thing they don't.
+   The rules are the FAQ's own ("What does it work on?", 3 Nov and 9 Nov
+   2026): food, non-alcoholic drinks and event tickets at every Plus place,
+   cover and line skips at select places, not alcohol; points on everything.
+   Styles: .tps-use* in plus-app.css. */
+const TicketGlyph = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 8.5V6.5h16v2a2.5 2.5 0 0 0 0 5v2H4v-2a2.5 2.5 0 0 0 0-5Z" transform="translate(0 1)" />
+    <path d="M14 7.5v1.5M14 11v1.5M14 14.5V16" />
+  </svg>
+);
+const DoorGlyph = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 20V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v15M4 20h16M14.5 12.5v.01" />
+  </svg>
+);
+const NoGlyph = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <circle cx="12" cy="12" r="8" />
+    <path d="M6.5 6.5l11 11" />
+  </svg>
+);
+
+export function UseItOn({ they = false }: { they?: boolean }) {
+  return (
+    <section className="tpa-module tps-use" aria-labelledby="tps-use-h">
+      <h2 id="tps-use-h" className="tpa-h2">
+        What can {they ? "they" : "I"} use it on?
+      </h2>
+      <p className="tps-use-lead">
+        {they ? "Their" : "Your"} ${CREDIT} and the {PERCENT}% go on what each place&nbsp;sells:
+      </p>
+      <ul className="tps-use-places">
+        {PLACES.map((p) => (
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <p>
+              <b>{p.name}</b>
+              <span>{p.what}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+      <ul className="tps-use-also">
+        <li>
+          <TicketGlyph />
+          <span>
+            <b>Event tickets</b> at every Plus place
+          </span>
+        </li>
+        <li>
+          <DoorGlyph />
+          <span>
+            <b>Cover and line skips</b> at select places
+          </span>
+        </li>
+        <li className="tps-use-not">
+          <NoGlyph />
+          <span>
+            <b>Not alcohol.</b> Points still earn on everything.
+          </span>
+        </li>
+      </ul>
+    </section>
+  );
+}

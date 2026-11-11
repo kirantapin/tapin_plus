@@ -3,6 +3,7 @@ import { inviteFor, type Invite } from "../model/invite";
 import { firstFigure, firstMonthLine, usePlusPrice, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected } from "../model/invite";
 import { useEffect, useRef, useState } from "react";
+import { usePlusSeats } from "./PlusSeats";
 
 /* ══ THE WELCOME OFFER'S CLOCK, THREE PLACES (Sam, 3 Nov 2026) ═════════════════
    model/deadline.ts holds the date. The bar pinned over the page, a pill in
@@ -79,7 +80,19 @@ function TickingClock() {
  *  November 30". A real date (model/deadline.ts); nothing once it passes. */
 export function WelcomeLine({ first }: { first: string }) {
   const r = useWelcomeEnds();
-  if (!r) return null;
+  const left = usePlusSeats();
+  /* With the countdown off (Sam, 11 Nov 2026), the half-off month is
+     standard and the pressure is the spots: "$3.99 first month · 26 spots
+     left". */
+  if (!r)
+    return (
+      <p className="tpa-wline" data-ph-show="">
+        <SeatsDot />
+        <span className="tnum">
+          {first} first month · {left} spots left
+        </span>
+      </p>
+    );
   return (
     <p className="tpa-wline" data-ph-show="">
       <TickingClock />
@@ -87,6 +100,16 @@ export function WelcomeLine({ first }: { first: string }) {
         {first} first month · ends {welcomeEndsDay}
       </span>
     </p>
+  );
+}
+
+/** A small filling ring for the spots line: how much of the 100 is gone. */
+function SeatsDot() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-clock">
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
+      <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+    </svg>
   );
 }
 
