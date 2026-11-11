@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { PayGet } from "../shell/OfferVersions";
+import { PayGet, LockedIn } from "../shell/OfferVersions";
 import { Clock } from "../shell/WelcomeOffer";
 import { asset } from "../asset";
 import { logoField, venues } from "../model/content";
@@ -217,6 +217,7 @@ export function PayGetLead() {
   return (
     <div className="ov ov-c" data-ph-show="">
       <PayGet first={FIRST} monthly={MONTHLY} they />
+      <LockedIn monthly={MONTHLY} they />
       {when ? (
         <>
           <p className="ov-ends">
