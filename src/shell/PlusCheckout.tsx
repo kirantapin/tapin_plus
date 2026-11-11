@@ -583,7 +583,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
       <li>
         <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$5</span>
         {/* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026), each one line. */}
-        <b>Get $5 at each spot, every month</b>
+        <b>Get $5 free at each spot, every month</b>
       </li>
       {/* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026). */}
       <li>
