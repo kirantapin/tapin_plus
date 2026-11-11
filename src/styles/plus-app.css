@@ -6042,3 +6042,46 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-weight: 500;
   color: var(--muted);
 }
+
+/* ══ WHAT CAN I USE IT ON, THE LOGOS BACK (11 Nov 2026, late) ══════════════
+   Between the busy first cut and the type-only one: a 36px logo, the name
+   over what it sells, on hairlines. Two columns on a computer. */
+.tps-use ul.tps-use-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-use-list > li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.tps-use-list img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-use-list p {
+  display: grid;
+  min-width: 0;
+}
+.tps-use-list b {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tps-use-list span {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+@media (min-width: 1024px) {
+  .tps-use ul.tps-use-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+}

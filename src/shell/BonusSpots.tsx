@@ -1,4 +1,5 @@
 import { PERCENT, PLACES } from "../routes/parents_kit";
+import { covers, venueCovers } from "../model/content";
 
 /* ══ $5 BONUS CREDIT AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════
    The small section right under the band on plus.tapin.app, and on /parents
@@ -200,17 +201,30 @@ export function UseItOn({ they = false }: { they?: boolean }) {
       <h2 id="tps-use-h" className="tpa-h2">
         What can {they ? "they" : "I"} use it on?
       </h2>
-      <dl className="tps-use-list">
+      {/* The logos back, small (Sam, 11 Nov 2026, of the type-only cut:
+          "this feels a bit too empty now?"): each row is the logo, then
+          the name over what it can go on (Sam: "instead of the types of
+          food, we should just show what it can be used towards, like
+          coffeeholics would be food, drink, events"), from venueCovers in
+          model/content.ts, the per-place list Sam gave on 20 Sep and 4 Nov. */}
+      <ul className="tps-use-list">
         {PLACES.map((p) => (
-          <div key={p.id}>
-            <dt>{p.name}</dt>
-            <dd>{p.what}</dd>
-          </div>
+          <li key={p.id}>
+            <img src={p.logo} alt="" decoding="async" loading="lazy" />
+            <p>
+              <b>{p.name}</b>
+              <span>
+                {covers
+                  .filter((c) => (venueCovers[p.id] ?? []).includes(c.id))
+                  .map((c) => c.label)
+                  .join(" · ")}
+              </span>
+            </p>
+          </li>
         ))}
-      </dl>
+      </ul>
       <p className="tps-use-foot">
-        {they ? "Their" : "Your"} ${CREDIT} and the {PERCENT}% also cover event tickets at every Plus place, and
-        cover and line skips at select places. Not alcohol, but points still earn on&nbsp;everything.
+        Drinks means non-alcoholic. Points still earn on&nbsp;everything.
       </p>
     </section>
   );
