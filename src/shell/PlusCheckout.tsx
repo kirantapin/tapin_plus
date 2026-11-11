@@ -940,7 +940,7 @@ function Review({
         </p>
         <ul className="pck-sum-list tnum">
           <li>$25 to spend right after you join</li>
-          <li>{usd(price.monthly)} a month, locked for life</li>
+          <li>{usd(lasts === "forever" ? today : price.monthly)} a month, locked for life</li>
           <li>Money back if you don’t save</li>
           <li>Cancel anytime in the app</li>
         </ul>

@@ -12,7 +12,7 @@ import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { Founders } from "../shell/Founders";
-import { firstFigure, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
+import { firstFigure, firstForever, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
@@ -32,7 +32,7 @@ import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots, UseItOn } from "../shell/BonusSpots";
 import type { Group } from "../model/groups";
-import { GroupBar, GroupHeadline, GroupOffer, GroupSpots, useGroupSeats } from "../shell/GroupBits";
+import { GroupBar, GroupHeadline, GroupOffer, GroupSpots, groupTerm, useGroupSeats } from "../shell/GroupBits";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -417,15 +417,21 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
 /* Said only while the group's own price is the one that applies (its link),
    so the page never promises a year the checkout won't give. Sam, 10 Nov
    2026: the year at $3.99 is agreed with Smith's Landing. */
-const groupPriceFaq = (first: string, monthly: string, year: boolean): { q: string; a: string } => ({
+const groupPriceFaq = (g: Group, first: string, monthly: string, on: boolean): { q: string; a: string } => ({
   q: "Will my price go up?",
-  a: year
-    ? `Not for your first full year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`
-    : `No. Your ${monthly} a month is locked in for as long as you’re a member, even as more places join.`,
+  a: !on
+    ? `No. Your ${monthly} a month is locked in for as long as you’re a member, even as more places join.`
+    : g.term === "forever"
+      ? `No. Your ${first} a month is locked in for as long as you’re a member, even as more places join.`
+      : `Not for your first full year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`,
 });
+/* Brexx (Sam, 11 Nov 2026): $3.99 a month for life, a partnership rate. */
 const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } => ({
   q: `Why is it ${first} for ${g.name}?`,
-  a: `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for your first 12 months, then ${monthly} a month. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
+  a:
+    g.term === "forever"
+      ? `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for as long as you’re a member, where everyone else pays ${monthly}. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`
+      : `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for your first 12 months, then ${monthly} a month. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
 });
 
 export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string; bandSrc?: string; group?: Group }) {
@@ -478,8 +484,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
   /* A group's year at $3.99 (model/groups.ts): on only when its link's
      price is the one that applied, so without the link the page is the
      ordinary offer. */
-  const groupOffer = !!group && !member && !!price?.linkId && firstLasts(price);
+  const groupOffer = !!group && !member && !!price?.linkId && (group.term === "forever" ? firstForever(price) : firstLasts(price));
   const groupSeats = useGroupSeats(group);
+  const gTerm = group ? groupTerm(group) : null;
   const TERM = firstTerm(price);
   /* View FAQ: a smooth scroll to the questions, landing them a little below
      the countdown bar, and focus there so a keyboard follows. */
@@ -499,22 +506,28 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             <>
               <span className="tpp-pt-dot" aria-hidden="true" />
               <span className="tnum">
-                {group.name} exclusive · {FIRST_MONTH}/mo for a year
+                {group.name} exclusive · {FIRST_MONTH}
+                {gTerm?.short}
               </span>
             </>
           ),
         },
-        {
-          key: "spots",
-          body: (
-            <>
-              <span className="tpp-pt-dot" aria-hidden="true" />
-              <span className="tnum">
-                {groupSeats} of {group.seats.cap} spots left at {FIRST_MONTH}/mo
-              </span>
-            </>
-          ),
-        },
+        /* Its spots only if it counts them (Brexx doesn't). */
+        ...(group.seats
+          ? [
+              {
+                key: "spots",
+                body: (
+                  <>
+                    <span className="tpp-pt-dot" aria-hidden="true" />
+                    <span className="tnum">
+                      {groupSeats} of {group.seats.cap} spots left at {FIRST_MONTH}/mo
+                    </span>
+                  </>
+                ),
+              },
+            ]
+          : []),
       ]
     : member || linked || invite || free
       ? []
@@ -673,7 +686,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
           is the same card signed in or out (Sam, 10 Nov 2026: "the page
           header looks different when signed in??"). */}
       {groupOffer && group ? (
-        <GroupBar group={group} line={`${FIRST_MONTH} a month for your first full year`} short={`${FIRST_MONTH}/mo for a year`} />
+        <GroupBar group={group} line={`${FIRST_MONTH} ${gTerm?.long}`} short={`${FIRST_MONTH}${gTerm?.short}`} />
       ) : linked && !member ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
       ) : (
@@ -695,7 +708,8 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         data-hero={place || invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
       >
-        <img className={`tpa-band-art${group ? " tpg-band-art" : ""}`} src={bandSrc ?? COLLAGE} alt="" decoding="async" />
+        {/* The group's own crop is for its own photo, not the collage. */}
+        <img className={`tpa-band-art${group && bandSrc ? " tpg-band-art" : ""}`} src={bandSrc ?? COLLAGE} alt="" decoding="async" />
         {/* A Welcome Week student is here for the offer: no town badge, no
             Members (Sam, 5 Nov 2026: "not sure if for the welcome week kids it
             makes sense"). Sign in stays in the foot for anyone who needs it. */}
@@ -734,7 +748,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
               <>
                 <GroupHeadline group={group} />
                 {member ? null : <WelcomeCallout />}
-                {groupOffer ? <GroupOffer first={FIRST_MONTH} /> : null}
+                {groupOffer ? <GroupOffer group={group} first={FIRST_MONTH} /> : null}
                 {/* No November 30 clock: the residents' offer is its own,
                     counted in spots (Sam, 10 Nov 2026). */}
               </>
@@ -980,6 +994,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 monthly={MONTHLY}
                 term={groupOffer ? TERM : undefined}
                 noEnds={!!group}
+                forever={groupOffer && group?.term === "forever"}
                 spots={group ? groupOffer ? <GroupSpots group={group} left={groupSeats} first={FIRST_MONTH} /> : <></> : undefined}
               />
             ) : (
@@ -1152,7 +1167,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
             ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY)).map((f) =>
               /* A group's price doesn't climb to $14.99 with the 100 spots. */
-              group && f.q === "Will my price go up?" ? groupPriceFaq(FIRST_MONTH, MONTHLY, groupOffer) : f,
+              group && f.q === "Will my price go up?" ? groupPriceFaq(group, FIRST_MONTH, MONTHLY, groupOffer) : f,
             ),
           ].map((f) => (
             <details key={f.q} className="tpa-qa">
@@ -1174,9 +1189,11 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} a month for your first full year` : `${FIRST_MONTH} your first month`}</h2>
+              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
-                {invite ? `For ${invite.who}. ` : ""}Then {MONTHLY}/month, locked in for as long as you’re a member.
+                {groupOffer && group?.term === "forever"
+                  ? `Locked in for as long as you’re a member, even as more places join.`
+                  : `${invite ? `For ${invite.who}. ` : ""}Then ${MONTHLY}/month, locked in for as long as you’re a member.`}
               </p>
               {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
               {linked || group ? null : <WelcomeEnds className="tpa-close-ends" />}

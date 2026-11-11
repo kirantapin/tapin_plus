@@ -36,12 +36,13 @@ export function GroupBar({ group, line, short }: { group: Group; line: string; s
 /** The group's spots left (model/seats.ts), checked once a minute so one
  *  can go while the page is open. */
 export function useGroupSeats(group: Group | undefined): number {
-  const [left, setLeft] = useState(() => (group ? scheduleSeatsLeft(group.seats) : 0));
+  const seats = group?.seats ?? null;
+  const [left, setLeft] = useState(() => (seats ? scheduleSeatsLeft(seats) : 0));
   useEffect(() => {
-    if (!group) return;
-    const t = window.setInterval(() => setLeft(scheduleSeatsLeft(group.seats)), 60_000);
+    if (!seats) return;
+    const t = window.setInterval(() => setLeft(scheduleSeatsLeft(seats)), 60_000);
     return () => window.clearInterval(t);
-  }, [group]);
+  }, [seats]);
   return left;
 }
 
@@ -49,6 +50,7 @@ export function useGroupSeats(group: Group | undefined): number {
  *  bar, in the offer card's own spots shape (ov-spots): the residents' 300
  *  at their price (Sam, 10 Nov 2026), with no next price after it. */
 export function GroupSpots({ group, left, first }: { group: Group; left: number; first: string }) {
+  if (!group.seats) return null;
   return (
     <div className="ov-spots">
       <p className="tnum">
@@ -64,8 +66,16 @@ export function GroupSpots({ group, left, first }: { group: Group; left: number;
   );
 }
 
+/** How a group's price is said after its figure: "a month for your first
+ *  full year" (Smith's Landing) or "a month for life" (Brexx), and the
+ *  short forms for the bar and the dock. */
+export const groupTerm = (group: Group) =>
+  group.term === "forever"
+    ? { long: "a month for life", short: "/mo for life" }
+    : { long: "a month for your first full year", short: "/mo for a year" };
+
 /** The exclusive price in the header, under the $25. */
-export function GroupOffer({ first }: { first: string }) {
+export function GroupOffer({ group, first }: { group: Group; first: string }) {
   return (
     <p className="tpa-wline tpg-offer" data-ph-show="">
       <svg className="tpg-offer-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -73,7 +83,7 @@ export function GroupOffer({ first }: { first: string }) {
         <circle cx="8.2" cy="8.2" r="1.6" fill="currentColor" />
       </svg>
       <span className="tnum">
-        <b>Resident exclusive</b> · {first} a month for your first full year
+        <b>Resident exclusive</b> · {first} {groupTerm(group).long}
       </span>
     </p>
   );

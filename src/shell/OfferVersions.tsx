@@ -33,16 +33,28 @@ export const offerVersion = (): OfferV | null => {
 /** C's two rows, shared with /parents: what you pay, and what you (or they)
  *  get, with the 15% inside it. `foot` is what follows: the student page's
  *  Nov 30 end and spots, the parents page's holiday price. */
-export function PayGet({ first, monthly, they = false, term = "first month" }: { first: string; monthly: string; they?: boolean; term?: string }) {
+export function PayGet({
+  first,
+  monthly,
+  they = false,
+  term = "first month",
+  forever = false,
+}: {
+  first: string;
+  monthly: string;
+  they?: boolean;
+  term?: string;
+  /** A price for as long as you're a member (a group's, model/groups.ts):
+   *  there is no "then". */
+  forever?: boolean;
+}) {
   const total = `$${PLACES.length * CREDIT}`;
   return (
     <>
       <div className="ov-c-row ov-c-pay">
         <span>You pay</span>
         <b className="tnum">{first}</b>
-        <small className="tnum">
-          {term}, then {monthly}
-        </small>
+        <small className="tnum">{forever ? term : `${term}, then ${monthly}`}</small>
       </div>
       <div className="ov-c-row ov-c-get">
         <span>{they ? "They get" : "You get"}</span>
@@ -313,6 +325,7 @@ export function OfferVersion({
   term,
   spots,
   noEnds = false,
+  forever = false,
 }: {
   v: OfferV;
   first: string;
@@ -321,6 +334,8 @@ export function OfferVersion({
   spots?: ReactNode;
   /** A group's page: its offer is counted in spots, not to November 30. */
   noEnds?: boolean;
+  /** A group's for-life price: it is the one locked in, with no "then". */
+  forever?: boolean;
 }) {
   const total = `$${PLACES.length * CREDIT}`;
   if (v === "a") {
@@ -395,8 +410,8 @@ export function OfferVersion({
   }
   return (
     <div className="ov ov-c" data-ph-show="">
-      <PayGet first={first} monthly={monthly} term={term} />
-      <LockedIn monthly={monthly} />
+      <PayGet first={first} monthly={monthly} term={term} forever={forever} />
+      <LockedIn monthly={forever ? first : monthly} />
       {/* A promo link's own price (a group's year at $3.99) has no end
           date: the November 30 clock is the welcome offer's. */}
       {term || noEnds ? null : <Ends />}

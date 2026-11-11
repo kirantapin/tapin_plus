@@ -128,6 +128,8 @@ const devPrice = (): PlusPrice | null => {
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
   /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
   if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: { periods: 12 }, linkId: "slpreview" };
+  /* Brexx's for-life link (model/groups.ts BREXX) before Kiran's exists. */
+  if (q.has("brexxpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "brexxpreview" };
   return null;
 };
 
@@ -233,7 +235,9 @@ export const firstThen = (price: PlusPrice | null): string =>
  *  "a month for 6 months". The checkout says the same (PlusCheckout). */
 export const firstTerm = (price: PlusPrice | null): string => {
   const f = price?.firstFor;
-  if (!f || f === "forever" || f.periods <= 1) return "first month";
+  /* A group's for-life price (model/groups.ts BREXX). */
+  if (f === "forever") return "a month for life";
+  if (!f || f.periods <= 1) return "first month";
   return f.periods === 12 ? "a month for your first full year" : `a month for ${f.periods} months`;
 };
 /** A promo link's price that lasts more than the first month. */
@@ -241,6 +245,8 @@ export const firstLasts = (price: PlusPrice | null): boolean => {
   const f = price?.firstFor;
   return !!f && f !== "forever" && f.periods > 1;
 };
+/** A promo link's price that lasts as long as you're a member. */
+export const firstForever = (price: PlusPrice | null): boolean => price?.firstFor === "forever";
 
 /** "Free first month" or "$3.99 first month". */
 export const firstMonthLine = (price: PlusPrice | null): string =>
