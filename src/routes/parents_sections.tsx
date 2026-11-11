@@ -138,6 +138,16 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
           { key: "text", d: GLYPHS.bell, b: "A text before every bill", rest: "" },
           { key: "cancel", d: GLYPHS.text, b: "Cancel anytime", rest: ", right from that text" },
         ];
+  /* Parents: one sentence, no glyphs (Sam, 11 Nov 2026: "should be less
+     busy"). */
+  if (audience !== "student")
+    return (
+      <div className="tpp-notes">
+        <p className="tpp-notes-line">
+          <b>Points</b> on everything. <b>A text before every bill</b>, and you can cancel right from&nbsp;it.
+        </p>
+      </div>
+    );
   return (
     <div className="tpp-notes">
       <ul aria-label={audience === "student" ? "Also with Plus" : "Also with Plus, and our promise"}>
@@ -220,15 +230,16 @@ export function PayGetLead() {
       <LockedIn monthly={MONTHLY} they />
       {when ? (
         <>
+          {/* One line (Sam, 11 Nov 2026: "there's a bit too much going on
+              here"). The lock band above already says their price is theirs
+              for as long as they're on it; this says only what changes, and
+              when. */}
           <p className="ov-ends">
             <Clock />
-            <span className="tnum">Holiday price locked in · {when}</span>
+            <span className="tnum">
+              {when} <i>· {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</i>
+            </span>
           </p>
-          <div className="ov-spots">
-            <p className="tnum">
-              <b>{MONTHLY} a month</b> for as long as they’re on it, {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1
-            </p>
-          </div>
         </>
       ) : null}
     </div>

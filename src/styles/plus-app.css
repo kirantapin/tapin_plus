@@ -5951,93 +5951,94 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   padding-top: 2px;
 }
 
-/* ══ WHAT CAN I USE IT ON (shell/BonusSpots.tsx UseItOn, 11 Nov 2026) ═════
-   The places, each with what it sells, then three short lines: tickets,
-   cover and line skips, and not alcohol. Two columns of places on a
-   computer. */
+/* ══ WHAT CAN I USE IT ON (shell/BonusSpots.tsx UseItOn, 11 Nov 2026;
+   quieter the same evening) ════════════════════════════════════════════════
+   Type only: a row per place on hairlines, name left, what it sells beside
+   it, then one muted sentence. One column everywhere. */
 .tps-use {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
-.tps-use .tpa-h2 {
+.tps-use .tpa-h2,
+.tps-use p,
+.tps-use dl,
+.tps-use dd {
   margin: 0;
 }
-.tps-use p {
-  margin: 0;
-}
-.tps-use ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.tps-use-lead {
-  font: 500 16px/22px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tps-use-places {
+.tps-use-list {
   display: grid;
-  gap: 10px;
+  border-top: 1px solid var(--hair);
 }
-.tps-use-places li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.tps-use-places img {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px var(--hair);
-}
-.tps-use-places p {
+.tps-use-list > div {
   display: grid;
-  min-width: 0;
+  grid-template-columns: 8.4em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.tps-use-list dt {
   font: 600 16px/21px "Gilroy", Arial, sans-serif;
   color: var(--ink);
 }
-.tps-use-places p span {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 19px;
-  color: var(--muted);
-}
-.tps-use-also {
-  display: grid;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--hair);
-}
-.tps-use-also li {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  align-items: start;
-  gap: 10px;
+.tps-use-list dd {
   font: 500 15px/21px "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
-.tps-use-also svg {
-  width: 20px;
-  height: 20px;
-  color: #0b7a53;
-}
-.tps-use-also b {
-  font-weight: 600;
-  color: var(--ink);
-}
-.tps-use-also .tps-use-not svg {
-  color: #d14245;
+.tps-use-foot {
+  font: 500 15px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
 }
 @media (min-width: 1024px) {
-  .tps-use-places {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 24px;
+  .tps-use-list > div {
+    grid-template-columns: 11em minmax(0, 1fr);
   }
-  .tps-use-also {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+  .tps-use-foot {
+    max-width: 68ch;
   }
+}
+
+/* ══ LOCKED IN B, QUIETER (Sam, 11 Nov 2026: "there's a bit too much going
+   on here … should be less busy") ══════════════════════════════════════════
+   No grey box inside the white card: the band sits on the card under one
+   hairline. The kinds keep their icons, on a thin ring with no fill, a size
+   smaller; the lock line follows without a second rule. */
+.ov-lk.ov-lk-b {
+  gap: 12px;
+  padding: 16px 0 0;
+  border-radius: 0;
+  background: none;
+  border-top: 1px solid var(--hair);
+}
+.ov-lk-b .ov-lk-tiles li > span {
+  width: 42px;
+  height: 42px;
+  background: none;
+}
+.ov-lk-b .ov-lk-tiles svg {
+  width: 20px;
+  height: 20px;
+}
+.ov-lk-b .ov-lk-foot {
+  padding-top: 2px;
+  border-top: 0;
+}
+.ov-lk-b .ov-lk-foot svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* The holiday line: the days in ink, the rest muted; the clock sits on the
+   first line when it wraps (11 Nov 2026 polish). */
+.ov-c .ov-ends {
+  align-items: flex-start;
+}
+.ov-c .ov-ends .tpa-clock {
+  margin-top: 1.5px;
+}
+.ov-c .ov-ends i {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--muted);
 }

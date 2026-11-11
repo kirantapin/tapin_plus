@@ -3295,3 +3295,15 @@
     margin-top: 18px;
   }
 }
+
+/* Parents under the card: one sentence (11 Nov 2026 polish). */
+.tpp-notes-line {
+  margin: 0;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpp-notes-line b {
+  font-weight: 600;
+  color: var(--ink);
+}
