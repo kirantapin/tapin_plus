@@ -26,10 +26,12 @@ const BLAZER = asset("/brand/founder-blazer.webp");
  *  live: "actually let's do the other version, rob and I floating there just
  *  looks a bit weird"); ?fv=c still previews C. */
 export type FounderV = "b" | "c" | "d" | "e";
+/* E is the section on every page (Sam, 11 Nov 2026: "this is perfect,
+   push everything"); ?fv=b|c|d still preview the earlier ones. */
 const version = (): FounderV => {
-  if (typeof window === "undefined") return "b";
+  if (typeof window === "undefined") return "e";
   const v = new URLSearchParams(window.location.search).get("fv");
-  return v === "c" || v === "d" || v === "e" ? v : "b";
+  return v === "b" || v === "c" || v === "d" ? v : "e";
 };
 
 const count = PLACES.length === 5 ? "five" : String(PLACES.length);
