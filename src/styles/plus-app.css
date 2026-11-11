@@ -5272,3 +5272,111 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     gap: 14px;
   }
 }
+
+/* ══ GET $5 · EARN $5 · SAVE 15% (shell/BonusSpots.tsx, Sam, 10 Nov 2026) ═══
+   Three rungs, the verb and its amount leading each in money green, the rest
+   of the line after it; the five places' logos with their $5 under Get. */
+.tps-ladder ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-ladder ol > li {
+  display: grid;
+  gap: 12px;
+  padding: 14px 0;
+}
+.tps-ladder ol > li:first-child {
+  padding-top: 2px;
+}
+.tps-ladder ol > li:last-child {
+  padding-bottom: 2px;
+}
+.tps-ladder ol > li + li {
+  border-top: 1px solid var(--hair);
+}
+.tps-ladder ol > li > p {
+  display: grid;
+  grid-template-columns: 98px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tps-ladder ol > li > p b {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 22px;
+  color: #0b7a53;
+  white-space: nowrap;
+}
+.tps-ladder ol > li > p span {
+  text-wrap: pretty;
+}
+.tps-ladder-spots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-ladder-spots li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.tps-ladder-spots img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-ladder-spots span {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e8f4ee;
+  color: #0b7a53;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
+@media (min-width: 1024px) {
+  .tps-ladder ol > li > p {
+    grid-template-columns: 116px minmax(0, 1fr);
+    font-size: 17px;
+  }
+  .tps-ladder ol > li > p b {
+    font-size: 22px;
+  }
+  /* The logos sit under Get's words, in the words' column. */
+  .tps-ladder-spots {
+    grid-template-columns: repeat(5, 48px);
+    gap: 14px;
+    margin-left: 128px;
+  }
+}
+
+/* The offer card's other two rungs. */
+.ov-c-more {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(11, 122, 83, 0.16);
+  list-style: none;
+}
+.ov-c-more li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+}
+.ov-c-more svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}

@@ -306,11 +306,12 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     /* The monthly credit (Sam, 9 Nov 2026): "they don't stack, and credit
        doesn't roll over". */
     q: "Does my credit roll over? Can I use it with the 15%?",
-    a: `No to both. Your $${CREDIT} at each place resets every month, so use it that month. And it’s one per order: your credit on one, then ${PERCENT}% off the others.`,
+    a: `No to both. Your free $${CREDIT} at each place resets every month, so use it that month. And it’s one per order: credit on one, ${PERCENT}% off on another.`,
   },
   {
-    q: "How often can I use it?",
-    a: `$${CREDIT} credit at each of the ${PLACES.length} places every month, with no minimum spend, there from the moment you join. Then ${PERCENT}% off your other orders, once a day.`,
+    /* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026). */
+    q: "How does it work?",
+    a: `Get $${CREDIT} at each of the ${PLACES.length} places every month, free, with no minimum spend, there from the moment you join. Earn $${CREDIT} back every week when you spend $10 on food and non-alcoholic drinks. Save ${PERCENT}% on your other orders, every day.`,
   },
   {
     q: "What does it work on?",
@@ -1183,9 +1184,18 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
 
         <footer className="tpa-foot">
           <p>
-            ${CREDIT} credit every month {place ? `at ${place.name}` : "at each place"}, no minimum spend; it resets each month and doesn’t roll over. Then {PERCENT}% off
-            your other orders, once a day. One per order: credit or {PERCENT}% off, not both. Credit and {PERCENT}% off don’t go toward alcohol. Cancel
-            anytime.
+            {place ? (
+              <>
+                ${CREDIT} credit every month at {place.name}, no minimum spend; it resets each month and doesn’t roll over. Then {PERCENT}% off your other
+                orders, once a day.
+              </>
+            ) : (
+              <>
+                Get ${CREDIT} credit every month at each place, no minimum spend; it resets each month and doesn’t roll over. Earn ${CREDIT} back every week
+                when you spend $10 on food and non-alcoholic drinks. Save {PERCENT}% on your other orders, every day.
+              </>
+            )}{" "}
+            One per order: credit or {PERCENT}% off, not both. Credit and {PERCENT}% off don’t go toward alcohol. Cancel anytime.
           </p>
           <AccountLine where="home_foot" app />
           <p className="tpa-links">
