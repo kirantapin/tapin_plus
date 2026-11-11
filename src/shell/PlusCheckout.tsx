@@ -926,59 +926,25 @@ function Review({
         </li>
       </ul>
       {invite?.ends && today === price.first ? <InviteClock invite={invite} className="pck-seats pck-pay-clock" /> : null}
-      {/* Sam, 3 Nov 2026: "The pay flow should say they get a text to
-          download the tapin app after they subscribe". One line each, above
-          the consent, so the terms stay right by the button that charges. */}
-      {/* Everything you get, on the last step (Sam, 11 Nov 2026), every
-          row on the same grey disc; the colour is the glyph's alone, money
-          green for the three benefits, red for cancel ("the pill design here
-          should be consistent for all of these"). */}
-      <ul className="pck-offer pck-offer-tight pck-offer-even">
-        <li>
-          <span className="pck-ico pck-ico-g" aria-hidden="true">
-            <GiftGlyph />
-          </span>
-          <b>Get $5 to spend at each spot, every month</b>
-        </li>
-        <li>
-          <span className="pck-ico pck-ico-g" aria-hidden="true">
-            <BackGlyph />
-          </span>
-          <b>Earn $5 back every week on $10+</b>
-        </li>
-        <li>
-          <span className="pck-ico pck-ico-g" aria-hidden="true">
-            <PctGlyph />
-          </span>
-          <b>Save 15% every day</b>
-        </li>
-        <li>
-          <span className="pck-ico pck-ico-cancel" aria-hidden="true">
-            <XGlyph />
-          </span>
-          <b>Cancel anytime in one tap</b>
-        </li>
-        <li>
-          <span className="pck-ico" aria-hidden="true">
-            <PhoneGlyph />
-          </span>
-          <b>Use it today: app link by text</b>
-        </li>
-        <li>
-          <span className="pck-ico" aria-hidden="true">
-            <ShieldGlyph />
-          </span>
-          <b>Money back if you don’t save</b>
-        </li>
-        {/* Sam, 5 Nov 2026: "should also show in the bullets, rate is locked
-            for life, even as more spots join". */}
-        <li>
-          <span className="pck-ico" aria-hidden="true">
-            <LockGlyph />
-          </span>
-          <b>{`${usd(price.monthly)} locked for life, even as places join`}</b>
-        </li>
-      </ul>
+      {/* THE PAY STEP, QUIETER (Sam, 11 Nov 2026, of the seven-row list: "this
+          might be a bit too much on the eye right? we should just say smth
+          like average member saves $60 a month on tapin plus. $25 available
+          immediately after purchase, locked for life, money back if you
+          don't save, cancel anytime in the app"). One line of what it's
+          worth, then four short promises with a small tick. "About $60 a
+          month" is the walkthrough's estimate, not a measured member
+          average, so it says "about" and doesn't claim an average. */}
+      <div className="pck-sum">
+        <p className="pck-sum-head tnum">
+          Save about <b>$60</b> a month with Plus
+        </p>
+        <ul className="pck-sum-list tnum">
+          <li>$25 to spend right after you join</li>
+          <li>{usd(price.monthly)} a month, locked for life</li>
+          <li>Money back if you don’t save</li>
+          <li>Cancel anytime in the app</li>
+        </ul>
+      </div>
       <p className="pck-consent">
         {lasting
           ? /* A deal that lasts: today's price for its months (or for good),
@@ -1117,23 +1083,6 @@ function Wallet({ cart, accessToken, onPaid }: { cart: PlusCart; accessToken: st
    for managing the membership (Sam, 3 Nov 2026: "a link to manage their
    membership on the tapin plus confirmation page"). */
 
-/* The three benefits' glyphs for the pay step's list (11 Nov 2026). */
-const GiftGlyph = () => (
-  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
-    <path d="M4 11h16v9H4zM3 7.5h18V11H3zM12 7.5V20M12 7.5C10.8 4.8 7.5 4.2 7.5 6.2c0 1.3 2.6 1.3 4.5 1.3Zm0 0c1.2-2.7 4.5-3.3 4.5-1.3 0 1.3-2.6 1.3-4.5 1.3Z" />
-  </svg>
-);
-const BackGlyph = () => (
-  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4v4h-4" />
-    <path d="M14 9.6c-.4-.6-1.1-.9-2-.9-1.1 0-1.9.6-1.9 1.4 0 1.9 4 1 4 3 0 .8-.9 1.5-2.1 1.5-.9 0-1.6-.4-2-1M12 7.6v1.1m0 6v1.1" strokeWidth="1.7" />
-  </svg>
-);
-const PctGlyph = () => (
-  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-    <path d="M18 6 6 18M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM16 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-  </svg>
-);
 function XGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">

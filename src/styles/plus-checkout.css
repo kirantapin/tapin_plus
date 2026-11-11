@@ -1455,3 +1455,44 @@
   padding-top: 0;
   border-top: 0;
 }
+
+/* ══ THE PAY STEP, QUIETER (Sam, 11 Nov 2026) ═════════════════════════════
+   One line of what it's worth, then four short promises, each with a small
+   green tick and no disc. */
+.pck-sum {
+  display: grid;
+  gap: 10px;
+}
+.pck-sum-head {
+  margin: 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.pck-sum-head b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.pck-sum-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pck-sum-list li {
+  position: relative;
+  padding-left: 24px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.pck-sum-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  width: 12px;
+  height: 7px;
+  border-left: 2px solid #0b7a53;
+  border-bottom: 2px solid #0b7a53;
+  transform: rotate(-45deg);
+}
