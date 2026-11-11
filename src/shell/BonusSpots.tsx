@@ -47,13 +47,13 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
             <b className="tnum">Get ${CREDIT} free</b>
             <span>at each spot every month, no&nbsp;minimum.</span>
           </p>
-          <ul className="tps-ladder-spots">
+          {/* The five places as one tight group in the words' column, no
+              $5 under each: the label already says it (Sam, 10 Nov 2026:
+              "I don't love the layout of the merchant logos"). */}
+          <ul className="tps-ladder-spots" aria-label="The five places">
             {PLACES.map((p) => (
               <li key={p.id}>
                 <img src={p.logo} alt={p.name} decoding="async" />
-                <span className="tnum" aria-hidden="true">
-                  ${CREDIT}
-                </span>
               </li>
             ))}
           </ul>
