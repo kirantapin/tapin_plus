@@ -5315,29 +5315,40 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-ladder ol > li > p span {
   text-wrap: pretty;
 }
-/* The logos head the section as one tight row (they're wordmarks, so they
-   never overlap), a hairline under them before the rungs. */
 .tps-ladder-spots {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 44px));
-  gap: 8px;
-  margin: 0 0 16px;
-  padding: 0 0 16px;
-  border-bottom: 1px solid var(--hair);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
+.tps-ladder-spots li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
 .tps-ladder-spots img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   background: #ffffff;
   box-shadow: 0 0 0 1px var(--hair);
 }
+.tps-ladder-spots span {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e8f4ee;
+  color: #0b7a53;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
 @media (min-width: 1024px) {
+  .tps-ladder-br {
+    display: none;
+  }
   .tps-ladder ol > li > p {
-    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-columns: 186px minmax(0, 1fr);
     font-size: 17px;
   }
   .tps-ladder ol > li > p b {
@@ -5346,7 +5357,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   /* The logos sit under Get's words, in the words' column. */
   .tps-ladder-spots {
     grid-template-columns: repeat(5, 48px);
-    gap: 10px;
+    gap: 14px;
+    margin-left: 198px;
   }
 }
 
