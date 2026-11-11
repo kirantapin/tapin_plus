@@ -5,13 +5,15 @@
 (function () {
   var path = location.pathname.replace(/\/+$/, "") || "/";
   var urls =
-    path === "/" || path === "/brexx"
+    path === "/"
       ? ["/collage/blacksburg.webp"]
       : path === "/parents"
         ? ["/parents/hero-split-parent.webp", "/parents/hero-split-student.webp"]
         : path === "/smiths-landing"
           ? ["/groups/smiths-landing.webp"]
-          : [];
+          : path === "/brexx"
+            ? ["/groups/brexx.webp"]
+            : [];
   for (var i = 0; i < urls.length; i++) {
     var l = document.createElement("link");
     l.rel = "preload";

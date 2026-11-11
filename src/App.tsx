@@ -102,9 +102,9 @@ export default function App() {
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
         <Route path="/smiths-landing" element={<GroupPage group={SMITHS_LANDING} bandSrc={asset("/groups/smiths-landing.webp")} />} />
-        {/* Brexx at Blacksburg (Sam, 11 Nov 2026): the home page's Blacksburg
-            collage until Sam sends a photo of Brexx. */}
-        <Route path="/brexx" element={<GroupPage group={BREXX} />} />
+        {/* Brexx at Blacksburg (Sam, 11 Nov 2026): Sam's collage of the
+            Brexx clubhouse and pool. */}
+        <Route path="/brexx" element={<GroupPage group={BREXX} bandSrc={asset("/groups/brexx.webp")} />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
