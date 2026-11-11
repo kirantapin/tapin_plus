@@ -14,7 +14,7 @@
           : path === "/brexx"
             ? ["/groups/brexx.webp"]
             : path === "/welcome-week"
-              ? ["/collage/blacksburg.webp"]
+              ? ["/groups/welcome-week.webp"]
               : [];
   for (var i = 0; i < urls.length; i++) {
     var l = document.createElement("link");

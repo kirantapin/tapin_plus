@@ -107,8 +107,8 @@ export default function App() {
             Brexx clubhouse and pool. */}
         <Route path="/brexx" element={<GroupPage group={BREXX} bandSrc={asset("/groups/brexx.webp")} />} />
         {/* Welcome Week's flash sale (Sam, 11 Nov 2026): $2.99 a month for
-            life until the end of today, on the Blacksburg collage. */}
-        <Route path="/welcome-week" element={<GroupPage group={WELCOME_WEEK} />} />
+            life until the end of today, on Sam's Welcome Week collage. */}
+        <Route path="/welcome-week" element={<GroupPage group={WELCOME_WEEK} bandSrc={asset("/groups/welcome-week.webp")} />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a

@@ -736,6 +736,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
       <header
         ref={bandRef}
         className="tpa-band"
+        data-group={group?.id}
         data-hero={place || invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
       >
