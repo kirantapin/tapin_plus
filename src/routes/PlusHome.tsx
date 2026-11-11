@@ -12,7 +12,7 @@ import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { Founders } from "../shell/Founders";
-import { firstFigure, firstForever, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
+import { refreshPlusPrice, firstFigure, firstForever, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
@@ -32,7 +32,7 @@ import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots, UseItOn } from "../shell/BonusSpots";
 import type { Group } from "../model/groups";
-import { GroupBar, GroupHeadline, GroupOffer, GroupSpots, groupTerm, useGroupSeats } from "../shell/GroupBits";
+import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
    "I think the design would be a lot more like the app. We don't want a ton
@@ -427,7 +427,14 @@ const groupPriceFaq = (g: Group, first: string, monthly: string, on: boolean): {
       : `Not for your first full year: ${first} a month for 12 months. Then it’s ${monthly} a month, locked in for as long as you’re a member, even as more places join.`,
 });
 /* Brexx (Sam, 11 Nov 2026): $3.99 a month for life, a partnership rate. */
-const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } => ({
+const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } =>
+  /* Welcome Week's flash sale (Sam, 11 Nov 2026): today only, for life. */
+  g.endsMs
+    ? {
+        q: `Why is it ${first}?`,
+        a: `It’s our ${g.name} price, and it’s today only. Join before midnight tonight and you pay ${first} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month after their first. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
+      }
+    : ({
   q: `Why is it ${first} for ${g.name}?`,
   a:
     g.term === "forever"
@@ -485,7 +492,16 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
   /* A group's year at $3.99 (model/groups.ts): on only when its link's
      price is the one that applied, so without the link the page is the
      ordinary offer. */
-  const groupOffer = !!group && !member && !!price?.linkId && (group.term === "forever" ? firstForever(price) : firstLasts(price));
+  /* Or its own public policy (Welcome Week), while its sale is on: past
+     its end the page is the ordinary offer and says the price ended. */
+  const saleEnded = useSaleEnded(group);
+  const groupPriced = !!price?.linkId || (!!group?.policyId && price?.policyId === group.policyId);
+  const groupOffer =
+    !!group && !member && !saleEnded && groupPriced && (group.term === "forever" ? firstForever(price) : firstLasts(price));
+  /* The sale ended with the page open: read the price again, without it. */
+  useEffect(() => {
+    if (saleEnded && price?.policyId) refreshPlusPrice();
+  }, [saleEnded, price?.policyId]);
   const groupSeats = useGroupSeats(group);
   const gTerm = group ? groupTerm(group) : null;
   const TERM = firstTerm(price);
@@ -507,12 +523,26 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             <>
               <span className="tpp-pt-dot" aria-hidden="true" />
               <span className="tnum">
-                {group.name} exclusive · {FIRST_MONTH}
+                {group.label ?? `${group.name} exclusive`} · {FIRST_MONTH}
                 {gTerm?.short}
               </span>
             </>
           ),
         },
+        /* A sale's time left (Welcome Week). */
+        ...(group.endsMs
+          ? [
+              {
+                key: "ends",
+                body: (
+                  <>
+                    <span className="tpp-pt-dot" aria-hidden="true" />
+                    <GroupLeftLine group={group} />
+                  </>
+                ),
+              },
+            ]
+          : []),
         /* Its spots only if it counts them (Brexx doesn't). */
         ...(group.seats
           ? [
@@ -749,7 +779,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
               <>
                 <GroupHeadline group={group} />
                 {member ? null : <WelcomeCallout />}
-                {groupOffer ? <GroupOffer group={group} first={FIRST_MONTH} /> : null}
+                {groupOffer ? <GroupOffer group={group} first={FIRST_MONTH} /> : saleEnded && !member ? <GroupEnded group={group} /> : null}
                 {/* No November 30 clock: the residents' offer is its own,
                     counted in spots (Sam, 10 Nov 2026). */}
               </>
@@ -996,7 +1026,18 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 term={groupOffer ? TERM : undefined}
                 noEnds={!!group}
                 forever={groupOffer && group?.term === "forever"}
-                spots={group ? groupOffer ? <GroupSpots group={group} left={groupSeats} first={FIRST_MONTH} /> : <></> : undefined}
+                spots={
+                  group ? (
+                    groupOffer ? (
+                      <>
+                        <GroupSpots group={group} left={groupSeats} first={FIRST_MONTH} />
+                        <GroupClock group={group} />
+                      </>
+                    ) : (
+                      <></>
+                    )
+                  ) : undefined
+                }
               />
             ) : (
             <>
@@ -1198,6 +1239,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
               </p>
               {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
               {linked || group ? null : <WelcomeEnds className="tpa-close-ends" />}
+              {groupOffer && group?.endsMs ? <p className="tpa-close-ends">Ends at midnight tonight.</p> : null}
             </>
           )}
           {joinCta("close", true)}
@@ -1262,6 +1304,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         {/* The deadline and the spots lead the turn (Sam, 10 Nov 2026), so
             on a phone they're on screen the whole way down. */}
         <ProofTurn
+          /* Starts again on the lead once it arrives with the price, so a
+             group's own line (a sale's clock) is the one on screen. */
+          key={dockLead[0]?.key ?? "none"}
           className="tpp-pt-dock"
           start={dockLead.length ? dockLead[0]!.key : place ? "refund" : "places"}
           paused={covered}

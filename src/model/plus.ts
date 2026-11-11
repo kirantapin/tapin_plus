@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 import { environment, supabase } from "../supabase";
 import { loadPlusLink } from "./link";
 import { WELCOME_WEEK_LINK_ID } from "./invite";
+import { pagePolicy } from "./pagePolicy";
+import { WELCOME_WEEK_FLASH_POLICY } from "./groups";
 
 export const TAPIN_ID = "tapin";
 
@@ -65,6 +67,9 @@ export interface PlusPrice {
   linkId: string | null;
   /** When that link's offer ends, or null for no end. */
   linkEnds: string | null;
+  /** The page's own public policy (model/pagePolicy.ts) when it set
+   *  `first`, else null or absent. */
+  policyId?: string | null;
 }
 
 /** One billing period on from `from`, placed the way Stripe places it: a
@@ -130,6 +135,10 @@ const devPrice = (): PlusPrice | null => {
   if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "slpreview" };
   /* Brexx's for-life link (model/groups.ts BREXX) before Kiran's exists. */
   if (q.has("brexxpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "brexxpreview" };
+  /* Welcome Week's $2.99 for life (model/groups.ts WELCOME_WEEK): a public
+     policy the local database doesn't have. Off once its end has passed. */
+  if (q.has("wwfpreview") && pagePolicy() === WELCOME_WEEK_FLASH_POLICY)
+    return { ...base, first: 2.99, firstFor: "forever", linkId: null, policyId: WELCOME_WEEK_FLASH_POLICY };
   return null;
 };
 
@@ -150,13 +159,17 @@ const devFallback = (): PlusPrice => ({
 async function fetchPrice(): Promise<PlusPrice> {
   const preview = devPrice();
   if (preview) return preview;
+  /* A page's own public policy in place of the welcome offer while its sale
+     is on (model/pagePolicy.ts); the checkout tries it the same way. */
+  const own = pagePolicy();
+  const offerId = own ?? welcomeOfferId;
   const [plus, offer, link] = await Promise.all([
     fetchPlusBundle(),
-    welcomeOfferId
+    offerId
       ? supabase
           .from("policies")
           .select("end_time, definition")
-          .eq("policy_id", welcomeOfferId)
+          .eq("policy_id", offerId)
           .eq("active", true)
           .maybeSingle<OfferPolicy>()
           .then(({ data, error }) => {
@@ -169,12 +182,18 @@ async function fetchPrice(): Promise<PlusPrice> {
   // A promo link's offer in place of the welcome offer, as the checkout
   // tries it first (model/link.ts).
   const linked = offerPrice(link?.policy ?? null, plus);
+  const offered = offerPrice(offer, plus);
+  /* The page's own policy set the price: its duration is the term. */
+  const ownSet = linked === null && own !== null && offered !== null;
   return {
     monthly: plus.price,
-    first: linked ?? offerPrice(offer, plus) ?? plus.price,
+    first: linked ?? offered ?? plus.price,
     firstFor: linked !== null && link
       ? link.policy.definition.action.discountDuration ?? null
-      : null,
+      : ownSet
+        ? offer?.definition.action.discountDuration ?? null
+        : null,
+    policyId: ownSet ? own : null,
     period: periodOf(plus),
     billing: plus.billing,
     linkId: linked !== null && link ? link.linkId : null,
@@ -195,10 +214,27 @@ const loadPrice = () =>
     throw e;
   }));
 
+/* Every mounted price hook, so the price can be read again when a page's
+   own sale ends while it's open (model/pagePolicy.ts). */
+const listeners = new Set<() => void>();
+/** Forget the price and read it again, everywhere it's shown. */
+export function refreshPlusPrice() {
+  pricePromise = null;
+  listeners.forEach((f) => f());
+}
+
 /** Plus's price, or null while it loads; `failed` once it couldn't be read,
  *  so a page that guessed an offer from its address can stop guessing. */
 export function usePlusPriceLoad(): { price: PlusPrice | null; failed: boolean } {
   const [state, setState] = useState<{ price: PlusPrice | null; failed: boolean }>({ price: null, failed: false });
+  const [epoch, setEpoch] = useState(0);
+  useEffect(() => {
+    const bump = () => setEpoch((n) => n + 1);
+    listeners.add(bump);
+    return () => {
+      listeners.delete(bump);
+    };
+  }, []);
   useEffect(() => {
     let live = true;
     loadPrice()
@@ -210,7 +246,7 @@ export function usePlusPriceLoad(): { price: PlusPrice | null; failed: boolean }
     return () => {
       live = false;
     };
-  }, []);
+  }, [epoch]);
   return state;
 }
 

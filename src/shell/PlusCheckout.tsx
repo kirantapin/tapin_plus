@@ -13,6 +13,8 @@ import { firstMonthLine, nextBillingDate, usd, usePlusPrice, type PlusPrice } fr
 import { inviteFor } from "../model/invite";
 import { sendCode, verifyCode } from "./authEnv";
 import { PlusSeats } from "./PlusSeats";
+import { GroupClock } from "./GroupBits";
+import { WELCOME_WEEK } from "../model/groups";
 import { InviteClock } from "./WelcomeOffer";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, reducedMotion, settle, type IslandOrigin, type IslandParts } from "./island";
 import { lockScroll } from "./scrollLock";
@@ -630,8 +632,13 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
      (Sam, 5 Nov 2026: "we should show a countdown for this offer right? on
      the checkout modal"). */
   const invite = inviteFor(price);
+  /* Welcome Week's flash sale (model/groups.ts): its own clock, never the
+     $7.99-then-$14.99 spots, which aren't its price. */
+  const sale = !!price?.policyId && price.policyId === WELCOME_WEEK.policyId;
   const seats = invite?.ends ? (
     <InviteClock invite={invite} className="pck-seats" />
+  ) : sale ? (
+    <GroupClock group={WELCOME_WEEK} className="ov-spots pck-seats" />
   ) : (
     <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
   );

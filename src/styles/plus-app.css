@@ -6085,3 +6085,26 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     column-gap: 40px;
   }
 }
+
+/* ══ WELCOME WEEK, A FLASH SALE (/welcome-week, shell/GroupBits.tsx, 11 Nov
+   2026) ═════════════════════════════════════════════════════════════════
+   The group page with a real end: the VT Welcome Week mark in place of the
+   tag, the time left in the bar (burnt orange, the one accent), a clock
+   that drains in the offer card, and one line once it's over. */
+.tpg-offer-marked {
+  align-items: center;
+}
+.tpg-offer .tpg-offer-mark {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+.tpg-bar .tpg-left {
+  font-weight: 600;
+  color: #f39a55;
+}
+.tpg-clock > span i {
+  background: #e5751f;
+}

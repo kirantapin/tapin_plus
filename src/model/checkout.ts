@@ -9,6 +9,7 @@
 
 import { supabase } from "../supabase";
 import { TAPIN_ID, fetchPlusBundle, welcomeOfferId, type DiscountDuration } from "./plus";
+import { pagePolicy } from "./pagePolicy";
 import { loadPlusLink } from "./link";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
@@ -105,8 +106,12 @@ export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
       content: { policy_id: policyId, bundle_id: null, userPreferences: null, link_id: linkId },
     });
   const linked = link ? await offer(link.policyId, link.linkId) : null;
+  /* A page's own public policy while its sale is on (model/pagePolicy.ts),
+     with no link, ahead of the welcome offer. */
+  const own = pagePolicy();
+  const owned = linked && "cart" in linked ? linked : own ? await offer(own, null) : null;
   const offered =
-    linked && "cart" in linked ? linked : welcomeOfferId ? await offer(welcomeOfferId, null) : null;
+    owned && "cart" in owned ? owned : welcomeOfferId ? await offer(welcomeOfferId, null) : null;
   const built =
     offered && "cart" in offered
       ? offered
