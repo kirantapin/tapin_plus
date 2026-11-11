@@ -6108,3 +6108,14 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tpg-clock > span i {
   background: #e5751f;
 }
+
+/* Sam's Welcome Week collage (public/groups/welcome-week.webp, 11 Nov 2026):
+   four faces across the photo's upper middle. On a phone the band is cut by
+   its height, so the headline would cross their chins: grow the photo from
+   its foot, which lifts the faces clear of the words. */
+@media (max-width: 1023px) {
+  .tpa-band[data-group="welcome-week"] .tpa-band-art {
+    transform: scale(1.18);
+    transform-origin: 50% 100%;
+  }
+}
