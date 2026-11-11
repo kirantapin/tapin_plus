@@ -4787,6 +4787,31 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   height: 17px;
   color: #861f41;
 }
+/* Locked in: a grey band under pay/get, the lock in ink. */
+.ov-lock {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f4f4f5;
+}
+.ov-lock svg {
+  width: 22px;
+  height: 22px;
+  color: var(--ink);
+}
+.ov-lock p {
+  margin: 0;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.ov-lock b {
+  font-weight: 600;
+  color: var(--ink);
+}
 .ov-spots {
   display: grid;
   gap: 7px;

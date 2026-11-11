@@ -48,7 +48,7 @@ export function PayGet({ first, monthly, they = false, term = "first month" }: {
         <span>{they ? "They get" : "You get"}</span>
         <b className="tnum">{total}</b>
         <small className="tnum">
-          in credit every month, ${CREDIT} at each spot
+          to spend every month, ${CREDIT} at each spot
         </small>
         {/* Then the other two rungs (Sam, 10 Nov 2026: Get $5 · Earn $5 ·
             Save 15%). */}
@@ -79,6 +79,28 @@ function Ends() {
         Offer ends {welcomeEndsDay} · {left}
       </span>
     </p>
+  );
+}
+
+/* ══ LOCKED IN (Sam, 11 Nov 2026: "make it very apparent that as new spots
+   join, which they are, the rate doesn't go up. So what they pay now is
+   that they're locked in at") ═══════════════════════════════════════════════
+   Its own band in the price card, straight under what you pay and get, so it
+   reads as part of the price, not fine print. The FAQ says it in full. */
+export function LockedIn({ monthly, they = false }: { monthly: string; they?: boolean }) {
+  return (
+    <div className="ov-lock">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+        <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+      <p className="tnum">
+        <b>
+          {they ? "Their" : "Your"} {monthly} a month is locked in.
+        </b>{" "}
+        New spots are joining, and {they ? "their" : "your"} price never goes&nbsp;up.
+      </p>
+    </div>
   );
 }
 
@@ -208,6 +230,7 @@ export function OfferVersion({
   return (
     <div className="ov ov-c" data-ph-show="">
       <PayGet first={first} monthly={monthly} term={term} />
+      <LockedIn monthly={monthly} />
       {/* A promo link's own price (a group's year at $3.99) has no end
           date: the November 30 clock is the welcome offer's. */}
       {term || noEnds ? null : <Ends />}
