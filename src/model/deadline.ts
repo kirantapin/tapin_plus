@@ -59,9 +59,17 @@ const welcomeAt = (): number => {
   return Number.isFinite(t) ? t : WELCOME_ENDS_MS;
 };
 
-/** Time left on the welcome offer; null once it has ended. */
+/* THE COUNTDOWN IS OFF (Sam, 11 Nov 2026: "let's get rid of the countdown
+   for the half off first month, we can just keep the half off first month
+   as standard and have the countdown be the number of seats left"). Every
+   November 30 clock and line reads this hook, so off here is off everywhere;
+   true brings them all back. The $3.99 first month itself is the cart's. */
+export const WELCOME_COUNTDOWN = false;
+
+/** Time left on the welcome offer; null once it has ended, or always while
+ *  the countdown is off. */
 export function useWelcomeEnds(): Remaining | null {
-  return useCountdown(welcomeAt());
+  return useCountdown(WELCOME_COUNTDOWN ? welcomeAt() : 0);
 }
 
 /** Time left to any end, or null with no end or once it has passed (a

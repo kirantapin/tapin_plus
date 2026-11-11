@@ -30,7 +30,7 @@ import { BenefitCards, CheckoutPhone, HowPhone, PayGetLead, ProofTurn, UnderOffe
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
-import { BonusSpots } from "../shell/BonusSpots";
+import { BonusSpots, UseItOn } from "../shell/BonusSpots";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -566,6 +566,7 @@ export default function ParentsHome() {
             main page (Sam, 9 Nov 2026: "should include this on the parent
             plus page too I think"). */}
         <BonusSpots they />
+        <UseItOn they />
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
         {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
             2026, the Dara Denney audit's fix 4: "move the parent quotes up";

@@ -5950,3 +5950,94 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .ov-lk-c .ov-lk-sub {
   padding-top: 2px;
 }
+
+/* ══ WHAT CAN I USE IT ON (shell/BonusSpots.tsx UseItOn, 11 Nov 2026) ═════
+   The places, each with what it sells, then three short lines: tickets,
+   cover and line skips, and not alcohol. Two columns of places on a
+   computer. */
+.tps-use {
+  display: grid;
+  gap: 12px;
+}
+.tps-use .tpa-h2 {
+  margin: 0;
+}
+.tps-use p {
+  margin: 0;
+}
+.tps-use ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-use-lead {
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tps-use-places {
+  display: grid;
+  gap: 10px;
+}
+.tps-use-places li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.tps-use-places img {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-use-places p {
+  display: grid;
+  min-width: 0;
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tps-use-places p span {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--muted);
+}
+.tps-use-also {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+}
+.tps-use-also li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tps-use-also svg {
+  width: 20px;
+  height: 20px;
+  color: #0b7a53;
+}
+.tps-use-also b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tps-use-also .tps-use-not svg {
+  color: #d14245;
+}
+@media (min-width: 1024px) {
+  .tps-use-places {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 24px;
+  }
+  .tps-use-also {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
