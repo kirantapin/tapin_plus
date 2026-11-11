@@ -5382,22 +5382,54 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-lv p {
   margin: 0;
 }
+/* The places: each logo over its name, then a plus for more coming.
+   Three across on a phone, six in a row on a computer. */
 .tps-lv-spots {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 44px));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.tps-lv-spots img {
+.tps-lv-spots li {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+.tps-lv-spots img,
+.tps-lv-more-mark {
   display: block;
-  width: 100%;
-  aspect-ratio: 1;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
+}
+.tps-lv-spots img {
   object-fit: cover;
   background: #ffffff;
   box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-lv-more-mark {
+  display: grid;
+  place-items: center;
+  background: #f4f4f5;
+  color: var(--muted);
+}
+.tps-lv-more-mark svg {
+  width: 22px;
+  height: 22px;
+}
+.tps-lv-spots li > span:last-child {
+  max-width: 100%;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.tps-lv-spots .tps-lv-more > span:last-child {
+  color: var(--muted);
 }
 .tps-lv-rest {
   font: 500 16px/22px "Gilroy", Arial, sans-serif;
@@ -5438,6 +5470,9 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 
 /* B · Three wells (the live section since 10 Nov 2026). A phone keeps
    them tight so all three show in one screen. */
+.tps-lv-b .tps-lv-spots {
+  margin-bottom: 16px;
+}
 .tps-lv-b ol {
   gap: 8px;
 }
@@ -5473,17 +5508,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-size: 15px;
   line-height: 20px;
 }
-/* The five logos in the first well, under its words. */
-.tps-lv-b .tps-lv-spots {
-  grid-column: 2;
-  grid-template-columns: repeat(5, 32px);
-  gap: 6px;
-  margin-top: 8px;
-}
+
 
 /* C · The sentence. */
 .tps-lv-c .tps-lv-spots {
-  grid-template-columns: repeat(5, minmax(0, 40px));
   margin-bottom: 20px;
 }
 .tps-lv-c ol {
@@ -5502,8 +5530,13 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 
 @media (min-width: 1024px) {
   .tps-lv-spots {
-    grid-template-columns: repeat(5, 48px);
-    gap: 10px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .tps-lv-spots img,
+  .tps-lv-more-mark {
+    width: 52px;
+    height: 52px;
   }
   /* A: three columns, a hairline between. */
   .tps-lv-a .tps-lv-spots {
@@ -5548,9 +5581,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     height: 22px;
   }
   .tps-lv-b .tps-lv-spots {
-    grid-column: auto;
-    grid-template-columns: repeat(5, 34px);
-    margin-top: 10px;
+    margin-bottom: 20px;
   }
   .tps-lv-label {
     font-size: 22px;
@@ -5558,7 +5589,6 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   /* C: bigger type, one line each. */
   .tps-lv-c .tps-lv-spots {
-    grid-template-columns: repeat(5, 44px);
     margin-bottom: 24px;
   }
   .tps-lv-c ol {
