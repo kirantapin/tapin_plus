@@ -68,26 +68,13 @@ const rungs = (they: boolean) => [
   { key: "save", verb: "Save", amt: `${PERCENT}%`, tail: "", rest: `on ${they ? "their" : "your"} other orders, every\u00a0day.`, Glyph: Pct },
 ];
 
-/* The places, named, over the wells (Sam, 11 Nov 2026: "maybe we have
-   the logos above though", "people would need to be able to see the
-   locations names", "there should be a plus button for more coming"). The
-   plus is a tile, not a control: there is nothing to open yet. */
 const Spots = () => (
-  <ul className="tps-lv-spots" aria-label="Where you can use it">
+  <ul className="tps-lv-spots" aria-label="The five places, $5 at each">
     {PLACES.map((p) => (
       <li key={p.id}>
-        <img src={p.logo} alt="" decoding="async" />
-        <span>{p.name}</span>
+        <img src={p.logo} alt={p.name} decoding="async" />
       </li>
     ))}
-    <li className="tps-lv-more">
-      <span className="tps-lv-more-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 6v12M6 12h12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </span>
-      <span>More coming</span>
-    </li>
   </ul>
 );
 
@@ -98,7 +85,7 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
       <h2 id="tps-ladder-h" className="tpp-sr">
         What you get with Tapin Plus
       </h2>
-      <Spots />
+      {v !== "b" && <Spots />}
       <ol>
         {list.map(({ key, verb, amt, tail, rest, Glyph }) => (
           <li key={key}>
@@ -116,8 +103,9 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
             ) : v === "b" ? (
               /* B · THREE WELLS: each benefit on its own grey well with a
                  glyph (a gift, money coming back, a percent), the way a
-                 wallet lists what's on the card. The places sit over the
-                 wells, named, with a plus for more coming. */
+                 wallet lists what's on the card. The five logos sit in the
+                 first well, under "at each spot", the thing they show (Sam:
+                 the logos above "still feel out of place"). */
               <>
                 <span className="tps-lv-glyph">
                   <Glyph />
@@ -126,6 +114,7 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
                   {verb} {amt} {tail}
                 </p>
                 <p className="tps-lv-rest">{rest}</p>
+                {key === "get" && <Spots />}
               </>
             ) : (
               /* C · THE SENTENCE: no table at all, three plain sentences in
