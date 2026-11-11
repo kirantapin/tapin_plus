@@ -5756,3 +5756,197 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     height: 64px;
   }
 }
+
+/* ══ LOCKED IN PREVIEWS ?lockv=a|b|c (shell/OfferVersions.tsx, 11 Nov 2026) */
+.ov-lk {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f4f4f5;
+}
+.ov-lk p {
+  margin: 0;
+}
+.ov-lk ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ov-lk svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.ov-lk-sub {
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* A · Chips. */
+.ov-lk-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-lk-head svg {
+  width: 22px;
+  height: 22px;
+}
+.ov-lk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ov-lk-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-lk-chips svg {
+  width: 18px;
+  height: 18px;
+  color: #861f41;
+}
+.ov-lk-chips .ov-lk-more {
+  color: var(--muted);
+}
+.ov-lk-chips .ov-lk-more svg {
+  color: var(--muted);
+}
+
+/* B · What's coming. */
+.ov-lk-b {
+  gap: 12px;
+  padding: 16px 14px 14px;
+}
+.ov-lk-title {
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-lk-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 4px;
+}
+.ov-lk-tiles li {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.ov-lk-tiles li > span {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #861f41;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.ov-lk-tiles svg {
+  width: 22px;
+  height: 22px;
+}
+.ov-lk-tiles .ov-lk-more {
+  color: var(--muted);
+}
+.ov-lk-tiles .ov-lk-more > span {
+  color: var(--muted);
+  background: transparent;
+}
+.ov-lk-foot {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-lk-foot svg {
+  width: 22px;
+  height: 22px;
+  color: var(--ink);
+}
+.ov-lk-foot b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* C · Same price. */
+.ov-lk-rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "icons price" "what price";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 6px;
+  padding: 12px 0;
+}
+.ov-lk-rows li:first-child {
+  padding-top: 2px;
+}
+.ov-lk-rows li + li {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.ov-lk-icons {
+  grid-area: icons;
+  display: flex;
+  gap: 6px;
+}
+.ov-lk-icons i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #861f41;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.ov-lk-icons svg {
+  width: 18px;
+  height: 18px;
+}
+.ov-lk-what {
+  grid-area: what;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-lk-what b {
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ov-lk-price {
+  grid-area: price;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 20px/24px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-lk-locked svg {
+  width: 18px;
+  height: 18px;
+  color: #0b7a53;
+}
+.ov-lk-c .ov-lk-sub {
+  padding-top: 2px;
+}
