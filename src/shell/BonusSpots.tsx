@@ -189,64 +189,29 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
    2026): food, non-alcoholic drinks and event tickets at every Plus place,
    cover and line skips at select places, not alcohol; points on everything.
    Styles: .tps-use* in plus-app.css. */
-const TicketGlyph = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 8.5V6.5h16v2a2.5 2.5 0 0 0 0 5v2H4v-2a2.5 2.5 0 0 0 0-5Z" transform="translate(0 1)" />
-    <path d="M14 7.5v1.5M14 11v1.5M14 14.5V16" />
-  </svg>
-);
-const DoorGlyph = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 20V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v15M4 20h16M14.5 12.5v.01" />
-  </svg>
-);
-const NoGlyph = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-    <circle cx="12" cy="12" r="8" />
-    <path d="M6.5 6.5l11 11" />
-  </svg>
-);
-
+/* QUIETER (Sam, 11 Nov 2026, of the first cut: "it's much too busy right
+   now"). The ladder just above already shows every logo, so this is type
+   only: one row per place, name and what it sells, on hairlines; then one
+   plain sentence for tickets, cover and line skips, and alcohol. No logos,
+   no icons, no second colour. */
 export function UseItOn({ they = false }: { they?: boolean }) {
   return (
     <section className="tpa-module tps-use" aria-labelledby="tps-use-h">
       <h2 id="tps-use-h" className="tpa-h2">
         What can {they ? "they" : "I"} use it on?
       </h2>
-      <p className="tps-use-lead">
-        {they ? "Their" : "Your"} ${CREDIT} and the {PERCENT}% go on what each place&nbsp;sells:
-      </p>
-      <ul className="tps-use-places">
+      <dl className="tps-use-list">
         {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt="" decoding="async" loading="lazy" />
-            <p>
-              <b>{p.name}</b>
-              <span>{p.what}</span>
-            </p>
-          </li>
+          <div key={p.id}>
+            <dt>{p.name}</dt>
+            <dd>{p.what}</dd>
+          </div>
         ))}
-      </ul>
-      <ul className="tps-use-also">
-        <li>
-          <TicketGlyph />
-          <span>
-            <b>Event tickets</b> at every Plus place
-          </span>
-        </li>
-        <li>
-          <DoorGlyph />
-          <span>
-            <b>Cover and line skips</b> at select places
-          </span>
-        </li>
-        <li className="tps-use-not">
-          <NoGlyph />
-          <span>
-            <b>Not alcohol.</b> Points still earn on everything.
-          </span>
-        </li>
-      </ul>
+      </dl>
+      <p className="tps-use-foot">
+        {they ? "Their" : "Your"} ${CREDIT} and the {PERCENT}% also cover event tickets at every Plus place, and
+        cover and line skips at select places. Not alcohol, but points still earn on&nbsp;everything.
+      </p>
     </section>
   );
 }
