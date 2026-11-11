@@ -5,7 +5,8 @@ import Arrival from "./shell/Arrival";
 import { PlusCheckoutMount } from "./shell/PlusCheckout";
 import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
-import { BREXX, SMITHS_LANDING, type Group } from "./model/groups";
+import { BREXX, SMITHS_LANDING, WELCOME_WEEK, type Group } from "./model/groups";
+import { setPagePolicy } from "./model/pagePolicy";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
 import ParentAccount from "./routes/ParentAccount";
@@ -105,6 +106,9 @@ export default function App() {
         {/* Brexx at Blacksburg (Sam, 11 Nov 2026): Sam's collage of the
             Brexx clubhouse and pool. */}
         <Route path="/brexx" element={<GroupPage group={BREXX} bandSrc={asset("/groups/brexx.webp")} />} />
+        {/* Welcome Week's flash sale (Sam, 11 Nov 2026): $2.99 a month for
+            life until the end of today, on the Blacksburg collage. */}
+        <Route path="/welcome-week" element={<GroupPage group={WELCOME_WEEK} />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
@@ -164,6 +168,8 @@ export default function App() {
    link. Put there before the page's first render reads it. */
 function GroupPage({ group, bandSrc }: { group: Group; bandSrc?: string }) {
   useState(() => {
+    /* Or its own public policy, with no link (model/pagePolicy.ts). */
+    if (group.policyId && typeof window !== "undefined") setPagePolicy(group.policyId, group.endsMs ?? null);
     if (!group.linkId || typeof window === "undefined") return;
     const url = new URL(window.location.href);
     if (url.searchParams.has("l")) return;

@@ -44,16 +44,18 @@
    or a bus. */
 
 import type { SeatSchedule } from "./seats";
+import { asset } from "../asset";
 
 export interface Group {
   /** The route and the analytics value. */
   id: string;
   /** How the page names the people it's for. */
   name: string;
-  /** "About 8 minutes by car", from the routing above. */
-  minutes: number;
+  /** "About 8 minutes by car", from the routing above; none for a group
+   *  that isn't a place (Welcome Week). */
+  minutes?: number;
   /** "About 1.5 miles", in a straight line to Draper Rd. */
-  miles: number;
+  miles?: number;
   /** The promo link that carries the group's price, or null until it
    *  exists (the page is then the ordinary offer). */
   linkId: string | null;
@@ -65,6 +67,21 @@ export interface Group {
    *  of the $7.99-then-$14.99 one while the group's price applies; null
    *  shows none. */
   seats: SeatSchedule | null;
+  /** A PUBLIC policy that carries the group's price with no link
+   *  (model/pagePolicy.ts), or none. */
+  policyId?: string | null;
+  /** A real end to the group's price, and when it started (for the bar that
+   *  drains between them). Past the end the page is the ordinary offer and
+   *  says the price ended; none for no end. */
+  endsMs?: number | null;
+  startMs?: number;
+  /** The headline, in place of "A more rewarding Blacksburg, for {name}." */
+  headline?: string;
+  /** Whose price it is, in the header line: "Resident exclusive" unless
+   *  said. */
+  label?: string;
+  /** A mark beside the price in the header, in place of the tag. */
+  mark?: { src: string; alt: string };
 }
 
 export const SMITHS_LANDING: Group = {
@@ -89,4 +106,50 @@ export const BREXX: Group = {
   linkId: null,
   term: "forever",
   seats: null,
+};
+
+/* ══ WELCOME WEEK, A FLASH SALE (Sam, 11 Nov 2026) ════════════════════════════
+   "We want to do a $2.99 for life offer for them, closing end of day. It's a
+   flash sale." For the VT Welcome Week students, the audience of the
+   5 Nov invitation (model/invite.ts, whose free month ended Sunday 8 Nov).
+   Sam: "it's $2.99 for life, welcome week only. As more spots join they
+   don't pay more."
+
+   THE OFFER: Kiran's PUBLIC policy f408a1cb ("$2.99 forever": add_item,
+   fixedDiscount 5 off $7.99, discountDuration "forever"; read 11 Nov 2026),
+   applied by its id with no link (model/pagePolicy.ts). $2.99 every month
+   for as long as they're a member.
+
+   THE END IS REAL: the end of Wednesday 11 November, Blacksburg time (EST,
+   UTC-5), so the page counts down to it and, past it, stops applying the
+   policy and shows the ordinary offer with a line saying the price ended.
+   The policy itself had no end_time when read: Kiran should set it to
+   2026-11-12T05:00:00Z so the checkout stops too. ?wwfpreview shows the
+   sale on local dev (the local database has no such policy); ?wwfends=<ISO>
+   moves the end there. */
+export const WELCOME_WEEK_FLASH_POLICY = "f408a1cb-99f4-4e25-9167-55f848852d04";
+const WW_ENDS_MS = Date.UTC(2026, 10, 12, 5, 0, 0);
+
+/** Dev only: ?wwfends=<ISO> moves the end, to see the last minutes and the
+ *  ended page. Never read in a production build. */
+const wwEnds = (): number => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return WW_ENDS_MS;
+  const raw = new URLSearchParams(window.location.search).get("wwfends");
+  const t = raw ? Date.parse(raw) : NaN;
+  return Number.isFinite(t) ? t : WW_ENDS_MS;
+};
+
+export const WELCOME_WEEK: Group = {
+  id: "welcome-week",
+  name: "Welcome Week",
+  linkId: null,
+  term: "forever",
+  seats: null,
+  policyId: WELCOME_WEEK_FLASH_POLICY,
+  endsMs: wwEnds(),
+  /* When Kiran's policy was made (modified_at, 11 Nov 20:20 UTC). */
+  startMs: Date.UTC(2026, 10, 11, 20, 20, 0),
+  headline: "A more rewarding Blacksburg, for Welcome Week.",
+  label: "Welcome Week only",
+  mark: { src: asset("/brand/vt-welcome-week.webp"), alt: "VT Welcome Week" },
 };

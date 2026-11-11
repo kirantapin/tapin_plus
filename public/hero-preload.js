@@ -13,7 +13,9 @@
           ? ["/groups/smiths-landing.webp"]
           : path === "/brexx"
             ? ["/groups/brexx.webp"]
-            : [];
+            : path === "/welcome-week"
+              ? ["/collage/blacksburg.webp"]
+              : [];
   for (var i = 0; i < urls.length; i++) {
     var l = document.createElement("link");
     l.rel = "preload";
