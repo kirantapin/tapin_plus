@@ -5,7 +5,7 @@
 (function () {
   var path = location.pathname.replace(/\/+$/, "") || "/";
   var urls =
-    path === "/"
+    path === "/" || path === "/brexx"
       ? ["/collage/blacksburg.webp"]
       : path === "/parents"
         ? ["/parents/hero-split-parent.webp", "/parents/hero-split-student.webp"]
