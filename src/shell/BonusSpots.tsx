@@ -29,9 +29,54 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
         </p>
       </section>
     );
-  /* GET $5 TO SPEND · EARN $5 BACK · SAVE 15% (Sam, 10 Nov 2026), as
-     three wells: B of the three versions ("i like this one"). */
-  return <LadderVersion v={ladderVersion()} they={they} />;
+  /* The original ladder, back (Sam, 11 Nov 2026, after the wells: "honestly
+     this version was great, let's just do this one like what we had
+     originally"). ?ladv=a|b|c still preview the three versions. */
+  const lv = ladderVersion();
+  if (lv) return <LadderVersion v={lv} they={they} />;
+  return (
+    <section className="tpa-module tps-ladder" aria-labelledby="tps-ladder-h">
+      <h2 id="tps-ladder-h" className="tpp-sr">
+        What you get with Tapin Plus
+      </h2>
+      <ol>
+        <li>
+          <p>
+            {/* The two $5s told apart in the labels themselves (Sam, 10
+                Nov 2026: "make the labels get $5 free and earn $5 back"),
+                then "$5 to spend" instead of "$5 free" (11 Nov). */}
+            <b className="tnum">
+              Get ${CREDIT}
+              <br className="tps-ladder-br" /> to spend
+            </b>
+            <span>at each spot every month, no&nbsp;minimum.</span>
+          </p>
+          <ul className="tps-ladder-spots">
+            {PLACES.map((p) => (
+              <li key={p.id}>
+                <img src={p.logo} alt={p.name} decoding="async" />
+                <span className="tnum" aria-hidden="true">
+                  ${CREDIT}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </li>
+        <li>
+          <p>
+            <b className="tnum">Earn ${CREDIT} back</b>
+            <span>every week when {they ? "they spend" : "you spend"} $10.</span>
+          </p>
+        </li>
+        <li>
+          <p>
+            <b className="tnum">Save {PERCENT}%</b>
+            <span>on {they ? "their" : "your"} other orders, every&nbsp;day.</span>
+          </p>
+        </li>
+      </ol>
+    </section>
+  );
 }
 
 /* ══ THREE PREVIEWS OF THE LADDER (Sam, 10 Nov 2026: "can I get 3 versions
@@ -39,10 +84,10 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
    Wells, the default; ?ladv=a and ?ladv=c still preview the other two.
    Styles: .tps-lv*. */
 type LadderV = "a" | "b" | "c";
-const ladderVersion = (): LadderV => {
-  if (typeof window === "undefined") return "b";
+const ladderVersion = (): LadderV | null => {
+  if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("ladv");
-  return v === "a" || v === "c" ? v : "b";
+  return v === "a" || v === "b" || v === "c" ? v : null;
 };
 
 const Gift = () => (
