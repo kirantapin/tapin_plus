@@ -5315,14 +5315,15 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-ladder ol > li > p span {
   text-wrap: pretty;
 }
-/* The logos sit in the words' column as one tight row (they're wordmarks,
-   so they never overlap); they shrink to fit a narrow phone. */
+/* The logos head the section as one tight row (they're wordmarks, so they
+   never overlap), a hairline under them before the rungs. */
 .tps-ladder-spots {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 36px));
-  gap: 5px;
-  margin: -2px 0 0 140px;
-  padding: 0;
+  grid-template-columns: repeat(5, minmax(0, 44px));
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--hair);
   list-style: none;
 }
 .tps-ladder-spots img {
@@ -5344,9 +5345,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   /* The logos sit under Get's words, in the words' column. */
   .tps-ladder-spots {
-    grid-template-columns: repeat(5, 44px);
-    gap: 8px;
-    margin-left: 162px;
+    grid-template-columns: repeat(5, 48px);
+    gap: 10px;
   }
 }
 
