@@ -88,6 +88,8 @@ function Ends() {
    Its own band in the price card, straight under what you pay and get, so it
    reads as part of the price, not fine print. The FAQ says it in full. */
 export function LockedIn({ monthly, they = false }: { monthly: string; they?: boolean }) {
+  const lv = lockVersion();
+  if (lv) return <LockedInVersion v={lv} monthly={monthly} they={they} />;
   return (
     <div className="ov-lock">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -104,6 +106,163 @@ export function LockedIn({ monthly, they = false }: { monthly: string; they?: bo
         New Blacksburg favorites are joining: bars, gyms, clubs, barbershops and more. When they do, {they ? "their" : "your"} price
         doesn’t go&nbsp;up.
       </p>
+    </div>
+  );
+}
+
+/* ══ LOCKED IN, THREE TAKES WITH THE KINDS OF PLACES JOINING (Sam, 11 Nov
+   2026: "redesign 3 variations of this please, I think we need icons for the
+   different types of spots joining") ═════════════════════════════════════
+   Preview only: ?lockv=a|b|c; the band above stays until Sam picks. Each
+   names the same four kinds Sam listed (bars, gyms, clubs, barbershops) and
+   "more", each with its icon, and says the price doesn't go up.
+
+   A · Chips: the promise first, then the four kinds as white chips, each
+       with its icon, and the "when they do" line under.
+   B · What's coming: the kinds lead, as icon tiles in a row with their
+       names, then the lock and the price under a hairline.
+   C · Same price: two rows, now and joining, the price beside each, so the
+       eye sees $7.99 twice and the lock on the second. */
+type LockV = "a" | "b" | "c";
+const lockVersion = (): LockV | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("lockv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+
+const Ico = ({ d, children }: { d?: string; children?: ReactNode }) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    {d ? <path d={d} /> : null}
+    {children}
+  </svg>
+);
+const LockIco = () => (
+  <Ico>
+    <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
+    <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
+  </Ico>
+);
+/** The four kinds Sam named, then more. */
+const KINDS: Array<{ key: string; name: string; Icon: () => JSX.Element }> = [
+  { key: "bars", name: "Bars", Icon: () => <Ico d="M5 5h14l-7 8zM12 13v6M8.5 19h7M8 8h8" /> },
+  { key: "gyms", name: "Gyms", Icon: () => <Ico d="M6.5 7.5v9M17.5 7.5v9M4 10v4M20 10v4M6.5 12h11" /> },
+  {
+    key: "clubs",
+    name: "Clubs",
+    Icon: () => (
+      <Ico d="M9 17.5V6.5l10-2v11">
+        <circle cx="7" cy="17.5" r="2" />
+        <circle cx="17" cy="15.5" r="2" />
+      </Ico>
+    ),
+  },
+  {
+    key: "barbers",
+    name: "Barbershops",
+    Icon: () => (
+      <Ico d="M8.2 7.6 20 16M8.2 16.4 20 8">
+        <circle cx="6" cy="6" r="2.5" />
+        <circle cx="6" cy="18" r="2.5" />
+      </Ico>
+    ),
+  },
+];
+const MoreIco = () => <Ico d="M12 6v12M6 12h12" />;
+const FoodIco = () => <Ico d="M5 9h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 13.5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M9 3.5v2.5M12 3.5v2.5" />;
+
+function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they: boolean }) {
+  const Your = they ? "Their" : "Your";
+  const your = they ? "their" : "your";
+  if (v === "a")
+    return (
+      <div className="ov-lk ov-lk-a">
+        <p className="ov-lk-head tnum">
+          <LockIco />
+          <b>
+            {Your} {monthly} a month is locked in.
+          </b>
+        </p>
+        <p className="ov-lk-sub">New Blacksburg favorites are joining:</p>
+        <ul className="ov-lk-chips">
+          {KINDS.map(({ key, name, Icon }) => (
+            <li key={key}>
+              <Icon />
+              {name}
+            </li>
+          ))}
+          <li className="ov-lk-more">
+            <MoreIco />
+            More
+          </li>
+        </ul>
+        <p className="ov-lk-sub">When they do, {your} price doesn’t go&nbsp;up.</p>
+      </div>
+    );
+  if (v === "b")
+    return (
+      <div className="ov-lk ov-lk-b">
+        <p className="ov-lk-title">New Blacksburg favorites are joining</p>
+        <ul className="ov-lk-tiles">
+          {KINDS.map(({ key, name, Icon }) => (
+            <li key={key}>
+              <span>
+                <Icon />
+              </span>
+              {name}
+            </li>
+          ))}
+          <li className="ov-lk-more">
+            <span>
+              <MoreIco />
+            </span>
+            More
+          </li>
+        </ul>
+        <p className="ov-lk-foot tnum">
+          <LockIco />
+          <span>
+            <b>
+              {Your} {monthly} a month is locked in.
+            </b>{" "}
+            When they join, {your} price doesn’t go&nbsp;up.
+          </span>
+        </p>
+      </div>
+    );
+  return (
+    <div className="ov-lk ov-lk-c">
+      <ul className="ov-lk-rows tnum">
+        <li>
+          <span className="ov-lk-icons">
+            <i>
+              <FoodIco />
+            </i>
+          </span>
+          <span className="ov-lk-what">
+            <b>Now</b>
+            Food and coffee spots
+          </span>
+          <b className="ov-lk-price">{monthly}</b>
+        </li>
+        <li>
+          <span className="ov-lk-icons">
+            {KINDS.map(({ key, Icon }) => (
+              <i key={key}>
+                <Icon />
+              </i>
+            ))}
+          </span>
+          <span className="ov-lk-what">
+            <b>Joining</b>
+            Bars, gyms, clubs, barbershops and&nbsp;more
+          </span>
+          <b className="ov-lk-price ov-lk-locked">
+            <LockIco />
+            {monthly}
+          </b>
+        </li>
+      </ul>
+      <p className="ov-lk-sub">{Your} price is locked in. It doesn’t go up as new places&nbsp;join.</p>
     </div>
   );
 }
