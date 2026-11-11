@@ -42,8 +42,10 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
       <ol>
         <li>
           <p>
-            <b className="tnum">Get ${CREDIT}</b>
-            <span>at each spot every month, free, no&nbsp;minimum.</span>
+            {/* The two $5s told apart in the labels themselves (Sam, 10
+                Nov 2026: "make the labels get $5 free and earn $5 back"). */}
+            <b className="tnum">Get ${CREDIT} free</b>
+            <span>at each spot every month, no&nbsp;minimum.</span>
           </p>
           <ul className="tps-ladder-spots">
             {PLACES.map((p) => (
@@ -58,8 +60,8 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
         </li>
         <li>
           <p>
-            <b className="tnum">Earn ${CREDIT}</b>
-            <span>back every week when {they ? "they spend" : "you spend"} $10.</span>
+            <b className="tnum">Earn ${CREDIT} back</b>
+            <span>every week when {they ? "they spend" : "you spend"} $10.</span>
           </p>
         </li>
         <li>

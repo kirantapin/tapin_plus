@@ -5298,7 +5298,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 .tps-ladder ol > li > p {
   display: grid;
-  grid-template-columns: 98px minmax(0, 1fr);
+  grid-template-columns: 128px minmax(0, 1fr);
   align-items: baseline;
   gap: 12px;
   margin: 0;
@@ -5345,7 +5345,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 @media (min-width: 1024px) {
   .tps-ladder ol > li > p {
-    grid-template-columns: 116px minmax(0, 1fr);
+    grid-template-columns: 150px minmax(0, 1fr);
     font-size: 17px;
   }
   .tps-ladder ol > li > p b {
@@ -5355,7 +5355,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   .tps-ladder-spots {
     grid-template-columns: repeat(5, 48px);
     gap: 14px;
-    margin-left: 128px;
+    margin-left: 162px;
   }
 }
 
