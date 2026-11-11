@@ -1170,6 +1170,23 @@ export function SceneClose() {
   );
 }
 
+/** $5 to spend at each of the five places, every month (11 Nov 2026). */
+const PLUS_IDS = ["coffeeholicsva", "sweetopia", "olaika", "theburg", "themilkparlor"];
+function SceneMonthly() {
+  return (
+    <div className="monthly-scene">
+      <ul>
+        {PLUS_IDS.map((id) => (
+          <li key={id}>
+            <Mark id={id} className="monthly-mark" />
+            <span className="tnum">$5</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** The places joining next, as tiles (shell/Coming.tsx). */
 function SceneGrowing() {
   return (
@@ -1181,6 +1198,7 @@ function SceneGrowing() {
 
 export const SCENES: Record<string, (p: SceneProps) => JSX.Element> = {
   growing: SceneGrowing,
+  monthly: SceneMonthly,
   spend: SceneSpend,
   value: SceneValue,
   order: SceneOrder,

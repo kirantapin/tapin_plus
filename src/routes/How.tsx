@@ -107,6 +107,17 @@ export function buildSlides(spend: number) {
       next: "Show me how",
     },
     {
+      /* The monthly $5 to spend at each place (Sam, 11 Nov 2026: "did you
+         update the how this works modal ... for the $5 to spend"), before
+         the order slide's weekly $5 back and 15%. */
+      id: "monthly",
+      headline: "$5 to spend at each spot, every month",
+      line: "No minimum spend. It resets each month, so use it.",
+      tag: null,
+      hold: false,
+      dwellMs: 6000,
+    },
+    {
       id: "order",
       headline: "Order in the app, save 15% now",
       /* "In the app" is the only place in the whole build that says WHERE the
@@ -116,7 +127,7 @@ export function buildSlides(spend: number) {
       /* Sam, 15 Sep 2026: "you'd only be able to use one of the two benefits
          ($5 credit on $10 spend or the 15% off), but you can earn points on
          everything." This slide is the 15%; the next is the credit. */
-      line: "Or pay full price on a $10+ order and get $5 credit added to your account. Points on everything.",
+      line: "Or pay full price on a $10+ order and earn $5 back, once a week at each place. Points on everything.",
       tag: null,
       hold: false,
       dwellMs: 8000,
