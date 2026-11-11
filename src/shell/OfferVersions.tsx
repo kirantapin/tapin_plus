@@ -50,10 +50,18 @@ export function PayGet({ first, monthly, they = false, term = "first month" }: {
         <small className="tnum">
           in credit every month, ${CREDIT} at each spot
         </small>
-        <p className="ov-c-plus tnum">
-          <Percent />
-          Then {PERCENT}% off, every day
-        </p>
+        {/* Then the other two rungs (Sam, 10 Nov 2026: Get $5 · Earn $5 ·
+            Save 15%). */}
+        <ul className="ov-c-more tnum">
+          <li>
+            <Coin />
+            Earn ${CREDIT} back every week on $10+
+          </li>
+          <li>
+            <Percent />
+            Save {PERCENT}% every day
+          </li>
+        </ul>
       </div>
     </>
   );
@@ -92,6 +100,13 @@ function Spots({ monthly }: { monthly: string }) {
 const Percent = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M18 6 6 18M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM16 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const Coin = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="2" />
+    <path d="M14.6 9.2c-.5-.8-1.5-1.2-2.6-1.2-1.5 0-2.6.8-2.6 1.9 0 2.6 5.4 1.4 5.4 4.1 0 1.1-1.2 2-2.8 2-1.2 0-2.2-.5-2.7-1.3M12 6.5v1.5m0 8v1.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 

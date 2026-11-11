@@ -581,15 +581,18 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
           checkout on how their credit is added to the phone number they pay
           with and they can cancel anytime"): first, and cancel stays below. */}
       <li>
-        <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$25</span>
-        {/* The offer itself now (Sam, 9 Nov 2026): $5 at each of five
-            places, every month, from the moment you join. */}
-        <b>{look === "c" ? "$25 credit every month" : "$25 in credit every month, $5 at each spot"}</b>
+        <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$5</span>
+        {/* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026), each one line. */}
+        <b>Get $5 at each spot, every month</b>
+      </li>
+      {/* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026). */}
+      <li>
+        <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">$5</span>
+        <b>Earn $5 back every week on $10+</b>
       </li>
       <li>
         <span className="pck-ico pck-ico-money pck-ico-wide tnum" aria-hidden="true">15%</span>
-        {/* After the credit, not instead of it (Sam, 10 Nov 2026). */}
-        <b>{look === "c" ? "Then 15% off daily" : "Then 15% off, once a day"}</b>
+        <b>Save 15% every day</b>
       </li>
       {/* Sam, 5 Nov 2026: "red icon with 'X' for easy one tap cancel
           anytime", moved here from the page ("it'd be one of these"), right under
