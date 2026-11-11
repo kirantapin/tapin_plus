@@ -5436,43 +5436,49 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   margin-top: 6px;
 }
 
-/* B · Three wells. */
-.tps-lv-b .tps-lv-spots {
-  margin-bottom: 16px;
-}
+/* B · Three wells (the live section since 10 Nov 2026). A phone keeps
+   them tight so all three show in one screen. */
 .tps-lv-b ol {
-  gap: 10px;
+  gap: 8px;
 }
 .tps-lv-b ol > li {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  column-gap: 14px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  column-gap: 12px;
   row-gap: 2px;
-  padding: 16px;
-  border-radius: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
   background: #f4f4f5;
 }
 .tps-lv-glyph {
   grid-row: span 2;
+  align-self: start;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: #e8f4ee;
   color: #0b7a53;
 }
 .tps-lv-glyph svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 .tps-lv-label {
-  font: 600 20px/24px "Gilroy", Arial, sans-serif;
+  font: 600 19px/23px "Gilroy", Arial, sans-serif;
   color: #0b7a53;
 }
 .tps-lv-b .tps-lv-rest {
   font-size: 15px;
-  line-height: 21px;
+  line-height: 20px;
+}
+/* The five logos in the first well, under its words. */
+.tps-lv-b .tps-lv-spots {
+  grid-column: 2;
+  grid-template-columns: repeat(5, 32px);
+  gap: 6px;
+  margin-top: 8px;
 }
 
 /* C · The sentence. */
@@ -5533,7 +5539,18 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   .tps-lv-b .tps-lv-glyph {
     grid-row: auto;
+    width: 44px;
+    height: 44px;
     margin-bottom: 8px;
+  }
+  .tps-lv-b .tps-lv-glyph svg {
+    width: 22px;
+    height: 22px;
+  }
+  .tps-lv-b .tps-lv-spots {
+    grid-column: auto;
+    grid-template-columns: repeat(5, 34px);
+    margin-top: 10px;
   }
   .tps-lv-label {
     font-size: 22px;
