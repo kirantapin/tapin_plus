@@ -29,63 +29,20 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
         </p>
       </section>
     );
-  const lv = ladderVersion();
-  if (lv) return <LadderVersion v={lv} they={they} />;
-  /* GET $5 · EARN $5 · SAVE 15% (Sam, 10 Nov 2026: "THIS IS PERFECT I love
-     it"). The ads still say $5 every week, the site said $5 a month; the
-     ladder holds both, true as written: the free monthly $5 at each spot
-     (no minimum), the weekly $5 back on a $10 order, then 15% off. The five
-     places' logos head it. */
-  return (
-    <section className="tpa-module tps-ladder" aria-labelledby="tps-ladder-h">
-      <h2 id="tps-ladder-h" className="tpp-sr">
-        What you get with Tapin Plus
-      </h2>
-      {/* The five places head the section, then the three rungs (Sam, 10
-          Nov 2026: "maybe we have the logos above this section?"); no $5
-          under each, the first rung already says it. */}
-      <ul className="tps-ladder-spots" aria-label="The five places">
-        {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt={p.name} decoding="async" />
-          </li>
-        ))}
-      </ul>
-      <ol>
-        <li>
-          <p>
-            {/* The two $5s told apart in the labels themselves (Sam, 10
-                Nov 2026: "make the labels get $5 free and earn $5 back"). */}
-            <b className="tnum">Get ${CREDIT} free</b>
-            <span>at each spot every month, no&nbsp;minimum.</span>
-          </p>
-        </li>
-        <li>
-          <p>
-            <b className="tnum">Earn ${CREDIT} back</b>
-            <span>every week when {they ? "they spend" : "you spend"} $10.</span>
-          </p>
-        </li>
-        <li>
-          <p>
-            <b className="tnum">Save {PERCENT}%</b>
-            <span>on {they ? "their" : "your"} other orders, every&nbsp;day.</span>
-          </p>
-        </li>
-      </ol>
-    </section>
-  );
+  /* GET $5 TO SPEND · EARN $5 BACK · SAVE 15% (Sam, 10 Nov 2026), as
+     three wells: B of the three versions ("i like this one"). */
+  return <LadderVersion v={ladderVersion()} they={they} />;
 }
 
 /* ══ THREE PREVIEWS OF THE LADDER (Sam, 10 Nov 2026: "can I get 3 versions
-   of this section actually? It's not quite there yet"). ?ladv=a|b|c; the
-   live section above stays until Sam picks. Same words in all three, the
-   logos on top in all three (his ask before this one). Styles: .tps-lv*. */
+   of this section actually? It's not quite there yet"). Sam picked B ·
+   Wells, the default; ?ladv=a and ?ladv=c still preview the other two.
+   Styles: .tps-lv*. */
 type LadderV = "a" | "b" | "c";
-const ladderVersion = (): LadderV | null => {
-  if (typeof window === "undefined") return null;
+const ladderVersion = (): LadderV => {
+  if (typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("ladv");
-  return v === "a" || v === "b" || v === "c" ? v : null;
+  return v === "a" || v === "c" ? v : "b";
 };
 
 const Gift = () => (
@@ -106,13 +63,13 @@ const Pct = () => (
 );
 
 const rungs = (they: boolean) => [
-  { key: "get", verb: "Get", amt: `$${CREDIT}`, tail: "free", rest: "at each spot every month, no\u00a0minimum.", Glyph: Gift },
+  { key: "get", verb: "Get", amt: `$${CREDIT}`, tail: "to spend", rest: "at each spot every month, no\u00a0minimum.", Glyph: Gift },
   { key: "earn", verb: "Earn", amt: `$${CREDIT}`, tail: "back", rest: `every week when ${they ? "they spend" : "you spend"} $10.`, Glyph: Back },
   { key: "save", verb: "Save", amt: `${PERCENT}%`, tail: "", rest: `on ${they ? "their" : "your"} other orders, every\u00a0day.`, Glyph: Pct },
 ];
 
 const Spots = () => (
-  <ul className="tps-lv-spots" aria-label="The five places">
+  <ul className="tps-lv-spots" aria-label="The five places, $5 at each">
     {PLACES.map((p) => (
       <li key={p.id}>
         <img src={p.logo} alt={p.name} decoding="async" />
@@ -128,7 +85,7 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
       <h2 id="tps-ladder-h" className="tpp-sr">
         What you get with Tapin Plus
       </h2>
-      <Spots />
+      {v !== "b" && <Spots />}
       <ol>
         {list.map(({ key, verb, amt, tail, rest, Glyph }) => (
           <li key={key}>
@@ -146,7 +103,9 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
             ) : v === "b" ? (
               /* B · THREE WELLS: each benefit on its own grey well with a
                  glyph (a gift, money coming back, a percent), the way a
-                 wallet lists what's on the card. */
+                 wallet lists what's on the card. The five logos sit in the
+                 first well, under "at each spot", the thing they show (Sam:
+                 the logos above "still feel out of place"). */
               <>
                 <span className="tps-lv-glyph">
                   <Glyph />
@@ -155,6 +114,7 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
                   {verb} {amt} {tail}
                 </p>
                 <p className="tps-lv-rest">{rest}</p>
+                {key === "get" && <Spots />}
               </>
             ) : (
               /* C · THE SENTENCE: no table at all, three plain sentences in

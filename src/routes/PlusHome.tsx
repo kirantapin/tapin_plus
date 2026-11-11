@@ -306,12 +306,12 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     /* The monthly credit (Sam, 9 Nov 2026): "they don't stack, and credit
        doesn't roll over". */
     q: "Does my credit roll over? Can I use it with the 15%?",
-    a: `No to both. Your free $${CREDIT} at each place resets every month, so use it that month. And it’s one per order: credit on one, ${PERCENT}% off on another.`,
+    a: `No to both. Your $${CREDIT} at each place resets every month, so use it that month. And it’s one per order: credit on one, ${PERCENT}% off on another.`,
   },
   {
     /* Get $5 · Earn $5 · Save 15% (Sam, 10 Nov 2026). */
     q: "How does it work?",
-    a: `Get $${CREDIT} at each of the ${PLACES.length} places every month, free, with no minimum spend, there from the moment you join. Earn $${CREDIT} back every week when you spend $10 on food and non-alcoholic drinks. Save ${PERCENT}% on your other orders, every day.`,
+    a: `Get $${CREDIT} to spend at each of the ${PLACES.length} places every month, with no minimum spend, there from the moment you join. Earn $${CREDIT} back every week when you spend $10 on food and non-alcoholic drinks. Save ${PERCENT}% on your other orders, every day.`,
   },
   {
     q: "What does it work on?",
