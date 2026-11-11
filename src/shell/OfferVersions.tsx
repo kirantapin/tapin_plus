@@ -98,7 +98,11 @@ export function LockedIn({ monthly, they = false }: { monthly: string; they?: bo
         <b>
           {they ? "Their" : "Your"} {monthly} a month is locked in.
         </b>{" "}
-        New spots are joining, and {they ? "their" : "your"} price never goes&nbsp;up.
+        {/* Sam, 11 Nov 2026: "new blacksburg favorites are joining, when
+            they do your price doesn't go up. Bars, gyms, clubs,
+            barbershops, etc." */}
+        New Blacksburg favorites are joining: bars, gyms, clubs, barbershops and more. When they do, {they ? "their" : "your"} price
+        doesn’t go&nbsp;up.
       </p>
     </div>
   );
