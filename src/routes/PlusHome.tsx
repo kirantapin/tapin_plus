@@ -415,8 +415,9 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
    group's own price; the offer, checkout, dock, founders and questions are
    the home page's. */
 /* Said only while the group's own price is the one that applies (its link),
-   so the page never promises a year the checkout won't give. Sam, 10 Nov
-   2026: the year at $3.99 is agreed with Smith's Landing. */
+   so the page never promises a price the checkout won't give. Smith's
+   Landing and Brexx are both $3.99 a month for life (Sam, 11 Nov 2026);
+   the year wording stays for a group whose rate lasts 12 months. */
 const groupPriceFaq = (g: Group, first: string, monthly: string, on: boolean): { q: string; a: string } => ({
   q: "Will my price go up?",
   a: !on

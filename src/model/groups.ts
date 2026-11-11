@@ -4,10 +4,11 @@
    offer, checkout, dock and questions as plus.tapin.app; only the header's
    words and one section are the group's own.
 
-   Only true things about a group go here. Tapin has no deal with Smith's
-   Landing and they don't sponsor this: no logo, photos or branding of
-   theirs, and nothing that says they're involved. The facts are where it is
-   and how far the Plus spots are. Distances were routed on OpenStreetMap
+   Only true things about a group go here. Smith's Landing's rate is agreed
+   with them (Sam, 10 Nov 2026), so "exclusive we set up with Smith's
+   Landing" is said; the header is Sam's own collage of The Lodge; their
+   logo stays off unless Sam says. The facts are where it is and how far
+   the Plus spots are. Distances were routed on OpenStreetMap
    (routing.openstreetmap.de, 10 Nov 2026) from 870 Plantation Rd to 211
    Draper Rd (Coffeeholics, The Milk Parlor; The Burg is across the street
    at 204): 1.47 miles in a straight line, so "about 1.5 miles"; by car 2.39
@@ -18,13 +19,14 @@
    so the page says no walking time. Blacksburg Transit routes weren't
    confirmed, so the page never names a bus.
 
-   THE OFFER (Sam, 10 Nov 2026): $3.99 a month for the first year, agreed
-   with Smith's Landing, for anyone with the link, no end date. It's a promo
-   link (model/link.ts) on a private policy, $4 off for 12 periods, which
-   the checkout already prices ("$3.99/mo for 12 months, then $7.99/mo").
-   Kiran makes the link; its id goes in `linkId`, and the route puts it in
-   the address so everything downstream applies it. Until then the page is
-   the ordinary offer; ?slpreview shows the year on local dev.
+   THE OFFER: $3.99 a month FOR LIFE (Sam, 11 Nov 2026: "the $3.99/month
+   would be for life btw"; on 10 Nov it was "for the first year"), agreed
+   with Smith's Landing, for anyone with the link, no end date, 300 spots.
+   It's a promo link (model/link.ts) on a private policy, $4 off, discount
+   duration "forever", which the checkout already prices ("$3.99 every
+   month"). Kiran makes the link; its id goes in `linkId`, and the route
+   puts it in the address so everything downstream applies it. Until then
+   the page is the ordinary offer; ?slpreview shows it on local dev.
 
    BREXX AT BLACKSBURG (Sam, 11 Nov 2026: "this apartment complex in
    blacksburg as well, with the $3.99/month for life exclusive rate"): the
@@ -70,8 +72,9 @@ export const SMITHS_LANDING: Group = {
   name: "Smith’s Landing",
   minutes: 8,
   miles: 1.5,
+  /* Kiran's private-policy link, $4 off, duration forever. */
   linkId: null,
-  term: "year",
+  term: "forever",
   /* 300 spots, 10 to 20 fewer a day (Sam, 10 Nov 2026), from launch at 6pm
      Eastern on 10 November; floors at 12. */
   seats: { cap: 300, startMs: Date.UTC(2026, 10, 10, 23, 0, 0), min: 10, max: 20, floor: 12, seed: 31 },

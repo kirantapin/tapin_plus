@@ -127,7 +127,7 @@ const devPrice = (): PlusPrice | null => {
   if (q.has("wwpreview") || q.get("l") === WELCOME_WEEK_LINK_ID) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
   /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
-  if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: { periods: 12 }, linkId: "slpreview" };
+  if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "slpreview" };
   /* Brexx's for-life link (model/groups.ts BREXX) before Kiran's exists. */
   if (q.has("brexxpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "brexxpreview" };
   return null;
