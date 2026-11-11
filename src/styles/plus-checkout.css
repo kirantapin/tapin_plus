@@ -1421,3 +1421,37 @@
     display: none;
   }
 }
+
+/* ══ ONE DISC FOR EVERY ROW (pay step, Sam, 11 Nov 2026: "the pill design
+   here should be consistent for all of these") ══════════════════════════
+   Same size, same grey ground; the glyph carries the colour: money green for
+   the three benefits, red for cancel, ink for the rest. */
+.pck-layer .pck-offer.pck-offer-even li {
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+}
+.pck-layer .pck-offer.pck-offer-even .pck-ico,
+.pck-layer .pck-offer.pck-offer-even .pck-ico.pck-ico-cancel {
+  width: 28px;
+  height: 28px;
+  background: #f0f0f0;
+  color: var(--ink);
+}
+.pck-layer .pck-offer.pck-offer-even .pck-ico svg {
+  width: 15px;
+  height: 15px;
+}
+.pck-layer .pck-offer.pck-offer-even .pck-ico.pck-ico-g {
+  color: #0b7a53;
+}
+.pck-layer .pck-offer.pck-offer-even .pck-ico.pck-ico-cancel {
+  color: #d14245;
+}
+
+/* The phone step's grey box holds the spots alone now (11 Nov 2026), so no
+   rule above them. */
+.pck-layer .pck-why > .pck-seats:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
