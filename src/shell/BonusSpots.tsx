@@ -29,6 +29,8 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
         </p>
       </section>
     );
+  const lv = ladderVersion();
+  if (lv) return <LadderVersion v={lv} they={they} />;
   /* GET $5 · EARN $5 · SAVE 15% (Sam, 10 Nov 2026: "THIS IS PERFECT I love
      it"). The ads still say $5 every week, the site said $5 a month; the
      ladder holds both, true as written: the free monthly $5 at each spot
@@ -70,6 +72,104 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
             <span>on {they ? "their" : "your"} other orders, every&nbsp;day.</span>
           </p>
         </li>
+      </ol>
+    </section>
+  );
+}
+
+/* ══ THREE PREVIEWS OF THE LADDER (Sam, 10 Nov 2026: "can I get 3 versions
+   of this section actually? It's not quite there yet"). ?ladv=a|b|c; the
+   live section above stays until Sam picks. Same words in all three, the
+   logos on top in all three (his ask before this one). Styles: .tps-lv*. */
+type LadderV = "a" | "b" | "c";
+const ladderVersion = (): LadderV | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("ladv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+
+const Gift = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M4 11h16v9H4zM3 7.5h18V11H3zM12 7.5V20M12 7.5C10.8 4.8 7.5 4.2 7.5 6.2c0 1.3 2.6 1.3 4.5 1.3Zm0 0c1.2-2.7 4.5-3.3 4.5-1.3 0 1.3-2.6 1.3-4.5 1.3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+  </svg>
+);
+const Back = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4v4h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 9.6c-.4-.6-1.1-.9-2-.9-1.1 0-1.9.6-1.9 1.4 0 1.9 4 1 4 3 0 .8-.9 1.5-2.1 1.5-.9 0-1.6-.4-2-1M12 7.6v1.1m0 6v1.1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+);
+const Pct = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M18 6 6 18M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM16 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const rungs = (they: boolean) => [
+  { key: "get", verb: "Get", amt: `$${CREDIT}`, tail: "free", rest: "at each spot every month, no\u00a0minimum.", Glyph: Gift },
+  { key: "earn", verb: "Earn", amt: `$${CREDIT}`, tail: "back", rest: `every week when ${they ? "they spend" : "you spend"} $10.`, Glyph: Back },
+  { key: "save", verb: "Save", amt: `${PERCENT}%`, tail: "", rest: `on ${they ? "their" : "your"} other orders, every\u00a0day.`, Glyph: Pct },
+];
+
+const Spots = () => (
+  <ul className="tps-lv-spots" aria-label="The five places">
+    {PLACES.map((p) => (
+      <li key={p.id}>
+        <img src={p.logo} alt={p.name} decoding="async" />
+      </li>
+    ))}
+  </ul>
+);
+
+function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
+  const list = rungs(they);
+  return (
+    <section className={`tpa-module tps-lv tps-lv-${v}`} aria-labelledby="tps-ladder-h">
+      <h2 id="tps-ladder-h" className="tpp-sr">
+        What you get with Tapin Plus
+      </h2>
+      <Spots />
+      <ol>
+        {list.map(({ key, verb, amt, tail, rest, Glyph }) => (
+          <li key={key}>
+            {v === "a" ? (
+              /* A · FIGURES: the amount is the picture. "$5" and "15%" set
+                 big in money green, the verb and its word either side at
+                 half size, so the three read as Get $5 free / Earn $5 back
+                 / Save 15% at a glance and the line under says when. */
+              <>
+                <p className="tps-lv-fig tnum">
+                  {verb} <strong>{amt}</strong> {tail}
+                </p>
+                <p className="tps-lv-rest">{rest}</p>
+              </>
+            ) : v === "b" ? (
+              /* B · THREE WELLS: each benefit on its own grey well with a
+                 glyph (a gift, money coming back, a percent), the way a
+                 wallet lists what's on the card. */
+              <>
+                <span className="tps-lv-glyph">
+                  <Glyph />
+                </span>
+                <p className="tps-lv-label tnum">
+                  {verb} {amt} {tail}
+                </p>
+                <p className="tps-lv-rest">{rest}</p>
+              </>
+            ) : (
+              /* C · THE SENTENCE: no table at all, three plain sentences in
+                 big type, the verb and amount in green. Reads like someone
+                 telling you what you get. */
+              <p className="tps-lv-say tnum">
+                <b>
+                  {verb} {amt}
+                  {tail ? ` ${tail}` : ""}
+                </b>{" "}
+                {rest}
+              </p>
+            )}
+          </li>
+        ))}
       </ol>
     </section>
   );
