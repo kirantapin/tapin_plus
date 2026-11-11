@@ -5371,3 +5371,184 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   width: 20px;
   height: 20px;
 }
+
+/* ══ LADDER PREVIEWS ?ladv=a|b|c (shell/BonusSpots.tsx, 10 Nov 2026) ══════ */
+.tps-lv ol {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-lv p {
+  margin: 0;
+}
+.tps-lv-spots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 44px));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tps-lv-spots img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tps-lv-rest {
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* A · Figures. */
+.tps-lv-a .tps-lv-spots {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--hair);
+}
+.tps-lv-a ol > li {
+  padding: 16px 0;
+}
+.tps-lv-a ol > li:last-child {
+  padding-bottom: 0;
+}
+.tps-lv-a ol > li + li {
+  border-top: 1px solid var(--hair);
+}
+.tps-lv-fig {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font: 600 22px/1 "Gilroy", Arial, sans-serif;
+  color: #0b7a53;
+}
+.tps-lv-fig strong {
+  font-weight: 600;
+  font-size: 46px;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+}
+.tps-lv-a .tps-lv-rest {
+  margin-top: 6px;
+}
+
+/* B · Three wells. */
+.tps-lv-b .tps-lv-spots {
+  margin-bottom: 16px;
+}
+.tps-lv-b ol {
+  gap: 10px;
+}
+.tps-lv-b ol > li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 2px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f4f4f5;
+}
+.tps-lv-glyph {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e8f4ee;
+  color: #0b7a53;
+}
+.tps-lv-glyph svg {
+  width: 22px;
+  height: 22px;
+}
+.tps-lv-label {
+  font: 600 20px/24px "Gilroy", Arial, sans-serif;
+  color: #0b7a53;
+}
+.tps-lv-b .tps-lv-rest {
+  font-size: 15px;
+  line-height: 21px;
+}
+
+/* C · The sentence. */
+.tps-lv-c .tps-lv-spots {
+  grid-template-columns: repeat(5, minmax(0, 40px));
+  margin-bottom: 20px;
+}
+.tps-lv-c ol {
+  gap: 14px;
+}
+.tps-lv-say {
+  font: 500 23px/30px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+.tps-lv-say b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+
+@media (min-width: 1024px) {
+  .tps-lv-spots {
+    grid-template-columns: repeat(5, 48px);
+    gap: 10px;
+  }
+  /* A: three columns, a hairline between. */
+  .tps-lv-a .tps-lv-spots {
+    padding-bottom: 22px;
+  }
+  .tps-lv-a ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .tps-lv-a ol > li {
+    padding: 22px 24px 0;
+  }
+  .tps-lv-a ol > li:first-child {
+    padding-left: 0;
+  }
+  .tps-lv-a ol > li + li {
+    border-top: 0;
+    border-left: 1px solid var(--hair);
+  }
+  .tps-lv-fig strong {
+    font-size: 52px;
+    line-height: 50px;
+  }
+  /* B: three wells side by side, the glyph on top. */
+  .tps-lv-b ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .tps-lv-b ol > li {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    row-gap: 6px;
+    padding: 20px;
+  }
+  .tps-lv-b .tps-lv-glyph {
+    grid-row: auto;
+    margin-bottom: 8px;
+  }
+  .tps-lv-label {
+    font-size: 22px;
+    line-height: 26px;
+  }
+  /* C: bigger type, one line each. */
+  .tps-lv-c .tps-lv-spots {
+    grid-template-columns: repeat(5, 44px);
+    margin-bottom: 24px;
+  }
+  .tps-lv-c ol {
+    gap: 12px;
+  }
+  .tps-lv-say {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
