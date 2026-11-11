@@ -5836,8 +5836,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 .ov-lk-tiles {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 4px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
 }
 .ov-lk-tiles li {
   display: grid;

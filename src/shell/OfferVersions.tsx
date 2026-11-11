@@ -88,9 +88,9 @@ function Ends() {
    Its own band in the price card, straight under what you pay and get, so it
    reads as part of the price, not fine print. The FAQ says it in full. */
 export function LockedIn({ monthly, they = false }: { monthly: string; they?: boolean }) {
-  /* A · Chips is the band (Sam, 11 Nov 2026: "actually let's go with this
-     one"); ?lockv=b / ?lockv=c preview the other two, ?lockv=0 the plain
-     band. */
+  /* B · What's coming is the band (Sam, 11 Nov 2026: "actually this one
+     instead please", after a turn on A); ?lockv=a / ?lockv=c preview the
+     other two, ?lockv=0 the plain band. */
   const lv = lockVersion();
   if (lv !== "0") return <LockedInVersion v={lv} monthly={monthly} they={they} />;
   return (
@@ -128,9 +128,9 @@ export function LockedIn({ monthly, they = false }: { monthly: string; they?: bo
        eye sees $7.99 twice and the lock on the second. */
 type LockV = "a" | "b" | "c";
 const lockVersion = (): LockV | "0" => {
-  if (typeof window === "undefined") return "a";
+  if (typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("lockv");
-  return v === "b" || v === "c" || v === "0" ? v : "a";
+  return v === "a" || v === "c" || v === "0" ? v : "b";
 };
 
 const Ico = ({ d, children }: { d?: string; children?: ReactNode }) => (
@@ -211,7 +211,7 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
               <span>
                 <Icon />
               </span>
-              {name}
+              {key === "barbers" ? "Barbers" : name}
             </li>
           ))}
           <li className="ov-lk-more">
