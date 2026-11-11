@@ -297,8 +297,7 @@ export function BenefitCards() {
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean; green?: boolean }> = [
     /* The $25 a month first, the offer itself (Sam, 9 Nov 2026, reworking
        the offer: "$5 monthly credit at each spot on tapin plus with no
-       minimum spend ... Credit doesn't roll over"). The weekly $5-on-$10
-       card and the $60 estimate built on it went: still true, not marketed. */
+       minimum spend ... Credit doesn't roll over"). */
     {
       key: "welcome",
       art: (
@@ -306,11 +305,20 @@ export function BenefitCards() {
           {money0(CREDIT * PLACES.length)}
         </b>
       ),
-      label: "In credit every month",
+      /* "$5 to spend" (Sam, 11 Nov 2026). */
+      label: "To spend every month",
       line: `${money0(CREDIT)} at each of five spots, no minimum spend. It resets each month, so they use it.`,
       /* On money green (Sam, 9 Nov 2026: "I think we give this a green
          background"). */
       green: true,
+    },
+    /* The weekly $5 is marketed again (Sam, 10 Nov 2026: Get $5 · Earn
+       $5 · Save 15%), so its card is back, second. */
+    {
+      key: "earn",
+      art: <b className="tpp-card-fig">{money0(CREDIT)}</b>,
+      label: "Back every week",
+      line: "When they spend $10 on food and non-alcoholic drinks.",
     },
     {
       key: "places",
@@ -321,8 +329,8 @@ export function BenefitCards() {
     {
       key: "pct",
       art: <b className="tpp-card-fig">{PERCENT}%</b>,
-      label: `Then ${PERCENT}% off, once a day`,
-      line: "On their other orders, after the credit. Alcohol excluded.",
+      label: `Off their other orders, every day`,
+      line: "One benefit per order. Alcohol excluded.",
     },
     {
       key: "note",
