@@ -35,7 +35,7 @@ import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
 import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
-import { COFFEEHOLICS_FOREVER_ENDS, campaignHeroShot } from "../model/campaign";
+import { COFFEEHOLICS_FOREVER_ENDS } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
@@ -103,8 +103,13 @@ const BURG_PHOTO = asset("/places/theburg-food.webp");
 /* Coffeeholics' card wears its own page's banner, the two iced coffees
    (Sam, 12 Nov 2026: "can we use the coffeeholics page banner for their
    plus page background"). */
-const COFFEEHOLICS_PHOTO = asset(campaignHeroShot);
-const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.id === "coffeeholicsva" ? COFFEEHOLICS_PHOTO : v.hero);
+/* Coffeeholics' own photo is the mural, the owl and four cups (Sam, 12 Nov
+   2026: "here's the image to use for coffeeholics background, it's a bit
+   off center btw"): its card and its page's band both wear it, framed on
+   the cups (they sit right of centre in the photo). */
+const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.hero);
+/** Where a place's photo is framed when it's cropped. */
+const PHOTO_POS: Record<string, string> = { coffeeholicsva: "56% 50%" };
 
 /* ══ ORDERS THAT EARN IT, ONE AT EACH PLACE ═════════════════════════════════
    Real items at their menu prices, each at or over $10, all food (the $5 is
@@ -464,7 +469,7 @@ const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: str
       : `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for your first 12 months, then ${monthly} a month. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
 });
 
-export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string; bandSrc?: string; group?: Group }) {
+export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId?: string; bandSrc?: string; bandPos?: string; group?: Group }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
   /* Its own orders on the phone, the $5 credit then the 15% (parents_kit). */
@@ -828,7 +833,13 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         data-invite={invite && !place ? "" : undefined}
       >
         {/* The group's own crop is for its own photo, not the collage. */}
-        <img className={`tpa-band-art${group && bandSrc ? " tpg-band-art" : ""}`} src={bandSrc ?? COLLAGE} alt="" decoding="async" />
+        <img
+          className={`tpa-band-art${group && bandSrc ? " tpg-band-art" : ""}`}
+          src={bandSrc ?? COLLAGE}
+          alt=""
+          decoding="async"
+          style={bandPos ? { objectPosition: bandPos } : undefined}
+        />
         {/* A Welcome Week student is here for the offer: no town badge, no
             Members (Sam, 5 Nov 2026: "not sure if for the welcome week kids it
             makes sense"). Sign in stays in the foot for anyone who needs it. */}
@@ -1091,7 +1102,14 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                           track("plus_place_opened", v.lite ? { place: v.id, lite: true } : { place: v.id });
                         }}
                       >
-                        <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
+                        <img
+                          className="tpa-place-photo"
+                          src={v.photo}
+                          alt=""
+                          decoding="async"
+                          loading="lazy"
+                          style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined}
+                        />
                         {/* Not live yet (Sam, 12 Nov 2026: "show 'live on
                             plus' next Friday with a small countdown so it's
                             clear"): a pill on the photo until the day. */}
