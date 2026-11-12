@@ -858,7 +858,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         {member ? null : <BonusSpots only={place?.id} />}
         {/* Crumbl just joined (Sam, 12 Nov 2026), a Tapin Lite place, which
             comes with Plus. Not on a place's own page or for members. */}
-        {member || place ? null : <LiteJoined place={LITE_PLACES[0]} />}
+        {member || place ? null : <LiteJoined places={LITE_PLACES} />}
         {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
             the what can I use it on a bit further down. I don't think it
             should be as big as it is"): the places rail below answers it,
