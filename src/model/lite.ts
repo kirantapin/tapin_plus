@@ -32,7 +32,8 @@ export const LITE_PLACES: LitePlace[] = [
     /* "10% off every day + Free chocolate chip cookie (one use a day for
        each)". */
     perks: [
-      { key: "free", b: "A free chocolate chip cookie", when: "Once a day" },
+      /* "with purchase of any other item" (Sam, 12 Nov 2026). */
+      { key: "free", b: "A free chocolate chip cookie", when: "With any other item, once a day" },
       { key: "percent", b: "10% off your order", when: "Once a day" },
     ],
   },
