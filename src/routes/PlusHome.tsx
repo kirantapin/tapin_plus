@@ -459,7 +459,10 @@ function CfInk({ first }: { first: string }) {
      · points, 10 a dollar on what you pay after those, 100 points ≈ $1.
    The picture is one bar of the month's savings in its four parts, with a
    mark where Plus's price falls, so you see how far past it the month goes. */
-const SPENDS = [25, 50, 75, 100] as const;
+/* $30 at the low end, not $25 (Sam, 12 Nov 2026: "assume the $5 credit is
+   used for all orders to maximize the savings calculation. Maybe $30 makes
+   more sense?"): three weeks of $10 earn three $5s, where $25 earned two. */
+const SPENDS = [30, 50, 75, 100] as const;
 const POINTS_PER_DOLLAR_PAID = 10;
 const POINTS_PER_DOLLAR_VALUE = 100;
 const cents = (n: number) => Math.round(n * 100) / 100;
@@ -524,7 +527,22 @@ function SpendSaves({ placeId, name, first }: { placeId: string; name: string; f
           <span>saved a month</span>
         </p>
       </div>
-      {/* How it adds up: one bar in four parts, Plus's price marked on it. */}
+      {/* How it adds up, folded under one line that opens (Sam, 12 Nov 2026:
+          "the 'how we got there' should be nested, when someone clicks it'd
+          expand"): one bar in four parts, Plus's price marked on it, the
+          parts listed, the note. */}
+      <details
+        className="ss-how"
+        onToggle={(e) => {
+          if ((e.currentTarget as HTMLDetailsElement).open) track("plus_place_savings_opened", { place: placeId, spend });
+        }}
+      >
+        <summary>
+          <span>How it adds up</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </summary>
       <div className="ss-viz" aria-hidden="true">
         <div className="ss-bar">
           {parts.map((p) => (
@@ -547,6 +565,7 @@ function SpendSaves({ placeId, name, first }: { placeId: string; name: string; f
         ))}
       </ul>
       <p className="ss-note">With every credit used. Plus costs {first} a month, so that’s {money(cents(s.total - price))} ahead.</p>
+      </details>
     </div>
   );
 }
