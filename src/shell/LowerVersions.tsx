@@ -71,7 +71,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           <li>
             <Tick />
             <span>
-              <b>{monthly} a month, locked in</b> as more spots&nbsp;join
+              <b>{monthly} a month, locked in</b> as more places&nbsp;join
             </span>
           </li>
           <li>
@@ -103,7 +103,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           <div className="lw-2-lock tnum">
             <LockIco />
             <b>{monthly}</b>
-            <span>a month, locked in as more spots join</span>
+            <span>a month, locked in as more places join</span>
           </div>
           <ul className="lw-2-kinds" aria-label="Joining">
             {KINDS.map(({ key, name, Icon }) => (
@@ -138,6 +138,9 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
         <Bar left={left} />
         {join}
         {tryCta}
+        {/* The lock line names what's coming (Sam, 11 Nov 2026: "more
+            places join, bars coffee salons gyms barbershops"). "Places",
+            not "spots", everywhere: on this card "spots" are the seats. */}
         <details className="lw-3-more">
           <summary>
             <span>Price lock, refunds and cancelling</span>
@@ -145,7 +148,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           </summary>
           <ul className="tnum">
             <li>
-              <b>{monthly} a month, locked in</b> as more spots join: bars, gyms, clubs, barbers and&nbsp;more.
+              <b>{monthly} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
             </li>
             <li>
               <b>Refund auto-approved</b> if Plus saved you less than you&nbsp;paid.
@@ -244,7 +247,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
       <div className="lw-5-after tnum">
         <div className="lw-5-lock">
           <p>
-            <b>{monthly} a month, locked in</b> as more spots&nbsp;join.
+            <b>{monthly} a month, locked in</b> as more places&nbsp;join.
           </p>
           <ul aria-label="Joining">
             {KINDS.map(({ key, name, Icon }) => (
