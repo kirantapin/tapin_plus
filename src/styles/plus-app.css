@@ -6263,3 +6263,311 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   height: 16px;
   color: #861f41;
 }
+
+/* ══ THE CARD'S LOWER HALF, FIVE LAYOUTS (shell/LowerVersions.tsx, ?lowv=,
+   11 Nov 2026) ═════════════════════════════════════════════════════════════
+   Each starts under one hairline after pay/get, as the joining band did. */
+.lw {
+  display: grid;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+.lw p,
+.lw ul,
+.lw dl,
+.lw dd {
+  margin: 0;
+}
+.lw ul {
+  padding: 0;
+  list-style: none;
+}
+.lw b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.lw .tpa-cta {
+  margin-top: 14px;
+}
+.lw-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e5ea;
+  overflow: hidden;
+}
+.lw-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left;
+}
+
+/* 1 · Checklist. */
+.lw-1-spots {
+  display: grid;
+  gap: 8px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-checks {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid var(--hair);
+}
+.lw-checks li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.lw-checks svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: #0b7a53;
+}
+
+/* 2 · Split. */
+.lw-2-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.lw-2-lock {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+.lw-2-lock svg {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.lw-2-lock b {
+  font: 600 28px/30px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.lw-2-lock span {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-2-kinds {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding-left: 16px !important;
+  border-left: 1px solid var(--hair);
+}
+.lw-2-kinds li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.lw-2-kinds svg {
+  width: 18px;
+  height: 18px;
+  color: #861f41;
+}
+.lw-2-spots {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-2-after {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin: 16px var(--gutter, 16px) 0;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-align: center;
+}
+.lw-2-after b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* 3 · Count. */
+.lw-3-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.lw-3-count > b {
+  font: 600 44px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.lw-3-count p {
+  display: grid;
+}
+.lw-3-count span {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.lw-3-count small {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-3-more {
+  margin-top: 12px;
+  border-top: 1px solid var(--hair);
+}
+.lw-3-more summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  list-style: none;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+.lw-3-more summary::-webkit-details-marker {
+  display: none;
+}
+.lw-3-more summary svg {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.lw-3-more[open] summary svg {
+  transform: rotate(180deg);
+}
+.lw-3-more ul {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 6px !important;
+}
+.lw-3-more li {
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* 4 · Spec sheet. */
+.lw-4-table > div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--hair);
+}
+.lw-4-table > div:first-child {
+  margin-top: -10px;
+}
+.lw-4-table dt {
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-4-table dd {
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-align: right;
+}
+.lw-4-kinds {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.lw-4-kinds i {
+  display: grid;
+  color: #861f41;
+}
+.lw-4-kinds .lw-4-more {
+  color: var(--muted);
+}
+.lw-4-kinds svg {
+  width: 19px;
+  height: 19px;
+}
+.lw-4 .tpa-cta {
+  margin-top: 18px;
+}
+
+/* 5 · Bare card. */
+.lw-5-spots {
+  margin-bottom: 8px !important;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-5-after {
+  display: grid;
+  gap: 16px;
+  margin: 18px var(--gutter, 16px) 0;
+  padding: 0 12px;
+}
+.lw-5-after p,
+.lw-5-after ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lw-5-lock {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.lw-5-lock p {
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.lw-5-lock b,
+.lw-5-list b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.lw-5-lock ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+.lw-5-lock li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.lw-5-lock svg {
+  width: 17px;
+  height: 17px;
+  color: #861f41;
+}
+.lw-5-list {
+  display: grid;
+  gap: 12px;
+}
+.lw-5-list li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.lw-5-list svg {
+  width: 20px;
+  height: 20px;
+  color: var(--ink);
+}
+@media (min-width: 1024px) {
+  :is(.tpp, .tps) .tpp-offer-col > :is(.lw-2-after, .lw-5-after) {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

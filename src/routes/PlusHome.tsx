@@ -11,6 +11,7 @@ import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parent
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
 import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
+import { LowerAfter, LowerVersion, lowerVersion } from "../shell/LowerVersions";
 import { Founders } from "../shell/Founders";
 import { refreshPlusPrice, firstFigure, firstForever, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
 import { inviteExpected, inviteFor, type Invite } from "../model/invite";
@@ -637,6 +638,11 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
   const [offer] = useState(offerLook);
   /* The offer card's new takes, preview only (?offv=a|b|c, 10 Nov 2026). */
   const [offv] = useState(offerVersion);
+  /* The card's lower half, five layouts, preview only (?lowv=1..5, Sam,
+     11 Nov 2026: "it's all so clustered still"); the plain students page
+     only. */
+  const [lowv] = useState(lowerVersion);
+  const lowOn = !!(lowv && offv && !place && !invite && !free && !group && !member);
   /* THE MAIN PAGE, WITH WHAT THE PARENTS PAGE TAUGHT US (Sam, 8 Nov 2026:
      "push the round 2 changes, they look good, for the main plus.tapin.app
      page"; previews in tapin-staging-work/main-from-parents). The two Plus
@@ -1027,6 +1033,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 term={groupOffer ? TERM : undefined}
                 noEnds={!!group}
                 forever={groupOffer && group?.term === "forever"}
+                lower={lowOn}
                 spots={
                   group ? (
                     groupOffer ? (
@@ -1116,8 +1123,14 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 going on here"): Join and Try alone under the price; the
                 wallet line (the checkout says it) and the turning proof line
                 (the band says the 500+) went. */}
-            {joinCta("hero")}
-            {tryCta}
+            {lowOn && lowv ? (
+              <LowerVersion v={lowv} monthly={MONTHLY} join={joinCta("hero")} tryCta={tryCta} />
+            ) : (
+              <>
+                {joinCta("hero")}
+                {tryCta}
+              </>
+            )}
           </section>
         ) : offer === "3" ? (
           <section className="tpa-s3" aria-label="Tapin Plus">
@@ -1179,7 +1192,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
 
         {/* Under the offer: the other benefits, then the promise (round 1
             and 2, Sam, 8 Nov 2026), in place of the "locked in" fold. */}
-        <UnderOffer audience="student" monthly={MONTHLY} />
+        {lowOn && lowv ? <LowerAfter v={lowv} monthly={MONTHLY} /> : <UnderOffer audience="student" monthly={MONTHLY} />}
         {desk ? null : <Voices audience="student" />}
         </div>
 
