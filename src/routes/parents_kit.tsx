@@ -118,7 +118,15 @@ export interface PhoneOrder {
 /* Which benefit an order shows: the month's $5 credit, the week's $5 back
    (earned by spending $10 and taken off a later order), or 15% off. */
 type OrderKind = "credit" | "back" | "percent";
-const PLACE_ORDERS: Record<string, Array<{ ids: string[]; kind: OrderKind }>> = {
+/* An order is menu items by id, or an event ticket, which isn't on the menu:
+   its name and price as the place sells it on Tapin, shown with the place's
+   logo (a ticket has no photo). */
+interface PlaceOrderDef {
+  ids?: string[];
+  ticket?: { name: string; price: number };
+  kind: OrderKind;
+}
+const PLACE_ORDERS: Record<string, PlaceOrderDef[]> = {
   /* Two $5s and one 15% (Sam, 12 Nov 2026: "We should show the $5 back on
      two of these and the 15% off on one"), and points on each ("Maybe we
      show points for all of them as well"). */
@@ -137,8 +145,12 @@ const PLACE_ORDERS: Record<string, Array<{ ids: string[]; kind: OrderKind }>> = 
   theburg: [
     /* Flautas and an empanada, $12.13. */
     { ids: ["theburg-522-553", "theburg-522-552"], kind: "credit" },
-    /* Nachos and a pastor taco, $12.19. */
-    { ids: ["theburg-522-554", "theburg-517-533"], kind: "percent" },
+    /* An event ticket second (Sam, 12 Nov 2026: "for the burg page, can we
+       show an event ticket as the second one here"): its live-show nights
+       sell at $20 a ticket on Tapin (passes, type event, read 12 Nov 2026),
+       and Plus covers tickets there (model/content.ts venueCovers). No act
+       named, as those nights have passed. */
+    { ticket: { name: "Live show ticket", price: 20 }, kind: "percent" },
     /* Lomo saltado, $18.92. */
     { ids: ["theburg-516-528"], kind: "back" },
   ],
@@ -153,15 +165,16 @@ const pick = (placeId: string, ids: string[]) => {
 };
 const total = (items: Array<{ price: number }>) => Math.round(items.reduce((s, i) => s + i.price, 0) * 100) / 100;
 export function placeOrders(placeId: string): PhoneOrder[] {
-  return (PLACE_ORDERS[placeId] ?? []).flatMap(({ ids, kind }) => {
-    const found = pick(placeId, ids);
+  const logo = PLACES.find((p) => p.id === placeId)?.logo ?? "";
+  return (PLACE_ORDERS[placeId] ?? []).flatMap(({ ids, ticket, kind }) => {
+    const found = ticket ? [{ id: `${placeId}-ticket`, name: ticket.name, price: ticket.price, img: logo }] : pick(placeId, ids ?? []);
     if (!found) return [];
     const price = total(found);
     const off = kind === "percent" ? percentOff(price) : Math.min(CREDIT, price);
     const paid = Math.max(0, Math.round((price - off) * 100) / 100);
     return [
       {
-        id: ids.join("+"),
+        id: found.map((i) => i.id).join("+"),
         title:
           kind === "credit"
             ? `Your ${money0(CREDIT)} credit`
