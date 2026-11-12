@@ -27,8 +27,20 @@ export type PlacePopupPlace = {
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export default function PlacePopup({ place, onClose, onJoin }: { place: PlacePopupPlace; onClose: () => void; onJoin: () => void }) {
-  const joinLabel = useJoinLabel();
+export default function PlacePopup({
+  place,
+  onClose,
+  onJoin,
+  cta,
+}: {
+  place: PlacePopupPlace;
+  onClose: () => void;
+  onJoin: () => void;
+  /** The button's words when the page has its own (the parents page). */
+  cta?: string;
+}) {
+  const plusLabel = useJoinLabel();
+  const joinLabel = cta ?? plusLabel;
   const layer = useRef<HTMLDivElement | null>(null);
   const sheet = useRef<HTMLDivElement | null>(null);
   const photo = useRef<HTMLDivElement | null>(null);

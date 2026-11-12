@@ -30,7 +30,8 @@ import { BenefitCards, CheckoutPhone, HowPhone, PayGetLead, ProofTurn, UnderOffe
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
-import { BonusSpots, UseItOn } from "../shell/BonusSpots";
+import { BonusSpots } from "../shell/BonusSpots";
+import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
    Third pass. The student page's language (routes/PlusHome.tsx, plus-app.css,
@@ -289,6 +290,10 @@ export default function ParentsHome() {
      "the parent container should expand into the builder"), else the
      button itself. */
   const [origin, setOrigin] = useState<HTMLElement | null>(null);
+  /* A place card's pop-up (shell/PlacePopup.tsx, as on the students page),
+     and the card it opened from, which the builder then grows out of. */
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  const placeFrom = useRef<HTMLElement | null>(null);
   const signUp = (where: string, el: HTMLElement) => {
     track("parent_signup_clicked", { where });
     setOrigin(el.closest<HTMLElement>("[data-island-origin]") ?? el);
@@ -566,7 +571,9 @@ export default function ParentsHome() {
             main page (Sam, 9 Nov 2026: "should include this on the parent
             plus page too I think"). */}
         <BonusSpots they />
-        <UseItOn they />
+        {/* "What can they use it on?" went from here (Sam, 11 Nov 2026, as on
+            the students page): the place cards below answer it, each opening
+            what Plus covers there. */}
         <GiftEnvelope onSend={(el) => signUp("gift", el)} />
         {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
             2026, the Dara Denney audit's fix 4: "move the parent quotes up";
@@ -593,12 +600,32 @@ export default function ParentsHome() {
         </section>
 
         <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
+          {/* Sam, 11 Nov 2026: "yes do the same for parents", the students
+              page's "What and where can I use it?" in their voice. */}
           <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
-            Places they already go
+            What and where can they use it?
           </h2>
+          <p className="tpa-places-sub">Open a card to see what Plus covers there.</p>
           <ul className="tpa-rail">
             {PLACES.map((p) => (
               <li key={p.id} className="tpa-place">
+                <button
+                  type="button"
+                  className="tpa-place-open"
+                  aria-label={`What Plus gets them at ${p.name}`}
+                  onClick={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    placeFrom.current = e.currentTarget;
+                    setPlaceOpen({
+                      id: p.id,
+                      name: p.name,
+                      kind: p.what,
+                      photo: p.photo,
+                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                    });
+                    track("plus_place_opened", { place: p.id, page: "parents" });
+                  }}
+                >
                 <img
                   className="tpa-place-photo"
                   src={p.photo}
@@ -613,10 +640,16 @@ export default function ParentsHome() {
                 >
                   <img src={p.logo} alt="" decoding="async" loading="lazy" />
                 </span>
+                <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
                 <span className="tpa-place-name">
                   <b>{p.name}</b>
                   <small>{p.what}</small>
                 </span>
+                </button>
               </li>
             ))}
           </ul>
@@ -833,6 +866,17 @@ export default function ParentsHome() {
         </button>
       </div>
 
+      {placeOpen ? (
+        <PlacePopup
+          place={placeOpen}
+          cta={cta}
+          onClose={() => setPlaceOpen(null)}
+          onJoin={() => {
+            setPlaceOpen(null);
+            if (placeFrom.current) signUp("place_popup", placeFrom.current);
+          }}
+        />
+      ) : null}
       {/* One continuous flow (Sam, 6 Nov 2026): the care package, then
           their number, you and the charge in the same panel (on a phone,
           the same drawer) over the gift's preview. */}

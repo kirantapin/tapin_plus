@@ -165,10 +165,33 @@ const plusOverride = (): number | null => {
   return Number.isFinite(n) ? Math.min(PLUS_SEAT_CAP, Math.max(PLUS_FLOOR, Math.round(n))) : null;
 };
 
+/* ══ ONE A DAY FROM 12 NOVEMBER (Sam, 11 Nov 2026: "let's have the number
+   of seats decrease by 1 a day now, instead of a bunch daily") ═══════════════
+   The 6-to-12 schedule above runs until 1am Eastern on 12 November, when its
+   last drop of the day is done (it stood at 19). From then on each Eastern
+   day loses one spot, at a moment seeded by the day between 9am and 9pm, so
+   the count carries on from where it was and never jumps back up. Still
+   floored at PLUS_FLOOR: from 19 that's about 28 November. */
+const ONE_A_DAY_MS = Date.UTC(2026, 10, 12, 6, 0, 0); // 12 Nov, 1am EST
+const DAY12_MS = Date.UTC(2026, 10, 12, 5, 0, 0); // midnight EST, 12 Nov
+
 /** Spots left at the $7.99 rate at a moment. */
 export function plusSeatsLeft(now: number = Date.now()): number {
   const forced = plusOverride();
   if (forced !== null) return forced;
+  if (now <= ONE_A_DAY_MS) return manyADay(now);
+  const before = manyADay(ONE_A_DAY_MS);
+  let gone = 0;
+  const lastDay = Math.floor((now - DAY12_MS) / DAY_MS);
+  for (let day = 0; day <= lastDay; day++) {
+    const at = DAY12_MS + day * DAY_MS + 9 * HOUR_MS + seeded(day + 4409)() * 12 * HOUR_MS;
+    if (at <= now) gone++;
+  }
+  return Math.max(PLUS_FLOOR, before - gone);
+}
+
+/** The first schedule, 6 to 12 a day (3 to 12 November). */
+function manyADay(now: number): number {
   if (now <= PLUS_START_MS) return PLUS_START_LEFT;
   let gone = 0;
   const lastDay = Math.floor((now - DAY0_MS) / DAY_MS) + 1;

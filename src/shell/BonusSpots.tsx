@@ -1,5 +1,4 @@
 import { PERCENT, PLACES } from "../routes/parents_kit";
-import { covers, venueCovers } from "../model/content";
 
 /* ══ $5 BONUS CREDIT AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════
    The small section right under the band on plus.tapin.app, and on /parents
@@ -177,55 +176,6 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
           </li>
         ))}
       </ol>
-    </section>
-  );
-}
-
-/* ══ WHAT CAN I USE IT ON (Sam, 11 Nov 2026: "A question I imagine people
-   have is what can I use these benefits on... so that needs to be
-   answered") ═══════════════════════════════════════════════════════════════
-   Straight after the ladder, on both pages: each place with what it sells,
-   then what else the $5 and the 15% cover, and the one thing they don't.
-   The rules are the FAQ's own ("What does it work on?", 3 Nov and 9 Nov
-   2026): food, non-alcoholic drinks and event tickets at every Plus place,
-   cover and line skips at select places, not alcohol; points on everything.
-   Styles: .tps-use* in plus-app.css. */
-/* QUIETER (Sam, 11 Nov 2026, of the first cut: "it's much too busy right
-   now"). The ladder just above already shows every logo, so this is type
-   only: one row per place, name and what it sells, on hairlines; then one
-   plain sentence for tickets, cover and line skips, and alcohol. No logos,
-   no icons, no second colour. */
-export function UseItOn({ they = false }: { they?: boolean }) {
-  return (
-    <section className="tpa-module tps-use" aria-labelledby="tps-use-h">
-      <h2 id="tps-use-h" className="tpa-h2">
-        What can {they ? "they" : "I"} use it on?
-      </h2>
-      {/* The logos back, small (Sam, 11 Nov 2026, of the type-only cut:
-          "this feels a bit too empty now?"): each row is the logo, then
-          the name over what it can go on (Sam: "instead of the types of
-          food, we should just show what it can be used towards, like
-          coffeeholics would be food, drink, events"), from venueCovers in
-          model/content.ts, the per-place list Sam gave on 20 Sep and 4 Nov. */}
-      <ul className="tps-use-list">
-        {PLACES.map((p) => (
-          <li key={p.id}>
-            <img src={p.logo} alt="" decoding="async" loading="lazy" />
-            <p>
-              <b>{p.name}</b>
-              <span>
-                {covers
-                  .filter((c) => (venueCovers[p.id] ?? []).includes(c.id))
-                  .map((c) => c.label)
-                  .join(" · ")}
-              </span>
-            </p>
-          </li>
-        ))}
-      </ul>
-      <p className="tps-use-foot">
-        Drinks means non-alcoholic. Points still earn on&nbsp;everything.
-      </p>
     </section>
   );
 }
