@@ -7,7 +7,7 @@ import { BAR_IDS, covers, venueCovers } from "../model/content";
 import { slideAway } from "./sheetMotion";
 import { litePlace } from "../model/lite";
 import { LiteMark } from "./LiteMark";
-import { LiveCountdown } from "./LiveSoon";
+import { LiveRow } from "./LiveSoon";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
    these merchant cards, there should be a small merchant pop up for each that
@@ -166,7 +166,9 @@ export default function PlacePopup({
             {place.name}
             <span>{place.kind}</span>
           </h2>
-          {place.liveSoon ? <LiveCountdown className="pp-live" /> : null}
+          {/* The day it goes live, as a row of its own with the time left
+              filling a bar (12 Nov 2026). */}
+          {place.liveSoon ? <LiveRow /> : null}
           {/* What the place sells on Tapin. */}
           {sells.length ? (
             <ul className="pp-sells" aria-label={`On Tapin at ${place.name}`}>

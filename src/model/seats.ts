@@ -245,3 +245,31 @@ export function scheduleSeatsLeft(s: SeatSchedule, now: number = Date.now()): nu
   }
   return Math.max(s.floor, s.cap - gone);
 }
+
+
+/* ══ COFFEEHOLICS' $3.99 FOR LIFE, 50 SPOTS (Sam, 12 Nov 2026: "cap the
+   number of seats we're allowing for coffeeholics special rate to 50, and we
+   should have this decrease by 5 every hour until it hits 20, and then 1
+   every hour following") ═══════════════════════════════════════════════════
+   From 4pm Eastern on Thursday 12 November: 50, then 5 fewer each hour (at a
+   minute seeded by the hour, so it doesn't tick on the hour) until 20, then
+   one an hour. Like every count on the site it is artificial, by Sam's
+   decision. It would reach 0 before the offer ends (11:59pm ET Friday 13
+   November), and 0 reads as sold out with the offer still on, so it stops at
+   COFFEEHOLICS_SEAT_FLOOR. */
+export const COFFEEHOLICS_SEAT_CAP = 50;
+export const COFFEEHOLICS_SEAT_FLOOR = 3;
+const CFH_FROM = Date.UTC(2026, 10, 12, 21, 0, 0); // 4pm EST, 12 Nov
+const CFH_FAST_TO = 20;
+
+export function coffeeholicsSeatsLeft(now: number = Date.now()): number {
+  if (now <= CFH_FROM) return COFFEEHOLICS_SEAT_CAP;
+  let left = COFFEEHOLICS_SEAT_CAP;
+  const hours = Math.floor((now - CFH_FROM) / HOUR_MS);
+  for (let h = 0; h <= hours; h++) {
+    const at = CFH_FROM + h * HOUR_MS + (10 + seeded(h + 9173)() * 40) * 60_000;
+    if (at > now) break;
+    left -= left > CFH_FAST_TO ? Math.min(5, left - CFH_FAST_TO) : 1;
+  }
+  return Math.max(COFFEEHOLICS_SEAT_FLOOR, left);
+}

@@ -7405,3 +7405,384 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .pp-live i {
   opacity: 0.62;
 }
+
+/* ══ THE FOR-LIFE CARD, THREE TAKES (?cfv=1|2|3, 12 Nov 2026) ════════════
+   1 · Count, 2 · Dots, 3 · Ink. The spots are model/seats.ts's 50. */
+.cfv {
+  display: grid;
+}
+.cfv-sub {
+  margin: 20px 0 0;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.cfv .tpa-math-then {
+  margin-top: 12px;
+}
+/* One green tile, full width, where 2 and 3 already said the price. */
+.tpa-math.cfv-math-one {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tpa-math.cfv-math-one .tpa-math-get {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 10px;
+}
+
+/* 1 · Count: the spots as the big number after the savings. */
+.cfv-count {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+.cfv-count-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cfv-count-row > b {
+  font: 600 44px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.cfv-count-row p {
+  display: grid;
+  margin: 0;
+}
+.cfv-count-row span {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.cfv-count-row small {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.cfv-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--well);
+  overflow: hidden;
+}
+.cfv-bar i {
+  display: block;
+  height: 100%;
+  background: #0b7a53;
+  transform-origin: left;
+  transition: transform 0.6s var(--ease);
+}
+
+/* 2 · Dots: fifty spots, the open ones in money green. */
+.cfv-dots {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.cfv-dots-grid {
+  display: grid;
+  grid-template-columns: repeat(25, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cfv-dots-grid li {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--well);
+}
+.cfv-dots-grid li[data-open] {
+  background: #0b7a53;
+}
+.cfv-dots p {
+  margin: 0;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.cfv-dots p b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* 3 · Ink: the price and the spots in one dark tile, the way the Join
+   button is dark. */
+.cfv-ink {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 4px 16px;
+  padding: 18px 18px 16px;
+  border-radius: 16px;
+  background: #141618;
+  color: #ffffff;
+}
+.cfv-ink p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+.cfv-ink-price b {
+  font: 600 40px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.cfv-ink-price span,
+.cfv-ink-left span {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+}
+.cfv-ink-left {
+  justify-items: end;
+  text-align: right;
+}
+.cfv-ink-left b {
+  font: 600 28px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: #7fd3a8;
+}
+.cfv-ink-ends {
+  grid-column: 1 / -1;
+  margin-top: 10px !important;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cfv-bar i {
+    transition: none;
+  }
+}
+
+/* ══ THE PHOTO'S BOX, AND THE LIVE BADGE'S FIVE TAKES (?livev=1..5, 12 Nov
+   2026; shell/LiveSoon.tsx) ══════════════════════════════════════════════
+   The photo sits in .tpa-place-shot. On the photo cards it steps aside
+   (display: contents); on C3 · Framed it is the photo's box, so what sits on
+   the photo is placed against the photo, not the whole card. */
+.tpa-place-shot {
+  display: contents;
+}
+.tpa-places[data-railv="c3"] .tpa-place-shot {
+  position: relative;
+  display: block;
+  grid-area: photo;
+  overflow: hidden;
+  border-radius: 14px;
+}
+.tpa-places[data-railv="c3"] .tpa-place-shot .tpa-place-photo {
+  display: block;
+}
+.tpa-places[data-railv="c3"] .tpa-place-shot .tpa-live {
+  top: 10px;
+  left: 10px;
+}
+
+/* 1 · Line: under the name, in the money green. */
+.lv-line {
+  color: #0b7a53 !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-line i {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* The takes that sit on the photo. */
+.lv {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 2 · Calendar: a leaf in the top-right corner, NOV over 20, the time left
+   on a strip under it. */
+.lv-cal {
+  top: 10px;
+  right: 10px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.lv-cal-leaf {
+  display: grid;
+  width: 46px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+.lv-cal-leaf i {
+  padding: 3px 0 2px;
+  background: #e5751f;
+  color: #ffffff;
+  font: 700 11px/12px "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lv-cal-leaf b {
+  padding: 3px 0 5px;
+  color: #141618;
+  font: 600 22px/24px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.lv-cal-left {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(20, 22, 24, 0.78);
+  color: #ffffff;
+  font: 600 12px/16px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+
+/* 3 · Ribbon: a band across the photo's foot. */
+.lv-ribbon {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(20, 22, 24, 0.82);
+  color: #ffffff;
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
+}
+.lv-ribbon b {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e5751f;
+  font-weight: 600;
+}
+
+/* 4 · Soon: the photo held back, the date in its middle. */
+.tpa-place-shot[data-soon] .tpa-place-photo {
+  filter: grayscale(0.45) brightness(0.62);
+}
+.lv-soon {
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  color: #ffffff;
+  text-align: center;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+.lv-soon small {
+  font: 600 12px/16px "Gilroy", Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+.lv-soon b {
+  font: 600 26px/30px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.lv-soon span {
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #141618;
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
+  text-shadow: none;
+}
+
+/* 5 · Chip: solid white, ink words, the time left in orange. */
+.lv-chip {
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 11px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  color: #141618;
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.lv-chip b {
+  padding-left: 8px;
+  border-left: 1px solid rgba(20, 22, 24, 0.12);
+  color: #c75f12;
+  font-weight: 600;
+}
+
+/* The pop-up's countdown row (shell/LiveSoon.tsx LiveRow, 12 Nov 2026): the
+   perks' white row, a calendar day for its mark, a bar filling to the day. */
+.pp-liverow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 14px 16px 18px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+.pp-liverow-day {
+  display: grid;
+  width: 36px;
+  overflow: hidden;
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+  text-align: center;
+}
+.pp-liverow-day i {
+  padding: 2px 0 1px;
+  background: #e5751f;
+  color: #ffffff;
+  font: 700 10px/12px "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pp-liverow-day b {
+  padding: 1px 0 3px;
+  color: #141618;
+  font: 600 17px/20px "Gilroy", Arial, sans-serif;
+}
+.pp-liverow-words {
+  display: grid;
+}
+.pp-liverow-words b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+}
+.pp-liverow-words span {
+  margin-top: 2px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.pp-liverow-bar {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 8px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ececef;
+}
+.pp-liverow-bar i {
+  display: block;
+  height: 100%;
+  background: #e5751f;
+  transform-origin: left;
+}
