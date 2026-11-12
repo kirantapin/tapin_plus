@@ -1,4 +1,4 @@
-import { BAR_IDS } from "../model/content";
+import { BAR_IDS, venueCovers } from "../model/content";
 import { PERCENT, PLACES } from "../routes/parents_kit";
 
 /* ══ $5 BONUS CREDIT AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════
@@ -23,8 +23,9 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
               <b>${CREDIT} credit</b> every month at {one.name}
             </h2>
             {/* At a bar (The Burg, 12 Nov 2026) it says what the $5s and
-                15% go on: never alcohol. */}
-            <p className="tps-unlock-sub">{BAR_IDS.has(one.id) ? "On food and non-alcoholic drinks. No minimum, no\u00a0markup." : "No minimum spend, no\u00a0markup."}</p>
+                15% go on, never alcohol, and events where Plus covers
+                tickets (Sam: "also this would include events"). */}
+            <p className="tps-unlock-sub">{BAR_IDS.has(one.id) ? `On food, non-alcoholic drinks${venueCovers[one.id]?.includes("tickets") ? " and events" : ""}. No minimum, no\u00a0markup.` : "No minimum spend, no\u00a0markup."}</p>
           </div>
         </div>
         {/* The weekly $5 back too (Sam, 12 Nov 2026: "for the coffeeholics

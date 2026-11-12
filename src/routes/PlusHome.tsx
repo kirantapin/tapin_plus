@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { BAR_IDS, venues } from "../model/content";
+import { BAR_IDS, venueCovers, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { MEMBERS_LINE } from "../model/proof";
 import { PLUS_NEXT_PRICE, placeSeatCap, plusSeatLine } from "../model/seats";
@@ -269,7 +269,7 @@ const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; 
 /* A place's own page (/coffeeholics, Sam, 10 Nov 2026: "scoped specifically
    to the Coffeeholics brand"): the same questions about that place alone. The
    bars question goes; it isn't about this place. */
-const placeFaq = (MONTHLY: string, name: string): ReadonlyArray<{ q: string; a: string }> => [
+const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray<{ q: string; a: string }> => [
   {
     q: "What’s the catch?",
     a: `There isn’t one. ${name} is in it for the exposure: every Plus member gets $${CREDIT} to spend there every month. That’s how they win new regulars, so there’s no minimum spend and no marked-up menu. Cancel anytime.`,
@@ -292,7 +292,9 @@ const placeFaq = (MONTHLY: string, name: string): ReadonlyArray<{ q: string; a: 
   },
   {
     q: "What does it work on?",
-    a: `Use your credit and the ${PERCENT}% on food and non-alcoholic drinks at ${name}.`,
+    /* Events too where Plus covers tickets (Sam, 12 Nov 2026, of The Burg:
+       "also this would include events"; model/content.ts venueCovers). */
+    a: `Use your credit and the ${PERCENT}% on food, non-alcoholic drinks${venueCovers[placeId]?.includes("tickets") ? " and event tickets" : ""} at ${name}.`,
   },
   {
     q: "Will my price go up?",
@@ -1726,7 +1728,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           {[
             ...(invite ? inviteFaq(invite, MONTHLY) : []),
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
-            ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY)).map((f) =>
+            ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY)).map((f) =>
               /* A group's price doesn't climb to $14.99 with the 100 spots. */
               group && f.q === "Will my price go up?"
                 ? groupPriceFaq(group, FIRST_MONTH, MONTHLY, groupOffer)
