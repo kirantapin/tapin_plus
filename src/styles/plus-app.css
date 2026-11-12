@@ -7344,3 +7344,11 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     display: none;
   }
 }
+
+/* The place's own card wears the ladder's money green on its figures (Sam,
+   12 Nov 2026: "we should make the bold text green I think, same green as
+   the other pages"): "$5 credit", "Earn $5 back", "Then 15% off". */
+.tps-unlock-one .tps-unlock-h b,
+.tps-unlock-one .tps-unlock-or b {
+  color: #0b7a53;
+}
