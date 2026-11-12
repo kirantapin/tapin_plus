@@ -12,7 +12,7 @@ import ParentsHome from "./routes/ParentsHome";
 import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
-import { campaignHeroShot } from "./model/campaign";
+import { COFFEEHOLICS_FOREVER_ENDS, COFFEEHOLICS_FOREVER_POLICY, campaignHeroShot } from "./model/campaign";
 import { loadPlusLink } from "./model/link";
 import { redactUrl } from "./model/redact";
 
@@ -101,7 +101,7 @@ export default function App() {
         {/* THE HOME PAGE IN THE APP'S OWN LOOK (Sam, 3 Nov 2026). Outside
             the shell: it paints the app's light ground edge to edge. */}
         <Route path="/" element={<PlusHome />} />
-        <Route path="/coffeeholics" element={<PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />} />
+        <Route path="/coffeeholics" element={<CoffeeholicsPage />} />
         <Route path="/smiths-landing" element={<GroupPage group={SMITHS_LANDING} bandSrc={asset("/groups/smiths-landing.webp")} />} />
         {/* Brexx at Blacksburg (Sam, 11 Nov 2026): Sam's collage of the
             Brexx clubhouse and pool. */}
@@ -161,6 +161,15 @@ export default function App() {
       {arrive ? <Arrival /> : null}
     </>
   );
+}
+
+/* /coffeeholics sells Plus at $3.99 a month for life (model/campaign.ts):
+   its policy is named before the page's first render reads the price. */
+function CoffeeholicsPage() {
+  useState(() => {
+    if (typeof window !== "undefined") setPagePolicy(COFFEEHOLICS_FOREVER_POLICY, COFFEEHOLICS_FOREVER_ENDS);
+  });
+  return <PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />;
 }
 
 /* A group's page carries its promo link (model/groups.ts) in the address, so

@@ -748,12 +748,15 @@ function studentSteps(first: string, free: boolean, appTab: number, place?: stri
 export function HowPhone({
   audience = "parent",
   first: firstProp,
+  firstLabel = "First month",
   monthly: monthlyProp,
   free = false,
   only,
 }: {
   audience?: Audience;
   first?: string;
+  /** The price row's words ("Every month" for a for-life price). */
+  firstLabel?: string;
   monthly?: string;
   free?: boolean;
   /** A place's own page (/coffeeholics): its name in step 3 and its logo
@@ -979,7 +982,7 @@ export function HowPhone({
                 </div>
                 <div className="tpp-hw-row">
                   {/* "Due today $0" went (Sam, 9 Nov 2026: "its $3.99 today"). */}
-                  <span>First month</span>
+                  <span>{firstLabel}</span>
                   <b>{first}</b>
                 </div>
                 <div className="tpp-hw-pay">{student ? (free ? "Join Tapin Plus" : `Pay ${first}`) : "Send the gift"}</div>

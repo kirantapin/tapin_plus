@@ -78,9 +78,26 @@ function TickingClock() {
 /** The deadline, quietly, under the header's $25 (Sam, 10 Nov 2026: "there's
  *  really no urgency or scarcity here right?"): "$3.99 first month · ends
  *  November 30". A real date (model/deadline.ts); nothing once it passes. */
-export function WelcomeLine({ first }: { first: string }) {
+export function WelcomeLine({ first, forever = false, endsMs = null }: { first: string; forever?: boolean; endsMs?: number | null }) {
   const r = useWelcomeEnds();
   const left = usePlusSeats();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!forever || !endsMs) return;
+    const t = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, [forever, endsMs]);
+  /* A for-life price (/coffeeholics, 12 Nov 2026): the price is the news,
+     and when it's for a limited time, the time left. */
+  if (forever)
+    return (
+      <p className="tpa-wline" data-ph-show="">
+        <TickingClock />
+        <span className="tnum">
+          {first} a month for life{endsMs && endsMs > now ? ` · ends in ${timeLeft(endsMs - now)}` : ""}
+        </span>
+      </p>
+    );
   /* With the countdown off (Sam, 11 Nov 2026), the half-off month is
      standard and the pressure is the spots: "$3.99 first month · 26 spots
      left". */
@@ -102,6 +119,29 @@ export function WelcomeLine({ first }: { first: string }) {
     </p>
   );
 }
+
+/** "$3.99 a month for life · ends in 1d 6h", ticking: the dock's line for a
+ *  limited for-life price (/coffeeholics, 12 Nov 2026). */
+export function ForeverLeft({ first, endsMs }: { first: string; endsMs: number }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  return (
+    <span className="tnum">
+      {first} a month for life{endsMs > now ? ` · ends in ${timeLeft(endsMs - now)}` : ""}
+    </span>
+  );
+}
+
+/** "1d 6h", "5h 12m", "8m". */
+const timeLeft = (ms: number) => {
+  const m = Math.max(1, Math.floor(ms / 60_000));
+  const d = Math.floor(m / 1440);
+  const h = Math.floor((m % 1440) / 60);
+  return d >= 1 ? `${d}d ${h}h` : h >= 1 ? `${h}h ${m % 60}m` : `${m}m`;
+};
 
 /** A small filling ring for the spots line: how much of the 100 is gone. */
 function SeatsDot() {

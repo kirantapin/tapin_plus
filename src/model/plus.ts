@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { environment, supabase } from "../supabase";
 import { loadPlusLink } from "./link";
 import { WELCOME_WEEK_LINK_ID } from "./invite";
+import { COFFEEHOLICS_FOREVER_POLICY } from "./campaign";
 import { pagePolicy } from "./pagePolicy";
 import { WELCOME_WEEK_FLASH_POLICY } from "./groups";
 
@@ -137,6 +138,10 @@ const devPrice = (): PlusPrice | null => {
   if (q.has("brexxpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "brexxpreview" };
   /* Welcome Week's $2.99 for life (model/groups.ts WELCOME_WEEK): a public
      policy the local database doesn't have. Off once its end has passed. */
+  /* /coffeeholics' $3.99 for life (model/campaign.ts), which the local
+     database doesn't have either. */
+  if (q.has("cflpreview") && pagePolicy() === COFFEEHOLICS_FOREVER_POLICY)
+    return { ...base, first: 3.99, firstFor: "forever", linkId: null, policyId: COFFEEHOLICS_FOREVER_POLICY };
   if (q.has("wwfpreview") && pagePolicy() === WELCOME_WEEK_FLASH_POLICY)
     return { ...base, first: 2.99, firstFor: "forever", linkId: null, policyId: WELCOME_WEEK_FLASH_POLICY };
   return null;

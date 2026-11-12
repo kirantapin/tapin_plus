@@ -28,14 +28,14 @@ import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
+import { ForeverLeft, InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
 import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
-import { campaignHeroShot } from "../model/campaign";
+import { COFFEEHOLICS_FOREVER_ENDS, campaignHeroShot } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
@@ -368,7 +368,7 @@ const Chevron = () => (
    then the first month's price against what that month saves there, the $5
    credit on one visit and 15% off the rest (parents_kit placeMonth). The
    figure eases in on a new answer; still with reduced motion. */
-function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: string; first: string; monthly: string }) {
+function PlaceMath({ placeId, name, first, monthly, forever = false }: { placeId: string; name: string; first: string; monthly: string; forever?: boolean }) {
   const m = placeMonth(placeId);
   const { track } = useEventTracking();
   const [at, setAt] = useState(1);
@@ -405,7 +405,7 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
       <div className="tpa-math" data-ph-show="">
         <p>
           <b className="tnum">{first}</b>
-          <span>your first month</span>
+          <span>{forever ? "a month, for life" : "your first month"}</span>
         </p>
         <svg className="tpa-math-arrow" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 12h15m-5.5-6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -418,7 +418,7 @@ function PlaceMath({ placeId, name, first, monthly }: { placeId: string; name: s
         </p>
       </div>
       <p className="tpa-math-then tnum">
-        {v.visits} visits a month for {m.what} ({money(m.price)}): your ${CREDIT} credit on one, {PERCENT}% off the other {v.visits - 1}. After the first month, {monthly} a month.
+        {v.visits} visits a month for {m.what} ({money(m.price)}): your ${CREDIT} credit on one, {PERCENT}% off the other {v.visits - 1}. {forever ? `${first} a month for as long as you stay a member.` : `After the first month, ${monthly} a month.`}
       </p>
     </>
   );
@@ -524,6 +524,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
   const [hero] = useState(heroVariant);
   const { price, failed: priceFailed } = usePlusPriceLoad();
   const FIRST_MONTH = firstFigure(price);
+  /* A place's own page selling Plus for life (/coffeeholics, 12 Nov 2026,
+     model/campaign.ts): its price, said as for life everywhere it shows. */
+  const placeForever = !!placeId && firstForever(price);
   const MONTHLY = usd(price?.monthly);
   /* `from` is the button tapped, which grows into the checkout. */
   /* `from` is the button tapped; `over`, a Join inside another pop-up. */
@@ -627,7 +630,21 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
       ]
     : member || linked || invite || free
       ? []
-      : [
+      : placeForever
+        ? [
+            /* The for-life price and its time left, in place of the $7.99
+               spots (/coffeeholics, 12 Nov 2026). */
+            {
+              key: "forever",
+              body: (
+                <>
+                  <span className="tpp-pt-dot" aria-hidden="true" />
+                  <ForeverLeft first={FIRST_MONTH} endsMs={COFFEEHOLICS_FOREVER_ENDS} />
+                </>
+              ),
+            },
+          ]
+        : [
           ...(welcomeLead && !group ? [{ key: "ends", body: welcomeLead }] : []),
           /* Not on a group's page: its own spots replace these (Sam, 10
              Nov 2026), and show only with its own price. */
@@ -868,7 +885,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                     <span>in credit every month</span>
                   </p>
                 )}
-                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeForever ? COFFEEHOLICS_FOREVER_ENDS : null} />}
               </>
             ) : hero === "0" ? (
               <h1>${CREDIT} credit at every place you already go in Blacksburg</h1>
@@ -883,7 +900,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 {/* The real deadline, quietly, under the $25 (Sam, 10 Nov
                     2026: "there's really no urgency or scarcity here"). Not
                     on a promo link, whose bar says its own offer. */}
-                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeForever ? COFFEEHOLICS_FOREVER_ENDS : null} />}
                 {/* No line under the callout on Rob's headline (Sam, 9 Nov
                     2026: "just remove the sub text"); other headlines
                     previewed with ?hero= keep theirs. */}
@@ -1184,7 +1201,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
             {place && placeMonth(place.id) ? (
-              <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} />
+              <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} />
             ) : offv && !place && !invite && !free ? (
               <OfferVersion
                 v={offv}
@@ -1275,6 +1292,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                   5 Nov 2026: "a countdown until sunday"). */}
               {invite?.ends ? (
                 <InviteClock invite={invite} className="tpa-buy-seats" />
+              ) : placeForever ? (
+                /* The spots are the $7.99 rate's; this price is its own. */
+                <p className="tpa-buy-seats tnum">Locked in for as long as you stay. Cancel anytime in the Tapin app.</p>
               ) : (
                 <PlusSeats monthly={MONTHLY} className="tpa-buy-seats" />
               )}
@@ -1365,7 +1385,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
           <h2 id="tpa-steps" className="tpa-h2">
             How it works
           </h2>
-          <HowPhone audience="student" first={FIRST_MONTH} monthly={MONTHLY} free={free} only={place?.id} />
+          <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
 
         {/* What if I don't save? went (Sam, 9 Nov 2026: "get rid of this too
@@ -1383,7 +1403,11 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
             ...(place ? placeFaq(MONTHLY, place.name) : faqFor(MONTHLY)).map((f) =>
               /* A group's price doesn't climb to $14.99 with the 100 spots. */
-              group && f.q === "Will my price go up?" ? groupPriceFaq(group, FIRST_MONTH, MONTHLY, groupOffer) : f,
+              group && f.q === "Will my price go up?"
+                ? groupPriceFaq(group, FIRST_MONTH, MONTHLY, groupOffer)
+                : placeForever && f.q === "Will my price go up?"
+                  ? { q: f.q, a: `No. Join here and you pay ${FIRST_MONTH} a month for as long as you stay a member, even as more places join. Cancel anytime in the Tapin app.` }
+                  : f,
             ),
           ].map((f) => (
             <details key={f.q} className="tpa-qa">
@@ -1405,7 +1429,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : `${FIRST_MONTH} your first month`}</h2>
+              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : placeForever ? `${FIRST_MONTH} a month for life` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
                 {groupOffer && group?.term === "forever"
                   ? `Locked in for as long as you’re a member, even as more places join.`
