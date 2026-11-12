@@ -74,13 +74,15 @@ type Place = (typeof PLACES)[number];
 /** What each place is, for the cards. The record calls the two bars "Drinks",
  *  which beside "$5 back" reads as earning it on bar drinks; the $5 is earned
  *  on food and non-alcoholic drinks (3 Nov 2026). */
-/* The places row's card, three takes (?railv=a|b|c, 12 Nov 2026); none is
-   the shipped card. */
+/* The places row's card (?railv=, 12 Nov 2026): C3 · Framed by default. */
 type RailV = "a" | "b" | "c" | "c1" | "c2" | "c3";
 const railVersion = (): RailV | null => {
   if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("railv");
-  return v === "a" || v === "b" || v === "c" || v === "c1" || v === "c2" || v === "c3" ? v : null;
+  /* C3 · Framed is the card (Sam, 12 Nov 2026: "C3 is best, use that
+     one"); ?railv=0 shows the old photo card, the others still preview. */
+  if (v === "0") return null;
+  return v === "a" || v === "b" || v === "c" || v === "c1" || v === "c2" || v === "c3" ? v : "c3";
 };
 
 const KIND: Record<string, string> = {
