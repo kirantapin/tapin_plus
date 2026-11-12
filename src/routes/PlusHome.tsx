@@ -2,14 +2,14 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { venues } from "../model/content";
+import { BAR_IDS, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { MEMBERS_LINE } from "../model/proof";
-import { COFFEEHOLICS_SEAT_CAP, PLUS_NEXT_PRICE, plusSeatLine } from "../model/seats";
+import { PLUS_NEXT_PRICE, placeSeatCap, plusSeatLine } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
-import { PlusSeats, useCoffeeholicsSeats, usePlusSeats } from "../shell/PlusSeats";
+import { PlusSeats, usePlaceSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { LowerAfter, LowerVersion, lowerVersion } from "../shell/LowerVersions";
 import { Founders } from "../shell/Founders";
@@ -35,7 +35,7 @@ import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
 import { LiveCountdown, LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
-import { COFFEEHOLICS_FOREVER_ENDS } from "../model/campaign";
+import { PLACE_FOREVER_ENDS, PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
@@ -382,15 +382,21 @@ const Chevron = () => (
    number; 2 · Dots shows the 50 spots as 50 dots, open ones green; 3 · Ink
    puts the price and the spots in one dark tile at the top. */
 type CfV = "1" | "2" | "3";
-const cfVersion = (): CfV | null => {
+/* The Burg's page shows 3 · Ink with no ?cfv (Sam, 12 Nov 2026, asked which
+   card: "Ink (cfv=3) default"); ?cfv=0 there shows the plain card. */
+const CFV_DEFAULT: Record<string, CfV> = { theburg: "3" };
+const cfVersion = (placeId?: string): CfV | null => {
   if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("cfv");
-  return v === "1" || v === "2" || v === "3" ? v : null;
+  if (v === "1" || v === "2" || v === "3") return v;
+  if (v === "0") return null;
+  return (placeId && CFV_DEFAULT[placeId]) || null;
 };
-const CF_ENDS_LABEL = "ends Fri 13 Nov, 11:59pm";
+const endsLabel = (placeId: string) => PLACE_FOREVER_ENDS_LABEL[placeId] ?? "";
 
-function CfCount({ first }: { first: string }) {
-  const left = useCoffeeholicsSeats();
+function CfCount({ placeId, first }: { placeId: string; first: string }) {
+  const left = usePlaceSeats(placeId);
+  const cap = placeSeatCap(placeId);
   return (
     <div className="cfv-count">
       <div className="cfv-count-row tnum">
@@ -398,38 +404,40 @@ function CfCount({ first }: { first: string }) {
         <p>
           <span>spots left at {first} for life</span>
           <small>
-            of {COFFEEHOLICS_SEAT_CAP} · {CF_ENDS_LABEL}
+            of {cap} · {endsLabel(placeId)}
           </small>
         </p>
       </div>
       <span className="cfv-bar" aria-hidden="true">
-        <i style={{ transform: `scaleX(${left / COFFEEHOLICS_SEAT_CAP})` }} />
+        <i style={{ transform: `scaleX(${left / cap})` }} />
       </span>
     </div>
   );
 }
 
-function CfDots() {
-  const left = useCoffeeholicsSeats();
+function CfDots({ placeId }: { placeId: string }) {
+  const left = usePlaceSeats(placeId);
+  const cap = placeSeatCap(placeId);
   return (
     <div className="cfv-dots">
-      <ol className="cfv-dots-grid" aria-label={`${left} of ${COFFEEHOLICS_SEAT_CAP} spots left`}>
-        {Array.from({ length: COFFEEHOLICS_SEAT_CAP }, (_, i) => (
+      <ol className="cfv-dots-grid" aria-label={`${left} of ${cap} spots left`}>
+        {Array.from({ length: cap }, (_, i) => (
           <li key={i} data-open={i < left ? "" : undefined} />
         ))}
       </ol>
       <p className="tnum">
         <b>
-          {left} of {COFFEEHOLICS_SEAT_CAP} spots left
+          {left} of {cap} spots left
         </b>{" "}
-        · {CF_ENDS_LABEL}
+        · {endsLabel(placeId)}
       </p>
     </div>
   );
 }
 
-function CfInk({ first }: { first: string }) {
-  const left = useCoffeeholicsSeats();
+function CfInk({ placeId, first }: { placeId: string; first: string }) {
+  const left = usePlaceSeats(placeId);
+  const cap = placeSeatCap(placeId);
   return (
     <div className="cfv-ink tnum">
       <p className="cfv-ink-price">
@@ -438,9 +446,9 @@ function CfInk({ first }: { first: string }) {
       </p>
       <p className="cfv-ink-left">
         <b>{left}</b>
-        <span>of {COFFEEHOLICS_SEAT_CAP} spots left</span>
+        <span>of {cap} spots left</span>
       </p>
-      <p className="cfv-ink-ends">Offer {CF_ENDS_LABEL}</p>
+      <p className="cfv-ink-ends">Offer {endsLabel(placeId)}</p>
     </div>
   );
 }
@@ -479,6 +487,9 @@ function spendSaves(spend: number) {
 }
 
 function SpendSaves({ placeId, name }: { placeId: string; name: string }) {
+  /* At a bar the spend is food and non-alcoholic drinks: the $5s and the 15%
+     never go on alcohol, so the math never counts it (3 Nov 2026). */
+  const bar = BAR_IDS.has(placeId);
   const { track } = useEventTracking();
   const [spend, setSpend] = useState<number>(50);
   const fig = useRef<HTMLElement | null>(null);
@@ -500,7 +511,7 @@ function SpendSaves({ placeId, name }: { placeId: string; name: string }) {
   return (
     <div className="ss">
       <h3 className="cfv-sub">What you’d save at {name}</h3>
-      <p className="ss-ask">If you spend this a month there</p>
+      <p className="ss-ask">{bar ? "If you spend this a month there, on anything but alcohol" : "If you spend this a month there"}</p>
       <div className="tpa-freq ss-pick" role="radiogroup" aria-label={`What you spend at ${name} a month`}>
         {SPENDS.map((x) => (
           <button
@@ -593,6 +604,15 @@ function PlaceMath({
     if (reducedMotion()) return;
     fig.current?.animate?.([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
   }, [at]);
+  /* 3 · Ink counts by what you spend, so it needs no everyday order (The
+     Burg has none: a bar's everyday order isn't one to model). */
+  if (forever && cfv === "3")
+    return (
+      <div className="cfv cfv-3">
+        <CfInk placeId={placeId} first={first} />
+        <SpendSaves placeId={placeId} name={name} />
+      </div>
+    );
   if (!m) return null;
   const v = VISITS[at] ?? VISITS[1];
   const save = m.save(v.visits);
@@ -643,27 +663,20 @@ function PlaceMath({
           {saved}
         </div>
         {how}
-        <CfCount first={first} />
+        <CfCount placeId={placeId} first={first} />
       </div>
     );
   if (forever && cfv === "2")
     return (
       <div className="cfv cfv-2">
         <h2 className="tpa-h2 tpa-math-h tnum">{first} a month, for life</h2>
-        <CfDots />
+        <CfDots placeId={placeId} />
         <h3 className="cfv-sub">What you’d save at {name}</h3>
         {freq}
         <div className="tpa-math cfv-math-one" data-ph-show="">
           {saved}
         </div>
         {how}
-      </div>
-    );
-  if (forever && cfv === "3")
-    return (
-      <div className="cfv cfv-3">
-        <CfInk first={first} />
-        <SpendSaves placeId={placeId} name={name} />
       </div>
     );
   return (
@@ -810,8 +823,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   /* A place's own page selling Plus for life (/coffeeholics, 12 Nov 2026,
      model/campaign.ts): its price, said as for life everywhere it shows. */
   const placeForever = !!placeId && firstForever(price);
+  /* When that page's offer ends (model/campaign.ts PLACE_FOREVER_ENDS). */
+  const placeEnds = placeForever && placeId ? (PLACE_FOREVER_ENDS[placeId] ?? null) : null;
   /* The for-life card's three takes, preview only (?cfv=1|2|3). */
-  const [cfv] = useState(cfVersion);
+  const [cfv] = useState(() => cfVersion(placeId));
   /* The live badge's five takes, preview only (?livev=1..5). */
   const [livev] = useState(liveVersion);
   const MONTHLY = usd(price?.monthly);
@@ -917,7 +932,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       ]
     : member || linked || invite || free
       ? []
-      : placeForever
+      : placeForever && placeEnds
         ? [
             /* The for-life price and its time left, in place of the $7.99
                spots (/coffeeholics, 12 Nov 2026). */
@@ -926,7 +941,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
               body: (
                 <>
                   <span className="tpp-pt-dot" aria-hidden="true" />
-                  <ForeverLeft first={FIRST_MONTH} endsMs={COFFEEHOLICS_FOREVER_ENDS} />
+                  <ForeverLeft first={FIRST_MONTH} endsMs={placeEnds} />
                 </>
               ),
             },
@@ -1183,7 +1198,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     <span>in credit every month</span>
                   </p>
                 )}
-                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeForever ? COFFEEHOLICS_FOREVER_ENDS : null} />}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
               </>
             ) : hero === "0" ? (
               <h1>${CREDIT} credit at every place you already go in Blacksburg</h1>
@@ -1198,7 +1213,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 {/* The real deadline, quietly, under the $25 (Sam, 10 Nov
                     2026: "there's really no urgency or scarcity here"). Not
                     on a promo link, whose bar says its own offer. */}
-                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeForever ? COFFEEHOLICS_FOREVER_ENDS : null} />}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
                 {/* No line under the callout on Rob's headline (Sam, 9 Nov
                     2026: "just remove the sub text"); other headlines
                     previewed with ?hero= keep theirs. */}
@@ -1510,7 +1525,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 "we can remove the calculator, and just show that $3.99 turns
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
-            {place && placeMonth(place.id) ? (
+            {place && (placeMonth(place.id) || (placeForever && cfv === "3")) ? (
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} cfv={cfv} />
             ) : offv && !place && !invite && !free ? (
               <OfferVersion
@@ -1741,12 +1756,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             <>
               <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : placeForever ? `${FIRST_MONTH} a month for life` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
-                {groupOffer && group?.term === "forever"
+                {(groupOffer && group?.term === "forever") || placeForever
                   ? `Locked in for as long as you’re a member, even as more places join.`
                   : `${invite ? `For ${invite.who}. ` : ""}Then ${MONTHLY}/month, locked in for as long as you’re a member.`}
               </p>
               {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
-              {linked || group ? null : <WelcomeEnds className="tpa-close-ends" />}
+              {linked || group || placeForever ? null : <WelcomeEnds className="tpa-close-ends" />}
               {groupOffer && group?.endsMs ? <p className="tpa-close-ends">Ends at midnight tonight.</p> : null}
             </>
           )}

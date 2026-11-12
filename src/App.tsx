@@ -12,7 +12,7 @@ import ParentsHome from "./routes/ParentsHome";
 import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
-import { COFFEEHOLICS_FOREVER_ENDS, COFFEEHOLICS_FOREVER_POLICY } from "./model/campaign";
+import { COFFEEHOLICS_FOREVER_ENDS, COFFEEHOLICS_FOREVER_POLICY, THEBURG_FOREVER_ENDS, THEBURG_FOREVER_POLICY } from "./model/campaign";
 import { loadPlusLink } from "./model/link";
 import { redactUrl } from "./model/redact";
 
@@ -102,6 +102,8 @@ export default function App() {
             the shell: it paints the app's light ground edge to edge. */}
         <Route path="/" element={<PlusHome />} />
         <Route path="/coffeeholics" element={<CoffeeholicsPage />} />
+        {/* The Burg's own page, the same offer (Sam, 12 Nov 2026). */}
+        <Route path="/theburg" element={<TheBurgPage />} />
         <Route path="/smiths-landing" element={<GroupPage group={SMITHS_LANDING} bandSrc={asset("/groups/smiths-landing.webp")} />} />
         {/* Brexx at Blacksburg (Sam, 11 Nov 2026): Sam's collage of the
             Brexx clubhouse and pool. */}
@@ -167,10 +169,20 @@ export default function App() {
    its policy is named before the page's first render reads the price. */
 function CoffeeholicsPage() {
   useState(() => {
-    if (typeof window !== "undefined") setPagePolicy(COFFEEHOLICS_FOREVER_POLICY, COFFEEHOLICS_FOREVER_ENDS);
+    if (typeof window !== "undefined") setPagePolicy(COFFEEHOLICS_FOREVER_POLICY, COFFEEHOLICS_FOREVER_ENDS, "coffeeholicsva");
   });
   /* The mural, framed on the cups (Sam, 12 Nov 2026). */
   return <PlusHome placeId="coffeeholicsva" bandSrc={asset("/heroes/coffeeholicsva.jpg")} bandPos="56% 50%" />;
+}
+
+/* /theburg sells the same for life as /coffeeholics (model/campaign.ts). Its
+   band is the food photo, empanadas and flautas, never the hero with the
+   bottles: no alcohol in the imagery. */
+function TheBurgPage() {
+  useState(() => {
+    if (typeof window !== "undefined") setPagePolicy(THEBURG_FOREVER_POLICY, THEBURG_FOREVER_ENDS, "theburg");
+  });
+  return <PlusHome placeId="theburg" bandSrc={asset("/places/theburg-food.webp")} bandPos="78% 55%" />;
 }
 
 /* A group's page carries its promo link (model/groups.ts) in the address, so

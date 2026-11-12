@@ -16,6 +16,10 @@ const KEY = "tp_plus_page_policy_v1";
 interface Kept {
   policyId: string;
   endsMs: number | null;
+  /** The place page that set it (/coffeeholics, /theburg). Two places can
+   *  sell the same policy (The Burg reuses Coffeeholics', 12 Nov 2026), so
+   *  the checkout tells their spots apart by this, not by the policy id. */
+  placeId?: string;
 }
 
 let current: Kept | null = null;
@@ -32,8 +36,8 @@ function read(): Kept | null {
 }
 
 /** Called by the page that sells it, before its first render. */
-export function setPagePolicy(policyId: string, endsMs: number | null) {
-  current = { policyId, endsMs };
+export function setPagePolicy(policyId: string, endsMs: number | null, placeId?: string) {
+  current = { policyId, endsMs, placeId };
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify(current));
   } catch {
@@ -48,4 +52,10 @@ export function pagePolicy(): string | null {
   if (!kept) return null;
   if (kept.endsMs !== null && Date.now() >= kept.endsMs) return null;
   return kept.policyId;
+}
+
+/** The place page whose policy is on, while its sale is on, else null. */
+export function pagePolicyPlace(): string | null {
+  if (!pagePolicy()) return null;
+  return read()?.placeId ?? null;
 }

@@ -247,29 +247,43 @@ export function scheduleSeatsLeft(s: SeatSchedule, now: number = Date.now()): nu
 }
 
 
-/* ══ COFFEEHOLICS' $3.99 FOR LIFE, 50 SPOTS (Sam, 12 Nov 2026: "cap the
+/* ══ A PLACE PAGE'S FOR-LIFE SPOTS (Coffeeholics: Sam, 12 Nov 2026: "cap the
    number of seats we're allowing for coffeeholics special rate to 50, and we
    should have this decrease by 5 every hour until it hits 20, and then 1
-   every hour following") ═══════════════════════════════════════════════════
-   From 4pm Eastern on Thursday 12 November: 50, then 5 fewer each hour (at a
-   minute seeded by the hour, so it doesn't tick on the hour) until 20, then
-   one an hour. Like every count on the site it is artificial, by Sam's
-   decision. It would reach 0 before the offer ends (11:59pm ET Friday 13
-   November), and 0 reads as sold out with the offer still on, so it stops at
-   COFFEEHOLICS_SEAT_FLOOR. */
-export const COFFEEHOLICS_SEAT_CAP = 50;
-export const COFFEEHOLICS_SEAT_FLOOR = 3;
-const CFH_FROM = Date.UTC(2026, 10, 12, 21, 0, 0); // 4pm EST, 12 Nov
-const CFH_FAST_TO = 20;
+   every hour following"; The Burg the same, Sam, 12 Nov 2026) ═══════════════
+   From its start: 50, then 5 fewer each hour (at a minute seeded by the hour,
+   so it doesn't tick on the hour) until 20, then one an hour. Each place has
+   its own count, start and seed. Like every count on the site it is
+   artificial, by Sam's decision. It would reach 0 before the offer ends
+   (11:59pm ET Friday 13 November), and 0 reads as sold out with the offer
+   still on, so it stops at its floor. */
+interface PlaceSeats {
+  cap: number;
+  floor: number;
+  fastTo: number;
+  fromMs: number;
+  seed: number;
+}
+const PLACE_SEATS: Record<string, PlaceSeats> = {
+  /* From 4pm Eastern, Thursday 12 November. */
+  coffeeholicsva: { cap: 50, floor: 3, fastTo: 20, fromMs: Date.UTC(2026, 10, 12, 21, 0, 0), seed: 9173 },
+  /* From 5pm Eastern the same day, when /theburg went up. */
+  theburg: { cap: 50, floor: 3, fastTo: 20, fromMs: Date.UTC(2026, 10, 12, 22, 0, 0), seed: 4421 },
+};
 
-export function coffeeholicsSeatsLeft(now: number = Date.now()): number {
-  if (now <= CFH_FROM) return COFFEEHOLICS_SEAT_CAP;
-  let left = COFFEEHOLICS_SEAT_CAP;
-  const hours = Math.floor((now - CFH_FROM) / HOUR_MS);
+/** The place's spot count's cap (50), or 0 if it doesn't count spots. */
+export const placeSeatCap = (placeId: string): number => PLACE_SEATS[placeId]?.cap ?? 0;
+
+export function placeSeatsLeft(placeId: string, now: number = Date.now()): number {
+  const p = PLACE_SEATS[placeId];
+  if (!p) return 0;
+  if (now <= p.fromMs) return p.cap;
+  let left = p.cap;
+  const hours = Math.floor((now - p.fromMs) / HOUR_MS);
   for (let h = 0; h <= hours; h++) {
-    const at = CFH_FROM + h * HOUR_MS + (10 + seeded(h + 9173)() * 40) * 60_000;
+    const at = p.fromMs + h * HOUR_MS + (10 + seeded(h + p.seed)() * 40) * 60_000;
     if (at > now) break;
-    left -= left > CFH_FAST_TO ? Math.min(5, left - CFH_FAST_TO) : 1;
+    left -= left > p.fastTo ? Math.min(5, left - p.fastTo) : 1;
   }
-  return Math.max(COFFEEHOLICS_SEAT_FLOOR, left);
+  return Math.max(p.floor, left);
 }
