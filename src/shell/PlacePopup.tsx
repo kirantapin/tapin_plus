@@ -51,7 +51,9 @@ export default function PlacePopup({
   const body = useRef<HTMLDivElement | null>(null);
   const xBtn = useRef<HTMLButtonElement | null>(null);
   const closing = useRef(false);
-  const sells = covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
+  /* A Lite place's pop-up lists only its perks (no "sells" chips), so
+     Crumbl and Italiano's read alike. */
+  const sells = place.lite ? [] : covers.filter((c) => (venueCovers[place.id] ?? []).includes(c.id));
   /* At the bars (The Burg, The Milk Parlor, Olaika) the rows say plainly that
      the $5 and 15% skip alcohol (Sam, 4 Nov 2026), and don't advertise points
      on drinks: Virginia bars ads for "anything of value conditioned on the
@@ -158,11 +160,13 @@ export default function PlacePopup({
             <span>{place.kind}</span>
           </h2>
           {/* What the place sells on Tapin. */}
-          <ul className="pp-sells" aria-label={`On Tapin at ${place.name}`}>
-            {sells.map((c) => (
-              <li key={c.id}>{c.id === "tickets" ? "Event tickets" : c.label}</li>
-            ))}
-          </ul>
+          {sells.length ? (
+            <ul className="pp-sells" aria-label={`On Tapin at ${place.name}`}>
+              {sells.map((c) => (
+                <li key={c.id}>{c.id === "tickets" ? "Event tickets" : c.label}</li>
+              ))}
+            </ul>
+          ) : null}
           {/* A Lite place (Sam, 12 Nov 2026): its own perks, each once a
               day, and how you get them. Nothing of Plus's is claimed here. */}
           {lite ? (

@@ -6587,18 +6587,24 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
 }
 
-/* ══ TAPIN LITE: CRUMBL JUST JOINED (shell/LiteJoined.tsx, 12 Nov 2026) ═══
-   The place's photo leads, its mark on the photo's edge; the news is the
-   heading; the two perks as a figure and the real cookie. */
+/* ══ TAPIN LITE: JUST JOINED (shell/LiteJoined.tsx, 12 Nov 2026) ═════════
+   Each place's photo side by side, its mark on the photo's edge; the news is
+   the heading; each place's perks under its name, a figure or the real item. */
 .tpl-new {
   padding: 8px 8px 16px;
+}
+.tpl-new-photos {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-bottom: 38px;
 }
 .tpl-new-photo {
   position: relative;
   height: 136px;
-  margin-bottom: 38px;
   border-radius: 12px;
-  background: #f6e3ea;
+  background: var(--well);
 }
 .tpl-new-photo > img:first-child {
   display: block;
@@ -6616,6 +6622,9 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   border-radius: 16px;
   box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
 }
+.tpl-new-logo[data-round] {
+  border-radius: 50%;
+}
 .tpl-new-h {
   margin: 0 8px;
   font: 600 22px/27px "Gilroy", Arial, sans-serif;
@@ -6623,12 +6632,20 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: var(--ink);
   text-wrap: balance;
 }
+.tpl-new-name {
+  margin: 18px 8px 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
 .tpl-new-perks {
   display: grid;
   gap: 12px;
   margin: 14px 8px 0;
   padding: 0;
   list-style: none;
+}
+.tpl-new-name + .tpl-new-perks {
+  margin-top: 10px;
 }
 .tpl-new-perks li {
   display: grid;
@@ -6666,7 +6683,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   letter-spacing: -0.02em;
 }
 .tpl-new-foot {
-  margin: 14px 8px 0;
+  margin: 16px 8px 0;
   padding-top: 12px;
   border-top: 1px solid var(--hair);
   font: 500 14px/19px "Gilroy", Arial, sans-serif;
@@ -6706,38 +6723,56 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   line-height: 19px;
   color: rgba(20, 22, 24, 0.62);
 }
-/* A computer: the photo beside the news, not a wide banner over a short
-   list. The mark sits inside the photo's corner. */
+/* A computer: the photos stacked beside the news, not a wide banner over
+   a short list. Each mark sits inside its photo's corner. */
 @media (min-width: 1024px) {
   .tpa-home .tpl-new {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr;
     column-gap: 32px;
-    align-items: start;
   }
-  .tpa-home .tpl-new-photo {
-    grid-row: 1 / -1;
-    height: 100%;
-    min-height: 260px;
+  .tpa-home .tpl-new-photos {
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(150px, 1fr);
     margin: 0;
+  }
+  /* The photos fill the rows the text sets, not their own height. */
+  .tpa-home .tpl-new-photo {
+    height: auto;
+  }
+  .tpa-home .tpl-new-photo > img:first-child {
+    position: absolute;
+    inset: 0;
   }
   .tpa-home .tpl-new-logo {
     bottom: 14px;
     left: 14px;
     box-shadow: 0 0 0 3px #ffffff, 0 6px 16px rgba(20, 22, 24, 0.18);
   }
+  .tpa-home .tpl-new-text {
+    display: flex;
+    flex-direction: column;
+  }
   .tpa-home .tpl-new-h {
     margin: 6px 0 0;
     font-size: 26px;
     line-height: 31px;
   }
+  .tpa-home .tpl-new-name {
+    margin: 20px 0 0;
+  }
   .tpa-home .tpl-new-perks {
     margin: 18px 0 0;
     gap: 14px;
   }
+  .tpa-home .tpl-new-name + .tpl-new-perks {
+    margin-top: 10px;
+  }
   .tpa-home .tpl-new-foot {
-    align-self: end;
-    margin: 18px 0 0;
+    margin: auto 0 0;
+    padding-top: 14px;
+  }
+  .tpa-home .tpl-new-place:last-of-type {
+    margin-bottom: 20px;
   }
 }

@@ -2,21 +2,26 @@ import { useEffect, useRef } from "react";
 import type { LitePlace } from "../model/lite";
 import { LiteMark } from "./LiteMark";
 
-/* ══ CRUMBL JUST JOINED (Sam, 12 Nov 2026: "we can show on the web page that
+/* ══ JUST JOINED (Sam, 12 Nov 2026: "we can show on the web page that
    Crumbl Cookies has now joined. We can have a dedicated card for them built
-   using /impeccable design") ══════════════════════════════════════════════════
-   The place's own photograph leads, its mark seated on the photo's edge like
-   an app avatar, then the news as the heading and the two perks in their own
-   words: the 10% as a figure, the free cookie as the real cookie, cut from
-   the same photo. One moment of motion: when the card comes into view the
-   cookie rolls in from the left and settles. The foot says how you get it:
-   Lite comes with Plus, it isn't sold on its own. Styles: .tpl-new*. */
+   using /impeccable design"; then Italiano's, "Crumbl and Italianos would
+   both be on Tapin lite", one card for both) ═══════════════════════════════════
+   Each place's own photograph side by side, its mark seated on the photo's
+   edge like an app avatar; the news as the heading; then each place's perks
+   under its name, in its own words: a percent as a figure, a free item as
+   the real item cut from the place's photo. One moment of motion: when the
+   card comes into view the cookie rolls in and settles. The foot says how
+   you get them: Lite comes with Plus, it isn't sold on its own. Styles:
+   .tpl-new*. */
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export function LiteJoined({ place }: { place: LitePlace }) {
-  const cookie = useRef<HTMLImageElement | null>(null);
+const names = (list: LitePlace[]) =>
+  list.length === 1 ? list[0].name : `${list.slice(0, -1).map((p) => p.name).join(", ")} and ${list[list.length - 1].name}`;
+
+export function LiteJoined({ places }: { places: LitePlace[] }) {
+  const item = useRef<HTMLImageElement | null>(null);
   useEffect(() => {
-    const el = cookie.current;
+    const el = item.current;
     if (!el || still() || typeof IntersectionObserver !== "function" || typeof el.animate !== "function") return;
     const io = new IntersectionObserver(
       ([e]) => {
@@ -36,43 +41,64 @@ export function LiteJoined({ place }: { place: LitePlace }) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  const percent = place.perks.find((p) => p.key === "percent");
-  const free = place.perks.find((p) => p.key === "free");
+  if (!places.length) return null;
+  let rolled = false;
   return (
-    <section className="tpa-module tpl-new" aria-labelledby="tpl-new-h">
-      <div className="tpl-new-photo">
-        <img src={place.photo} alt="" decoding="async" loading="lazy" />
-        <img className="tpl-new-logo" src={place.logo} alt={place.name} width="60" height="60" decoding="async" loading="lazy" />
+    <section className="tpa-module tpl-new" data-n={places.length} aria-labelledby="tpl-new-h">
+      <div className="tpl-new-photos">
+        {places.map((p) => (
+          <div key={p.id} className="tpl-new-photo">
+            <img src={p.photo} alt="" decoding="async" loading="lazy" />
+            <img
+              className="tpl-new-logo"
+              data-round={p.round ? "" : undefined}
+              src={p.logo}
+              alt={p.name}
+              width="60"
+              height="60"
+              decoding="async"
+              loading="lazy"
+            />
+          </div>
+        ))}
       </div>
-      <h2 id="tpl-new-h" className="tpl-new-h">
-        {place.name} just joined&nbsp;Tapin
-      </h2>
-      <ul className="tpl-new-perks">
-        {free ? (
-          <li>
-            {place.item ? <img ref={cookie} className="tpl-new-item" src={place.item} alt="" decoding="async" loading="lazy" /> : null}
-            <p>
-              <b>{free.b}</b>
-              <span>{free.when}</span>
-            </p>
-          </li>
-        ) : null}
-        {percent ? (
-          <li>
-            <span className="tpl-new-pct tnum" aria-hidden="true">
-              {percent.b.match(/\d+%/)?.[0] ?? "%"}
-            </span>
-            <p>
-              <b>{percent.b}</b>
-              <span>{percent.when}</span>
-            </p>
-          </li>
-        ) : null}
-      </ul>
-      <p className="tpl-new-foot">
-        <LiteMark className="lite-mark" />
-        <span>Comes with Plus, as a Tapin Lite&nbsp;place.</span>
-      </p>
+      <div className="tpl-new-text">
+        <h2 id="tpl-new-h" className="tpl-new-h">
+          {names(places)} just joined&nbsp;Tapin
+        </h2>
+        {places.map((p) => (
+          <div key={p.id} className="tpl-new-place">
+            {places.length > 1 ? <h3 className="tpl-new-name">{p.name}</h3> : null}
+            <ul className="tpl-new-perks">
+              {p.perks.map((k) => {
+                const roll = k.key === "free" && p.item && !rolled;
+                if (roll) rolled = true;
+                return (
+                  <li key={k.key}>
+                    {k.key === "free" && p.item ? (
+                      <img ref={roll ? item : undefined} className="tpl-new-item" src={p.item} alt="" decoding="async" loading="lazy" />
+                    ) : (
+                      <span className="tpl-new-pct tnum" aria-hidden="true">
+                        {k.b.match(/\d+%/)?.[0] ?? "%"}
+                      </span>
+                    )}
+                    <p>
+                      <b>{k.b}</b>
+                      <span>{k.when}</span>
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+        <p className="tpl-new-foot">
+          <LiteMark className="lite-mark" />
+          <span>
+            {places.length > 1 ? "Both come with Plus, as Tapin Lite places." : "Comes with Plus, as a Tapin Lite place."}
+          </span>
+        </p>
+      </div>
     </section>
   );
 }
