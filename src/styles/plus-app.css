@@ -6620,6 +6620,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   width: 60px;
   height: 60px;
   border-radius: 16px;
+  object-fit: cover;
+  background: #ffffff;
   box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
 }
 .tpl-new-logo[data-round] {

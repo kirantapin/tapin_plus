@@ -32,6 +32,9 @@ import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
+import { LiteJoined } from "../shell/LiteJoined";
+import { LiteMark } from "../shell/LiteMark";
+import { LITE_PLACES } from "../model/lite";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
@@ -586,6 +589,9 @@ export default function ParentsHome() {
             main page (Sam, 9 Nov 2026: "should include this on the parent
             plus page too I think"). */}
         <BonusSpots they />
+        {/* Crumbl and Italiano's just joined, Tapin Lite places that come
+            with Plus (Sam, 12 Nov 2026: "add them to the parents page too"). */}
+        <LiteJoined places={LITE_PLACES} they />
         {/* "What can they use it on?" went from here (Sam, 11 Nov 2026, as on
             the students page): the place cards below answer it, each opening
             what Plus covers there. */}
@@ -664,6 +670,49 @@ export default function ParentsHome() {
                   <b>{p.name}</b>
                   <small>{p.what}</small>
                 </span>
+                </button>
+              </li>
+            ))}
+            {/* The Lite places after the five, as on the students page: the
+                logo like the others, a Lite tag beside it, their own perks
+                in the pop-up. */}
+            {LITE_PLACES.map((p) => (
+              <li key={p.id} className="tpa-place">
+                <button
+                  type="button"
+                  className="tpa-place-open"
+                  aria-label={`What they get at ${p.name}`}
+                  onClick={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    placeFrom.current = e.currentTarget;
+                    setPlaceOpen({
+                      id: p.id,
+                      name: p.name,
+                      kind: p.kind,
+                      photo: p.photo,
+                      lite: true,
+                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                    });
+                    track("plus_place_opened", { place: p.id, page: "parents", lite: true });
+                  }}
+                >
+                  <img className="tpa-place-photo" src={p.photo} alt="" decoding="async" loading="lazy" />
+                  <span className="tpp-place-logo collar" data-field={logoField(p.id)} aria-hidden="true">
+                    <img src={p.logo} alt="" decoding="async" loading="lazy" />
+                  </span>
+                  <span className="tpa-glass tpa-tag tpp-lite-tag">
+                    <LiteMark className="tpa-tag-mark" />
+                    Lite
+                  </span>
+                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="tpa-place-name">
+                    <b>{p.name}</b>
+                    <small>{p.kind}</small>
+                  </span>
                 </button>
               </li>
             ))}
@@ -884,6 +933,7 @@ export default function ParentsHome() {
         <PlacePopup
           place={placeOpen}
           cta={cta}
+          they
           onClose={() => setPlaceOpen(null)}
           onJoin={() => {
             setPlaceOpen(null);
