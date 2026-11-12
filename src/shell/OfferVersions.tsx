@@ -242,9 +242,9 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
         </div>
         <p className="ov-lk-d-lock tnum">
           <b>
-            {Your} {monthly} a month is locked in,
+            {Your} {monthly} a month is locked in
           </b>{" "}
-          however many places&nbsp;join.
+          as more spots&nbsp;join.
         </p>
       </div>
     );
@@ -266,7 +266,7 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
           joining Plus in&nbsp;Blacksburg.
         </p>
         <p className="ov-lk-e-lock tnum">
-          {Your} {monthly} a month is locked in, however many&nbsp;join.
+          {Your} {monthly} a month is locked in as more spots&nbsp;join.
         </p>
       </div>
     );
@@ -277,7 +277,7 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
         <div className="ov-lk-f-row tnum">
           <p>
             <b>Locked in</b>
-            <span>however many places join</span>
+            <span>as more spots join</span>
           </p>
           <strong>
             {monthly}
@@ -316,13 +316,13 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
           </li>
         </ul>
         {/* One sentence, no lock glyph (Sam, 11 Nov 2026, circling it:
-            "still too crowded"). "However many places join" also drops the
-            two different "they"s the parents' line had. */}
+            "still too crowded"). "As more spots join" (Sam, 11 Nov 2026)
+            also drops the two different "they"s the parents' line had. */}
         <p className="ov-lk-foot tnum">
           <b>
-            {Your} {monthly} a month is locked in,
+            {Your} {monthly} a month is locked in
           </b>{" "}
-          however many places&nbsp;join.
+          as more spots&nbsp;join.
         </p>
       </div>
     );
