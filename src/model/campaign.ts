@@ -159,6 +159,19 @@ export const campaignBenefits: {
  */
 export const campaignHeroShot = "/shots/coffeeholicsva-cup.jpg";
 
+/* ══ $3.99 A MONTH FOR LIFE AT /coffeeholics (Sam, 12 Nov 2026: "Let's do
+   $3.99 offer for coffeeholics, for life as long as they don't cancel") ═════
+   Kiran's public policy "$3.99 forever" on the tapin row: $4 off the $7.99
+   bundle, discountDuration "forever", active, no end (read 12 Nov 2026). The
+   page names it (model/pagePolicy.ts) and the price and the checkout apply
+   it with no link, as Welcome Week's $2.99 does. */
+export const COFFEEHOLICS_FOREVER_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
+/* A limited-time offer (Sam, 12 Nov 2026: "let's have the $3.99 for life
+   expire tomorrow evening"): to 11:59pm Eastern, Friday 13 November. Past it
+   the page stops applying the policy and sells the ordinary offer; the
+   policy itself has no end_time, so Kiran should set one to match. */
+export const COFFEEHOLICS_FOREVER_ENDS = Date.parse("2026-11-13T23:59:00-05:00");
+
 /**
  * WHAT YOU'D SAVE HERE — three of Coffeeholics' own items, each under the
  * benefit it exercises (docs/POLISH-2026-09-21.md §11). Sam, 22 Sep 2026:
