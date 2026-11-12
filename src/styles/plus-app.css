@@ -6133,3 +6133,133 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .ov-lk-b + * {
   margin-top: 6px;
 }
+
+/* ══ LOCKED IN D / E / F PREVIEWS (?lockv=d|e|f, 11 Nov 2026) ═════════════
+   No box on any of them: each sits on the card under one hairline, like B. */
+.ov-lk.ov-lk-d,
+.ov-lk.ov-lk-e,
+.ov-lk.ov-lk-f {
+  gap: 10px;
+  padding: 16px 0 0;
+  border-radius: 0;
+  background: none;
+  border-top: 1px solid var(--hair);
+}
+.ov-lk-d + *,
+.ov-lk-e + *,
+.ov-lk-f + * {
+  margin-top: 6px;
+}
+
+/* D · Stack. */
+.ov-lk-d-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ov-lk-stack {
+  display: flex;
+  flex: none;
+}
+.ov-lk-stack li {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #ffffff, inset 0 0 0 1px var(--hair);
+  color: #861f41;
+}
+.ov-lk-stack li + li {
+  margin-left: -8px;
+}
+.ov-lk-stack svg {
+  width: 17px;
+  height: 17px;
+}
+.ov-lk-stack .ov-lk-more {
+  color: var(--muted);
+  background: #f4f4f5;
+}
+.ov-lk-d-names {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.ov-lk-d-lock,
+.ov-lk-e-lock {
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.ov-lk-d-lock b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* E · Inline. */
+.ov-lk-e-line {
+  font: 600 16px/26px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.ov-lk-w {
+  white-space: nowrap;
+}
+.ov-lk .ov-lk-w svg {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin: 0 3px 0 1px;
+  vertical-align: -3px;
+  color: #861f41;
+}
+
+/* F · Price row. */
+.ov-lk-f-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ov-lk-f-row p {
+  display: grid;
+}
+.ov-lk-f-row b {
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.ov-lk-f-row span {
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-lk-f-row strong {
+  font: 600 30px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.ov-lk-f-row small {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.ov-lk-f-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  font: 500 14px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ov-lk-f-kinds li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.ov-lk .ov-lk-f-kinds svg {
+  width: 16px;
+  height: 16px;
+  color: #861f41;
+}
