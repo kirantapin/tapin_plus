@@ -709,13 +709,20 @@ const HUG = asset("/parents/hero-hug.webp");
    parents.css). The refund is the module right under this one. `first` and
    `monthly` are the prices the page shows; `free` a promo link's free first
    month. */
-function studentSteps(first: string, free: boolean, appTab: number, place?: string): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
+function studentSteps(first: string, free: boolean, appTab: number, place?: string, forLife = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
   return [
     {
       glyph: GLYPHS.card,
       when: "Today",
       title: "Join with your number",
-      line: free ? <>Enter your mobile number. Your first month is free.</> : <>Enter your mobile number and pay {first} for your first month.</>,
+      line: free ? (
+        <>Enter your mobile number. Your first month is free.</>
+      ) : forLife ? (
+        /* A for-life price (/coffeeholics) isn't a first month's. */
+        <>Enter your mobile number and pay {first} a month, for life.</>
+      ) : (
+        <>Enter your mobile number and pay {first} for your first month.</>
+      ),
     },
     {
       glyph: GLYPHS.phone,
@@ -731,10 +738,10 @@ function studentSteps(first: string, free: boolean, appTab: number, place?: stri
     {
       glyph: GLYPHS.tag,
       when: "Every month",
-      title: place ? `Save at ${place}` : "Save at each place",
+      title: place ? `Save at ${place} and more` : "Save at each place",
       line: place ? (
         <>
-          {money0(CREDIT)} credit every month, no minimum spend. Then {PERCENT}% off, once a day.
+          {money0(CREDIT)} credit every month at {place} and every other Plus place, no minimum spend. Then {PERCENT}% off, once a day.
         </>
       ) : (
         <>
@@ -765,7 +772,10 @@ export function HowPhone({
 } = {}) {
   const prices = useParentPrice();
   const onlyPlace = only ? PLACES.find((p) => p.id === only) : undefined;
-  const shownPlaces = onlyPlace ? [onlyPlace] : PLACES;
+  /* Every place, the page's own first (Sam, 12 Nov 2026: "for the burg page
+     and the coffeeholics page the how it works section should show the other
+     locations too"). */
+  const shownPlaces = onlyPlace ? [onlyPlace, ...PLACES.filter((p) => p.id !== onlyPlace.id)] : PLACES;
   const first = firstProp ?? prices.FIRST;
   const monthly = monthlyProp ?? prices.MONTHLY;
   const MONTHLY = prices.MONTHLY;
@@ -781,7 +791,7 @@ export function HowPhone({
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name) : parentSteps(first);
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month") : parentSteps(first);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -1018,7 +1028,7 @@ export function HowPhone({
                     <span className="tpp-hw-lbl tpp-hw-every">
                       <b>{money0(CREDIT)} credit</b> every month at
                     </span>
-                    <div className="tpp-hw-places" data-one={onlyPlace ? "" : undefined}>
+                    <div className="tpp-hw-places">
                       {shownPlaces.map((p) => (
                         <span key={p.id}>
                           <img src={p.logo} alt="" decoding="async" loading="lazy" />
