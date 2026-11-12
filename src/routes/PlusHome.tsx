@@ -31,7 +31,7 @@ import TrialModal from "../shell/TrialModal";
 import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
-import { BonusSpots, UseItOn } from "../shell/BonusSpots";
+import { BonusSpots } from "../shell/BonusSpots";
 import type { Group } from "../model/groups";
 import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
 
@@ -853,9 +853,10 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
         {member ? null : <BonusSpots only={place?.id} />}
-        {/* What the $5 and the 15% go on (Sam, 11 Nov 2026). Not on a
-            place's own page, which is about that place. */}
-        {member || place ? null : <UseItOn />}
+        {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
+            the what can I use it on a bit further down. I don't think it
+            should be as big as it is"): the places rail below answers it,
+            each card opening what Plus covers there. */}
 
         {/* WHAT $5 BACK LOOKS LIKE, ON YOUR PHONE (round 2, Sam, 8 Nov 2026):
             the parents page's checkout phone, in "you", in place of the old
@@ -895,9 +896,13 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             Promise card, which would push How it works off the first. */}
         {place ? null : (
         <section className="tpa-places" aria-labelledby="tpa-every">
+          {/* Sam, 11 Nov 2026: "for the 'Every plus place' section we have
+              it be called 'what and where can I use it, click on a card to
+              see'". The pop-up lists what Plus covers at that place. */}
           <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
-            Every Plus place
+            What and where can I use it?
           </h2>
+          <p className="tpa-places-sub">Open a card to see what Plus covers there.</p>
           <ul className="tpa-rail">
             {PLACES.map((v) => (
               <li key={v.id} className="tpa-place">
