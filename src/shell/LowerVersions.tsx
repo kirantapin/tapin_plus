@@ -24,10 +24,14 @@ import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP } from "../model/seats";
    5 · Bare card: only the spots and Join in the card; the price lock and
        the promises move under it, on the ground. */
 export type LowV = "1" | "2" | "3" | "4" | "5";
+/* 3 · Count is the card (Sam, 11 Nov 2026: "let's go with option 3
+   'count'"); ?lowv=1|2|4|5 still preview the others, ?lowv=0 the old
+   lower half (the joining band, the spots, the list under the card). */
 export const lowerVersion = (): LowV | null => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return "3";
   const v = new URLSearchParams(window.location.search).get("lowv");
-  return v === "1" || v === "2" || v === "3" || v === "4" || v === "5" ? v : null;
+  if (v === "0") return null;
+  return v === "1" || v === "2" || v === "3" || v === "4" || v === "5" ? v : "3";
 };
 
 const Tick = () => (
@@ -67,7 +71,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           <li>
             <Tick />
             <span>
-              <b>{monthly} a month, locked in</b> as bars, gyms, clubs and barbers&nbsp;join
+              <b>{monthly} a month, locked in</b> as more spots&nbsp;join
             </span>
           </li>
           <li>
@@ -99,7 +103,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           <div className="lw-2-lock tnum">
             <LockIco />
             <b>{monthly}</b>
-            <span>a month, locked in as new places join</span>
+            <span>a month, locked in as more spots join</span>
           </div>
           <ul className="lw-2-kinds" aria-label="Joining">
             {KINDS.map(({ key, name, Icon }) => (
@@ -141,7 +145,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           </summary>
           <ul className="tnum">
             <li>
-              <b>{monthly} a month, locked in.</b> New bars, gyms, clubs and barbers are joining, and your price doesn’t go&nbsp;up.
+              <b>{monthly} a month, locked in</b> as more spots join: bars, gyms, clubs, barbers and&nbsp;more.
             </li>
             <li>
               <b>Refund auto-approved</b> if Plus saved you less than you&nbsp;paid.
@@ -240,7 +244,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
       <div className="lw-5-after tnum">
         <div className="lw-5-lock">
           <p>
-            <b>{monthly} a month, locked in.</b> New Blacksburg favorites are joining, and your price doesn’t go&nbsp;up.
+            <b>{monthly} a month, locked in</b> as more spots&nbsp;join.
           </p>
           <ul aria-label="Joining">
             {KINDS.map(({ key, name, Icon }) => (
