@@ -12,7 +12,8 @@ import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from 
 import { firstMonthLine, nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { inviteFor } from "../model/invite";
 import { sendCode, verifyCode } from "./authEnv";
-import { PlusSeats } from "./PlusSeats";
+import { CoffeeholicsSeats, PlusSeats } from "./PlusSeats";
+import { COFFEEHOLICS_FOREVER_POLICY } from "../model/campaign";
 import { GroupClock } from "./GroupBits";
 import { WELCOME_WEEK } from "../model/groups";
 import { InviteClock } from "./WelcomeOffer";
@@ -635,10 +636,15 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   /* Welcome Week's flash sale (model/groups.ts): its own clock, never the
      $7.99-then-$14.99 spots, which aren't its price. */
   const sale = !!price?.policyId && price.policyId === WELCOME_WEEK.policyId;
+  /* /coffeeholics' for-life offer (model/campaign.ts): its own 50 spots, not
+     the $7.99 ones. */
+  const cfh = !!price?.policyId && price.policyId === COFFEEHOLICS_FOREVER_POLICY;
   const seats = invite?.ends ? (
     <InviteClock invite={invite} className="pck-seats" />
   ) : sale ? (
     <GroupClock group={WELCOME_WEEK} className="ov-spots pck-seats" />
+  ) : cfh ? (
+    <CoffeeholicsSeats first={usd(price?.first)} ends="ends Fri 13 Nov, 11:59pm" className="pck-seats" />
   ) : (
     <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
   );
@@ -835,7 +841,7 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
      good. Otherwise the first month's line. */
   const welcome =
     price?.firstFor === "forever"
-      ? `${usd(price.first)}/mo, renews monthly`
+      ? `${usd(price.first)}/mo for life, renews monthly`
       : price?.firstFor && price.firstFor.periods > 1
         ? `${usd(price.first)}/mo for ${price.firstFor.periods} months, then ${usd(price.monthly)}/mo`
         : `${firstMonthLine(price)}, renews at ${usd(price?.monthly)}/mo`;
