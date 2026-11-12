@@ -3307,3 +3307,9 @@
   font-weight: 600;
   color: var(--ink);
 }
+
+/* Count on the parents card (12 Nov 2026): the students layout, the
+   button's own spacing kept. */
+.tpp .tpp-offer .tpp-lw .tpa-cta {
+  margin-top: 14px;
+}

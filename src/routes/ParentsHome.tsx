@@ -26,7 +26,8 @@ import {
   Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { BenefitCards, CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { lowerVersion } from "../shell/LowerVersions";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
@@ -293,6 +294,9 @@ export default function ParentsHome() {
   /* A place card's pop-up (shell/PlacePopup.tsx, as on the students page),
      and the card it opened from, which the builder then grows out of. */
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  /* The card's lower half is Count, as on the students page (Sam, 12 Nov
+     2026); ?lowv=0 shows the old one. */
+  const [count] = useState(() => lowerVersion() !== null);
   const placeFrom = useRef<HTMLElement | null>(null);
   const signUp = (where: string, el: HTMLElement) => {
     track("parent_signup_clicked", { where });
@@ -436,6 +440,17 @@ export default function ParentsHome() {
     },
   ];
 
+  /* The card's button (Count draws it between the spots and the fold). */
+  const heroJoin = (
+    <button
+      type="button"
+      className="tpa-cta tpp-cta"
+      data-page-cta=""
+      onClick={(e) => signUp("hero", e.currentTarget)}
+    >
+      {cta}
+    </button>
+  );
   return (
     <div className="tpa tpa-home tpp">
       {/* The students line as the page's announcement bar, as on the main
@@ -677,15 +692,12 @@ export default function ParentsHome() {
               $3.99, then $7.99). */}
           {/* Pay / get, the student page's card in their voice (Sam, 10 Nov
               2026: "this is great, for both the moms and regular page"). */}
-          <PayGetLead />
-          <button
-            type="button"
-            className="tpa-cta tpp-cta"
-            data-page-cta=""
-            onClick={(e) => signUp("hero", e.currentTarget)}
-          >
-            {cta}
-          </button>
+          <PayGetLead lower={count} />
+          {count ? (
+            <ParentsCount join={heroJoin} />
+          ) : (
+            <>
+          {heroJoin}
           {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"), with
               the parents' guarantee beside it (Sam, 9 Nov 2026, the Dara
               Denney audit's fix 2). On request, so never "auto". */}
@@ -693,6 +705,8 @@ export default function ParentsHome() {
           <p className="tpp-under">
             <span>Full refund if they don’t save what you spent.</span>
           </p>
+            </>
+          )}
           {/* The turning proof line left the card (9 Nov 2026 polish, Sam:
               "we could still clean it up a bit"): its places, refund and
               students each already show nearby. A phone keeps it on the
@@ -702,7 +716,7 @@ export default function ParentsHome() {
         {/* The other two benefits and the promise, one quiet list (7 Nov
             2026 polish: the chips and the promise lines were four objects
             in two styles). */}
-        <UnderOffer />
+        {count ? null : <UnderOffer />}
         </div>
 
         {/* What a week looks like, in one order, on their phone (Sam's pick

@@ -214,7 +214,7 @@ export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
    the holiday price the old card carried: $MONTHLY locked in, $14.99 for new
    gifts from January 1, the days left. After the year turns, the two rows
    alone. */
-export function PayGetLead() {
+export function PayGetLead({ lower = false }: { lower?: boolean }) {
   const { FIRST, MONTHLY } = useParentPrice();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -227,8 +227,9 @@ export function PayGetLead() {
   return (
     <div className="ov ov-c" data-ph-show="">
       <PayGet first={FIRST} monthly={MONTHLY} they />
-      <LockedIn monthly={MONTHLY} they />
-      {when ? (
+      {/* With Count under it (ParentsCount), pay/get alone here. */}
+      {lower ? null : <LockedIn monthly={MONTHLY} they />}
+      {when && !lower ? (
         <>
           {/* One line (Sam, 11 Nov 2026: "there's a bit too much going on
               here"). The lock band above already says their price is theirs
@@ -246,6 +247,73 @@ export function PayGetLead() {
   );
 }
 export const AFTER_HOLIDAY = 14.99;
+
+/* ══ COUNT, IN THE PARENTS' TERMS (Sam, 12 Nov 2026: "port the count layout
+   to the parents page too") ═══════════════════════════════════════════════
+   The students card's lower half (shell/LowerVersions.tsx, 3 · Count): one
+   big number with its bar, the button, then one line that opens on the
+   price lock, the refund and cancelling. The parents' price has no spots:
+   what runs out for them is the holiday price, so the big number is the
+   days left before new gifts cost $14.99 (January 1). The bar runs from 9
+   November, when that countdown started. The list under the card (points,
+   the text before each bill) folds into the line. ?lowv=0 shows the old
+   card, as on the students page. */
+const HOLIDAY_FROM = Date.parse("2026-11-09T00:00:00-05:00");
+export function ParentsCount({ join }: { join: ReactNode }) {
+  const { MONTHLY } = useParentPrice();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(t);
+  }, []);
+  const left = HOLIDAY_ENDS - now;
+  const days = Math.floor(left / 86_400_000);
+  const share = Math.max(0, Math.min(1, left / (HOLIDAY_ENDS - HOLIDAY_FROM)));
+  return (
+    <div className="lw lw-3 tpp-lw">
+      {left > 0 ? (
+        <>
+          <div className="lw-3-count tnum">
+            {days >= 1 ? <b>{days}</b> : null}
+            <p>
+              <span>
+                {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"} at {MONTHLY}&nbsp;a&nbsp;month
+              </span>
+              <small>then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</small>
+            </p>
+          </div>
+          <span className="lw-bar" aria-hidden="true">
+            <i style={{ transform: `scaleX(${share})` }} />
+          </span>
+        </>
+      ) : null}
+      {join}
+      <details className="lw-3-more">
+        <summary>
+          <span>Price lock, refunds and cancelling</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m7 10 5 5 5-5" />
+          </svg>
+        </summary>
+        <ul className="tnum">
+          <li>
+            <b>{MONTHLY} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
+          </li>
+          {/* On request, so never "auto" (the parents' guarantee, 9 Nov). */}
+          <li>
+            <b>Full refund</b> if they don’t save what you&nbsp;spent.
+          </li>
+          <li>
+            <b>A text before every bill</b>, and you can cancel right from&nbsp;it.
+          </li>
+          <li>
+            <b>Points</b> on everything.
+          </li>
+        </ul>
+      </details>
+    </div>
+  );
+}
 export function PriceLead() {
   const { FIRST, MONTHLY } = useParentPrice();
   /* Checked each minute so the days turn over at midnight. */
