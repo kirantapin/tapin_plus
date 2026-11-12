@@ -7896,3 +7896,47 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     transition: none;
   }
 }
+
+/* "How it adds up" folds the savings picture under one line (12 Nov 2026),
+   the way "Price lock, refunds and cancelling" folds on the main card. */
+.ss-how {
+  margin-top: 12px;
+  border-top: 1px solid var(--hair);
+}
+.ss-how summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  list-style: none;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+.ss-how summary::-webkit-details-marker {
+  display: none;
+}
+.ss-how summary svg {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+.ss-how[open] summary svg {
+  transform: rotate(180deg);
+}
+.ss-how summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.ss-how .ss-viz {
+  margin-top: 4px;
+}
+.ss-how .ss-note {
+  margin-bottom: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-how summary svg {
+    transition: none;
+  }
+}
