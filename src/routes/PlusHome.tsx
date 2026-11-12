@@ -386,7 +386,9 @@ const Chevron = () => (
 type CfV = "1" | "2" | "3";
 /* The Burg's page shows 3 · Ink with no ?cfv (Sam, 12 Nov 2026, asked which
    card: "Ink (cfv=3) default"); ?cfv=0 there shows the plain card. */
-const CFV_DEFAULT: Record<string, CfV> = { theburg: "3" };
+/* Ink (3) is the card on both places' pages (Sam, 12 Nov 2026: "I thought
+   we had changed this for coffeeholics right?"); ?cfv=0 shows the old one. */
+const CFV_DEFAULT: Record<string, CfV> = { theburg: "3", coffeeholicsva: "3" };
 const cfVersion = (placeId?: string): CfV | null => {
   if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("cfv");
