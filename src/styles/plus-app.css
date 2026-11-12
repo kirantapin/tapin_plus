@@ -6571,3 +6571,18 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     margin-right: 0;
   }
 }
+
+/* The places rail's line under its heading (11 Nov 2026). */
+.tpa-places-sub {
+  margin: 4px var(--gutter) 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpa-places-sub + .tpa-rail {
+  margin-top: 12px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-places-sub {
+    margin: 6px 0 0;
+  }
+}
