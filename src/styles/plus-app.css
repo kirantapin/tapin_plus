@@ -7940,3 +7940,86 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     transition: none;
   }
 }
+
+/* ══ THE CARD'S COUNTDOWN AS A SMALL ROW (12 Nov 2026) ════════════════════
+   The pop-up's row (.pp-liverow), made small: a white panel on the photo's
+   foot, inset 8px, with the calendar day, the date and the time left, and the
+   orange bar under them. Replaces the dark glass pill. */
+.tpa-place-shot .tpa-live,
+.tpa-place .tpa-live {
+  position: absolute;
+  z-index: 2;
+  top: auto;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  height: auto;
+  padding: 8px 10px 13px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  color: #141618;
+  font: inherit;
+  white-space: normal;
+}
+.tpa-places[data-railv="c3"] .tpa-place-shot .tpa-live {
+  top: auto;
+  left: 8px;
+}
+.tpa-live-day {
+  display: grid;
+  width: 30px;
+  overflow: hidden;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+  text-align: center;
+}
+.tpa-live-day i {
+  padding: 1px 0;
+  background: #e5751f;
+  color: #ffffff;
+  font: 700 9px/11px "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+.tpa-live-day b {
+  padding: 0 0 2px;
+  font: 600 14px/17px "Gilroy", Arial, sans-serif;
+}
+.tpa-live-words {
+  display: grid;
+  min-width: 0;
+}
+.tpa-live-words b {
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tpa-live-words span {
+  font: 500 14px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpa-live-bar {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 6px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ececef;
+}
+.tpa-live-bar i {
+  display: block;
+  height: 100%;
+  background: #e5751f;
+  transform-origin: left;
+  opacity: 1;
+}

@@ -21,7 +21,13 @@ const left = (ms: number) => {
   return d >= 1 ? `${d}d ${h}h` : h >= 1 ? `${h}h ${min}m` : `${Math.max(1, min)}m`;
 };
 
-/** "Live Fri 20 Nov · 7d 4h", ticking each minute; nothing once it's live. */
+/** The card's countdown: the pop-up's row (LiveRow) made small and set on
+ *  the photo's foot (Sam, 12 Nov 2026, of the pop-up's row: "I like the second
+ *  screenshot a LOTTT, but I don't like the way the same thing shows up on
+ *  the first screenshot. /impeccable redesign"). The same calendar day, the
+ *  date, the time left, the orange bar filling to the day, on a white panel
+ *  inset from the photo's edges in place of the dark glass pill. Nothing once
+ *  it's live. */
 export function LiveCountdown({ className }: { className?: string }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -29,15 +35,25 @@ export function LiveCountdown({ className }: { className?: string }) {
     return () => window.clearInterval(t);
   }, []);
   if (now >= LIVE_ON) return null;
+  const done = Math.min(1, Math.max(0, (now - ANNOUNCED_AT) / (LIVE_ON - ANNOUNCED_AT)));
   return (
     <span className={className}>
-      <span className="tpa-live-dot" aria-hidden="true" />
-      <span>
-        Live Fri 20 Nov <i className="tnum">· {left(LIVE_ON - now)}</i>
+      <span className="tpa-live-day" aria-hidden="true">
+        <i>Nov</i>
+        <b>20</b>
+      </span>
+      <span className="tpa-live-words">
+        <b>Live Fri 20 Nov</b>
+        <span className="tnum">{left(LIVE_ON - now)} to go</span>
+      </span>
+      <span className="tpa-live-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${done})` }} />
       </span>
     </span>
   );
 }
+/** 12 November, the day it was announced: where the bars start. */
+const ANNOUNCED_AT = Date.parse("2026-11-12T00:00:00-05:00");
 
 /* ══ THE LIVE BADGE, FIVE TAKES (?livev=1..5, Sam, 12 Nov 2026: "this
    'live' design needs to look different here I don't like the way it looks.
