@@ -3320,3 +3320,27 @@
   top: 12px;
   left: 50px;
 }
+
+/* Points on the order (12 Nov 2026): a quiet row under the total, star then
+   the figure, so every example shows them without competing with the
+   discount. */
+.tpp-fb-points {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  color: rgba(20, 22, 24, 0.62);
+}
+.tpp-fb-points .tpp-glyph {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+.tpp-fb-points b {
+  margin-left: auto;
+  font-weight: 600;
+  color: #141618;
+}

@@ -7352,3 +7352,56 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-unlock-one .tps-unlock-or b {
   color: #0b7a53;
 }
+
+/* ══ LIVE ON PLUS FRIDAY (shell/LiveSoon.tsx, 12 Nov 2026) ═════════════════
+   A glass pill on the card's photo, top left, until the day: an orange dot,
+   the day, the time left. In the pop-up, the same words as a plain line. */
+.tpa-live {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 11px 0 10px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.tpa-live i,
+.pp-live i {
+  font-style: normal;
+  font-weight: 500;
+  opacity: 0.86;
+}
+.tpa-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e5751f;
+  flex: none;
+}
+.tpa-places[data-railv="c3"] .tpa-live {
+  top: 18px;
+  left: 18px;
+}
+.pp-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  margin: -4px 0 0;
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141618;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
+.pp-live i {
+  opacity: 0.62;
+}

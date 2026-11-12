@@ -34,6 +34,8 @@ import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
+import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
+import { campaignHeroShot } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
@@ -98,7 +100,11 @@ const itemAt = (venueId: string, name: string) => itemsFor(venueId).find((i) => 
  *  with GPT Image (4 Nov 2026; Sam, 5 Nov: the ceviche "looks really ugly").
  *  No alcohol in the imagery. */
 const BURG_PHOTO = asset("/places/theburg-food.webp");
-const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.hero);
+/* Coffeeholics' card wears its own page's banner, the two iced coffees
+   (Sam, 12 Nov 2026: "can we use the coffeeholics page banner for their
+   plus page background"). */
+const COFFEEHOLICS_PHOTO = asset(campaignHeroShot);
+const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.id === "coffeeholicsva" ? COFFEEHOLICS_PHOTO : v.hero);
 
 /* ══ ORDERS THAT EARN IT, ONE AT EACH PLACE ═════════════════════════════════
    Real items at their menu prices, each at or over $10, all food (the $5 is
@@ -1062,12 +1068,17 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                             kind: v.kind,
                             photo: v.photo,
                             lite: v.lite || undefined,
+                            liveSoon: liveSoon(v.id) || undefined,
                             from: { x: r.left, y: r.top, w: r.width, h: r.height },
                           });
                           track("plus_place_opened", v.lite ? { place: v.id, lite: true } : { place: v.id });
                         }}
                       >
                         <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
+                        {/* Not live yet (Sam, 12 Nov 2026: "show 'live on
+                            plus' next Friday with a small countdown so it's
+                            clear"): a pill on the photo until the day. */}
+                        {liveSoon(v.id) ? <LiveCountdown className="tpa-live" /> : null}
                         <span className="tpa-glass tpa-tag">
                           {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
                           {v.lite ? "Lite" : "Plus"}

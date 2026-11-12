@@ -7,6 +7,7 @@ import { BAR_IDS, covers, venueCovers } from "../model/content";
 import { slideAway } from "./sheetMotion";
 import { litePlace } from "../model/lite";
 import { LiteMark } from "./LiteMark";
+import { LiveCountdown } from "./LiveSoon";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
    these merchant cards, there should be a small merchant pop up for each that
@@ -27,6 +28,9 @@ export type PlacePopupPlace = {
   from?: { x: number; y: number; w: number; h: number };
   /** A Tapin Lite place (model/lite.ts): its own perks, not Plus's. */
   lite?: boolean;
+  /** Not live on Plus yet (shell/LiveSoon.tsx): says when, with the time
+   *  left. */
+  liveSoon?: boolean;
 };
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -162,6 +166,7 @@ export default function PlacePopup({
             {place.name}
             <span>{place.kind}</span>
           </h2>
+          {place.liveSoon ? <LiveCountdown className="pp-live" /> : null}
           {/* What the place sells on Tapin. */}
           {sells.length ? (
             <ul className="pp-sells" aria-label={`On Tapin at ${place.name}`}>

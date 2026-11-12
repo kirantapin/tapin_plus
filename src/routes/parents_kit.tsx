@@ -3,6 +3,7 @@ import { asset } from "../asset";
 import { venues } from "../model/content";
 import { itemNamed, itemsFor } from "../model/menu";
 import { usd, usePlusPrice } from "../model/plus";
+import { POINTS_PER_DOLLAR } from "../model/order";
 
 /* The parents page's shared figures, places and small pieces, so the page
    (ParentsHome.tsx) and its design variations (parents_variants.tsx) read
@@ -111,16 +112,24 @@ export interface PhoneOrder {
   /** What Plus takes off, and what the phone calls it. */
   off: number;
   offLabel: string;
+  /** Points earned on the order (one place's page shows them, 12 Nov 2026). */
+  points?: number;
 }
-const PLACE_ORDERS: Record<string, Array<{ ids: string[]; credit: boolean }>> = {
+/* Which benefit an order shows: the month's $5 credit, the week's $5 back
+   (earned by spending $10 and taken off a later order), or 15% off. */
+type OrderKind = "credit" | "back" | "percent";
+const PLACE_ORDERS: Record<string, Array<{ ids: string[]; kind: OrderKind }>> = {
+  /* Two $5s and one 15% (Sam, 12 Nov 2026: "We should show the $5 back on
+     two of these and the 15% off on one"), and points on each ("Maybe we
+     show points for all of them as well"). */
   coffeeholicsva: [
     /* California Club, $12. */
-    { ids: ["coffeeholicsva-160-35"], credit: true },
+    { ids: ["coffeeholicsva-160-35"], kind: "credit" },
     /* Cappuccino and Butter Croissant, $7.75. */
-    { ids: ["coffeeholicsva-157-37", "coffeeholicsva-163-33"], credit: false },
+    { ids: ["coffeeholicsva-157-37", "coffeeholicsva-163-33"], kind: "percent" },
     /* The turkey melt, $12 (by id: its name trips scripts/guards.py, as
        model/campaign.ts says). */
-    { ids: ["coffeeholicsva-160-49"], credit: false },
+    { ids: ["coffeeholicsva-160-49"], kind: "back" },
   ],
 };
 /** 15% of an order, to the cent. */
@@ -133,20 +142,29 @@ const pick = (placeId: string, ids: string[]) => {
 };
 const total = (items: Array<{ price: number }>) => Math.round(items.reduce((s, i) => s + i.price, 0) * 100) / 100;
 export function placeOrders(placeId: string): PhoneOrder[] {
-  return (PLACE_ORDERS[placeId] ?? []).flatMap(({ ids, credit }) => {
+  return (PLACE_ORDERS[placeId] ?? []).flatMap(({ ids, kind }) => {
     const found = pick(placeId, ids);
     if (!found) return [];
     const price = total(found);
+    const off = kind === "percent" ? percentOff(price) : Math.min(CREDIT, price);
+    const paid = Math.max(0, Math.round((price - off) * 100) / 100);
     return [
       {
         id: ids.join("+"),
-        title: credit ? `Your ${money0(CREDIT)} credit` : `Then ${PERCENT}% off`,
+        title:
+          kind === "credit"
+            ? `Your ${money0(CREDIT)} credit`
+            : kind === "back"
+              ? `Your ${money0(CREDIT)} back`
+              : `Then ${PERCENT}% off`,
         sub: found.map((i) => i.name).join(" + "),
         img: found[0].img ?? "",
         lines: found.map((i) => ({ name: i.name, price: i.price, img: i.img ?? "", qty: 1 })),
         price,
-        off: credit ? Math.min(CREDIT, price) : percentOff(price),
-        offLabel: credit ? "Plus credit" : `${PERCENT}% off`,
+        off,
+        offLabel: kind === "credit" ? "Plus credit" : kind === "back" ? `${money0(CREDIT)} back` : `${PERCENT}% off`,
+        /* Points on the price paid (as the in-app strip counts them). */
+        points: Math.floor((Math.round(paid * 100) * POINTS_PER_DOLLAR) / 100),
       },
     ];
   });

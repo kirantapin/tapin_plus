@@ -1370,6 +1370,15 @@ export function CheckoutPhone({
                     <b className="now">{money(now)}</b>
                   </span>
                 </p>
+                {/* Points on every order (Sam, 12 Nov 2026: "Maybe we show
+                    points for all of them as well"); one place's page. */}
+                {one && p.points ? (
+                  <p className="tpp-fb-points">
+                    <Glyph d={GLYPHS.star} />
+                    <span>You earn</span>
+                    <b>{p.points} points</b>
+                  </p>
+                ) : null}
                 <p className="tpp-fb-pay">
                   <span className="tpp-fb-swap">
                     <b className="was">Pay {money(p.price)}</b>
@@ -1404,7 +1413,7 @@ export function CheckoutPhone({
           </div>
           {one ? (
             <p className="tpp-math">
-              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum. Then {PERCENT}% off your other orders, once a day.
+              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum, and <b>{money0(CREDIT)} back</b> every week you spend $10. Then {PERCENT}% off your other orders, once a day. Points on every order.
             </p>
           ) : student ? (
             <p className="tpp-math">
