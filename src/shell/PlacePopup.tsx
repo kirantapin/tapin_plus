@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { BAR_IDS, covers, venueCovers } from "../model/content";
 import { slideAway } from "./sheetMotion";
+import { litePlace } from "../model/lite";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
    these merchant cards, there should be a small merchant pop up for each that
@@ -23,6 +24,8 @@ export type PlacePopupPlace = {
   photo: string;
   /** The card's box on screen, for the photo's flight. */
   from?: { x: number; y: number; w: number; h: number };
+  /** A Tapin Lite place (model/lite.ts): its own perks, not Plus's. */
+  lite?: boolean;
 };
 
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -53,6 +56,7 @@ export default function PlacePopup({
      on drinks: Virginia bars ads for "anything of value conditioned on the
      purchase of alcoholic beverages" (3VAC5-20-10 C 8; research 4 Nov 2026). */
   const bar = BAR_IDS.has(place.id);
+  const lite = place.lite ? litePlace(place.id) : undefined;
 
   const close = useCallback(
     (then?: () => void) => {
@@ -158,7 +162,34 @@ export default function PlacePopup({
               <li key={c.id}>{c.id === "tickets" ? "Event tickets" : c.label}</li>
             ))}
           </ul>
+          {/* A Lite place (Sam, 12 Nov 2026): its own perks, each once a
+              day, and how you get them. Nothing of Plus's is claimed here. */}
+          {lite ? (
+            <>
+              <ul className="pp-rows">
+                {lite.perks.map((k) => (
+                  <li key={k.key}>
+                    {k.key === "free" && lite.item ? (
+                      <span className="pp-ico pp-ico-item" aria-hidden="true">
+                        <img src={lite.item} alt="" decoding="async" />
+                      </span>
+                    ) : (
+                      <span className="pp-ico pp-ico-money tnum" aria-hidden="true">
+                        {k.b.match(/\d+%/)?.[0] ?? "%"}
+                      </span>
+                    )}
+                    <span>
+                      <b>{k.b}</b>
+                      <span>{k.when}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="pp-note">{lite.name} is a Tapin Lite place. Lite comes with&nbsp;Plus.</p>
+            </>
+          ) : null}
           {/* What Plus gives here, and on what. */}
+          {lite ? null : (
           <ul className="pp-rows">
             <li>
               <span className="pp-ico pp-ico-money tnum" aria-hidden="true">
@@ -181,6 +212,7 @@ export default function PlacePopup({
               </span>
             </li>
           </ul>
+          )}
           <button type="button" className="pp-cta" onClick={onJoin}>
             {joinLabel}
           </button>

@@ -32,6 +32,8 @@ import { InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcome
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
+import { LiteJoined } from "../shell/LiteJoined";
+import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
 import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
 
@@ -853,6 +855,9 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
         {member ? null : <BonusSpots only={place?.id} />}
+        {/* Crumbl just joined (Sam, 12 Nov 2026), a Tapin Lite place, which
+            comes with Plus. Not on a place's own page or for members. */}
+        {member || place ? null : <LiteJoined place={LITE_PLACES[0]} />}
         {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
             the what can I use it on a bit further down. I don't think it
             should be as big as it is"): the places rail below answers it,
@@ -941,6 +946,41 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                   <span className="tpa-place-name">
                     <b>{v.name}</b>
                     <small>{KIND[v.id] ?? v.category}</small>
+                  </span>
+                </button>
+              </li>
+            ))}
+            {/* Tapin Lite places after the five (Sam, 12 Nov 2026: Crumbl
+                "inside the place cards rail"), tagged Lite, not Plus. */}
+            {LITE_PLACES.map((v) => (
+              <li key={v.id} className="tpa-place">
+                <button
+                  type="button"
+                  className="tpa-place-open"
+                  aria-label={`What you get at ${v.name}`}
+                  onClick={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    setPlaceOpen({
+                      id: v.id,
+                      name: v.name,
+                      kind: v.kind,
+                      photo: v.photo,
+                      lite: true,
+                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                    });
+                    track("plus_place_opened", { place: v.id, lite: true });
+                  }}
+                >
+                  <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
+                  <span className="tpa-glass tpa-tag tpa-tag-lite">Lite</span>
+                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span className="tpa-place-name">
+                    <b>{v.name}</b>
+                    <small>{v.kind}</small>
                   </span>
                 </button>
               </li>
