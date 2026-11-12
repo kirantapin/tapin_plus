@@ -425,13 +425,53 @@
   flex: none;
   color: var(--muted);
 }
-/* A computer: the scan tile beside what's waiting. */
-.acc-app[data-device="desktop"] {
-  grid-template-columns: minmax(0, 1fr) 200px;
-  column-gap: 20px;
+/* A computer: the scan tile beside what's waiting, but only when the card
+   is wide enough for two columns (Sam, 12 Nov 2026, of a narrow window:
+   "this looks off on mobile"). Below that it stacks, the scan tile a row of
+   its own: the code on the left, its words beside it. Measured on the card
+   itself (a container query), since a computer's window can be phone-wide. */
+.acc-app {
+  container-type: inline-size;
 }
-.acc-app[data-device="desktop"] .acc-app-sign {
-  grid-column: 1 / -1;
+.acc-app-wide {
+  display: grid;
+  gap: 18px;
+}
+@container (min-width: 500px) {
+  .acc-app[data-device="desktop"] .acc-app-wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: 18px 20px;
+  }
+}
+@container (max-width: 499.98px) {
+  .acc-app-wide {
+    display: grid;
+    gap: 18px;
+  }
+  .acc-app .acc-app-scan {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    justify-items: start;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    padding: 14px;
+    text-align: left;
+  }
+  .acc-app .acc-app-scan .acc-app-qr {
+    grid-row: 1 / span 2;
+    width: 88px;
+    height: 88px;
+    padding: 6px;
+  }
+  .acc-app .acc-app-scan p {
+    align-self: end;
+    margin: 0;
+  }
+  .acc-app .acc-app-scan a {
+    align-self: start;
+  }
 }
 .acc-app-scan {
   display: grid;
