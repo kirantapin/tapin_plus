@@ -131,6 +131,17 @@ const PLACE_ORDERS: Record<string, Array<{ ids: string[]; kind: OrderKind }>> = 
        model/campaign.ts says). */
     { ids: ["coffeeholicsva-160-49"], kind: "back" },
   ],
+  /* The Burg's the same way (Sam, 12 Nov 2026), all food: a bar's $5s and
+     15% never go on alcohol. The flautas and empanada are the ones in its
+     page's photo. */
+  theburg: [
+    /* Flautas and an empanada, $12.13. */
+    { ids: ["theburg-522-553", "theburg-522-552"], kind: "credit" },
+    /* Nachos and a pastor taco, $12.19. */
+    { ids: ["theburg-522-554", "theburg-517-533"], kind: "percent" },
+    /* Lomo saltado, $18.92. */
+    { ids: ["theburg-516-528"], kind: "back" },
+  ],
 };
 /** 15% of an order, to the cent. */
 export const percentOff = (price: number) => Math.round(price * PERCENT) / 100;

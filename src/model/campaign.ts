@@ -175,6 +175,25 @@ export const COFFEEHOLICS_FOREVER_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021
    policy itself has no end_time, so Kiran should set one to match. */
 export const COFFEEHOLICS_FOREVER_ENDS = Date.parse("2026-11-13T23:59:00-05:00");
 
+/* ══ THE SAME FOR-LIFE OFFER AT /theburg (Sam, 12 Nov 2026: "the burg would
+   need their own splash page"; asked which offer: "Reuse Coffeeholics'
+   policy") ════════════════════════════════════════════════════════════════
+   The same public policy and the same end, so the price, the checkout and the
+   clock read exactly as /coffeeholics' do. */
+export const THEBURG_FOREVER_POLICY = COFFEEHOLICS_FOREVER_POLICY;
+export const THEBURG_FOREVER_ENDS = COFFEEHOLICS_FOREVER_ENDS;
+
+/** When each place page's for-life offer ends, by place id. */
+export const PLACE_FOREVER_ENDS: Readonly<Record<string, number>> = {
+  coffeeholicsva: COFFEEHOLICS_FOREVER_ENDS,
+  theburg: THEBURG_FOREVER_ENDS,
+};
+/** The same ends, as the card and the checkout say them. */
+export const PLACE_FOREVER_ENDS_LABEL: Readonly<Record<string, string>> = {
+  coffeeholicsva: "ends Fri 13 Nov, 11:59pm",
+  theburg: "ends Fri 13 Nov, 11:59pm",
+};
+
 /**
  * WHAT YOU'D SAVE HERE — three of Coffeeholics' own items, each under the
  * benefit it exercises (docs/POLISH-2026-09-21.md §11). Sam, 22 Sep 2026:

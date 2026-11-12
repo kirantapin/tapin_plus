@@ -1,3 +1,4 @@
+import { BAR_IDS } from "../model/content";
 import { PERCENT, PLACES } from "../routes/parents_kit";
 
 /* ══ $5 BONUS CREDIT AT EACH SPOT (Sam, 9 Nov 2026) ════════════════════════
@@ -21,14 +22,16 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
             <h2 id="tps-unlock-h" className="tps-unlock-h">
               <b>${CREDIT} credit</b> every month at {one.name}
             </h2>
-            <p className="tps-unlock-sub">No minimum spend, no&nbsp;markup.</p>
+            {/* At a bar (The Burg, 12 Nov 2026) it says what the $5s and
+                15% go on: never alcohol. */}
+            <p className="tps-unlock-sub">{BAR_IDS.has(one.id) ? "On food and non-alcoholic drinks. No minimum, no\u00a0markup." : "No minimum spend, no\u00a0markup."}</p>
           </div>
         </div>
         {/* The weekly $5 back too (Sam, 12 Nov 2026: "for the coffeeholics
             page, I think we should show the spend $10 get $5 back weekly"),
             in the ladder's words. */}
         <p className="tps-unlock-or">
-          <b>Earn ${CREDIT} back</b> every week when you spend&nbsp;$10
+          <b>Earn ${CREDIT} back</b> every week when you spend&nbsp;$10{BAR_IDS.has(one.id) ? " on\u00a0food" : ""}
         </p>
         <p className="tps-unlock-or">
           <b>Then {PERCENT}% off</b> your other orders, once&nbsp;a&nbsp;day

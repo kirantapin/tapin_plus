@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { COFFEEHOLICS_SEAT_CAP, PLUS_NEXT_PRICE, PLUS_SEAT_CAP, coffeeholicsSeatsLeft, plusSeatLine, plusSeatsLeft } from "../model/seats";
+import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP, placeSeatCap, placeSeatsLeft, plusSeatLine, plusSeatsLeft } from "../model/seats";
 
 /* The next-100 count (model/seats.ts), checked once a minute so a seat can
    go while the page is open. */
@@ -12,14 +12,15 @@ export function usePlusSeats(): number {
   return left;
 }
 
-/* Coffeeholics' 50 (model/seats.ts), checked every 30 seconds: it moves
-   hourly, sometimes by five. */
-export function useCoffeeholicsSeats(): number {
-  const [left, setLeft] = useState(() => coffeeholicsSeatsLeft());
+/* A place page's 50 for life (model/seats.ts), checked every 30 seconds: it
+   moves hourly, sometimes by five. */
+export function usePlaceSeats(placeId: string): number {
+  const [left, setLeft] = useState(() => placeSeatsLeft(placeId));
   useEffect(() => {
-    const t = window.setInterval(() => setLeft(coffeeholicsSeatsLeft()), 30_000);
+    setLeft(placeSeatsLeft(placeId));
+    const t = window.setInterval(() => setLeft(placeSeatsLeft(placeId)), 30_000);
     return () => window.clearInterval(t);
-  }, []);
+  }, [placeId]);
   return left;
 }
 
@@ -43,21 +44,23 @@ export function PlusSeats({ monthly, className, then = true }: { monthly: string
   );
 }
 
-/** Coffeeholics' for-life offer in the checkout (Sam, 12 Nov 2026: "need to
- *  make sure this is updated too for the coffeeholics offer"): its own 50
- *  spots and its end, in the $7.99 spots box's place and look. */
-export function CoffeeholicsSeats({ first, ends, className }: { first: string; ends: string; className?: string }) {
-  const left = useCoffeeholicsSeats();
+/** A place page's for-life offer in the checkout (Sam, 12 Nov 2026: "need to
+ *  make sure this is updated too for the coffeeholics offer"; The Burg the
+ *  same): its own 50 spots and its end, in the $7.99 spots box's place and
+ *  look. */
+export function PlaceSeats({ placeId, first, ends, className }: { placeId: string; first: string; ends: string; className?: string }) {
+  const left = usePlaceSeats(placeId);
+  const cap = placeSeatCap(placeId);
   return (
     <div className={`plus-seats ${className ?? ""}`}>
       <p className="plus-seats-line">
         <b className="tnum">
-          {left} of {COFFEEHOLICS_SEAT_CAP} spots left at {first} for life
+          {left} of {cap} spots left at {first} for life
         </b>
         <span>Offer {ends}</span>
       </p>
       <span className="plus-seats-bar" aria-hidden="true">
-        <i style={{ transform: `scaleX(${left / COFFEEHOLICS_SEAT_CAP})` }} />
+        <i style={{ transform: `scaleX(${cap ? left / cap : 0})` }} />
       </span>
     </div>
   );

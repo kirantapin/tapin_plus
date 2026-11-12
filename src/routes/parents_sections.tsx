@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefO
 import { PayGet, LockedIn } from "../shell/OfferVersions";
 import { Clock } from "../shell/WelcomeOffer";
 import { asset } from "../asset";
-import { logoField, venues } from "../model/content";
+import { BAR_IDS, logoField, venues } from "../model/content";
 import { SAMPLE_GIFT } from "../model/gift";
 import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
@@ -1426,7 +1426,9 @@ export function CheckoutPhone({
           </div>
           {one ? (
             <p className="tpp-math">
-              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum, and <b>{money0(CREDIT)} back</b> every week you spend $10. Then {PERCENT}% off your other orders, once a day. Points on every order.
+              {/* At a bar the $5s and 15% skip alcohol, and the line says so
+                  in place of the points (The Burg, 12 Nov 2026). */}
+              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum, and <b>{money0(CREDIT)} back</b> every week you spend $10{BAR_IDS.has(place!.id) ? " on food" : ""}. Then {PERCENT}% off your other orders, once a day.{BAR_IDS.has(place!.id) ? " Never on alcohol." : " Points on every order."}
             </p>
           ) : student ? (
             <p className="tpp-math">
