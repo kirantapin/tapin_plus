@@ -3313,3 +3313,10 @@
 .tpp .tpp-offer .tpp-lw .tpa-cta {
   margin-top: 14px;
 }
+
+/* A Lite place's card (12 Nov 2026): its logo where the others' sit, the
+   Lite tag beside it. */
+.tpp .tpp-lite-tag {
+  top: 12px;
+  left: 50px;
+}

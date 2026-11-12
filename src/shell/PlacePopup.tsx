@@ -36,12 +36,15 @@ export default function PlacePopup({
   onClose,
   onJoin,
   cta,
+  they = false,
 }: {
   place: PlacePopupPlace;
   onClose: () => void;
   onJoin: () => void;
   /** The button's words when the page has its own (the parents page). */
   cta?: string;
+  /** The parents page: a Lite perk says "their order". */
+  they?: boolean;
 }) {
   const plusLabel = useJoinLabel();
   const joinLabel = cta ?? plusLabel;
@@ -184,7 +187,7 @@ export default function PlacePopup({
                       </span>
                     )}
                     <span>
-                      <b>{k.b}</b>
+                      <b>{they ? k.b.replace(/\byour\b/g, "their") : k.b}</b>
                       <span>{k.when}</span>
                     </span>
                   </li>

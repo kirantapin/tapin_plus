@@ -18,7 +18,11 @@ const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(pre
 const names = (list: LitePlace[]) =>
   list.length === 1 ? list[0].name : `${list.slice(0, -1).map((p) => p.name).join(", ")} and ${list[list.length - 1].name}`;
 
-export function LiteJoined({ places }: { places: LitePlace[] }) {
+/* The parents page says "their order" (Sam, 12 Nov 2026: "add them to the
+   parents page too"). */
+const voice = (t: string, they: boolean) => (they ? t.replace(/\byour\b/g, "their") : t);
+
+export function LiteJoined({ places, they = false }: { places: LitePlace[]; they?: boolean }) {
   const item = useRef<HTMLImageElement | null>(null);
   useEffect(() => {
     const el = item.current;
@@ -83,7 +87,7 @@ export function LiteJoined({ places }: { places: LitePlace[] }) {
                       </span>
                     )}
                     <p>
-                      <b>{k.b}</b>
+                      <b>{voice(k.b, they)}</b>
                       <span>{k.when}</span>
                     </p>
                   </li>
