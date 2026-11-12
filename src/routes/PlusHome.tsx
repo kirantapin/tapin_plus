@@ -34,6 +34,7 @@ import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
+import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
 import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
@@ -75,11 +76,11 @@ type Place = (typeof PLACES)[number];
  *  on food and non-alcoholic drinks (3 Nov 2026). */
 /* The places row's card, three takes (?railv=a|b|c, 12 Nov 2026); none is
    the shipped card. */
-type RailV = "a" | "b" | "c";
+type RailV = "a" | "b" | "c" | "c1" | "c2" | "c3";
 const railVersion = (): RailV | null => {
   if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("railv");
-  return v === "a" || v === "b" || v === "c" ? v : null;
+  return v === "a" || v === "b" || v === "c" || v === "c1" || v === "c2" || v === "c3" ? v : null;
 };
 
 const KIND: Record<string, string> = {
@@ -477,6 +478,35 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
      components within the cards feels weird"). */
   const [railv] = useState(railVersion);
   const railRef = useRef<HTMLUListElement | null>(null);
+  /* The cards in the row, Plus then Lite, as the filter has them; a
+     place's own page leaves itself out. */
+  const railCards = [
+    ...(railKind === "lite" ? [] : PLACES.filter((v) => v.id !== placeId)).map((v) => ({
+      id: v.id,
+      name: v.name,
+      kind: KIND[v.id] ?? v.category,
+      photo: photoFor(v),
+      logo: v.logo,
+      lite: false,
+      /* The three verbs (#302), true at every Plus place. */
+      perk: "Get $5 · Earn $5 · Save 15%",
+    })),
+    ...(railKind === "plus" ? [] : LITE_PLACES).map((v) => ({
+      id: v.id,
+      name: v.name,
+      kind: v.kind,
+      photo: v.photo,
+      logo: v.logo,
+      lite: true,
+      perk: v.short,
+    })),
+  ];
+  /* A ticker when there are enough cards to fill a row (Sam, 12 Nov 2026:
+     "not a carousel but rather a ticker - scrolling on its own but also
+     still horizontally scrollable"); the pause button stops it. */
+  const tickerOn = railCards.length >= 4;
+  const [tickerPaused, setTickerPaused] = useState(false);
+  useTicker(railRef, tickerOn, tickerPaused, railKind);
   const railBy = (dir: 1 | -1) => {
     const r = railRef.current;
     if (!r) return;
@@ -927,7 +957,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             the coffeeholics page, we should show the other spots that are
             included in the plus membership"): the same rail without that
             place, Lite places included, since Lite comes with Plus. */}
-        <section className="tpa-places" aria-labelledby="tpa-every" data-railv={railv ?? undefined}>
+        <section className="tpa-places" aria-labelledby="tpa-every" data-railv={railv === "c1" ? "c c1" : railv ?? undefined}>
           {/* Sam, 11 Nov 2026: "for the 'Every plus place' section we have
               it be called 'what and where can I use it, click on a card to
               see'". The pop-up lists what Plus covers at that place. */}
@@ -963,6 +993,25 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
               ))}
             </div>
             <div className="tpa-rail-arrows">
+              {tickerOn ? (
+                <button
+                  type="button"
+                  className="tpa-rail-arrow tpa-rail-pause"
+                  aria-label={tickerPaused ? "Play the places" : "Pause the places"}
+                  aria-pressed={tickerPaused}
+                  onClick={() => setTickerPaused((v) => !v)}
+                >
+                  {tickerPaused ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </button>
+              ) : null}
               <button type="button" className="tpa-rail-arrow" aria-label="Earlier places" onClick={() => railBy(-1)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -975,92 +1024,58 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
               </button>
             </div>
           </div>
-          <ul className="tpa-rail" ref={railRef}>
-            {(railKind === "lite" ? [] : PLACES.filter((v) => v.id !== place?.id)).map((v) => (
-              <li key={v.id} className="tpa-place">
-                {/* A tap opens what Plus does there (Sam, 4 Nov 2026). */}
-                <button
-                  type="button"
-                  className="tpa-place-open"
-                  aria-label={`What Plus gets you at ${v.name}`}
-                  onClick={(e) => {
-                    /* Where the card is, so the photo can fly from it into
-                       the pop-up (shell/PlacePopup.tsx). */
-                    const r = e.currentTarget.getBoundingClientRect();
-                    setPlaceOpen({
-                      id: v.id,
-                      name: v.name,
-                      kind: KIND[v.id] ?? v.category,
-                      photo: photoFor(v),
-                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
-                    });
-                    track("plus_place_opened", { place: v.id });
-                  }}
-                >
-                  <img className="tpa-place-photo" src={photoFor(v)} alt="" decoding="async" loading="lazy" />
-                  <span className="tpa-glass tpa-tag">
-                    <FlatMark className="tpa-tag-mark" />
-                    Plus
-                  </span>
-                  {/* Says the card opens (Sam, 4 Nov 2026: "a small icon in
-                      the top right of these to indicate they can be
-                      pressed"). */}
-                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                  <span className="tpa-place-name">
-                    <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
-                    <span className="tpa-place-words">
-                      <b>{v.name}</b>
-                      <small>{KIND[v.id] ?? v.category}</small>
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
-            {/* Tapin Lite places after the five (Sam, 12 Nov 2026: Crumbl
-                "inside the place cards rail"), tagged Lite, not Plus. */}
-            {(railKind === "plus" ? [] : LITE_PLACES).map((v) => (
-              <li key={v.id} className="tpa-place">
-                <button
-                  type="button"
-                  className="tpa-place-open"
-                  aria-label={`What you get at ${v.name}`}
-                  onClick={(e) => {
-                    const r = e.currentTarget.getBoundingClientRect();
-                    setPlaceOpen({
-                      id: v.id,
-                      name: v.name,
-                      kind: v.kind,
-                      photo: v.photo,
-                      lite: true,
-                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
-                    });
-                    track("plus_place_opened", { place: v.id, lite: true });
-                  }}
-                >
-                  <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
-                  <span className="tpa-glass tpa-tag">
-                    <LiteMark className="tpa-tag-mark" />
-                    Lite
-                  </span>
-                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                  <span className="tpa-place-name">
-                    <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
-                    <span className="tpa-place-words">
-                      <b>{v.name}</b>
-                      <small>{v.kind}</small>
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
+          {/* The row's cards, Plus places then Lite, filtered. As a ticker
+              (shell/useTicker.ts) it is drawn twice so the drift wraps; the
+              copy is hidden from screen readers and the keyboard. */}
+          <ul className="tpa-rail" ref={railRef} data-ticker={tickerOn ? "" : undefined}>
+            {[false, true].map((copy) =>
+              copy && !tickerOn
+                ? null
+                : railCards.map((v) => (
+                    <li key={`${copy ? "copy-" : ""}${v.id}`} className="tpa-place" data-ticker-copy={copy ? "" : undefined} aria-hidden={copy || undefined}>
+                      <button
+                        type="button"
+                        className="tpa-place-open"
+                        tabIndex={copy ? -1 : undefined}
+                        aria-label={v.lite ? `What you get at ${v.name}` : `What Plus gets you at ${v.name}`}
+                        onClick={(e) => {
+                          /* Where the card is, so the photo can fly from it
+                             into the pop-up (shell/PlacePopup.tsx). */
+                          const r = e.currentTarget.getBoundingClientRect();
+                          setPlaceOpen({
+                            id: v.id,
+                            name: v.name,
+                            kind: v.kind,
+                            photo: v.photo,
+                            lite: v.lite || undefined,
+                            from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                          });
+                          track("plus_place_opened", v.lite ? { place: v.id, lite: true } : { place: v.id });
+                        }}
+                      >
+                        <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
+                        <span className="tpa-glass tpa-tag">
+                          {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
+                          {v.lite ? "Lite" : "Plus"}
+                        </span>
+                        {/* Says the card opens (Sam, 4 Nov 2026). */}
+                        <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <span className="tpa-place-name">
+                          <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
+                          <span className="tpa-place-words">
+                            <b>{v.name}</b>
+                            <small>{v.kind}</small>
+                            <small className="tpa-place-perk">{v.perk}</small>
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  )),
+            )}
           </ul>
         </section>
 

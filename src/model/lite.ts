@@ -21,6 +21,8 @@ export type LitePlace = {
   item?: string;
   /** A round mark (a badge), seated as a circle rather than a tile. */
   round?: boolean;
+  /** The perks in one short line, for a card (12 Nov 2026). */
+  short: string;
   perks: LitePerk[];
 };
 
@@ -32,6 +34,7 @@ export const LITE_PLACES: LitePlace[] = [
     logo: asset("logos/crumbl.png"),
     photo: asset("places/crumbl.jpg"),
     item: asset("places/crumbl-choc-chip.jpg"),
+    short: "10% off · free cookie with any item",
     /* "10% off every day + Free chocolate chip cookie (one use a day for
        each)". */
     perks: [
@@ -50,6 +53,7 @@ export const LITE_PLACES: LitePlace[] = [
     logo: asset("logos/italianos-ib.png"),
     photo: asset("places/italianos.jpg"),
     round: true,
+    short: "10% off, once a day",
     perks: [{ key: "percent", b: "10% off your order", when: "Once a day" }],
   },
 ];
