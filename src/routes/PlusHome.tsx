@@ -1156,9 +1156,14 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                  longer repeats it. */
               <>
                 <h1>Make every dollar you spend at {place.name} go further.</h1>
+                {/* $25 a month at the place (Sam, 12 Nov 2026: "we should
+                    show $25 in credit every month, since it's true. The first
+                    $5 is theirs, the other $20 is from spending $40 but we
+                    don't have to say that"): the month's $5 and four weeks'
+                    $5 back. The opening card under it says how. */}
                 {member ? null : (
                   <p className="wc" data-wc="1" data-ph-show="">
-                    <b className="tnum">${CREDIT}</b>
+                    <b className="tnum">${CREDIT * 5}</b>
                     <span>in credit every month</span>
                   </p>
                 )}
