@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { BAR_IDS, covers, venueCovers } from "../model/content";
 import { slideAway } from "./sheetMotion";
 import { litePlace } from "../model/lite";
+import { LiteMark } from "./LiteMark";
 
 /* ══ ONE PLACE, WHAT PLUS DOES THERE (Sam, 4 Nov 2026: "when people click on
    these merchant cards, there should be a small merchant pop up for each that
@@ -185,7 +186,10 @@ export default function PlacePopup({
                   </li>
                 ))}
               </ul>
-              <p className="pp-note">{lite.name} is a Tapin Lite place. Lite comes with&nbsp;Plus.</p>
+              <p className="pp-note">
+                <LiteMark className="lite-mark" />
+                <span>{lite.name} is a Tapin Lite place. Lite comes with&nbsp;Plus.</span>
+              </p>
             </>
           ) : null}
           {/* What Plus gives here, and on what. */}
