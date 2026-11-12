@@ -69,10 +69,8 @@ export function LiveCountdown({ className }: { className?: string }) {
     );
   return (
     <span className={className}>
-      <span className="tpa-live-day" aria-hidden="true">
-        <i>Nov</i>
-        <b>20</b>
-      </span>
+      {/* No calendar day on the card (Sam, 12 Nov 2026: "use the current
+          version but remove the calendar icon"); the pop-up keeps it. */}
       <span className="tpa-live-words">
         <b>Live Fri 20 Nov</b>
         <span className="tnum">{left(LIVE_ON - now)} to go</span>
