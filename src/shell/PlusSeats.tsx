@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP, plusSeatLine, plusSeatsLeft } from "../model/seats";
+import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP, coffeeholicsSeatsLeft, plusSeatLine, plusSeatsLeft } from "../model/seats";
 
 /* The next-100 count (model/seats.ts), checked once a minute so a seat can
    go while the page is open. */
@@ -7,6 +7,17 @@ export function usePlusSeats(): number {
   const [left, setLeft] = useState(() => plusSeatsLeft());
   useEffect(() => {
     const t = window.setInterval(() => setLeft(plusSeatsLeft()), 60_000);
+    return () => window.clearInterval(t);
+  }, []);
+  return left;
+}
+
+/* Coffeeholics' 50 (model/seats.ts), checked every 30 seconds: it moves
+   hourly, sometimes by five. */
+export function useCoffeeholicsSeats(): number {
+  const [left, setLeft] = useState(() => coffeeholicsSeatsLeft());
+  useEffect(() => {
+    const t = window.setInterval(() => setLeft(coffeeholicsSeatsLeft()), 30_000);
     return () => window.clearInterval(t);
   }, []);
   return left;

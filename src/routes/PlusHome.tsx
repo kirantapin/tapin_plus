@@ -5,11 +5,11 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { MEMBERS_LINE } from "../model/proof";
-import { PLUS_NEXT_PRICE, plusSeatLine } from "../model/seats";
+import { COFFEEHOLICS_SEAT_CAP, PLUS_NEXT_PRICE, plusSeatLine } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
-import { PlusSeats, usePlusSeats } from "../shell/PlusSeats";
+import { PlusSeats, useCoffeeholicsSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
 import { LowerAfter, LowerVersion, lowerVersion } from "../shell/LowerVersions";
 import { Founders } from "../shell/Founders";
@@ -34,7 +34,7 @@ import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
-import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
+import { LiveCountdown, LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
 import { COFFEEHOLICS_FOREVER_ENDS } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
@@ -373,7 +373,93 @@ const Chevron = () => (
    then the first month's price against what that month saves there, the $5
    credit on one visit and 15% off the rest (parents_kit placeMonth). The
    figure eases in on a new answer; still with reduced motion. */
-function PlaceMath({ placeId, name, first, monthly, forever = false }: { placeId: string; name: string; first: string; monthly: string; forever?: boolean }) {
+/* ══ THE FOR-LIFE CARD, THREE TAKES (?cfv=1|2|3, Sam, 12 Nov 2026: "can we
+   /impeccable design 3 versions of this? I think we should cap the number of
+   seats we're allowing for coffeeholics special rate to 50") ══════════════════
+   Each holds the same true things: $3.99 a month for life, the spots left of
+   50 (model/seats.ts), when the offer ends, how often you'd go and what that
+   saves. 1 · Count leads with the savings and ends on the spots as one big
+   number; 2 · Dots shows the 50 spots as 50 dots, open ones green; 3 · Ink
+   puts the price and the spots in one dark tile at the top. */
+type CfV = "1" | "2" | "3";
+const cfVersion = (): CfV | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("cfv");
+  return v === "1" || v === "2" || v === "3" ? v : null;
+};
+const CF_ENDS_LABEL = "ends Fri 13 Nov, 11:59pm";
+
+function CfCount({ first }: { first: string }) {
+  const left = useCoffeeholicsSeats();
+  return (
+    <div className="cfv-count">
+      <div className="cfv-count-row tnum">
+        <b>{left}</b>
+        <p>
+          <span>spots left at {first} for life</span>
+          <small>
+            of {COFFEEHOLICS_SEAT_CAP} · {CF_ENDS_LABEL}
+          </small>
+        </p>
+      </div>
+      <span className="cfv-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${left / COFFEEHOLICS_SEAT_CAP})` }} />
+      </span>
+    </div>
+  );
+}
+
+function CfDots() {
+  const left = useCoffeeholicsSeats();
+  return (
+    <div className="cfv-dots">
+      <ol className="cfv-dots-grid" aria-label={`${left} of ${COFFEEHOLICS_SEAT_CAP} spots left`}>
+        {Array.from({ length: COFFEEHOLICS_SEAT_CAP }, (_, i) => (
+          <li key={i} data-open={i < left ? "" : undefined} />
+        ))}
+      </ol>
+      <p className="tnum">
+        <b>
+          {left} of {COFFEEHOLICS_SEAT_CAP} spots left
+        </b>{" "}
+        · {CF_ENDS_LABEL}
+      </p>
+    </div>
+  );
+}
+
+function CfInk({ first }: { first: string }) {
+  const left = useCoffeeholicsSeats();
+  return (
+    <div className="cfv-ink tnum">
+      <p className="cfv-ink-price">
+        <b>{first}</b>
+        <span>a month, for life</span>
+      </p>
+      <p className="cfv-ink-left">
+        <b>{left}</b>
+        <span>of {COFFEEHOLICS_SEAT_CAP} spots left</span>
+      </p>
+      <p className="cfv-ink-ends">Offer {CF_ENDS_LABEL}</p>
+    </div>
+  );
+}
+
+function PlaceMath({
+  placeId,
+  name,
+  first,
+  monthly,
+  forever = false,
+  cfv = null,
+}: {
+  placeId: string;
+  name: string;
+  first: string;
+  monthly: string;
+  forever?: boolean;
+  cfv?: CfV | null;
+}) {
   const m = placeMonth(placeId);
   const { track } = useEventTracking();
   const [at, setAt] = useState(1);
@@ -388,6 +474,81 @@ function PlaceMath({ placeId, name, first, monthly, forever = false }: { placeId
   if (!m) return null;
   const v = VISITS[at] ?? VISITS[1];
   const save = m.save(v.visits);
+  const freq = (
+    <div className="tpa-freq" role="radiogroup" aria-label={`How often you go to ${name}`}>
+      {VISITS.map((x, i) => (
+        <button
+          key={x.id}
+          type="button"
+          role="radio"
+          aria-checked={i === at}
+          onClick={() => {
+            setAt(i);
+            track("plus_place_visits_picked", { place: placeId, visits: x.visits });
+          }}
+        >
+          {x.label}
+        </button>
+      ))}
+    </div>
+  );
+  const how = (
+    <p className="tpa-math-then tnum">
+      {v.visits} visits a month for {m.what} ({money(m.price)}): your ${CREDIT} credit on one, {PERCENT}% off the other {v.visits - 1}.
+    </p>
+  );
+  const saved = (
+    <p className="tpa-math-get" aria-live="polite">
+      <b className="tnum" ref={fig}>
+        {money(save)}
+      </b>
+      <span>saved a month</span>
+    </p>
+  );
+  if (forever && cfv === "1")
+    return (
+      <div className="cfv cfv-1">
+        <h2 className="tpa-h2 tpa-math-h">What you’d save at {name}</h2>
+        {freq}
+        <div className="tpa-math" data-ph-show="">
+          <p>
+            <b className="tnum">{first}</b>
+            <span>a month, for life</span>
+          </p>
+          <svg className="tpa-math-arrow" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 12h15m-5.5-6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {saved}
+        </div>
+        {how}
+        <CfCount first={first} />
+      </div>
+    );
+  if (forever && cfv === "2")
+    return (
+      <div className="cfv cfv-2">
+        <h2 className="tpa-h2 tpa-math-h tnum">{first} a month, for life</h2>
+        <CfDots />
+        <h3 className="cfv-sub">What you’d save at {name}</h3>
+        {freq}
+        <div className="tpa-math cfv-math-one" data-ph-show="">
+          {saved}
+        </div>
+        {how}
+      </div>
+    );
+  if (forever && cfv === "3")
+    return (
+      <div className="cfv cfv-3">
+        <CfInk first={first} />
+        <h3 className="cfv-sub">What you’d save at {name}</h3>
+        {freq}
+        <div className="tpa-math cfv-math-one" data-ph-show="">
+          {saved}
+        </div>
+        {how}
+      </div>
+    );
   return (
     <>
       <h2 className="tpa-h2 tpa-math-h">What you’d save at {name}</h2>
@@ -532,6 +693,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   /* A place's own page selling Plus for life (/coffeeholics, 12 Nov 2026,
      model/campaign.ts): its price, said as for life everywhere it shows. */
   const placeForever = !!placeId && firstForever(price);
+  /* The for-life card's three takes, preview only (?cfv=1|2|3). */
+  const [cfv] = useState(cfVersion);
+  /* The live badge's five takes, preview only (?livev=1..5). */
+  const [livev] = useState(liveVersion);
   const MONTHLY = usd(price?.monthly);
   /* `from` is the button tapped, which grows into the checkout. */
   /* `from` is the button tapped; `over`, a Join inside another pop-up. */
@@ -1102,18 +1267,23 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                           track("plus_place_opened", v.lite ? { place: v.id, lite: true } : { place: v.id });
                         }}
                       >
-                        <img
-                          className="tpa-place-photo"
-                          src={v.photo}
-                          alt=""
-                          decoding="async"
-                          loading="lazy"
-                          style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined}
-                        />
-                        {/* Not live yet (Sam, 12 Nov 2026: "show 'live on
-                            plus' next Friday with a small countdown so it's
-                            clear"): a pill on the photo until the day. */}
-                        {liveSoon(v.id) ? <LiveCountdown className="tpa-live" /> : null}
+                        {/* The photo and what sits on it (the live badge's
+                            takes need its box; display: contents otherwise). */}
+                        <span className="tpa-place-shot" data-soon={liveSoon(v.id) && livev === "4" ? "" : undefined}>
+                          <img
+                            className="tpa-place-photo"
+                            src={v.photo}
+                            alt=""
+                            decoding="async"
+                            loading="lazy"
+                            style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined}
+                          />
+                          {/* Not live yet (Sam, 12 Nov 2026: "show 'live on
+                              plus' next Friday with a small countdown so it's
+                              clear"): a pill on the photo until the day, or
+                              one of its five takes (?livev=). */}
+                          {liveSoon(v.id) ? livev ? <LiveOnPhoto v={livev} /> : <LiveCountdown className="tpa-live" /> : null}
+                        </span>
                         <span className="tpa-glass tpa-tag">
                           {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
                           {v.lite ? "Lite" : "Plus"}
@@ -1128,7 +1298,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                           <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
                           <span className="tpa-place-words">
                             <b>{v.name}</b>
-                            <small>{v.kind}</small>
+                            {liveSoon(v.id) && livev === "1" ? <LiveLine /> : <small>{v.kind}</small>}
                             <small className="tpa-place-perk">{v.perk}</small>
                           </span>
                         </span>
@@ -1219,7 +1389,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
             {place && placeMonth(place.id) ? (
-              <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} />
+              <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} cfv={cfv} />
             ) : offv && !place && !invite && !free ? (
               <OfferVersion
                 v={offv}
@@ -1310,7 +1480,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   5 Nov 2026: "a countdown until sunday"). */}
               {invite?.ends ? (
                 <InviteClock invite={invite} className="tpa-buy-seats" />
-              ) : placeForever ? (
+              ) : placeForever && cfv ? null : placeForever ? (
                 /* The spots are the $7.99 rate's; this price is its own. */
                 <p className="tpa-buy-seats tnum">Locked in for as long as you stay. Cancel anytime in the Tapin app.</p>
               ) : (
