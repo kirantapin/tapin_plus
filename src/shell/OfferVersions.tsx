@@ -162,14 +162,14 @@ const Ico = ({ d, children }: { d?: string; children?: ReactNode }) => (
     {children}
   </svg>
 );
-const LockIco = () => (
+export const LockIco = () => (
   <Ico>
     <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
     <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
   </Ico>
 );
 /** The four kinds Sam named, then more. */
-const KINDS: Array<{ key: string; name: string; Icon: () => JSX.Element }> = [
+export const KINDS: Array<{ key: string; name: string; Icon: () => JSX.Element }> = [
   { key: "bars", name: "Bars", Icon: () => <Ico d="M5 5h14l-7 8zM12 13v6M8.5 19h7M8 8h8" /> },
   { key: "gyms", name: "Gyms", Icon: () => <Ico d="M6.5 7.5v9M17.5 7.5v9M4 10v4M20 10v4M6.5 12h11" /> },
   {
@@ -193,7 +193,7 @@ const KINDS: Array<{ key: string; name: string; Icon: () => JSX.Element }> = [
     ),
   },
 ];
-const MoreIco = () => <Ico d="M12 6v12M6 12h12" />;
+export const MoreIco = () => <Ico d="M12 6v12M6 12h12" />;
 const FoodIco = () => <Ico d="M5 9h11v4.5a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 5 13.5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M9 3.5v2.5M12 3.5v2.5" />;
 
 function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they: boolean }) {
@@ -408,6 +408,7 @@ export function OfferVersion({
   spots,
   noEnds = false,
   forever = false,
+  lower = false,
 }: {
   v: OfferV;
   first: string;
@@ -418,6 +419,9 @@ export function OfferVersion({
   noEnds?: boolean;
   /** A group's for-life price: it is the one locked in, with no "then". */
   forever?: boolean;
+  /** A lower-half preview (shell/LowerVersions.tsx, ?lowv=) draws the rest:
+   *  only pay/get here. */
+  lower?: boolean;
 }) {
   const total = `$${PLACES.length * CREDIT}`;
   if (v === "a") {
@@ -493,13 +497,13 @@ export function OfferVersion({
   return (
     <div className="ov ov-c" data-ph-show="">
       <PayGet first={first} monthly={monthly} term={term} forever={forever} />
-      <LockedIn monthly={forever ? first : monthly} />
+      {lower ? null : <LockedIn monthly={forever ? first : monthly} />}
       {/* A promo link's own price (a group's year at $3.99) has no end
           date: the November 30 clock is the welcome offer's. */}
-      {term || noEnds ? null : <Ends />}
+      {term || noEnds || lower ? null : <Ends />}
       {/* A group's own spots (shell/GroupBits.tsx) in place of the $7.99
           ones, which lead to $14.99. */}
-      {spots ?? <Spots monthly={monthly} />}
+      {lower ? null : spots ?? <Spots monthly={monthly} />}
     </div>
   );
 }
