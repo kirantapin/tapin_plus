@@ -801,7 +801,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
         ref={bandRef}
         className="tpa-band"
         data-group={group?.id}
-        data-hero={place || invite || hero === "0" ? undefined : hero}
+        data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
       >
         {/* The group's own crop is for its own photo, not the collage. */}
@@ -848,12 +848,24 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                 {/* No November 30 clock: the residents' offer is its own,
                     counted in spots (Sam, 10 Nov 2026). */}
               </>
-            ) : place || hero === "0" ? (
-              <h1>
-                {place
-                  ? `$${CREDIT} credit every month at ${place.name}`
-                  : `$${CREDIT} credit at every place you already go in Blacksburg`}
-              </h1>
+            ) : place ? (
+              /* A place's own header, the main page's in its terms (Sam, 12
+                 Nov 2026: "the header should be updated too I think"): the
+                 headline, the green figure for that place, the price line.
+                 The card below says how the $5 works, so the header no
+                 longer repeats it. */
+              <>
+                <h1>Make every dollar you spend at {place.name} go further.</h1>
+                {member ? null : (
+                  <p className="wc" data-wc="1" data-ph-show="">
+                    <b className="tnum">${CREDIT}</b>
+                    <span>in credit every month</span>
+                  </p>
+                )}
+                {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} />}
+              </>
+            ) : hero === "0" ? (
+              <h1>${CREDIT} credit at every place you already go in Blacksburg</h1>
             ) : HERO_LINES[hero] ? (
               /* Round 3 of the hero test (model/heroTest.ts). */
               <>
