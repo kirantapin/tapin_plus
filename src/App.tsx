@@ -12,7 +12,7 @@ import ParentsHome from "./routes/ParentsHome";
 import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
-import { COFFEEHOLICS_FOREVER_ENDS, COFFEEHOLICS_FOREVER_POLICY, campaignHeroShot } from "./model/campaign";
+import { COFFEEHOLICS_FOREVER_ENDS, COFFEEHOLICS_FOREVER_POLICY } from "./model/campaign";
 import { loadPlusLink } from "./model/link";
 import { redactUrl } from "./model/redact";
 
@@ -169,7 +169,8 @@ function CoffeeholicsPage() {
   useState(() => {
     if (typeof window !== "undefined") setPagePolicy(COFFEEHOLICS_FOREVER_POLICY, COFFEEHOLICS_FOREVER_ENDS);
   });
-  return <PlusHome placeId="coffeeholicsva" bandSrc={asset(campaignHeroShot)} />;
+  /* The mural, framed on the cups (Sam, 12 Nov 2026). */
+  return <PlusHome placeId="coffeeholicsva" bandSrc={asset("/heroes/coffeeholicsva.jpg")} bandPos="56% 50%" />;
 }
 
 /* A group's page carries its promo link (model/groups.ts) in the address, so
