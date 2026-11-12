@@ -478,7 +478,7 @@ function spendSaves(spend: number) {
   return { credit, weeks, back, rest, pct, paid, points, pointsValue, total: cents(credit + back + pct + pointsValue) };
 }
 
-function SpendSaves({ placeId, name, first }: { placeId: string; name: string; first: string }) {
+function SpendSaves({ placeId, name }: { placeId: string; name: string }) {
   const { track } = useEventTracking();
   const [spend, setSpend] = useState<number>(50);
   const fig = useRef<HTMLElement | null>(null);
@@ -490,7 +490,6 @@ function SpendSaves({ placeId, name, first }: { placeId: string; name: string; f
     fig.current?.animate?.([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
   }, [spend]);
   const s = spendSaves(spend);
-  const price = Number(first.replace(/[^0-9.]/g, "")) || 0;
   const parts = [
     { key: "credit", amount: s.credit, label: `$${CREDIT} credit, every month` },
     { key: "back", amount: s.back, label: `$${CREDIT} back, ${s.weeks} ${s.weeks === 1 ? "week" : "weeks"} you spend $10` },
@@ -548,11 +547,6 @@ function SpendSaves({ placeId, name, first }: { placeId: string; name: string; f
           {parts.map((p) => (
             <i key={p.key} data-k={p.key} style={{ width: at(p.amount) }} />
           ))}
-          {price > 0 && price < s.total ? (
-            <span className="ss-mark" style={{ left: at(price) }}>
-              <span className="tnum">{first} Plus</span>
-            </span>
-          ) : null}
         </div>
       </div>
       <ul className="ss-parts tnum">
@@ -564,7 +558,10 @@ function SpendSaves({ placeId, name, first }: { placeId: string; name: string; f
           </li>
         ))}
       </ul>
-      <p className="ss-note">With every credit used. Plus costs {first} a month, so that’s {money(cents(s.total - price))} ahead.</p>
+      {/* What they save, not net of Plus (Sam, 12 Nov 2026: "we should just
+          show what they saved, not what they saved after plus"): no price
+          mark on the bar, no "ahead". */}
+      <p className="ss-note">With every credit used.</p>
       </details>
     </div>
   );
@@ -666,7 +663,7 @@ function PlaceMath({
     return (
       <div className="cfv cfv-3">
         <CfInk first={first} />
-        <SpendSaves placeId={placeId} name={name} first={first} />
+        <SpendSaves placeId={placeId} name={name} />
       </div>
     );
   return (
