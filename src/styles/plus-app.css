@@ -6586,3 +6586,148 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     margin: 6px 0 0;
   }
 }
+
+/* ══ TAPIN LITE: CRUMBL JUST JOINED (shell/LiteJoined.tsx, 12 Nov 2026) ═══
+   The place's photo leads, its mark on the photo's edge; the news is the
+   heading; the two perks as a figure and the real cookie. */
+.tpl-new {
+  padding: 8px 8px 16px;
+}
+.tpl-new-photo {
+  position: relative;
+  height: 136px;
+  margin-bottom: 38px;
+  border-radius: 12px;
+  background: #f6e3ea;
+}
+.tpl-new-photo > img:first-child {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.tpl-new-logo {
+  position: absolute;
+  left: 12px;
+  bottom: -30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
+}
+.tpl-new-h {
+  margin: 0 8px;
+  font: 600 22px/27px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.tpl-new-perks {
+  display: grid;
+  gap: 12px;
+  margin: 14px 8px 0;
+  padding: 0;
+  list-style: none;
+}
+.tpl-new-perks li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tpl-new-perks p {
+  display: grid;
+  margin: 0;
+}
+.tpl-new-perks b {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpl-new-perks span:not(.tpl-new-pct) {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpl-new-item {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.tpl-new-pct {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #0b7a53;
+  color: #ffffff;
+  font: 700 14px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.tpl-new-foot {
+  margin: 14px 8px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+
+/* A Lite place in the rail wears its own tag, with no Plus mark. */
+.tpa-tag-lite {
+  padding: 0 11px;
+}
+
+/* A Lite place's pop-up: its own perks, the real item as the icon, and how
+   you get Lite. */
+.pp-ico-item {
+  overflow: hidden;
+  background: transparent;
+}
+.pp-ico-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pp-note {
+  margin: 0;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: rgba(20, 22, 24, 0.62);
+}
+/* A computer: the photo beside the news, not a wide banner over a short
+   list. The mark sits inside the photo's corner. */
+@media (min-width: 1024px) {
+  .tpa-home .tpl-new {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: 32px;
+    align-items: start;
+  }
+  .tpa-home .tpl-new-photo {
+    grid-row: 1 / -1;
+    height: 100%;
+    min-height: 260px;
+    margin: 0;
+  }
+  .tpa-home .tpl-new-logo {
+    bottom: 14px;
+    left: 14px;
+    box-shadow: 0 0 0 3px #ffffff, 0 6px 16px rgba(20, 22, 24, 0.18);
+  }
+  .tpa-home .tpl-new-h {
+    margin: 6px 0 0;
+    font-size: 26px;
+    line-height: 31px;
+  }
+  .tpa-home .tpl-new-perks {
+    margin: 18px 0 0;
+    gap: 14px;
+  }
+  .tpa-home .tpl-new-foot {
+    align-self: end;
+    margin: 18px 0 0;
+  }
+}
