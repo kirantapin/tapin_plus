@@ -169,6 +169,9 @@ export function AppPanel({ where, signIn, they = false }: { where: string; signI
         In the app
       </h2>
       <div className="acc-panel acc-app" data-device={d}>
+        {/* What's waiting and the way in: side by side on a wide card, one
+            above the other on a narrow one (account.css). */}
+        <div className="acc-app-wide">
         <div className="acc-app-main">
           <div className="acc-app-head">
             <img className="acc-app-icon" src={APP_ICON} alt="" width="48" height="48" decoding="async" />
@@ -216,6 +219,7 @@ export function AppPanel({ where, signIn, they = false }: { where: string; signI
             {d === "android" ? "Open Tapin" : "Get the app"}
           </a>
         )}
+        </div>
         <p className="acc-app-sign">
           <Glyph d={GLYPHS.phone} className="acc-glyph" />
           {signIn}
