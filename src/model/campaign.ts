@@ -161,7 +161,10 @@ export const campaignHeroShot = "/shots/coffeeholicsva-cup.jpg";
 
 /* ══ $3.99 A MONTH FOR LIFE AT /coffeeholics (Sam, 12 Nov 2026: "Let's do
    $3.99 offer for coffeeholics, for life as long as they don't cancel") ═════
-   Kiran's public policy "$3.99 forever" on the tapin row: $4 off the $7.99
+   Sam made it $4.99 the same evening ("just changed the price from $3.99 for
+   life to $4.99 for life"): the policy now reads "$4.99 forever", $3 off.
+   The page reads the price from the policy, so nothing here names it.
+   First read: Kiran's public policy "$3.99 forever" on the tapin row: $4 off the $7.99
    bundle, discountDuration "forever", active, no end (read 12 Nov 2026). The
    page names it (model/pagePolicy.ts) and the price and the checkout apply
    it with no link, as Welcome Week's $2.99 does. */
