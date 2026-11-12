@@ -2,6 +2,7 @@ import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
 import { AccountCard, AccountFrame, AppPanel, InfoPanel } from "../shell/AccountPage";
 import { openPlusSignIn } from "../shell/PlusCheckout";
+import { plusPageBack } from "../model/backTo";
 
 /* ══ THE STUDENTS' ACCOUNT (/in) ════════════════════════════════════════════
    Was the presale's receipt, then "Members" in the home page's band and
@@ -49,7 +50,8 @@ export default function Members() {
   ];
 
   return (
-    <AccountFrame back="/" backState={{ from: "members" }} docTitle="Your account · Tapin Plus">
+    /* Back to the Plus page they came from (model/backTo.ts), e.g. /coffeeholics. */
+    <AccountFrame back={plusPageBack()} backState={{ from: "members" }} docTitle="Your account · Tapin Plus">
       {member ? (
         <AccountCard
           title="You’re a Plus member"
