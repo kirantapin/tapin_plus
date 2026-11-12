@@ -138,11 +138,22 @@ export function LockedIn({ monthly, they = false }: { monthly: string; they?: bo
        names, then the lock and the price under a hairline.
    C · Same price: two rows, now and joining, the price beside each, so the
        eye sees $7.99 twice and the lock on the second. */
-type LockV = "a" | "b" | "c";
+/* ══ THREE MORE (Sam, 11 Nov 2026, after the band was quietened twice:
+   "design 3 variations of this please") ═════════════════════════════════
+   Preview only: ?lockv=d|e|f; B stays the band until Sam picks. Each is
+   two lines at most, no box, and keeps the kinds' icons.
+
+   D · Stack: the kinds as a small overlapping stack, like faces joining a
+       group, with the names beside it; the lock line under.
+   E · Inline: one sentence with each kind's icon in the words, then the
+       lock line.
+   F · Price row: the price that stays, set like the pay/get rows above it,
+       with the kinds joining in a quiet line under. */
+type LockV = "a" | "b" | "c" | "d" | "e" | "f";
 const lockVersion = (): LockV | "0" => {
   if (typeof window === "undefined") return "b";
   const v = new URLSearchParams(window.location.search).get("lockv");
-  return v === "a" || v === "c" || v === "0" ? v : "b";
+  return v === "a" || v === "c" || v === "d" || v === "e" || v === "f" || v === "0" ? v : "b";
 };
 
 const Ico = ({ d, children }: { d?: string; children?: ReactNode }) => (
@@ -211,6 +222,77 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
           </li>
         </ul>
         <p className="ov-lk-sub">When they do, {your} price doesn’t go&nbsp;up.</p>
+      </div>
+    );
+  if (v === "d")
+    return (
+      <div className="ov-lk ov-lk-d">
+        <div className="ov-lk-d-row">
+          <ul className="ov-lk-stack" aria-hidden="true">
+            {KINDS.map(({ key, Icon }) => (
+              <li key={key}>
+                <Icon />
+              </li>
+            ))}
+            <li className="ov-lk-more">
+              <MoreIco />
+            </li>
+          </ul>
+          <p className="ov-lk-d-names">Bars, gyms, clubs and barbers are&nbsp;joining</p>
+        </div>
+        <p className="ov-lk-d-lock tnum">
+          <b>
+            {Your} {monthly} a month is locked in,
+          </b>{" "}
+          however many places&nbsp;join.
+        </p>
+      </div>
+    );
+  if (v === "e") {
+    const K = Object.fromEntries(KINDS.map((k) => [k.key, k.Icon]));
+    const W = ({ k, children }: { k: string; children: ReactNode }) => {
+      const I = K[k];
+      return (
+        <span className="ov-lk-w">
+          <I />
+          {children}
+        </span>
+      );
+    };
+    return (
+      <div className="ov-lk ov-lk-e">
+        <p className="ov-lk-e-line">
+          New <W k="bars">bars</W>, <W k="gyms">gyms</W>, <W k="clubs">clubs</W> and <W k="barbers">barbers</W> are
+          joining Plus in&nbsp;Blacksburg.
+        </p>
+        <p className="ov-lk-e-lock tnum">
+          {Your} {monthly} a month is locked in, however many&nbsp;join.
+        </p>
+      </div>
+    );
+  }
+  if (v === "f")
+    return (
+      <div className="ov-lk ov-lk-f">
+        <div className="ov-lk-f-row tnum">
+          <p>
+            <b>Locked in</b>
+            <span>however many places join</span>
+          </p>
+          <strong>
+            {monthly}
+            <small>/mo</small>
+          </strong>
+        </div>
+        <ul className="ov-lk-f-kinds">
+          {KINDS.map(({ key, name, Icon }) => (
+            <li key={key}>
+              <Icon />
+              {key === "barbers" ? "Barbers" : name}
+            </li>
+          ))}
+          <li className="ov-lk-more">and more joining</li>
+        </ul>
       </div>
     );
   if (v === "b")
