@@ -1008,7 +1008,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {joinLabel}
       </button>
     );
-  const tryCta = invite ? null : (
+  /* Not on a place's own page (Sam, 12 Nov 2026: "remove the 'try it once
+     for free' for both burg and coffeeholics pages"). */
+  const tryCta = invite || place ? null : (
     <button
       type="button"
       className="tpa-try"
