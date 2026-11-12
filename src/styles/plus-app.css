@@ -8023,3 +8023,80 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   transform-origin: left;
   opacity: 1;
 }
+
+/* ══ THE CARD'S COUNTDOWN, TWO LIGHTER TAKES (?livec=a|b, 12 Nov 2026) ════
+   A · Edge: a hairline of progress along the photo's foot, a small white tag
+   just above it. B · Mini: the calendar day alone in the top-left corner,
+   the time left on a slim tag beside it. Both leave the photo to speak. */
+.lvc-edge-tag {
+  position: absolute;
+  z-index: 2;
+  left: 10px;
+  bottom: 13px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: rgba(20, 22, 24, 0.62);
+  font: 500 13px/16px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.lvc-edge-tag b {
+  font-weight: 600;
+  color: #141618;
+}
+.lvc-edge-line {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.55);
+}
+.lvc-edge-line i {
+  display: block;
+  height: 100%;
+  background: #e5751f;
+  transform-origin: left;
+}
+.lvc-mini {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lvc-mini-day {
+  display: grid;
+  width: 30px;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  text-align: center;
+}
+.lvc-mini-day i {
+  padding: 1px 0;
+  background: #e5751f;
+  color: #ffffff;
+  font: 700 9px/11px "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lvc-mini-day b {
+  padding: 0 0 2px;
+  color: #141618;
+  font: 600 14px/17px "Gilroy", Arial, sans-serif;
+}
+.lvc-mini-left {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  color: #141618;
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
