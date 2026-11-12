@@ -34,6 +34,7 @@ import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
+import { rememberPlusPage } from "../model/backTo";
 import { LiveCountdown, LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
 import { PLACE_FOREVER_ENDS, PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
@@ -1084,6 +1085,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     e.preventDefault();
     settle(true, 200, "ease-in", () => navigate("/in"));
   };
+  /* The account page's back comes here (model/backTo.ts). */
+  useEffect(() => {
+    rememberPlusPage(location.pathname + location.search);
+  }, [location.pathname, location.search]);
   useLayoutEffect(() => {
     const from = (location.state as { from?: string } | null)?.from;
     if (from === "members" && !reducedMotion() && typeof bandRef.current?.animate === "function") {
