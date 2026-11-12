@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { LitePlace } from "../model/lite";
+import { LiteMark } from "./LiteMark";
 
 /* ══ CRUMBL JUST JOINED (Sam, 12 Nov 2026: "we can show on the web page that
    Crumbl Cookies has now joined. We can have a dedicated card for them built
@@ -68,7 +69,10 @@ export function LiteJoined({ place }: { place: LitePlace }) {
           </li>
         ) : null}
       </ul>
-      <p className="tpl-new-foot">Comes with Plus, as a Tapin Lite&nbsp;place.</p>
+      <p className="tpl-new-foot">
+        <LiteMark className="lite-mark" />
+        <span>Comes with Plus, as a Tapin Lite&nbsp;place.</span>
+      </p>
     </section>
   );
 }

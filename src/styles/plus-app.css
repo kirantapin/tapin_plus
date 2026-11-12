@@ -6673,9 +6673,19 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   color: var(--muted);
 }
 
-/* A Lite place in the rail wears its own tag, with no Plus mark. */
-.tpa-tag-lite {
-  padding: 0 11px;
+/* The Lite mark (shell/LiteMark.tsx, 12 Nov 2026) beside a line of text:
+   the pop-up's note and the just-joined card's foot. */
+.lite-mark {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--ink, #141618);
+}
+.pp-note,
+.tpl-new-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* A Lite place's pop-up: its own perks, the real item as the icon, and how

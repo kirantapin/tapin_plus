@@ -33,6 +33,7 @@ import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
+import { LiteMark } from "../shell/LiteMark";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
 import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
@@ -972,7 +973,10 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                   }}
                 >
                   <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
-                  <span className="tpa-glass tpa-tag tpa-tag-lite">Lite</span>
+                  <span className="tpa-glass tpa-tag">
+                    <LiteMark className="tpa-tag-mark" />
+                    Lite
+                  </span>
                   <span className="tpa-glass tpa-place-more" aria-hidden="true">
                     <svg viewBox="0 0 24 24">
                       <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
