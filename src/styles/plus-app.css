@@ -7008,24 +7008,24 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 
 /* C · Postcard */
-.tpa-places[data-railv="c"] .tpa-rail {
+.tpa-places[data-railv~="c"] .tpa-rail {
   grid-auto-columns: 272px;
 }
-.tpa-places[data-railv="c"] .tpa-place {
+.tpa-places[data-railv~="c"] .tpa-place {
   height: 188px;
 }
-.tpa-places[data-railv="c"] .tpa-place::after {
+.tpa-places[data-railv~="c"] .tpa-place::after {
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.72) 0, rgba(0, 0, 0, 0.32) 42%, rgba(0, 0, 0, 0) 70%);
 }
-.tpa-places[data-railv="c"] .tpa-place-more {
+.tpa-places[data-railv~="c"] .tpa-place-more {
   display: none;
 }
-.tpa-places[data-railv="c"] .tpa-tag {
+.tpa-places[data-railv~="c"] .tpa-tag {
   top: 12px;
   left: auto;
   right: 12px;
 }
-.tpa-places[data-railv="c"] .tpa-place-logo {
+.tpa-places[data-railv~="c"] .tpa-place-logo {
   display: block;
   width: 44px;
   height: 44px;
@@ -7035,7 +7035,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(0, 0, 0, 0.22);
 }
 /* The logo beside the name at the card's foot, one unit. */
-.tpa-places[data-railv="c"] .tpa-place-name {
+.tpa-places[data-railv~="c"] .tpa-place-name {
   position: absolute;
   left: 14px;
   right: 14px;
@@ -7045,7 +7045,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   align-items: center;
   gap: 12px;
 }
-.tpa-places[data-railv="c"] .tpa-place-name b {
+.tpa-places[data-railv~="c"] .tpa-place-name b {
   font-weight: 600;
   font-size: 21px;
   line-height: 25px;
@@ -7087,31 +7087,260 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   .tpa-home .tpa-places[data-railv="b"] .tpa-place {
     height: auto;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-rail {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-rail {
     grid-auto-columns: 340px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-place {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-place {
     height: 228px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-place-logo {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-place-logo {
     width: 52px;
     height: 52px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-tag {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-tag {
     top: 14px;
     right: 14px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-place-name {
     left: 18px;
     bottom: 18px;
     grid-template-columns: 52px minmax(0, 1fr);
     gap: 14px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name b {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-place-name b {
     font-size: 24px;
     line-height: 28px;
   }
-  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name small {
+  .tpa-home .tpa-places[data-railv~="c"] .tpa-place-name small {
     font-size: 15px;
+  }
+}
+
+/* ══ THE ROW AS A TICKER (shell/useTicker.ts, Sam, 12 Nov 2026) ═════════════
+   It drifts by its own scroll position, so no snapping (which would fight
+   it) and no smooth-scroll (which would lag each step). The pause button
+   shows at every width; the arrows only on a computer. */
+.tpa-rail[data-ticker] {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+.tpa-rail-arrows {
+  display: flex;
+}
+.tpa-rail-arrow:not(.tpa-rail-pause) {
+  display: none;
+}
+.tpa-rail-pause svg {
+  width: 16px;
+  height: 16px;
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-rail-arrow:not(.tpa-rail-pause) {
+    display: grid;
+  }
+}
+.tpa-place-perk {
+  display: none;
+}
+
+/* ══ THREE TAKES ON C · POSTCARD (?railv=c1|c2|c3, Sam, 12 Nov 2026: "let's
+   mock up 3 /impeccable designs based on option C") ══════════════════════════
+   C1 · Postcard + perks: C, with what Plus or Lite gives there in place of
+        the kind of place.
+   C2 · Split: the photo on the left, a white panel on the right holding the
+        tag, the logo, the name and the perks, all at one reading size.
+   C3 · Framed: the photo set into a white card, with a strip under it for
+        the logo, the name and the tag. */
+
+/* C1 */
+.tpa-places[data-railv~="c1"] .tpa-place-words small:not(.tpa-place-perk) {
+  display: none;
+}
+.tpa-places[data-railv~="c1"] .tpa-place-perk {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: #ffffff;
+}
+
+/* C2 */
+.tpa-places[data-railv="c2"] .tpa-rail {
+  grid-auto-columns: 304px;
+}
+.tpa-places[data-railv="c2"] .tpa-place {
+  height: 180px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+}
+.tpa-places[data-railv="c2"] .tpa-place::after {
+  content: none;
+}
+.tpa-places[data-railv="c2"] .tpa-place-open {
+  display: grid;
+  grid-template-columns: 46% minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "photo tag" "photo name";
+}
+.tpa-places[data-railv="c2"] .tpa-place-photo {
+  position: static;
+  grid-area: photo;
+  width: 100%;
+  height: 100%;
+}
+.tpa-places[data-railv="c2"] .tpa-place-more {
+  display: none;
+}
+.tpa-places[data-railv="c2"] .tpa-tag {
+  position: static;
+  grid-area: tag;
+  justify-self: start;
+  margin: 12px 12px 0 14px;
+  background: #f0f0f0;
+  color: var(--ink);
+  box-shadow: none;
+}
+.tpa-places[data-railv="c2"] .tpa-place-name {
+  position: static;
+  grid-area: name;
+  align-self: end;
+  display: grid;
+  gap: 8px;
+  padding: 0 12px 14px 14px;
+}
+.tpa-places[data-railv="c2"] .tpa-place-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tpa-places[data-railv="c2"] .tpa-place-name b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 21px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.tpa-places[data-railv="c2"] .tpa-place-name small {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+.tpa-places[data-railv="c2"] .tpa-place-perk {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+  color: #0b7a53 !important;
+}
+
+/* C3 */
+.tpa-places[data-railv="c3"] .tpa-rail {
+  grid-auto-columns: 256px;
+}
+.tpa-places[data-railv="c3"] .tpa-place {
+  height: auto;
+  padding: 8px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+}
+.tpa-places[data-railv="c3"] .tpa-place::after {
+  content: none;
+}
+.tpa-places[data-railv="c3"] .tpa-place-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "photo photo" "name tag";
+  align-items: center;
+  row-gap: 10px;
+  height: auto;
+}
+.tpa-places[data-railv="c3"] .tpa-place-photo {
+  position: static;
+  grid-area: photo;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  background: var(--well);
+}
+.tpa-places[data-railv="c3"] .tpa-place-more {
+  display: none;
+}
+.tpa-places[data-railv="c3"] .tpa-tag {
+  position: static;
+  grid-area: tag;
+  margin: 0 4px 4px 0;
+  background: #f0f0f0;
+  color: var(--ink);
+  box-shadow: none;
+}
+.tpa-places[data-railv="c3"] .tpa-place-name {
+  position: static;
+  grid-area: name;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0 0 4px 4px;
+}
+.tpa-places[data-railv="c3"] .tpa-place-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tpa-places[data-railv="c3"] .tpa-place-name b {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tpa-places[data-railv="c3"] .tpa-place-name small {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+  .tpa-home .tpa-places[data-railv="c2"] .tpa-rail {
+    grid-auto-columns: 372px;
+  }
+  .tpa-home .tpa-places[data-railv="c2"] .tpa-place {
+    height: 212px;
+  }
+  .tpa-home .tpa-places[data-railv="c2"] .tpa-place-logo {
+    width: 44px;
+    height: 44px;
+  }
+  .tpa-home .tpa-places[data-railv="c2"] .tpa-place-name b {
+    font-size: 19px;
+    line-height: 23px;
+  }
+  .tpa-home .tpa-places[data-railv="c3"] .tpa-rail {
+    grid-auto-columns: 288px;
+  }
+  .tpa-home .tpa-places[data-railv="c3"] .tpa-place {
+    height: auto;
+  }
+}
+/* C2 on a phone: the kind of place goes, so the panel isn't crowded. */
+@media (max-width: 1023px) {
+  .tpa-places[data-railv="c2"] .tpa-place-words small:not(.tpa-place-perk) {
+    display: none;
   }
 }
