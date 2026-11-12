@@ -73,6 +73,15 @@ type Place = (typeof PLACES)[number];
 /** What each place is, for the cards. The record calls the two bars "Drinks",
  *  which beside "$5 back" reads as earning it on bar drinks; the $5 is earned
  *  on food and non-alcoholic drinks (3 Nov 2026). */
+/* The places row's card, three takes (?railv=a|b|c, 12 Nov 2026); none is
+   the shipped card. */
+type RailV = "a" | "b" | "c";
+const railVersion = (): RailV | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("railv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+
 const KIND: Record<string, string> = {
   sweetopia: "Dessert",
   themilkparlor: "Bar & kitchen",
@@ -463,6 +472,10 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
      computer (Sam, 12 Nov 2026: "more like a scrollable ticker I think with
      filters for Tapin plus and Tapin lite"). */
   const [railKind, setRailKind] = useState<"all" | "plus" | "lite">("all");
+  /* Three takes on the cards, preview only (?railv=a|b|c, Sam, 12 Nov 2026:
+     "the merchant cards feel a bit lopsided now, like large cards and small
+     components within the cards feels weird"). */
+  const [railv] = useState(railVersion);
   const railRef = useRef<HTMLUListElement | null>(null);
   const railBy = (dir: 1 | -1) => {
     const r = railRef.current;
@@ -914,7 +927,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             the coffeeholics page, we should show the other spots that are
             included in the plus membership"): the same rail without that
             place, Lite places included, since Lite comes with Plus. */}
-        <section className="tpa-places" aria-labelledby="tpa-every">
+        <section className="tpa-places" aria-labelledby="tpa-every" data-railv={railv ?? undefined}>
           {/* Sam, 11 Nov 2026: "for the 'Every plus place' section we have
               it be called 'what and where can I use it, click on a card to
               see'". The pop-up lists what Plus covers at that place. */}
@@ -998,8 +1011,11 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                     </svg>
                   </span>
                   <span className="tpa-place-name">
-                    <b>{v.name}</b>
-                    <small>{KIND[v.id] ?? v.category}</small>
+                    <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
+                    <span className="tpa-place-words">
+                      <b>{v.name}</b>
+                      <small>{KIND[v.id] ?? v.category}</small>
+                    </span>
                   </span>
                 </button>
               </li>
@@ -1036,8 +1052,11 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
                     </svg>
                   </span>
                   <span className="tpa-place-name">
-                    <b>{v.name}</b>
-                    <small>{v.kind}</small>
+                    <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
+                    <span className="tpa-place-words">
+                      <b>{v.name}</b>
+                      <small>{v.kind}</small>
+                    </span>
                   </span>
                 </button>
               </li>

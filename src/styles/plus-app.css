@@ -6889,3 +6889,229 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     height: 280px;
   }
 }
+
+/* ══ THE PLACE CARD, THREE TAKES (?railv=a|b|c, Sam, 12 Nov 2026: "the
+   merchant cards feel a bit lopsided now, like large cards and small
+   components within the cards feels weird") ═══════════════════════════════
+   The shipped card has a 28px tag and an 18px name on a 248 × 280 photo.
+   A · Proportioned: the same card with everything inside grown to it.
+   B · Shelf: the photo above, the place's logo and name under it on the
+       page, the way a shop shows a product. Nothing floats on the photo but
+       the tag.
+   C · Postcard: a shorter, wider card, the place's logo beside its name at
+       the foot, so the pieces and the card are in scale by shape. */
+.tpa-place-logo {
+  display: none;
+}
+.tpa-place-words {
+  display: grid;
+}
+
+/* A · Proportioned */
+.tpa-places[data-railv="a"] .tpa-place {
+  height: 268px;
+}
+.tpa-places[data-railv="a"] .tpa-tag {
+  top: 14px;
+  left: 14px;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px 0 10px;
+  font-size: 15px;
+}
+.tpa-places[data-railv="a"] .tpa-tag-mark {
+  width: 18px;
+  height: 18px;
+}
+.tpa-places[data-railv="a"] .tpa-place-more {
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+}
+.tpa-places[data-railv="a"] .tpa-place-more svg {
+  width: 18px;
+  height: 18px;
+}
+.tpa-places[data-railv="a"] .tpa-place-name {
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  gap: 2px;
+}
+.tpa-places[data-railv="a"] .tpa-place-name b {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 26px;
+  letter-spacing: -0.02em;
+}
+.tpa-places[data-railv="a"] .tpa-place-name small {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+/* B · Shelf */
+.tpa-places[data-railv="b"] .tpa-place {
+  height: auto;
+  overflow: visible;
+  background: none;
+  color: var(--ink);
+}
+.tpa-places[data-railv="b"] .tpa-place::after {
+  content: none;
+}
+.tpa-places[data-railv="b"] .tpa-place-open {
+  display: grid;
+  gap: 12px;
+  height: auto;
+}
+.tpa-places[data-railv="b"] .tpa-place-photo {
+  position: relative;
+  inset: auto;
+  display: block;
+  height: auto;
+  aspect-ratio: 5 / 6;
+  border-radius: 16px;
+  background: var(--well);
+}
+.tpa-places[data-railv="b"] .tpa-place-more {
+  display: none;
+}
+.tpa-places[data-railv="b"] .tpa-place-name {
+  position: static;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+.tpa-places[data-railv="b"] .tpa-place-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tpa-places[data-railv="b"] .tpa-place-name b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 21px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.tpa-places[data-railv="b"] .tpa-place-name small {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+/* C · Postcard */
+.tpa-places[data-railv="c"] .tpa-rail {
+  grid-auto-columns: 272px;
+}
+.tpa-places[data-railv="c"] .tpa-place {
+  height: 188px;
+}
+.tpa-places[data-railv="c"] .tpa-place::after {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.72) 0, rgba(0, 0, 0, 0.32) 42%, rgba(0, 0, 0, 0) 70%);
+}
+.tpa-places[data-railv="c"] .tpa-place-more {
+  display: none;
+}
+.tpa-places[data-railv="c"] .tpa-tag {
+  top: 12px;
+  left: auto;
+  right: 12px;
+}
+.tpa-places[data-railv="c"] .tpa-place-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 12px rgba(0, 0, 0, 0.22);
+}
+/* The logo beside the name at the card's foot, one unit. */
+.tpa-places[data-railv="c"] .tpa-place-name {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tpa-places[data-railv="c"] .tpa-place-name b {
+  font-weight: 600;
+  font-size: 21px;
+  line-height: 25px;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 1024px) {
+  .tpa-home .tpa-places[data-railv="a"] .tpa-place {
+    height: 312px;
+  }
+  .tpa-home .tpa-places[data-railv="a"] .tpa-tag {
+    top: 16px;
+    left: 16px;
+    height: 36px;
+    font-size: 16px;
+  }
+  .tpa-home .tpa-places[data-railv="a"] .tpa-place-more {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+  .tpa-home .tpa-places[data-railv="a"] .tpa-place-name {
+    left: 20px;
+    right: 20px;
+    bottom: 18px;
+  }
+  .tpa-home .tpa-places[data-railv="a"] .tpa-place-name b {
+    font-size: 26px;
+    line-height: 30px;
+  }
+  .tpa-home .tpa-places[data-railv="a"] .tpa-place-name small {
+    font-size: 16px;
+    line-height: 21px;
+  }
+  .tpa-home .tpa-places[data-railv="b"] .tpa-rail {
+    grid-auto-columns: 224px;
+  }
+  .tpa-home .tpa-places[data-railv="b"] .tpa-place {
+    height: auto;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-rail {
+    grid-auto-columns: 340px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-place {
+    height: 228px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-place-logo {
+    width: 52px;
+    height: 52px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-tag {
+    top: 14px;
+    right: 14px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name {
+    left: 18px;
+    bottom: 18px;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name b {
+    font-size: 24px;
+    line-height: 28px;
+  }
+  .tpa-home .tpa-places[data-railv="c"] .tpa-place-name small {
+    font-size: 15px;
+  }
+}
