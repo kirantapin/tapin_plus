@@ -7786,3 +7786,113 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   background: #e5751f;
   transform-origin: left;
 }
+
+/* ══ WHAT YOU'D SAVE BY WHAT YOU SPEND (SpendSaves, 12 Nov 2026) ══════════
+   Four spends, the month's savings, and how they add up: one bar in four
+   greens, darkest first (the credit you get for nothing) to palest (points),
+   with a hairline where Plus's price falls; the parts listed under it with
+   their own swatches. */
+.ss {
+  display: grid;
+}
+.ss-ask {
+  margin: 6px 0 0;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpa-freq.ss-pick {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 10px;
+}
+.ss-pick button {
+  font-weight: 600;
+  font-size: 15px;
+}
+.ss-viz {
+  margin-top: 16px;
+  padding-top: 22px;
+}
+.ss-bar {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 14px;
+}
+.ss-bar > i {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  transition: width 0.45s var(--ease);
+}
+.ss-bar > i:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.ss-bar > i:last-of-type {
+  border-radius: 0 999px 999px 0;
+}
+[data-k="credit"] {
+  background: #0b4f37;
+}
+[data-k="back"] {
+  background: #0b7a53;
+}
+[data-k="pct"] {
+  background: #46a97c;
+}
+[data-k="pts"] {
+  background: #a6dbc0;
+}
+/* Plus's price, as a hairline standing above the bar with its label. */
+.ss-mark {
+  position: absolute;
+  top: -22px;
+  bottom: -4px;
+  width: 0;
+  border-left: 1.5px solid var(--ink);
+  transition: left 0.45s var(--ease);
+}
+.ss-mark span {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  font: 600 12px/14px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.ss-parts {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ss-parts li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ss-parts li i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.ss-parts li b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ss-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-bar > i,
+  .ss-mark {
+    transition: none;
+  }
+}

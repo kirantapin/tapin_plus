@@ -376,7 +376,7 @@ const Chevron = () => (
 /* ══ THE FOR-LIFE CARD, THREE TAKES (?cfv=1|2|3, Sam, 12 Nov 2026: "can we
    /impeccable design 3 versions of this? I think we should cap the number of
    seats we're allowing for coffeeholics special rate to 50") ══════════════════
-   Each holds the same true things: $3.99 a month for life, the spots left of
+   Each holds the same true things: the price for life (the policy's), the spots left of
    50 (model/seats.ts), when the offer ends, how often you'd go and what that
    saves. 1 · Count leads with the savings and ends on the spots as one big
    number; 2 · Dots shows the 50 spots as 50 dots, open ones green; 3 · Ink
@@ -441,6 +441,112 @@ function CfInk({ first }: { first: string }) {
         <span>of {COFFEEHOLICS_SEAT_CAP} spots left</span>
       </p>
       <p className="cfv-ink-ends">Offer {CF_ENDS_LABEL}</p>
+    </div>
+  );
+}
+
+/* ══ WHAT YOU'D SAVE, BY WHAT YOU SPEND (Sam, 12 Nov 2026: "based on how much
+   you spend at coffeeholics every month how much you'd save. Like if you
+   spend $25 $50 $75 $100 - also would want to have the $5 back weekly
+   considered savings, the points valued at $1 for 100 points on average (10pts
+   per dollar spent), and 15% off everything else. Assume the $5 is maximized,
+   along with the $5 they get every month automatically"; then "a simple
+   /impeccable design visualization of how we got here") ═══════════════════════
+   For a month's spend S at the place, every credit used:
+     · the month's $5 credit;
+     · $5 back for each week you spend $10, at most four weeks (S / 10);
+     · 15% off what the credits don't cover;
+     · points, 10 a dollar on what you pay after those, 100 points ≈ $1.
+   The picture is one bar of the month's savings in its four parts, with a
+   mark where Plus's price falls, so you see how far past it the month goes. */
+const SPENDS = [25, 50, 75, 100] as const;
+const POINTS_PER_DOLLAR_PAID = 10;
+const POINTS_PER_DOLLAR_VALUE = 100;
+const cents = (n: number) => Math.round(n * 100) / 100;
+function spendSaves(spend: number) {
+  const credit = Math.min(CREDIT, spend);
+  const weeks = Math.min(4, Math.floor(spend / 10));
+  const back = Math.min(weeks * CREDIT, Math.max(0, spend - credit));
+  const rest = Math.max(0, spend - credit - back);
+  const pct = cents((rest * PERCENT) / 100);
+  const paid = cents(rest - pct);
+  const points = Math.floor(paid * POINTS_PER_DOLLAR_PAID);
+  const pointsValue = cents(points / POINTS_PER_DOLLAR_VALUE);
+  return { credit, weeks, back, rest, pct, paid, points, pointsValue, total: cents(credit + back + pct + pointsValue) };
+}
+
+function SpendSaves({ placeId, name, first }: { placeId: string; name: string; first: string }) {
+  const { track } = useEventTracking();
+  const [spend, setSpend] = useState<number>(50);
+  const fig = useRef<HTMLElement | null>(null);
+  const shown = useRef(spend);
+  useLayoutEffect(() => {
+    if (shown.current === spend) return;
+    shown.current = spend;
+    if (reducedMotion()) return;
+    fig.current?.animate?.([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
+  }, [spend]);
+  const s = spendSaves(spend);
+  const price = Number(first.replace(/[^0-9.]/g, "")) || 0;
+  const parts = [
+    { key: "credit", amount: s.credit, label: `$${CREDIT} credit, every month` },
+    { key: "back", amount: s.back, label: `$${CREDIT} back, ${s.weeks} ${s.weeks === 1 ? "week" : "weeks"} you spend $10` },
+    { key: "pct", amount: s.pct, label: `${PERCENT}% off the other ${money(s.rest)}` },
+    { key: "pts", amount: s.pointsValue, label: `${s.points} points (100 ≈ $1)` },
+  ].filter((p) => p.amount > 0);
+  const at = (n: number) => `${Math.min(100, (n / s.total) * 100)}%`;
+  return (
+    <div className="ss">
+      <h3 className="cfv-sub">What you’d save at {name}</h3>
+      <p className="ss-ask">If you spend this a month there</p>
+      <div className="tpa-freq ss-pick" role="radiogroup" aria-label={`What you spend at ${name} a month`}>
+        {SPENDS.map((x) => (
+          <button
+            key={x}
+            type="button"
+            role="radio"
+            aria-checked={x === spend}
+            className="tnum"
+            onClick={() => {
+              setSpend(x);
+              track("plus_place_spend_picked", { place: placeId, spend: x });
+            }}
+          >
+            ${x}
+          </button>
+        ))}
+      </div>
+      <div className="tpa-math cfv-math-one" data-ph-show="">
+        <p className="tpa-math-get" aria-live="polite">
+          <b className="tnum" ref={fig}>
+            {money(s.total)}
+          </b>
+          <span>saved a month</span>
+        </p>
+      </div>
+      {/* How it adds up: one bar in four parts, Plus's price marked on it. */}
+      <div className="ss-viz" aria-hidden="true">
+        <div className="ss-bar">
+          {parts.map((p) => (
+            <i key={p.key} data-k={p.key} style={{ width: at(p.amount) }} />
+          ))}
+          {price > 0 && price < s.total ? (
+            <span className="ss-mark" style={{ left: at(price) }}>
+              <span className="tnum">{first} Plus</span>
+            </span>
+          ) : null}
+        </div>
+      </div>
+      <ul className="ss-parts tnum">
+        {parts.map((p) => (
+          <li key={p.key}>
+            <i data-k={p.key} aria-hidden="true" />
+            <span>{p.label}</span>
+            <b>{money(p.amount)}</b>
+          </li>
+        ))}
+      </ul>
+      <p className="ss-note">With every credit used. Plus costs {first} a month, so that’s {money(cents(s.total - price))} ahead.</p>
     </div>
   );
 }
@@ -541,12 +647,7 @@ function PlaceMath({
     return (
       <div className="cfv cfv-3">
         <CfInk first={first} />
-        <h3 className="cfv-sub">What you’d save at {name}</h3>
-        {freq}
-        <div className="tpa-math cfv-math-one" data-ph-show="">
-          {saved}
-        </div>
-        {how}
+        <SpendSaves placeId={placeId} name={name} first={first} />
       </div>
     );
   return (
