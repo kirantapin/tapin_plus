@@ -6119,3 +6119,17 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     transform-origin: 50% 100%;
   }
 }
+
+/* ══ LOCKED IN B, ROOM TO BREATHE (Sam, 11 Nov 2026: "still too crowded") ═
+   The lock line is a plain sentence with no glyph, set a clear step below
+   the tile labels; the line after the band (the holiday days, the spots)
+   gets the same step, so the band reads as its own group. */
+.ov-lk-b .ov-lk-foot {
+  display: block;
+  margin-top: 6px;
+  padding-top: 0;
+  text-wrap: pretty;
+}
+.ov-lk-b + * {
+  margin-top: 6px;
+}

@@ -233,14 +233,14 @@ function LockedInVersion({ v, monthly, they }: { v: LockV; monthly: string; they
             More
           </li>
         </ul>
+        {/* One sentence, no lock glyph (Sam, 11 Nov 2026, circling it:
+            "still too crowded"). "However many places join" also drops the
+            two different "they"s the parents' line had. */}
         <p className="ov-lk-foot tnum">
-          <LockIco />
-          <span>
-            <b>
-              {Your} {monthly} a month is locked in.
-            </b>{" "}
-            When they join, {your} price doesn’t go&nbsp;up.
-          </span>
+          <b>
+            {Your} {monthly} a month is locked in,
+          </b>{" "}
+          however many places&nbsp;join.
         </p>
       </div>
     );
