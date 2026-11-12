@@ -34,8 +34,39 @@ export function LiveCountdown({ className }: { className?: string }) {
     const t = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(t);
   }, []);
+  const [lightV] = useState(liveCardVersion);
   if (now >= LIVE_ON) return null;
   const done = Math.min(1, Math.max(0, (now - ANNOUNCED_AT) / (LIVE_ON - ANNOUNCED_AT)));
+  const t = left(LIVE_ON - now);
+  /* Two lighter takes, preview only (?livec=a|b, Sam, 12 Nov 2026: "don't
+     love the way this looks on the merchant card, I like it on the modal
+     though, can you give me 2 /impeccable redesigns that are a bit easier on
+     the eye"). A · Edge: no panel; a hairline of progress along the photo's
+     foot and a small white tag above it. B · Mini: the calendar day alone in
+     the corner with the time left beside it. */
+  if (lightV === "a")
+    return (
+      <>
+        <span className="lvc-edge-tag tnum">
+          <b>Fri 20 Nov</b> · {t}
+        </span>
+        <span className="lvc-edge-line" aria-hidden="true">
+          <i style={{ transform: `scaleX(${done})` }} />
+        </span>
+      </>
+    );
+  if (lightV === "b")
+    return (
+      <span className="lvc-mini" aria-label={`Live on Plus Friday 20 November, in ${t}`}>
+        <span className="lvc-mini-day" aria-hidden="true">
+          <i>Nov</i>
+          <b>20</b>
+        </span>
+        <span className="lvc-mini-left tnum" aria-hidden="true">
+          {t}
+        </span>
+      </span>
+    );
   return (
     <span className={className}>
       <span className="tpa-live-day" aria-hidden="true">
@@ -52,6 +83,11 @@ export function LiveCountdown({ className }: { className?: string }) {
     </span>
   );
 }
+const liveCardVersion = (): "a" | "b" | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("livec");
+  return v === "a" || v === "b" ? v : null;
+};
 /** 12 November, the day it was announced: where the bars start. */
 const ANNOUNCED_AT = Date.parse("2026-11-12T00:00:00-05:00");
 
