@@ -2071,12 +2071,16 @@ html[data-surface="tpa"] .hs-scene .spot-earned {
   .tpa-home .tpa-h2-out {
     margin: 40px 0 0;
   }
-  /* The places: one row of five. */
+  /* The places: one row that scrolls sideways, as on a phone, at a card
+     width that keeps the tags clear of the corner arrow (12 Nov 2026: five
+     Plus then the Lite places no longer fit a five-wide grid). */
   .tpa-home .tpa-rail {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    overflow: visible;
-    padding: 0;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 168px;
+    overflow-x: auto;
+    padding: 0 0 2px;
+    scroll-padding: 0;
   }
   .tpa-home .tpa-place {
     height: 220px;
@@ -4316,6 +4320,13 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-unlock-or b {
   font-weight: 600;
   color: var(--ink);
+}
+/* A place's own card has two foot lines (12 Nov 2026): one hairline above
+   both, not one each. */
+.tps-unlock-or + .tps-unlock-or {
+  margin-top: -6px;
+  padding-top: 0;
+  border-top: 0;
 }
 /* A computer: two sides (Sam, 9 Nov 2026: "desktop just needs to look a bit
    more complete"). */
@@ -6776,5 +6787,105 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
   .tpa-home .tpl-new-place:last-of-type {
     margin-bottom: 20px;
+  }
+}
+
+/* ══ THE PLACES ROW: FILTERS AND A WIDER SCROLLING ROW (Sam, 12 Nov 2026:
+   "more like a scrollable ticker I think with filters for Tapin plus and
+   Tapin lite. The merchant containers can be a bit wider") ═════════════════ */
+.tpa-rail-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px var(--gutter) 0;
+}
+.tpa-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tpa-filters::-webkit-scrollbar {
+  display: none;
+}
+.tpa-filter {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+.tpa-filter[aria-pressed="true"] {
+  background: var(--ink);
+  color: #ffffff;
+  box-shadow: none;
+}
+.tpa-filter-mark {
+  width: 15px;
+  height: 15px;
+}
+.tpa-filter:focus-visible,
+.tpa-rail-arrow:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tpa-rail-arrows {
+  display: none;
+  gap: 8px;
+}
+.tpa-rail-arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  color: var(--ink);
+  cursor: pointer;
+}
+.tpa-rail-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+.tpa-rail-bar + .tpa-rail {
+  margin-top: 12px;
+}
+/* Wider cards (168 → 212 on a phone). */
+.tpa-rail {
+  grid-auto-columns: 212px;
+  scroll-behavior: smooth;
+}
+.tpa-place {
+  height: 236px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tpa-rail {
+    scroll-behavior: auto;
+  }
+}
+@media (min-width: 1024px) {
+  .tpa-home .tpa-rail-bar {
+    margin: 16px 0 0;
+  }
+  .tpa-home .tpa-rail-arrows {
+    display: flex;
+  }
+  .tpa-home .tpa-rail {
+    grid-auto-columns: 248px;
+  }
+  .tpa-home .tpa-place {
+    height: 280px;
   }
 }

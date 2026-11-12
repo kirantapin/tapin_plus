@@ -24,6 +24,12 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
             <p className="tps-unlock-sub">No minimum spend, no&nbsp;markup.</p>
           </div>
         </div>
+        {/* The weekly $5 back too (Sam, 12 Nov 2026: "for the coffeeholics
+            page, I think we should show the spend $10 get $5 back weekly"),
+            in the ladder's words. */}
+        <p className="tps-unlock-or">
+          <b>Earn ${CREDIT} back</b> every week when you spend&nbsp;$10
+        </p>
         <p className="tps-unlock-or">
           <b>Then {PERCENT}% off</b> your other orders, once&nbsp;a&nbsp;day
         </p>

@@ -459,6 +459,16 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
      for free option"). The ads' /try links land here with the window open. */
   const [trial, setTrial] = useTrialLink();
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  /* The places row's filter and the row itself, for the arrows on a
+     computer (Sam, 12 Nov 2026: "more like a scrollable ticker I think with
+     filters for Tapin plus and Tapin lite"). */
+  const [railKind, setRailKind] = useState<"all" | "plus" | "lite">("all");
+  const railRef = useRef<HTMLUListElement | null>(null);
+  const railBy = (dir: 1 | -1) => {
+    const r = railRef.current;
+    if (!r) return;
+    r.scrollBy({ left: dir * Math.max(240, r.clientWidth * 0.8), behavior: reducedMotion() ? "auto" : "smooth" });
+  };
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
   const { price, failed: priceFailed } = usePlusPriceLoad();
@@ -900,17 +910,60 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             "should we have the every plus place higher?"): on a phone they
             top the second screen, under the example order. Not above the
             Promise card, which would push How it works off the first. */}
-        {place ? null : (
+        {/* A place's own page shows the others too (Sam, 12 Nov 2026: "for
+            the coffeeholics page, we should show the other spots that are
+            included in the plus membership"): the same rail without that
+            place, Lite places included, since Lite comes with Plus. */}
         <section className="tpa-places" aria-labelledby="tpa-every">
           {/* Sam, 11 Nov 2026: "for the 'Every plus place' section we have
               it be called 'what and where can I use it, click on a card to
               see'". The pop-up lists what Plus covers at that place. */}
           <h2 id="tpa-every" className="tpa-h2 tpa-h2-out">
-            What and where can I use it?
+            {place ? "Also included with Plus" : "What and where can I use it?"}
           </h2>
           <p className="tpa-places-sub">Open a card to see what Plus covers there.</p>
-          <ul className="tpa-rail">
-            {PLACES.map((v) => (
+          {/* All, Plus or Lite, and on a computer two arrows to move the
+              row. Lite comes with Plus, so All is the default. */}
+          <div className="tpa-rail-bar">
+            <div className="tpa-filters" role="group" aria-label="Show places">
+              {(
+                [
+                  ["all", "All"],
+                  ["plus", "Tapin Plus"],
+                  ["lite", "Tapin Lite"],
+                ] as const
+              ).map(([k, label]) => (
+                <button
+                  key={k}
+                  type="button"
+                  className="tpa-filter"
+                  aria-pressed={railKind === k}
+                  onClick={() => {
+                    setRailKind(k);
+                    railRef.current?.scrollTo({ left: 0 });
+                    track("plus_places_filter", { kind: k });
+                  }}
+                >
+                  {k === "plus" ? <FlatMark className="tpa-filter-mark" /> : k === "lite" ? <LiteMark className="tpa-filter-mark" /> : null}
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="tpa-rail-arrows">
+              <button type="button" className="tpa-rail-arrow" aria-label="Earlier places" onClick={() => railBy(-1)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button type="button" className="tpa-rail-arrow" aria-label="More places" onClick={() => railBy(1)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <ul className="tpa-rail" ref={railRef}>
+            {(railKind === "lite" ? [] : PLACES.filter((v) => v.id !== place?.id)).map((v) => (
               <li key={v.id} className="tpa-place">
                 {/* A tap opens what Plus does there (Sam, 4 Nov 2026). */}
                 <button
@@ -953,7 +1006,7 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             ))}
             {/* Tapin Lite places after the five (Sam, 12 Nov 2026: Crumbl
                 "inside the place cards rail"), tagged Lite, not Plus. */}
-            {LITE_PLACES.map((v) => (
+            {(railKind === "plus" ? [] : LITE_PLACES).map((v) => (
               <li key={v.id} className="tpa-place">
                 <button
                   type="button"
@@ -991,7 +1044,6 @@ export default function PlusHome({ placeId, bandSrc, group }: { placeId?: string
             ))}
           </ul>
         </section>
-        )}
 
         {/* Students' own words (round 1, Sam, 8 Nov 2026): nothing shows until
             model/voices.ts STUDENT_VOICES has real ones; local dev shows the
