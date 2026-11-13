@@ -8101,424 +8101,688 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   white-space: nowrap;
 }
 
-/* ══ JUST JOINED, AS TWO SLIDES (shell/LiteSlides.tsx, ?ljv=a|b|c, 13 Nov
-   2026) ══════════════════════════════════════════════════════════════════════
-   One slide a place in a scroll-snapped row, under How it works. */
-.tls {
+/* ══ JUST JOINED, FIVE FRESH TAKES (shell/LiteNew.tsx, ?ljv=1..5, 13 Nov
+   2026) ══════════════════════════════════════════════════════════════════════ */
+.tln {
   padding: 20px 0 16px;
 }
-.tls-h {
+.tln-h {
   margin: 0 20px;
   font: 600 22px/27px "Gilroy", Arial, sans-serif;
   letter-spacing: -0.02em;
   color: var(--ink);
   text-wrap: balance;
 }
-.tls-row {
+.tln-row {
   display: grid;
   grid-auto-flow: column;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 0 20px;
+  grid-auto-columns: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scroll-padding: 0 20px;
   scrollbar-width: none;
 }
-.tls-row::-webkit-scrollbar {
+.tln-row::-webkit-scrollbar {
   display: none;
 }
-.tls-row:focus-visible {
+.tln-row:focus-visible,
+.tln-deck:focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 2px;
-  border-radius: 16px;
+  outline-offset: 3px;
+  border-radius: 20px;
 }
-.tls-slide {
+.tln-slide {
+  position: relative;
   min-width: 0;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
-.tls-photo {
-  position: relative;
-  border-radius: 14px;
-  background: var(--well);
-}
-.tls-photo > img:first-child {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 14px;
-}
-.tls-logo {
+.tln-logo {
   flex: none;
-  border-radius: 12px;
+  border-radius: 10px;
   object-fit: cover;
   background: #ffffff;
 }
-.tls-logo[data-round] {
+.tln-logo[data-round] {
   border-radius: 50%;
 }
-.tls-name {
-  margin: 0;
-  font: 600 18px/22px "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-.tls-kind {
-  display: block;
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  letter-spacing: 0;
+.tln-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 20px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
-.tls-perks {
+.tln-live {
+  margin: 14px 20px 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tln-live b {
+  font-weight: 600;
+  color: #e5751f;
+}
+
+/* 1 · Story: a 9:14 frame, the photo full bleed, two segments up top. */
+.tln-story {
+  position: relative;
+  margin: 16px 20px 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #141618;
+}
+.tln-story-bars {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  pointer-events: none;
+}
+.tln-story-bars span {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.4);
+}
+.tln-story-bars i {
+  display: block;
+  height: 100%;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.tln-story-frame {
+  aspect-ratio: 9 / 13;
+  color: #ffffff;
+}
+.tln-story-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tln-story-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 22%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.5) 42%, rgba(0, 0, 0, 0) 66%);
+}
+.tln-story-who {
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tln-story-who .tln-logo {
+  box-shadow: 0 0 0 2px #ffffff;
+}
+.tln-story-who b {
+  display: block;
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+}
+.tln-story-who span span {
+  display: block;
+  font: 500 13px/16px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.82);
+}
+.tln-story-say {
+  position: absolute;
+  z-index: 2;
+  left: 18px;
+  right: 18px;
+  bottom: 20px;
+}
+.tln-story-big {
+  margin: 0 0 14px;
+  font: 600 30px/33px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.025em;
+}
+.tln-story-say ul {
   display: grid;
   gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.tls-perks li {
+.tln-story-say li {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 40px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
-.tls-perks p {
+.tln-story-say li > img,
+.tln-story-say li > span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #0b7a53;
+  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+}
+.tln-story-say p {
   display: grid;
   margin: 0;
 }
-.tls-perks b {
+.tln-story-say b {
   font: 600 16px/20px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
 }
-.tls-perks p span {
+.tln-story-say p span {
   font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.8);
 }
-.tls-fig {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.tln-story-tap {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  bottom: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
-.tls-fig-item {
-  object-fit: cover;
+.tln-story-tap[data-side="back"] {
+  left: 0;
+  width: 33%;
 }
-.tls-fig-pct {
-  background: #0b7a53;
-  color: #ffffff;
-  font: 600 14px/1 "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.02em;
+.tln-story-tap[data-side="next"] {
+  right: 0;
+  width: 67%;
 }
-.tls-live {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 16px 20px 0;
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tls-live b {
-  font-weight: 600;
-  color: var(--ink);
-}
-.tls-live-day {
-  display: grid;
-  flex: none;
-  width: 32px;
-  overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
-  text-align: center;
-}
-.tls-live-day i {
-  padding: 1px 0;
-  background: #e5751f;
-  color: #ffffff;
-  font: 600 9px/11px "Gilroy", Arial, sans-serif;
-  font-style: normal;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.tls-live-day b {
-  padding: 0 0 2px;
-  font: 600 15px/18px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tls-foot {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 14px 20px 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--hair);
-  font: 500 14px/19px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
+.tln-story-tap:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -4px;
+  border-radius: 18px;
 }
 
-/* A · Postcards: the photo leads, the next place peeks in. */
-.tls[data-v="a"] .tls-row {
-  grid-auto-columns: 84%;
+/* 2 · Lock screen: the photo is the wallpaper, the day is the clock. */
+.tln-lock {
+  margin: 16px 20px 0;
 }
-.tls[data-v="a"] .tls-photo {
-  height: 168px;
-  margin-bottom: 36px;
+.tln-lock .tln-row {
+  border-radius: 28px;
 }
-.tls[data-v="a"] .tls-photo .tls-logo {
+.tln-lock-screen {
+  min-height: 460px;
+  overflow: hidden;
+  border-radius: 28px;
+  color: #ffffff;
+}
+.tln-lock-photo {
   position: absolute;
-  left: 14px;
-  bottom: -26px;
-  box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
 }
-.tls[data-v="a"] .tls-name {
-  margin: 0 4px 14px;
+.tln-lock-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 14, 0.38);
 }
-.tls[data-v="a"] .tls-perks {
-  margin: 0 4px;
+.tln-lock-time {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  padding: 26px 16px 0;
+  text-align: center;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
 }
-.tls-dots {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 14px;
+.tln-lock-time span {
+  font: 600 15px/19px "Gilroy", Arial, sans-serif;
 }
-.tls-dot {
+.tln-lock-time b {
+  font: 600 76px/80px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.035em;
+}
+.tln-lock-time span:last-child {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+}
+.tln-lock-notes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0 10px 18px;
+  list-style: none;
+}
+.tln-note {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px 11px 11px;
+  border-radius: 20px;
+  background: rgba(250, 250, 252, 0.94);
+  color: var(--ink);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+.tln-note-ico {
   display: grid;
   place-items: center;
-  width: 28px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.tln-note-ico[data-round] {
+  border-radius: 50%;
+}
+.tln-note-pct {
+  background: #0b7a53;
+  color: #ffffff;
+  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+}
+.tln-note p {
+  display: grid;
+  margin: 0;
+  min-width: 0;
+}
+.tln-note-app {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font: 500 13px/16px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tln-note b {
+  font: 600 15px/19px "Gilroy", Arial, sans-serif;
+}
+.tln-note p > span:last-child {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tln-pagedots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 10px;
+}
+.tln-pagedots button {
+  display: grid;
+  place-items: center;
+  width: 24px;
   height: 24px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
 }
-.tls-dot::after {
+.tln-pagedots button::after {
   content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(20, 22, 24, 0.2);
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(20, 22, 24, 0.22);
+  transition: background-color 0.25s;
 }
-.tls-dot[aria-current]::after {
-  width: 22px;
+.tln-pagedots button[aria-current]::after {
   background: var(--ink);
 }
-.tls-dot:focus-visible {
-  outline: 2px solid var(--ink);
-  border-radius: 8px;
-}
 
-/* B · Side by side: a short slide, the arrows in the heading's row. */
-.tls-pager {
+/* 3 · Wallet: two passes stacked; the back one shows its band above. */
+.tln-wallet {
+  margin: 16px 20px 0;
+}
+.tln-deck {
+  position: relative;
+  display: grid;
+  padding-top: 18px;
+  cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+}
+.tln-pass {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair), 0 10px 28px rgba(20, 22, 24, 0.12);
+  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.2, 1), filter 0.5s;
+}
+.tln-pass[data-pos="0"] {
+  z-index: 2;
+}
+.tln-pass[data-pos="1"] {
+  /* The back pass takes the front one's height, so the deck is as tall as
+     the pass you're reading. */
+  position: absolute;
+  inset: 18px 0 0;
+  z-index: 1;
+  transform: translateY(-16px) scale(0.93);
+  filter: brightness(0.96);
+}
+.tln-pass-band {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  margin: 12px 20px 0;
+  padding: 14px 16px;
+  background: var(--g);
+  color: var(--k);
 }
-.tls-arrows {
+.tln-pass-band .tln-logo {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.tln-pass-band > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.tln-pass-band b {
+  display: block;
+  font: 600 18px/22px "Gilroy", Arial, sans-serif;
+}
+.tln-pass-band > span:nth-child(2) span {
+  display: block;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  opacity: 0.8;
+}
+.tln-pass-tier {
   display: flex;
-  flex: none;
-  gap: 6px;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink);
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
 }
-.tls-arrow {
+.tln-pass-tier .lite-mark {
+  width: 14px;
+  height: 14px;
+}
+.tln-pass-perks {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 18px 16px;
+  list-style: none;
+}
+.tln-pass-perks li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tln-pass-perks li > img,
+.tln-pass-perks li > span {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--well);
-  color: var(--ink);
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
+  object-fit: cover;
+  background: #0b7a53;
+  color: #ffffff;
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
 }
-.tls-arrow:active:not(:disabled) {
-  transform: scale(0.94);
-}
-.tls-arrow:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.tls-arrow:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-.tls[data-v="b"] .tls-row {
-  grid-auto-columns: 100%;
-}
-.tls[data-v="b"] .tls-slide {
+.tln-pass-perks p {
   display: grid;
-  grid-template-columns: 38% minmax(0, 1fr);
-  gap: 14px;
-  padding: 10px;
-  border-radius: 18px;
-  background: #f4f4f6;
-}
-.tls[data-v="b"] .tls-photo {
-  min-height: 150px;
-}
-.tls[data-v="b"] .tls-photo > img:first-child {
-  position: absolute;
-  inset: 0;
-}
-.tls[data-v="b"] .tls-side {
-  display: grid;
-  align-content: center;
-  gap: 14px;
-  padding: 4px 4px 4px 0;
-}
-.tls[data-v="b"] .tls-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 17px;
-}
-.tls[data-v="b"] .tls-name .tls-logo {
-  border-radius: 9px;
-  box-shadow: 0 0 0 1px var(--hair);
-}
-.tls[data-v="b"] .tls-name .tls-logo[data-round] {
-  border-radius: 50%;
-}
-.tls[data-v="b"] .tls-perks {
-  gap: 10px;
-}
-.tls[data-v="b"] .tls-fig {
-  width: 36px;
-  height: 36px;
-}
-.tls[data-v="b"] .tls-fig-pct {
-  font-size: 12px;
-}
-.tls[data-v="b"] .tls-perks b {
-  font-size: 15px;
-  line-height: 19px;
-}
-.tls-count {
   margin: 0;
+}
+.tln-pass-perks b {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tln-pass-perks p span {
   font: 500 14px/18px "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
-.tls-count b {
+.tln-pass-foot {
+  margin-top: auto !important;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 16px;
+  padding: 12px 0 14px;
+  border-top: 1px dashed transparent;
+  box-shadow: inset 0 1px 0 var(--hair);
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tln-pass-foot b {
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  color: #e5751f;
+}
+.tln-wallet-hint {
+  margin: 12px 0 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tln-wallet-hint b {
   font-weight: 600;
   color: var(--ink);
 }
 
-/* C · Pick a place: logos as tabs over one large slide. */
-.tls-tabs {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 4px;
-  margin: 16px 20px 0;
-  padding: 4px;
-  border-radius: 999px;
+/* 4 · Cut-up: a torn photo, the mark stuck on, label strips for perks. */
+.tln-cut {
+  margin-top: 16px;
+}
+.tln-cut-slide {
+  padding: 0 20px 6px;
+}
+.tln-cut-photo {
+  height: 200px;
+  overflow: hidden;
+  border-radius: 6px 6px 0 0;
   background: var(--well);
 }
-.tls-tab {
+.tln-cut-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tln-cut-sticker {
+  position: absolute;
+  top: 14px;
+  right: 32px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 4px #ffffff, 0 6px 14px rgba(0, 0, 0, 0.22);
+  transform: rotate(5deg);
+}
+.tln-cut-sticker[data-round] {
+  border-radius: 50%;
+}
+.tln-cut-name {
+  display: inline-block;
+  position: relative;
+  margin: -26px 0 0 10px;
+  padding: 6px 14px 7px;
+  font: 600 26px/30px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  transform: rotate(-2deg);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
+}
+.tln-cut-strips {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tln-cut-strips li {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 7px 14px 8px 8px;
+  background: #141618;
+  color: #ffffff;
+  font: 500 15px/19px "Gilroy", Arial, sans-serif;
+  transform: rotate(calc((var(--n) * 2 - 1) * 0.8deg));
+}
+.tln-cut-strips li:not(:has(img)) {
+  padding-left: 14px;
+}
+.tln-cut-strips b {
+  font-weight: 600;
+}
+.tln-cut-strips img {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.tln-cut-tabs {
+  display: flex;
   gap: 8px;
-  min-height: 44px;
-  padding: 0 12px 0 8px;
+  margin: 14px 20px 0;
+}
+.tln-cut-tabs button {
+  min-height: 36px;
+  padding: 0 14px;
   border: 0;
   border-radius: 999px;
-  background: transparent;
+  background: var(--well);
+  color: var(--ink);
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+}
+.tln-cut-tabs button[aria-current] {
+  background: var(--ink);
+  color: #ffffff;
+}
+
+/* 5 · Big type: the perk is the headline. */
+.tln-type-tabs {
+  display: flex;
+  gap: 18px;
+  margin: 14px 20px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.tln-type-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 8px 0 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
   color: var(--muted);
   font: 600 15px/18px "Gilroy", Arial, sans-serif;
   cursor: pointer;
-  transition: background-color 0.25s, color 0.25s, box-shadow 0.25s;
+  transition: color 0.2s, border-color 0.2s;
 }
-.tls-tab .tls-logo {
-  border-radius: 7px;
+.tln-type-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--ink);
+  color: var(--ink);
 }
-.tls-tab .tls-logo[data-round] {
+.tln-type-tabs .tln-logo {
+  border-radius: 6px;
+}
+.tln-type-tabs .tln-logo[data-round] {
   border-radius: 50%;
 }
-.tls-tab[aria-selected="true"] {
-  background: #ffffff;
+.tln-type-slide {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 0;
+}
+.tln-type-line {
+  display: grid;
+  margin: 0;
+}
+.tln-type-line b {
+  font: 600 64px/64px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.04em;
+  color: #0b7a53;
+}
+.tln-type-line span {
+  margin-top: 6px;
+  font: 500 20px/25px "Gilroy", Arial, sans-serif;
   color: var(--ink);
-  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.08), 0 4px 12px rgba(20, 22, 24, 0.08);
 }
-.tls-tab:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
+.tln-type-plus {
+  margin: 14px 0 0;
+  font: 500 20px/30px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
 }
-.tls[data-v="c"] .tls-row {
-  grid-auto-columns: 100%;
-  margin-top: 12px;
-  /* Room for the panel's shadow inside the scrolling row. */
-  padding-bottom: 20px;
-  margin-bottom: -20px;
+.tln-type-and {
+  font-weight: 600;
+  color: #0b7a53;
 }
-.tls[data-v="c"] .tls-slide {
+.tln-type-plus img {
+  width: 30px;
+  height: 30px;
+  margin: 0 2px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: -8px;
+}
+.tln-type-photo {
   position: relative;
+  height: 110px;
+  margin-top: auto;
+  padding-top: 18px;
 }
-.tls[data-v="c"] .tls-photo {
-  height: 210px;
-}
-.tls[data-v="c"] .tls-panel {
-  position: relative;
-  margin: -44px 12px 0;
-  padding: 16px;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(20, 22, 24, 0.12);
-}
-.tls[data-v="c"] .tls-perks {
-  gap: 14px;
-}
-.tls-fig-big {
-  width: 56px;
-  height: 56px;
-}
-.tls-fig-pct.tls-fig-big {
+.tln-type-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 14px;
-  font-size: 19px;
+  object-fit: cover;
 }
-.tls[data-v="c"] .tls-perks b {
-  font-size: 17px;
-  line-height: 21px;
+.tln-type-photo span {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  font: 600 13px/16px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
 }
 
-/* A computer: two slides fit side by side, so the row stops being a row to
-   swipe; the arrows, dots, count and tabs have nothing to do there. */
+/* A computer: the frames sit side by side at a phone's size. */
 @media (min-width: 1024px) {
-  .tpa-home .tls {
+  .tpa-home .tln {
     padding: 28px 0 20px;
   }
-  .tpa-home .tls-h {
+  .tpa-home .tln-h {
     font-size: 26px;
     line-height: 31px;
   }
-  .tpa-home .tls[data-v="a"] .tls-row {
-    grid-auto-columns: minmax(0, 1fr);
+  .tpa-home .tln[data-v="1"] .tln-story {
+    max-width: 360px;
   }
-  .tpa-home .tls[data-v="a"] .tls-dots {
-    display: none;
+  .tpa-home .tln[data-v="2"] .tln-lock,
+  .tpa-home .tln[data-v="3"] .tln-wallet,
+  .tpa-home .tln[data-v="5"] .tln-type-tabs,
+  .tpa-home .tln[data-v="5"] .tln-row {
+    max-width: 440px;
   }
-  .tpa-home .tls[data-v="b"] .tls-row,
-  .tpa-home .tls[data-v="c"] .tls-row {
-    grid-auto-columns: minmax(0, 1fr);
-  }
-  .tpa-home .tls[data-v="b"] .tls-pager,
-  .tpa-home .tls[data-v="c"] .tls-tabs {
-    display: none;
-  }
-  .tpa-home .tls[data-v="c"] .tls-row {
-    margin-top: 16px;
+  .tpa-home .tln[data-v="4"] .tln-row {
+    max-width: 560px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tls-dot::after,
-  .tls-tab,
-  .tls-arrow {
+  .tln-pass,
+  .tln-type-tabs button,
+  .tln-pagedots button::after {
     transition: none;
   }
 }
