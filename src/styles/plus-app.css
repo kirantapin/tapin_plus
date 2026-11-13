@@ -8082,15 +8082,18 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   right: 18px;
   bottom: 20px;
 }
+/* Bolder, with more room under it (Sam, 13 Nov 2026: "the 'just joined
+   tapin' should be a bit bolder, and should give the content underneath it a
+   bit more space"). 700, not 800 (no heavy type). */
 .tln-story-big {
-  margin: 0 0 18px;
-  font: 600 30px/32px "Gilroy", Arial, sans-serif;
+  margin: 0 0 24px;
+  font: 700 30px/32px "Gilroy", Arial, sans-serif;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
 .tln-story-say ul {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -8114,14 +8117,14 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font: 600 14px/1 "Gilroy", Arial, sans-serif;
   letter-spacing: -0.02em;
 }
-.tln-story-say p {
+.tln-story-say li p {
   display: grid;
   margin: 0;
 }
 .tln-story-say b {
   font: 600 16px/20px "Gilroy", Arial, sans-serif;
 }
-.tln-story-say p span {
+.tln-story-say li p span {
   font: 500 14px/18px "Gilroy", Arial, sans-serif;
   color: rgba(255, 255, 255, 0.82);
 }
