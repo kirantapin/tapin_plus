@@ -209,8 +209,14 @@ async function fetchPrice(): Promise<PlusPrice> {
 /* Loaded once, on first use, and shared by every caller. A failed load is
    forgotten so the next mount tries again. */
 let pricePromise: Promise<PlusPrice> | null = null;
-const loadPrice = () =>
-  (pricePromise ??= fetchPrice().catch((e) => {
+/* The page offer the cached price was read under: a page's own offer is
+   that page's alone (model/pagePolicy.ts), so a different page reads again. */
+let priceFor: string | null = null;
+const loadPrice = () => {
+  const own = pagePolicy();
+  if (pricePromise && priceFor !== own) pricePromise = null;
+  priceFor = own;
+  return (pricePromise ??= fetchPrice().catch((e) => {
     if (import.meta.env.DEV) {
       console.warn("Plus price unavailable locally; showing sample figures", e);
       return devFallback();
@@ -218,6 +224,7 @@ const loadPrice = () =>
     pricePromise = null;
     throw e;
   }));
+};
 
 /* Every mounted price hook, so the price can be read again when a page's
    own sale ends while it's open (model/pagePolicy.ts). */

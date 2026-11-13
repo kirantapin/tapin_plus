@@ -35,6 +35,7 @@ import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
 import { rememberPlusPage } from "../model/backTo";
+import { pagePolicy } from "../model/pagePolicy";
 import { LiveCountdown, LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
 import { PLACE_FOREVER_ENDS, PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
@@ -1085,6 +1086,16 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     e.preventDefault();
     settle(true, 200, "ease-in", () => navigate("/in"));
   };
+  /* The price is read once a tab and shared; a page's own offer is that
+     page's alone (model/pagePolicy.ts). Arriving from a page that had its
+     own (or arriving at one), read it again once so this page never shows
+     the other page's price. */
+  const priceChecked = useRef<string | null>(null);
+  useEffect(() => {
+    if (!price || priceChecked.current === location.pathname) return;
+    priceChecked.current = location.pathname;
+    if ((price.policyId ?? null) !== pagePolicy()) refreshPlusPrice();
+  }, [price, location.pathname]);
   /* The account page's back comes here (model/backTo.ts). */
   useEffect(() => {
     rememberPlusPage(location.pathname + location.search);

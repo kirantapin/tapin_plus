@@ -20,6 +20,10 @@ interface Kept {
    *  sell the same policy (The Burg reuses Coffeeholics', 12 Nov 2026), so
    *  the checkout tells their spots apart by this, not by the policy id. */
   placeId?: string;
+  /** The page's address. The offer is that page's alone (Sam, 13 Nov 2026,
+   *  of the home page reading "$4.99 first month" after a visit to
+   *  /coffeeholics): elsewhere nothing applies it. */
+  path?: string;
 }
 
 let current: Kept | null = null;
@@ -37,7 +41,7 @@ function read(): Kept | null {
 
 /** Called by the page that sells it, before its first render. */
 export function setPagePolicy(policyId: string, endsMs: number | null, placeId?: string) {
-  current = { policyId, endsMs, placeId };
+  current = { policyId, endsMs, placeId, path: window.location.pathname };
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify(current));
   } catch {
@@ -51,6 +55,9 @@ export function pagePolicy(): string | null {
   const kept = read();
   if (!kept) return null;
   if (kept.endsMs !== null && Date.now() >= kept.endsMs) return null;
+  /* Only on the page that set it: the home page and every other page sell
+     their own offer, even later in the same tab. */
+  if (kept.path && window.location.pathname !== kept.path) return null;
   return kept.policyId;
 }
 
