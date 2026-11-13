@@ -33,6 +33,7 @@ import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
+import { LiteSlides, liteSlidesVersion } from "../shell/LiteSlides";
 import { LiteMark } from "../shell/LiteMark";
 import { rememberPlusPage } from "../model/backTo";
 import { pagePolicy } from "../model/pagePolicy";
@@ -787,6 +788,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      "the merchant cards feel a bit lopsided now, like large cards and small
      components within the cards feels weird"). */
   const [railv] = useState(railVersion);
+  const [ljv] = useState(liteSlidesVersion);
   const railRef = useRef<HTMLUListElement | null>(null);
   /* The cards in the row, Plus then Lite, as the filter has them; a
      place's own page leaves itself out. */
@@ -1281,9 +1283,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
         {member ? null : <BonusSpots only={place?.id} />}
-        {/* Crumbl just joined (Sam, 12 Nov 2026), a Tapin Lite place, which
-            comes with Plus. Not on a place's own page or for members. */}
-        {member || place ? null : <LiteJoined places={LITE_PLACES} />}
         {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
             the what can I use it on a bit further down. I don't think it
             should be as big as it is"): the places rail below answers it,
@@ -1734,6 +1733,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           </h2>
           <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
+
+        {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
+            places, which come with Plus. Under How it works (Sam, 13 Nov
+            2026: "they're too high up right now"), as two slides at ?ljv=a|b|c
+            (shell/LiteSlides.tsx). Not on a place's own page or for members. */}
+        {member || place ? null : ljv ? <LiteSlides places={LITE_PLACES} v={ljv} /> : <LiteJoined places={LITE_PLACES} />}
 
         {/* What if I don't save? went (Sam, 9 Nov 2026: "get rid of this too
             please"); the refund is a row under the offer and in the FAQ. */}
