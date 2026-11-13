@@ -57,7 +57,9 @@ export function pagePolicy(): string | null {
   if (kept.endsMs !== null && Date.now() >= kept.endsMs) return null;
   /* Only on the page that set it: the home page and every other page sell
      their own offer, even later in the same tab. */
-  if (kept.path && window.location.pathname !== kept.path) return null;
+  /* One kept before the page was recorded (13 Nov 2026) applies nowhere:
+     its page sets it again, with the page, when it opens. */
+  if (!kept.path || window.location.pathname !== kept.path) return null;
   return kept.policyId;
 }
 
