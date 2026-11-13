@@ -278,10 +278,22 @@ interface PlaceSeats {
   fastTo: number;
   fromMs: number;
   seed: number;
+  /** A reset: from this moment the count stands at `to`, then loses one an
+   *  hour at the same seeded minutes. */
+  reset?: { atMs: number; to: number };
 }
 const PLACE_SEATS: Record<string, PlaceSeats> = {
   /* From 4pm Eastern, Thursday 12 November. */
-  coffeeholicsva: { cap: 50, floor: 3, fastTo: 20, fromMs: Date.UTC(2026, 10, 12, 21, 0, 0), seed: 9173 },
+  /* Reset to 20 at 4:05pm Eastern, Friday 13 November (Sam: "reset
+     coffeeholics spots to 20"). */
+  coffeeholicsva: {
+    cap: 50,
+    floor: 3,
+    fastTo: 20,
+    fromMs: Date.UTC(2026, 10, 12, 21, 0, 0),
+    seed: 9173,
+    reset: { atMs: Date.UTC(2026, 10, 13, 21, 5, 0), to: 20 },
+  },
   /* From 5pm Eastern the same day, when /theburg went up. */
   theburg: { cap: 50, floor: 3, fastTo: 20, fromMs: Date.UTC(2026, 10, 12, 22, 0, 0), seed: 4421 },
 };
@@ -293,6 +305,17 @@ export function placeSeatsLeft(placeId: string, now: number = Date.now()): numbe
   const p = PLACE_SEATS[placeId];
   if (!p) return 0;
   if (now <= p.fromMs) return p.cap;
+  if (p.reset && now >= p.reset.atMs) {
+    const { atMs, to } = p.reset;
+    let left = to;
+    const hours = Math.floor((now - atMs) / HOUR_MS);
+    for (let h = 0; h <= hours; h++) {
+      const at = atMs + h * HOUR_MS + (10 + seeded(h + p.seed)() * 40) * 60_000;
+      if (at > now) break;
+      left -= 1;
+    }
+    return Math.max(p.floor, left);
+  }
   let left = p.cap;
   const hours = Math.floor((now - p.fromMs) / HOUR_MS);
   for (let h = 0; h <= hours; h++) {
