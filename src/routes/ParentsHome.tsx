@@ -31,7 +31,6 @@ import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
-import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
 import { useTicker } from "../shell/useTicker";
 import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
@@ -633,9 +632,9 @@ export default function ParentsHome() {
             main page (Sam, 9 Nov 2026: "should include this on the parent
             plus page too I think"). */}
         <BonusSpots they />
-        {/* Crumbl and Italiano's just joined, Tapin Lite places that come
-            with Plus (Sam, 12 Nov 2026: "add them to the parents page too"). */}
-        <LiteJoined places={LITE_PLACES} they />
+        {/* The "Crumbl and Italiano's just joined" card went from here (Sam,
+            13 Nov 2026: "not there at all actually"); both are still in the
+            places row under All and Lite. The students page keeps it. */}
         {/* "What can they use it on?" went from here (Sam, 11 Nov 2026, as on
             the students page): the place cards below answer it, each opening
             what Plus covers there. */}
