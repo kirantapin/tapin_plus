@@ -175,10 +175,25 @@ const plusOverride = (): number | null => {
 const ONE_A_DAY_MS = Date.UTC(2026, 10, 12, 6, 0, 0); // 12 Nov, 1am EST
 const DAY12_MS = Date.UTC(2026, 10, 12, 5, 0, 0); // midnight EST, 12 Nov
 
+/* ══ RESET TO 25 (Sam, 13 Nov 2026: "let's reset the counter to 25 spots")
+   From 3:30pm Eastern on 13 November the count stands at 25, then loses one
+   a day from 14 November at the same seeded moments as before. */
+const RESET_MS = Date.UTC(2026, 10, 13, 20, 30, 0); // 13 Nov, 3:30pm EST
+const RESET_LEFT = 25;
+
 /** Spots left at the $7.99 rate at a moment. */
 export function plusSeatsLeft(now: number = Date.now()): number {
   const forced = plusOverride();
   if (forced !== null) return forced;
+  if (now >= RESET_MS) {
+    let gone = 0;
+    const lastDay = Math.floor((now - DAY12_MS) / DAY_MS);
+    for (let day = 2; day <= lastDay; day++) {
+      const at = DAY12_MS + day * DAY_MS + 9 * HOUR_MS + seeded(day + 4409)() * 12 * HOUR_MS;
+      if (at <= now) gone++;
+    }
+    return Math.max(PLUS_FLOOR, RESET_LEFT - gone);
+  }
   if (now <= ONE_A_DAY_MS) return manyADay(now);
   const before = manyADay(ONE_A_DAY_MS);
   let gone = 0;
