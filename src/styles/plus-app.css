@@ -6598,111 +6598,6 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   }
 }
 
-/* ══ TAPIN LITE: JUST JOINED (shell/LiteJoined.tsx, 12 Nov 2026) ═════════
-   Each place's photo side by side, its mark on the photo's edge; the news is
-   the heading; each place's perks under its name, a figure or the real item. */
-.tpl-new {
-  padding: 8px 8px 16px;
-}
-.tpl-new-photos {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 6px;
-  margin-bottom: 38px;
-}
-.tpl-new-photo {
-  position: relative;
-  height: 136px;
-  border-radius: 12px;
-  background: var(--well);
-}
-.tpl-new-photo > img:first-child {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-}
-.tpl-new-logo {
-  position: absolute;
-  left: 12px;
-  bottom: -30px;
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  object-fit: cover;
-  background: #ffffff;
-  box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
-}
-.tpl-new-logo[data-round] {
-  border-radius: 50%;
-}
-.tpl-new-h {
-  margin: 0 8px;
-  font: 600 22px/27px "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-  text-wrap: balance;
-}
-.tpl-new-name {
-  margin: 18px 8px 0;
-  font: 600 15px/20px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tpl-new-perks {
-  display: grid;
-  gap: 12px;
-  margin: 14px 8px 0;
-  padding: 0;
-  list-style: none;
-}
-.tpl-new-name + .tpl-new-perks {
-  margin-top: 10px;
-}
-.tpl-new-perks li {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-}
-.tpl-new-perks p {
-  display: grid;
-  margin: 0;
-}
-.tpl-new-perks b {
-  font: 600 16px/20px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tpl-new-perks span:not(.tpl-new-pct) {
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tpl-new-item {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.tpl-new-pct {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #0b7a53;
-  color: #ffffff;
-  font: 700 14px/1 "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.02em;
-}
-.tpl-new-foot {
-  margin: 16px 8px 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--hair);
-  font: 500 14px/19px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-
 /* The Lite mark (shell/LiteMark.tsx, 12 Nov 2026) beside a line of text:
    the pop-up's note and the just-joined card's foot. */
 .lite-mark {
@@ -6711,8 +6606,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   height: 18px;
   color: var(--ink, #141618);
 }
-.pp-note,
-.tpl-new-foot {
+.pp-note {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -6736,60 +6630,6 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   line-height: 19px;
   color: rgba(20, 22, 24, 0.62);
 }
-/* A computer: the photos stacked beside the news, not a wide banner over
-   a short list. Each mark sits inside its photo's corner. */
-@media (min-width: 1024px) {
-  .tpa-home .tpl-new {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: 32px;
-  }
-  .tpa-home .tpl-new-photos {
-    grid-auto-flow: row;
-    grid-auto-rows: minmax(150px, 1fr);
-    margin: 0;
-  }
-  /* The photos fill the rows the text sets, not their own height. */
-  .tpa-home .tpl-new-photo {
-    height: auto;
-  }
-  .tpa-home .tpl-new-photo > img:first-child {
-    position: absolute;
-    inset: 0;
-  }
-  .tpa-home .tpl-new-logo {
-    bottom: 14px;
-    left: 14px;
-    box-shadow: 0 0 0 3px #ffffff, 0 6px 16px rgba(20, 22, 24, 0.18);
-  }
-  .tpa-home .tpl-new-text {
-    display: flex;
-    flex-direction: column;
-  }
-  .tpa-home .tpl-new-h {
-    margin: 6px 0 0;
-    font-size: 26px;
-    line-height: 31px;
-  }
-  .tpa-home .tpl-new-name {
-    margin: 20px 0 0;
-  }
-  .tpa-home .tpl-new-perks {
-    margin: 18px 0 0;
-    gap: 14px;
-  }
-  .tpa-home .tpl-new-name + .tpl-new-perks {
-    margin-top: 10px;
-  }
-  .tpa-home .tpl-new-foot {
-    margin: auto 0 0;
-    padding-top: 14px;
-  }
-  .tpa-home .tpl-new-place:last-of-type {
-    margin-bottom: 20px;
-  }
-}
-
 /* ══ THE PLACES ROW: FILTERS AND A WIDER SCROLLING ROW (Sam, 12 Nov 2026:
    "more like a scrollable ticker I think with filters for Tapin plus and
    Tapin lite. The merchant containers can be a bit wider") ═════════════════ */
@@ -8101,8 +7941,8 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   white-space: nowrap;
 }
 
-/* ══ JUST JOINED, FIVE FRESH TAKES (shell/LiteNew.tsx, ?ljv=1..5, 13 Nov
-   2026) ══════════════════════════════════════════════════════════════════════ */
+/* ══ JUST JOINED, AS A STORY (shell/LiteStory.tsx, 13 Nov 2026) ═══════════════
+   One full-bleed frame a place, two segments up top, under How it works. */
 .tln {
   padding: 20px 0 16px;
 }
@@ -8112,6 +7952,17 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   letter-spacing: -0.02em;
   color: var(--ink);
   text-wrap: balance;
+}
+.tln-story {
+  position: relative;
+  margin: 16px 20px 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #141618;
+  /* Safari keeps the rounded clip while the photos scale. */
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .tln-row {
   display: grid;
@@ -8125,79 +7976,17 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tln-row::-webkit-scrollbar {
   display: none;
 }
-.tln-row:focus-visible,
-.tln-deck:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 3px;
-  border-radius: 20px;
+.tln-row:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -4px;
+  border-radius: 18px;
 }
 .tln-slide {
   position: relative;
   min-width: 0;
+  overflow: hidden;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-}
-.tln-logo {
-  flex: none;
-  border-radius: 10px;
-  object-fit: cover;
-  background: #ffffff;
-}
-.tln-logo[data-round] {
-  border-radius: 50%;
-}
-.tln-foot {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 16px 20px 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--hair);
-  font: 500 14px/19px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-live {
-  margin: 14px 20px 0;
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-live b {
-  font-weight: 600;
-  color: #e5751f;
-}
-
-/* 1 · Story: a 9:14 frame, the photo full bleed, two segments up top. */
-.tln-story {
-  position: relative;
-  margin: 16px 20px 0;
-  overflow: hidden;
-  border-radius: 18px;
-  background: #141618;
-}
-.tln-story-bars {
-  position: absolute;
-  z-index: 3;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 4px;
-  pointer-events: none;
-}
-.tln-story-bars span {
-  height: 3px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.4);
-}
-.tln-story-bars i {
-  display: block;
-  height: 100%;
-  background: #ffffff;
-  transform: scaleX(0);
-  transform-origin: left;
 }
 .tln-story-frame {
   aspect-ratio: 9 / 13;
@@ -8209,13 +7998,44 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: 50% 40%;
+  -webkit-user-drag: none;
 }
+/* Photo shades, not decoration: the top keeps the segments and the name
+   readable on a pale photo (Crumbl's pink), the foot carries the perks. */
 .tln-story-shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 22%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.5) 42%, rgba(0, 0, 0, 0) 66%);
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.22) 18%, rgba(0, 0, 0, 0) 30%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.84), rgba(0, 0, 0, 0.55) 38%, rgba(0, 0, 0, 0) 62%);
+  pointer-events: none;
+}
+.tln-story-bars {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  pointer-events: none;
+}
+.tln-story-bars span {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+}
+.tln-story-bars i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
 }
 .tln-story-who {
   position: absolute;
@@ -8226,18 +8046,34 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
-.tln-story-who .tln-logo {
-  box-shadow: 0 0 0 2px #ffffff;
+.tln-logo {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px #ffffff, 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.tln-logo[data-round] {
+  border-radius: 50%;
+}
+.tln-story-who > span {
+  min-width: 0;
 }
 .tln-story-who b {
   display: block;
-  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  font: 600 16px/19px "Gilroy", Arial, sans-serif;
 }
 .tln-story-who span span {
   display: block;
-  font: 500 13px/16px "Gilroy", Arial, sans-serif;
-  color: rgba(255, 255, 255, 0.82);
+  overflow: hidden;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.88);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tln-story-say {
   position: absolute;
@@ -8247,9 +8083,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   bottom: 20px;
 }
 .tln-story-big {
-  margin: 0 0 14px;
-  font: 600 30px/33px "Gilroy", Arial, sans-serif;
+  margin: 0 0 18px;
+  font: 600 30px/32px "Gilroy", Arial, sans-serif;
   letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 .tln-story-say ul {
   display: grid;
@@ -8260,7 +8097,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 .tln-story-say li {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
@@ -8268,12 +8105,14 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tln-story-say li > span {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
   background: #0b7a53;
-  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
 }
 .tln-story-say p {
   display: grid;
@@ -8284,7 +8123,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 }
 .tln-story-say p span {
   font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.82);
 }
 .tln-story-tap {
   position: absolute;
@@ -8304,460 +8143,24 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   right: 0;
   width: 67%;
 }
-.tln-story-tap:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: -4px;
-  border-radius: 18px;
+/* Paused (held, hovered, focused): the segments dim a touch, as a story's
+   do, so the hold reads. */
+.tln-story[data-paused] .tln-story-bars {
+  opacity: 0.75;
 }
-
-/* 2 · Lock screen: the photo is the wallpaper, the day is the clock. */
-.tln-lock {
+.tln-story-bars {
+  transition: opacity 0.2s;
+}
+.tln-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 16px 20px 0;
-}
-.tln-lock .tln-row {
-  border-radius: 28px;
-}
-.tln-lock-screen {
-  min-height: 460px;
-  overflow: hidden;
-  border-radius: 28px;
-  color: #ffffff;
-}
-.tln-lock-photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.04);
-}
-.tln-lock-shade {
-  position: absolute;
-  inset: 0;
-  background: rgba(10, 12, 14, 0.38);
-}
-.tln-lock-time {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  padding: 26px 16px 0;
-  text-align: center;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.3);
-}
-.tln-lock-time span {
-  font: 600 15px/19px "Gilroy", Arial, sans-serif;
-}
-.tln-lock-time b {
-  font: 600 76px/80px "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.035em;
-}
-.tln-lock-time span:last-child {
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.86);
-}
-.tln-lock-notes {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 8px;
-  margin: 22px 0 0;
-  padding: 0 10px 18px;
-  list-style: none;
-}
-.tln-note {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
-  align-items: center;
-  gap: 11px;
-  padding: 11px 14px 11px 11px;
-  border-radius: 20px;
-  background: rgba(250, 250, 252, 0.94);
-  color: var(--ink);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-}
-.tln-note-ico {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  object-fit: cover;
-}
-.tln-note-ico[data-round] {
-  border-radius: 50%;
-}
-.tln-note-pct {
-  background: #0b7a53;
-  color: #ffffff;
-  font: 600 13px/1 "Gilroy", Arial, sans-serif;
-}
-.tln-note p {
-  display: grid;
-  margin: 0;
-  min-width: 0;
-}
-.tln-note-app {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font: 500 13px/16px "Gilroy", Arial, sans-serif;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
   color: var(--muted);
 }
-.tln-note b {
-  font: 600 15px/19px "Gilroy", Arial, sans-serif;
-}
-.tln-note p > span:last-child {
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-pagedots {
-  display: flex;
-  justify-content: center;
-  gap: 2px;
-  margin-top: 10px;
-}
-.tln-pagedots button {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-.tln-pagedots button::after {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(20, 22, 24, 0.22);
-  transition: background-color 0.25s;
-}
-.tln-pagedots button[aria-current]::after {
-  background: var(--ink);
-}
-
-/* 3 · Wallet: two passes stacked; the back one shows its band above. */
-.tln-wallet {
-  margin: 16px 20px 0;
-}
-.tln-deck {
-  position: relative;
-  display: grid;
-  padding-top: 18px;
-  cursor: pointer;
-  touch-action: pan-y;
-  user-select: none;
-}
-.tln-pass {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px var(--hair), 0 10px 28px rgba(20, 22, 24, 0.12);
-  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.2, 1), filter 0.5s;
-}
-.tln-pass[data-pos="0"] {
-  z-index: 2;
-}
-.tln-pass[data-pos="1"] {
-  /* The back pass takes the front one's height, so the deck is as tall as
-     the pass you're reading. */
-  position: absolute;
-  inset: 18px 0 0;
-  z-index: 1;
-  transform: translateY(-16px) scale(0.93);
-  filter: brightness(0.96);
-}
-.tln-pass-band {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--g);
-  color: var(--k);
-}
-.tln-pass-band .tln-logo {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
-}
-.tln-pass-band > span:nth-child(2) {
-  flex: 1;
-  min-width: 0;
-}
-.tln-pass-band b {
-  display: block;
-  font: 600 18px/22px "Gilroy", Arial, sans-serif;
-}
-.tln-pass-band > span:nth-child(2) span {
-  display: block;
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  opacity: 0.8;
-}
-.tln-pass-tier {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px 5px 8px;
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--ink);
-  font: 600 13px/16px "Gilroy", Arial, sans-serif;
-}
-.tln-pass-tier .lite-mark {
-  width: 14px;
-  height: 14px;
-}
-.tln-pass-perks {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 18px 16px;
-  list-style: none;
-}
-.tln-pass-perks li {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-}
-.tln-pass-perks li > img,
-.tln-pass-perks li > span {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #0b7a53;
-  color: #ffffff;
-  font: 600 14px/1 "Gilroy", Arial, sans-serif;
-}
-.tln-pass-perks p {
-  display: grid;
-  margin: 0;
-}
-.tln-pass-perks b {
-  font: 600 16px/20px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tln-pass-perks p span {
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-pass-foot {
-  margin-top: auto !important;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin: 0 16px;
-  padding: 12px 0 14px;
-  border-top: 1px dashed transparent;
-  box-shadow: inset 0 1px 0 var(--hair);
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-pass-foot b {
-  font: 600 15px/18px "Gilroy", Arial, sans-serif;
-  color: #e5751f;
-}
-.tln-wallet-hint {
-  margin: 12px 0 0;
-  font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--muted);
-}
-.tln-wallet-hint b {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-/* 4 · Cut-up: a torn photo, the mark stuck on, label strips for perks. */
-.tln-cut {
-  margin-top: 16px;
-}
-.tln-cut-slide {
-  padding: 0 20px 6px;
-}
-.tln-cut-photo {
-  height: 200px;
-  overflow: hidden;
-  border-radius: 6px 6px 0 0;
-  background: var(--well);
-}
-.tln-cut-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.tln-cut-sticker {
-  position: absolute;
-  top: 14px;
-  right: 32px;
-  border-radius: 14px;
-  box-shadow: 0 0 0 4px #ffffff, 0 6px 14px rgba(0, 0, 0, 0.22);
-  transform: rotate(5deg);
-}
-.tln-cut-sticker[data-round] {
-  border-radius: 50%;
-}
-.tln-cut-name {
-  display: inline-block;
-  position: relative;
-  margin: -26px 0 0 10px;
-  padding: 6px 14px 7px;
-  font: 600 26px/30px "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.02em;
-  transform: rotate(-2deg);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.16);
-}
-.tln-cut-strips {
-  display: grid;
-  justify-items: start;
-  gap: 8px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.tln-cut-strips li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 100%;
-  padding: 7px 14px 8px 8px;
-  background: #141618;
-  color: #ffffff;
-  font: 500 15px/19px "Gilroy", Arial, sans-serif;
-  transform: rotate(calc((var(--n) * 2 - 1) * 0.8deg));
-}
-.tln-cut-strips li:not(:has(img)) {
-  padding-left: 14px;
-}
-.tln-cut-strips b {
-  font-weight: 600;
-}
-.tln-cut-strips img {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.tln-cut-tabs {
-  display: flex;
-  gap: 8px;
-  margin: 14px 20px 0;
-}
-.tln-cut-tabs button {
-  min-height: 36px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--well);
-  color: var(--ink);
-  font: 600 14px/18px "Gilroy", Arial, sans-serif;
-  cursor: pointer;
-}
-.tln-cut-tabs button[aria-current] {
-  background: var(--ink);
-  color: #ffffff;
-}
-
-/* 5 · Big type: the perk is the headline. */
-.tln-type-tabs {
-  display: flex;
-  gap: 18px;
-  margin: 14px 20px 0;
-  border-bottom: 1px solid var(--hair);
-}
-.tln-type-tabs button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: -1px;
-  padding: 8px 0 10px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--muted);
-  font: 600 15px/18px "Gilroy", Arial, sans-serif;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
-}
-.tln-type-tabs button[aria-selected="true"] {
-  border-bottom-color: var(--ink);
-  color: var(--ink);
-}
-.tln-type-tabs .tln-logo {
-  border-radius: 6px;
-}
-.tln-type-tabs .tln-logo[data-round] {
-  border-radius: 50%;
-}
-.tln-type-slide {
-  display: flex;
-  flex-direction: column;
-  padding: 18px 20px 0;
-}
-.tln-type-line {
-  display: grid;
-  margin: 0;
-}
-.tln-type-line b {
-  font: 600 64px/64px "Gilroy", Arial, sans-serif;
-  letter-spacing: -0.04em;
-  color: #0b7a53;
-}
-.tln-type-line span {
-  margin-top: 6px;
-  font: 500 20px/25px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tln-type-plus {
-  margin: 14px 0 0;
-  font: 500 20px/30px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-.tln-type-and {
-  font-weight: 600;
-  color: #0b7a53;
-}
-.tln-type-plus img {
-  width: 30px;
-  height: 30px;
-  margin: 0 2px;
-  border-radius: 50%;
-  object-fit: cover;
-  vertical-align: -8px;
-}
-.tln-type-photo {
-  position: relative;
-  height: 110px;
-  margin-top: auto;
-  padding-top: 18px;
-}
-.tln-type-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 14px;
-  object-fit: cover;
-}
-.tln-type-photo span {
-  position: absolute;
-  left: 10px;
-  bottom: 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  font: 600 13px/16px "Gilroy", Arial, sans-serif;
-  color: var(--ink);
-}
-
-/* A computer: the frames sit side by side at a phone's size. */
 @media (min-width: 1024px) {
   .tpa-home .tln {
     padding: 28px 0 20px;
@@ -8766,23 +8169,32 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     font-size: 26px;
     line-height: 31px;
   }
-  .tpa-home .tln[data-v="1"] .tln-story {
-    max-width: 360px;
+  /* Room for both: the frames side by side, each its own story card; no
+     segments or tap zones, each photo still pushing in on its turn. */
+  .tpa-home .tln-story {
+    overflow: visible;
+    border-radius: 0;
+    background: none;
   }
-  .tpa-home .tln[data-v="2"] .tln-lock,
-  .tpa-home .tln[data-v="3"] .tln-wallet,
-  .tpa-home .tln[data-v="5"] .tln-type-tabs,
-  .tpa-home .tln[data-v="5"] .tln-row {
-    max-width: 440px;
+  .tpa-home .tln-row {
+    grid-auto-columns: minmax(0, 340px);
+    gap: 16px;
+    overflow: visible;
   }
-  .tpa-home .tln[data-v="4"] .tln-row {
-    max-width: 560px;
+  .tpa-home .tln-slide {
+    border-radius: 18px;
+    background: #141618;
+  }
+  .tpa-home .tln-story-bars,
+  .tpa-home .tln-story-tap {
+    display: none;
+  }
+  .tpa-home .tln-story-who {
+    top: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tln-pass,
-  .tln-type-tabs button,
-  .tln-pagedots button::after {
+  .tln-story-bars {
     transition: none;
   }
 }
