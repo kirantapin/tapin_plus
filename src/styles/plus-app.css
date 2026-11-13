@@ -7988,8 +7988,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
+/* 4:5, not a full 9:13 story (Sam, 13 Nov 2026: "maybe don't need to be so
+   tall tho"): still room for the name up top and the perks below. */
 .tln-story-frame {
-  aspect-ratio: 9 / 13;
+  aspect-ratio: 4 / 5;
   color: #ffffff;
 }
 .tln-story-photo {
