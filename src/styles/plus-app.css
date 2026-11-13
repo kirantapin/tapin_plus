@@ -8100,3 +8100,425 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font: 600 13px/16px "Gilroy", Arial, sans-serif;
   white-space: nowrap;
 }
+
+/* ══ JUST JOINED, AS TWO SLIDES (shell/LiteSlides.tsx, ?ljv=a|b|c, 13 Nov
+   2026) ══════════════════════════════════════════════════════════════════════
+   One slide a place in a scroll-snapped row, under How it works. */
+.tls {
+  padding: 20px 0 16px;
+}
+.tls-h {
+  margin: 0 20px;
+  font: 600 22px/27px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.tls-row {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 0 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 20px;
+  scrollbar-width: none;
+}
+.tls-row::-webkit-scrollbar {
+  display: none;
+}
+.tls-row:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 16px;
+}
+.tls-slide {
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.tls-photo {
+  position: relative;
+  border-radius: 14px;
+  background: var(--well);
+}
+.tls-photo > img:first-child {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.tls-logo {
+  flex: none;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #ffffff;
+}
+.tls-logo[data-round] {
+  border-radius: 50%;
+}
+.tls-name {
+  margin: 0;
+  font: 600 18px/22px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.tls-kind {
+  display: block;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+.tls-perks {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tls-perks li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.tls-perks p {
+  display: grid;
+  margin: 0;
+}
+.tls-perks b {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tls-perks p span {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tls-fig {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.tls-fig-item {
+  object-fit: cover;
+}
+.tls-fig-pct {
+  background: #0b7a53;
+  color: #ffffff;
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.tls-live {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 20px 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tls-live b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tls-live-day {
+  display: grid;
+  flex: none;
+  width: 32px;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.1);
+  text-align: center;
+}
+.tls-live-day i {
+  padding: 1px 0;
+  background: #e5751f;
+  color: #ffffff;
+  font: 600 9px/11px "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tls-live-day b {
+  padding: 0 0 2px;
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tls-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 20px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+
+/* A · Postcards: the photo leads, the next place peeks in. */
+.tls[data-v="a"] .tls-row {
+  grid-auto-columns: 84%;
+}
+.tls[data-v="a"] .tls-photo {
+  height: 168px;
+  margin-bottom: 36px;
+}
+.tls[data-v="a"] .tls-photo .tls-logo {
+  position: absolute;
+  left: 14px;
+  bottom: -26px;
+  box-shadow: 0 0 0 4px var(--module, #ffffff), 0 6px 16px rgba(20, 22, 24, 0.16);
+}
+.tls[data-v="a"] .tls-name {
+  margin: 0 4px 14px;
+}
+.tls[data-v="a"] .tls-perks {
+  margin: 0 4px;
+}
+.tls-dots {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 14px;
+}
+.tls-dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.tls-dot::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(20, 22, 24, 0.2);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s;
+}
+.tls-dot[aria-current]::after {
+  width: 22px;
+  background: var(--ink);
+}
+.tls-dot:focus-visible {
+  outline: 2px solid var(--ink);
+  border-radius: 8px;
+}
+
+/* B · Side by side: a short slide, the arrows in the heading's row. */
+.tls-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 20px 0;
+}
+.tls-arrows {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+.tls-arrow {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--well);
+  color: var(--ink);
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.tls-arrow:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.tls-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.tls-arrow:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tls[data-v="b"] .tls-row {
+  grid-auto-columns: 100%;
+}
+.tls[data-v="b"] .tls-slide {
+  display: grid;
+  grid-template-columns: 38% minmax(0, 1fr);
+  gap: 14px;
+  padding: 10px;
+  border-radius: 18px;
+  background: #f4f4f6;
+}
+.tls[data-v="b"] .tls-photo {
+  min-height: 150px;
+}
+.tls[data-v="b"] .tls-photo > img:first-child {
+  position: absolute;
+  inset: 0;
+}
+.tls[data-v="b"] .tls-side {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  padding: 4px 4px 4px 0;
+}
+.tls[data-v="b"] .tls-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+}
+.tls[data-v="b"] .tls-name .tls-logo {
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.tls[data-v="b"] .tls-name .tls-logo[data-round] {
+  border-radius: 50%;
+}
+.tls[data-v="b"] .tls-perks {
+  gap: 10px;
+}
+.tls[data-v="b"] .tls-fig {
+  width: 36px;
+  height: 36px;
+}
+.tls[data-v="b"] .tls-fig-pct {
+  font-size: 12px;
+}
+.tls[data-v="b"] .tls-perks b {
+  font-size: 15px;
+  line-height: 19px;
+}
+.tls-count {
+  margin: 0;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tls-count b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* C · Pick a place: logos as tabs over one large slide. */
+.tls-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin: 16px 20px 0;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--well);
+}
+.tls-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: background-color 0.25s, color 0.25s, box-shadow 0.25s;
+}
+.tls-tab .tls-logo {
+  border-radius: 7px;
+}
+.tls-tab .tls-logo[data-round] {
+  border-radius: 50%;
+}
+.tls-tab[aria-selected="true"] {
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.08), 0 4px 12px rgba(20, 22, 24, 0.08);
+}
+.tls-tab:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tls[data-v="c"] .tls-row {
+  grid-auto-columns: 100%;
+  margin-top: 12px;
+  /* Room for the panel's shadow inside the scrolling row. */
+  padding-bottom: 20px;
+  margin-bottom: -20px;
+}
+.tls[data-v="c"] .tls-slide {
+  position: relative;
+}
+.tls[data-v="c"] .tls-photo {
+  height: 210px;
+}
+.tls[data-v="c"] .tls-panel {
+  position: relative;
+  margin: -44px 12px 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(20, 22, 24, 0.12);
+}
+.tls[data-v="c"] .tls-perks {
+  gap: 14px;
+}
+.tls-fig-big {
+  width: 56px;
+  height: 56px;
+}
+.tls-fig-pct.tls-fig-big {
+  border-radius: 14px;
+  font-size: 19px;
+}
+.tls[data-v="c"] .tls-perks b {
+  font-size: 17px;
+  line-height: 21px;
+}
+
+/* A computer: two slides fit side by side, so the row stops being a row to
+   swipe; the arrows, dots, count and tabs have nothing to do there. */
+@media (min-width: 1024px) {
+  .tpa-home .tls {
+    padding: 28px 0 20px;
+  }
+  .tpa-home .tls-h {
+    font-size: 26px;
+    line-height: 31px;
+  }
+  .tpa-home .tls[data-v="a"] .tls-row {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .tpa-home .tls[data-v="a"] .tls-dots {
+    display: none;
+  }
+  .tpa-home .tls[data-v="b"] .tls-row,
+  .tpa-home .tls[data-v="c"] .tls-row {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .tpa-home .tls[data-v="b"] .tls-pager,
+  .tpa-home .tls[data-v="c"] .tls-tabs {
+    display: none;
+  }
+  .tpa-home .tls[data-v="c"] .tls-row {
+    margin-top: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tls-dot::after,
+  .tls-tab,
+  .tls-arrow {
+    transition: none;
+  }
+}
