@@ -8,7 +8,6 @@ import {
 } from "react";
 import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
-import { logoField } from "../model/content";
 import { captureUtm } from "../model/parents";
 import ParentCheckout, { hasSavedGiftCard, resumeStep } from "../shell/ParentCheckout";
 import { hydrateGiftDraft } from "../model/giftDraft";
@@ -34,6 +33,18 @@ import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteJoined } from "../shell/LiteJoined";
 import { LiteMark } from "../shell/LiteMark";
+import { useTicker } from "../shell/useTicker";
+import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
+
+/* Each place's kind, short enough for the C3 card's strip, in the parents'
+   food-first words (the pop-up keeps the longer line). */
+const PARENT_KIND: Record<string, string> = {
+  coffeeholicsva: "Coffee",
+  sweetopia: "Ice cream",
+  olaika: "Pizza & burgers",
+  theburg: "Tacos",
+  themilkparlor: "Baskets",
+};
 import { LITE_PLACES } from "../model/lite";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 
@@ -301,6 +312,39 @@ export default function ParentsHome() {
      2026); ?lowv=0 shows the old one. */
   const [count] = useState(() => lowerVersion() !== null);
   const placeFrom = useRef<HTMLElement | null>(null);
+  /* The places row, as on the students page (13 Nov 2026): the filter, the
+     row for the arrows, the ticker and its pause. Short kinds fit the C3
+     strip; the pop-up keeps each place's longer line. */
+  const [railKind, setRailKind] = useState<"all" | "plus" | "lite">("all");
+  const railRef = useRef<HTMLUListElement | null>(null);
+  const railBy = (dir: 1 | -1) => {
+    const r = railRef.current;
+    if (!r) return;
+    r.scrollBy({ left: dir * Math.max(240, r.clientWidth * 0.8), behavior: reducedMotion() ? "auto" : "smooth" });
+  };
+  const railCards = [
+    ...(railKind === "lite" ? [] : PLACES).map((p) => ({
+      id: p.id,
+      name: p.name,
+      kind: PARENT_KIND[p.id] ?? p.what,
+      what: p.what,
+      photo: p.photo,
+      logo: p.logo,
+      lite: false,
+    })),
+    ...(railKind === "plus" ? [] : LITE_PLACES).map((p) => ({
+      id: p.id,
+      name: p.name,
+      kind: p.kind,
+      what: p.kind,
+      photo: p.photo,
+      logo: p.logo,
+      lite: true,
+    })),
+  ];
+  const tickerOn = railCards.length >= 4;
+  const [tickerPaused, setTickerPaused] = useState(false);
+  useTicker(railRef, tickerOn, tickerPaused, railKind);
   const signUp = (where: string, el: HTMLElement) => {
     track("parent_signup_clicked", { where });
     setOrigin(el.closest<HTMLElement>("[data-island-origin]") ?? el);
@@ -620,102 +664,124 @@ export default function ParentsHome() {
           <BenefitCards />
         </section>
 
-        <section className="tpa-places tpp-places" aria-labelledby="tpp-every">
+        <section className="tpa-places tpp-places" aria-labelledby="tpp-every" data-railv="c3">
           {/* Sam, 11 Nov 2026: "yes do the same for parents", the students
               page's "What and where can I use it?" in their voice. */}
           <h2 id="tpp-every" className="tpa-h2 tpa-h2-out">
             What and where can they use it?
           </h2>
           <p className="tpa-places-sub">Open a card to see what Plus covers there.</p>
-          <ul className="tpa-rail">
-            {PLACES.map((p) => (
-              <li key={p.id} className="tpa-place">
+          {/* As on the students page (Sam, 13 Nov 2026: "thought we were
+              going to update this on the mom's page"): All, Tapin Plus or
+              Tapin Lite, arrows and a pause on a computer, and one row that
+              drifts on its own (shell/useTicker.ts), with C3 · Framed cards. */}
+          <div className="tpa-rail-bar">
+            <div className="tpa-filters" role="group" aria-label="Show places">
+              {(
+                [
+                  ["all", "All"],
+                  ["plus", "Tapin Plus"],
+                  ["lite", "Tapin Lite"],
+                ] as const
+              ).map(([k, label]) => (
                 <button
+                  key={k}
                   type="button"
-                  className="tpa-place-open"
-                  aria-label={`What Plus gets them at ${p.name}`}
-                  onClick={(e) => {
-                    const r = e.currentTarget.getBoundingClientRect();
-                    placeFrom.current = e.currentTarget;
-                    setPlaceOpen({
-                      id: p.id,
-                      name: p.name,
-                      kind: p.what,
-                      photo: p.photo,
-                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
-                    });
-                    track("plus_place_opened", { place: p.id, page: "parents" });
+                  className="tpa-filter"
+                  aria-pressed={railKind === k}
+                  onClick={() => {
+                    setRailKind(k);
+                    railRef.current?.scrollTo({ left: 0 });
+                    track("plus_places_filter", { kind: k, page: "parents" });
                   }}
                 >
-                <img
-                  className="tpa-place-photo"
-                  src={p.photo}
-                  alt=""
-                  decoding="async"
-                  loading="lazy"
-                />
-                <span
-                  className="tpp-place-logo collar"
-                  data-field={logoField(p.id)}
-                  aria-hidden="true"
-                >
-                  <img src={p.logo} alt="" decoding="async" loading="lazy" />
-                </span>
-                <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="tpa-place-name">
-                  <b>{p.name}</b>
-                  <small>{p.what}</small>
-                </span>
+                  {k === "plus" ? <FlatMark className="tpa-filter-mark" /> : k === "lite" ? <LiteMark className="tpa-filter-mark" /> : null}
+                  {label}
                 </button>
-              </li>
-            ))}
-            {/* The Lite places after the five, as on the students page: the
-                logo like the others, a Lite tag beside it, their own perks
-                in the pop-up. */}
-            {LITE_PLACES.map((p) => (
-              <li key={p.id} className="tpa-place">
+              ))}
+            </div>
+            <div className="tpa-rail-arrows">
+              {tickerOn ? (
                 <button
                   type="button"
-                  className="tpa-place-open"
-                  aria-label={`What they get at ${p.name}`}
-                  onClick={(e) => {
-                    const r = e.currentTarget.getBoundingClientRect();
-                    placeFrom.current = e.currentTarget;
-                    setPlaceOpen({
-                      id: p.id,
-                      name: p.name,
-                      kind: p.kind,
-                      photo: p.photo,
-                      lite: true,
-                      from: { x: r.left, y: r.top, w: r.width, h: r.height },
-                    });
-                    track("plus_place_opened", { place: p.id, page: "parents", lite: true });
-                  }}
+                  className="tpa-rail-arrow tpa-rail-pause"
+                  aria-label={tickerPaused ? "Play the places" : "Pause the places"}
+                  aria-pressed={tickerPaused}
+                  onClick={() => setTickerPaused((v) => !v)}
                 >
-                  <img className="tpa-place-photo" src={p.photo} alt="" decoding="async" loading="lazy" />
-                  <span className="tpp-place-logo collar" data-field={logoField(p.id)} aria-hidden="true">
-                    <img src={p.logo} alt="" decoding="async" loading="lazy" />
-                  </span>
-                  <span className="tpa-glass tpa-tag tpp-lite-tag">
-                    <LiteMark className="tpa-tag-mark" />
-                    Lite
-                  </span>
-                  <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  {tickerPaused ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" />
                     </svg>
-                  </span>
-                  <span className="tpa-place-name">
-                    <b>{p.name}</b>
-                    <small>{p.kind}</small>
-                  </span>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+                    </svg>
+                  )}
                 </button>
-              </li>
-            ))}
+              ) : null}
+              <button type="button" className="tpa-rail-arrow" aria-label="Earlier places" onClick={() => railBy(-1)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button type="button" className="tpa-rail-arrow" aria-label="More places" onClick={() => railBy(1)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <ul className="tpa-rail" ref={railRef} data-ticker={tickerOn ? "" : undefined}>
+            {[false, true].map((copy) =>
+              copy && !tickerOn
+                ? null
+                : railCards.map((v) => (
+                    <li key={`${copy ? "copy-" : ""}${v.id}`} className="tpa-place" data-ticker-copy={copy ? "" : undefined} aria-hidden={copy || undefined}>
+                      <button
+                        type="button"
+                        className="tpa-place-open"
+                        tabIndex={copy ? -1 : undefined}
+                        aria-label={v.lite ? `What they get at ${v.name}` : `What Plus gets them at ${v.name}`}
+                        onClick={(e) => {
+                          const r = e.currentTarget.getBoundingClientRect();
+                          placeFrom.current = e.currentTarget;
+                          setPlaceOpen({
+                            id: v.id,
+                            name: v.name,
+                            kind: v.what,
+                            photo: v.photo,
+                            lite: v.lite || undefined,
+                            liveSoon: liveSoon(v.id) || undefined,
+                            from: { x: r.left, y: r.top, w: r.width, h: r.height },
+                          });
+                          track("plus_place_opened", v.lite ? { place: v.id, page: "parents", lite: true } : { place: v.id, page: "parents" });
+                        }}
+                      >
+                        <span className="tpa-place-shot">
+                          <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
+                          {liveSoon(v.id) ? <LiveCountdown className="tpa-live" /> : null}
+                        </span>
+                        <span className="tpa-glass tpa-tag">
+                          {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
+                          {v.lite ? "Lite" : "Plus"}
+                        </span>
+                        <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                        <span className="tpa-place-name">
+                          <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
+                          <span className="tpa-place-words">
+                            <b>{v.name}</b>
+                            <small>{v.kind}</small>
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  )),
+            )}
           </ul>
           <p className="tpp-more">More places are joining.</p>
         </section>
