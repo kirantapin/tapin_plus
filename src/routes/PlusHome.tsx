@@ -1813,7 +1813,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
               </p>
               {invite?.ends ? <p className="tpa-close-ends">Free first month ends {invite.endsLabel}.</p> : null}
               {linked || group || placeForever ? null : <WelcomeEnds className="tpa-close-ends" />}
-              {groupOffer && group?.endsMs ? <p className="tpa-close-ends">Ends at midnight tonight.</p> : null}
+              {groupOffer && group?.endsMs ? <p className="tpa-close-ends">{group.endsLine ?? "Ends at midnight tonight"}.</p> : null}
             </>
           )}
           {joinCta("close", true)}
