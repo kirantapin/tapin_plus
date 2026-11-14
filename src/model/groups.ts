@@ -177,33 +177,19 @@ export const WELCOME_WEEK: Group = {
    $7.99, discountDuration forever; read active with no end_time on 14 Nov
    2026), applied by its id on this page alone (model/pagePolicy.ts).
 
-   THE END IS EACH PERSON'S OWN (Sam: "each person would see the offer ending
-   in 1 day"): 24 hours from when they first open the page on that phone,
-   kept in localStorage. It's held on the device, so a second phone or a
-   cleared browser starts its own day; the policy itself has no end, so the
-   checkout would still take it after the page stops offering it. The pitch
+   THE END (Sam, 14 Nov 2026: "you can make the VIP offer end on the Tuesday
+   after cyber monday"): 11:59pm Eastern on Tuesday 1 December 2026 (Cyber
+   Monday is 30 November), the same moment for everyone. It replaced the
+   first version's 24 hours from each phone's first visit. The policy itself
+   has no end_time, so only the page stops offering it; Kiran can set
+   end_time to 2026-12-02T04:59:00Z so the checkout stops too. The pitch
    (Sam: "just using Tapin once, at one of our partners, is enough to make
    your money back and more"): one $5 credit is more than the $2.99 month. */
-const VIP_KEY = "tp_vip_first_v1";
-const VIP_HOURS = 24;
+const VIP_ENDS_MS = Date.UTC(2026, 11, 2, 4, 59, 0); // Tue 1 Dec, 11:59pm EST
+/* When the page went up (14 Nov 2026), for the bar that drains to the end. */
+const VIP_START_MS = Date.UTC(2026, 10, 14, 17, 0, 0);
 
-/** When this phone first opened /vip, recorded the first time it's asked. */
-function vipFirstSeen(): number {
-  const now = Date.now();
-  try {
-    const kept = Number(window.localStorage.getItem(VIP_KEY));
-    if (Number.isFinite(kept) && kept > 0 && kept <= now) return kept;
-    window.localStorage.setItem(VIP_KEY, String(now));
-  } catch {
-    /* No storage: the day starts now, each visit. */
-  }
-  return now;
-}
-
-/** The VIP group, with this person's own 24 hours. Built when /vip opens,
- *  never on another page, so only a visit to /vip starts the clock. */
 export function vipGroup(): Group {
-  const start = typeof window === "undefined" ? Date.now() : vipFirstSeen();
   return {
     id: "vip",
     name: "VIP",
@@ -211,17 +197,17 @@ export function vipGroup(): Group {
     term: "forever",
     seats: null,
     policyId: WELCOME_WEEK_FLASH_POLICY,
-    startMs: start,
-    endsMs: start + VIP_HOURS * 3_600_000,
-    headline: "Your own Plus price, for the next 24 hours.",
+    startMs: VIP_START_MS,
+    endsMs: VIP_ENDS_MS,
+    headline: "Your own Plus price, until Tuesday, December 1.",
     label: "VIP offer",
-    endsLine: "Your price ends today",
-    endsShort: "Ends today",
+    endsLine: "Ends Tue 1 Dec, 11:59pm",
+    endsShort: "Ends Tue 1 Dec",
     endedLine: "Your VIP price has ended.",
     note: "Use one $5 credit once and Plus has paid for itself.",
     faq: (first, monthly) => ({
       q: `Why is it ${first}?`,
-      a: `It’s a VIP price for people who signed in to Tapin but haven’t joined Plus yet, and it lasts 24 hours from when you first open this page. Join in time and you pay ${first} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month after their first. Use one $5 credit once and the month has paid for itself. Cancel anytime in the Tapin app.`,
+      a: `It’s a VIP price for people who signed in to Tapin but haven’t joined Plus yet, and it ends at 11:59pm on Tuesday, December 1. Join before then and you pay ${first} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month after their first. Use one $5 credit once and the month has paid for itself. Cancel anytime in the Tapin app.`,
     }),
   };
 }

@@ -112,7 +112,7 @@ export default function App() {
             life until the end of today, on Sam's Welcome Week collage. */}
         <Route path="/welcome-week" element={<GroupPage group={WELCOME_WEEK} bandSrc={asset("/groups/welcome-week.webp")} />} />
         {/* The comeback price texted to people who signed in but didn't
-            join (Sam, 14 Nov 2026), 24 hours from their first visit. */}
+            join (Sam, 14 Nov 2026), until 11:59pm ET Tue 1 Dec. */}
         <Route path="/vip" element={<VipPage />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
@@ -188,8 +188,7 @@ function TheBurgPage() {
   return <PlusHome placeId="theburg" bandSrc={asset("/places/theburg-food.webp")} bandPos="78% 55%" />;
 }
 
-/* The VIP group is built when /vip opens, so only a visit there starts that
-   person's 24 hours (model/groups.ts). */
+/* The VIP group (model/groups.ts). */
 function VipPage() {
   const [group] = useState(vipGroup);
   return <GroupPage group={group} />;
