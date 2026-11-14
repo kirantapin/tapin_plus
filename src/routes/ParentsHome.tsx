@@ -438,7 +438,7 @@ export default function ParentsHome() {
       /* Why the places are on board (Sam, 9 Nov 2026: "it's for exclusive
          exposure"). */
       q: "What’s the catch?",
-      a: `There isn’t one. The places are in it for the exposure: Plus is an exclusive group of Blacksburg spots, and every member gets $${CREDIT} to try each one, every month. That’s how they win new regulars, so there’s no minimum spend and no marked-up menu. Cancel anytime.`,
+      a: `There isn’t one. Tapin is a handpicked group of Blacksburg places that don’t compete for the same spend but share the same customers. The places fund the perks to reach more people, and Tapin puts the membership fee into promoting them. We don’t let everyone in, or it wouldn’t work. There’s no minimum spend and no marked-up menu. Cancel anytime.`,
     },
     {
       q: "Does this replace their meal plan?",
