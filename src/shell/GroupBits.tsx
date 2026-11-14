@@ -26,7 +26,7 @@ export function GroupBar({ group, line, short }: { group: Group; line: string; s
   return (
     <aside
       className="tpa-wbar tpa-pbar tpg-bar"
-      aria-label={`${who}: ${line}${left ? `, ends at midnight tonight, ${spokenClock(left)} left` : ""}`}
+      aria-label={`${who}: ${line}${left ? `, ${(group.endsLine ?? "Ends at midnight tonight").toLowerCase()}, ${spokenClock(left)} left` : ""}`}
     >
       <i className="tpa-pbar-dot" aria-hidden="true" />
       <span aria-hidden="true" className="tnum tpa-pbar-long">
@@ -73,8 +73,8 @@ export function GroupLeftLine({ group }: { group: Group }) {
   const left = useEndsAt(group.endsMs ?? null);
   if (!left) return null;
   return (
-    <span className="tnum" aria-label={`Ends at midnight tonight, ${spokenClock(left)} left`}>
-      Ends at midnight · <span className="tpg-left">{shortClock(left)} left</span>
+    <span className="tnum" aria-label={`${group.endsLine ?? "Ends at midnight tonight"}, ${spokenClock(left)} left`}>
+      {group.endsShort ?? "Ends at midnight"} · <span className="tpg-left">{shortClock(left)} left</span>
     </span>
   );
 }
@@ -89,8 +89,8 @@ export function GroupClock({ group, className = "ov-spots" }: { group: Group; cl
   const ms = ((left.days * 24 + left.hours) * 60 + left.minutes) * 60_000 + left.seconds * 1000;
   return (
     <div className={`${className} tpg-clock`} data-ph-show="">
-      <p className="tnum" aria-label={`Ends at midnight tonight, ${spokenClock(left)} left`}>
-        <b>Ends at midnight tonight</b> · {shortClock(left)} left
+      <p className="tnum" aria-label={`${group.endsLine ?? "Ends at midnight tonight"}, ${spokenClock(left)} left`}>
+        <b>{group.endsLine ?? "Ends at midnight tonight"}</b> · {shortClock(left)} left
       </p>
       <span aria-hidden="true">
         <i style={{ transform: `scaleX(${Math.max(0, Math.min(1, ms / span))})` }} />
@@ -103,7 +103,7 @@ export function GroupClock({ group, className = "ov-spots" }: { group: Group; cl
 export function GroupEnded({ group }: { group: Group }) {
   return (
     <p className="tpa-wline tpg-offer tpg-ended" data-ph-show="">
-      <span>The {group.name} price ended at midnight.</span>
+      <span>{group.endedLine ?? `The ${group.name} price ended at midnight.`}</span>
     </p>
   );
 }
@@ -152,6 +152,7 @@ export const groupTerm = (group: Group) =>
 /** The exclusive price in the header, under the $25. */
 export function GroupOffer({ group, first }: { group: Group; first: string }) {
   return (
+    <>
     <p className={`tpa-wline tpg-offer${group.mark ? " tpg-offer-marked" : ""}`} data-ph-show="">
       {group.mark ? (
         /* The group's own mark in place of the tag (Welcome Week's, as the
@@ -167,5 +168,7 @@ export function GroupOffer({ group, first }: { group: Group; first: string }) {
         <b>{group.label ?? "Resident exclusive"}</b> · {first} {groupTerm(group).long}
       </span>
     </p>
+    {group.note ? <p className="tpa-wline tpg-note">{group.note}</p> : null}
+    </>
   );
 }

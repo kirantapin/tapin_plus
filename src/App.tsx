@@ -5,7 +5,7 @@ import Arrival from "./shell/Arrival";
 import { PlusCheckoutMount } from "./shell/PlusCheckout";
 import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
-import { BREXX, SMITHS_LANDING, WELCOME_WEEK, type Group } from "./model/groups";
+import { BREXX, SMITHS_LANDING, WELCOME_WEEK, vipGroup, type Group } from "./model/groups";
 import { setPagePolicy } from "./model/pagePolicy";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
@@ -111,6 +111,9 @@ export default function App() {
         {/* Welcome Week's flash sale (Sam, 11 Nov 2026): $2.99 a month for
             life until the end of today, on Sam's Welcome Week collage. */}
         <Route path="/welcome-week" element={<GroupPage group={WELCOME_WEEK} bandSrc={asset("/groups/welcome-week.webp")} />} />
+        {/* The comeback price texted to people who signed in but didn't
+            join (Sam, 14 Nov 2026), 24 hours from their first visit. */}
+        <Route path="/vip" element={<VipPage />} />
         <Route path="/in" element={<Members />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
@@ -183,6 +186,13 @@ function TheBurgPage() {
     if (typeof window !== "undefined") setPagePolicy(THEBURG_FOREVER_POLICY, THEBURG_FOREVER_ENDS, "theburg");
   });
   return <PlusHome placeId="theburg" bandSrc={asset("/places/theburg-food.webp")} bandPos="78% 55%" />;
+}
+
+/* The VIP group is built when /vip opens, so only a visit there starts that
+   person's 24 hours (model/groups.ts). */
+function VipPage() {
+  const [group] = useState(vipGroup);
+  return <GroupPage group={group} />;
 }
 
 /* A group's page carries its promo link (model/groups.ts) in the address, so

@@ -82,6 +82,17 @@ export interface Group {
   label?: string;
   /** A mark beside the price in the header, in place of the tag. */
   mark?: { src: string; alt: string };
+  /** How the clock names the end: "Ends at midnight tonight" unless said,
+   *  and its short form, "Ends at midnight". */
+  endsLine?: string;
+  endsShort?: string;
+  /** The line once it's over: "The {name} price ended at midnight." unless
+   *  said. */
+  endedLine?: string;
+  /** One more line under the price in the header. */
+  note?: string;
+  /** The page's own "Why is it $X?" question, in place of the stock one. */
+  faq?: (first: string, monthly: string) => { q: string; a: string };
 }
 
 export const SMITHS_LANDING: Group = {
@@ -153,3 +164,64 @@ export const WELCOME_WEEK: Group = {
   label: "Welcome Week only",
   mark: { src: asset("/brand/vt-welcome-week.webp"), alt: "VT Welcome Week" },
 };
+
+
+/* ══ VIP: A COMEBACK PRICE FOR THOSE WHO SIGNED IN BUT DIDN'T JOIN (Sam,
+   14 Nov 2026: "a landing page for those who signed into tapin but didn't
+   purchase ... an exclusive deal to one of our $2.99 or $3.99 for life
+   policies. This would be a limited time offer, and we'd send SMS
+   specifically to those who signed into Tapin in blacksburg but didn't
+   purchase tapin plus") ══════════════════════════════════════════════════════
+   plus.tapin.app/vip, the link in that text. THE OFFER: the same PUBLIC
+   policy as Welcome Week's flash sale, f408a1cb ("$2.99 forever", $5 off
+   $7.99, discountDuration forever; read active with no end_time on 14 Nov
+   2026), applied by its id on this page alone (model/pagePolicy.ts).
+
+   THE END IS EACH PERSON'S OWN (Sam: "each person would see the offer ending
+   in 1 day"): 24 hours from when they first open the page on that phone,
+   kept in localStorage. It's held on the device, so a second phone or a
+   cleared browser starts its own day; the policy itself has no end, so the
+   checkout would still take it after the page stops offering it. The pitch
+   (Sam: "just using Tapin once, at one of our partners, is enough to make
+   your money back and more"): one $5 credit is more than the $2.99 month. */
+const VIP_KEY = "tp_vip_first_v1";
+const VIP_HOURS = 24;
+
+/** When this phone first opened /vip, recorded the first time it's asked. */
+function vipFirstSeen(): number {
+  const now = Date.now();
+  try {
+    const kept = Number(window.localStorage.getItem(VIP_KEY));
+    if (Number.isFinite(kept) && kept > 0 && kept <= now) return kept;
+    window.localStorage.setItem(VIP_KEY, String(now));
+  } catch {
+    /* No storage: the day starts now, each visit. */
+  }
+  return now;
+}
+
+/** The VIP group, with this person's own 24 hours. Built when /vip opens,
+ *  never on another page, so only a visit to /vip starts the clock. */
+export function vipGroup(): Group {
+  const start = typeof window === "undefined" ? Date.now() : vipFirstSeen();
+  return {
+    id: "vip",
+    name: "VIP",
+    linkId: null,
+    term: "forever",
+    seats: null,
+    policyId: WELCOME_WEEK_FLASH_POLICY,
+    startMs: start,
+    endsMs: start + VIP_HOURS * 3_600_000,
+    headline: "Your own Plus price, for the next 24 hours.",
+    label: "VIP offer",
+    endsLine: "Your price ends today",
+    endsShort: "Ends today",
+    endedLine: "Your VIP price has ended.",
+    note: "Use one $5 credit once and Plus has paid for itself.",
+    faq: (first, monthly) => ({
+      q: `Why is it ${first}?`,
+      a: `It’s a VIP price for people who signed in to Tapin but haven’t joined Plus yet, and it lasts 24 hours from when you first open this page. Join in time and you pay ${first} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month after their first. Use one $5 credit once and the month has paid for itself. Cancel anytime in the Tapin app.`,
+    }),
+  };
+}
