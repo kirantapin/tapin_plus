@@ -178,8 +178,16 @@ const DAY12_MS = Date.UTC(2026, 10, 12, 5, 0, 0); // midnight EST, 12 Nov
 /* ══ RESET TO 25 (Sam, 13 Nov 2026: "let's reset the counter to 25 spots")
    From 3:30pm Eastern on 13 November the count stands at 25, then loses one
    a day from 14 November at the same seeded moments as before. */
-const RESET_MS = Date.UTC(2026, 10, 13, 20, 30, 0); // 13 Nov, 3:30pm EST
-const RESET_LEFT = 25;
+/* ══ THEN 8 (Sam, 13 Nov 2026, evening: "let's have the number of seats
+   available now at 8, and decrease 1 per day") ═════════════════════════════
+   From 8:55pm Eastern on 13 November, 8, then one a day from 14 November at the
+   same seeded moments, floored at PLUS_FLOOR (3, about 19 November). The
+   latest reset that has started sets the count. */
+const RESETS: { atMs: number; left: number }[] = [
+  { atMs: Date.UTC(2026, 10, 13, 20, 30, 0), left: 25 }, // 13 Nov, 3:30pm EST
+  { atMs: Date.UTC(2026, 10, 14, 1, 55, 0), left: 8 }, // 13 Nov, 8:55pm EST
+];
+const RESET_MS = RESETS[0].atMs;
 
 /** Spots left at the $7.99 rate at a moment. */
 export function plusSeatsLeft(now: number = Date.now()): number {
@@ -192,7 +200,8 @@ export function plusSeatsLeft(now: number = Date.now()): number {
       const at = DAY12_MS + day * DAY_MS + 9 * HOUR_MS + seeded(day + 4409)() * 12 * HOUR_MS;
       if (at <= now) gone++;
     }
-    return Math.max(PLUS_FLOOR, RESET_LEFT - gone);
+    const from = RESETS.filter((r) => r.atMs <= now).pop() ?? RESETS[0];
+    return Math.max(PLUS_FLOOR, from.left - gone);
   }
   if (now <= ONE_A_DAY_MS) return manyADay(now);
   const before = manyADay(ONE_A_DAY_MS);
