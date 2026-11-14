@@ -8203,3 +8203,14 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     transition: none;
   }
 }
+
+/* A place page's spend card carries its own spots in the tile, so the buy
+   block under it can be empty; it takes no room then, and Join sits under
+   the "How it adds up" fold (Sam, 14 Nov 2026: "tighten the gap above the
+   join button"). */
+.tpa-buy:empty {
+  display: none;
+}
+.cfv-3 + .tpa-buy:empty + .tpa-cta {
+  margin-top: 14px;
+}
