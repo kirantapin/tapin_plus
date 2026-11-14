@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { asset } from "../asset";
-import { CREDIT, PLACES } from "../routes/parents_kit";
+import { CREDIT } from "../routes/parents_kit";
 
 /* ══ WHY WE BROUGHT PLUS TO BLACKSBURG (Sam, 10 Nov 2026: "for all landing
    pages, I'd like to have a section with Rob and I's image, as the founders
@@ -34,7 +34,6 @@ const version = (): FounderV => {
   return v === "b" || v === "c" || v === "d" ? v : "e";
 };
 
-const count = PLACES.length === 5 ? "five" : String(PLACES.length);
 const still = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /** The rest of the story, opened in place. It rises in a touch as it
@@ -73,6 +72,12 @@ function More({ children }: { children: React.ReactNode }) {
    alum, this is our contribution to world peace". */
 const ALUMS = "Rob’s a Hokie alum, Sam’s a UVA alum. Tapin is our contribution to world peace.";
 
+/* The story says what "What's the catch?" says (Sam, 14 Nov 2026: "we
+   should inform it (on all pages) with the change we made to the what's the
+   catch FAQ", #379): a handpicked group of places that don't compete for the
+   same spend but share the same customers; they fund the perks to reach more
+   people, the membership fee goes into promoting them, and not everyone gets
+   in. "No chains" went with the old version: a Lite place can be one. */
 const Story = ({ line = false, they = false }: { line?: boolean; they?: boolean }) => (
   <>
     <p>
@@ -80,11 +85,11 @@ const Story = ({ line = false, they = false }: { line?: boolean; they?: boolean 
       {line ? " And a regular everywhere is a member nowhere." : ""}
     </p>
     <p>
-      The places we love share the same regulars, but each one is on its own, up against chains with bigger budgets. So we put them together: one
-      membership, {count} local spots, no&nbsp;chains.
+      The places in Plus don’t compete for the same spend, but they share the same customers. We don’t let everyone in, or it wouldn’t&nbsp;work.
     </p>
     <p className="tnum">
-      {they ? `Your student gets $${CREDIT} at each of them every month. The places get new regulars.` : `You get $${CREDIT} at each of them every month. They get new regulars.`}{" "}
+      The places fund the perks to reach more people, and we put the membership fee into promoting them.{" "}
+      {they ? `Your student gets $${CREDIT} at each Plus place every month. The places get new regulars.` : `You get $${CREDIT} at each Plus place every month. They get new regulars.`}{" "}
       That’s the whole&nbsp;idea.
     </p>
   </>
@@ -180,7 +185,7 @@ function Note({ they }: { they: boolean }) {
           Why we brought Plus to Blacksburg
         </h2>
         <p className="tpf-e-lead">
-          A regular everywhere is a member nowhere. So we put the places we love together, in one&nbsp;membership.
+          A regular everywhere is a member nowhere. So we handpicked the places we love and put them in one&nbsp;membership.
         </p>
         <More>
           <Story they={they} />
