@@ -218,6 +218,20 @@ export default function PlacePopup({
                 <span>On anything but alcohol</span>
               </span>
             </li>
+            {/* The weekly $5 back here too (Sam, 13 Nov 2026: "we need to
+                show the $5 credit on $10+ weekly here too"): earned on food
+                and non-alcoholic drinks only. */}
+            <li>
+              <span className="pp-ico pp-ico-money" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v4.2h4.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span>
+                <b>$5 back every week</b>
+                <span>When {they ? "they spend" : "you spend"} $10+ on food and non-alcoholic drinks</span>
+              </span>
+            </li>
             <li>
               <span className="pp-ico" aria-hidden="true">
                 <svg viewBox="0 0 24 24">
