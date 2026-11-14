@@ -1544,7 +1544,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 "we can remove the calculator, and just show that $3.99 turns
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
-            {place && (placeMonth(place.id) || (placeForever && cfv === "3")) ? (
+            {/* A place page shows its own savings card only while its for-life
+                offer runs; otherwise the same box as The Burg's (Sam, 14 Nov
+                2026: "it should look more like the burg I think"). */}
+            {place && placeForever && cfv === "3" ? (
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} cfv={cfv} />
             ) : offv && !place && !invite && !free ? (
               <OfferVersion
