@@ -5,7 +5,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { BAR_IDS, venueCovers, venues } from "../model/content";
 import { itemsFor } from "../model/menu";
 import { MEMBERS_LINE } from "../model/proof";
-import { PLUS_NEXT_PRICE, placeSeatCap, plusSeatLine } from "../model/seats";
+import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP, placeSeatCap, plusSeatLine } from "../model/seats";
 import { useMedia } from "../shell/useMedia";
 import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
@@ -459,6 +459,27 @@ function CfInk({ placeId, first }: { placeId: string; first: string }) {
   );
 }
 
+/* The Ink tile on the standard offer, once a place's for-life offer is over:
+   the first month, the spots left at the monthly price, what follows. */
+function CfFirst({ first, monthly }: { first: string; monthly: string }) {
+  const left = usePlusSeats();
+  return (
+    <div className="cfv-ink tnum">
+      <p className="cfv-ink-price">
+        <b>{first}</b>
+        <span>your first month</span>
+      </p>
+      <p className="cfv-ink-left">
+        <b>{left}</b>
+        <span>of {PLUS_SEAT_CAP} spots left</span>
+      </p>
+      <p className="cfv-ink-ends">
+        Then {monthly} a month, {PLUS_NEXT_PRICE} when the spots are gone
+      </p>
+    </div>
+  );
+}
+
 /* ══ WHAT YOU'D SAVE, BY WHAT YOU SPEND (Sam, 12 Nov 2026: "based on how much
    you spend at coffeeholics every month how much you'd save. Like if you
    spend $25 $50 $75 $100 - also would want to have the $5 back weekly
@@ -612,10 +633,10 @@ function PlaceMath({
   }, [at]);
   /* 3 · Ink counts by what you spend, so it needs no everyday order (The
      Burg has none: a bar's everyday order isn't one to model). */
-  if (forever && cfv === "3")
+  if (cfv === "3")
     return (
       <div className="cfv cfv-3">
-        <CfInk placeId={placeId} first={first} />
+        {forever ? <CfInk placeId={placeId} first={first} /> : <CfFirst first={first} monthly={monthly} />}
         <SpendSaves placeId={placeId} name={name} />
       </div>
     );
@@ -1544,10 +1565,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 "we can remove the calculator, and just show that $3.99 turns
                 into $25 every month"). The calculator was built on the old
                 weekly $5-on-$10, so it went with it. */}
-            {/* A place page shows its own savings card only while its for-life
-                offer runs; otherwise the same box as The Burg's (Sam, 14 Nov
-                2026: "it should look more like the burg I think"). */}
-            {place && placeForever && cfv === "3" ? (
+            {/* A place page keeps its spend-buttons card after its for-life
+                offer ends (Sam, 14 Nov 2026: "the one with the spend buttons
+                and how it adds up"), its tile showing the standard offer. */}
+            {place && cfv === "3" ? (
               <PlaceMath placeId={place.id} name={place.name} first={FIRST_MONTH} monthly={MONTHLY} forever={placeForever} cfv={cfv} />
             ) : offv && !place && !invite && !free ? (
               <OfferVersion
@@ -1639,7 +1660,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   5 Nov 2026: "a countdown until sunday"). */}
               {invite?.ends ? (
                 <InviteClock invite={invite} className="tpa-buy-seats" />
-              ) : placeForever && cfv ? null : placeForever ? (
+              ) : placeForever && cfv ? null : place && cfv === "3" ? null : placeForever ? (
                 /* The spots are the $7.99 rate's; this price is its own. */
                 <p className="tpa-buy-seats tnum">Locked in for as long as you stay. Cancel anytime in the Tapin app.</p>
               ) : (
