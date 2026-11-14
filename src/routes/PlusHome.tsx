@@ -773,6 +773,7 @@ const groupPriceFaq = (g: Group, first: string, monthly: string, on: boolean): {
 });
 /* Brexx (Sam, 11 Nov 2026): $3.99 a month for life, a partnership rate. */
 const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: string } =>
+  g.faq ? g.faq(first, monthly) :
   /* Welcome Week's flash sale (Sam, 11 Nov 2026): today only, for life. */
   g.endsMs
     ? {
@@ -1753,7 +1754,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           <h2 id="tpa-steps" className="tpa-h2">
             How it works
           </h2>
-          <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
+          <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
 
         {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
