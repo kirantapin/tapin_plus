@@ -816,7 +816,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   /* The places row's filter and the row itself, for the arrows on a
      computer (Sam, 12 Nov 2026: "more like a scrollable ticker I think with
      filters for Tapin plus and Tapin lite"). */
-  const [railKind, setRailKind] = useState<"all" | "plus" | "lite">("all");
+  const [railKind] = useState<"all" | "plus" | "lite">("all");
   /* Three takes on the cards, preview only (?railv=a|b|c, Sam, 12 Nov 2026:
      "the merchant cards feel a bit lopsided now, like large cards and small
      components within the cards feels weird"). */
@@ -1180,35 +1180,16 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 {place ? "Also included with Plus" : "What and where can I use it?"}
               </h2>
             ) : null}
-            {sub ? <p className="tpa-places-sub">Open a card to see what Plus covers there.</p> : null}
             {/* All, Plus or Lite, and on a computer two arrows to move the
                 row. Lite comes with Plus, so All is the default. */}
             <div className="tpa-rail-bar">
-              <div className="tpa-filters" role="group" aria-label="Show places">
-                {(
-                  [
-                    ["all", "All"],
-                    ["plus", "Tapin Plus"],
-                    ["lite", "Tapin Lite"],
-                  ] as const
-                ).map(([k, label]) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className="tpa-filter"
-                    aria-pressed={railKind === k}
-                    onClick={() => {
-                      setRailKind(k);
-                      railRef.current?.scrollTo({ left: 0 });
-                      track("plus_places_filter", { kind: k });
-                    }}
-                  >
-                    {k === "plus" ? <FlatMark className="tpa-filter-mark" /> : k === "lite" ? <LiteMark className="tpa-filter-mark" /> : null}
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div className="tpa-rail-arrows">
+              {/* The line under the heading shares a row with the pause and
+                  arrows now the filters are gone. */}
+              {sub ? <p className="tpa-places-sub">Open a card to see what Plus covers there.</p> : <span />}
+              {/* No All / Tapin Plus / Tapin Lite filters (Sam, 15 Nov 2026:
+                "let's just remove tapin lite and tapin plus filters"); every
+                place shows, each card saying Plus or Lite. */}
+            <div className="tpa-rail-arrows">
                 {tickerOn ? (
                   <button
                     type="button"
