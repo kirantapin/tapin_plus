@@ -8381,3 +8381,20 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .tps-ladder-rail .tpw-b + ol {
   margin-top: 16px;
 }
+
+/* The places row's bar without filters (15 Nov 2026): the line under the
+   heading on the left, the pause and arrows on the right. */
+.tpa-rail-bar > .tpa-places-sub {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+.tpa-places > .tpa-h2-out + .tpa-rail-bar {
+  margin-top: 4px;
+}
+.tps-ladder-rail .tpw-b .tpa-rail-bar {
+  margin-top: -8px;
+}
+.tps-ladder-rail .tpw-b .tpa-rail-bar > .tpa-places-sub {
+  margin: 0;
+}
