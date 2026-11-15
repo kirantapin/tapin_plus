@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BAR_IDS, venueCovers } from "../model/content";
 import { PERCENT, PLACES } from "../routes/parents_kit";
 
@@ -8,7 +9,22 @@ import { PERCENT, PLACES } from "../routes/parents_kit";
    sides, the words with the $25 total on the left, the five places named on
    the right. Styles: .tps-unlock* in plus-app.css. */
 const CREDIT = 5;
-export function BonusSpots({ they = false, only }: { they?: boolean; only?: string }) {
+export function BonusSpots({
+  they = false,
+  only,
+  logos = true,
+  title,
+  rail,
+}: {
+  they?: boolean;
+  only?: string;
+  /** The five logos under Get (off when the places row sits beside it). */
+  logos?: boolean;
+  /** A heading you can see, in place of the hidden one. */
+  title?: string;
+  /** The places row, above the rungs in place of the logos (?wherev=b). */
+  rail?: ReactNode;
+}) {
   /* A place's own page (/coffeeholics, Sam, 10 Nov 2026: "scoped
      specifically to the Coffeeholics brand"): that place alone, its logo
      beside its $5, the 15% under it. */
@@ -45,10 +61,14 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
   const lv = ladderVersion();
   if (lv) return <LadderVersion v={lv} they={they} />;
   return (
-    <section className="tpa-module tps-ladder" aria-labelledby="tps-ladder-h">
-      <h2 id="tps-ladder-h" className="tpp-sr">
-        What you get with Tapin Plus
+    <section className={`tpa-module tps-ladder${rail ? " tps-ladder-rail" : ""}`} aria-labelledby="tps-ladder-h">
+      <h2 id="tps-ladder-h" className={title ? "tpa-h2 tps-ladder-title" : "tpp-sr"}>
+        {title ?? "What you get with Tapin Plus"}
       </h2>
+      {/* The places row first, right under the heading, and the three rungs
+          under it (Sam, 15 Nov 2026, of B: "I think the ticker should go
+          right above"). */}
+      {rail ?? null}
       <ol>
         <li>
           <p>
@@ -61,16 +81,18 @@ export function BonusSpots({ they = false, only }: { they?: boolean; only?: stri
             </b>
             <span>at each spot every month, no&nbsp;minimum.</span>
           </p>
-          <ul className="tps-ladder-spots">
-            {PLACES.map((p) => (
-              <li key={p.id}>
-                <img src={p.logo} alt={p.name} decoding="async" />
-                <span className="tnum" aria-hidden="true">
-                  ${CREDIT}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {rail ? null : (logos ? (
+            <ul className="tps-ladder-spots">
+              {PLACES.map((p) => (
+                <li key={p.id}>
+                  <img src={p.logo} alt={p.name} decoding="async" />
+                  <span className="tnum" aria-hidden="true">
+                    ${CREDIT}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null)}
         </li>
         <li>
           <p>
@@ -187,5 +209,55 @@ function LadderVersion({ v, they }: { v: LadderV; they: boolean }) {
         ))}
       </ol>
     </section>
+  );
+}
+
+/* ══ WHAT AND WHERE, UNDER THE HEADER (?wherev=, Sam, 15 Nov 2026) ════════
+   A · LadderLead: the ladder as the places row's first card, the same size
+   as a place, so "what" and "where" read as one row. C · LadderSay: the
+   ladder as three plain lines over the row, no box. Styles: .tpw-*. */
+export function LadderLead({ they = false }: { they?: boolean }) {
+  return (
+    <div className="tpw-lead-card">
+      <p className="tpw-lead-h">
+        <b>Plus</b> at every spot
+      </p>
+      <ol>
+        <li>
+          <b className="tnum">Get ${CREDIT}</b>
+          <span>to spend every month</span>
+        </li>
+        <li>
+          <b className="tnum">Earn ${CREDIT} back</b>
+          <span>every week {they ? "they spend" : "you spend"} $10</span>
+        </li>
+        <li>
+          <b className="tnum">Save {PERCENT}%</b>
+          <span>on {they ? "their" : "your"} other orders</span>
+        </li>
+      </ol>
+      <p className="tpw-lead-go" aria-hidden="true">
+        Swipe for the places
+        <svg viewBox="0 0 24 24">
+          <path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </p>
+    </div>
+  );
+}
+
+export function LadderSay({ they = false }: { they?: boolean }) {
+  return (
+    <ol className="tpw-say" aria-label="What you get with Tapin Plus">
+      <li>
+        <b className="tnum">Get ${CREDIT} to spend</b> at each spot every month, no&nbsp;minimum.
+      </li>
+      <li>
+        <b className="tnum">Earn ${CREDIT} back</b> every week when {they ? "they spend" : "you spend"}&nbsp;$10.
+      </li>
+      <li>
+        <b className="tnum">Save {PERCENT}%</b> on {they ? "their" : "your"} other orders, every&nbsp;day.
+      </li>
+    </ol>
   );
 }

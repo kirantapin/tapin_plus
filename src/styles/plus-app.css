@@ -8214,3 +8214,170 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .cfv-3 + .tpa-buy:empty + .tpa-cta {
   margin-top: 14px;
 }
+
+/* ══ WHAT AND WHERE, UNDER THE HEADER (?wherev=a|b|c, Sam, 15 Nov 2026) ════
+   The places row moved up under the header and blended with the ladder.
+   routes/PlusHome.tsx placesRail(), shell/BonusSpots.tsx. */
+/* A · the row first, the ladder card right under it. */
+.tpw-a > .tpa-h2-out:first-child {
+  margin-top: 22px;
+}
+.tpw-a + .tps-ladder {
+  margin-top: 16px;
+}
+/* B · the row inside the ladder card, in the logos' place, reaching the
+   card's edges. */
+.tps-ladder-title {
+  margin: 0 0 14px;
+}
+.tps-ladder-rail .tpw-b {
+  margin: 0 calc(-1 * var(--wpad, 16px));
+}
+.tps-ladder-rail .tpw-b .tpa-places-sub {
+  margin: -4px var(--wpad, 16px) 0;
+}
+.tps-ladder-rail .tpw-b .tpa-rail-bar {
+  margin-left: var(--wpad, 16px);
+  margin-right: var(--wpad, 16px);
+}
+.tps-ladder-rail .tpw-b .tpa-rail {
+  padding-left: var(--wpad, 16px);
+  padding-right: var(--wpad, 16px);
+  scroll-padding: 0 var(--wpad, 16px);
+}
+/* B · the grid keeps the row inside the card. */
+.tps-ladder-rail ol {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tps-ladder-rail ol > li {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+.tps-ladder-rail .tpw-b .tpa-places-sub {
+  margin-top: 2px;
+}
+.tps-ladder-rail .tpw-b .tpa-rail-bar {
+  margin-top: 2px;
+}
+/* A · the ladder as the row's first card. */
+.tpw-lead {
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.tpw-lead-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  padding: 16px 16px 14px;
+}
+.tpw-lead-h {
+  margin: 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpw-lead-h b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tpw-lead-card ol {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tpw-lead-card li {
+  display: grid;
+  gap: 1px;
+}
+.tpw-lead-card li b {
+  font: 600 21px/24px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.01em;
+  color: #0b7a53;
+}
+.tpw-lead-card li span {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.tpw-lead-go {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.tpw-lead-go svg {
+  width: 16px;
+  height: 16px;
+}
+@media (min-width: 1024px) {
+  .tpw-lead-card {
+    padding: 20px 20px 18px;
+  }
+  .tpw-lead-card li b {
+    font-size: 24px;
+    line-height: 28px;
+  }
+  .tpw-lead-card li span {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .tpw-lead-go {
+    display: none;
+  }
+}
+/* C · the ladder said in three lines over the row, no box. */
+.tpw-c > .tpa-h2-out:first-child {
+  margin-top: 22px;
+}
+.tpw-say {
+  display: grid;
+  gap: 8px;
+  margin: 12px var(--gutter) 0;
+  padding: 0;
+  list-style: none;
+  font: 500 17px/23px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.tpw-say b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.tpw-c .tpa-places-sub {
+  display: none;
+}
+.tpw-c .tpa-rail-bar {
+  margin-top: 18px;
+}
+@media (min-width: 1024px) {
+  .tpw-say {
+    margin: 14px 0 0;
+    font-size: 19px;
+    line-height: 26px;
+  }
+}
+.tps-ladder-rail { --wpad: 16px; }
+/* B on a phone: room for the three filters, and a beat above them. */
+.tps-ladder-rail .tpw-b .tpa-rail-bar {
+  margin-top: 12px;
+}
+/* The pause stays (the row moves by itself); the filters close up so all
+   three fit beside it in the card, and scroll if they still don't. */
+@media (max-width: 1023px) {
+  .tps-ladder-rail .tpw-b .tpa-filters {
+    gap: 6px;
+  }
+  .tps-ladder-rail .tpw-b .tpa-filter {
+    padding: 0 11px;
+  }
+}
+/* B: the row under the heading, the rungs under the row. */
+.tps-ladder-rail .tpw-b .tpa-places-sub {
+  margin-top: -6px;
+}
+.tps-ladder-rail .tpw-b + ol {
+  margin-top: 16px;
+}
