@@ -33,6 +33,7 @@ import { ForeverLeft, InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLin
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots, LadderLead, LadderSay } from "../shell/BonusSpots";
+import { HeadTake, headVersion } from "../shell/HeadTakes";
 import { LiteStory } from "../shell/LiteStory";
 import { LiteMark } from "../shell/LiteMark";
 import { rememberPlusPage } from "../model/backTo";
@@ -866,6 +867,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      B · One card: the ladder with the places row in place of the logos.
      C · Said over the row: the ladder as three plain lines, then the row. */
   const [wherevQ] = useState(whereVersion);
+  /* The header's redesign, three takes (shell/HeadTakes.tsx), ?headv=a|b|c. */
+  const [headvQ] = useState(headVersion);
   const wherev = placeId ? null : wherevQ;
   const railRef = useRef<HTMLUListElement | null>(null);
   /* The cards in the row, Plus then Lite, as the filter has them; a
@@ -1406,6 +1409,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       <header
         ref={bandRef}
         className={`tpa-band${auditHome ? " tpu-band" : ""}`}
+        data-headv={auditHome && headvQ ? headvQ : undefined}
         data-group={group?.id}
         data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
@@ -1481,6 +1485,26 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 )}
                 {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
               </>
+            ) : auditHome && headvQ ? (
+              <HeadTake
+                v={headvQ}
+                h1={<>${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week</>}
+                total={CREDIT * PLACES.length}
+                places={PLACES.map((v) => ({ id: v.id, name: v.name.replace(/^The (Milk Parlor)$/, "$1"), logo: v.logo }))}
+                terms={
+                  <>
+                    {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
+                    <AuditPromise />
+                  </>
+                }
+                join={
+                  desk ? (
+                    <button type="button" className={`tpa-cta${headvQ === "a" ? "" : " tpa-cta-white"}`} onClick={(e) => join("band", e.currentTarget)}>
+                      {joinLabel}
+                    </button>
+                  ) : null
+                }
+              />
             ) : auditHome ? (
               <>
                 {/* Sam, 16 Nov 2026: "$5 credit at 5 Blacksburg spots, every

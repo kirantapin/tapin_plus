@@ -26,7 +26,7 @@ function tornSides(seed: number, amp: number): string {
 }
 
 /** Ink on a torn cream strip, with the white deckle rim behind it. */
-function Strip({ seed, children }: { seed: number; children: React.ReactNode }) {
+export function Strip({ seed, children }: { seed: number; children: React.ReactNode }) {
   return (
     <span className="tpa-ww-strip" style={{ clipPath: tornSides(seed + 101, 5) }}>
       <span className="tpa-ww-paper" style={{ clipPath: tornSides(seed, 4) }}>

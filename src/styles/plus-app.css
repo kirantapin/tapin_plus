@@ -8877,3 +8877,485 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     outline-offset: 3px;
   }
 }
+
+/* ══ THE HEADER, REDESIGNED: THREE TAKES (16 Nov 2026, ?headv=a|b|c) ════════
+   shell/HeadTakes.tsx. Shared parts first, then each take. */
+.tpa-band[data-headv] .tpa-band-title span {
+  flex: initial;
+  padding: 0;
+  font: inherit;
+  text-shadow: inherit;
+}
+.tpa-band[data-headv] .tph-h1 {
+  margin: 0;
+  font: 700 31px/35px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  max-width: 14ch;
+  text-wrap: balance;
+}
+.tpa-band[data-headv] .tph-plus {
+  margin: 0;
+  text-wrap: pretty;
+}
+.tph-places {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tph-places > li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.tpa-band[data-headv] .tph-logo {
+  flex: none;
+  display: block;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #ffffff;
+}
+.tph-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tph-act {
+  display: grid;
+  gap: 16px;
+}
+.tph-terms {
+  display: grid;
+  gap: 9px;
+}
+.tpa-band[data-headv] .tph-terms > p {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  text-shadow: none;
+}
+.tpa-band[data-headv] .tph-terms svg {
+  position: static;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+.tpa-band[data-headv] .tph-terms b {
+  font-weight: 600;
+}
+.tpa-band[data-headv] .tph-act .tpa-cta {
+  margin: 0;
+}
+
+/* A · TRAY and B · SPLIT: the header becomes a grid. The photo and its
+   shade are grid items, the title's wrappers step aside (display:
+   contents), and each piece takes a row. */
+.tps .tpa-band.tpu-band[data-headv="a"],
+.tps .tpa-band.tpu-band[data-headv="b"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  height: auto;
+  min-height: 0;
+  padding: 0;
+}
+.tps .tpa-band.tpu-band[data-headv="a"] > .tpa-band-art,
+.tps .tpa-band.tpu-band[data-headv="b"] > .tpa-band-art {
+  position: relative;
+  grid-area: 1 / 1;
+  height: 236px;
+}
+.tps .tpa-band.tpu-band[data-headv="a"]::after,
+.tps .tpa-band.tpu-band[data-headv="b"]::after {
+  position: relative;
+  inset: auto;
+  grid-area: 1 / 1;
+}
+.tpa-band[data-headv="a"] .tpa-band-title,
+.tpa-band[data-headv="a"] .tpa-band-title > div,
+.tpa-band[data-headv="b"] .tpa-band-title,
+.tpa-band[data-headv="b"] .tpa-band-title > div {
+  display: contents;
+}
+
+/* A · TRAY. The collage with the headline on it, then the white tray. */
+.tps .tpa-band.tpu-band[data-headv="a"] {
+  background: #ffffff;
+  color: var(--ink-1, #141618);
+}
+.tps .tpa-band.tpu-band[data-headv="a"] > .tpa-band-art {
+  height: 268px;
+}
+.tps .tpa-band.tpu-band[data-headv="a"]::after {
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.74) 0, rgba(0, 0, 0, 0.36) 46%, rgba(0, 0, 0, 0) 76%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) 90px);
+}
+.tpa-band[data-headv="a"] .tph-h1 {
+  position: relative;
+  z-index: 1;
+  grid-area: 1 / 1;
+  align-self: end;
+  margin: 0 18px 20px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 18px rgba(0, 0, 0, 0.45);
+}
+.tpa-band[data-headv="a"] .tph-plus {
+  margin: 20px 18px 0;
+  font: 500 18px/24px "Gilroy", Arial, sans-serif;
+  color: var(--ink-2, #3b3f43);
+}
+.tpa-band[data-headv="a"] .tph-plus b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.tpa-band[data-headv="a"] .tph-places {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin: 16px 18px 0;
+}
+.tpa-band[data-headv="a"] .tph-places > li {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+}
+.tpa-band[data-headv="a"] .tph-logo {
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.12);
+}
+.tpa-band[data-headv="a"] .tph-act {
+  margin: 18px 18px 22px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 rgba(20, 22, 24, 0.1);
+}
+.tpa-band[data-headv="a"] .tph-terms > p {
+  color: var(--ink-3, #5d6166);
+}
+.tpa-band[data-headv="a"] .tph-terms b {
+  color: var(--ink-1, #141618);
+}
+.tpa-band[data-headv="a"] .tph-terms svg {
+  color: #0b7a53;
+}
+
+/* B · SPLIT. The collage, then the words on near-black. */
+.tps .tpa-band.tpu-band[data-headv="b"] {
+  background: #141618;
+  color: #ffffff;
+}
+.tps .tpa-band.tpu-band[data-headv="b"] > .tpa-band-art {
+  height: 200px;
+}
+.tps .tpa-band.tpu-band[data-headv="b"]::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) 90px);
+}
+.tpa-band[data-headv="b"] .tph-h1 {
+  margin: 24px 18px 0;
+}
+.tpa-band[data-headv="b"] .tph-plus {
+  margin: 10px 18px 0;
+  font: 500 18px/24px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+}
+.tpa-band[data-headv="b"] .tph-plus b {
+  font-weight: 600;
+  color: #3ccf8e;
+}
+.tpa-band[data-headv="b"] .tph-places {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin: 18px 18px 0;
+}
+.tpa-band[data-headv="b"] .tph-places > li {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+}
+.tpa-band[data-headv="b"] .tph-logo {
+  width: 32px;
+  height: 32px;
+}
+.tpa-band[data-headv="b"] .tph-act {
+  margin: 20px 18px 24px;
+  padding-top: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.tpa-band[data-headv="b"] .tph-terms > p {
+  color: rgba(255, 255, 255, 0.78);
+}
+.tpa-band[data-headv="b"] .tph-terms b {
+  color: #ffffff;
+}
+.tpa-band[data-headv="b"] .tph-terms svg {
+  color: #3ccf8e;
+}
+
+/* C · CUT PAPER. On the collage as now, in the collage's own language. */
+.tps .tpa-band.tpu-band[data-headv="c"] {
+  height: calc(env(safe-area-inset-top) + 500px);
+}
+.tpa-band[data-headv="c"] .tph-h1 {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 18px rgba(0, 0, 0, 0.45);
+}
+.tpa-band[data-headv="c"] .tph-plus {
+  margin-top: 14px;
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+}
+.tpa-band[data-headv="c"] .tph-plus .tpa-ww-strip {
+  display: inline-block;
+  rotate: -1.5deg;
+  padding: 3px 4px;
+  background: #f7f3ea;
+}
+.tpa-band[data-headv="c"] .tph-plus .tpa-ww-paper {
+  display: block;
+  padding: 5px 12px 6px;
+  background: #ece5d5;
+  color: #141618;
+  white-space: normal;
+}
+.tpa-band[data-headv="c"] .tph-plus b {
+  font-weight: 700;
+  color: #0b7a53;
+}
+.tpa-band[data-headv="c"] .tph-places {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+.tpa-band[data-headv="c"] .tph-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.tpa-band[data-headv="c"] .tph-logo {
+  width: 46px;
+  height: 46px;
+  box-shadow: 0 0 0 3px #ffffff, 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+.tpa-band[data-headv="c"] p.tph-names {
+  margin: 12px 0 0;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: #ffffff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  text-wrap: pretty;
+}
+.tpa-band[data-headv="c"] .tph-names > span {
+  white-space: nowrap;
+}
+.tpa-band[data-headv="c"] .tph-act {
+  margin-top: 16px;
+  padding-top: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+.tpa-band[data-headv="c"] .tph-terms > p {
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.tpa-band[data-headv="c"] .tph-terms b {
+  color: #ffffff;
+}
+.tpa-band[data-headv="c"] .tph-terms svg {
+  color: #3ccf8e;
+}
+
+@media (min-width: 1024px) {
+  .tpa-band[data-headv] .tph-h1 {
+    max-width: 18ch;
+    font-size: 56px;
+    line-height: 60px;
+  }
+  .tpa-band[data-headv] .tph-terms > p {
+    font-size: 16px;
+    line-height: 21px;
+    white-space: nowrap;
+  }
+  .tpa-band[data-headv] .tph-act .tpa-cta {
+    height: 56px;
+    padding: 0 30px;
+    font-size: 17px;
+  }
+
+  /* A · TRAY on a computer: the collage 340 tall with the headline; the
+     tray as two columns, what you get on the left, the act on the right. */
+  .tpa-home .tpa-band.tpu-band[data-headv="a"] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 56px;
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="a"] > .tpa-band-art,
+  .tpa-home .tpa-band.tpu-band[data-headv="a"]::after {
+    grid-area: 1 / 1 / 2 / 3;
+    height: 340px;
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="a"]::after {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 62%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0) 55%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0, rgba(0, 0, 0, 0) 90px);
+  }
+  .tpa-band[data-headv="a"] .tph-h1 {
+    grid-area: 1 / 1 / 2 / 3;
+    margin: 0 48px 40px;
+  }
+  .tpa-band[data-headv="a"] .tph-plus {
+    grid-column: 1;
+    margin: 32px 0 0 48px;
+    font-size: 22px;
+    line-height: 28px;
+  }
+  .tpa-band[data-headv="a"] .tph-places {
+    grid-column: 1;
+    grid-template-columns: repeat(5, max-content);
+    gap: 12px 28px;
+    margin: 20px 0 36px 48px;
+  }
+  .tpa-band[data-headv="a"] .tph-places > li {
+    font-size: 16px;
+  }
+  .tpa-band[data-headv="a"] .tph-logo {
+    width: 36px;
+    height: 36px;
+  }
+  .tpa-band[data-headv="a"] .tph-act {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    align-self: center;
+    margin: 32px 48px 36px 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  /* B · SPLIT on a computer: the words on the left half, the collage on
+     the right, full height, nothing over it but Members. */
+  .tpa-home .tpa-band.tpu-band[data-headv="b"] {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    grid-template-rows: minmax(104px, 1fr) auto auto auto minmax(44px, 1fr);
+    min-height: 540px;
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="b"] > .tpa-band-art,
+  .tpa-home .tpa-band.tpu-band[data-headv="b"]::after {
+    grid-area: 1 / 2 / 7 / 3;
+    height: 100%;
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="b"] > .tpa-band-art {
+    object-position: 58% 30%;
+  }
+  .tpa-band[data-headv="b"] .tph-h1 {
+    grid-area: 2 / 1;
+    margin: 0 48px;
+  }
+  .tpa-band[data-headv="b"] .tph-plus {
+    grid-area: 3 / 1;
+    margin: 16px 48px 0;
+    font-size: 21px;
+    line-height: 28px;
+  }
+  .tpa-band[data-headv="b"] .tph-places {
+    grid-area: 4 / 1;
+    grid-template-columns: repeat(3, max-content);
+    gap: 12px 26px;
+    margin: 24px 48px 0;
+  }
+  .tpa-band[data-headv="b"] .tph-places > li {
+    font-size: 16px;
+  }
+  .tpa-band[data-headv="b"] .tph-logo {
+    width: 34px;
+    height: 34px;
+  }
+  .tpa-band[data-headv="b"] .tph-act {
+    grid-area: 5 / 1;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 28px 48px 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  /* C · CUT PAPER on a computer: as the shipped header, taller. */
+  .tpa-home .tpa-band.tpu-band[data-headv="c"] {
+    height: 540px;
+  }
+  .tpa-band[data-headv="c"] .tph-plus {
+    margin-top: 18px;
+    font-size: 21px;
+    line-height: 27px;
+  }
+  .tpa-band[data-headv="c"] .tph-places {
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .tpa-band[data-headv="c"] .tph-logo {
+    width: 52px;
+    height: 52px;
+  }
+  .tpa-band[data-headv="c"] p.tph-names {
+    font-size: 17px;
+    line-height: 22px;
+  }
+  .tpa-band[data-headv="c"] .tph-act {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 26px;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
+/* The takes, first-look fixes: the tray's ink (the band's white text rules
+   reach in), the title's width in C, and Join at its own width. */
+.tps .tpa-band.tpu-band[data-headv="a"] .tph-plus {
+  color: #3b3f43;
+}
+.tps .tpa-band.tpu-band[data-headv="a"] .tph-plus b {
+  color: #0b7a53;
+}
+.tps .tpa-band.tpu-band[data-headv="a"] .tph-places > li {
+  color: #141618;
+  text-shadow: none;
+}
+.tps .tpa-band.tpu-band[data-headv="a"] .tph-terms > p {
+  color: #5d6166;
+}
+.tps .tpa-band.tpu-band[data-headv="a"] .tph-terms b {
+  color: #141618;
+}
+.tpa-band[data-headv="c"] .tpa-band-title > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tpa-band[data-headv] .tph-act .tpa-cta {
+  flex: none;
+  width: auto;
+  min-width: 200px;
+}
+@media (min-width: 1024px) {
+  .tpa-band[data-headv="b"] .tph-act {
+    display: grid;
+    justify-items: start;
+    gap: 18px;
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="c"] {
+    height: 560px;
+  }
+}
+@media (min-width: 1024px) {
+  /* B: the photo takes its cell's height, never sets it. */
+  .tpa-home .tpa-band.tpu-band[data-headv="b"] {
+    height: 600px;
+    min-height: 0;
+    grid-template-rows: minmax(96px, 1fr) auto auto auto auto minmax(48px, 1fr);
+  }
+  .tpa-home .tpa-band.tpu-band[data-headv="b"] > .tpa-band-art {
+    contain: size;
+  }
+}
