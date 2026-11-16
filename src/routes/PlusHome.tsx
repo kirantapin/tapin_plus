@@ -867,7 +867,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      B · One card: the ladder with the places row in place of the logos.
      C · Said over the row: the ladder as three plain lines, then the row. */
   const [wherevQ] = useState(whereVersion);
-  /* The header's redesign, three takes (shell/HeadTakes.tsx), ?headv=a|b|c. */
+  /* The header, three takes on the original (shell/HeadTakes.tsx), ?headv=d|e|f. */
   const [headvQ] = useState(headVersion);
   const wherev = placeId ? null : wherevQ;
   const railRef = useRef<HTMLUListElement | null>(null);
@@ -1499,7 +1499,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 }
                 join={
                   desk ? (
-                    <button type="button" className={`tpa-cta${headvQ === "a" ? "" : " tpa-cta-white"}`} onClick={(e) => join("band", e.currentTarget)}>
+                    <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
                       {joinLabel}
                     </button>
                   ) : null
