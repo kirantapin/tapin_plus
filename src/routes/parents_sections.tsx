@@ -301,9 +301,9 @@ export function ParentsCount({ join }: { join: ReactNode }) {
           <li>
             <b>{MONTHLY} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
           </li>
-          {/* On request, so never "auto" (the parents' guarantee, 9 Nov). */}
+          {/* Automatic since 16 Nov 2026, as on the student page. */}
           <li>
-            <b>Full refund</b> if they don’t save what you&nbsp;spent.
+            <b>Auto refund</b> if they don’t save what you&nbsp;pay.
           </li>
           <li>
             <b>A text before every bill</b>, and you can cancel right from&nbsp;it.
@@ -437,7 +437,7 @@ export function BenefitCards() {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
       label: `First month, then ${MONTHLY} a month`,
-      line: "A text before every bill. Cancel anytime. If they don’t save what you spent, ask for a full refund.",
+      line: "A text before every bill. Cancel anytime. Auto refund if they don’t save what you pay.",
     },
   ];
   /* One dot per place the rail can stop, not per card: on a computer three
@@ -1471,8 +1471,8 @@ const B_TRACK = 12;
 const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
   parent: {
     h: "What if they don\u2019t use it?",
-    row: "Full refund.",
-    fine: "Full refund if they don\u2019t save what you spent. Cancel anytime, right from the text we send before every bill.",
+    row: "Auto refund.",
+    fine: "Every month counts on its own. If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. Cancel anytime, right from the text we send before every bill.",
   },
   student: {
     h: "What if I don\u2019t save?",
@@ -1739,7 +1739,7 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          {student ? "Didn\u2019t save? Auto refund." : "Didn\u2019t save what you spent? Full refund."}
+          {student ? "Didn\u2019t save? Auto refund." : "Didn\u2019t save what you paid? Auto refund."}
         </>
       ),
     },

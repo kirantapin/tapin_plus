@@ -1032,7 +1032,7 @@ function Sheet({
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
-          <b>Didn’t save what you spent?</b> Ask for a full refund.
+          <b>Didn’t save what you paid?</b> Auto refund.
         </span>
       </li>
       <li>
