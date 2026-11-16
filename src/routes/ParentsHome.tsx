@@ -29,7 +29,6 @@ import { BenefitCards, CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofT
 import { lowerVersion } from "../shell/LowerVersions";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
-import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteMark } from "../shell/LiteMark";
 import { useTicker } from "../shell/useTicker";
@@ -453,7 +452,8 @@ export default function ParentsHome() {
       q: "What if they don’t use it?",
       /* No "unclaimed costs nothing" (Sam, 9 Nov 2026: "we have to remove
          the 'if it's unclaimed it costs nothing' thing"). */
-      a: `Their credit resets each month, so what they don’t use that month doesn’t carry over. If they don’t save what you spent, ask for a full refund. Cancel anytime.`,
+      /* The auto refund (Sam, 16 Nov 2026), the student page's rule. */
+      a: `Their credit resets each month, so what they don’t use that month doesn’t carry over. If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. You don’t have to ask. Cancel anytime.`,
     },
     {
       q: "Can I see what they order?",
@@ -511,7 +511,7 @@ export default function ParentsHome() {
         <span className="tpa-pbar-short">{NAME_VT ? "500+ Virginia Tech students on Plus" : "500+ Blacksburg students on Plus"}</span>
       </aside>
       <header
-        className="tpa-band tpp-band"
+        className="tpa-band tpp-band tpu-band"
         data-hero="parents"
         data-photo={photo}
         data-hdr={chips}
@@ -574,9 +574,40 @@ export default function ParentsHome() {
                 </>
               ) : null}
             </h1>
-            {/* The welcome offer, in the header (Sam, 9 Nov 2026): the $25
-                the moment they join, then the weekly line under it. */}
-            <WelcomeCallout they />
+            {/* The student page's header, in the parents' words (Sam, 16
+                Nov 2026: "update the mom's header with the auto refund stuff?
+                And the header design stuff"): the payback under the
+                headline, then the terms as one set (the price, then the auto
+                refund), and on a computer the button beside them. It takes
+                the place of the $25 pill. */}
+            <p className="tpu-sub">
+              <b className="tnum">+${CREDIT * PLACES.length}</b> added to their account to spend every&nbsp;month
+            </p>
+            <div className="tpu-act">
+              <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" onClick={(e) => signUp("band", e.currentTarget)}>
+                {cta}
+              </button>
+              <div className="tpu-terms">
+                <p className="tpa-wline">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
+                    <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+                  </svg>
+                  <span className="tnum">
+                    <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
+                  </span>
+                </p>
+                <p className="tpu-promise">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+                    <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>
+                    <b>Auto refund</b> if they don’t save what you&nbsp;pay
+                  </span>
+                </p>
+              </div>
+            </div>
             {/* A phone: the button and the price on the photo (Sam, 8 Nov
                 2026, picking preview 5, "just a bit more refined"); a
                 computer keeps them on the held card. */}
@@ -814,10 +845,11 @@ export default function ParentsHome() {
           {heroJoin}
           {/* The price, once, quiet (Sam, 6 Nov 2026: "far too busy"), with
               the parents' guarantee beside it (Sam, 9 Nov 2026, the Dara
-              Denney audit's fix 2). On request, so never "auto". */}
+              Denney audit's fix 2). Automatic since 16 Nov 2026, as on the
+              student page. */}
           {/* The first month moved up under the price (Sam, 9 Nov 2026). */}
           <p className="tpp-under">
-            <span>Full refund if they don’t save what you spent.</span>
+            <span>Auto refund if they don’t save what you pay.</span>
           </p>
             </>
           )}
@@ -882,9 +914,9 @@ export default function ParentsHome() {
             <Fold
               className="tpp-sure-row"
               lead={<Glyph d={GLYPHS.refund} />}
-              label="Didn’t save what you spent? Full refund"
+              label="Didn’t save what you paid? Auto refund"
             >
-              Ask support@tapin.app and you get a full refund.
+              If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. You don’t have to ask.
             </Fold>
             <Fold
               className="tpp-sure-row"

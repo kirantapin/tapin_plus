@@ -3344,3 +3344,59 @@
   font-weight: 600;
   color: #141618;
 }
+
+/* ══ THE HEADER, THE STUDENT PAGE'S WAY (Sam, 16 Nov 2026: "update the mom's
+   header with the auto refund stuff? And the header design stuff") ═════════
+   ParentsHome.tsx: the payback line under the headline, then the price and
+   the auto refund as one set under a hairline (plus-app.css .tpu-sub,
+   .tpu-terms), the band's height left to its words. A phone keeps its
+   button under the band, so the header's own button is a computer's. */
+.tpp .tpa-band.tpp-band.tpu-band {
+  height: auto;
+}
+.tpp-head-cta {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .tpp .tpa-band.tpp-band.tpu-band {
+    height: 468px;
+    min-height: 0;
+  }
+  .tpp .tpu-act .tpp-head-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+/* On a phone the header is the photo card (THE PHONE HEADER AS THE
+   COMPUTER'S CARD above): the payback takes the +$25 pill's row, the terms
+   a row of their own inside the card, and the button and the students line
+   move a row down, under it. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="card"] {
+    grid-template-rows: auto minmax(150px, 1fr) auto auto auto auto auto;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpa-band-art,
+  .tpp .tpa-band.tpp-band[data-phone="card"]::after {
+    grid-row: 1 / 6;
+  }
+  .tpp .tpp-band[data-phone="card"] :is(.tpu-sub, .tpu-act) {
+    position: relative;
+    z-index: 2;
+    grid-column: 1;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpu-sub {
+    grid-row: 4;
+    margin: 10px 24px 0;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpu-act {
+    grid-row: 5;
+    margin: 0 24px 24px;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-band-cta {
+    grid-row: 6;
+  }
+  .tpp .tpp-band[data-phone="card"] .tpp-proof-desk {
+    grid-row: 7;
+  }
+}
