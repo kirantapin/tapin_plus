@@ -53,7 +53,20 @@ const Bar = ({ left }: { left: number }) => (
 
 const kindLabel = (key: string, name: string) => (key === "barbers" ? "Barbers" : name);
 
-export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: string; join: ReactNode; tryCta: ReactNode }) {
+export function LowerVersion({
+  v,
+  monthly,
+  join,
+  tryCta,
+  autoRefund = false,
+}: {
+  v: LowV;
+  monthly: string;
+  join: ReactNode;
+  tryCta: ReactNode;
+  /** The audit take's refund (?audit=1, Sam, 15 Nov 2026): automatic, no request. */
+  autoRefund?: boolean;
+}) {
   const left = usePlusSeats();
 
   if (v === "1")
@@ -83,7 +96,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           <li>
             <Tick />
             <span>
-              <b>Refund auto-approved</b> if Plus saved you less than you&nbsp;paid
+              <b>Auto refund</b> if you don’t save what you&nbsp;pay
             </span>
           </li>
           <li>
@@ -151,7 +164,15 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
               <b>{monthly} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
             </li>
             <li>
-              <b>Refund auto-approved</b> if Plus saved you less than you&nbsp;paid.
+              {autoRefund ? (
+                <>
+                  <b>Auto refund</b> of the difference if you use a Tapin benefit and still save less than you pay that&nbsp;month.
+                </>
+              ) : (
+                <>
+                  <b>Auto refund</b> if you don’t save what you&nbsp;pay.
+                </>
+              )}
             </li>
             <li>
               <b>Cancel anytime</b> in the Tapin app.
@@ -198,7 +219,7 @@ export function LowerVersion({ v, monthly, join, tryCta }: { v: LowV; monthly: s
           </div>
           <div>
             <dt>If you don’t save</dt>
-            <dd>Refund auto-approved</dd>
+            <dd>Auto refund</dd>
           </div>
           <div>
             <dt>Cancel</dt>
@@ -235,7 +256,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
           <b>Points</b> on everything
         </span>
         <span>
-          <b>Refund auto-approved</b> if you don’t save
+          <b>Auto refund</b> if you don’t save
         </span>
         <span>
           <b>Cancel anytime</b> in the app
@@ -268,7 +289,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
           <li>
             <Glyph d={GLYPHS.refund} />
             <span>
-              <b>Refund auto-approved</b> if Plus saved you less than you paid
+              <b>Auto refund</b> if you don’t save what you pay
             </span>
           </li>
           <li>

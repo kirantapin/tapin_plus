@@ -65,6 +65,19 @@ export function buildSlides(spend: number) {
       next: "That's about right",
     },
     {
+      /* The monthly $5 to spend at each place (Sam, 11 Nov 2026: "did you
+         update the how this works modal ... for the $5 to spend"). Second,
+         straight after the spend question (Sam, 16 Nov 2026: "this second
+         slide should show the $5 credit to spend at each spot"): what you
+         get, before what it's worth to you. */
+      id: "monthly",
+      headline: "$5 to spend at each spot, every month",
+      line: "No minimum spend. It resets each month, so use it.",
+      tag: null,
+      hold: false,
+      dwellMs: 7000,
+    },
+    {
       id: "value",
       /* The payoff, immediately after the question — computed from HER answer.
          §7 governs here exactly as it does on the close: a figure at display
@@ -105,17 +118,6 @@ export function buildSlides(spend: number) {
          and opened the price going up (Sam, 6 Nov 2026: "make sure it makes
          sense logically"). It sits here now, straight before the how. */
       next: "Show me how",
-    },
-    {
-      /* The monthly $5 to spend at each place (Sam, 11 Nov 2026: "did you
-         update the how this works modal ... for the $5 to spend"), before
-         the order slide's weekly $5 back and 15%. */
-      id: "monthly",
-      headline: "$5 to spend at each spot, every month",
-      line: "No minimum spend. It resets each month, so use it.",
-      tag: null,
-      hold: false,
-      dwellMs: 6000,
     },
     {
       id: "order",
@@ -172,6 +174,19 @@ export function buildSlides(spend: number) {
       tag: null,
       hold: false,
       dwellMs: 6000,
+    },
+    {
+      /* Tapin Lite, as a Plus member's extra (Sam, 16 Nov 2026: "an
+         /impeccable designed slide for the tapin lite locations, additional
+         benefits available as a tapin plus member"). Lite comes with Plus
+         and isn't sold alone; each place's perks are its own (model/lite.ts),
+         never the Plus $5, 15% or points. */
+      id: "lite",
+      headline: "Tapin Lite comes with Plus",
+      line: "Extra perks at more spots, at no extra cost.",
+      tag: null,
+      hold: false,
+      dwellMs: 7000,
     },
     {
       id: "entry",

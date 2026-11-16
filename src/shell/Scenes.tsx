@@ -39,6 +39,8 @@ import { BENEFIT } from "../model/savings";
 import { POINTS_PER_DOLLAR, CREDIT_CENTS, money } from "../model/order";
 import { venues, logoField, offers, heroIsBright } from "../model/content";
 import { ComingTiles } from "./Coming";
+import { LITE_PLACES } from "../model/lite";
+import { LiteMark } from "./LiteMark";
 
 /**
  * The receipt's basket, resolved from the real menu rather than typed.
@@ -1173,13 +1175,80 @@ export function SceneClose() {
 /** $5 to spend at each of the five places, every month (11 Nov 2026). */
 const PLUS_IDS = ["coffeeholicsva", "sweetopia", "olaika", "theburg", "themilkparlor"];
 function SceneMonthly() {
+  /* ══ $5 AT EACH SPOT, AS ROWS (Sam, 16 Nov 2026) ═════════════════════════
+     The value slide's row language (a photo with the place's mark on its
+     corner, the name, the figure on the right in the money green), one row
+     a place, so "$5 at each spot" reads as five real places with $5 each,
+     and the month's total under them. The five marks floating on the grey
+     it replaces said "$5" five times without saying where. */
+  const each = 5;
   return (
     <div className="monthly-scene">
-      <ul>
-        {PLUS_IDS.map((id) => (
-          <li key={id}>
-            <Mark id={id} className="monthly-mark" />
-            <span className="tnum">$5</span>
+      <ul className="vs-rows mo-rows">
+        {PLUS_IDS.map((id) => {
+          const v = venues.find((x) => x.id === id);
+          if (!v) return null;
+          return (
+            <li key={id}>
+              <span className="vs-thumb">
+                <img src={v.hero} alt="" decoding="async" data-bright={heroIsBright(id) ? "true" : undefined} />
+                <Mark id={id} className="vs-mark" />
+              </span>
+              <span className="vs-what">
+                <b>{v.name}</b>
+              </span>
+              <span className="mo-five tnum">
+                <b>${each}</b>
+                <small>to spend</small>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mo-total tnum">
+        <b>${each * PLUS_IDS.length}</b> to spend every month, no minimum
+      </p>
+    </div>
+  );
+}
+
+/* ══ TAPIN LITE, A PLUS MEMBER'S EXTRA (Sam, 16 Nov 2026) ══════════════════
+   One card a Lite place: its own photo across the top with its mark seated
+   on the corner and the leaf chip that tags Lite everywhere else (the places
+   row, the pop-up), then the name, what it is, and its perks, each a line in
+   ink with when it applies under it. Only the place's own perks
+   (model/lite.ts): no $5, no 15%, no points. On a phone they stack; on a
+   computer, side by side. */
+function SceneLite() {
+  return (
+    <div className="lite-scene">
+      <ul className="ls-cards">
+        {LITE_PLACES.map((p) => (
+          <li key={p.id}>
+            <span className="ls-photo">
+              <img src={p.photo} alt="" decoding="async" />
+              <span className={`ls-logo${p.round ? " is-round" : ""}`}>
+                <img src={p.logo} alt="" decoding="async" />
+              </span>
+              <span className="ls-chip">
+                <LiteMark className="ls-leaf" />
+                Lite
+              </span>
+            </span>
+            <span className="ls-body">
+              <span className="ls-name">
+                <b>{p.name}</b>
+                <small>{p.kind}</small>
+              </span>
+              <span className="ls-perks">
+                {p.perks.map((k) => (
+                  <span key={k.key} className="ls-perk">
+                    <b>{k.b}</b>
+                    <small>{k.when}</small>
+                  </span>
+                ))}
+              </span>
+            </span>
           </li>
         ))}
       </ul>
@@ -1199,6 +1268,7 @@ function SceneGrowing() {
 export const SCENES: Record<string, (p: SceneProps) => JSX.Element> = {
   growing: SceneGrowing,
   monthly: SceneMonthly,
+  lite: SceneLite,
   spend: SceneSpend,
   value: SceneValue,
   order: SceneOrder,

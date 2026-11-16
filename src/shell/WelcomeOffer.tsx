@@ -78,7 +78,19 @@ function TickingClock() {
 /** The deadline, quietly, under the header's $25 (Sam, 10 Nov 2026: "there's
  *  really no urgency or scarcity here right?"): "$3.99 first month · ends
  *  November 30". A real date (model/deadline.ts); nothing once it passes. */
-export function WelcomeLine({ first, forever = false, endsMs = null }: { first: string; forever?: boolean; endsMs?: number | null }) {
+export function WelcomeLine({
+  first,
+  forever = false,
+  endsMs = null,
+  strong = false,
+}: {
+  first: string;
+  forever?: boolean;
+  endsMs?: number | null;
+  /** The price in bold, the rest plain (the audit take's terms, ?audit=1). */
+  strong?: boolean;
+}) {
+  const lead = (t: string) => (strong ? <b>{t}</b> : t);
   const r = useWelcomeEnds();
   const left = usePlusSeats();
   const [now, setNow] = useState(() => Date.now());
@@ -94,7 +106,8 @@ export function WelcomeLine({ first, forever = false, endsMs = null }: { first: 
       <p className="tpa-wline" data-ph-show="">
         <TickingClock />
         <span className="tnum">
-          {first} a month for life{endsMs && endsMs > now ? ` · ends in ${timeLeft(endsMs - now)}` : ""}
+          {lead(`${first} a month for life`)}
+          {endsMs && endsMs > now ? ` · ends in ${timeLeft(endsMs - now)}` : ""}
         </span>
       </p>
     );
@@ -106,7 +119,7 @@ export function WelcomeLine({ first, forever = false, endsMs = null }: { first: 
       <p className="tpa-wline" data-ph-show="">
         <SeatsDot />
         <span className="tnum">
-          {first} first month · {left} spots left
+          {lead(`${first} first month`)} · {left} spots left
         </span>
       </p>
     );
@@ -114,7 +127,7 @@ export function WelcomeLine({ first, forever = false, endsMs = null }: { first: 
     <p className="tpa-wline" data-ph-show="">
       <TickingClock />
       <span className="tnum">
-        {first} first month · ends {welcomeEndsDay}
+        {lead(`${first} first month`)} · ends {welcomeEndsDay}
       </span>
     </p>
   );

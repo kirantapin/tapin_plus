@@ -290,7 +290,7 @@ const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray
   },
   {
     q: "How do I cancel and get a refund?",
-    a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
+    a: "Cancel anytime in the Tapin app. Use at least one Tapin benefit each month, and if Plus saves you less than you paid that month, we refund the difference automatically. You don’t have to ask.",
   },
   {
     q: "When do I get my credit?",
@@ -316,6 +316,27 @@ const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray
   },
 ];
 
+/* Where Try lives on the audit take (?audit=1): the FAQ only. Says what the
+   pop-up offers (shell/TrialModal.tsx, model/campaign.ts). */
+const TRY_FAQ = {
+  q: "Can I try it before I join?",
+  a: `Yes, once, without joining. Spend $${MIN_ORDER} at Coffeeholics or The Burg and get $${CREDIT} credit, or take ${PERCENT}% off an order at Coffeeholics. One time each.`,
+};
+
+/* The refund on the audit take, in Sam's words (15 Nov 2026): "use one tapin
+   benefit every month, and if you don't save what you pay for the membership
+   we'll refund the difference automatically, you don't have to request
+   anything". Replaces "How do I cancel and get a refund?" there, which said
+   to email support; cancelling keeps its own answer. No worked example
+   (Sam, same day). */
+const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
+  {
+    q: "How does the auto refund work?",
+    a: "Use at least one Tapin benefit each month. If Plus saves you less than you paid for the membership that month, we refund the difference automatically. You don’t have to ask.",
+  },
+  { q: "How do I cancel?", a: "Cancel anytime in the Tapin app." },
+];
+
 const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
      support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
@@ -331,7 +352,7 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
   },
   {
     q: "How do I cancel and get a refund?",
-    a: "Cancel anytime in the Tapin app. For a refund, email support@tapin.app. If Plus saved you less than you paid that month, your refund is auto-approved.",
+    a: "Cancel anytime in the Tapin app. Use at least one Tapin benefit each month, and if Plus saves you less than you paid that month, we refund the difference automatically. You don’t have to ask.",
   },
   {
     /* The welcome credit is there at once (Sam, 9 Nov 2026: "the FAQ needs
@@ -800,6 +821,22 @@ const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: str
       : `It’s an exclusive we set up with ${g.name} for the people who live there: ${first} a month for your first 12 months, then ${monthly} a month. Everything else is the same Tapin Plus. Cancel anytime in the Tapin app.`,
 });
 
+/* The refund line, said where the price is (the audit's take, ?audit=1):
+   in the header on a phone, under Join in the price card on a computer. */
+function AuditPromise({ className }: { className?: string }) {
+  return (
+    <p className={`tpu-promise${className ? ` ${className}` : ""}`}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+        <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span>
+        <b>Auto refund</b> if you don't save what you&nbsp;pay
+      </span>
+    </p>
+  );
+}
+
 export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId?: string; bandSrc?: string; bandPos?: string; group?: Group }) {
   const place = placeId ? PLACES.find((p) => p.id === placeId) : undefined;
   const startAt = place ? Math.max(0, KIT_PLACES.findIndex((p) => p.id === place.id)) : 0;
@@ -867,6 +904,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   };
   /* The hero A/B test (model/heroTest.ts). */
   const [hero] = useState(heroVariant);
+  /* THE AUDIT'S TAKE (preview only, ?audit=1, 15 Nov 2026, not shipped):
+     one concrete headline, the refund line by the price, Join beside Try,
+     and how it works on the first screen. Main page only. */
+  /* Shipped to every page, no flag any more (Sam, 16 Nov 2026: "make sure
+     to update all the pages with the updates you made here"). */
   const { price, failed: priceFailed } = usePlusPriceLoad();
   const FIRST_MONTH = firstFigure(price);
   /* A place's own page selling Plus for life (/coffeeholics, 12 Nov 2026,
@@ -1057,7 +1099,14 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     );
   /* Not on a place's own page (Sam, 12 Nov 2026: "remove the 'try it once
      for free' for both burg and coffeeholics pages"). */
-  const tryCta = invite || place ? null : (
+  /* `audit`: the take everywhere a non-member lands (the main page, a
+     place's page, a group's, /vip): the refund line, no Try outside the FAQ,
+     the auto-refund FAQ. `auditHome`: the main page's own header. */
+  const auditOn = !member;
+  const auditHome = auditOn && !place && !invite && !group;
+  /* The audit take keeps Try only in the FAQ (Sam, 15 Nov 2026: "remove the
+     try it once for free everywhere other than the FAQ section"). */
+  const tryCta = invite || place || auditOn ? null : (
     <button
       type="button"
       className="tpa-try"
@@ -1069,6 +1118,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       Try it once for free
     </button>
   );
+  const audit = auditOn;
+  const openTry = (where: string) => {
+    setTrial(true);
+    track("plus_try_opened", { where });
+  };
   const [offer] = useState(offerLook);
   /* The offer card's new takes, preview only (?offv=a|b|c, 10 Nov 2026). */
   const [offv] = useState(offerVersion);
@@ -1328,7 +1382,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       )}
       <header
         ref={bandRef}
-        className="tpa-band"
+        className={`tpa-band${auditHome ? " tpu-band" : ""}`}
         data-group={group?.id}
         data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
@@ -1403,6 +1457,31 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   </p>
                 )}
                 {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
+              </>
+            ) : auditHome ? (
+              <>
+                <h1 className="tpu-h1">
+                  ${CREDIT} to spend at {PLACES.length} Blacksburg spots, every&nbsp;month
+                </h1>
+                {/* The payback, said once (one $5 is more than the $3.99
+                    month). Not on a free month, where there's nothing to
+                    pay back. */}
+                {free ? null : <p className="tpu-sub">Spend it once and your first month has paid for&nbsp;itself.</p>}
+                {/* The act: on a computer, Join with the terms beside it (the
+                    held price card's Join sits under the first screen there);
+                    on a phone, the terms alone, the dock carries Join. */}
+                <div className="tpu-act">
+                  {desk ? (
+                    <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
+                      {joinLabel}
+                    </button>
+                  ) : null}
+                  {/* The terms, as one set: the price, then the refund. */}
+                  <div className="tpu-terms">
+                    {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
+                    <AuditPromise />
+                  </div>
+                </div>
               </>
             ) : hero === "0" ? (
               <h1>${CREDIT} credit at every place you already go in Blacksburg</h1>
@@ -1531,7 +1610,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Students' own words (round 1, Sam, 8 Nov 2026): nothing shows until
             model/voices.ts STUDENT_VOICES has real ones; local dev shows the
             marked slots. On a computer, three across here. */}
-        {desk ? <Voices audience="student" className="tps-voices-desk" /> : null}
+        {desk ? <Voices audience="student" className="tps-voices-desk" lead={place?.id} /> : null}
 
         {/* The offer card and, under it (not in it), one quiet list and the
             voices, as the parents page has them: on a computer the held
@@ -1714,11 +1793,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 wallet line (the checkout says it) and the turning proof line
                 (the band says the 500+) went. */}
             {lowOn && lowv ? (
-              <LowerVersion v={lowv} monthly={MONTHLY} join={joinCta("hero")} tryCta={tryCta} />
+              <LowerVersion v={lowv} monthly={MONTHLY} join={joinCta("hero")} tryCta={audit ? <AuditPromise className="tpu-promise-card" /> : tryCta} autoRefund={audit} />
             ) : (
               <>
                 {joinCta("hero")}
                 {tryCta}
+                {audit ? <AuditPromise className="tpu-promise-card" /> : null}
               </>
             )}
           </section>
@@ -1783,7 +1863,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Under the offer: the other benefits, then the promise (round 1
             and 2, Sam, 8 Nov 2026), in place of the "locked in" fold. */}
         {lowOn && lowv ? <LowerAfter v={lowv} monthly={MONTHLY} /> : <UnderOffer audience="student" monthly={MONTHLY} />}
-        {desk ? null : <Voices audience="student" />}
+        {desk ? null : <Voices audience="student" lead={place?.id} />}
         </div>
 
         {/* HOW IT WORKS, FOUR STEPS ON A PHONE (round 2, Sam, 8 Nov 2026):
@@ -1818,7 +1898,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           {[
             ...(invite ? inviteFaq(invite, MONTHLY) : []),
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
-            ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY)).map((f) =>
+            ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY))
+              .flatMap((f): ReadonlyArray<{ q: string; a: string }> =>
+                !audit ? [f] : f.q === "What’s the catch?" && !place ? [f, TRY_FAQ] : f.q === "How do I cancel and get a refund?" ? refundFaq() : [f],
+              )
+              .map((f) =>
               /* A group's price doesn't climb to $14.99 with the 100 spots. */
               group && f.q === "Will my price go up?"
                 ? groupPriceFaq(group, FIRST_MONTH, MONTHLY, groupOffer)
@@ -1833,6 +1917,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 <Chevron />
               </summary>
               <p>{f.a}</p>
+              {f === TRY_FAQ ? (
+                <button type="button" className="tpa-try tpu-faq-try" onClick={() => openTry("faq")}>
+                  Try it once for free
+                </button>
+              ) : null}
             </details>
           ))}
         </section>
@@ -1918,7 +2007,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* The proof line, on the dock (round 1, Sam, 8 Nov 2026). */}
         {/* The deadline and the spots lead the turn (Sam, 10 Nov 2026), so
             on a phone they're on screen the whole way down. */}
-        <ProofTurn
+        {/* The audit take: the refund, said plainly, in place of the turn
+            (Sam, 15 Nov 2026: "what we have here should just be the 'auto
+            refund if you don't save what you pay'"). */}
+        {/* A group's own lead line (a sale's clock) keeps the turn. */}
+        {audit && !(group && dockLead.length) ? <AuditPromise className="tpu-promise-dock" /> : <ProofTurn
           /* Starts again on the lead once it arrives with the price, so a
              group's own line (a sale's clock) is the one on screen. */
           key={dockLead[0]?.key ?? "none"}
@@ -1928,9 +2021,28 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           audience="student"
           noPlaces={!!place}
           lead={dockLead}
-        />
+        />}
         {member ? (
           getApp("dock", false, " tpa-dock-cta")
+        ) : audit && !place ? (
+          /* The audit take: Join, and under it the quiet way to see how it
+             works first, the Step through it sheet (Sam, 16 Nov 2026). */
+          <div className="tpu-dock-stack">
+            <button type="button" className="tpa-cta tpa-dock-cta" onClick={(e) => join("dock", e.currentTarget)}>
+              {joinLabel}
+              <DockArrow />
+            </button>
+            <button
+              type="button"
+              className="tpu-dock-how"
+              onClick={() => {
+                setHow(true);
+                track("plus_how_opened", { where: "dock" });
+              }}
+            >
+              See how it works
+            </button>
+          </div>
         ) : (
           <button type="button" className="tpa-cta tpa-dock-cta" onClick={(e) => join("dock", e.currentTarget)}>
             {joinLabel}

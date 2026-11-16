@@ -46,6 +46,7 @@ const LINES: Record<string, string> = {
   order: "Or pay full price on $10+ and earn $5 back.",
   myspot: "Order now, pick it up later.",
   offers: "From each place, for members.",
+  lite: "Extra perks at more spots, at no extra cost.",
   entry: "Points, and 15% off once a day.",
   points: "Spend them where you earned them.",
   redeem: "Show your phone, or it goes to the kitchen.",

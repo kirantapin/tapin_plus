@@ -40,7 +40,8 @@ export default function Members() {
       key: "promise",
       icon: Shield,
       title: "The Plus Promise",
-      line: "Save more than Plus costs each month, or get your money back. Ask for a refund and it’s auto-approved.",
+      /* The auto refund (Sam, 16 Nov 2026): no asking. */
+      line: "Use a Tapin benefit each month. If Plus saves you less than you paid, we refund the difference automatically.",
     },
     /* Early-access memberships bought here are not in the app yet (Sam, 3 Nov
        2026, after talking to Kiran): on file, and who to ask. */
