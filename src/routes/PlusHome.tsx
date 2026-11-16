@@ -1489,22 +1489,34 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 <h1 className="tpu-h1">
                   ${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week
                 </h1>
+                {/* Sam, 16 Nov 2026: "+$25 added to your account to spend
+                    every month" ($5 at each of the five, every month). */}
                 <p className="tpu-sub">
-                  <b className="tnum">${CREDIT * PLACES.length}</b> added to your account for signing&nbsp;up
+                  <b className="tnum">+${CREDIT * PLACES.length}</b> added to your account to spend every&nbsp;month
                 </p>
                 {/* The five places, named in the header (Sam, 16 Nov 2026:
                     "add a list of merchants to the header like we had
                     originally ... because most people barely scroll at all,
                     let alone right below to see what the offer is"). The full
                     What and where can I use it? sits under How it works. */}
-                <ul className="tpu-places" aria-label="The five Plus spots">
-                  {PLACES.map((v) => (
-                    <li key={v.id} className="tpa-glass">
-                      <img src={v.logo} alt="" decoding="async" />
-                      {v.name.replace(/^The (Milk Parlor)$/, "$1")}
-                    </li>
-                  ))}
-                </ul>
+                {/* The places as one unit (polish, 16 Nov 2026): their logos as a
+                    row of coins, then their names as a sentence. Five bordered
+                    pills read as filter chips and fought the headline. */}
+                <div className="tpu-places">
+                  <span className="tpu-coins" aria-hidden="true">
+                    {PLACES.map((v) => (
+                      <img key={v.id} src={v.logo} alt="" decoding="async" />
+                    ))}
+                  </span>
+                  <p className="tpu-names">
+                    {PLACES.map((v, i) => (
+                      <span key={v.id}>
+                        {v.name.replace(/^The (Milk Parlor)$/, "$1")}
+                        {i < PLACES.length - 2 ? ", " : i === PLACES.length - 2 ? " and " : ""}
+                      </span>
+                    ))}
+                  </p>
+                </div>
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}

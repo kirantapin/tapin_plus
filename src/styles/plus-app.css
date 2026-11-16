@@ -8614,33 +8614,46 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-weight: 600;
   line-height: inherit;
 }
-/* The five places in the header (16 Nov 2026): each a smoked pill with its
-   logo, wrapping to two rows on a phone, so the first screen says where. */
+/* The five places in the header (16 Nov 2026, polished the same day): a row
+   of logo coins, each ringed in the shade's near-black so the overlap reads
+   as a stack, then the names as one sentence. One unit, not five chips. */
 .tpa-band.tpu-band.tpu-band {
-  height: calc(env(safe-area-inset-top) + 452px);
+  height: calc(env(safe-area-inset-top) + 424px);
 }
 .tpu-places {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.tpu-coins {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
+  gap: 6px;
 }
-.tpu-places > li {
-  gap: 7px;
-  height: 34px;
-  padding: 0 13px 0 4px;
-  font: 600 15px/1 "Gilroy", Arial, sans-serif;
-  white-space: nowrap;
-}
-.tpu-places img {
+.tpu-coins img {
   flex: none;
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   object-fit: cover;
   background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.tpu-band .tpa-band-title p.tpu-names {
+  margin: 0;
+  max-width: 34ch;
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: #ffffff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  text-wrap: pretty;
+}
+/* Clear `.tpa-band-title span` (the old proof line's rule). */
+.tpu-band .tpa-band-title .tpu-names > span {
+  flex: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  white-space: nowrap;
 }
 /* The terms (Sam, 15 Nov 2026: "a better way to surface these, it's a bit
    random"): the price and the refund as one set under a hairline, a step
@@ -8775,7 +8788,7 @@ html[data-surface="tpa"] .hs-scene .value-scene {
    headline, payback, act. */
 @media (min-width: 1024px) {
   .tpa-home .tpa-band.tpu-band {
-    height: 468px;
+    height: 500px;
   }
   .tpa-home .tpa-band.tpu-band::after {
     background:
@@ -8808,6 +8821,22 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     font-size: 20px;
     line-height: 28px;
     color: rgba(255, 255, 255, 0.94);
+  }
+  /* The places on one line: the coins, then the names beside them. */
+  .tpu-places {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .tpu-coins img {
+    width: 38px;
+    height: 38px;
+  }
+  .tpu-band .tpa-band-title p.tpu-names {
+    max-width: none;
+    font-size: 17px;
+    line-height: 22px;
   }
   /* The act: Join, then its terms beside it, centred on the button. */
   .tpu-act {
