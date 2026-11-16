@@ -8614,6 +8614,34 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   font-weight: 600;
   line-height: inherit;
 }
+/* The five places in the header (16 Nov 2026): each a smoked pill with its
+   logo, wrapping to two rows on a phone, so the first screen says where. */
+.tpa-band.tpu-band.tpu-band {
+  height: calc(env(safe-area-inset-top) + 452px);
+}
+.tpu-places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tpu-places > li {
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px 0 4px;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.tpu-places img {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+}
 /* The terms (Sam, 15 Nov 2026: "a better way to surface these, it's a bit
    random"): the price and the refund as one set under a hairline, a step
    below the payback. One grid for both rows (icon, then words, a wrapped

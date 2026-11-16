@@ -1356,6 +1356,29 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     );
   };
 
+  /* What and where can I use it?, as the ?wherev= take has it (B by default). */
+  const whereSection = () => (
+  wherev === "a" ? (
+            placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
+          ) : wherev === "b" ? (
+            member ? (
+              placesRail({ cls: "tpw" })
+            ) : (
+              <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
+            )
+          ) : wherev === "c" ? (
+            <section className="tpw tpw-c" aria-labelledby="tpw-c-h">
+              <h2 id="tpw-c-h" className="tpa-h2 tpa-h2-out">
+                What and where can I use it?
+              </h2>
+              {member ? null : <LadderSay />}
+              {placesRail({ head: false, inCard: true })}
+            </section>
+          ) : member ? null : (
+            <BonusSpots only={place?.id} />
+          )
+  );
+
   return (
     <div className="tpa tpa-home tps">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
@@ -1469,6 +1492,19 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 <p className="tpu-sub">
                   <b className="tnum">${CREDIT * PLACES.length}</b> added to your account for signing&nbsp;up
                 </p>
+                {/* The five places, named in the header (Sam, 16 Nov 2026:
+                    "add a list of merchants to the header like we had
+                    originally ... because most people barely scroll at all,
+                    let alone right below to see what the offer is"). The full
+                    What and where can I use it? sits under How it works. */}
+                <ul className="tpu-places" aria-label="The five Plus spots">
+                  {PLACES.map((v) => (
+                    <li key={v.id} className="tpa-glass">
+                      <img src={v.logo} alt="" decoding="async" />
+                      {v.name.replace(/^The (Milk Parlor)$/, "$1")}
+                    </li>
+                  ))}
+                </ul>
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
@@ -1481,7 +1517,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   {/* The terms, as one set: the price, then the refund. */}
                   <div className="tpu-terms">
                     {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
-                    <AuditPromise />
+                    {/* On a phone the dock already says the refund. */}
+                    {desk ? <AuditPromise /> : null}
                   </div>
                 </div>
               </>
@@ -1543,25 +1580,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
-        {wherev === "a" ? (
-          placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
-        ) : wherev === "b" ? (
-          member ? (
-            placesRail({ cls: "tpw" })
-          ) : (
-            <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
-          )
-        ) : wherev === "c" ? (
-          <section className="tpw tpw-c" aria-labelledby="tpw-c-h">
-            <h2 id="tpw-c-h" className="tpa-h2 tpa-h2-out">
-              What and where can I use it?
-            </h2>
-            {member ? null : <LadderSay />}
-            {placesRail({ head: false, inCard: true })}
-          </section>
-        ) : member ? null : (
-          <BonusSpots only={place?.id} />
-        )}
+        {/* On the main page it sits under How it works now (Sam, 16 Nov
+            2026); the header names the five places instead. */}
+        {auditHome ? null : whereSection()}
         {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
             the what can I use it on a bit further down. I don't think it
             should be as big as it is"): the places rail below answers it,
@@ -1879,6 +1900,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           </h2>
           <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
+
+        {/* The whole What and where can I use it?, under How it works on the
+            main page (Sam, 16 Nov 2026): the header names the five places
+            now, so the first screen says where before anyone scrolls. */}
+        {auditHome ? whereSection() : null}
 
         {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
             places, which come with Plus. Under How it works (Sam, 13 Nov
