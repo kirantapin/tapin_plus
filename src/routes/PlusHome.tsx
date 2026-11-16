@@ -33,7 +33,6 @@ import { ForeverLeft, InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLin
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots, LadderLead, LadderSay } from "../shell/BonusSpots";
-import { HeadTake, headVersion } from "../shell/HeadTakes";
 import { LiteStory } from "../shell/LiteStory";
 import { LiteMark } from "../shell/LiteMark";
 import { rememberPlusPage } from "../model/backTo";
@@ -867,8 +866,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      B · One card: the ladder with the places row in place of the logos.
      C · Said over the row: the ladder as three plain lines, then the row. */
   const [wherevQ] = useState(whereVersion);
-  /* The header, three takes on the original (shell/HeadTakes.tsx), ?headv=d|e|f. */
-  const [headvQ] = useState(headVersion);
   const wherev = placeId ? null : wherevQ;
   const railRef = useRef<HTMLUListElement | null>(null);
   /* The cards in the row, Plus then Lite, as the filter has them; a
@@ -1359,29 +1356,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     );
   };
 
-  /* What and where can I use it?, as the ?wherev= take has it (B by default). */
-  const whereSection = () => (
-  wherev === "a" ? (
-            placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
-          ) : wherev === "b" ? (
-            member ? (
-              placesRail({ cls: "tpw" })
-            ) : (
-              <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
-            )
-          ) : wherev === "c" ? (
-            <section className="tpw tpw-c" aria-labelledby="tpw-c-h">
-              <h2 id="tpw-c-h" className="tpa-h2 tpa-h2-out">
-                What and where can I use it?
-              </h2>
-              {member ? null : <LadderSay />}
-              {placesRail({ head: false, inCard: true })}
-            </section>
-          ) : member ? null : (
-            <BonusSpots only={place?.id} />
-          )
-  );
-
   return (
     <div className="tpa tpa-home tps">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
@@ -1409,7 +1383,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       <header
         ref={bandRef}
         className={`tpa-band${auditHome ? " tpu-band" : ""}`}
-        data-headv={auditHome && headvQ ? headvQ : undefined}
         data-group={group?.id}
         data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
@@ -1485,26 +1458,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 )}
                 {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
               </>
-            ) : auditHome && headvQ ? (
-              <HeadTake
-                v={headvQ}
-                h1={<>${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week</>}
-                total={CREDIT * PLACES.length}
-                places={PLACES.map((v) => ({ id: v.id, name: v.name.replace(/^The (Milk Parlor)$/, "$1"), logo: v.logo }))}
-                terms={
-                  <>
-                    {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
-                    <AuditPromise />
-                  </>
-                }
-                join={
-                  desk ? (
-                    <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
-                      {joinLabel}
-                    </button>
-                  ) : null
-                }
-              />
             ) : auditHome ? (
               <>
                 {/* Sam, 16 Nov 2026: "$5 credit at 5 Blacksburg spots, every
@@ -1514,33 +1467,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   ${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week
                 </h1>
                 {/* Sam, 16 Nov 2026: "+$25 added to your account to spend
-                    every month" ($5 at each of the five, every month). */}
+                    every month" ($5 at each of the five, every month). The
+                    logos in the header (#391–#394) were rolled back at his
+                    ask; this line stays. */}
                 <p className="tpu-sub">
                   <b className="tnum">+${CREDIT * PLACES.length}</b> added to your account to spend every&nbsp;month
                 </p>
-                {/* The five places, named in the header (Sam, 16 Nov 2026:
-                    "add a list of merchants to the header like we had
-                    originally ... because most people barely scroll at all,
-                    let alone right below to see what the offer is"). The full
-                    What and where can I use it? sits under How it works. */}
-                {/* The places as one unit (polish, 16 Nov 2026): their logos as a
-                    row of coins, then their names as a sentence. Five bordered
-                    pills read as filter chips and fought the headline. */}
-                <div className="tpu-places">
-                  <span className="tpu-coins" aria-hidden="true">
-                    {PLACES.map((v) => (
-                      <img key={v.id} src={v.logo} alt="" decoding="async" />
-                    ))}
-                  </span>
-                  <p className="tpu-names">
-                    {PLACES.map((v, i) => (
-                      <span key={v.id}>
-                        {v.name.replace(/^The (Milk Parlor)$/, "$1")}
-                        {i < PLACES.length - 2 ? ", " : i === PLACES.length - 2 ? " and " : ""}
-                      </span>
-                    ))}
-                  </p>
-                </div>
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
@@ -1553,8 +1485,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   {/* The terms, as one set: the price, then the refund. */}
                   <div className="tpu-terms">
                     {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
-                    {/* On a phone the dock already says the refund. */}
-                    {desk ? <AuditPromise /> : null}
+                    <AuditPromise />
                   </div>
                 </div>
               </>
@@ -1616,9 +1547,25 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
-        {/* On the main page it sits under How it works now (Sam, 16 Nov
-            2026); the header names the five places instead. */}
-        {auditHome ? null : whereSection()}
+        {wherev === "a" ? (
+          placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
+        ) : wherev === "b" ? (
+          member ? (
+            placesRail({ cls: "tpw" })
+          ) : (
+            <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
+          )
+        ) : wherev === "c" ? (
+          <section className="tpw tpw-c" aria-labelledby="tpw-c-h">
+            <h2 id="tpw-c-h" className="tpa-h2 tpa-h2-out">
+              What and where can I use it?
+            </h2>
+            {member ? null : <LadderSay />}
+            {placesRail({ head: false, inCard: true })}
+          </section>
+        ) : member ? null : (
+          <BonusSpots only={place?.id} />
+        )}
         {/* "What can I use it on?" went from here (Sam, 11 Nov 2026: "move
             the what can I use it on a bit further down. I don't think it
             should be as big as it is"): the places rail below answers it,
@@ -1936,11 +1883,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           </h2>
           <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
-
-        {/* The whole What and where can I use it?, under How it works on the
-            main page (Sam, 16 Nov 2026): the header names the five places
-            now, so the first screen says where before anyone scrolls. */}
-        {auditHome ? whereSection() : null}
 
         {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
             places, which come with Plus. Under How it works (Sam, 13 Nov
