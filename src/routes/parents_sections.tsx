@@ -8,6 +8,7 @@ import { POINTS_PER_DOLLAR } from "../model/order";
 import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
+import { useEventTracking } from "../context/event_tracking_context";
 import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
@@ -127,7 +128,8 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
     audience === "student"
       ? [
           { key: "points", d: GLYPHS.star, b: "Points", rest: " on everything" },
-          { key: "refund", d: GLYPHS.refund, b: "Refund auto-approved", rest: " if Plus saved you less than you paid" },
+          /* The auto refund (Sam, 15–16 Nov 2026), in the site's one line. */
+          { key: "refund", d: GLYPHS.refund, b: "Auto refund", rest: " if you don\u2019t save what you pay" },
           { key: "cancel", d: GLYPHS.phone, b: "Cancel anytime", rest: " in the Tapin app" },
         ]
       : [
@@ -1474,8 +1476,8 @@ const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
   },
   student: {
     h: "What if I don\u2019t save?",
-    row: "Refund, auto-approved.",
-    fine: "Every month counts on its own. If Plus saved you less than you paid that month, ask for a refund and it\u2019s auto-approved.",
+    row: "Auto refund.",
+    fine: "Every month counts on its own. Use a Tapin benefit that month, and if Plus saves you less than you paid, we refund the difference automatically.",
   },
 };
 export function WhatIfUnused({ audience = "parent", monthly: monthlyProp }: { audience?: Audience; monthly?: string } = {}) {
@@ -1564,11 +1566,27 @@ export function WhatIfUnused({ audience = "parent", monthly: monthlyProp }: { au
    model/voices.ts STUDENT_VOICES, empty until real students' words are in;
    local dev shows its three marked slots without a flag. `className` places
    the rail (on a computer, three across under the places). */
-export function Voices({ audience = "parent", className }: { audience?: Audience; className?: string } = {}) {
+/** The quote with its result in bold money green, when it names one. */
+function Hit({ text, hit }: { text: string; hit?: string }) {
+  const at = hit ? text.indexOf(hit) : -1;
+  if (!hit || at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <strong className="tpp-v-hit">{hit}</strong>
+      {text.slice(at + hit.length)}
+    </>
+  );
+}
+
+export function Voices({ audience = "parent", className, lead }: { audience?: Audience; className?: string; lead?: string } = {}) {
   const student = audience === "student";
+  const { track } = useEventTracking();
   const own = student ? STUDENT_VOICES : VOICES;
   const real = own.length > 0;
-  const list = real ? own : student ? PREVIEW_STUDENT_VOICES : parentMock() ? PREVIEW_VOICES : [];
+  const base = real ? own : student ? PREVIEW_STUDENT_VOICES : parentMock() ? PREVIEW_VOICES : [];
+  /* On a place's page, the students who talk about that place come first. */
+  const list = lead ? [...base.filter((v) => v.place === lead), ...base.filter((v) => v.place !== lead)] : base;
   const [box, seen] = useSeen<HTMLUListElement>(0.5);
   const runs = useRef<Array<Animation | undefined>>([]);
   /* One card's whole quote at a time (Sam: little text at first touch). */
@@ -1610,15 +1628,39 @@ export function Voices({ audience = "parent", className }: { audience?: Audience
               ) : real ? null : (
                 <span className="tpp-v-face" aria-hidden="true" />
               )}
-              <span className="tpp-v-name">{v.name}</span>
-              <small>{v.label ?? v.role}</small>
+              {student ? (
+                /* Students: the name and who they are, then their Instagram,
+                   linked (15 Nov 2026), so a visitor can check they're real. */
+                <span className="tpp-v-who">
+                  <span className="tpp-v-line">
+                    <span className="tpp-v-name">{v.name}</span>
+                    <small>{` · ${v.year ?? v.label ?? v.role}`}</small>
+                  </span>
+                  {v.handle ? (
+                    <a
+                      className="tpp-v-handle"
+                      href={`https://www.instagram.com/${v.handle}/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => track("plus_voice_handle_opened", { handle: v.handle })}
+                    >
+                      @{v.handle}
+                    </a>
+                  ) : null}
+                </span>
+              ) : (
+                <>
+                  <span className="tpp-v-name">{v.name}</span>
+                  <small>{v.label ?? v.role}</small>
+                </>
+              )}
               <span className="tpp-v-mark" aria-hidden="true">
                 “
               </span>
             </figcaption>
             <div className="tpp-v-body">
               <blockquote id={`tpp-v-${i}`} className="tpp-v-quote">
-                {open === i && v.full ? v.full : v.quote}
+                {open === i && v.full ? v.full : <Hit text={v.quote} hit={v.hit} />}
               </blockquote>
               {v.full ? (
                 <>
@@ -1697,7 +1739,7 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          {student ? "Didn\u2019t save? Refund auto-approved." : "Didn\u2019t save what you spent? Full refund."}
+          {student ? "Didn\u2019t save? Auto refund." : "Didn\u2019t save what you spent? Full refund."}
         </>
       ),
     },

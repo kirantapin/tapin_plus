@@ -21,6 +21,18 @@ export interface Voice {
   full?: string;
   /** What shows under the name, if not the role (Sam, 7 Nov 2026: "VT parent"). */
   label?: string;
+  /** Their Instagram handle, no @: shown under the name and linked to their
+   *  profile, so a visitor can see they're real (15 Nov 2026). */
+  handle?: string;
+  /** Their class year ("Junior"), shown in place of the label when known:
+   *  the nearer the reader's own group, the stronger the proof. */
+  year?: string;
+  /** The words of the quote that are the result, set in bold money green so
+   *  a skim gets it. Must appear in `quote` exactly. */
+  hit?: string;
+  /** The place they talk about (a venue id): on that place's own page they
+   *  come first. */
+  place?: string;
 }
 
 export const VOICES: Voice[] = [
@@ -66,7 +78,40 @@ export const PREVIEW_VOICES: Voice[] = import.meta.env.DEV
    until there are some, and while it's empty the slot renders nothing in a
    build. Never write one for anyone, and never reuse a parent's quote here
    without asking them again (Denise M.'s permission covered /parents). */
-export const STUDENT_VOICES: Voice[] = [];
+export const STUDENT_VOICES: Voice[] = [
+  /* The three students who lent their name, photo and Instagram (Sam, 15–16
+     Nov 2026). Each answers one doubt a student has before joining, in a
+     texting voice, one specific detail each, no exclamation marks:
+       Zoe    · "Is it worth the money?"         (what she saves)
+       Grace  · "Do I even go out enough?"        (the habit she already had)
+       Hayley · "What's the catch?"               (to come, in her words)
+     DRAFTS for Sam's review, built only on what each told us; each student
+     confirms hers is true and OKs the wording in writing before it ships
+     (Hayley Palenscar, @hayleypalenscar, the third, goes in once she sends
+     her own answer to "did you think there was a catch?"; her photo is in
+     public/students/voices on the session's working copy). `place` puts a
+     place's own student first on that place's page. */
+  {
+    quote: "I was spending like $100 a month on coffee between Starbucks and Coffeeholics. Now it\u2019s all Coffeeholics and I\u2019m saving like $40 a month.",
+    name: "Zoe P.",
+    role: "Student",
+    label: "VT student",
+    handle: "zoe.peeler",
+    hit: "saving like $40 a month",
+    photo: "/students/voices/zoe.webp",
+    place: "coffeeholicsva",
+  },
+  {
+    quote: "The Burg was already my once-a-week spot, so this was kind of a no-brainer. I go way more now. Get the birria tacos.",
+    name: "Grace G.",
+    role: "Student",
+    label: "VT student",
+    handle: "graceeluoo",
+    hit: "I go way more now",
+    photo: "/students/voices/grace.webp",
+    place: "theburg",
+  },
+];
 
 /* Local dev only (npm run dev): three marked placeholder slots, so the
    layout can be seen before real quotes exist. A production build drops
