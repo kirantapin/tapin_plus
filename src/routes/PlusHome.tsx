@@ -1460,13 +1460,15 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
               </>
             ) : auditHome ? (
               <>
+                {/* Sam, 16 Nov 2026: "$5 credit at 5 Blacksburg spots, every
+                    week. And then $25 added to your account for signing up":
+                    the weekly $5 back, then the month's $5 at each spot. */}
                 <h1 className="tpu-h1">
-                  ${CREDIT} to spend at {PLACES.length} Blacksburg spots, every&nbsp;month
+                  ${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week
                 </h1>
-                {/* The payback, said once (one $5 is more than the $3.99
-                    month). Not on a free month, where there's nothing to
-                    pay back. */}
-                {free ? null : <p className="tpu-sub">Spend it once and your first month has paid for&nbsp;itself.</p>}
+                <p className="tpu-sub">
+                  <b className="tnum">${CREDIT * PLACES.length}</b> added to your account for signing&nbsp;up
+                </p>
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}

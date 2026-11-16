@@ -8610,6 +8610,10 @@ html[data-surface="tpa"] .hs-scene .value-scene {
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
   text-wrap: pretty;
 }
+.tpu-sub b {
+  font-weight: 600;
+  line-height: inherit;
+}
 /* The terms (Sam, 15 Nov 2026: "a better way to surface these, it's a bit
    random"): the price and the refund as one set under a hairline, a step
    below the payback. One grid for both rows (icon, then words, a wrapped
