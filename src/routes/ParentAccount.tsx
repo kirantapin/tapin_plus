@@ -5,7 +5,9 @@ import { useAuth } from "../context/auth_context";
 import { supabase } from "../supabase";
 import { openPlusSignIn } from "../shell/PlusCheckout";
 import { cancelGiftedPlus, revokeGift } from "../model/giftApi";
-import { AccountCard, AccountFrame, AppPanel, InfoPanel, type Tone } from "../shell/AccountPage";
+import { type Tone } from "../shell/AccountPage";
+import { Account, Back, Benefits, GetApp, Logos, Pass, Shell, useFour } from "./MembersPass";
+import { device } from "../shell/GetTheApp";
 import { GLYPHS, Glyph } from "./parents_kit";
 
 /* ══ THE PARENT'S ACCOUNT PAGE (/parents/account; Sam, 6 Nov 2026: "add a
@@ -197,48 +199,91 @@ export default function ParentAccount() {
       </ul>
     );
 
-  const rows = ROWS.map((r) => ({ key: r.glyph, icon: <Glyph d={GLYPHS[r.glyph]} className="acc-glyph" />, title: r.title, line: r.line }));
+  const four = useFour();
+  const signedIn = !!accessToken;
 
+  /* The pass page's design (Sam, 17 Nov 2026: "looks like this hasn't been
+     updated across all pages yet"), as /in: the Plus card on the left,
+     signed in with the way out under it; Your account beside it with the
+     gifts they've sent (or, signed out, the sign-in), then their student's
+     app, what Plus gets them every month, and the parents' foot. */
   return (
-    <AccountFrame back="/parents" docTitle="Your account · Tapin Plus">
-      {accessToken ? (
-        <AccountCard title="Your account">
-          <div className="acc-gifts-head">
-            <h2 className="acc-h3">Gifts you’ve sent</h2>
-            {gifts !== "loading" && gifts !== "failed" && gifts.sent.length ? (
-              <Link className="acc-link" to="/parents">
-                Send another
-              </Link>
-            ) : null}
-          </div>
-          {list}
-          {actionError ? (
-            <p className="acc-quiet acc-error" role="alert">
-              {actionError}
+    <Shell>
+      <div className="mv-a-top">
+        <Back to="/parents" />
+      </div>
+      <div className="mv-a-grid">
+        <div className="mv-a-left">
+          <Pass active={false} who={signedIn ? (four ? `••• ${four}` : "Signed in") : undefined} whoLabel="Signed in" />
+          {signedIn ? <Account four={four} className="mv-a-acct" /> : null}
+        </div>
+        <div className="mv-a-right">
+          <h1 className="mv-a-h">Your account</h1>
+          {signedIn ? (
+            <div className="mv-panel">
+              <div className="acc-gifts-head">
+                <h2 className="acc-h3">Gifts you’ve sent</h2>
+                {gifts !== "loading" && gifts !== "failed" && gifts.sent.length ? (
+                  <Link className="acc-link" to="/parents">
+                    Send another
+                  </Link>
+                ) : null}
+              </div>
+              {list}
+              {actionError ? (
+                <p className="acc-quiet acc-error" role="alert">
+                  {actionError}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <p className="mv-a-lede">Sent a gift? Sign in with the mobile number you used to send it.</p>
+              <button
+                type="button"
+                className="mv-cta mv-cta-dark mv-signin"
+                onClick={() => {
+                  track("parent_account_signin");
+                  openPlusSignIn("parent_account");
+                }}
+              >
+                Sign in with your mobile
+              </button>
+            </>
+          )}
+          {/* The app is the student's: their Plus lives there. */}
+          <h2 className="mv-h2">In the Tapin app</h2>
+          <p className="mv-a-lede">They sign in with the number you gave us.</p>
+          <GetApp where="parent_account" tone={device() === "desktop" ? "dark" : "light"} />
+          <h2 className="mv-h2">Every month with Plus</h2>
+          <Benefits they />
+          <Logos />
+          <footer className="mv-foot">
+            {ROWS.map((r) => (
+              <p key={r.glyph} className="mv-promise">
+                <Glyph d={GLYPHS[r.glyph]} />
+                <span>
+                  <b>{r.title}</b> {r.line}
+                </span>
+              </p>
+            ))}
+            <p className="mv-help">
+              Questions about their plan or a refund?{" "}
+              <a href={MAIL} onClick={() => track("parent_account_email")}>
+                support@tapin.app
+              </a>
             </p>
-          ) : null}
-        </AccountCard>
-      ) : (
-        <AccountCard title="Your account" line="Sent a gift? Sign in with the mobile number you used to send it.">
-          <div className="acc-acts">
-            <button
-              type="button"
-              className="acc-btn acc-btn-dark"
-              onClick={() => {
-                track("parent_account_signin");
-                openPlusSignIn("parent_account");
-              }}
-            >
-              Sign in with your mobile
-            </button>
-          </div>
-        </AccountCard>
-      )}
-
-      {/* The app is the student's: their Plus lives there. */}
-      <AppPanel where="parent_account" they signIn="They sign in with the number you gave us." />
-
-      <InfoPanel rows={rows} mail={MAIL} onMail={() => track("parent_account_email")} />
-    </AccountFrame>
+            <p className="mv-links">
+              <a href="https://go.tapin.app/terms-and-conditions" target="_blank" rel="noopener noreferrer">
+                Terms
+              </a>
+              <a href="https://go.tapin.app/privacy-policy" target="_blank" rel="noopener noreferrer">
+                Privacy
+              </a>
+            </p>
+          </footer>
+        </div>
+      </div>
+    </Shell>
   );
 }

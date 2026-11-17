@@ -29,7 +29,7 @@ const PRIVACY_URL = "https://go.tapin.app/privacy-policy";
 
 /* The last four of the number they signed in with. A local preview with no
    session shows a marked sample. */
-function useFour(): string | null {
+export function useFour(): string | null {
   const { userSession } = useAuth();
   const d = (userSession?.user?.phone ?? "").replace(/\D/g, "");
   if (d.length >= 4) return d.slice(-4);
@@ -42,12 +42,19 @@ const BENEFITS = [
   { big: `Save ${PERCENT}%`, rest: "on your other orders, once a day." },
   { big: "Points", rest: "on everything." },
 ];
+/* The same, in a parent's words (their student's Plus). */
+const BENEFITS_THEY = [
+  { big: `Get $${CREDIT}`, rest: "to spend at each spot, every month. No minimum." },
+  { big: `Earn $${CREDIT} back`, rest: "every week when they spend $10." },
+  { big: `Save ${PERCENT}%`, rest: "on their other orders, once a day." },
+  { big: "Points", rest: "on everything." },
+];
 const FINE = `Credit and ${PERCENT}% off don’t go toward alcohol. One per order: credit or ${PERCENT}% off.`;
 const PROMISE = "Use a Tapin benefit each month. If Plus saves you less than you paid, we refund the difference automatically.";
 
-function Back() {
+export function Back({ to }: { to?: string } = {}) {
   return (
-    <Link className="tpa-glass tpa-signin mv-back" to={plusPageBack()} state={{ from: "members" }}>
+    <Link className="tpa-glass tpa-signin mv-back" to={to ?? plusPageBack()} state={{ from: "members" }}>
       <svg className="tpa-back" viewBox="0 0 24 24" aria-hidden="true">
         <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
@@ -58,7 +65,7 @@ function Back() {
 
 /** The one action: the app. A button on a phone; on a computer the QR to
  *  scan with the phone, and the App Store link. */
-function GetApp({ where, tone = "dark", qr = 120 }: { where: string; tone?: "dark" | "light"; qr?: number }) {
+export function GetApp({ where, tone = "dark", qr = 120 }: { where: string; tone?: "dark" | "light"; qr?: number }) {
   const { track } = useEventTracking();
   const d = device();
   const tap = () => track("plus_get_app_clicked", { where, device: d });
@@ -86,7 +93,7 @@ function GetApp({ where, tone = "dark", qr = 120 }: { where: string; tone?: "dar
 }
 
 /** Who's signed in, and the way out. */
-function Account({ four, className = "" }: { four: string | null; className?: string }) {
+export function Account({ four, className = "" }: { four: string | null; className?: string }) {
   const { userSession, logout } = useAuth();
   const [busy, setBusy] = useState(false);
   return (
@@ -140,7 +147,7 @@ function Foot({ onMail }: { onMail: () => void }) {
   );
 }
 
-function Logos({ size = 40 }: { size?: number }) {
+export function Logos({ size = 40 }: { size?: number }) {
   return (
     <ul className="mv-logos" aria-label={`${PLACES.length} Blacksburg spots`}>
       {PLACES.map((p) => (
@@ -152,10 +159,10 @@ function Logos({ size = 40 }: { size?: number }) {
   );
 }
 
-function Benefits({ className = "" }: { className?: string }) {
+export function Benefits({ className = "", they = false }: { className?: string; they?: boolean }) {
   return (
     <ul className={`mv-ben ${className}`}>
-      {BENEFITS.map((b) => (
+      {(they ? BENEFITS_THEY : BENEFITS).map((b) => (
         <li key={b.big}>
           <b className="tnum">{b.big}</b>
           <span>{b.rest}</span>
@@ -165,7 +172,7 @@ function Benefits({ className = "" }: { className?: string }) {
   );
 }
 
-function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
@@ -183,7 +190,7 @@ function Shell({ children }: { children: ReactNode }) {
 /** The pass card. `active`: a member's (Active, Member and their last
  *  four); otherwise the same card without them, which says whose it would
  *  be. */
-function Pass({ active, who, whoLabel }: { active: boolean; who?: string; whoLabel?: string }) {
+export function Pass({ active, who, whoLabel }: { active: boolean; who?: string; whoLabel?: string }) {
   return (
     <section className={active ? "mv-pass" : "mv-pass mv-pass-guest"} aria-label={active ? "Your Tapin Plus membership" : "Tapin Plus Blacksburg"}>
       <img className="mv-pass-art" src={COLLAGE} alt="" decoding="async" />
