@@ -347,7 +347,7 @@ const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
 const WAITLIST_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   {
     q: "Why is Plus invite only?",
-    a: "We’re letting students in a few at a time instead of opening it to everyone at once. Join the waitlist and you’re in line.",
+    a: "Plus comes with real discounts at every place, so we can’t let everyone in at once. We’re letting students in a few at a time to give the places time to adjust. Join the waitlist and you’re in line.",
   },
   {
     q: "How does the waitlist work?",
