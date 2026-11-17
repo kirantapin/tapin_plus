@@ -28,7 +28,9 @@ import { sendCode, verifyCode } from "./authEnv";
 import { clearGiftDraft, getGiftDraft, setGiftDraft, useGiftDraft } from "../model/giftDraft";
 import { dropResume, keepFields, keptFields, keptQuick, keptStep, type ResumeStep } from "../model/checkoutResume";
 import { DEFAULT_NOTE, SCENE_ORDER, giftWho } from "../model/gift";
-import { usePlusPrice } from "../model/plus";
+import { refreshPlusPrice, usePlusPrice } from "../model/plus";
+import { GIFT_TEXTS_RATE, chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
+import { TextsRateBox } from "./TextsRateBox";
 import { ResumeContext, ResumeLine } from "./ResumeLine";
 import { BackArrow } from "./BackArrow";
 import { GiftSentContext } from "./giftSent";
@@ -286,6 +288,16 @@ function Sheet({
   /* The parent's cart (built once they're signed in) and, for the card step,
      the SetupIntent that saves the card for it. */
   const [cart, setCart] = useState<PlusCart | null>(() => saved?.cart ?? null);
+  /* The texts rate on a gift (model/textsRate.ts GIFT_TEXTS_RATE): the
+     parent says yes to Tapin texts at their own number; the gift's cart is
+     built again so it carries the rate. */
+  const [texts, setTexts] = useState(() => GIFT_TEXTS_RATE && textsRateChosen());
+  const pickTexts = (on: boolean) => {
+    setTexts(on);
+    chooseTextsRate(on);
+    setCart(null);
+    refreshPlusPrice();
+  };
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   /* The card is saved: no going back to change details. */
   const [cardSaved, setCardSaved] = useState(() => !!saved);
@@ -640,7 +652,7 @@ function Sheet({
       track("parent_code_sent", { source });
       return null;
     }
-    const err = await verifyCode(to, codeD);
+    const err = await verifyCode(to, codeD, undefined, GIFT_TEXTS_RATE && textsRateOn() ? texts : undefined);
     if (err) throw new Error(err);
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw new Error("We couldn’t sign you in. Please try again.");
@@ -1137,6 +1149,19 @@ function Sheet({
       ),
       true,
     );
+    /* The texts rate, at the parent's own number (model/textsRate.ts
+       GIFT_TEXTS_RATE, off until Kiran confirms the claim keeps it). */
+    const textsTile =
+      GIFT_TEXTS_RATE && textsRateOn() ? (
+        <TextsRateBox
+          checked={texts}
+          price={price}
+          onChange={(on) => {
+            pickTexts(on);
+            if (signedIn) void setTextsConsent(on);
+          }}
+        />
+      ) : null;
     /* The student's consent (it was the end of their number's help, Sam,
        5 Nov 2026), shorter and by the buttons it applies to. Counsel to OK
        the wording and the move (lever-lab/effort/notes.md, D). */
@@ -1162,6 +1187,7 @@ function Sheet({
             ) : null}
             {theirs}
             {yours}
+            {textsTile}
             {walletsShown ? (
               <div className="prc-e-due">
                 {rows}

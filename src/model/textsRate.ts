@@ -66,3 +66,11 @@ export async function setTextsConsent(on: boolean) {
     console.error("Could not save the texts consent", e);
   }
 }
+
+/** The texts rate on a parent's gift (Sam, 16 Nov 2026: "add the texts deal to
+ *  the parents checkout too"). Built, and OFF until Kiran confirms claim_gift
+ *  charges the gift's own cart, forever discount and all: the comment in
+ *  ParentCheckout says "the claim rebuilds it for the student", and if it
+ *  rebuilds with the welcome offer a parent shown $4.99 for life would pay
+ *  $3.99 then $7.99. Flip to true once he does. */
+export const GIFT_TEXTS_RATE = false;
