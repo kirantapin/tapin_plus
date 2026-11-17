@@ -2078,10 +2078,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026). */}
         <Founders />
 
-        {/* The students' words, right above the questions (Sam, 16 Nov
-            2026: "can we have the testimonials right above the FAQ
-            section?"); three across on a computer. */}
-        <Voices audience="student" className={desk ? "tps-voices-desk" : undefined} lead={place?.id} />
 
         <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
@@ -2119,6 +2115,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             </details>
           ))}
         </section>
+
+        {/* The students' words, right under the questions (Sam, 17 Nov
+            2026: "let's have these below the FAQ"; they sat above it from
+            16 Nov); three across on a computer. */}
+        <Voices audience="student" className={desk ? "tps-voices-desk" : undefined} lead={place?.id} />
 
         <section className="tpa-close" aria-label={joinLabel}>
           <img className="tpa-close-paper" src={PAPER_MARK} alt="" width="96" height="76" decoding="async" loading="lazy" />
