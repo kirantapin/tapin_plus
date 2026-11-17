@@ -79,4 +79,11 @@ export const WAITLIST_CTA = "Join the waitlist";
    Kiran's query (auth.users with waitlist_at) when it changes, never by a
    schedule. A made-up count of people would be fake social proof. */
 export const WAITLIST_COUNT: number = 13;
-export const waitlistCountLine = (): string => `${WAITLIST_COUNT} ${WAITLIST_COUNT === 1 ? "student" : "students"} on the waitlist`;
+/* Shown only once it's big enough to be proof (Sam, 17 Nov 2026: "is it best
+   to show or hide wait list count? ... use your best judgement"). A small
+   count says few people want in, the opposite of the point, and the page
+   already says 500+ students are in. Long waitlists that show a number
+   (Robinhood's, Superhuman's) show a big one. Under 100 the line is null. */
+export const WAITLIST_COUNT_SHOWN_FROM = 100;
+export const waitlistCountLine = (): string | null =>
+  WAITLIST_COUNT >= WAITLIST_COUNT_SHOWN_FROM ? `${WAITLIST_COUNT} students on the waitlist` : null;

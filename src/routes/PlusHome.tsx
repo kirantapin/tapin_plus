@@ -1830,7 +1830,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
              to get in. No price: there's nothing to buy here. */
           <section className="tpa-module tpa-offer tpu-wl-card" aria-labelledby="tpu-wl-h">
             <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
-            <p className="tpa-member-kicker">Invite only · {waitlistCountLine()}</p>
+            <p className="tpa-member-kicker">{waitlistCountLine() ? `Invite only · ${waitlistCountLine()}` : "Invite only"}</p>
             <h2 id="tpu-wl-h" className="tpa-h2">
               {listed ? "You’re on the list" : "All Tapin Plus seats are gone"}
             </h2>
@@ -2246,7 +2246,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {wait ? (
           <p className="tpu-promise tpu-promise-dock tpu-wl-dock">
             <i className="tpa-pbar-dot" aria-hidden="true" />
-            <span>{listed ? "You’re on the list" : `Invite only · ${waitlistCountLine()}`}</span>
+            <span>{listed ? "You’re on the list" : `Invite only · ${waitlistCountLine() ?? "spots open a few at a time"}`}</span>
           </p>
         ) : audit && !(group && dockLead.length) ? <AuditPromise className="tpu-promise-dock" /> : <ProofTurn
           /* Starts again on the lead once it arrives with the price, so a
