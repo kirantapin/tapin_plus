@@ -497,7 +497,11 @@ export function OfferVersion({
   return (
     <div className="ov ov-c" data-ph-show="">
       <PayGet first={first} monthly={monthly} term={term} forever={forever} />
-      {lower ? null : <LockedIn monthly={forever ? first : monthly} />}
+      {/* The "New Blacksburg favorites are joining" band went everywhere
+          (Sam, 16 Nov 2026, of /vip: "this looks old by the way - I thought
+          we deprecated this"). The main page's Count (?lowv=3) replaced it on
+          11 Nov; place and group pages still drew it. The parents page keeps
+          its own LockedIn. */}
       {/* A promo link's own price (a group's year at $3.99) has no end
           date: the November 30 clock is the welcome offer's. */}
       {term || noEnds || lower ? null : <Ends />}
