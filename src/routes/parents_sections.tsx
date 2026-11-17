@@ -216,7 +216,7 @@ export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
    the holiday price the old card carried: $MONTHLY locked in, $14.99 for new
    gifts from January 1, the days left. After the year turns, the two rows
    alone. */
-export function PayGetLead({ lower = false }: { lower?: boolean }) {
+export function PayGetLead({ lower = false, held = false }: { lower?: boolean; held?: boolean }) {
   const { FIRST, MONTHLY } = useParentPrice();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -228,7 +228,7 @@ export function PayGetLead({ lower = false }: { lower?: boolean }) {
   const when = left <= 0 ? null : days < 1 ? "ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
   return (
     <div className="ov ov-c" data-ph-show="">
-      <PayGet first={FIRST} monthly={MONTHLY} they />
+      <PayGet first={FIRST} monthly={MONTHLY} they hidden={held} />
       {/* With Count under it (ParentsCount), pay/get alone here. */}
       {lower ? null : <LockedIn monthly={MONTHLY} they />}
       {when && !lower ? (
@@ -261,7 +261,9 @@ export const AFTER_HOLIDAY = 14.99;
    the text before each bill) folds into the line. ?lowv=0 shows the old
    card, as on the students page. */
 const HOLIDAY_FROM = Date.parse("2026-11-09T00:00:00-05:00");
-export function ParentsCount({ join }: { join: ReactNode }) {
+/** `held`: the price after their number (model/priceGate.ts, Sam, 16 Nov
+ *  2026: "now hide the price on the parents page too"). */
+export function ParentsCount({ join, held = false }: { join: ReactNode; held?: boolean }) {
   const { MONTHLY } = useParentPrice();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -279,9 +281,9 @@ export function ParentsCount({ join }: { join: ReactNode }) {
             {days >= 1 ? <b>{days}</b> : null}
             <p>
               <span>
-                {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"} at {MONTHLY}&nbsp;a&nbsp;month
+                {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"} {held ? "at the holiday price" : <>at {MONTHLY}&nbsp;a&nbsp;month</>}
               </span>
-              <small>then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</small>
+              <small>{held ? <>then the price goes up for new gifts from January&nbsp;1</> : <>then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</>}</small>
             </p>
           </div>
           <span className="lw-bar" aria-hidden="true">
@@ -299,7 +301,7 @@ export function ParentsCount({ join }: { join: ReactNode }) {
         </summary>
         <ul className="tnum">
           <li>
-            <b>{MONTHLY} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
+            <b>{held ? "Their price, locked in" : `${MONTHLY} a month, locked in`}</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
           </li>
           {/* Automatic since 16 Nov 2026, as on the student page. */}
           <li>
@@ -616,12 +618,17 @@ export function LunchBars() {
    step's glyph, its timer and the gift's small marks, money green on the
    savings. Four steps since 7 Nov: the last is how to cancel, and that an
    unclaimed gift expires uncharged (the gift backend, 8 Nov 2026). */
-const parentSteps = (first: string): Array<{ glyph: string; when: string; title: string; line: ReactNode }> => [
+const parentSteps = (first: string, held = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> => [
   {
     glyph: GLYPHS.card,
     when: "Today",
     title: "You add their number",
-    line: <>Enter your student’s mobile number and add your card: {first} for the first month.</>,
+    line: held ? (
+      /* The price after their number (model/priceGate.ts). */
+      <>Enter your student’s mobile number to see the price, then add your card for the first month.</>
+    ) : (
+      <>Enter your student’s mobile number and add your card: {first} for the first month.</>
+    ),
   },
   {
     glyph: GLYPHS.text,
@@ -799,7 +806,7 @@ export function HowPhone({
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month", held) : parentSteps(first);
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month", held) : parentSteps(first, held);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -1139,7 +1146,7 @@ export function HowPhone({
                   <b>Tapin</b>
                 </div>
                 <p className="tpp-hw-em-body tpp-hw-bubble tnum">
-                  {SAMPLE_GIFT.to}’s Tapin Plus renews soon at {MONTHLY}. Want to cancel? Just reply to this text.
+                  {SAMPLE_GIFT.to}’s Tapin Plus renews soon{held ? "" : ` at ${MONTHLY}`}. Want to cancel? Just reply to this text.
                 </p>
               </div>
                 </>

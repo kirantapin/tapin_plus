@@ -65,7 +65,13 @@ export function PayGet({
             <LockIco />
           </b>
           <small>
-            Shows when you add your number. Say yes to Tapin texts and unlock <strong>{TEXTS_TEASER}</strong>.
+            {they ? (
+              "Shows when you add their number."
+            ) : (
+              <>
+                Shows when you add your number. Say yes to Tapin texts and unlock <strong>{TEXTS_TEASER}</strong>.
+              </>
+            )}
           </small>
         </div>
       ) : (
