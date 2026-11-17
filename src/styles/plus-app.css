@@ -9509,3 +9509,52 @@ button.tpu-plate:active {
 .tpa-sheet > .hk {
   margin: 20px var(--gutter) 4px;
 }
+
+/* ══ TEXT ON A PHONE, A STEP UP (Sam, 17 Nov 2026: "the browser pane looks
+   great, but on a mobile phone some of these components are too small") ══
+   Gilroy runs small for its size, and the 13–14px lines that read fine in a
+   desktop window read tiny held at arm's length. On a phone nothing a person
+   reads is under 15px now, and the legal lines under 14. The phone mock
+   inside "What $5 credit looks like" keeps its app-sized type. The root's
+   surface attribute lifts these over the rules they replace. */
+@media (max-width: 1023.98px) {
+  html[data-surface="tpa"] .tpa-pbar-short,
+  html[data-surface="tpa"] .tpa-badge,
+  html[data-surface="tpa"] .tpa-signin,
+  html[data-surface="tpa"] .tpa-tag,
+  html[data-surface="tpa"] .tpa-places .tpa-place-words small:not(.tpa-place-perk),
+  html[data-surface="tpa"] .tpa-member-kicker,
+  html[data-surface="tpa"] .tpa-account,
+  html[data-surface="tpa"] .tpa-account :is(a, button, span),
+  html[data-surface="tpa"] .tln-foot span {
+    font-size: 15px;
+  }
+  html[data-surface="tpa"] .tpa-dock .tpu-promise-dock {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  html[data-surface="tpa"] .hk b {
+    font-size: 17px;
+    line-height: 22px;
+  }
+  html[data-surface="tpa"] .hk span {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  html[data-surface="tpa"] .tpa-foot p,
+  html[data-surface="tpa"] .tpa-links a {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  /* The join sheet. */
+  html[data-surface="tpa"] .pck-sheet .pck-price,
+  html[data-surface="tpa"] .pck-sheet .plus-seats-line :is(b, span) {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  html[data-surface="tpa"] .pck-sheet .pck-fine,
+  html[data-surface="tpa"] .pck-sheet .pck-town {
+    font-size: 14px;
+    line-height: 19px;
+  }
+}

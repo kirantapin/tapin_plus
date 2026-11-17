@@ -354,3 +354,18 @@
     transition: none;
   }
 }
+
+/* Text on a phone, a step up (17 Nov 2026, as plus-app.css says why). */
+@media (max-width: 1023.98px) {
+  .mv-pass-who {
+    font-size: 14px;
+  }
+  .mv-foot {
+    font-size: 15px;
+    line-height: 21px;
+  }
+  .mv-fine {
+    font-size: 14px;
+    line-height: 19px;
+  }
+}
