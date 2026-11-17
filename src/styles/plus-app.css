@@ -9348,3 +9348,62 @@ a.tpu-plate:active {
     line-height: 18px;
   }
 }
+
+/* ══ INVITE ONLY: THE WAITLIST (17 Nov 2026, model/waitlist.ts) ══════════════
+   The offer card's place: the paper mark, Invite only in the money green,
+   the heading, one paragraph, the button, and a quiet link to /parents. The
+   header and the dock keep their own looks with the words changed. */
+.tpu-wl-card .tpa-member-kicker {
+  margin-top: 4px;
+}
+.tpu-wl-card .tpa-h2 {
+  margin-top: 6px;
+}
+.tpu-wl-copy {
+  margin: 8px 0 18px;
+  max-width: 34ch;
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: #4b4f55;
+  text-wrap: pretty;
+}
+.tpu-wl-parent {
+  display: block;
+  margin-top: 14px;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-align: center;
+}
+.tpa-dock .tpu-wl-dock .tpa-pbar-dot {
+  margin: 0 2px 0 0;
+  background: #0b7a53;
+}
+
+/* What and where can I use it?, on a phone: what you get first, then where
+   (Sam, 17 Nov 2026: "can we invert this on mobile? So the benefits show up
+   before the locations"). The rungs under the heading, the places row under
+   the rungs; a computer keeps the row first. The parents card too. */
+@media (max-width: 1023px) {
+  .tps-ladder-rail {
+    display: flex;
+    flex-direction: column;
+  }
+  .tps-ladder-rail > ol {
+    order: 1;
+    margin-top: 0;
+  }
+  .tps-ladder-rail > .tpw-b {
+    order: 2;
+    margin-top: 18px;
+    padding-top: 18px;
+    box-shadow: inset 0 1px 0 var(--hair);
+  }
+  .tps-ladder-rail .tpw-b + ol {
+    margin-top: 0;
+  }
+  .tps-ladder-rail .tpw-b .tpa-rail-bar {
+    margin-top: 0;
+  }
+}

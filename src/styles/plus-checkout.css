@@ -250,7 +250,10 @@
 /* Three bars, no labels: how short the way is, at a glance. */
 .pck-steps {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* As many bars as steps, the full width: three to join, two for the
+     waitlist (17 Nov 2026). */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 6px;
   margin: 16px 0 0;
   padding: 0;

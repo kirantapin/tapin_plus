@@ -23,7 +23,8 @@ import { inviteExpected, inviteFor, type Invite } from "../model/invite";
 import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
-import { openPlusCheckout, usePlusCheckoutOpen } from "../shell/PlusCheckout";
+import { openPlusCheckout, openPlusWaitlist, usePlusCheckoutOpen } from "../shell/PlusCheckout";
+import { WAITLIST_CTA, joinedThisVisit, onWaitlist, setWaitlistPage, waitlistOn } from "../model/waitlist";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
@@ -339,6 +340,23 @@ const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
     a: "Use at least one Tapin benefit each month. If Plus saves you less than you paid for the membership that month, we refund the difference automatically. You don’t have to ask.",
   },
   { q: "How do I cancel?", a: "Cancel anytime in the Tapin app." },
+];
+
+/* The waitlist's questions (model/waitlist.ts), first while Plus is invite
+   only. Only what's true of the list: no wait times promised. */
+const WAITLIST_FAQ: ReadonlyArray<{ q: string; a: string }> = [
+  {
+    q: "Why is Plus invite only?",
+    a: "We’re letting students in a few at a time instead of opening it to everyone at once. Join the waitlist and you’re in line.",
+  },
+  {
+    q: "How does the waitlist work?",
+    a: "Add your number and you’re in line. When a spot opens, we text you a link to join. You have 48 hours to claim it, then it goes to the next person.",
+  },
+  {
+    q: "Can I get in sooner?",
+    a: "A parent can gift you Plus at plus.tapin.app/parents. Gifts don’t wait on the list.",
+  },
 ];
 
 const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: string }> => [
@@ -930,6 +948,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   /* `from` is the button tapped, which grows into the checkout. */
   /* `from` is the button tapped; `over`, a Join inside another pop-up. */
   const join = (where: string, from?: HTMLElement | null, over = false) => {
+    /* Invite only (model/waitlist.ts): every Join puts them on the list. */
+    if (wait) {
+      track("plus_waitlist_clicked", { where });
+      openPlusWaitlist(where, from, { over });
+      return;
+    }
     track("plus_join_clicked", { where });
     openPlusCheckout(where, from, { over });
   };
@@ -969,6 +993,17 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   useEffect(() => {
     if (saleEnded && price?.policyId) refreshPlusPrice();
   }, [saleEnded, price?.policyId]);
+  /* INVITE ONLY (Sam, 17 Nov 2026, model/waitlist.ts): every student page
+     takes waitlist joins instead of selling, except for an invite, a promo
+     link texted to someone on the list. A group page puts its own link in
+     the address, so its own link isn't an invite. */
+  const invitedVisit = price ? !!price.linkId && !(group?.linkId && price.linkId === group.linkId) : !!expected && !group?.linkId;
+  /* /vip keeps selling until its texted deadline, 11:59pm ET Tue 1 Dec
+     (Sam, 17 Nov 2026: "keep vip open until dec 1"), then waits too. */
+  const vipOpen = group?.id === "vip" && !saleEnded;
+  const wait = waitlistOn() && !member && !invitedVisit && !vipOpen;
+  setWaitlistPage(wait);
+  const listed = wait && (onWaitlist(userSession?.user?.user_metadata as Record<string, unknown> | undefined) || joinedThisVisit());
   const groupSeats = useGroupSeats(group);
   const gTerm = group ? groupTerm(group) : null;
   const TERM = firstTerm(price);
@@ -982,7 +1017,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      a promo link or an invitation, whose offers are their own. */
   const welcomeLead = useWelcomeLead(FIRST_MONTH);
   const seatsLeft = usePlusSeats();
-  const dockLead = groupOffer && group
+  const dockLead = wait
+    ? []
+    : groupOffer && group
     ? [
         {
           key: "group",
@@ -1085,7 +1122,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       Get the Tapin app
     </a>
   );
-  const joinLabel = invite && free ? "Try Plus for free" : "Join Tapin Plus";
+  const joinLabel = wait ? (listed ? "You’re on the list" : WAITLIST_CTA) : invite && free ? "Try Plus for free" : "Join Tapin Plus";
   /* The Welcome Week headline test (model/wwHeroTest.ts): drawn only once
      the invitation applies, so nobody else is put in it, and every event of
      the session carries the variant from then on. */
@@ -1150,7 +1187,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   /* The texts rate, chosen (model/textsRate.ts): $4.99 for life against the
      monthly, struck. */
   const textsOn = auditHome && !linked && textsRateChosen() && firstForever(price);
-  setPriceHidden(hidePrice);
+  setPriceHidden(hidePrice || wait);
   /* Real students on video under the header, preview only (?ugc). */
   const [ugc] = useState(ugcOn);
   /* THE MAIN PAGE, WITH WHAT THE PARENTS PAGE TAUGHT US (Sam, 8 Nov 2026:
@@ -1385,7 +1422,14 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       {/* Members get the same bar, with their own line, so the header above
           is the same card signed in or out (Sam, 10 Nov 2026: "the page
           header looks different when signed in??"). */}
-      {groupOffer && group ? (
+      {wait ? (
+        /* Invite only, said first (model/waitlist.ts). */
+        <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus is invite only">
+          <i className="tpa-pbar-dot" aria-hidden="true" />
+          <span className="tpa-pbar-long">Tapin Plus is invite only. 500+ Virginia Tech students are in.</span>
+          <span className="tpa-pbar-short">Plus is invite only now</span>
+        </aside>
+      ) : groupOffer && group ? (
         <GroupBar group={group} line={`${FIRST_MONTH} ${gTerm?.long}`} short={`${FIRST_MONTH}${gTerm?.short}`} />
       ) : linked && !member ? (
         <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
@@ -1404,10 +1448,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       )}
       <header
         ref={bandRef}
-        className={`tpa-band${auditHome || memberHome ? " tpu-band" : ""}`}
+        className={`tpa-band${auditHome || memberHome || (wait && !place && !group) ? " tpu-band" : ""}`}
         data-group={group?.id}
         data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
-        data-invite={invite && !place ? "" : undefined}
+        data-invite={invite && !place && !wait ? "" : undefined}
       >
         {/* The group's own crop is for its own photo, not the collage. */}
         <img
@@ -1440,7 +1484,39 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 "a" names the places and says the price and the Promise
                 (Grok's audit, 3 Nov 2026); "b" leads with the payoff. A
                 place's own page keeps its own. */}
-            {invite && !place ? (
+            {wait ? (
+              /* INVITE ONLY (model/waitlist.ts): the news as the headline,
+                 what Plus is under it, then the one way in. The same
+                 header on every student page. */
+              <>
+                <h1 className="tpu-h1">Tapin Plus is invite only&nbsp;now</h1>
+                <p className="tpu-sub">
+                  {place ? (
+                    <>${CREDIT} credit every month at {place.name} and {PLACES.length - 1} more Blacksburg spots, plus {PERCENT}% off. Join the waitlist to get&nbsp;in.</>
+                  ) : (
+                    <>${CREDIT} credit at {PLACES.length} Blacksburg spots, every week. Join the waitlist to get&nbsp;in.</>
+                  )}
+                </p>
+                <HokieLine dark />
+                <div className="tpu-act">
+                  {desk ? (
+                    <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
+                      {joinLabel}
+                    </button>
+                  ) : null}
+                  <div className="tpu-terms">
+                    <p>
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4.5 6.5A2.5 2.5 0 0 1 7 4h10a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 17 16h-6.5L6 19.5V16h0a2.5 2.5 0 0 1-1.5-2.3Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+                      </svg>
+                      <span>
+                      {listed ? "You’re on the list. We’ll text you when your spot opens." : "Spots open a few at a time. We text you when yours does."}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : invite && !place ? (
               /* The invitation, then what it gets you (Sam, 5 Nov 2026:
                  "the welcome week logo somewhere, tied to the offer"), as a
                  sticker and a paper strip (shell/InviteHero.tsx). */
@@ -1609,7 +1685,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 promo link), so it isn't said twice. */}
             {/* Not on a group's page: its bar and header already carry its offer,
                 and one line fewer there. */}
-            {(invite && !place) || member || !linked || groupOffer ? null : <SocialProof text={MEMBERS_LINE} />}
+            {wait || (invite && !place) || member || !linked || groupOffer ? null : <SocialProof text={MEMBERS_LINE} />}
           </div>
         </div>
       </header>
@@ -1710,7 +1786,26 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
               the most a month holds.
             3 · Poster: the collage band with the line set over it, the way
               the page's own header is, and the offer under it. */}
-        {offer === "1" ? (
+        {wait ? (
+          /* INVITE ONLY (model/waitlist.ts): in the offer card's place, how
+             to get in. No price: there's nothing to buy here. */
+          <section className="tpa-module tpa-offer tpu-wl-card" aria-labelledby="tpu-wl-h">
+            <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
+            <p className="tpa-member-kicker">Invite only</p>
+            <h2 id="tpu-wl-h" className="tpa-h2">
+              {listed ? "You’re on the list" : "Get on the list"}
+            </h2>
+            <p className="tpu-wl-copy">
+              {listed
+                ? "When your spot opens, we text you a link. You’ll have 48 hours to claim it."
+                : "Spots open a few at a time. When yours does, we text you a link, and you have 48 hours to claim it."}
+            </p>
+            {joinCta("hero")}
+            <a className="tpu-wl-parent" href="/parents" onClick={() => track("plus_waitlist_parent_clicked", { where: "offer" })}>
+              Want in sooner? A parent can gift you Plus
+            </a>
+          </section>
+        ) : offer === "1" ? (
           <section className="tpa-module tpa-offer tpa-s1" aria-label="Tapin Plus">
             <h2 className="tpa-s1-h">Your first ${MIN_ORDER} order covers&nbsp;it.</h2>
             <div className="tpa-s1-art">
@@ -1952,7 +2047,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           <h2 id="tpa-steps" className="tpa-h2">
             How it works
           </h2>
-          <HowPhone audience="student" held={hidePrice} first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
+          <HowPhone audience="student" held={hidePrice || wait} first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
 
         {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
@@ -1977,7 +2072,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           <h2 id="tpa-faq" className="tpa-h2">
             Questions
           </h2>
-          {[
+          {(wait
+            ? [...WAITLIST_FAQ, ...faqFor(MONTHLY, true)]
+            : [
             ...(invite ? inviteFaq(invite, MONTHLY) : []),
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
             ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY, hidePrice))
@@ -1992,7 +2089,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   ? { q: f.q, a: `No. Join here and you pay ${FIRST_MONTH} a month for as long as you stay a member, even as more places join. Cancel anytime in the Tapin app.` }
                   : f,
             ),
-          ].map((f) => (
+          ]).map((f) => (
             <details key={f.q} className="tpa-qa">
               <summary>
                 <span>{f.q}</span>
@@ -2014,6 +2111,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             <>
               <h2 className="tpa-close-h">Your Plus is in the app</h2>
               <p className="tpa-close-line">Order, see your credit and manage your membership there.</p>
+            </>
+          ) : wait ? (
+            <>
+              <h2 className="tpa-close-h">{listed ? "You’re on the list" : "Get on the list"}</h2>
+              <p className="tpa-close-line">Tapin Plus is invite only. Spots open a few at a time, and we text you when yours does.</p>
             </>
           ) : (
             <>
@@ -2060,7 +2162,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         </footer>
       </main>
 
-      {trial ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
+      {trial && !wait ? <TrialModal lit onClose={() => setTrial(false)} /> : null}
       {placeOpen ? (
         <PlacePopup
           place={placeOpen}
@@ -2095,7 +2197,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             (Sam, 15 Nov 2026: "what we have here should just be the 'auto
             refund if you don't save what you pay'"). */}
         {/* A group's own lead line (a sale's clock) keeps the turn. */}
-        {audit && !(group && dockLead.length) ? <AuditPromise className="tpu-promise-dock" /> : <ProofTurn
+        {wait ? (
+          <p className="tpu-promise tpu-promise-dock tpu-wl-dock">
+            <i className="tpa-pbar-dot" aria-hidden="true" />
+            <span>{listed ? "You’re on the list" : "Invite only · spots open a few at a time"}</span>
+          </p>
+        ) : audit && !(group && dockLead.length) ? <AuditPromise className="tpu-promise-dock" /> : <ProofTurn
           /* Starts again on the lead once it arrives with the price, so a
              group's own line (a sale's clock) is the one on screen. */
           key={dockLead[0]?.key ?? "none"}

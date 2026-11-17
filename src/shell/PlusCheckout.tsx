@@ -15,6 +15,7 @@ import { sendCode, verifyCode } from "./authEnv";
 import { PlaceSeats, PlusSeats } from "./PlusSeats";
 import { chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
+import { joinWaitlist, joinedThisVisit, onWaitlist } from "../model/waitlist";
 import { priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { pagePolicy, pagePolicyPlace } from "../model/pagePolicy";
@@ -37,7 +38,7 @@ import { lockScroll } from "./scrollLock";
 /* ── The one open sheet, as a tiny store ─────────────────────────────────── */
 /* `from`: the Join that was tapped. `opener`: what had focus, to go back to.
    `over`: another pop-up's backdrop is up and hands over to this one. */
-type Open = { where: string; mode: "join" | "signin"; from?: HTMLElement | null; opener?: HTMLElement | null; over?: boolean };
+type Open = { where: string; mode: "join" | "signin" | "waitlist"; from?: HTMLElement | null; opener?: HTMLElement | null; over?: boolean };
 let openFrom: Open | null = null;
 const listeners = new Set<() => void>();
 const set = (next: Open | null) => {
@@ -92,6 +93,11 @@ export const openPlusCheckout = (where: string, from?: HTMLElement | null, opts?
  *  on this page"). A member's page then shows Get the app. */
 export const openPlusSignIn = (where: string) => set({ where, mode: "signin", opener: focused() });
 
+/** Opens the same island to join the waitlist (model/waitlist.ts): the
+ *  number, the code, then they're on the list. Nothing is charged. */
+export const openPlusWaitlist = (where: string, from?: HTMLElement | null, opts?: { over?: boolean }) =>
+  set({ where, mode: "waitlist", from, opener: focused() ?? from ?? null, over: !!opts?.over });
+
 /** Mounted once near the root. */
 export function PlusCheckoutMount() {
   const open = useSyncExternalStore(subscribe, () => openFrom);
@@ -103,6 +109,7 @@ export function PlusCheckoutMount() {
       opener={open.opener}
       over={open.over}
       signInOnly={open.mode === "signin"}
+      waitlist={open.mode === "waitlist"}
       onClose={() => set(null)}
     />
   ) : null;
@@ -131,6 +138,7 @@ function PlusCheckoutSheet({
   opener,
   over = false,
   signInOnly = false,
+  waitlist = false,
   onClose,
 }: {
   where: string;
@@ -138,6 +146,7 @@ function PlusCheckoutSheet({
   opener?: HTMLElement | null;
   over?: boolean;
   signInOnly?: boolean;
+  waitlist?: boolean;
   onClose: () => void;
 }) {
   const { userSession, accessToken, subscribed } = useAuth();
@@ -251,7 +260,7 @@ function PlusCheckoutSheet({
   }, []);
 
   useEffect(() => {
-    track(signInOnly ? "plus_signin_opened" : "checkout_opened", { where });
+    track(signInOnly ? "plus_signin_opened" : waitlist ? "plus_waitlist_opened" : "checkout_opened", { where });
     /* The field first (it also autofocuses), else the dialog. */
     const node = sheet.current;
     if (node && !node.contains(document.activeElement))
@@ -305,8 +314,59 @@ function PlusCheckoutSheet({
   /* Local dev only (stripped from builds): ?pckpreview=done shows the screen
      after paying, without signing in or paying. */
   const preview = import.meta.env.DEV && typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("pckpreview") : null;
-  const body =
-    preview === "done" || (preview === "pay" && paid) ? (
+  /* ── The waitlist (model/waitlist.ts) ── Signed in and not a member, they
+     go on the list as soon as the sheet knows who they are: the number and
+     the code were the asking. `?pckpreview=listed` shows the end on local
+     dev, without signing in. */
+  const meta = userSession?.user?.user_metadata as Record<string, unknown> | undefined;
+  const already = onWaitlist(meta) || joinedThisVisit();
+  const [listed, setListed] = useState(false);
+  const [joinErr, setJoinErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    if (!waitlist || !signedIn || subscribed !== false || already || listed) return;
+    let live = true;
+    setJoinErr(null);
+    const page = typeof window !== "undefined" ? window.location.pathname : "/";
+    void joinWaitlist(where, page).then((err) => {
+      if (!live) return;
+      if (err) {
+        setJoinErr(err);
+        track("plus_waitlist_failed", { where });
+      } else {
+        setListed(true);
+        /* Mirrored to Meta as a Lead (context/meta_pixel.ts). */
+        track("plus_waitlist_joined", { where, page });
+      }
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waitlist, signedIn, subscribed, already, listed, retry]);
+  const onList = waitlist && (preview === "listed" || ((listed || already) && subscribed !== true));
+  const body = waitlist ? (
+    onList ? (
+      <WaitlistDone />
+    ) : userSession === undefined ? null : !signedIn ? (
+      <SignIn onStage={setSignInStage} waitlist />
+    ) : subscribed === true ? (
+      <Done />
+    ) : joinErr ? (
+      <div className="pck-body">
+        <p className="pck-error" role="alert">
+          {joinErr}
+        </p>
+        <button type="button" className="pck-cta" onClick={() => setRetry((n) => n + 1)}>
+          Try again
+        </button>
+      </div>
+    ) : (
+      <div className="pck-body">
+        <p className="pck-lede">Adding you to the list…</p>
+      </div>
+    )
+  ) : preview === "done" || (preview === "pay" && paid) ? (
       <Done texted />
     ) : preview === "pay" ? (
       /* The stand-in Pay goes on to the done screen, so the preview walks
@@ -326,13 +386,13 @@ function PlusCheckoutSheet({
      view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
      design). */
   /* Signing in only never turns into the member screen as it closes. */
-  const done = !signInOnly && (preview === "done" || !!paid || subscribed === true);
+  const done = waitlist ? onList || (signedIn && subscribed === true) : !signInOnly && (preview === "done" || !!paid || subscribed === true);
   const step = done ? 4 : preview === "pay" ? 3 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
   /* Once joined, the header is the moment: a tick that draws itself and
      "You're in" (or, for someone who already was, "You're a member"), in
      place of "Join Tapin Plus" and a price that no longer applies (Sam, 3 Nov
      2026: polish the post-purchase screen). */
-  const doneTitle = paid || preview === "done" ? "You’re in" : "You’re a member";
+  const doneTitle = onList ? "You’re on the list" : paid || preview === "done" ? "You’re in" : "You’re a member";
   const tick = useRef<SVGPathElement | null>(null);
   /* "You're in" gets focus, so a screen reader says it. */
   useEffect(() => {
@@ -368,8 +428,15 @@ function PlusCheckoutSheet({
                 <h2 id="pck-title" className="pck-title" tabIndex={-1}>
                   {doneTitle}
                 </h2>
-                <p className="pck-price">Your Tapin Plus membership is active.</p>
+                <p className="pck-price">{onList ? "We’ll text you when your spot opens." : "Your Tapin Plus membership is active."}</p>
               </div>
+            </div>
+          ) : waitlist ? (
+            <div className="pck-head">
+              <h2 id="pck-title" className="pck-title">
+                Join the waitlist <span className="pck-town">Blacksburg</span>
+              </h2>
+              <p className="pck-price">Tapin Plus is invite only now.</p>
             </div>
           ) : signInOnly ? (
             <div className="pck-head">
@@ -401,8 +468,8 @@ function PlusCheckoutSheet({
           </button>
         </div>
         {step < 4 && !signInOnly ? (
-          <ol className="pck-steps" aria-label={`Step ${step} of 3`}>
-            {["Phone", "Code", "Pay"].map((label, k) => (
+          <ol className="pck-steps" aria-label={`Step ${step} of ${waitlist ? 2 : 3}`}>
+            {(waitlist ? ["Phone", "Code"] : ["Phone", "Code", "Pay"]).map((label, k) => (
               <li key={label} data-on={k + 1 <= step ? "" : undefined} aria-current={k + 1 === step ? "step" : undefined}>
                 <span className="pck-sr">{label}</span>
               </li>
@@ -448,7 +515,7 @@ const formatPhone = (d: string) =>
 const RESEND_S = 30;
 
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
-function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code") => void; plain?: boolean }) {
+function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage: "phone" | "code") => void; plain?: boolean; waitlist?: boolean }) {
   const price = usePlusPrice();
   const { track } = useEventTracking();
   const look = signInLook();
@@ -530,7 +597,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     setBusy(true);
     setError(null);
     // On success the session lands in auth_context and the sheet moves on.
-    const err = await verifyCode(phone, value, undefined, optIn);
+    const err = await verifyCode(phone, value, undefined, waitlist || optIn);
     verifying.current = false;
     setBusy(false);
     if (err) {
@@ -555,7 +622,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
       if (!ok) return;
       /* Each step of the sheet, so a drop-off shows where it happened
          (Grok's audit, 3 Nov 2026). */
-      track("plus_phone_submitted", { opt_in: optIn, sign_in_only: plain, look });
+      track("plus_phone_submitted", { opt_in: waitlist || optIn, sign_in_only: plain, waitlist, look });
       setWait(RESEND_S);
       setStage("code");
       return;
@@ -717,14 +784,43 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   );
   const sendBtn = (
     <button type="submit" className="pck-cta" disabled={busy} aria-disabled={digits.length !== 10 || undefined}>
-      {busy ? "Sending…" : better ? "Continue" : "Send code"}
+      {busy ? "Sending…" : waitlist ? "Join the waitlist" : better ? "Continue" : "Send code"}
     </button>
+  );
+  /* The waitlist's phone step: the join sheet as it is, with its words
+     changed (Sam, 17 Nov 2026: "it could be the same sheet as what we have
+     currently, just the copy changes"). The spots panel says how the list
+     works; the consent the list needs is said before the number. Being
+     texted when a spot opens IS the waitlist, so that consent goes with
+     joining it. It is never a condition of buying anything (TCPA), and
+     nothing is bought here. */
+  const listWhy = (
+    <div className="pck-why">
+      <div className="plus-seats pck-seats">
+        <p className="plus-seats-line">
+          <b>Invite only. Spots open a few at a time.</b>
+          <span>We text you when yours does</span>
+        </p>
+      </div>
+    </div>
+  );
+  const listConsent = (
+    <p className="pck-fine">
+      By joining, you agree to get automated texts from Tapin about your spot and Tapin Plus at this number, starting with a sign-in code. Not a condition of any purchase. Msg &amp; data rates may apply. Reply STOP to opt out.
+    </p>
   );
 
   return (
     <form className={`pck-body pck-look-${look}`} onSubmit={submit}>
       {stage === "phone" ? (
-        plain ? (
+        waitlist ? (
+          <>
+            {listWhy}
+            {listConsent}
+            {field}
+            {sendBtn}
+          </>
+        ) : plain ? (
           <>
             {/* The number right above the button, as on the join step. */}
             {consent}
@@ -775,7 +871,7 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
               </>
             ) : (
               <>
-                We sent a 6-digit code to +1 {digits}.{plain ? "" : " Then it’s one tap with Apple Pay or Google Pay."}
+                We sent a 6-digit code to +1 {digits}.{plain ? "" : waitlist ? " Then you’re on the list." : " Then it’s one tap with Apple Pay or Google Pay."}
               </>
             )}
           </p>
@@ -1181,6 +1277,27 @@ function PhoneGlyph() {
       <rect x="7" y="3" width="10" height="18" rx="2.6" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <path d="M10.5 17.5h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
+  );
+}
+
+/* On the list: the done screen's plate, then the one way in sooner that is
+   real, a parent's gift (/parents still sells; Sam, 17 Nov 2026). */
+function WaitlistDone() {
+  const { track } = useEventTracking();
+  return (
+    <div className="pck-body pck-done-body" role="status">
+      <div className="pck-why">
+        <div className="plus-seats pck-seats">
+          <p className="plus-seats-line">
+            <b>You’ll have 48 hours to claim it</b>
+            <span>We text a link to this number</span>
+          </p>
+        </div>
+      </div>
+      <a className="pck-manage" href="/parents" onClick={() => track("plus_waitlist_parent_clicked", {})}>
+        Want in sooner? A parent can gift you Plus
+      </a>
+    </div>
   );
 }
 
