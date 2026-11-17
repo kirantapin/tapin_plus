@@ -7902,16 +7902,19 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .ss-bar > i:last-of-type {
   border-radius: 0 999px 999px 0;
 }
-[data-k="credit"] {
+/* The slider's bar and key swatches only (the <i>s): unscoped, these filled
+   the gift page's "$5 credit" and "15% off" words with the bar colours
+   (Sam, 16 Nov 2026, on /parents: "what's going on here?"). */
+i[data-k="credit"] {
   background: #0b4f37;
 }
-[data-k="back"] {
+i[data-k="back"] {
   background: #0b7a53;
 }
-[data-k="pct"] {
+i[data-k="pct"] {
   background: #46a97c;
 }
-[data-k="pts"] {
+i[data-k="pts"] {
   background: #a6dbc0;
 }
 /* Plus's price, as a hairline standing above the bar with its label. */
