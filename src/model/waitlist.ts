@@ -46,13 +46,23 @@ export const joinedThisVisit = (): boolean => {
  *  come first served by that time. Joining is asking to be texted when a spot
  *  opens, and the join sheet says so before the number, so the texts consent
  *  is recorded with it. Resolves to an error string, or null. */
-export async function joinWaitlist(where: string, page: string): Promise<string | null> {
+export type JoinFailure = { message: string; reason: "timeout" | "auth" | "network" };
+/* A join that never answers fails after this long (17 Nov 2026: neither
+   plus_waitlist_joined nor plus_waitlist_failed had ever fired, so a hang
+   would have been invisible; now it reports itself). */
+const JOIN_TIMEOUT_MS = 15_000;
+export async function joinWaitlist(where: string, page: string): Promise<JoinFailure | null> {
   try {
     const now = new Date().toISOString();
-    const { error } = await supabase.auth.updateUser({
-      data: { waitlist_at: now, waitlist_where: where, waitlist_page: page, marketing_opt_in: true, marketing_opt_in_at: now },
-    });
-    if (error) return "We couldn’t add you just now. Try again in a moment.";
+    const timeout = new Promise<"timeout">((resolve) => window.setTimeout(() => resolve("timeout"), JOIN_TIMEOUT_MS));
+    const result = await Promise.race([
+      supabase.auth.updateUser({
+        data: { waitlist_at: now, waitlist_where: where, waitlist_page: page, marketing_opt_in: true, marketing_opt_in_at: now },
+      }),
+      timeout,
+    ]);
+    if (result === "timeout") return { message: "We couldn’t add you just now. Try again in a moment.", reason: "timeout" };
+    if (result.error) return { message: "We couldn’t add you just now. Try again in a moment.", reason: "auth" };
     try {
       sessionStorage.setItem(KEY, "1");
     } catch {
@@ -60,7 +70,7 @@ export async function joinWaitlist(where: string, page: string): Promise<string 
     }
     return null;
   } catch {
-    return "We could not reach the network. Check your connection and try again.";
+    return { message: "We could not reach the network. Check your connection and try again.", reason: "network" };
   }
 }
 
