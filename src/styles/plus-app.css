@@ -9611,3 +9611,30 @@ a.hk-link:focus-visible {
     transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
+
+/* A clip that doesn't play by itself (the parents page, 17 Nov 2026): its
+   poster, and a play mark in the middle; the whole card opens it. */
+.ugc-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  background: rgba(20, 22, 24, 0.62);
+  color: #ffffff;
+  pointer-events: none;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ugc-play svg {
+  width: 24px;
+  height: 24px;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ugc-clip:hover .ugc-play {
+    transform: scale(1.06);
+  }
+}

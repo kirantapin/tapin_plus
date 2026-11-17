@@ -131,7 +131,11 @@ function Enlarged({ open, onClosed }: { open: Open; onClosed: () => void }) {
   );
 }
 
-function Clip({ src, poster, label }: { src: string; poster: string; label: string }) {
+/** `still`: no autoplay (the parents page, Sam, 17 Nov 2026: "for the
+ *  parents page, can we not have these on auto play?"). The card holds its
+ *  poster with a play mark; a tap opens it large, from the start, with
+ *  sound. */
+function Clip({ src, poster, label, still: held = false }: { src: string; poster: string; label: string; still?: boolean }) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [sound, setSound] = useState(false);
   const [open, setOpen] = useState<Open | null>(null);
@@ -155,7 +159,7 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
     clips.add(v);
     const onVol = () => setSound(!v.muted);
     v.addEventListener("volumechange", onVol);
-    const still = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const still = held || !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const io = still
       ? null
       : new IntersectionObserver(
@@ -174,6 +178,7 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
       v.removeEventListener("volumechange", onVol);
       io?.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   /* The tap is the gesture iOS needs to let a video make sound; it also
      plays a clip that reduced motion held still. */
@@ -196,9 +201,17 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
       <video ref={ref} className="ph-no-capture" src={asset(src)} poster={asset(poster)} muted loop playsInline preload="none" aria-hidden="true" onClick={enlarge} style={open ? { visibility: "hidden" } : undefined} />
       {/* The whole clip is the way in; this names it for a screen reader. */}
       <button type="button" className="ugc-open" onClick={enlarge} aria-label={`Watch ${label} larger`} />
-      <button type="button" className="ugc-sound" onClick={toggle} aria-pressed={sound} aria-label={sound ? `Mute ${label}` : `Unmute ${label}`}>
-        <SoundIco on={sound} />
-      </button>
+      {held ? (
+        <span className="ugc-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M8.5 5.8v12.4a.8.8 0 0 0 1.2.7l9.6-6.2a.8.8 0 0 0 0-1.4L9.7 5.1a.8.8 0 0 0-1.2.7Z" fill="currentColor" />
+          </svg>
+        </span>
+      ) : (
+        <button type="button" className="ugc-sound" onClick={toggle} aria-pressed={sound} aria-label={sound ? `Mute ${label}` : `Unmute ${label}`}>
+          <SoundIco on={sound} />
+        </button>
+      )}
       {open ? <Enlarged open={open} onClosed={() => setOpen(null)} /> : null}
     </div>
   );
@@ -210,7 +223,7 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
  *  2026: "we should just show coffeeholics content on their page"), and
  *  nothing when it has none. */
 /* "Watch it in action" (Sam, 16 Nov 2026; was "Students using it"). */
-export function UgcRow({ title = "Watch it in action", without = [], place }: { title?: string; without?: string[]; place?: string } = {}) {
+export function UgcRow({ title = "Watch it in action", without = [], place, still = false }: { title?: string; without?: string[]; place?: string; still?: boolean } = {}) {
   const shown = CLIPS.filter((c) => !without.includes(c.key) && (!place || c.place === place));
   if (!shown.length) return null;
   return (
@@ -224,7 +237,7 @@ export function UgcRow({ title = "Watch it in action", without = [], place }: { 
       <ul className="ugc-row">
         {shown.map((c) => (
           <li key={c.key}>
-            <Clip src={c.src} poster={c.poster} label={`${c.who} ${c.where}`} />
+            <Clip src={c.src} poster={c.poster} label={`${c.who} ${c.where}`} still={still} />
             <p>
               <b>{c.who}</b>
               <span>{c.where}</span>
