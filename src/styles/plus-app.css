@@ -9568,3 +9568,46 @@ button.tpu-plate:active {
     line-height: 16px;
   }
 }
+
+/* Rob's line opens his LinkedIn (17 Nov 2026): the whole line is the link,
+   the LinkedIn mark after his name; no underline, a soft press. */
+a.hk-link {
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 14px;
+}
+a.hk-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+.hk-who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.hk-in {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: #0a66c2;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hk.hk-dark .hk-in {
+  color: #ffffff;
+  --hk-in-ground: #141618;
+}
+@media (hover: hover) {
+  a.hk-link:hover b {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  a.hk-link:active .hk-face {
+    transform: scale(0.96);
+  }
+  .hk-face {
+    transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
