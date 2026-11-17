@@ -1491,7 +1491,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   {place ? (
                     <>${CREDIT} credit every month at {place.name} and {PLACES.length - 1} more Blacksburg spots, plus {PERCENT}% off. Join the waitlist to get&nbsp;in.</>
                   ) : (
-                    <>${CREDIT} credit at {PLACES.length} Blacksburg spots, every week. Join the waitlist to get&nbsp;in.</>
+                    <>One membership for all your favorites in Blacksburg. Join the waitlist to get&nbsp;in.</>
                   )}
                 </p>
                 {desk ? <HokieLine dark /> : null}
