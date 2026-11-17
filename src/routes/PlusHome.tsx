@@ -1110,6 +1110,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      the auto-refund FAQ. `auditHome`: the main page's own header. */
   const auditOn = !member;
   const auditHome = auditOn && !place && !invite && !group;
+  /* A member's main page wears the same header and sections (Sam, 16 Nov
+     2026: "can we update this page when I'm signed in? not sure why it
+     changed so much after I signed in"), with nothing to buy. */
+  const memberHome = member && !place && !invite && !group;
   /* The audit take keeps Try only in the FAQ (Sam, 15 Nov 2026: "remove the
      try it once for free everywhere other than the FAQ section"). */
   const tryCta = invite || place || auditOn ? null : (
@@ -1397,7 +1401,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       )}
       <header
         ref={bandRef}
-        className={`tpa-band${auditHome ? " tpu-band" : ""}`}
+        className={`tpa-band${auditHome || memberHome ? " tpu-band" : ""}`}
         data-group={group?.id}
         data-hero={place ? "place" : invite || hero === "0" ? undefined : hero}
         data-invite={invite && !place ? "" : undefined}
@@ -1473,7 +1477,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 )}
                 {member || linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} />}
               </>
-            ) : auditHome ? (
+            ) : auditHome || memberHome ? (
               <>
                 {/* Sam, 16 Nov 2026: "$5 credit at 5 Blacksburg spots, every
                     week. And then $25 added to your account for signing up":
@@ -1491,6 +1495,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
+                {memberHome ? null : (
                 <div className="tpu-act">
                   {desk ? (
                     <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
@@ -1509,6 +1514,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     <AuditPromise />
                   </div>
                 </div>
+                )}
               </>
             ) : hero === "0" ? (
               <h1>${CREDIT} credit at every place you already go in Blacksburg</h1>
@@ -1568,15 +1574,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
-        {ugc && !member ? <UgcRow place={place?.id} /> : null}
+        {ugc ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (
           placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
         ) : wherev === "b" ? (
-          member ? (
-            placesRail({ cls: "tpw" })
-          ) : (
-            <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
-          )
+          <BonusSpots title="What and where can I use it?" rail={placesRail({ cls: "tpw tpw-b", head: false, inCard: true })} />
         ) : wherev === "c" ? (
           <section className="tpw tpw-c" aria-labelledby="tpw-c-h">
             <h2 id="tpw-c-h" className="tpa-h2 tpa-h2-out">
@@ -1968,7 +1970,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
               <h2 className="tpa-close-h">{hidePrice ? "Lock in this round’s price" : free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : placeForever ? `${FIRST_MONTH} a month for life` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
                 {hidePrice
-                  ? `See it when you add your number, then it’s locked in for as long as you’re a member. Say yes to Tapin texts for 37% off for life.`
+                  ? `See it when you add your number, then it’s locked in for as long as you’re a member. Say yes to Tapin texts for an exclusive rate.`
                   : (groupOffer && group?.term === "forever") || placeForever
                   ? `Locked in for as long as you’re a member, even as more places join.`
                   : `${invite ? `For ${invite.who}. ` : ""}Then ${MONTHLY}/month, locked in for as long as you’re a member.`}
