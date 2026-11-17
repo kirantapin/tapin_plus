@@ -1494,7 +1494,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     <>One membership for all your favorites in Blacksburg. Join the waitlist to get&nbsp;in.</>
                   )}
                 </p>
-                {desk ? <HokieLine dark /> : null}
+                {/* Rob's line: on a computer its own card above "Watch it in
+                    action" (17 Nov 2026), on a phone under the header. */}
                 {/* The waitlist line as the member's status plate (Sam, 17
                     Nov 2026: "i like the second screenshot container, let's
                     do smth similar for the first"): the header's glass, the
@@ -1606,7 +1607,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     ask; this line stays. */}
                 {/* Rob's line in its place (Sam, 16 Nov 2026: "you can have rob's
                     thing replace the $25 to spend every month in the header"). */}
-                {memberHome && !desk ? null : <HokieLine dark />}
+                {memberHome || desk ? null : <HokieLine dark />}
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
@@ -1735,7 +1736,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Rob's line, under the header on a phone while Plus is invite
             only (Sam, 17 Nov 2026: "I think Rob comes down above the 'watch
             it in action'"). */}
-        {(wait || memberHome) && !desk ? <HokieLine /> : null}
+        {/* On a computer, Rob's line is a card here, above "Watch it in
+            action" (Sam, 17 Nov 2026), whatever the page's state. */}
+        {desk ? <HokieLine card /> : wait || memberHome ? <HokieLine /> : null}
         {ugc ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (
           placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
