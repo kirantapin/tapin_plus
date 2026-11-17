@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { LitePlace } from "../model/lite";
 import { LiteMark } from "./LiteMark";
-import { useLiveLeft } from "./LiveSoon";
+import { liveLeftAt, liveShort, useNow } from "./LiveSoon";
 
 /* ══ JUST JOINED, AS A STORY (Sam, 13 Nov 2026, of take 1 of five: "this is
    perfect, just /impeccable polish now") ═══════════════════════════════════════
@@ -36,7 +36,7 @@ export function LiteStory({ places }: { places: LitePlace[] }) {
   const [hover, setHover] = useState(false);
   const [held, setHeld] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const left = useLiveLeft();
+  const now = useNow();
   const n = places.length;
 
   /* Which frame is in view, as the row is swiped. */
@@ -171,7 +171,7 @@ export function LiteStory({ places }: { places: LitePlace[] }) {
                 <img className="tln-logo" data-round={p.round ? "" : undefined} src={p.logo} alt="" width="38" height="38" decoding="async" loading="lazy" />
                 <span>
                   <b>{p.name}</b>
-                  <span className="tnum">{left ? `Live on Plus Fri 20 Nov · ${left} to go` : p.kind}</span>
+                  <span className="tnum">{liveLeftAt(p.id, now) ? `Live on Plus ${liveShort(p.id)} · ${liveLeftAt(p.id, now)} to go` : p.kind}</span>
                 </span>
               </div>
               <div className="tln-story-say">
@@ -179,7 +179,7 @@ export function LiteStory({ places }: { places: LitePlace[] }) {
                 <ul>
                   {p.perks.map((k) => (
                     <li key={k.key}>
-                      {k.key === "free" && p.item ? <img src={p.item} alt="" /> : <span className="tnum">{pct(k.b)}</span>}
+                      {k.key === "free" && p.item ? <img src={p.item} alt="" /> : <span className="tnum">{pct(k.b) ?? (k.key === "free" ? "Free" : null)}</span>}
                       <p>
                         <b>{k.b}</b>
                         <span>{k.when}</span>

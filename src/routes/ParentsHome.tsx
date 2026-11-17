@@ -790,7 +790,7 @@ export default function ParentsHome() {
                       >
                         <span className="tpa-place-shot">
                           <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
-                          {liveSoon(v.id) ? <LiveCountdown className="tpa-live" /> : null}
+                          {liveSoon(v.id) ? <LiveCountdown className="tpa-live" id={v.id} /> : null}
                         </span>
                         <span className="tpa-glass tpa-tag">
                           {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}

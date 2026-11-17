@@ -3177,17 +3177,62 @@ html[data-surface="tpa"] .hs-scene .mo-rows .vs-thumb {
   font: 600 15px/20px "Gilroy", Arial, sans-serif;
   color: var(--ink-1, #141618);
 }
-/* Short phones (an SE, 667 tall): no photo strip, the mark beside the
-   name, so both cards and their perks fit the stage without a scroll. */
+/* As rows (Playa Bowls made three, 16 Nov 2026): three cards with a photo
+   across the top ran off the stage on a phone and in the computer's pop-up,
+   so each is a row: the photo down the left with the mark seated in its
+   corner and the leaf in the other, the name and the perks beside it. */
+.ls-cards > li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+}
+.ls-photo {
+  height: auto;
+  min-height: 100px;
+}
+.ls-logo {
+  left: 8px;
+  bottom: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  box-shadow: 0 0 0 2px #ffffff, 0 2px 6px rgba(20, 22, 24, 0.2);
+}
+/* The leaf alone: "Lite" is the slide's headline. */
+.ls-chip {
+  top: 8px;
+  left: 8px;
+  right: auto;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font-size: 0;
+}
+.ls-leaf {
+  width: 15px;
+  height: 15px;
+}
+.ls-body {
+  align-content: center;
+  gap: 6px;
+  padding: 12px 14px;
+}
+.ls-perks {
+  gap: 6px;
+}
+/* Short phones (an SE, 667 tall): no photo, the mark beside the name, so all
+   three and their perks fit the stage without a scroll. */
 @media (max-height: 760px) {
+  .ls-cards {
+    gap: 8px;
+  }
   .ls-cards > li {
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 36px minmax(0, 1fr);
     column-gap: 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
   }
   .ls-photo {
-    height: auto;
+    min-height: 0;
     background: none;
   }
   .ls-photo > img,
@@ -3196,19 +3241,16 @@ html[data-surface="tpa"] .hs-scene .mo-rows .vs-thumb {
   }
   .ls-logo {
     position: static;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     box-shadow: 0 0 0 1px rgba(20, 22, 24, 0.08);
   }
   .ls-body {
-    gap: 6px;
+    gap: 4px;
     padding: 0;
   }
-}
-@media (min-width: 1024px) {
-  .ls-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
+  .ls-perks {
+    gap: 4px;
   }
 }
 .growing-scene {
