@@ -9496,3 +9496,16 @@ button.tpu-plate:active {
     white-space: nowrap;
   }
 }
+
+/* The waitlist header on a phone (17 Nov 2026): the headline, its line, and
+   one white Join the waitlist; Rob's line sits under the header instead. */
+.tpa-band-title .tpu-act-wl-phone {
+  margin-top: 18px;
+}
+.tpa-band-title .tpu-act-wl-phone .tpa-cta {
+  width: 100%;
+  margin: 0;
+}
+.tpa-sheet > .hk {
+  margin: 20px var(--gutter) 4px;
+}
