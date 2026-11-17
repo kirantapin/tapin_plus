@@ -3,7 +3,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { AccountCard, AccountFrame, AppPanel, InfoPanel } from "../shell/AccountPage";
 import { openPlusSignIn } from "../shell/PlusCheckout";
 import { plusPageBack } from "../model/backTo";
-import { MembersPass } from "./MembersPass";
+import { MembersGuest, MembersPass } from "./MembersPass";
 
 /* ══ THE STUDENTS' ACCOUNT (/in) ════════════════════════════════════════════
    Was the presale's receipt, then "Members" in the home page's band and
@@ -15,6 +15,7 @@ import { MembersPass } from "./MembersPass";
    person. The offer's countdown bar went with the home page's (#256). */
 
 const MAIL = "mailto:support@tapin.app";
+const MEMBERS_FRAME = false;
 
 const Shield = (
   <svg viewBox="0 0 24 24" width="18" height="18">
@@ -38,6 +39,10 @@ export default function Members() {
   /* A member's page is the pass (Sam, 17 Nov 2026, A of five: "this one");
      signed out or not a member, the account frame below as before. */
   if (member) return <MembersPass />;
+  /* Everyone else gets the pass's page too (Sam, 17 Nov 2026: "the signed
+     out version of this would look more like the signed in version"). The
+     account frame below is kept for MEMBERS_FRAME = true. */
+  if (!MEMBERS_FRAME) return <MembersGuest />;
 
   const rows = [
     {

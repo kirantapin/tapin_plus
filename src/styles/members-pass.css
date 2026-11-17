@@ -369,3 +369,17 @@
     line-height: 19px;
   }
 }
+
+/* ── /in for everyone else (17 Nov 2026): the same pass without Active or a
+   number; the sign-in is the page's button, the app a light one beside the
+   ground. ── */
+.mv-signin {
+  border: 0;
+  cursor: pointer;
+}
+.mv-a-right .mv-cta-light {
+  box-shadow: inset 0 0 0 1px var(--hair, rgba(20, 22, 24, 0.12));
+}
+.mv-pass-guest .mv-pass-who b {
+  letter-spacing: 0;
+}

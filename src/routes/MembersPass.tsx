@@ -6,6 +6,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { AppQr, AppleGlyph, appHref, device } from "../shell/GetTheApp";
 import { CREDIT, PERCENT, PLACES } from "./parents_kit";
 import { plusPageBack } from "../model/backTo";
+import { openPlusSignIn } from "../shell/PlusCheckout";
 
 /* ══ THE MEMBER'S PAGE: THE PASS (Sam, 17 Nov 2026, picked A of five:
    "this one") ══════════════════════════════════════════════════════════════
@@ -179,6 +180,38 @@ function Shell({ children }: { children: ReactNode }) {
   return <div className="tpa mv mv-a">{children}</div>;
 }
 
+/** The pass card. `active`: a member's (Active, Member and their last
+ *  four); otherwise the same card without them, which says whose it would
+ *  be. */
+function Pass({ active, who, whoLabel }: { active: boolean; who?: string; whoLabel?: string }) {
+  return (
+    <section className={active ? "mv-pass" : "mv-pass mv-pass-guest"} aria-label={active ? "Your Tapin Plus membership" : "Tapin Plus Blacksburg"}>
+      <img className="mv-pass-art" src={COLLAGE} alt="" decoding="async" />
+      <div className="mv-pass-head">
+        <img className="mv-pass-mark" src={PAPER_MARK} alt="" width="56" height="44" decoding="async" />
+        {active ? (
+          <p className="mv-pass-live">
+            <i aria-hidden="true" />
+            Active
+          </p>
+        ) : null}
+      </div>
+      <div className="mv-pass-foot">
+        <p className="mv-pass-name">
+          Tapin Plus
+          <span>Blacksburg</span>
+        </p>
+        {who ? (
+          <p className="mv-pass-who">
+            <span>{whoLabel}</span>
+            <b className="tnum">{who}</b>
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 function VersionA({ four, onMail }: { four: string | null; onMail: () => void }) {
   return (
     <Shell>
@@ -187,26 +220,7 @@ function VersionA({ four, onMail }: { four: string | null; onMail: () => void })
       </div>
       <div className="mv-a-grid">
         <div className="mv-a-left">
-          <section className="mv-pass" aria-label="Your Tapin Plus membership">
-            <img className="mv-pass-art" src={COLLAGE} alt="" decoding="async" />
-            <div className="mv-pass-head">
-              <img className="mv-pass-mark" src={PAPER_MARK} alt="" width="56" height="44" decoding="async" />
-              <p className="mv-pass-live">
-                <i aria-hidden="true" />
-                Active
-              </p>
-            </div>
-            <div className="mv-pass-foot">
-              <p className="mv-pass-name">
-                Tapin Plus
-                <span>Blacksburg</span>
-              </p>
-              <p className="mv-pass-who">
-                <span>Member</span>
-                <b className="tnum">{four ? `••• ${four}` : "Signed in"}</b>
-              </p>
-            </div>
-          </section>
+          <Pass active who={four ? `••• ${four}` : "Signed in"} whoLabel="Member" />
           <Account four={four} className="mv-a-acct" />
         </div>
         <div className="mv-a-right">
@@ -217,6 +231,66 @@ function VersionA({ four, onMail }: { four: string | null; onMail: () => void })
           <Benefits />
           <Logos />
           <Foot onMail={onMail} />
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
+/* ══ /in FOR EVERYONE ELSE (Sam, 17 Nov 2026: "the signed out version of
+   this would look more like the signed in version") ══════════════════════
+   The pass's page for someone who isn't (or isn't yet shown as) a member:
+   the same card without Active or a number, and beside it Your account and
+   the one thing to do. Signed out, that's signing in with the number they
+   joined with; signed in and not a member, who's signed in and that early
+   access is on file. Then the app, what Plus gets every month, the foot. */
+export function MembersGuest() {
+  const { userSession, subscribed } = useAuth();
+  const four = useFour();
+  const { track } = useEventTracking();
+  const signedIn = !!userSession;
+  const loading = userSession === undefined || (signedIn && subscribed === null);
+  return (
+    <Shell>
+      <div className="mv-a-top">
+        <Back />
+      </div>
+      <div className="mv-a-grid">
+        <div className="mv-a-left">
+          <Pass active={false} who={signedIn ? (four ? `••• ${four}` : "Signed in") : undefined} whoLabel="Signed in" />
+          {signedIn ? <Account four={four} className="mv-a-acct" /> : null}
+        </div>
+        <div className="mv-a-right">
+          <h1 className="mv-a-h">Your account</h1>
+          {signedIn ? (
+            loading ? null : (
+              <p className="mv-a-lede">Joined early access? You’re on file. For anything about your plan, your credit or a refund, email us below.</p>
+            )
+          ) : (
+            <>
+              <p className="mv-a-lede">Sign in with the mobile number you joined with.</p>
+              {loading ? null : (
+                <button
+                  type="button"
+                  className="mv-cta mv-cta-dark mv-signin"
+                  onClick={() => {
+                    track("members_signin");
+                    openPlusSignIn("members");
+                  }}
+                >
+                  Sign in with your mobile
+                </button>
+              )}
+            </>
+          )}
+          <h2 className="mv-h2">In the Tapin app</h2>
+          {/* The QR as on the member's page; on a phone a light button,
+              so the sign-in stays the one dark one. */}
+          <GetApp where="members_guest" tone={device() === "desktop" ? "dark" : "light"} />
+          <h2 className="mv-h2">Every month with Plus</h2>
+          <Benefits />
+          <Logos />
+          <Foot onMail={() => track("members_email")} />
         </div>
       </div>
     </Shell>
