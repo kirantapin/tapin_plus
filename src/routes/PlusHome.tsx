@@ -25,7 +25,7 @@ import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, openPlusWaitlist, usePlusCheckoutOpen } from "../shell/PlusCheckout";
-import { WAITLIST_CTA, joinedThisVisit, onWaitlist, setWaitlistPage, waitlistOn } from "../model/waitlist";
+import { WAITLIST_CTA, joinedThisVisit, onWaitlist, setWaitlistPage, waitlistCountLine, waitlistOn } from "../model/waitlist";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
@@ -1830,7 +1830,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
              to get in. No price: there's nothing to buy here. */
           <section className="tpa-module tpa-offer tpu-wl-card" aria-labelledby="tpu-wl-h">
             <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
-            <p className="tpa-member-kicker">Invite only</p>
+            <p className="tpa-member-kicker">Invite only · {waitlistCountLine()}</p>
             <h2 id="tpu-wl-h" className="tpa-h2">
               {listed ? "You’re on the list" : "All Tapin Plus seats are gone"}
             </h2>
@@ -2246,7 +2246,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {wait ? (
           <p className="tpu-promise tpu-promise-dock tpu-wl-dock">
             <i className="tpa-pbar-dot" aria-hidden="true" />
-            <span>{listed ? "You’re on the list" : "Invite only · spots open a few at a time"}</span>
+            <span>{listed ? "You’re on the list" : `Invite only · ${waitlistCountLine()}`}</span>
           </p>
         ) : audit && !(group && dockLead.length) ? <AuditPromise className="tpu-promise-dock" /> : <ProofTurn
           /* Starts again on the lead once it arrives with the price, so a
