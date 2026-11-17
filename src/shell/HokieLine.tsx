@@ -31,7 +31,7 @@ function HokieLink({ dark }: { dark: boolean }) {
       href={ROB_LINKEDIN}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Built by a Hokie, for Hokies: Rob, Virginia Tech class of 2024, on LinkedIn"
+      aria-label="Built by a Hokie, for Hokies: Rob, Virginia Tech class of 2025, on LinkedIn"
       onClick={() => track("plus_rob_linkedin", { dark })}
       data-ph-show=""
     >
@@ -41,7 +41,7 @@ function HokieLink({ dark }: { dark: boolean }) {
       <p aria-hidden="true">
         <b>Built by a Hokie, for Hokies</b>
         <span className="hk-who">
-          Rob, Virginia Tech class of 2024
+          Rob, Virginia Tech class of 2025
           <svg className="hk-in" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <rect x="2" y="2" width="20" height="20" rx="4.5" fill="currentColor" />
             <path
