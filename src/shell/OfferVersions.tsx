@@ -4,6 +4,7 @@ import { Clock } from "./WelcomeOffer";
 import { useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
 import { usePlusSeats } from "./PlusSeats";
 import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP } from "../model/seats";
+import { TEXTS_TEASER } from "../model/priceGate";
 
 /* ══ THE OFFER CARD, THREE NEW TAKES (Sam, 10 Nov 2026: "can we redesign
    this? Still don't love it") ════════════════════════════════════════════
@@ -39,11 +40,17 @@ export function PayGet({
   they = false,
   term = "first month",
   forever = false,
+  hidden = false,
+  was,
 }: {
   first: string;
   monthly: string;
   they?: boolean;
   term?: string;
+  /** The texts rate: the full price, struck, and "for life". */
+  was?: string;
+  /** The price held back until the number (model/priceGate.ts). */
+  hidden?: boolean;
   /** A price for as long as you're a member (a group's, model/groups.ts):
    *  there is no "then". */
   forever?: boolean;
@@ -51,11 +58,33 @@ export function PayGet({
   const total = `$${PLACES.length * CREDIT}`;
   return (
     <>
-      <div className="ov-c-row ov-c-pay">
-        <span>You pay</span>
-        <b className="tnum">{first}</b>
-        <small className="tnum">{forever ? term : `${term}, then ${monthly}`}</small>
-      </div>
+      {hidden ? (
+        <div className="ov-c-row ov-c-pay ov-c-pay-held">
+          <span>You pay</span>
+          <b aria-hidden="true">
+            <LockIco />
+          </b>
+          <small>
+            Shows when you add your number. Say yes to Tapin texts and unlock <strong>{TEXTS_TEASER}</strong>.
+          </small>
+        </div>
+      ) : (
+        <div className="ov-c-row ov-c-pay">
+          <span>You pay</span>
+          <b className="tnum">{first}</b>
+          <small className="tnum">
+            {was ? (
+              <>
+                <s>{was}</s> a month, for life
+              </>
+            ) : forever ? (
+              term
+            ) : (
+              `${term}, then ${monthly}`
+            )}
+          </small>
+        </div>
+      )}
       <div className="ov-c-row ov-c-get">
         <span>{they ? "They get" : "You get"}</span>
         <b className="tnum">{total}</b>
@@ -409,6 +438,8 @@ export function OfferVersion({
   noEnds = false,
   forever = false,
   lower = false,
+  hidden = false,
+  was,
 }: {
   v: OfferV;
   first: string;
@@ -422,6 +453,10 @@ export function OfferVersion({
   /** A lower-half preview (shell/LowerVersions.tsx, ?lowv=) draws the rest:
    *  only pay/get here. */
   lower?: boolean;
+  /** The price held back until the number (model/priceGate.ts). */
+  hidden?: boolean;
+  /** The texts rate's full price, struck. */
+  was?: string;
 }) {
   const total = `$${PLACES.length * CREDIT}`;
   if (v === "a") {
@@ -496,7 +531,7 @@ export function OfferVersion({
   }
   return (
     <div className="ov ov-c" data-ph-show="">
-      <PayGet first={first} monthly={monthly} term={term} forever={forever} />
+      <PayGet first={first} monthly={monthly} term={term} forever={forever} hidden={hidden} was={was} />
       {/* The "New Blacksburg favorites are joining" band went everywhere
           (Sam, 16 Nov 2026, of /vip: "this looks old by the way - I thought
           we deprecated this"). The main page's Count (?lowv=3) replaced it on

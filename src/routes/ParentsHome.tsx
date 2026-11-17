@@ -1,3 +1,5 @@
+import { UgcRow, ugcOn } from "../shell/UgcRow";
+import { HokieLine } from "../shell/HokieLine";
 import { Link } from "react-router-dom";
 import { Founders } from "../shell/Founders";
 import {
@@ -20,12 +22,9 @@ import {
   PLACES,
   reducedMotion,
   Chevron,
-  Glyph,
-  GLYPHS,
-  Fold,
   FlatMark,
 } from "./parents_kit";
-import { BenefitCards, CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { lowerVersion } from "../shell/LowerVersions";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
@@ -260,6 +259,8 @@ const PROOF_STUDENTS = NAME_VT
   : "Over 500 Blacksburg students are on Tapin Plus";
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
+  /* Real students on video, preview only (?ugc, shell/UgcRow). */
+  const [ugc] = useState(ugcOn);
 
   /* The care package and checkout as they left it, if it's under a day old
      (model/checkoutResume.ts): before anything draws, so the band and the
@@ -580,9 +581,8 @@ export default function ParentsHome() {
                 headline, then the terms as one set (the price, then the auto
                 refund), and on a computer the button beside them. It takes
                 the place of the $25 pill. */}
-            <p className="tpu-sub">
-              <b className="tnum">+${CREDIT * PLACES.length}</b> added to their account to spend every&nbsp;month
-            </p>
+            {/* Rob's line in the $25 line's place, as on the students page. */}
+            <HokieLine dark />
             <div className="tpu-act">
               <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" onClick={(e) => signUp("band", e.currentTarget)}>
                 {cta}
@@ -653,47 +653,18 @@ export default function ParentsHome() {
       </header>
 
       <main className="tpa-sheet">
-        {/* Sam's mom, 8 Nov 2026: the care package first, then what they get,
-            then the places; "What a lunch costs" and "What if they don't use
-            it?" are gone. The offer card follows the places on a phone; a
-            computer still holds it in the right-hand column. */}
-        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
-            their student opens. */}
-        {/* $5 bonus credit at each spot, right under the band, as on the
-            main page (Sam, 9 Nov 2026: "should include this on the parent
-            plus page too I think"). */}
-        <BonusSpots they />
-        {/* The "Crumbl and Italiano's just joined" card went from here (Sam,
-            13 Nov 2026: "not there at all actually"); both are still in the
-            places row under All and Lite. The students page keeps it. */}
-        {/* "What can they use it on?" went from here (Sam, 11 Nov 2026, as on
-            the students page): the place cards below answer it, each opening
-            what Plus covers there. */}
-        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
-        {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
-            2026, the Dara Denney audit's fix 4: "move the parent quotes up";
-            they sat under the offer card). Nothing shows until
-            model/voices.ts has real ones. */}
-        <Voices className="tpp-v-up" />
-
-        {/* THE VALUE STACK (COPY.md v2) as six tiles: a figure or a glyph and
-            a few words each, the approved line one tap under it. No total
-            anywhere, no points value. */}
-        <section
-          className="tpa-module"
-          aria-labelledby="tpp-get"
-        >
-          {/* What's in it, said as a care package (Sam, 8 Nov 2026: "it just
-              needs to be more abundantly clear what's actually in it and how
-              this acts like a care package"; the cards stay, his mom liked
-              them). */}
-          <h2 id="tpp-get" className="tpa-h2">
-            What’s in their care package
-          </h2>
-          <p className="tpp-get-intro">Like a box from home that lives on their phone instead of the mail room.</p>
-          <BenefitCards />
-        </section>
-
+        {/* Real students on video (shell/UgcRow), right below the header
+            (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
+            parent page right below the header too"); preview only (?ugc)
+            until it ships. */}
+        {ugc ? <UgcRow title="VT students using it" /> : null}
+        {/* THE STUDENTS PAGE'S ORDER (Sam, 16 Nov 2026: "A lot of the sections
+            are old, and the structure is off no?"): the places first, then
+            Get, Earn, Save, what $5 looks like, the care package note, the
+            offer, their words and the videos, how it works, then the founders
+            and questions. "What's in their care package" (the six tiles) and
+            "No surprises" went: the three rows and the offer card's fold say
+            both (price lock, auto refund, a text before every bill, cancel). */}
         <section className="tpa-places tpp-places" aria-labelledby="tpp-every" data-railv="c3">
           {/* Sam, 11 Nov 2026: "yes do the same for parents", the students
               page's "What and where can I use it?" in their voice. */}
@@ -816,6 +787,26 @@ export default function ParentsHome() {
           <p className="tpp-more">More places are joining.</p>
         </section>
 
+        {/* Sam's mom, 8 Nov 2026: the care package first, then what they get,
+            then the places; "What a lunch costs" and "What if they don't use
+            it?" are gone. The offer card follows the places on a phone; a
+            computer still holds it in the right-hand column. */}
+        {/* SEND IT WITH A NOTE (Sam, 6 Nov 2026): the gift, and the page
+            their student opens. */}
+        {/* $5 bonus credit at each spot, right under the band, as on the
+            main page (Sam, 9 Nov 2026: "should include this on the parent
+            plus page too I think"). */}
+        <BonusSpots they />
+        {/* What a week looks like, in one order, on their phone (Sam's pick
+            D, 7 Nov 2026). */}
+        <section className="tpa-module" aria-labelledby="tpp-save">
+          <h2 id="tpp-save" className="tpa-h2">
+            What ${CREDIT} credit looks like
+          </h2>
+          <CheckoutPhone />
+        </section>
+
+        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
         {/* THE OFFER: what it is, the price, the button. Right under the band
             on a phone; on a computer, the card held on the right
             (plus-app.css keys that on aria-label="Tapin Plus"). */}
@@ -865,14 +856,11 @@ export default function ParentsHome() {
         {count ? null : <UnderOffer />}
         </div>
 
-        {/* What a week looks like, in one order, on their phone (Sam's pick
-            D, 7 Nov 2026). */}
-        <section className="tpa-module" aria-labelledby="tpp-save">
-          <h2 id="tpp-save" className="tpa-h2">
-            What ${CREDIT} credit looks like
-          </h2>
-          <CheckoutPhone />
-        </section>
+        {/* C · parents' own words, straight after the envelope (Sam, 9 Nov
+            2026, the Dara Denney audit's fix 4: "move the parent quotes up";
+            they sat under the offer card). Nothing shows until
+            model/voices.ts has real ones. */}
+        <Voices className="tpp-v-up" />
 
         {/* Answering the parent (Elevate's "for parents" section, in our own
             claims): how sign-up works from their side, shown on a phone
@@ -885,47 +873,6 @@ export default function ParentsHome() {
             How it works for you
           </h2>
           <HowPhone />
-        </section>
-
-        {/* No surprises: a glyph and a few words per line, the full line one
-            tap under it. */}
-        <section className="tpa-module" aria-labelledby="tpp-sure">
-          <h2 id="tpp-sure" className="tpa-h2">
-            No surprises
-          </h2>
-          <div className="tpp-sure tnum">
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.calendar} />}
-              label={`${FIRST} the first month, then ${MONTHLY}`}
-            >
-              {FIRST} for the first month, then {MONTHLY} a month, billed monthly until you cancel.
-            </Fold>
-            {/* A text before every bill, and cancel by text (Sam, 9 Nov
-                2026); "unclaimed, it costs nothing" and "no one is charged
-                twice" went with the charge at purchase. */}
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.bell} />}
-              label="A text before every bill"
-            >
-              We text you before each monthly bill, and you can cancel right from that text.
-            </Fold>
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.refund} />}
-              label="Didn’t save what you paid? Auto refund"
-            >
-              If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. You don’t have to ask.
-            </Fold>
-            <Fold
-              className="tpp-sure-row"
-              lead={<Glyph d={GLYPHS.mail} />}
-              label="Cancel anytime"
-            >
-              Reply to our text, cancel from Your account, or email support@tapin.app and we’ll do it for you.
-            </Fold>
-          </div>
         </section>
 
         {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026:

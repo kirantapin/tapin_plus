@@ -127,7 +127,9 @@ export const seatLine = (now: Date = new Date()): string => {
 export const PLUS_SEAT_CAP = 100;
 /* $14.99 once the spots are gone (Sam, 9 Nov 2026, via the content session:
    "once the $7.99 spots are gone, the price goes up to $14.99, not $9.99"). */
-export const PLUS_NEXT_PRICE = "$14.99";
+/* $12.99 (Sam, 16 Nov 2026: "now it's $7.99 and after that it's $12.99
+   when these sell out"). */
+export const PLUS_NEXT_PRICE = "$12.99";
 const PLUS_START_MS = Date.UTC(2026, 10, 4, 2, 0, 0); // 3 Nov, 9pm EST
 const PLUS_START_LEFT = 91;
 const PLUS_FLOOR = 3;

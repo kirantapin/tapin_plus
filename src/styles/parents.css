@@ -3380,12 +3380,12 @@
   .tpp .tpa-band.tpp-band[data-phone="card"]::after {
     grid-row: 1 / 6;
   }
-  .tpp .tpp-band[data-phone="card"] :is(.tpu-sub, .tpu-act) {
+  .tpp .tpp-band[data-phone="card"] :is(.tpu-sub, .hk, .tpu-act) {
     position: relative;
     z-index: 2;
     grid-column: 1;
   }
-  .tpp .tpp-band[data-phone="card"] .tpu-sub {
+  .tpp .tpp-band[data-phone="card"] :is(.tpu-sub, .hk) {
     grid-row: 4;
     margin: 10px 24px 0;
   }
