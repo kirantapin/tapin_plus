@@ -9242,3 +9242,27 @@ i[data-k="pts"] {
   font-size: inherit;
   line-height: inherit;
 }
+/* The member's status line wraps on a narrow phone instead of running off
+   the card (Sam, 17 Nov 2026, of "...joined wit" cut at the edge); the dot
+   stays on the first line, and the card's foot gets its breath back. */
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on {
+  align-items: flex-start;
+  min-width: 0;
+  white-space: normal;
+}
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on i {
+  margin-top: 6px;
+}
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on span {
+  min-width: 0;
+  white-space: normal;
+  text-wrap: pretty;
+}
+@media (max-width: 1023.98px) {
+  .tpu-band .tpa-band-title .tpu-act-member {
+    margin: 14px 0 10px;
+  }
+}
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on span {
+  flex: 1 1 auto;
+}
