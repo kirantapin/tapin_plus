@@ -14,8 +14,16 @@ const ROB = asset("/brand/founder-blazer.webp");
 const ROB_LINKEDIN = "https://www.linkedin.com/in/robert-tabet-699772230/";
 
 /** `dark`: in the header, on the photo (Sam, 16 Nov 2026), in place of the
- *  "+$25 added to your account" line. */
-export function HokieLine({ dark = false }: { dark?: boolean } = {}) {
+ *  "+$25 added to your account" line. `card`: on a computer, its own white
+ *  card right above "Watch it in action" (Sam, 17 Nov 2026: "on desktop,
+ *  this should also be in a parent container right above the 'watch it in
+ *  action' section"). */
+export function HokieLine({ dark = false, card = false }: { dark?: boolean; card?: boolean } = {}) {
+  const line = <HokieLink dark={dark} />;
+  return card ? <section className="tpa-module hk-card" aria-label="Who built Tapin Plus">{line}</section> : line;
+}
+
+function HokieLink({ dark }: { dark: boolean }) {
   const { track } = useEventTracking();
   return (
     <a

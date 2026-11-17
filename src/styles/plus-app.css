@@ -9638,3 +9638,13 @@ a.hk-link:focus-visible {
     transform: scale(1.06);
   }
 }
+
+/* Rob's line as its own card on a computer (17 Nov 2026), above "Watch it
+   in action": the page's white module, the line inside it. */
+.hk-card {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.hk-card > .hk {
+  margin: 0;
+}

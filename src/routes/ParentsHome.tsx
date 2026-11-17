@@ -605,7 +605,6 @@ export default function ParentsHome() {
                 (Sam, 17 Nov 2026: "we can have rob show up like he does on the
                 main plus page, and the CTA be the white button overlaying the
                 banner image"). */}
-            {desk ? <HokieLine dark /> : null}
             <div className="tpu-act">
               <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" data-page-cta="" onClick={(e) => signUp("band", e.currentTarget)}>
                 {cta}
@@ -688,7 +687,9 @@ export default function ParentsHome() {
       </header>
 
       <main className="tpa-sheet">
-        {desk ? null : <HokieLine />}
+        {/* Rob's line: under the header on a phone, its own card on a
+            computer (Sam, 17 Nov 2026), above "Watch it in action". */}
+        <HokieLine card={desk} />
         {/* Real students on video (shell/UgcRow), right below the header
             (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
             parent page right below the header too"); preview only (?ugc)
