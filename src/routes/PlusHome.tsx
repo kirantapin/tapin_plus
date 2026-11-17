@@ -292,7 +292,7 @@ const inviteFaq = (invite: Invite, MONTHLY: string): ReadonlyArray<{ q: string; 
 const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray<{ q: string; a: string }> => [
   {
     q: "What’s the catch?",
-    a: `There isn’t one. ${name} is one of a handpicked group of Blacksburg places that don’t compete for the same spend but share the same customers. They fund the perks to reach more people, and Tapin puts the membership fee into promoting them. We don’t let everyone in, or it wouldn’t work. There’s no minimum spend and no marked-up menu. Cancel anytime.`,
+    a: `There isn’t one. ${name} is one of a handpicked group of Blacksburg places that don’t compete for the same spend but share the same customers. They fund the perks to reach more people, and Tapin puts the membership fee into promoting them. We don’t let everyone in, or it wouldn’t work. There’s no minimum spend. Cancel anytime.`,
   },
   {
     q: "How do I cancel and get a refund?",
@@ -308,7 +308,7 @@ const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray
   },
   {
     q: "How often can I use it?",
-    a: `$${CREDIT} credit at ${name} every month, with no minimum spend, there from the moment you join. Then ${PERCENT}% off your other orders, once a day.`,
+    a: `$${CREDIT} credit at ${name} every month on eligible items, with no minimum spend, there from the moment you join. Then ${PERCENT}% off your other orders, once a day.`,
   },
   {
     q: "What does it work on?",
@@ -2188,7 +2188,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           <p>
             {place ? (
               <>
-                ${CREDIT} credit every month at {place.name}, no minimum spend; it resets each month and doesn’t roll over. Then {PERCENT}% off your other
+                ${CREDIT} credit every month at {place.name} on eligible items, no minimum spend; it resets each month and doesn’t roll over. Then {PERCENT}% off your other
                 orders, once a day.
               </>
             ) : (

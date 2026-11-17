@@ -777,7 +777,7 @@ function studentSteps(first: string, free: boolean, appTab: number, place?: stri
       title: place ? `Save at ${place} and more` : "Save at each place",
       line: place ? (
         <>
-          {money0(CREDIT)} credit every month at {place} and every other Plus place, no minimum spend. Then {PERCENT}% off, once a day.
+          {money0(CREDIT)} credit every month at {place} and every other Plus place on eligible items, no minimum spend. Then {PERCENT}% off, once a day.
         </>
       ) : (
         <>
@@ -1469,7 +1469,7 @@ export function CheckoutPhone({
             <p className="tpp-math">
               {/* At a bar the $5s and 15% skip alcohol, and the line says so
                   in place of the points (The Burg, 12 Nov 2026). */}
-              <b>{money0(CREDIT)}</b> credit at {place!.name} every month, no minimum, and <b>{money0(CREDIT)} back</b> every week you spend $10{BAR_IDS.has(place!.id) ? " on food" : ""}. Then {PERCENT}% off your other orders, once a day.{BAR_IDS.has(place!.id) ? " Never on alcohol." : " Points on every order."}
+              <b>{money0(CREDIT)}</b> credit at {place!.name} every month on eligible items, and <b>{money0(CREDIT)} back</b> every week you spend $10{BAR_IDS.has(place!.id) ? " on food" : ""}. Then {PERCENT}% off your other orders, once a day.{BAR_IDS.has(place!.id) ? " Never on alcohol." : " Points on every order."}
             </p>
           ) : student ? (
             <p className="tpp-math">
