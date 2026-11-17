@@ -36,6 +36,7 @@ import "./styles/parent-pages.css";
 import "./styles/gift.css";
 /* The account pages, /in and /parents/account (9 Nov 2026). */
 import "./styles/account.css";
+import "./styles/members-pass.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
