@@ -203,6 +203,11 @@ function parentHero(): ParentHero {
 /* The experiment's flag isn't registered any more (the test is over); the
    variant still is, so events say which headline was showing. */
 const parentHeroProps = (v: ParentHero) => ({ parent_hero_variant: v });
+/* Rob's headlines in three lines on a computer (17 Nov 2026). */
+const PARENT_HEROES_3: Partial<Record<ParentHero, string[]>> = {
+  r: ["Make every dollar", "they spend in", "Blacksburg go further."],
+  s: ["Make every dollar", "they spend in", "Blacksburg go further."],
+};
 
 /* ══ THE HERO PHOTOGRAPH ═════════════════════════════════════════════════════
    Parents and their student, framed so the faces clear the pill and the
@@ -586,13 +591,27 @@ export default function ParentsHome() {
         <div ref={titleRef} className="tpa-band-title">
           <div>
             <h1 data-variant={hero}>
-              {headline[0]}
-              {headline[1] ? (
+              {/* Three lines on a computer where a headline has them (Sam, 17
+                  Nov 2026: "can we make this three lines instead of 2"); a
+                  phone flows them as before. */}
+              {PARENT_HEROES_3[hero] ? (
+                PARENT_HEROES_3[hero]!.map((line, i) => (
+                  <span key={line} className="tpp-l">
+                    {i ? " " : null}
+                    {line}
+                  </span>
+                ))
+              ) : (
                 <>
-                  {" "}
-                  <span className="tpp-nowrap">{headline[1]}</span>
+                  {headline[0]}
+                  {headline[1] ? (
+                    <>
+                      {" "}
+                      <span className="tpp-nowrap">{headline[1]}</span>
+                    </>
+                  ) : null}
                 </>
-              ) : null}
+              )}
             </h1>
             {/* The student page's header, in the parents' words (Sam, 16
                 Nov 2026: "update the mom's header with the auto refund stuff?

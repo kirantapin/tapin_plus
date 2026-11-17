@@ -3480,3 +3480,21 @@
     display: none;
   }
 }
+
+/* Three lines on a computer (Sam, 17 Nov 2026: "for parents page can we
+   make this three lines instead of 2"): "Make every dollar / they spend in /
+   Blacksburg go further.", each its own line (ParentsHome PARENT_HEROES_3);
+   the type keeps B's size. A phone flows the words as before. */
+.tpp .tpa-band-title h1 .tpp-l {
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-shadow: inherit;
+}
+@media (min-width: 1024px) {
+  .tpp .tpa-band-title h1 .tpp-l {
+    display: block;
+    white-space: nowrap;
+  }
+}
