@@ -209,7 +209,8 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
 /** `place`: a place's own page shows only that place's clips (Sam, 16 Nov
  *  2026: "we should just show coffeeholics content on their page"), and
  *  nothing when it has none. */
-export function UgcRow({ title = "Students using it", without = [], place }: { title?: string; without?: string[]; place?: string } = {}) {
+/* "Watch it in action" (Sam, 16 Nov 2026; was "Students using it"). */
+export function UgcRow({ title = "Watch it in action", without = [], place }: { title?: string; without?: string[]; place?: string } = {}) {
   const shown = CLIPS.filter((c) => !without.includes(c.key) && (!place || c.place === place));
   if (!shown.length) return null;
   return (
