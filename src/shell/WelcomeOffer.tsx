@@ -1,3 +1,4 @@
+import { WAITLIST_CTA, waitlistPage } from "../model/waitlist";
 import { shortClock, spokenClock, useEndsAt, useWelcomeEnds, welcomeEndsDay } from "../model/deadline";
 import { inviteFor, type Invite } from "../model/invite";
 import { firstFigure, firstMonthLine, usePlusPrice, usePlusPriceLoad } from "../model/plus";
@@ -283,6 +284,7 @@ export function InviteClock({ invite, className }: { invite: Invite; className?:
  *  month is what joining gets, else "Join Tapin Plus". */
 export function useJoinLabel(): string {
   const price = usePlusPrice();
+  if (waitlistPage()) return WAITLIST_CTA;
   return inviteFor(price) && price?.first === 0 ? "Try Plus for free" : "Join Tapin Plus";
 }
 

@@ -105,6 +105,10 @@ const MIRRORED: Record<
 > = {
   $pageview: { name: "PageView" },
 
+  /* Joining the Plus waitlist (model/waitlist.ts, 17 Nov 2026): a Lead, the
+     event the student campaigns optimise for while Plus is invite only. */
+  plus_waitlist_joined: { name: "Lead" },
+
   /* InitiateCheckout is the pay step showing, with its price, not the sheet
      opening (Grok's audit, 3 Nov 2026): the sheet opens before anyone has
      typed a number, so every curious tap counted as a checkout. */

@@ -1,4 +1,5 @@
 import { priceHidden } from "../model/priceGate";
+import { waitlistPage } from "../model/waitlist";
 import { handOverFocus } from "./PlusCheckout";
 import { lockScroll, modalOpen } from "./scrollLock";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -249,7 +250,7 @@ export default function HowSheet({
                 {HEADS[slide.id] ?? slide.headline}
                 {slide.tag ? <span className="hs-tag">{slide.tag}</span> : null}
               </h2>
-              <p className="hs-line">{LINES[slide.id] ?? slide.line}</p>
+              <p className="hs-line">{slide.id === "growing" && (waitlistPage() || priceHidden()) ? "As places join, the price goes up for people who join later. Yours never does." : (LINES[slide.id] ?? slide.line)}</p>
             </>
           )}
         </div>
@@ -259,7 +260,7 @@ export default function HowSheet({
             <div>
               {/* From the price, so a promo link's free month says so (5 Nov 2026). */}
               {priceHidden() ? null : <p className="hs-price">{firstThen(price)}</p>}
-              {price?.linkId ? null : <WelcomeEnds className="hs-ends" />}
+              {price?.linkId || waitlistPage() ? null : <WelcomeEnds className="hs-ends" />}
             </div>
           ) : null}
           <div className="hs-nav">
@@ -293,7 +294,7 @@ export default function HowSheet({
           {i >= slides.length - 2 ? null : (
             <p className="hs-when">
               <button type="button" className="hs-skip" onClick={() => go(slides.length - 1)}>
-                Skip to the price
+                {waitlistPage() ? "Skip to the end" : "Skip to the price"}
               </button>
             </p>
           )}
