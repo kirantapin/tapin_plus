@@ -23,7 +23,10 @@ export const PERCENT = 15;
 export function useParentPrice(): { FIRST: string; MONTHLY: string; LIFE: boolean; WAS: string } {
   const price = usePlusPrice();
   const life = price?.firstFor === "forever";
-  return { FIRST: usd(price?.first), MONTHLY: usd(life ? price?.first : price?.monthly), LIFE: life, WAS: usd(price?.monthly) };
+  /* On /parents the rate is struck against the parents' regular price
+     (PARENT_REGULAR); anywhere else against the bundle's own. */
+  const onParents = typeof window !== "undefined" && window.location.pathname.startsWith("/parents");
+  return { FIRST: usd(price?.first), MONTHLY: usd(life ? price?.first : price?.monthly), LIFE: life, WAS: usd(life && onParents ? PARENT_REGULAR : price?.monthly) };
 }
 
 /* ══ THE PARENTS' LAUNCH SALE (Sam, 17 Nov 2026: "for the parents page, can
@@ -43,6 +46,11 @@ export const PARENTS_LAUNCH_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
    should call the rate an exclusive VT Parent Group / Hungry Hokies rate,
    rather than a launch price"). */
 export const PARENT_RATE = "VT Parent Group / Hungry Hokies rate";
+/* The parents' regular price, struck beside the rate (Sam, 17 Nov 2026:
+   "let's make the regular price $14.99 btw on the parents page", choosing to
+   cross out $14.99 now). True only while a parent without the group rate is
+   charged $14.99 a month: Kiran sets that price on the backend. */
+export const PARENT_REGULAR = 14.99;
 export const PARENTS_LAUNCH_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 
 /* ══ WHAT A LUNCH COSTS (COPY.md v2) ═════════════════════════════════════════
