@@ -1494,22 +1494,41 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   )}
                 </p>
                 <HokieLine dark />
-                <div className="tpu-act">
+                {/* The waitlist line as the member's status plate (Sam, 17
+                    Nov 2026: "i like the second screenshot container, let's
+                    do smth similar for the first"): the header's glass, the
+                    dot, Invite only over how the list works. On a phone the
+                    whole plate opens the waitlist; on a computer it sits by
+                    Join the waitlist. */}
+                <div className="tpu-act tpu-act-member tpu-act-wl">
                   {desk ? (
                     <button type="button" className="tpa-cta tpa-cta-white" onClick={(e) => join("band", e.currentTarget)}>
                       {joinLabel}
                     </button>
                   ) : null}
-                  <div className="tpu-terms">
-                    <p>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4.5 6.5A2.5 2.5 0 0 1 7 4h10a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 17 16h-6.5L6 19.5V16h0a2.5 2.5 0 0 1-1.5-2.3Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
-                      </svg>
-                      <span>
-                      {listed ? "You’re on the list. We’ll text you when your spot opens." : "Spots open a few at a time. We text you when yours does."}
-                      </span>
-                    </p>
-                  </div>
+                  {(() => {
+                    const inner = (
+                      <>
+                        <i className="tpu-plate-dot" aria-hidden="true" />
+                        <span className="tpu-plate-words">
+                          <b>{listed ? "You’re on the list" : "Invite only"}</b>
+                          <small>{listed ? "We’ll text you when your spot opens." : "Spots open a few at a time. We text you when yours\u00a0does."}</small>
+                        </span>
+                        {desk ? null : (
+                          <svg className="tpu-plate-go" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </>
+                    );
+                    return desk ? (
+                      <div className="tpu-plate">{inner}</div>
+                    ) : (
+                      <button type="button" className="tpu-plate" onClick={(e) => join("band_plate", e.currentTarget)}>
+                        {inner}
+                      </button>
+                    );
+                  })()}
                 </div>
               </>
             ) : invite && !place ? (
