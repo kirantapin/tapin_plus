@@ -1789,12 +1789,15 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             <img className="tpa-offer-mark" src={PAPER_MARK} alt="" width="76" height="60" decoding="async" />
             <p className="tpa-member-kicker">Invite only</p>
             <h2 id="tpu-wl-h" className="tpa-h2">
-              {listed ? "You’re on the list" : "Get on the list"}
+              {listed ? "You’re on the list" : "All Tapin Plus seats are gone"}
             </h2>
+            {/* Sam, 17 Nov 2026: "all tapin seats are gone now, thank you all
+                for the overwhelming support. We'll text you when more seats
+                become available". */}
             <p className="tpu-wl-copy">
               {listed
-                ? "When your spot opens, we text you a link. You’ll have 48 hours to claim it."
-                : "Spots open a few at a time. When yours does, we text you a link, and you have 48 hours to claim it."}
+                ? "Thank you for the support. We’ll text you when more seats become available."
+                : "Thank you all for the overwhelming support. Join the waitlist and we’ll text you when more seats become available."}
             </p>
             {joinCta("hero")}
           </section>
