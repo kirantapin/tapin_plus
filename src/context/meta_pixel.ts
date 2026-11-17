@@ -107,10 +107,17 @@ const MIRRORED: Record<
 
   /* Joining the Plus waitlist (model/waitlist.ts, 17 Nov 2026): a Lead, the
      event the student campaigns optimise for while Plus is invite only. */
-  plus_waitlist_joined: {
+  /* The Lead is the number given and the code texted (Sam, 17 Nov 2026:
+     "can we just have it trigger when they provide their phone number not a
+     2FA?"); wlp_<hash of the number> is the server copy's id too. */
+  plus_waitlist_phone_given: {
     name: "Lead",
-    /* wl_<user id>: the same id the server's Conversions API Lead carries
-       (api/meta-lead.js), so Meta counts the two once. */
+    eventId: (p) => (typeof p.lead_id === "string" && p.lead_id ? p.lead_id : undefined),
+  },
+  /* On the list after the code: CompleteRegistration, so Meta can still see
+     who finished (wl_<user id>, the server copy's id too). */
+  plus_waitlist_joined: {
+    name: "CompleteRegistration",
     eventId: (p) => (typeof p.lead_id === "string" && p.lead_id ? p.lead_id : undefined),
   },
 
@@ -151,11 +158,11 @@ const MIRRORED: Record<
 };
 
 /**
- * The waitlist Lead, server side (api/meta-lead.js, 17 Nov 2026): the browser
- * pixel misses visitors who block it, and the Leads campaign optimises on
- * this one event. Same gate as the pixel (it only goes if the pixel loaded);
- * the server checks the session and that the student is on the list, then
- * sends Lead with event id wl_<user id>, matching the pixel's. The browser
+ * The finished join, server side (api/meta-lead.js, 17 Nov 2026): the browser
+ * pixel misses visitors who block it. Same gate as the pixel (it only goes if
+ * the pixel loaded); the server checks the session and that the student is
+ * on the list, then sends CompleteRegistration with event id wl_<user id>,
+ * matching the pixel's. (The Lead goes earlier, at the number: sendPhoneLead.) The browser
  * cookies _fbp/_fbc go along so Meta can match the visit. Fire and forget.
  */
 export function sendServerLead(accessToken: string): void {
@@ -167,6 +174,37 @@ export function sendServerLead(accessToken: string): void {
       keepalive: true,
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ fbp: cookie("_fbp"), fbc: cookie("_fbc"), url: window.location.origin + window.location.pathname }),
+    }).catch(() => undefined);
+  } catch {
+    /* Analytics must never break the page. */
+  }
+}
+
+/**
+ * The waitlist Lead at the number (17 Nov 2026): the browser pixel's Lead,
+ * through `track` (PostHog's plus_waitlist_phone_given, mirrored above), and
+ * the same Lead from the server (api/meta-lead.js, stage "phone") with the
+ * number hashed there. The event id is a hash of the number, so a second
+ * try with the same number is one Lead. Same gate as the pixel.
+ */
+export async function sendPhoneLead(digits: string, track: (event: string, props?: Record<string, unknown>) => void): Promise<void> {
+  if (typeof window === "undefined") return;
+  let leadId: string | undefined;
+  try {
+    const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`1${digits}`));
+    leadId = `wlp_${Array.from(new Uint8Array(bytes).slice(0, 16), (b) => b.toString(16).padStart(2, "0")).join("")}`;
+  } catch {
+    leadId = undefined;
+  }
+  track("plus_waitlist_phone_given", { lead_id: leadId });
+  if (!started || !leadId) return;
+  const cookie = (name: string) => document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))?.[1];
+  try {
+    void fetch("/api/meta-lead", {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: "phone", phone: digits, event_id: leadId, fbp: cookie("_fbp"), fbc: cookie("_fbc"), url: window.location.origin + window.location.pathname }),
     }).catch(() => undefined);
   } catch {
     /* Analytics must never break the page. */

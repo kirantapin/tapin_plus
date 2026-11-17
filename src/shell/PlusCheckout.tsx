@@ -16,7 +16,7 @@ import { PlaceSeats, PlusSeats } from "./PlusSeats";
 import { chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
 import { joinWaitlist, joinedThisVisit, onWaitlist } from "../model/waitlist";
-import { sendServerLead } from "../context/meta_pixel";
+import { sendPhoneLead, sendServerLead } from "../context/meta_pixel";
 import { priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { pagePolicy, pagePolicyPlace } from "../model/pagePolicy";
@@ -634,6 +634,11 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
       /* Each step of the sheet, so a drop-off shows where it happened
          (Grok's audit, 3 Nov 2026). */
       track("plus_phone_submitted", { opt_in: waitlist || optIn, sign_in_only: plain, waitlist, look });
+      /* The waitlist's Lead goes when the number is given and the code is
+         texted, not after the code (Sam, 17 Nov 2026: "can we just have it
+         trigger when they provide their phone number not a 2FA?"). Browser
+         and server, one event id per number (context/meta_pixel.ts). */
+      if (waitlist) void sendPhoneLead(digits, track);
       setWait(RESEND_S);
       setStage("code");
       return;
