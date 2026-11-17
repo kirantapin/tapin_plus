@@ -9154,3 +9154,22 @@ i[data-k="pts"] {
     text-overflow: clip;
   }
 }
+
+/* ── Students using it, as a card (16 Nov 2026) ─────────────────────────────
+   The section is a .tpa-module now: the heading inside, the clips inside the
+   card's padding; on a phone the swiping row runs to the card's edges, so a
+   clip slides in from the edge rather than from a gap. */
+.tpa-module.ugc {
+  --ugc-pad: 20px;
+  margin-bottom: 0;
+}
+.tpa-module.ugc > .ugc-row {
+  margin: 0;
+}
+@media (max-width: 1023.98px) {
+  .tpa-module.ugc > .ugc-row:has(> li:nth-child(3)) {
+    margin-inline: calc(-1 * var(--ugc-pad, 16px));
+    padding-inline: var(--ugc-pad, 16px);
+    scroll-padding-inline: var(--ugc-pad, 16px);
+  }
+}

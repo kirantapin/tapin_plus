@@ -213,8 +213,11 @@ export function UgcRow({ title = "Students using it", without = [], place }: { t
   const shown = CLIPS.filter((c) => !without.includes(c.key) && (!place || c.place === place));
   if (!shown.length) return null;
   return (
-    <section className="ugc" aria-labelledby="ugc-h">
-      <h2 id="ugc-h" className="tpa-h2 tpa-h2-out">
+    /* A white card like every other section (Sam, 16 Nov 2026: "can we put
+       these testimonial videos in their own white background parent
+       container similar to the other sections?"). */
+    <section className="tpa-module ugc" aria-labelledby="ugc-h">
+      <h2 id="ugc-h" className="tpa-h2">
         {title}
       </h2>
       <ul className="ugc-row">
