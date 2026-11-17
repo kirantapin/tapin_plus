@@ -1511,12 +1511,35 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   <div className="tpu-act tpu-act-member">
                     {/* On a phone the dock carries the app button. */}
                     {desk ? getApp("member_band", true) : null}
-                    <p className="tpu-on">
-                      <i aria-hidden="true" />
-                      <span>
-                        <b>Plus is on</b> · sign in with the number you joined&nbsp;with
-                      </span>
-                    </p>
+                    {/* The status as its own plate (Sam, 17 Nov 2026: "I don't
+                        love the way this looks ... maybe it's in its own full
+                        width parent container"): the header's glass, the dot,
+                        "Plus is on" over how to get in. On a phone the whole
+                        plate opens the app; on a computer it sits by the
+                        button, which does. */}
+                    {(() => {
+                      const inner = (
+                        <>
+                          <i className="tpu-plate-dot" aria-hidden="true" />
+                          <span className="tpu-plate-words">
+                            <b>Plus is on</b>
+                            <small>Sign in to the app with the number you joined&nbsp;with</small>
+                          </span>
+                          {desk ? null : (
+                            <svg className="tpu-plate-go" viewBox="0 0 24 24" aria-hidden="true">
+                              <path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </>
+                      );
+                      return desk ? (
+                        <div className="tpu-plate">{inner}</div>
+                      ) : (
+                        <a className="tpu-plate" href={appHref()} rel="noopener noreferrer" onClick={() => track("plus_get_app_clicked", { where: "member_plate", device: device() })}>
+                          {inner}
+                        </a>
+                      );
+                    })()}
                   </div>
                 ) : null}
                 {memberHome ? null : (
