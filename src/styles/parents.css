@@ -3498,3 +3498,25 @@
     white-space: nowrap;
   }
 }
+
+/* ══ A TABLET (Sam, 17 Nov 2026: "this tablet page break needs /impeccable
+   polish") ════════════════════════════════════════════════════════════════
+   From a big phone up to a computer, the page is the phone's one column,
+   448px wide, centred, as the students page is. The header was the one thing
+   that ran edge to edge, so its headline sat in one long line over a
+   900px photo with a button stretched across it. Now it holds the column
+   like everything under it. */
+@media (min-width: 480px) and (max-width: 1023.98px) {
+  /* The photo card sits 10px inside its band, so the band is 468px and the
+     card's edges line up with the 448px cards under it. */
+  .tpp .tpa-band.tpp-band {
+    width: auto;
+    max-width: 468px;
+    margin-left: auto;
+    margin-right: auto;
+  }  /* The headline in its three lines, as on a phone and a computer. */
+  .tpp .tpa-band-title h1 .tpp-l {
+    display: block;
+    white-space: nowrap;
+  }
+}
