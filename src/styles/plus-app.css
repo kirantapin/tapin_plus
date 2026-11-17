@@ -9173,3 +9173,72 @@ i[data-k="pts"] {
     scroll-padding-inline: var(--ugc-pad, 16px);
   }
 }
+
+/* ══ The member's header act (16 Nov 2026) ═══════════════════════════════════
+   In the visitor's Join row's place: the app button (a computer; the dock
+   has it on a phone) and a live "Plus is on" line. */
+.tpu-act-member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: 18px;
+}
+.tpu-on {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+}
+.tpu-on i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ad08a;
+  box-shadow: 0 0 0 4px rgba(58, 208, 138, 0.22);
+}
+.tpu-on b {
+  font-weight: 600;
+  color: #ffffff;
+}
+@media (min-width: 1024px) {
+  .tpu-act-member {
+    margin-top: 32px;
+  }
+  .tpu-on {
+    font-size: 16px;
+    line-height: 21px;
+  }
+}
+/* Above the band title's own paragraph rules. */
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+}
+@media (max-width: 1023.98px) {
+  .tpu-band .tpa-band-title .tpu-act-member {
+    margin: 14px 0 4px;
+    padding: 0;
+  }
+}
+@media (min-width: 1024px) {
+  .tpu-band .tpa-band-title .tpu-act-member .tpu-on {
+    font-size: 16px;
+    line-height: 21px;
+  }
+}
+/* The Apple mark beside "Get the Tapin app", sat on the text's baseline. */
+.tpa-cta > svg:first-child {
+  flex: none;
+  margin: -2px 8px 0 0;
+}
+.tpu-band .tpa-band-title .tpu-act-member .tpu-on :is(span, b) {
+  font-size: inherit;
+  line-height: inherit;
+}

@@ -30,7 +30,7 @@ import AccountLine from "../shell/AccountLine";
 import MemberDot from "../shell/MemberDot";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
-import { AppCard, appHref, device } from "../shell/GetTheApp";
+import { AppCard, AppleGlyph, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
 import { ForeverLeft, InviteClock, LinkBar, SpotsLine, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
@@ -1079,6 +1079,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
       rel="noopener noreferrer"
       onClick={() => track("plus_get_app_clicked", { where, device: device() })}
     >
+      {/* The App Store's mark (Sam, 16 Nov 2026: "can we add the apple icon
+          next to get the app?"); not on Android, where it opens the web app. */}
+      {device() === "android" ? null : <AppleGlyph />}
       Get the Tapin app
     </a>
   );
@@ -1483,7 +1486,14 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     week. And then $25 added to your account for signing up":
                     the weekly $5 back, then the month's $5 at each spot. */}
                 <h1 className="tpu-h1">
-                  ${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week
+                  {/* A member's own line (Sam, 16 Nov 2026, of the member
+                      header: "what's good with this header??"): what they
+                      have, not the pitch. The monthly $5 at each place. */}
+                  {memberHome ? (
+                    <>Your ${CREDIT} credit is waiting at {PLACES.length} Blacksburg&nbsp;spots</>
+                  ) : (
+                    <>${CREDIT} credit at {PLACES.length} Blacksburg spots, every&nbsp;week</>
+                  )}
                 </h1>
                 {/* Sam, 16 Nov 2026: "+$25 added to your account to spend
                     every month" ($5 at each of the five, every month). The
@@ -1495,6 +1505,20 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
+                {/* A member's act: the app, where the credit is, and that
+                    Plus is on (in the visitor's Join row's place). */}
+                {memberHome ? (
+                  <div className="tpu-act tpu-act-member">
+                    {/* On a phone the dock carries the app button. */}
+                    {desk ? getApp("member_band", true) : null}
+                    <p className="tpu-on">
+                      <i aria-hidden="true" />
+                      <span>
+                        <b>Plus is on</b> · sign in with the number you joined&nbsp;with
+                      </span>
+                    </p>
+                  </div>
+                ) : null}
                 {memberHome ? null : (
                 <div className="tpu-act">
                   {desk ? (
