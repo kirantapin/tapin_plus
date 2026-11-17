@@ -10,6 +10,9 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { thanksHref, type Gift } from "../model/gift";
 import { APP_STORE_URL, appHref } from "../shell/GetTheApp";
+import { LiteMark } from "../shell/LiteMark";
+import { liveDay } from "../shell/LiveSoon";
+import { LITE_PLACES } from "../model/lite";
 import { CREDIT, FlatMark, PERCENT, PLACES } from "./parents_kit";
 import type { DockCta } from "./GiftPage";
 import "../styles/gift-after.css";
@@ -95,7 +98,7 @@ function Places(p: Props) {
         <h2 id="gav-h" className="gav-d-lede">
           {/* The monthly offer, the 15% after the credit (Sam, 9 and 10 Nov
               2026); the weekly $5-on-$10 isn't marketed. */}
-          <span data-k="credit">${CREDIT} credit</span> every month at each place, no minimum. Then{" "}
+          <span data-k="credit">${CREDIT} credit</span> every month at each Plus place, no minimum. Then{" "}
           <span data-k="pct">{PERCENT}% off</span>, once a day. Points on everything.
         </h2>
         <ul className="gav-d-rail" aria-label="Where it works">
@@ -109,6 +112,28 @@ function Places(p: Props) {
               </div>
             </li>
           ))}
+          {/* The Lite places after the five (Sam, 17 Nov 2026: "add playa
+              bowls and crumbl and italianos to this list, but marked as lite
+              locations"). Their own perks only, never the $5 or 15%
+              (model/lite.ts), and the day each goes live while it's ahead. */}
+          {LITE_PLACES.map((pl) => {
+            const day = liveDay(pl.id);
+            return (
+              <li key={pl.id} className="gav-d-lite">
+                <img className="gav-d-photo" src={pl.photo} alt="" decoding="async" loading="lazy" />
+                <span className="gav-d-tag" data-ph-show="">
+                  <LiteMark className="gav-d-leaf" />
+                  Lite
+                </span>
+                <div>
+                  <img className="gav-d-logo" src={pl.logo} alt="" decoding="async" loading="lazy" />
+                  <b>{pl.name}</b>
+                  <span>{pl.short}</span>
+                  {day ? <span className="gav-d-day">From {day}</span> : null}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <section className="gav-d-app" aria-label="The Tapin app">

@@ -242,3 +242,33 @@
   color: #f7f3ea;
   fill: currentColor;
 }
+
+/* The Lite places in the rail (17 Nov 2026): a leaf "Lite" tag on the
+   photo, their own perk line, the day they go live while it's ahead. */
+.gft .gav-d-rail li.gav-d-lite {
+  position: relative;
+}
+.gft .gav-d-rail .gav-d-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px 4px 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141618;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+}
+.gft .gav-d-rail .gav-d-leaf {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+}
+.gft .gav-d-rail .gav-d-day {
+  color: #141618;
+  font-weight: 600;
+}

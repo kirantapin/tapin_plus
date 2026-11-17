@@ -1574,3 +1574,26 @@
     transition: none;
   }
 }
+
+/* The waitlist's phone step (17 Nov 2026): one reason line above the
+   number, and the text consent small under the button, after it in the
+   pinned order. */
+.pck-list-why {
+  margin: 2px 0 2px;
+  color: var(--ink);
+}
+.pck-island form.pck-body > .pck-fine-under,
+.pck-fine-under {
+  order: 4;
+  /* The body's 12px gap plus 2px: close under the button, as its note. */
+  margin: 2px 0 0;
+  text-wrap: pretty;
+  font-size: 12px;
+  line-height: 16px;
+  color: #6b6c6e;
+  text-align: left;
+}
+.pck-list-why {
+  /* Fill the field's width; only the orphan is avoided. */
+  text-wrap: pretty;
+}

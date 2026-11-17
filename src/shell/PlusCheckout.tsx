@@ -467,7 +467,9 @@ function PlusCheckoutSheet({
             </svg>
           </button>
         </div>
-        {step < 4 && !signInOnly ? (
+        {/* The waitlist shows no steps (Sam, 17 Nov 2026): a two-part bar warned
+            a code was coming before they had typed a number. */}
+        {step < 4 && !signInOnly && !waitlist ? (
           <ol className="pck-steps" aria-label={`Step ${step} of ${waitlist ? 2 : 3}`}>
             {(waitlist ? ["Phone", "Code"] : ["Phone", "Code", "Pay"]).map((label, k) => (
               <li key={label} data-on={k + 1 <= step ? "" : undefined} aria-current={k + 1 === step ? "step" : undefined}>
@@ -789,24 +791,19 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
   );
   /* The waitlist's phone step: the join sheet as it is, with its words
      changed (Sam, 17 Nov 2026: "it could be the same sheet as what we have
-     currently, just the copy changes"). The spots panel says how the list
-     works; the consent the list needs is said before the number. Being
+     currently, just the copy changes"). Being
      texted when a spot opens IS the waitlist, so that consent goes with
      joining it. It is never a condition of buying anything (TCPA), and
      nothing is bought here. */
-  const listWhy = (
-    <div className="pck-why">
-      <div className="plus-seats pck-seats">
-        <p className="plus-seats-line">
-          <b>Invite only. Spots open a few at a time.</b>
-          <span>We text you when yours does</span>
-        </p>
-      </div>
-    </div>
-  );
+  /* One reason to give the number, then the number and the button; the
+     consent sits under the button in small type (Sam, 17 Nov 2026: the
+     four lines of it were the biggest thing above the field, and the grey
+     panel repeated the header's "invite only"). Tapping the button is the
+     agreement, so the notice names it. */
+  const listWhy = <p className="pck-lede pck-list-why">Save your spot in line. We text you when it opens.</p>;
   const listConsent = (
-    <p className="pck-fine">
-      By joining, you agree to get automated texts from Tapin about your spot and Tapin Plus at this number, starting with a sign-in code. Not a condition of any purchase. Msg &amp; data rates may apply. Reply STOP to opt out.
+    <p className="pck-fine pck-fine-under">
+      By tapping Join the waitlist, you agree to get automated texts from Tapin about your spot and Tapin Plus at this number, starting with a sign-in code. Not a condition of any purchase. Msg &amp; data rates may apply. Reply STOP to opt out.
     </p>
   );
 
@@ -816,9 +813,9 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
         waitlist ? (
           <>
             {listWhy}
-            {listConsent}
             {field}
             {sendBtn}
+            {listConsent}
           </>
         ) : plain ? (
           <>
