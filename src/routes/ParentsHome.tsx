@@ -25,6 +25,7 @@ import {
   reducedMotion,
   Chevron,
   FlatMark,
+  PARENT_RATE,
 } from "./parents_kit";
 import { CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
 import { lowerVersion } from "../shell/LowerVersions";
@@ -641,7 +642,7 @@ export default function ParentsHome() {
                       </>
                     ) : LIFE ? (
                       <>
-                        <b>{FIRST}/month for life</b> · launch sale <s>{WAS}</s>
+                        <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
                       </>
                     ) : (
                       <>
@@ -960,7 +961,7 @@ export default function ParentsHome() {
             {held
               ? "See it when you add their number. We text you before every bill. Cancel anytime."
               : LIFE
-                ? `Exclusive launch sale, usually ${WAS}. We text you before every bill. Cancel anytime.`
+                ? `Exclusive ${PARENT_RATE}, usually ${WAS}. We text you before every bill. Cancel anytime.`
                 : `Then ${MONTHLY}/month. We text you before every bill. Cancel anytime.`}
           </p>
           <button

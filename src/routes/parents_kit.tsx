@@ -39,6 +39,10 @@ export function useParentPrice(): { FIRST: string; MONTHLY: string; LIFE: boolea
    January 1, when new gifts go to $12.99; past it the page sells the
    ordinary offer. */
 export const PARENTS_LAUNCH_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
+/* What the rate is called (Sam, 17 Nov 2026: "for the parents group, we
+   should call the rate an exclusive VT Parent Group / Hungry Hokies rate,
+   rather than a launch price"). */
+export const PARENT_RATE = "VT Parent Group / Hungry Hokies rate";
 export const PARENTS_LAUNCH_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 
 /* ══ WHAT A LUNCH COSTS (COPY.md v2) ═════════════════════════════════════════
