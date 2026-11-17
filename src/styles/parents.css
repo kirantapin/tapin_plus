@@ -3480,3 +3480,23 @@
     display: none;
   }
 }
+
+/* Three lines on a computer (Sam, 17 Nov 2026: "for parents page can we make
+   this three lines instead of 2"), one per DESK_LINES entry: "Make every
+   dollar / they spend in / Blacksburg go further." A phone runs the pieces
+   together as before. */
+.tpp .tpa-band-title .tpp-dl {
+  flex: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  text-shadow: inherit;
+  color: inherit;
+}
+@media (min-width: 1024px) {
+  .tpp .tpa-band-title h1[data-lines] .tpp-dl {
+    display: block;
+    white-space: nowrap;
+  }
+}

@@ -5,6 +5,7 @@ import { useAuth } from "../context/auth_context";
 import { Link } from "react-router-dom";
 import { Founders } from "../shell/Founders";
 import {
+  Fragment,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -171,6 +172,12 @@ const PARENT_HEROES: Record<ParentHero, readonly [string, string?]> = {
 };
 /** A line under the headline, for the headlines that carry one; it says the
  *  offer, so the favourites row then shows the places alone. */
+/** A headline's lines on a computer, where they're set one per line (Sam, 17
+ *  Nov 2026: "for parents page can we make this three lines instead of 2");
+ *  "spend" stays on the second line. A phone runs them together as before. */
+const DESK_LINES: Partial<Record<ParentHero, readonly string[]>> = {
+  s: ["Make every dollar", "they spend in", "Blacksburg go further."],
+};
 const PARENT_SUBS: Partial<Record<ParentHero, string>> = {
   r: "Tapin Plus gives your Virginia Tech student $5 credit every month at each of their favorite local spots, then 15% off a meal every day.",
   s: "$5 credit every month at each of their favorite Blacksburg spots, then 15% off once a day.",
@@ -288,6 +295,7 @@ export default function ParentsHome() {
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
   const headline = PARENT_HEROES[hero];
+  const deskLines = DESK_LINES[hero];
   const shot = PHOTOS[photo];
   /* Plus's price for this page (a promo link's offer, else the welcome
      offer): what the parent's gift will charge when it's claimed. */
@@ -585,14 +593,25 @@ export default function ParentsHome() {
         </div>
         <div ref={titleRef} className="tpa-band-title">
           <div>
-            <h1 data-variant={hero}>
-              {headline[0]}
-              {headline[1] ? (
+            <h1 data-variant={hero} data-lines={deskLines ? deskLines.length : undefined}>
+              {deskLines ? (
+                deskLines.map((line, i) => (
+                  <Fragment key={line}>
+                    {i ? " " : null}
+                    <span className="tpp-dl">{line}</span>
+                  </Fragment>
+                ))
+              ) : (
                 <>
-                  {" "}
-                  <span className="tpp-nowrap">{headline[1]}</span>
+                  {headline[0]}
+                  {headline[1] ? (
+                    <>
+                      {" "}
+                      <span className="tpp-nowrap">{headline[1]}</span>
+                    </>
+                  ) : null}
                 </>
-              ) : null}
+              )}
             </h1>
             {/* The student page's header, in the parents' words (Sam, 16
                 Nov 2026: "update the mom's header with the auto refund stuff?
