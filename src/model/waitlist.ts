@@ -73,3 +73,10 @@ export const setWaitlistPage = (on: boolean) => {
 };
 export const waitlistPage = (): boolean => pageWaits;
 export const WAITLIST_CTA = "Join the waitlist";
+
+/* How many students are on the waitlist, shown on the card and the dock
+   (Sam, 17 Nov 2026: "13 is real"). The REAL count only: update it from
+   Kiran's query (auth.users with waitlist_at) when it changes, never by a
+   schedule. A made-up count of people would be fake social proof. */
+export const WAITLIST_COUNT: number = 13;
+export const waitlistCountLine = (): string => `${WAITLIST_COUNT} ${WAITLIST_COUNT === 1 ? "student" : "students"} on the waitlist`;
