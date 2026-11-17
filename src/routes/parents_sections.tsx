@@ -9,7 +9,7 @@ import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
-import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -285,7 +285,7 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
             <p>
               <span>
                 {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"}{" "}
-                {held ? "at the holiday price" : LIFE ? "in the launch sale" : <>at {MONTHLY}&nbsp;a&nbsp;month</>}
+                {held ? "at the holiday price" : LIFE ? `at the ${PARENT_RATE}` : <>at {MONTHLY}&nbsp;a&nbsp;month</>}
               </span>
               <small>
                 {held ? (
@@ -361,7 +361,7 @@ export function PriceLead() {
       <p className="tpp-price-then tnum">
         {LIFE ? (
           <>
-            Launch sale, usually <s>{WAS}</s>
+            Exclusive {PARENT_RATE}, usually <s>{WAS}</s>
           </>
         ) : (
           <>
@@ -460,7 +460,7 @@ export function BenefitCards() {
     {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
-      label: LIFE ? `A month, for life. Launch sale, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
+      label: LIFE ? `A month, for life. Exclusive ${PARENT_RATE}, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
       line: "A text before every bill. Cancel anytime. Auto refund if they don’t save what you pay.",
     },
   ];
