@@ -191,17 +191,22 @@ async function fetchPrice(): Promise<PlusPrice> {
   // tries it first (model/link.ts).
   const linked = offerPrice(link?.policy ?? null, plus);
   const offered = offerPrice(offer, plus);
+  /* The texts rate (model/textsRate.ts), when it is the offer that applied:
+     its duration is the term (forever) and its id says which it is, so the
+     checkout's tile can show it. */
+  const texts = textsRatePolicy();
+  const textsSet = linked === null && texts !== null && offerId === texts && offered !== null;
   /* The page's own policy set the price: its duration is the term. */
-  const ownSet = linked === null && own !== null && offered !== null;
+  const ownSet = linked === null && !textsSet && own !== null && offered !== null;
   return {
     monthly: plus.price,
     first: linked ?? offered ?? plus.price,
     firstFor: linked !== null && link
       ? link.policy.definition.action.discountDuration ?? null
-      : ownSet
+      : ownSet || textsSet
         ? offer?.definition.action.discountDuration ?? null
         : null,
-    policyId: ownSet ? own : null,
+    policyId: ownSet ? own : textsSet ? texts : null,
     period: periodOf(plus),
     billing: plus.billing,
     linkId: linked !== null && link ? link.linkId : null,
