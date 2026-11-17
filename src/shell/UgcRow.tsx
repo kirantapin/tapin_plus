@@ -116,7 +116,7 @@ function Enlarged({ open, onClosed }: { open: Open; onClosed: () => void }) {
     <div className="ugc-big" role="dialog" aria-modal="true" aria-label={open.label}>
       <div ref={shade} className="ugc-big-shade" onClick={close} />
       <div ref={frame} className="ugc-big-frame">
-        <video ref={vid} src={asset(open.src)} poster={asset(open.poster)} loop playsInline onClick={toggle} />
+        <video ref={vid} className="ph-no-capture" src={asset(open.src)} poster={asset(open.poster)} loop playsInline onClick={toggle} />
         <button type="button" className="ugc-big-close" onClick={close} aria-label="Close" autoFocus>
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <path d="M6 6l12 12M18 6 6 18" />
@@ -149,6 +149,9 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    /* React sets the property, never the attribute; write it so anything
+       reading the page (a recorder, an extension) sees the clip is silent. */
+    v.setAttribute("muted", "");
     clips.add(v);
     const onVol = () => setSound(!v.muted);
     v.addEventListener("volumechange", onVol);
@@ -186,7 +189,11 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
   };
   return (
     <div className="ugc-clip">
-      <video ref={ref} src={asset(src)} poster={asset(poster)} muted loop playsInline preload="none" aria-hidden="true" onClick={enlarge} style={open ? { visibility: "hidden" } : undefined} />
+      {/* ph-no-capture: PostHog's recordings leave the clips out (Sam, 16 Nov
+          2026: "all of the audio seems to be coming through on the post hog
+          recordings"); React never writes the muted attribute, so a replay
+          played them with sound. */}
+      <video ref={ref} className="ph-no-capture" src={asset(src)} poster={asset(poster)} muted loop playsInline preload="none" aria-hidden="true" onClick={enlarge} style={open ? { visibility: "hidden" } : undefined} />
       {/* The whole clip is the way in; this names it for a screen reader. */}
       <button type="button" className="ugc-open" onClick={enlarge} aria-label={`Watch ${label} larger`} />
       <button type="button" className="ugc-sound" onClick={toggle} aria-pressed={sound} aria-label={sound ? `Mute ${label}` : `Unmute ${label}`}>
