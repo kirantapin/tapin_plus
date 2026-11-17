@@ -9558,3 +9558,13 @@ button.tpu-plate:active {
     line-height: 19px;
   }
 }
+
+/* The waitlist consent stays fine print under the button on a phone (the
+   15px floor above is for reading text, not the legal notice). */
+@media (max-width: 1023.98px) {
+  html[data-surface="tpa"] .pck-island .pck-fine.pck-fine-under,
+  html[data-surface="tpa"] .pck-sheet .pck-fine.pck-fine-under {
+    font-size: 12px;
+    line-height: 16px;
+  }
+}

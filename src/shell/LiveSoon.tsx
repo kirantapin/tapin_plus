@@ -15,6 +15,8 @@ const liveOf = (id?: string): Live => (id && LIVE[id]) || FRI_20;
 
 /** Whether a place shows the countdown now. */
 export const liveSoon = (id: string, now: number = Date.now()) => id in LIVE && now < LIVE[id].at;
+/** The day a place goes live ("Wed 25 Nov") while it is still ahead, else null. */
+export const liveDay = (id: string, now: number = Date.now()): string | null => (liveSoon(id, now) ? LIVE[id].short : null);
 
 const left = (ms: number) => {
   const m = Math.max(0, Math.floor(ms / 60_000));
