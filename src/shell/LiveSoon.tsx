@@ -5,13 +5,16 @@ import { useEffect, useState } from "react";
    countdown so it's clear. Same with Sweetopia") ══════════════════════════════
    Until midnight Eastern on Friday 20 November these three show a pill with
    the day and the time left ("Live Fri 20 Nov · 7d 4h"); from then on it
-   goes and the card is an ordinary Plus or Lite card. One date for all three:
-   if one moves, give LIVE_ON a date per place. */
-export const LIVE_ON = Date.parse("2026-11-20T00:00:00-05:00");
-const SOON = new Set(["crumbl", "italianospizza", "sweetopia"]);
+   goes and the card is an ordinary Plus or Lite card. A date per place since
+   Playa Bowls (Sam, 16 Nov 2026: "going live on the 25th of November"). */
+type Live = { at: number; short: string; long: string; day: string };
+const FRI_20: Live = { at: Date.parse("2026-11-20T00:00:00-05:00"), short: "Fri 20 Nov", long: "Friday 20 November", day: "20" };
+const WED_25: Live = { at: Date.parse("2026-11-25T00:00:00-05:00"), short: "Wed 25 Nov", long: "Wednesday 25 November", day: "25" };
+const LIVE: Record<string, Live> = { crumbl: FRI_20, italianospizza: FRI_20, sweetopia: FRI_20, playabowls: WED_25 };
+const liveOf = (id?: string): Live => (id && LIVE[id]) || FRI_20;
 
 /** Whether a place shows the countdown now. */
-export const liveSoon = (id: string, now: number = Date.now()) => SOON.has(id) && now < LIVE_ON;
+export const liveSoon = (id: string, now: number = Date.now()) => id in LIVE && now < LIVE[id].at;
 
 const left = (ms: number) => {
   const m = Math.max(0, Math.floor(ms / 60_000));
@@ -28,16 +31,17 @@ const left = (ms: number) => {
  *  date, the time left, the orange bar filling to the day, on a white panel
  *  inset from the photo's edges in place of the dark glass pill. Nothing once
  *  it's live. */
-export function LiveCountdown({ className }: { className?: string }) {
+export function LiveCountdown({ className, id }: { className?: string; id?: string }) {
+  const L = liveOf(id);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(t);
   }, []);
   const [lightV] = useState(liveCardVersion);
-  if (now >= LIVE_ON) return null;
-  const done = Math.min(1, Math.max(0, (now - ANNOUNCED_AT) / (LIVE_ON - ANNOUNCED_AT)));
-  const t = left(LIVE_ON - now);
+  if (now >= L.at) return null;
+  const done = Math.min(1, Math.max(0, (now - ANNOUNCED_AT) / (L.at - ANNOUNCED_AT)));
+  const t = left(L.at - now);
   /* Two lighter takes, preview only (?livec=a|b, Sam, 12 Nov 2026: "don't
      love the way this looks on the merchant card, I like it on the modal
      though, can you give me 2 /impeccable redesigns that are a bit easier on
@@ -48,7 +52,7 @@ export function LiveCountdown({ className }: { className?: string }) {
     return (
       <>
         <span className="lvc-edge-tag tnum">
-          <b>Fri 20 Nov</b> · {t}
+          <b>{L.short}</b> · {t}
         </span>
         <span className="lvc-edge-line" aria-hidden="true">
           <i style={{ transform: `scaleX(${done})` }} />
@@ -57,10 +61,10 @@ export function LiveCountdown({ className }: { className?: string }) {
     );
   if (lightV === "b")
     return (
-      <span className="lvc-mini" aria-label={`Live on Plus Friday 20 November, in ${t}`}>
+      <span className="lvc-mini" aria-label={`Live on Plus ${L.long}, in ${t}`}>
         <span className="lvc-mini-day" aria-hidden="true">
           <i>Nov</i>
-          <b>20</b>
+          <b>{L.day}</b>
         </span>
         <span className="lvc-mini-left tnum" aria-hidden="true">
           {t}
@@ -72,8 +76,8 @@ export function LiveCountdown({ className }: { className?: string }) {
       {/* No calendar day on the card (Sam, 12 Nov 2026: "use the current
           version but remove the calendar icon"); the pop-up keeps it. */}
       <span className="tpa-live-words">
-        <b>Live Fri 20 Nov</b>
-        <span className="tnum">{left(LIVE_ON - now)} to go</span>
+        <b>Live {L.short}</b>
+        <span className="tnum">{left(L.at - now)} to go</span>
       </span>
       <span className="tpa-live-bar" aria-hidden="true">
         <i style={{ transform: `scaleX(${done})` }} />
@@ -110,26 +114,46 @@ export const liveVersion = (): LiveV | null => {
   return v === "1" || v === "2" || v === "3" || v === "4" || v === "5" ? v : null;
 };
 
-/** The time left to the day, ticking. Null once it's live. */
-export function useLiveLeft(): string | null {
+/** The time left to a place's day, from a given now. Null once it's live. */
+export const liveLeftAt = (id: string, now: number): string | null => {
+  const L = liveOf(id);
+  return now >= L.at ? null : left(L.at - now);
+};
+/** The date, short ("Wed 25 Nov"). */
+export const liveShort = (id?: string) => liveOf(id).short;
+
+/** Now, ticking every 30 seconds. */
+export function useNow(): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(t);
   }, []);
-  return now >= LIVE_ON ? null : left(LIVE_ON - now);
+  return now;
+}
+
+/** The time left to the day, ticking. Null once it's live. */
+export function useLiveLeft(id?: string): string | null {
+  const L = liveOf(id);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  return now >= L.at ? null : left(L.at - now);
 }
 
 /** On the photo (takes 2 to 5). */
-export function LiveOnPhoto({ v }: { v: LiveV }) {
-  const t = useLiveLeft();
+export function LiveOnPhoto({ v, id }: { v: LiveV; id?: string }) {
+  const L = liveOf(id);
+  const t = useLiveLeft(id);
   if (!t || v === "1") return null;
   if (v === "2")
     return (
-      <span className="lv lv-cal" aria-label={`Live on Plus Friday 20 November, in ${t}`}>
+      <span className="lv lv-cal" aria-label={`Live on Plus ${L.long}, in ${t}`}>
         <span className="lv-cal-leaf" aria-hidden="true">
           <i>Nov</i>
-          <b>20</b>
+          <b>{L.day}</b>
         </span>
         <span className="lv-cal-left tnum" aria-hidden="true">
           {t}
@@ -139,7 +163,7 @@ export function LiveOnPhoto({ v }: { v: LiveV }) {
   if (v === "3")
     return (
       <span className="lv lv-ribbon">
-        <span>Live on Plus Fri 20 Nov</span>
+        <span>Live on Plus {L.short}</span>
         <b className="tnum">{t}</b>
       </span>
     );
@@ -147,25 +171,26 @@ export function LiveOnPhoto({ v }: { v: LiveV }) {
     return (
       <span className="lv lv-soon">
         <small>Live on Plus</small>
-        <b>Fri 20 Nov</b>
+        <b>{L.short}</b>
         <span className="tnum">in {t}</span>
       </span>
     );
   return (
     <span className="lv lv-chip">
-      <span>Live Fri 20 Nov</span>
+      <span>Live {L.short}</span>
       <b className="tnum">{t}</b>
     </span>
   );
 }
 
 /** Under the name (take 1), in place of the kind of place. */
-export function LiveLine() {
-  const t = useLiveLeft();
+export function LiveLine({ id }: { id?: string }) {
+  const L = liveOf(id);
+  const t = useLiveLeft(id);
   if (!t) return null;
   return (
     <small className="lv-line tnum">
-      Live Fri 20 Nov <i>· {t}</i>
+      Live {L.short} <i>· {t}</i>
     </small>
   );
 }
@@ -178,23 +203,24 @@ export function LiveLine() {
    ink with the time left under it, and a thin bar across the foot that fills
    as the day comes, from 12 November, the day it was announced. */
 const ANNOUNCED = Date.parse("2026-11-12T00:00:00-05:00");
-export function LiveRow() {
+export function LiveRow({ id }: { id?: string }) {
+  const L = liveOf(id);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 30_000);
     return () => window.clearInterval(t);
   }, []);
-  if (now >= LIVE_ON) return null;
-  const done = Math.min(1, Math.max(0, (now - ANNOUNCED) / (LIVE_ON - ANNOUNCED)));
+  if (now >= L.at) return null;
+  const done = Math.min(1, Math.max(0, (now - ANNOUNCED) / (L.at - ANNOUNCED)));
   return (
     <div className="pp-liverow">
       <span className="pp-liverow-day" aria-hidden="true">
         <i>Nov</i>
-        <b>20</b>
+        <b>{L.day}</b>
       </span>
       <span className="pp-liverow-words">
-        <b>Live on Plus Fri 20 Nov</b>
-        <span className="tnum">{left(LIVE_ON - now)} to go</span>
+        <b>Live on Plus {L.short}</b>
+        <span className="tnum">{left(L.at - now)} to go</span>
       </span>
       <span
         className="pp-liverow-bar"

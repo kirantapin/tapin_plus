@@ -168,7 +168,7 @@ export default function PlacePopup({
           </h2>
           {/* The day it goes live, as a row of its own with the time left
               filling a bar (12 Nov 2026). */}
-          {place.liveSoon ? <LiveRow /> : null}
+          {place.liveSoon ? <LiveRow id={place.id} /> : null}
           {/* What the place sells on Tapin. */}
           {sells.length ? (
             <ul className="pp-sells" aria-label={`On Tapin at ${place.name}`}>
@@ -190,7 +190,7 @@ export default function PlacePopup({
                       </span>
                     ) : (
                       <span className="pp-ico pp-ico-money tnum" aria-hidden="true">
-                        {k.b.match(/\d+%/)?.[0] ?? "%"}
+                        {k.b.match(/\d+%/)?.[0] ?? (k.key === "free" ? "Free" : "%")}
                       </span>
                     )}
                     <span>

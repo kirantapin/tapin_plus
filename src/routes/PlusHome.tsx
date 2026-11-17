@@ -1326,7 +1326,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                                 plus' next Friday with a small countdown so it's
                                 clear"): a pill on the photo until the day, or
                                 one of its five takes (?livev=). */}
-                            {liveSoon(v.id) ? livev ? <LiveOnPhoto v={livev} /> : <LiveCountdown className="tpa-live" /> : null}
+                            {liveSoon(v.id) ? livev ? <LiveOnPhoto v={livev} id={v.id} /> : <LiveCountdown className="tpa-live" id={v.id} /> : null}
                           </span>
                           <span className="tpa-glass tpa-tag">
                             {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
@@ -1342,7 +1342,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                             <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
                             <span className="tpa-place-words">
                               <b>{v.name}</b>
-                              {liveSoon(v.id) && livev === "1" ? <LiveLine /> : <small>{v.kind}</small>}
+                              {liveSoon(v.id) && livev === "1" ? <LiveLine id={v.id} /> : <small>{v.kind}</small>}
                               <small className="tpa-place-perk">{v.perk}</small>
                             </span>
                           </span>

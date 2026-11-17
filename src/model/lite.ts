@@ -56,6 +56,21 @@ export const LITE_PLACES: LitePlace[] = [
     short: "10% off, once a day",
     perks: [{ key: "percent", b: "10% off your order", when: "Once a day" }],
   },
+  {
+    /* Sam, 16 Nov 2026: "playabowls just joined tapin ... free cold brew
+       with any purchase. Tapin lite partner", live on Wednesday 25 November
+       (shell/LiveSoon.tsx). The round "NJ's original acai shop" badge and
+       the bowls spread are the ones Sam sent. No cold brew photo yet, so the
+       free perk shows the word in place of the item. */
+    id: "playabowls",
+    name: "Playa Bowls",
+    kind: "Acai bowls and smoothies",
+    logo: asset("logos/playabowls.png"),
+    photo: asset("places/playabowls.jpg"),
+    round: true,
+    short: "Free cold brew with any purchase",
+    perks: [{ key: "free", b: "A free cold brew", when: "With any purchase" }],
+  },
 ];
 
 export const litePlace = (id: string) => LITE_PLACES.find((p) => p.id === id);
