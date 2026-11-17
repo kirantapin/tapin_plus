@@ -9475,3 +9475,24 @@ button.tpu-plate:active {
   max-width: calc(100% - 84px);
   text-wrap: balance;
 }
+
+/* The header's button and its plate, one height on a computer (Sam, 17 Nov
+   2026: "also same height?"): the plate's two lines held it at 80px beside a
+   52px button. Both are 60 now; the plate's second line stays one line (it
+   has the width), so the two read as one row. The member's header too. */
+@media (min-width: 1024px) {
+  .tpa .tpu-act.tpu-act-member .tpa-cta {
+    height: 60px;
+    border-radius: 16px;
+  }
+  .tpa-band-title .tpu-act-member .tpu-plate {
+    box-sizing: border-box;
+    height: 60px;
+    max-width: none;
+    padding: 0 20px 0 16px;
+  }
+  .tpu-band .tpa-band-title .tpu-act-member .tpu-plate-words small,
+  .tpa-band-title .tpu-act-wl .tpu-plate-words small {
+    white-space: nowrap;
+  }
+}
