@@ -3400,3 +3400,55 @@
     grid-row: 7;
   }
 }
+
+/* ══ One photo in the phone card (16 Nov 2026) ═══════════════════════════════
+   The phone header was built around the split (its own box); a single photo
+   drew at its natural 1024px and showed only its corner. It fills the photo
+   rows now and frames by its --photo-pos, so the hug shows the whole family. */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band[data-phone="card"] img.tpa-band-art {
+    grid-column: 1;
+    /* The card's 10px inset each side (the art's margin). */
+    width: calc(100% - 20px);
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    object-fit: cover;
+    object-position: var(--photo-pos, 50% 22%);
+  }
+}
+
+/* Shorter (Sam, 16 Nov 2026: "it's too tall"): the photo's free row 150px →
+   96px, the family framed a little higher to clear the headline. */
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="card"]:not([data-photo="split"]) {
+    grid-template-rows: auto minmax(96px, auto) auto auto auto auto auto;
+  }
+}
+
+/* ══ THE FAMILY HEADER, QUIETER (Sam, 16 Nov 2026: "now the header is a bit
+   too busy") ═══════════════════════════════════════════════════════════════
+   The hug put three faces under the headline. On a computer the photo is
+   mirrored so the family stands on the right and the words sit over the
+   trees, on a left-hand shade; on a phone a deeper, longer shade from the
+   foot gives the words a calm ground. The hairline between Rob's line and
+   the terms goes: one rule fewer, the spacing already groups them. */
+.tpp .tpp-band:not([data-photo="split"]) .tpu-terms {
+  padding-top: 0;
+  box-shadow: none;
+}
+@media (max-width: 1023.98px) {
+  .tpp .tpa-band.tpp-band[data-phone="card"]:not([data-photo="split"])::after {
+    background: linear-gradient(0deg, rgba(10, 11, 12, 0.86) 0, rgba(10, 11, 12, 0.7) 34%, rgba(10, 11, 12, 0.28) 62%, rgba(10, 11, 12, 0) 80%);
+  }
+}
+@media (min-width: 1024px) {
+  .tpp .tpp-band:not([data-photo="split"]) img.tpa-band-art {
+    transform: scaleX(-1);
+  }
+  .tpp .tpa-band.tpp-band:not([data-photo="split"])::after {
+    background:
+      linear-gradient(90deg, rgba(10, 11, 12, 0.78) 0, rgba(10, 11, 12, 0.6) 34%, rgba(10, 11, 12, 0.18) 56%, rgba(10, 11, 12, 0) 70%),
+      linear-gradient(0deg, rgba(10, 11, 12, 0.4) 0, rgba(10, 11, 12, 0) 40%);
+  }
+}

@@ -229,7 +229,9 @@ const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
     },
     hug: {
       src: asset("/parents/hero-hug.webp"),
-      phone: "36% 18%",
+      /* The three of them, dad, student and mom, at the left of the frame
+         (16 Nov 2026: a phone shows about half the photo's width). */
+      phone: "4% 14%",
       desk: "50% 22%",
     },
     downtown: {
@@ -238,10 +240,14 @@ const PHOTOS: Record<HeroPhoto, { src: string; phone: string; desk: string }> =
       desk: "50% 22%",
     },
   };
+/* One family photo, no split (Sam, 16 Nov 2026: "this is quite busy ... like
+   the line that cuts through the image", then "should be a family photo I
+   think?"): the hug, the one where the whole family fits a phone's frame.
+   ?photo=split|move-in|downtown still previews the others. */
 const heroPhoto = (): HeroPhoto => {
-  if (typeof window === "undefined") return "split";
+  if (typeof window === "undefined") return "hug";
   const p = new URLSearchParams(window.location.search).get("photo");
-  return p === "move-in" || p === "hug" || p === "downtown" ? p : "split";
+  return p === "move-in" || p === "split" || p === "downtown" ? p : "hug";
 };
 
 const LEGAL = [
