@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { YouGet } from "../shell/OfferVersions";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { asset } from "../asset";
@@ -1818,6 +1819,12 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 ? "Thank you for the support. We’ll text you when more seats become available."
                 : "Thank you all for the overwhelming support. Join the waitlist and we’ll text you when more seats become available."}
             </p>
+            {/* What Plus gets you, as the price card had it (Sam, 17 Nov
+                2026: "this card should still show the tapin plus benefits I
+                think? similar to the last one"): its You get row, no price. */}
+            <div className="ov ov-c tpu-wl-get" data-ph-show="">
+              <YouGet />
+            </div>
             {joinCta("hero")}
           </section>
         ) : offer === "1" ? (
