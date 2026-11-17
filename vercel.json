@@ -3,6 +3,18 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/vtparents",
+      "destination": "/parents?utm_source=facebook&utm_medium=group_post&utm_campaign=vt_parents_finals&utm_content=deedee_group",
+      "permanent": true
+    },
+    {
+      "source": "/hokies",
+      "destination": "/parents?utm_source=hungry_hokies_guide&utm_medium=guide&utm_campaign=vt_parents_finals&utm_content=guide_entry",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/blacksburg",
