@@ -41,7 +41,11 @@ export function BonusSpots({
             {/* At a bar (The Burg, 12 Nov 2026) it says what the $5s and
                 15% go on, never alcohol, and events where Plus covers
                 tickets (Sam: "also this would include events"). */}
-            <p className="tps-unlock-sub">{BAR_IDS.has(one.id) ? `On food, non-alcoholic drinks${venueCovers[one.id]?.includes("tickets") ? " and events" : ""}. No minimum, no\u00a0markup.` : "No minimum spend, no\u00a0markup."}</p>
+            {/* No "no markup" on a place's page, and the monthly $5 is on
+                eligible items (Sam, 17 Nov 2026: "let's not have the 'no
+                markup' text", and the credit "may only be eligible for
+                specific items"). */}
+            <p className="tps-unlock-sub">{BAR_IDS.has(one.id) ? `On food, non-alcoholic drinks${venueCovers[one.id]?.includes("tickets") ? " and events" : ""}. No\u00a0minimum.` : "On eligible items. No minimum\u00a0spend."}</p>
           </div>
         </div>
         {/* The weekly $5 back too (Sam, 12 Nov 2026: "for the coffeeholics
