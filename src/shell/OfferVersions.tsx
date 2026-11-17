@@ -55,7 +55,6 @@ export function PayGet({
    *  there is no "then". */
   forever?: boolean;
 }) {
-  const total = `$${PLACES.length * CREDIT}`;
   return (
     <>
       {hidden ? (
@@ -91,30 +90,39 @@ export function PayGet({
           </small>
         </div>
       )}
-      <div className="ov-c-row ov-c-get">
-        <span>{they ? "They get" : "You get"}</span>
-        <b className="tnum">{total}</b>
-        <small className="tnum">
-          to spend every month, ${CREDIT} at each spot
-        </small>
-        {/* Then the other two rungs (Sam, 10 Nov 2026: Get $5 · Earn $5 ·
-            Save 15%). */}
-        <ul className="ov-c-more tnum">
-          <li>
-            <Coin />
-            Earn ${CREDIT} back every week on $10+
-          </li>
-          <li>
-            <Percent />
-            Save {PERCENT}% every day
-          </li>
-        </ul>
-      </div>
+      <YouGet they={they} />
     </>
   );
 }
 
 /** "Offer ends November 30 · 20 days left"; nothing once it's over. */
+/** C's "You get" row on its own: the $25 a month, then Earn $5 back and
+ *  Save 15%. The waitlist card shows it with no "You pay" (17 Nov 2026). */
+export function YouGet({ they = false }: { they?: boolean }) {
+  const total = `$${PLACES.length * CREDIT}`;
+  return (
+    <div className="ov-c-row ov-c-get">
+      <span>{they ? "They get" : "You get"}</span>
+      <b className="tnum">{total}</b>
+      <small className="tnum">
+        to spend every month, ${CREDIT} at each spot
+      </small>
+      {/* Then the other two rungs (Sam, 10 Nov 2026: Get $5 · Earn $5 ·
+          Save 15%). */}
+      <ul className="ov-c-more tnum">
+        <li>
+          <Coin />
+          Earn ${CREDIT} back every week on $10+
+        </li>
+        <li>
+          <Percent />
+          Save {PERCENT}% every day
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function Ends() {
   const r = useWelcomeEnds();
   if (!r) return null;
