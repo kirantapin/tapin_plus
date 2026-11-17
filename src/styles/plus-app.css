@@ -9397,3 +9397,28 @@ a.tpu-plate:active {
     margin-top: 0;
   }
 }
+
+/* Watch it in action, on a phone: no card (Sam, 17 Nov 2026: "on mobile,
+   this section doesn't need a background container"). The heading sits on
+   the page like the other outside headings, and the clips swipe edge to edge
+   of the screen. A computer keeps the white card. */
+@media (max-width: 1023.98px) {
+  .tpa-module.ugc {
+    margin-inline: 0;
+    padding: 8px 0 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .tpa-module.ugc > .tpa-h2 {
+    margin-inline: var(--gutter);
+  }
+  .tpa-module.ugc > .ugc-row {
+    margin-inline: var(--gutter);
+  }
+  .tpa-module.ugc > .ugc-row:has(> li:nth-child(3)) {
+    margin-inline: 0;
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+  }
+}
