@@ -196,7 +196,7 @@ export function LiteStory({ places }: { places: LitePlace[] }) {
       </div>
       <p className="tln-foot">
         <LiteMark className="lite-mark" />
-        <span>{n > 1 ? "Both come with Plus, as Tapin Lite places." : "Comes with Plus, as a Tapin Lite place."}</span>
+        <span>{n > 2 ? "All come with Plus, as Tapin Lite places." : n > 1 ? "Both come with Plus, as Tapin Lite places." : "Comes with Plus, as a Tapin Lite place."}</span>
       </p>
     </section>
   );

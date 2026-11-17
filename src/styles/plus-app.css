@@ -9105,3 +9105,49 @@ html[data-surface="tpa"] .hs-scene .value-scene {
 .hk.hk-dark .hk-face {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
+
+/* ── Students using it, laid out (Sam, 16 Nov 2026: "the gap here feels a
+   bit off") ───────────────────────────────────────────────────────────────
+   The heading took the places row's 40px lead on top of the sheet's own 32,
+   so the header sat 72px away and the next card only 16px: now the sheet's
+   gap alone above, the heading tight to its clips, and the card under it a
+   clear step away. On a computer the clips fill the column, four across and
+   lined up with the heading and the cards below, so nothing scrolls or
+   crops. */
+.ugc {
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.ugc > .tpa-h2-out {
+  margin-top: 0;
+}
+@media (min-width: 1024px) {
+  .ugc-row,
+  .ugc-row:has(> li:nth-child(3)) {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+}
+
+/* ── Just joined, on a computer (Sam, 16 Nov 2026: "some text overlay issues
+   here") ─────────────────────────────────────────────────────────────────
+   Three frames side by side are narrow: "Just joined Tapin" wrapped to two
+   big lines and rode up over the place's name, and the live date was cut
+   off. The section's heading already says it, so the frames drop it, and the
+   date wraps to a second line instead of ending in an ellipsis. */
+@media (min-width: 1024px) {
+  .tpa-home .tln-story-big {
+    display: none;
+  }
+  .tpa-home .tln-story-who span span {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
+}
