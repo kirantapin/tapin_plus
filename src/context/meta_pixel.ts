@@ -107,7 +107,12 @@ const MIRRORED: Record<
 
   /* Joining the Plus waitlist (model/waitlist.ts, 17 Nov 2026): a Lead, the
      event the student campaigns optimise for while Plus is invite only. */
-  plus_waitlist_joined: { name: "Lead" },
+  plus_waitlist_joined: {
+    name: "Lead",
+    /* wl_<user id>: the same id the server's Conversions API Lead carries
+       (api/meta-lead.js), so Meta counts the two once. */
+    eventId: (p) => (typeof p.lead_id === "string" && p.lead_id ? p.lead_id : undefined),
+  },
 
   /* InitiateCheckout is the pay step showing, with its price, not the sheet
      opening (Grok's audit, 3 Nov 2026): the sheet opens before anyone has
@@ -144,6 +149,29 @@ const MIRRORED: Record<
     eventId: (p) => (typeof p.order_id === "string" && p.order_id ? p.order_id : undefined),
   },
 };
+
+/**
+ * The waitlist Lead, server side (api/meta-lead.js, 17 Nov 2026): the browser
+ * pixel misses visitors who block it, and the Leads campaign optimises on
+ * this one event. Same gate as the pixel (it only goes if the pixel loaded);
+ * the server checks the session and that the student is on the list, then
+ * sends Lead with event id wl_<user id>, matching the pixel's. The browser
+ * cookies _fbp/_fbc go along so Meta can match the visit. Fire and forget.
+ */
+export function sendServerLead(accessToken: string): void {
+  if (!started || typeof window === "undefined") return;
+  const cookie = (name: string) => document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))?.[1];
+  try {
+    void fetch("/api/meta-lead", {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ fbp: cookie("_fbp"), fbc: cookie("_fbc"), url: window.location.origin + window.location.pathname }),
+    }).catch(() => undefined);
+  } catch {
+    /* Analytics must never break the page. */
+  }
+}
 
 /**
  * Called from `track()` for every event. Silent for anything not in the table

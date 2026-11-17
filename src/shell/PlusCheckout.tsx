@@ -16,6 +16,7 @@ import { PlaceSeats, PlusSeats } from "./PlusSeats";
 import { chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
 import { joinWaitlist, joinedThisVisit, onWaitlist } from "../model/waitlist";
+import { sendServerLead } from "../context/meta_pixel";
 import { priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { pagePolicy, pagePolicyPlace } from "../model/pagePolicy";
@@ -328,15 +329,23 @@ function PlusCheckoutSheet({
     let live = true;
     setJoinErr(null);
     const page = typeof window !== "undefined" ? window.location.pathname : "/";
+    /* Seen in PostHog when the join begins, so a join that never ends shows. */
+    track("plus_waitlist_join_started", { where });
+    const uid = userSession?.user?.id;
+    const token = accessToken;
     void joinWaitlist(where, page).then((err) => {
       if (!live) return;
       if (err) {
-        setJoinErr(err);
-        track("plus_waitlist_failed", { where });
+        setJoinErr(err.message);
+        track("plus_waitlist_failed", { where, reason: err.reason });
       } else {
         setListed(true);
-        /* Mirrored to Meta as a Lead (context/meta_pixel.ts). */
-        track("plus_waitlist_joined", { where, page });
+        /* Mirrored to Meta as a Lead (context/meta_pixel.ts), with one event
+           id per student so the server's copy (api/meta-lead.js) is counted
+           once with it. */
+        const leadId = uid ? `wl_${uid}` : undefined;
+        track("plus_waitlist_joined", { where, page, lead_id: leadId });
+        if (leadId && token) sendServerLead(token);
       }
     });
     return () => {
