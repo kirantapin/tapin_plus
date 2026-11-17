@@ -348,7 +348,7 @@ const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
 const WAITLIST_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   {
     q: "Why is Plus invite only?",
-    a: "Plus comes with real discounts at every place, so we can’t let everyone in at once. We’re letting students in a few at a time to give the places time to adjust. Join the waitlist and you’re in line.",
+    a: "The benefits on Tapin Plus are very aggressive, which means we can’t give them out to everyone. Doing it too quickly wouldn’t give our partners time to adapt. You can join the waitlist now to save your spot in line.",
   },
   {
     q: "How does the waitlist work?",
