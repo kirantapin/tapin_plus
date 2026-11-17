@@ -248,7 +248,9 @@ export function PayGetLead({ lower = false, held = false }: { lower?: boolean; h
     </div>
   );
 }
-export const AFTER_HOLIDAY = 14.99;
+/* $12.99, as on the student pages (Sam, 17 Nov 2026: "make the parents
+   january price $12.99 too"; was $14.99). */
+export const AFTER_HOLIDAY = 12.99;
 
 /* ══ COUNT, IN THE PARENTS' TERMS (Sam, 12 Nov 2026: "port the count layout
    to the parents page too") ═══════════════════════════════════════════════
