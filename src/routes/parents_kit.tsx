@@ -17,10 +17,29 @@ export const PERCENT = 15;
    gift is built from (ParentCheckout, buildPlusCart), so a link (?l=) gives a
    group of parents its own price here and at the claim. "$–" while it
    loads. */
-export function useParentPrice(): { FIRST: string; MONTHLY: string } {
+/* A for-life price (the parents' launch sale, 17 Nov 2026, or any page's
+   forever offer): LIFE, and MONTHLY is what they pay every month, the sale
+   price; WAS is the full price it's discounted from. */
+export function useParentPrice(): { FIRST: string; MONTHLY: string; LIFE: boolean; WAS: string } {
   const price = usePlusPrice();
-  return { FIRST: usd(price?.first), MONTHLY: usd(price?.monthly) };
+  const life = price?.firstFor === "forever";
+  return { FIRST: usd(price?.first), MONTHLY: usd(life ? price?.first : price?.monthly), LIFE: life, WAS: usd(price?.monthly) };
 }
+
+/* ══ THE PARENTS' LAUNCH SALE (Sam, 17 Nov 2026: "for the parents page, can
+   we make it $4.99/month for life? Exclusive launch sale. Discounted from
+   $7.99 for life? You can show the price") ═══════════════════════════════════
+   Kiran's PUBLIC policy 2220e5ff ("$4.99 forever": $3 off the $7.99 bundle,
+   discountDuration "forever"; the texts rate's and the place pages'),
+   applied by its id on /parents alone (model/pagePolicy.ts), so the page's
+   price and the gift's cart both carry it. The claim rebuilds that cart for
+   the student and makes a forever coupon from the policy (claim_gift,
+   subscription_coupon.ts on tapin_edge_functions main), so they pay $4.99
+   every month. It ends with the holiday price, midnight Eastern going into
+   January 1, when new gifts go to $12.99; past it the page sells the
+   ordinary offer. */
+export const PARENTS_LAUNCH_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
+export const PARENTS_LAUNCH_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
 
 /* ══ WHAT A LUNCH COSTS (COPY.md v2) ═════════════════════════════════════════
    One meal priced four ways, never a plan. The door rate is VT Dining's

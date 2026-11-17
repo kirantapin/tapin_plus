@@ -9,6 +9,7 @@ import { BREXX, SMITHS_LANDING, WELCOME_WEEK, vipGroup, type Group } from "./mod
 import { setPagePolicy } from "./model/pagePolicy";
 import Members from "./routes/Members";
 import ParentsHome from "./routes/ParentsHome";
+import { PARENTS_LAUNCH_ENDS, PARENTS_LAUNCH_POLICY } from "./routes/parents_kit";
 import ParentAccount from "./routes/ParentAccount";
 import GiftPage from "./routes/GiftPage";
 import { asset } from "./asset";
@@ -120,7 +121,7 @@ export default function App() {
             gift, and their account, signed in. Outside the shell, in the
             app's own look. The old manage-by-link addresses go to the
             account. */}
-        <Route path="/parents" element={<ParentsHome />} />
+        <Route path="/parents" element={<ParentsPage />} />
         <Route path="/parents/manage/:token" element={<Navigate to="/parents/account" replace />} />
         <Route path="/parents/manage" element={<Navigate to="/parents/account" replace />} />
         <Route path="/parents/account" element={<ParentAccount />} />
@@ -186,6 +187,15 @@ function TheBurgPage() {
     if (typeof window !== "undefined") setPagePolicy(THEBURG_FOREVER_POLICY, THEBURG_FOREVER_ENDS, "theburg");
   });
   return <PlusHome placeId="theburg" bandSrc={asset("/places/theburg-food.webp")} bandPos="78% 55%" />;
+}
+
+/* /parents sells the launch sale, $4.99 a month for life (routes/parents_kit.ts):
+   its policy is named before the page's first render reads the price. */
+function ParentsPage() {
+  useState(() => {
+    if (typeof window !== "undefined") setPagePolicy(PARENTS_LAUNCH_POLICY, PARENTS_LAUNCH_ENDS);
+  });
+  return <ParentsHome />;
 }
 
 /* The VIP group (model/groups.ts). */

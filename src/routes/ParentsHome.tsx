@@ -264,14 +264,17 @@ const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const PROOF_STUDENTS = NAME_VT
   ? "Over 500 Virginia Tech students are on Tapin Plus"
   : "Over 500 Blacksburg students are on Tapin Plus";
+const PRICE_HELD = false;
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
   /* The price after their number (Sam, 16 Nov 2026: "now hide the price on
      the parents page too"): until a parent has signed in, nothing on the page
      says a figure; the checkout says it beside the payment (it already held
      it back before sign-in, 9 Nov 2026). */
+  /* Shown again for the launch sale (Sam, 17 Nov 2026: "You can show the
+     price"). PRICE_HELD = true hides it until sign-in as before. */
   const { userSession } = useAuth();
-  const held = !userSession;
+  const held = PRICE_HELD && !userSession;
   /* Real students on video, preview only (?ugc, shell/UgcRow). */
   const [ugc] = useState(ugcOn);
 
@@ -286,7 +289,7 @@ export default function ParentsHome() {
   const shot = PHOTOS[photo];
   /* Plus's price for this page (a promo link's offer, else the welcome
      offer): what the parent's gift will charge when it's claimed. */
-  const { FIRST, MONTHLY } = useParentPrice();
+  const { FIRST, MONTHLY, LIFE, WAS } = useParentPrice();
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -612,6 +615,10 @@ export default function ParentsHome() {
                       <>
                         <b>Holiday price</b> until January&nbsp;1
                       </>
+                    ) : LIFE ? (
+                      <>
+                        <b>{FIRST}/month for life</b> · launch sale <s>{WAS}</s>
+                      </>
                     ) : (
                       <>
                         <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
@@ -917,12 +924,14 @@ export default function ParentsHome() {
             loading="lazy"
           />
           <h2 id="tpp-close-h" className="tpa-close-h tnum">
-            {held ? "The holiday price, locked in" : `${FIRST} the first month`}
+            {held ? "The holiday price, locked in" : LIFE ? `${FIRST} a month, for life` : `${FIRST} the first month`}
           </h2>
           <p className="tpa-close-line tnum">
             {held
               ? "See it when you add their number. We text you before every bill. Cancel anytime."
-              : `Then ${MONTHLY}/month. We text you before every bill. Cancel anytime.`}
+              : LIFE
+                ? `Exclusive launch sale, usually ${WAS}. We text you before every bill. Cancel anytime.`
+                : `Then ${MONTHLY}/month. We text you before every bill. Cancel anytime.`}
           </p>
           <button
             type="button"
@@ -941,7 +950,7 @@ export default function ParentsHome() {
             through Tapin, no minimum spend; credit resets each month and
             doesn’t roll over. Then {PERCENT}% off once a day. One benefit per
             order. Alcohol excluded.{" "}
-            {held ? "Billed" : `${FIRST} the first month, then ${MONTHLY}/month, billed`} every month until
+            {held ? "Billed" : LIFE ? `${FIRST}/month for life, billed` : `${FIRST} the first month, then ${MONTHLY}/month, billed`} every month until
             cancelled, with a text before each bill. Tapin is not affiliated
             with Virginia Tech.
           </p>

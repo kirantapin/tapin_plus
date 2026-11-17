@@ -217,7 +217,7 @@ export const HOLIDAY_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
    gifts from January 1, the days left. After the year turns, the two rows
    alone. */
 export function PayGetLead({ lower = false, held = false }: { lower?: boolean; held?: boolean }) {
-  const { FIRST, MONTHLY } = useParentPrice();
+  const { FIRST, MONTHLY, LIFE, WAS } = useParentPrice();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -228,7 +228,8 @@ export function PayGetLead({ lower = false, held = false }: { lower?: boolean; h
   const when = left <= 0 ? null : days < 1 ? "ends tonight" : days === 1 ? "1 day left" : `${days} days left`;
   return (
     <div className="ov ov-c" data-ph-show="">
-      <PayGet first={FIRST} monthly={MONTHLY} they hidden={held} />
+      {/* The launch sale: the full price struck, "for life". */}
+      <PayGet first={FIRST} monthly={MONTHLY} they hidden={held} was={LIFE ? WAS : undefined} />
       {/* With Count under it (ParentsCount), pay/get alone here. */}
       {lower ? null : <LockedIn monthly={MONTHLY} they />}
       {when && !lower ? (
@@ -266,7 +267,7 @@ const HOLIDAY_FROM = Date.parse("2026-11-09T00:00:00-05:00");
 /** `held`: the price after their number (model/priceGate.ts, Sam, 16 Nov
  *  2026: "now hide the price on the parents page too"). */
 export function ParentsCount({ join, held = false }: { join: ReactNode; held?: boolean }) {
-  const { MONTHLY } = useParentPrice();
+  const { MONTHLY, LIFE } = useParentPrice();
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -283,9 +284,20 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
             {days >= 1 ? <b>{days}</b> : null}
             <p>
               <span>
-                {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"} {held ? "at the holiday price" : <>at {MONTHLY}&nbsp;a&nbsp;month</>}
+                {days >= 1 ? (days === 1 ? "day" : "days") + " left" : "Ends tonight"}{" "}
+                {held ? "at the holiday price" : LIFE ? "in the launch sale" : <>at {MONTHLY}&nbsp;a&nbsp;month</>}
               </span>
-              <small>{held ? <>then the price goes up for new gifts from January&nbsp;1</> : <>then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</>}</small>
+              <small>
+                {held ? (
+                  <>then the price goes up for new gifts from January&nbsp;1</>
+                ) : LIFE ? (
+                  <>
+                    {MONTHLY} a month for life, then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1
+                  </>
+                ) : (
+                  <>then {money(AFTER_HOLIDAY)} for new gifts from January&nbsp;1</>
+                )}
+              </small>
             </p>
           </div>
           <span className="lw-bar" aria-hidden="true">
@@ -303,7 +315,7 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
         </summary>
         <ul className="tnum">
           <li>
-            <b>{held ? "Their price, locked in" : `${MONTHLY} a month, locked in`}</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
+            <b>{held ? "Their price, locked in" : LIFE ? `${MONTHLY} a month, for life` : `${MONTHLY} a month, locked in`}</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
           </li>
           {/* Automatic since 16 Nov 2026, as on the student page. */}
           <li>
@@ -321,7 +333,7 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
   );
 }
 export function PriceLead() {
-  const { FIRST, MONTHLY } = useParentPrice();
+  const { FIRST, MONTHLY, LIFE, WAS } = useParentPrice();
   /* Checked each minute so the days turn over at midnight. */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -342,13 +354,21 @@ export function PriceLead() {
           the big one here, and the $7.99 be below"). */}
       <p className="tpp-price-fig tnum">
         <b>{FIRST}</b>
-        <span>first month</span>
+        <span>{LIFE ? "a month, for life" : "first month"}</span>
       </p>
       {/* The monthly whole ("$7.99/month"), the compare-at price after it
           (9 Nov 2026 polish). */}
       <p className="tpp-price-then tnum">
-        Then <b>{MONTHLY}/month</b>
-        {when ? (
+        {LIFE ? (
+          <>
+            Launch sale, usually <s>{WAS}</s>
+          </>
+        ) : (
+          <>
+            Then <b>{MONTHLY}/month</b>
+          </>
+        )}
+        {when && !LIFE ? (
           <s>
             <span className="tpp-sr">was </span>
             {money(AFTER_HOLIDAY)}
@@ -377,7 +397,7 @@ export function PriceLead() {
    enough that its line shows without a tap. No total, no points value. The
    dots follow the swipe and jump to a card. */
 export function BenefitCards() {
-  const { FIRST, MONTHLY } = useParentPrice();
+  const { FIRST, MONTHLY, LIFE, WAS } = useParentPrice();
   const rail = useRef<HTMLUListElement | null>(null);
   const [at, setAt] = useState(0);
   const cards: Array<{ key: string; art: ReactNode; label: string; line?: string; ink?: boolean; green?: boolean }> = [
@@ -440,7 +460,7 @@ export function BenefitCards() {
     {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
-      label: `First month, then ${MONTHLY} a month`,
+      label: LIFE ? `A month, for life. Launch sale, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
       line: "A text before every bill. Cancel anytime. Auto refund if they don’t save what you pay.",
     },
   ];
@@ -620,7 +640,7 @@ export function LunchBars() {
    step's glyph, its timer and the gift's small marks, money green on the
    savings. Four steps since 7 Nov: the last is how to cancel, and that an
    unclaimed gift expires uncharged (the gift backend, 8 Nov 2026). */
-const parentSteps = (first: string, held = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> => [
+const parentSteps = (first: string, held = false, forLife = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> => [
   {
     glyph: GLYPHS.card,
     when: "Today",
@@ -628,6 +648,8 @@ const parentSteps = (first: string, held = false): Array<{ glyph: string; when: 
     line: held ? (
       /* The price after their number (model/priceGate.ts). */
       <>Enter your student’s mobile number to see the price, then add your card for the first month.</>
+    ) : forLife ? (
+      <>Enter your student’s mobile number and add your card: {first} a month, for life.</>
     ) : (
       <>Enter your student’s mobile number and add your card: {first} for the first month.</>
     ),
@@ -808,7 +830,7 @@ export function HowPhone({
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month", held) : parentSteps(first, held);
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month" || prices.LIFE, held) : parentSteps(first, held, prices.LIFE);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -1010,7 +1032,7 @@ export function HowPhone({
                 {held ? null : (
                   <div className="tpp-hw-row">
                     {/* "Due today $0" went (Sam, 9 Nov 2026: "its $3.99 today"). */}
-                    <span>{firstLabel}</span>
+                    <span>{prices.LIFE && firstLabel === "First month" ? "Every month" : firstLabel}</span>
                     <b>{first}</b>
                   </div>
                 )}
