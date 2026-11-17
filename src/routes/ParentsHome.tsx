@@ -858,7 +858,6 @@ export default function ParentsHome() {
             2026, the Dara Denney audit's fix 4: "move the parent quotes up";
             they sat under the offer card). Nothing shows until
             model/voices.ts has real ones. */}
-        <Voices className="tpp-v-up" />
 
         {/* Answering the parent (Elevate's "for parents" section, in our own
             claims): how sign-up works from their side, shown on a phone
@@ -876,6 +875,9 @@ export default function ParentsHome() {
         {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026:
             "for all landing pages"), in the parents' voice. */}
         <Founders they />
+
+        {/* The parents' words, right above the questions (Sam, 16 Nov 2026). */}
+        <Voices className="tpp-v-up" />
 
         <section className="tpa-module" aria-labelledby="tpp-faq">
           <h2 id="tpp-faq" className="tpa-h2">

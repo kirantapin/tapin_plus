@@ -1664,7 +1664,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Students' own words (round 1, Sam, 8 Nov 2026): nothing shows until
             model/voices.ts STUDENT_VOICES has real ones; local dev shows the
             marked slots. On a computer, three across here. */}
-        {desk ? <Voices audience="student" className="tps-voices-desk" lead={place?.id} /> : null}
 
         {/* The offer card and, under it (not in it), one quiet list and the
             voices, as the parents page has them: on a computer the held
@@ -1919,7 +1918,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Under the offer: the other benefits, then the promise (round 1
             and 2, Sam, 8 Nov 2026), in place of the "locked in" fold. */}
         {lowOn && lowv ? <LowerAfter v={lowv} monthly={MONTHLY} /> : <UnderOffer audience="student" monthly={MONTHLY} />}
-        {desk ? null : <Voices audience="student" lead={place?.id} />}
         </div>
 
         {/* HOW IT WORKS, FOUR STEPS ON A PHONE (round 2, Sam, 8 Nov 2026):
@@ -1946,6 +1944,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
 
         {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026). */}
         <Founders />
+
+        {/* The students' words, right above the questions (Sam, 16 Nov
+            2026: "can we have the testimonials right above the FAQ
+            section?"); three across on a computer. */}
+        <Voices audience="student" className={desk ? "tps-voices-desk" : undefined} lead={place?.id} />
 
         <section ref={faqRef} className="tpa-module" aria-labelledby="tpa-faq" tabIndex={-1}>
           <h2 id="tpa-faq" className="tpa-h2">
