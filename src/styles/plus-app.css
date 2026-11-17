@@ -8862,3 +8862,246 @@ html[data-surface="tpa"] .hs-scene .value-scene {
     outline-offset: 3px;
   }
 }
+
+/* ══ STUDENTS USING IT (preview only, ?ugc, 16 Nov 2026; shell/UgcRow) ════
+   Two real 9:16 clips side by side under the header, rounded like the
+   place cards, with who and where under each. */
+.ugc {
+  display: grid;
+  gap: 12px;
+}
+.ugc-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.ugc-row li {
+  display: grid;
+  gap: 8px;
+}
+.ugc-row video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  object-fit: cover;
+  border-radius: 18px;
+  background: #e5e5ea;
+}
+.ugc-row p {
+  margin: 0 4px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.ugc-row p b {
+  font-weight: 600;
+  color: var(--ink);
+}
+@media (min-width: 1024px) {
+  .ugc-row {
+    grid-template-columns: repeat(2, minmax(0, 260px));
+  }
+}
+/* Three or more clips: a row that scrolls sideways, each card a little under
+   half the screen so the next one peeks in. */
+.ugc-row:has(> li:nth-child(3)) {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: 44%;
+  margin-inline: 0;
+  padding-inline: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+.ugc-row:has(> li:nth-child(3))::-webkit-scrollbar {
+  display: none;
+}
+.ugc-row:has(> li:nth-child(3)) > li {
+  scroll-snap-align: start;
+}
+@media (min-width: 1024px) {
+  .ugc-row:has(> li:nth-child(3)) {
+    grid-auto-columns: 220px;
+  }
+}
+/* Who on the first line, where on the second (Sam, 16 Nov 2026). */
+.ugc-row p {
+  display: grid;
+}
+/* The sound button, on the clip's corner. */
+.ugc-clip {
+  position: relative;
+}
+.ugc-sound {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 22, 24, 0.62);
+  color: #ffffff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ugc-sound svg {
+  width: 18px;
+  height: 18px;
+}
+.ugc-sound::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+/* ══ A clip, enlarged (16 Nov 2026; shell/UgcRow Enlarged) ═══════════════
+   Grows out of its card to the middle of the screen over the smoked plate;
+   9:16, as tall as fits with room around it. */
+.ugc-open {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  cursor: zoom-in;
+  -webkit-tap-highlight-color: transparent;
+}
+.ugc-sound {
+  z-index: 1;
+}
+.ugc-big {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+}
+.ugc-big-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 15, 17, 0.78);
+}
+.ugc-big-frame {
+  position: relative;
+  height: min(84vh, calc(92vw * 16 / 9));
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #000;
+  transform-origin: 0 0;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+}
+.ugc-big-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ugc-big-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(20, 22, 24, 0.62);
+  color: #ffffff;
+  cursor: pointer;
+}
+.ugc-big-close svg {
+  width: 20px;
+  height: 20px;
+}
+.ugc-big-sound {
+  right: 12px;
+  bottom: 12px;
+  width: 44px;
+  height: 44px;
+}
+.ugc-big-sound svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ══ BUILT BY A HOKIE (16 Nov 2026; shell/HokieLine) ═══════════════════════
+   A face and two lines under the header, on the page's ground: Rob on Virginia
+   Tech maroon, as in the founders section. */
+.hk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px;
+}
+.hk-face {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #861f41;
+}
+.hk-face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  transform: scale(1.5);
+  transform-origin: 50% 30%;
+}
+.hk p {
+  display: grid;
+  margin: 0;
+}
+.hk b {
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+}
+.hk span {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+/* You pay, held until the number (model/priceGate.ts): a lock where the
+   figure was. */
+.ov-c-pay-held > b {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--ink);
+}
+.ov-c-pay-held > b svg {
+  width: 22px;
+  height: 22px;
+}
+.ov-c-pay-held strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* In the header, on the photo: white words, the face ringed in white. */
+.hk.hk-dark {
+  margin: 14px 0 0;
+}
+.hk.hk-dark b {
+  color: #ffffff;
+}
+.hk.hk-dark span {
+  color: rgba(255, 255, 255, 0.82);
+}
+.hk.hk-dark .hk-face {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}

@@ -1496,3 +1496,78 @@
   border-bottom: 2px solid #0b7a53;
   transform: rotate(-45deg);
 }
+/* The texts rate, once ticked: the full price struck, the rate beside it. */
+.pck-rate {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ink, #141618);
+}
+.pck-rate s {
+  color: var(--muted, #6b6f73);
+  text-decoration-thickness: 1.5px;
+}
+.pck-rate b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+/* ══ The texts rate as one tile (16 Nov 2026; TextsRateBox) ════════════════
+   Quiet hairline when off; money green when on, its second line the rate. */
+.pck-texts {
+  display: grid;
+  gap: 8px;
+}
+.pck-texts-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.12);
+  cursor: pointer;
+  transition: box-shadow 0.18s ease, background-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.pck-texts-tile.is-on {
+  background: #eef7f2;
+  box-shadow: inset 0 0 0 1.5px #0b7a53;
+}
+.pck-texts-tile input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #0b7a53;
+}
+.pck-texts-words {
+  display: grid;
+  min-width: 0;
+}
+.pck-texts-words > b {
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+}
+.pck-texts-words > span {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted, #6b6f73);
+}
+.pck-texts-rate s {
+  text-decoration-thickness: 1.5px;
+}
+.pck-texts-rate b {
+  font-weight: 600;
+  color: #0b7a53;
+}
+.pck-texts-fine {
+  margin: 0 2px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #6b6f73);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pck-texts-tile {
+    transition: none;
+  }
+}

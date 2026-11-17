@@ -711,7 +711,7 @@ const HUG = asset("/parents/hero-hug.webp");
    parents.css). The refund is the module right under this one. `first` and
    `monthly` are the prices the page shows; `free` a promo link's free first
    month. */
-function studentSteps(first: string, free: boolean, appTab: number, place?: string, forLife = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
+function studentSteps(first: string, free: boolean, appTab: number, place?: string, forLife = false, held = false): Array<{ glyph: string; when: string; title: string; line: ReactNode }> {
   return [
     {
       glyph: GLYPHS.card,
@@ -719,6 +719,9 @@ function studentSteps(first: string, free: boolean, appTab: number, place?: stri
       title: "Join with your number",
       line: free ? (
         <>Enter your mobile number. Your first month is free.</>
+      ) : held ? (
+        /* The price after the number (model/priceGate.ts). */
+        <>Enter your mobile number to see your price, then pay for your first month.</>
       ) : forLife ? (
         /* A for-life price (/coffeeholics) isn't a first month's. */
         <>Enter your mobile number and pay {first} a month, for life.</>
@@ -761,9 +764,12 @@ export function HowPhone({
   monthly: monthlyProp,
   free = false,
   only,
+  held = false,
 }: {
   audience?: Audience;
   first?: string;
+  /** The price held back until the number (model/priceGate.ts). */
+  held?: boolean;
   /** The price row's words ("Every month" for a for-life price). */
   firstLabel?: string;
   monthly?: string;
@@ -793,7 +799,7 @@ export function HowPhone({
   const wk = useRef<Animation[]>([]);
   const list = useRef<HTMLOListElement | null>(null);
   /* The student's app link only takes focus while its step is open. */
-  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month") : parentSteps(first);
+  const steps = student ? studentSteps(first, free, cur === 1 ? 0 : -1, onlyPlace?.name, firstLabel === "Every month", held) : parentSteps(first);
   useLayoutEffect(() => {
     const el = list.current;
     if (!el) return;
@@ -992,12 +998,14 @@ export function HowPhone({
                   <span ref={num}>{SAMPLE_NUMBER}</span>
                   <span className="tpp-hw-caret" />
                 </div>
-                <div className="tpp-hw-row">
-                  {/* "Due today $0" went (Sam, 9 Nov 2026: "its $3.99 today"). */}
-                  <span>{firstLabel}</span>
-                  <b>{first}</b>
-                </div>
-                <div className="tpp-hw-pay">{student ? (free ? "Join Tapin Plus" : `Pay ${first}`) : "Send the gift"}</div>
+                {held ? null : (
+                  <div className="tpp-hw-row">
+                    {/* "Due today $0" went (Sam, 9 Nov 2026: "its $3.99 today"). */}
+                    <span>{firstLabel}</span>
+                    <b>{first}</b>
+                  </div>
+                )}
+                <div className="tpp-hw-pay">{student ? (free || held ? "Join Tapin Plus" : `Pay ${first}`) : "Send the gift"}</div>
               </div>
               {student ? (
                 <>
@@ -1049,7 +1057,7 @@ export function HowPhone({
                         <i />
                         Plus is on
                       </b>
-                      <span>{monthly}/month, locked in</span>
+                      <span>{held ? "Your price, locked in" : `${monthly}/month, locked in`}</span>
                     </div>
                     <span className="tpp-hw-cancel">Cancel Plus</span>
                   </div>

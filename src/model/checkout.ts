@@ -7,6 +7,7 @@
    never a figure on the page. Mirrors the app's use_plus_checkout.ts and
    utils/purchase.ts. */
 
+import { textsRatePolicy } from "./textsRate";
 import { supabase } from "../supabase";
 import { TAPIN_ID, fetchPlusBundle, welcomeOfferId, type DiscountDuration } from "./plus";
 import { pagePolicy } from "./pagePolicy";
@@ -108,8 +109,11 @@ export async function buildPlusCart(accessToken: string): Promise<PlusCart> {
   const linked = link ? await offer(link.policyId, link.linkId) : null;
   /* A page's own public policy while its sale is on (model/pagePolicy.ts),
      with no link, ahead of the welcome offer. */
+  /* The texts rate (model/textsRate.ts), when the box was ticked, first. */
+  const texts = textsRatePolicy();
+  const texted = linked && "cart" in linked ? linked : texts ? await offer(texts, null) : null;
   const own = pagePolicy();
-  const owned = linked && "cart" in linked ? linked : own ? await offer(own, null) : null;
+  const owned = texted && "cart" in texted ? texted : own ? await offer(own, null) : null;
   const offered =
     owned && "cart" in owned ? owned : welcomeOfferId ? await offer(welcomeOfferId, null) : null;
   const built =

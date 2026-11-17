@@ -83,10 +83,15 @@ export function WelcomeLine({
   forever = false,
   endsMs = null,
   strong = false,
+  was,
 }: {
   first: string;
   forever?: boolean;
   endsMs?: number | null;
+  /** The price it's against, struck before it (the texts rate, Sam, 16 Nov
+   *  2026: "this should show on the page after they login if they checked
+   *  the box"). */
+  was?: string;
   /** The price in bold, the rest plain (the audit take's terms, ?audit=1). */
   strong?: boolean;
 }) {
@@ -106,6 +111,11 @@ export function WelcomeLine({
       <p className="tpa-wline" data-ph-show="">
         <TickingClock />
         <span className="tnum">
+          {was ? (
+            <>
+              <s>{was}</s>{" "}
+            </>
+          ) : null}
           {lead(`${first} a month for life`)}
           {endsMs && endsMs > now ? ` · ends in ${timeLeft(endsMs - now)}` : ""}
         </span>
@@ -157,7 +167,7 @@ const timeLeft = (ms: number) => {
 };
 
 /** A small filling ring for the spots line: how much of the 100 is gone. */
-function SeatsDot() {
+export function SeatsDot() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="tpa-clock">
       <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
@@ -289,5 +299,19 @@ export function OfferBar() {
     <LinkBar line={free ? (invite?.ends ? "Free first month offer" : "First month free") : firstMonthLine(price)} invite={invite} ends={price?.linkEnds ?? invite?.ends ?? null} />
   ) : (
     <WelcomeBar price={firstFigure(price)} />
+  );
+}
+
+/** The header's line with the price held back (model/priceGate.ts): the
+ *  spots alone. */
+export function SpotsLine() {
+  const left = usePlusSeats();
+  return (
+    <p className="tpa-wline" data-ph-show="">
+      <SeatsDot />
+      <span className="tnum">
+        <b>{left} of 100 spots left</b> this round
+      </span>
+    </p>
   );
 }

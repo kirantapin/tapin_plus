@@ -12,6 +12,10 @@ import { CheckoutPhone, HowPhone, ProofTurn, UnderOffer, Voices } from "./parent
 import { PLACES as KIT_PLACES, VISITS, placeMonth, placeOrders } from "./parents_kit";
 import { PlusSeats, usePlaceSeats, usePlusSeats } from "../shell/PlusSeats";
 import { OfferVersion, offerVersion } from "../shell/OfferVersions";
+import { UgcRow, ugcOn } from "../shell/UgcRow";
+import { HokieLine } from "../shell/HokieLine";
+import { setPriceHidden } from "../model/priceGate";
+import { textsRateChosen } from "../model/textsRate";
 import { LowerAfter, LowerVersion, lowerVersion } from "../shell/LowerVersions";
 import { Founders } from "../shell/Founders";
 import { refreshPlusPrice, firstFigure, firstForever, firstLasts, firstMonthLine, firstTerm, usd, usePlusPriceLoad } from "../model/plus";
@@ -29,7 +33,7 @@ import { HERO_LINES, HERO_SUBS, heroVariant } from "../model/heroTest";
 import { AppCard, appHref, device } from "../shell/GetTheApp";
 import { useAuth } from "../context/auth_context";
 import TrialModal from "../shell/TrialModal";
-import { ForeverLeft, InviteClock, LinkBar, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
+import { ForeverLeft, InviteClock, LinkBar, SpotsLine, WelcomeChip, WelcomeEnds, WelcomeLine, useWelcomeLead } from "../shell/WelcomeOffer";
 import { useTrialLink } from "../shell/useTrialLink";
 import { WelcomeCallout } from "../shell/WelcomeCallout";
 import { BonusSpots, LadderLead, LadderSay } from "../shell/BonusSpots";
@@ -337,7 +341,7 @@ const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
   { q: "How do I cancel?", a: "Cancel anytime in the Tapin app." },
 ];
 
-const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
+const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: string }> => [
   /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
      support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
      cancelled; stacking 1). Cancel is in the app, refunds by email (Sam,
@@ -388,7 +392,9 @@ const faqFor = (MONTHLY: string): ReadonlyArray<{ q: string; a: string }> => [
     q: "Will my price go up?",
     /* Places joining is the other reason the price rises, and only for people
        who join later (Sam, 4 Nov 2026: "pays to get in early"). */
-    a: `No. Your ${MONTHLY} a month is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and to ${PLUS_NEXT_PRICE} once these 100 spots are gone. It pays to get in early.`,
+    a: held
+      ? `No. Once you join, your price is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and again once these 100 spots are gone. It pays to get in early.`
+      : `No. Your ${MONTHLY} a month is locked in for as long as you’re a member, even as more places join. For new members it goes up as places join, and to ${PLUS_NEXT_PRICE} once these 100 spots are gone. It pays to get in early.`,
   },
 ];
 
@@ -931,7 +937,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      signed in on this page, and they have the membership, the CTA should be
      to download the app"): every Join becomes Get the app, the offer becomes
      the app card, and the welcome clock goes, as there is nothing to buy. */
-  const { subscribed } = useAuth();
+  const { subscribed, userSession } = useAuth();
   /* ?member previews this on local dev only (stripped from builds). */
   const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
   /* A PROMO LINK'S PAGE (5 Nov 2026). Kiran's ?l=<link id> (model/link.ts)
@@ -1131,6 +1137,15 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      only. */
   const [lowv] = useState(lowerVersion);
   const lowOn = !!(lowv && offv && !place && !invite && !free && !group && !member);
+  /* The price after the number (model/priceGate.ts, Sam, 16 Nov 2026): the
+     main page's ordinary offer only; pages that sell a price keep it. */
+  const hidePrice = auditHome && !linked && !free && !placeForever && !userSession;
+  /* The texts rate, chosen (model/textsRate.ts): $4.99 for life against the
+     monthly, struck. */
+  const textsOn = auditHome && !linked && textsRateChosen() && firstForever(price);
+  setPriceHidden(hidePrice);
+  /* Real students on video under the header, preview only (?ugc). */
+  const [ugc] = useState(ugcOn);
   /* THE MAIN PAGE, WITH WHAT THE PARENTS PAGE TAUGHT US (Sam, 8 Nov 2026:
      "push the round 2 changes, they look good, for the main plus.tapin.app
      page"; previews in tapin-staging-work/main-from-parents). The two Plus
@@ -1470,9 +1485,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     every month" ($5 at each of the five, every month). The
                     logos in the header (#391–#394) were rolled back at his
                     ask; this line stays. */}
-                <p className="tpu-sub">
-                  <b className="tnum">+${CREDIT * PLACES.length}</b> added to your account to spend every&nbsp;month
-                </p>
+                {/* Rob's line in its place (Sam, 16 Nov 2026: "you can have rob's
+                    thing replace the $25 to spend every month in the header"). */}
+                <HokieLine dark />
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
@@ -1484,7 +1499,13 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                   ) : null}
                   {/* The terms, as one set: the price, then the refund. */}
                   <div className="tpu-terms">
-                    {linked || free ? null : <WelcomeLine first={FIRST_MONTH} forever={placeForever} endsMs={placeEnds} strong />}
+                    {/* Nothing until the price is in: "$–" read as "$0" and "$1" in
+                        the recordings (PostHog, 16 Nov 2026). The space is held. */}
+                    {linked || free ? null : (
+                      <div style={price ? undefined : { visibility: "hidden" }}>
+                        {hidePrice && !textsOn ? <SpotsLine /> : <WelcomeLine first={FIRST_MONTH} forever={placeForever || firstForever(price)} endsMs={placeEnds} strong was={textsOn ? MONTHLY : undefined} />}
+                      </div>
+                    )}
                     <AuditPromise />
                   </div>
                 </div>
@@ -1547,6 +1568,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
+        {ugc && !member ? <UgcRow /> : null}
         {wherev === "a" ? (
           placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
         ) : wherev === "b" ? (
@@ -1706,6 +1728,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 noEnds={!!group}
                 forever={groupOffer && group?.term === "forever"}
                 lower={lowOn}
+                hidden={hidePrice && !textsOn}
+                was={textsOn ? MONTHLY : undefined}
                 spots={
                   group ? (
                     groupOffer ? (
@@ -1799,7 +1823,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 wallet line (the checkout says it) and the turning proof line
                 (the band says the 500+) went. */}
             {lowOn && lowv ? (
-              <LowerVersion v={lowv} monthly={MONTHLY} join={joinCta("hero")} tryCta={audit ? <AuditPromise className="tpu-promise-card" /> : tryCta} autoRefund={audit} />
+              <LowerVersion v={lowv} monthly={MONTHLY} join={joinCta("hero")} tryCta={audit ? <AuditPromise className="tpu-promise-card" /> : tryCta} autoRefund={audit} hidden={hidePrice} />
             ) : (
               <>
                 {joinCta("hero")}
@@ -1881,7 +1905,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           <h2 id="tpa-steps" className="tpa-h2">
             How it works
           </h2>
-          <HowPhone audience="student" first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
+          <HowPhone audience="student" held={hidePrice} first={FIRST_MONTH} firstLabel={placeForever || (groupOffer && group?.term === "forever") ? "Every month" : undefined} monthly={MONTHLY} free={free} only={place?.id} />
         </section>
 
         {/* Crumbl and Italiano's just joined (Sam, 12 Nov 2026), Tapin Lite
@@ -1904,7 +1928,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
           {[
             ...(invite ? inviteFaq(invite, MONTHLY) : []),
             ...(group && groupOffer ? [groupFaq(group, FIRST_MONTH, MONTHLY)] : []),
-            ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY))
+            ...(place ? placeFaq(MONTHLY, place.name, place.id) : faqFor(MONTHLY, hidePrice))
               .flatMap((f): ReadonlyArray<{ q: string; a: string }> =>
                 !audit ? [f] : f.q === "What’s the catch?" && !place ? [f, TRY_FAQ] : f.q === "How do I cancel and get a refund?" ? refundFaq() : [f],
               )
@@ -1941,9 +1965,11 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             </>
           ) : (
             <>
-              <h2 className="tpa-close-h">{free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : placeForever ? `${FIRST_MONTH} a month for life` : `${FIRST_MONTH} your first month`}</h2>
+              <h2 className="tpa-close-h">{hidePrice ? "Lock in this round’s price" : free ? "Your first month free" : groupOffer ? `${FIRST_MONTH} ${gTerm?.long}` : placeForever ? `${FIRST_MONTH} a month for life` : `${FIRST_MONTH} your first month`}</h2>
               <p className="tpa-close-line">
-                {(groupOffer && group?.term === "forever") || placeForever
+                {hidePrice
+                  ? `See it when you add your number, then it’s locked in for as long as you’re a member. Say yes to Tapin texts for 37% off for life.`
+                  : (groupOffer && group?.term === "forever") || placeForever
                   ? `Locked in for as long as you’re a member, even as more places join.`
                   : `${invite ? `For ${invite.who}. ` : ""}Then ${MONTHLY}/month, locked in for as long as you’re a member.`}
               </p>

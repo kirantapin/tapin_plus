@@ -1,3 +1,4 @@
+import { priceHidden } from "../model/priceGate";
 import { handOverFocus } from "./PlusCheckout";
 import { lockScroll, modalOpen } from "./scrollLock";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -257,7 +258,7 @@ export default function HowSheet({
           {last ? (
             <div>
               {/* From the price, so a promo link's free month says so (5 Nov 2026). */}
-              <p className="hs-price">{firstThen(price)}</p>
+              {priceHidden() ? null : <p className="hs-price">{firstThen(price)}</p>}
               {price?.linkId ? null : <WelcomeEnds className="hs-ends" />}
             </div>
           ) : null}

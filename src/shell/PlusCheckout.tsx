@@ -9,10 +9,12 @@ import { useAuth } from "../context/auth_context";
 import { AppCard, appHref } from "./GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { buildPlusCart, createPlusIntent, submitPlusOrder, type PlusCart } from "../model/checkout";
-import { firstMonthLine, nextBillingDate, usd, usePlusPrice, type PlusPrice } from "../model/plus";
+import { firstMonthLine, nextBillingDate, refreshPlusPrice, usd, usePlusPrice, type PlusPrice } from "../model/plus";
 import { inviteFor } from "../model/invite";
 import { sendCode, verifyCode } from "./authEnv";
 import { PlaceSeats, PlusSeats } from "./PlusSeats";
+import { TEXTS_RATE_POLICY, chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
+import { TEXTS_TEASER, priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { pagePolicy, pagePolicyPlace } from "../model/pagePolicy";
 import { GroupClock } from "./GroupBits";
@@ -386,7 +388,8 @@ function PlusCheckoutSheet({
                 {invite && (dueCents === null || dueCents / 100 === price?.first) ? (
                   <img className="pck-invite" src={invite.logo} alt={invite.alt} width="20" height="20" />
                 ) : null}
-                {priceLine(price, dueCents)}
+                {/* Before the number, the price waits (model/priceGate.ts). */}
+                {priceHidden() && step < 3 ? "Your price shows after your number" : priceLine(price, dueCents)}
               </p>
             </div>
           )}
@@ -451,7 +454,8 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
   const better = look !== "0";
   const previewCode = devParam("pckstage") === "code";
   const [digits, setDigits] = useState(previewCode ? "5405550123" : "");
-  const [optIn, setOptIn] = useState(false);
+  /* Ticked already if the texts rate was chosen this visit, so the box and the price agree. */
+  const [optIn, setOptIn] = useState(() => textsRateChosen());
   const [code, setCode] = useState("");
   const [stage, setStage] = useState<"phone" | "code">(previewCode ? "code" : "phone");
   const [busy, setBusy] = useState(false);
@@ -648,6 +652,17 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     <GroupClock group={WELCOME_WEEK} className="ov-spots pck-seats" />
   ) : forLifePlace && forLifeEnds ? (
     <PlaceSeats placeId={forLifePlace} first={usd(price?.first)} ends={forLifeEnds} className="pck-seats" />
+  ) : priceHidden() ? (
+    /* The price after the number (model/priceGate.ts): the spots alone. */
+    <PlusSeats monthly="this round's price" then={false} className="pck-seats" />
+  ) : textsRateChosen() && price?.firstFor === "forever" ? (
+    /* The texts rate, ticked: its own terms, not the $7.99 spots. */
+    <div className="plus-seats pck-seats">
+      <p className="plus-seats-line">
+        <b className="tnum">{usd(price.first)}/mo for life</b>
+        <span>Locked in. It never goes up.</span>
+      </p>
+    </div>
   ) : (
     <PlusSeats monthly={usd(price?.monthly)} className="pck-seats" />
   );
@@ -675,11 +690,28 @@ function SignIn({ onStage, plain = false }: { onStage: (stage: "phone" | "code")
     <>
       {/* Marketing texts are optional and unticked: consent to them can't be
           a condition of buying (TCPA). */}
-      <label className="pck-check">
-        <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
-        <span>Text me Tapin offers (optional)</span>
-      </label>
-      <p className="pck-fine">We text a code now and the app link after. Msg &amp; data rates may apply.</p>
+      {textsRateOn() ? (
+        <>
+          {/* The texts rate (model/textsRate.ts), one tile (TextsRateBox). */}
+          <TextsRateBox
+            checked={optIn}
+            price={price}
+            onChange={(on) => {
+              setOptIn(on);
+              chooseTextsRate(on);
+              refreshPlusPrice();
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <label className="pck-check">
+            <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} />
+            <span>Text me Tapin offers (optional)</span>
+          </label>
+          <p className="pck-fine">We text a code now and the app link after. Msg &amp; data rates may apply.</p>
+        </>
+      )}
     </>
   );
   const sendBtn = (
@@ -860,6 +892,38 @@ function priceLine(price: PlusPrice | null, dueCents: number | null) {
 const PREVIEW_PRICE: PlusPrice = { monthly: 7.99, first: 3.99, firstFor: null, period: "month", billing: { interval: "month", interval_count: 1 } as PlusPrice["billing"], linkId: null, linkEnds: null };
 const PREVIEW_CART: PlusCart = { cart: [], dealEffect: null, cartResults: { totalPrice: 3.99 }, token: "", dueTodayCents: 399, accountId: "", linkId: null, discountDuration: null };
 
+/* ══ THE TEXTS RATE, ONE TILE (Sam, 16 Nov 2026: "maybe we clean this up a
+   bit? /impeccable polish. There's a LOT going on") ══════════════════════
+   The box, the ask and what it unlocks as one tappable tile: unticked it
+   says what to do, ticked its second line becomes the rate against the full
+   price, so nothing is added below it. The disclosure sits under the tile,
+   smaller, every part of it kept (TCPA). The rate shows only when the price
+   the server returned is the texts policy's, so the tile never says a price
+   the checkout won't charge. */
+function TextsRateBox({ checked, price, onChange }: { checked: boolean; price: PlusPrice | null; onChange: (on: boolean) => void }) {
+  const real = !!price && price.firstFor === "forever" && (price.policyId === TEXTS_RATE_POLICY || price.policyId === "textspreview");
+  return (
+    <div className="pck-texts">
+      <label className={`pck-texts-tile${checked ? " is-on" : ""}`}>
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+        <span className="pck-texts-words">
+          <b>Say yes to Tapin texts</b>
+          {checked && real && price ? (
+            <span className="pck-texts-rate tnum">
+              <s>{usd(price.monthly)}</s> <b>{usd(price.first)}/mo</b> for life
+            </span>
+          ) : (
+            <span>Unlock {TEXTS_TEASER}</span>
+          )}
+        </span>
+      </label>
+      <p className="pck-texts-fine">
+        Optional, not needed to buy. By ticking, you agree to recurring automated marketing texts from Tapin at this number. Msg &amp; data rates may apply. Reply STOP to opt out.
+      </p>
+    </div>
+  );
+}
+
 function Review({
   accessToken,
   price,
@@ -874,8 +938,20 @@ function Review({
   preview?: boolean;
 }) {
   const [built, setCart] = useState<PlusCart | null>(null);
+  /* The texts rate at the pay step (model/textsRate.ts): ticking it here
+     records the consent and prices the order again. The ordinary offer only. */
+  const [texts, setTexts] = useState(() => textsRateChosen());
+  const textsHere = textsRateOn() && !!price && !price.linkId && !pagePolicy();
+  const pickTexts = (on: boolean) => {
+    setTexts(on);
+    chooseTextsRate(on);
+    if (!preview) void setTextsConsent(on);
+    refreshPlusPrice();
+  };
   /* The preview's cart follows the preview price, so ?wwpreview shows $0. */
-  const cart = preview ? { ...PREVIEW_CART, dueTodayCents: Math.round((price?.first ?? 3.99) * 100) } : built;
+  const cart = preview
+    ? { ...PREVIEW_CART, dueTodayCents: Math.round((price?.first ?? 3.99) * 100), discountDuration: price?.firstFor === "forever" ? ("forever" as const) : PREVIEW_CART.discountDuration }
+    : built;
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const { track } = useEventTracking();
@@ -902,7 +978,7 @@ function Review({
     return () => {
       live = false;
     };
-  }, [accessToken, attempt]);
+  }, [accessToken, attempt, texts]);
 
   if (error)
     return (
@@ -931,6 +1007,11 @@ function Review({
   const invite = inviteFor(price);
   return (
     <div className="pck-body">
+      {textsHere ? (
+        <div className="pck-pay-texts">
+          <TextsRateBox checked={texts} price={price} onChange={pickTexts} />
+        </div>
+      ) : null}
       <ul className="pck-rows">
         <li>
           <b>Due today</b>

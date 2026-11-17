@@ -5,6 +5,7 @@
    These figures are only for showing: what's charged is always the signed cart
    (model/checkout.ts). Mirrors the app's plus_offers.ts and tapin_admin_context. */
 
+import { textsRatePolicy, textsRatePreview } from "./textsRate";
 import { useEffect, useState } from "react";
 import { environment, supabase } from "../supabase";
 import { loadPlusLink } from "./link";
@@ -131,6 +132,8 @@ const devPrice = (): PlusPrice | null => {
   const q = new URLSearchParams(window.location.search);
   const base = { monthly: 7.99, period: "month", billing: { interval: "month" as const, interval_count: 1 }, linkEnds: null, firstFor: null };
   if (q.has("wwpreview") || q.get("l") === WELCOME_WEEK_LINK_ID) return { ...base, first: 0, linkId: WELCOME_WEEK_LINK_ID };
+  /* The texts rate, ticked (model/textsRate.ts). */
+  if (textsRatePreview()) return { ...base, first: 4.99, firstFor: "forever", linkId: null, policyId: "textspreview" };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
   /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
   if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "slpreview" };
@@ -167,7 +170,7 @@ async function fetchPrice(): Promise<PlusPrice> {
   /* A page's own public policy in place of the welcome offer while its sale
      is on (model/pagePolicy.ts); the checkout tries it the same way. */
   const own = pagePolicy();
-  const offerId = own ?? welcomeOfferId;
+  const offerId = textsRatePolicy() ?? own ?? welcomeOfferId;
   const [plus, offer, link] = await Promise.all([
     fetchPlusBundle(),
     offerId

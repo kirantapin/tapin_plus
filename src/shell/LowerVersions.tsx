@@ -59,6 +59,7 @@ export function LowerVersion({
   join,
   tryCta,
   autoRefund = false,
+  hidden = false,
 }: {
   v: LowV;
   monthly: string;
@@ -66,6 +67,8 @@ export function LowerVersion({
   tryCta: ReactNode;
   /** The audit take's refund (?audit=1, Sam, 15 Nov 2026): automatic, no request. */
   autoRefund?: boolean;
+  /** The price held back until the number (model/priceGate.ts). */
+  hidden?: boolean;
 }) {
   const left = usePlusSeats();
 
@@ -144,8 +147,8 @@ export function LowerVersion({
         <div className="lw-3-count tnum">
           <b>{left}</b>
           <p>
-            <span>spots left at {monthly}</span>
-            <small>of {PLUS_SEAT_CAP}, then {PLUS_NEXT_PRICE}</small>
+            <span>{hidden ? "spots left this round" : `spots left at ${monthly}`}</span>
+            <small>{hidden ? `of ${PLUS_SEAT_CAP}, then the price goes up` : `of ${PLUS_SEAT_CAP}, then ${PLUS_NEXT_PRICE}`}</small>
           </p>
         </div>
         <Bar left={left} />
@@ -161,7 +164,7 @@ export function LowerVersion({
           </summary>
           <ul className="tnum">
             <li>
-              <b>{monthly} a month, locked in</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
+              <b>{hidden ? "Your price, locked in" : `${monthly} a month, locked in`}</b> as more places join: bars, coffee shops, salons, gyms, barbershops and&nbsp;more.
             </li>
             <li>
               {autoRefund ? (
