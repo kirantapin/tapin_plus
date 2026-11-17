@@ -1,5 +1,6 @@
 import { UgcRow, ugcOn } from "../shell/UgcRow";
 import { HokieLine } from "../shell/HokieLine";
+import { useAuth } from "../context/auth_context";
 import { Link } from "react-router-dom";
 import { Founders } from "../shell/Founders";
 import {
@@ -259,6 +260,12 @@ const PROOF_STUDENTS = NAME_VT
   : "Over 500 Blacksburg students are on Tapin Plus";
 export default function ParentsHome() {
   const { track, registerForSession } = useEventTracking();
+  /* The price after their number (Sam, 16 Nov 2026: "now hide the price on
+     the parents page too"): until a parent has signed in, nothing on the page
+     says a figure; the checkout says it beside the payment (it already held
+     it back before sign-in, 9 Nov 2026). */
+  const { userSession } = useAuth();
+  const held = !userSession;
   /* Real students on video, preview only (?ugc, shell/UgcRow). */
   const [ugc] = useState(ugcOn);
 
@@ -594,7 +601,15 @@ export default function ParentsHome() {
                     <circle cx="12" cy="12" r="3.6" fill="currentColor" />
                   </svg>
                   <span className="tnum">
-                    <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
+                    {held ? (
+                      <>
+                        <b>Holiday price</b> until January&nbsp;1
+                      </>
+                    ) : (
+                      <>
+                        <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
+                      </>
+                    )}
                   </span>
                 </p>
                 <p className="tpu-promise">
@@ -828,9 +843,9 @@ export default function ParentsHome() {
               $3.99, then $7.99). */}
           {/* Pay / get, the student page's card in their voice (Sam, 10 Nov
               2026: "this is great, for both the moms and regular page"). */}
-          <PayGetLead lower={count} />
+          <PayGetLead lower={count} held={held} />
           {count ? (
-            <ParentsCount join={heroJoin} />
+            <ParentsCount join={heroJoin} held={held} />
           ) : (
             <>
           {heroJoin}
@@ -872,7 +887,7 @@ export default function ParentsHome() {
           <h2 id="tpp-how" className="tpa-h2">
             How it works for you
           </h2>
-          <HowPhone />
+          <HowPhone held={held} />
         </section>
 
         {/* Rob and Sam, and why Plus is in Blacksburg (Sam, 10 Nov 2026:
@@ -917,10 +932,12 @@ export default function ParentsHome() {
             loading="lazy"
           />
           <h2 id="tpp-close-h" className="tpa-close-h tnum">
-            {FIRST} the first month
+            {held ? "The holiday price, locked in" : `${FIRST} the first month`}
           </h2>
           <p className="tpa-close-line tnum">
-            Then {MONTHLY}/month. We text you before every bill. Cancel anytime.
+            {held
+              ? "See it when you add their number. We text you before every bill. Cancel anytime."
+              : `Then ${MONTHLY}/month. We text you before every bill. Cancel anytime.`}
           </p>
           <button
             type="button"
@@ -938,8 +955,8 @@ export default function ParentsHome() {
             ${CREDIT} credit every month at each Plus place on orders placed
             through Tapin, no minimum spend; credit resets each month and
             doesn’t roll over. Then {PERCENT}% off once a day. One benefit per
-            order. Alcohol excluded. {FIRST} the
-            first month, then {MONTHLY}/month, billed every month until
+            order. Alcohol excluded.{" "}
+            {held ? "Billed" : `${FIRST} the first month, then ${MONTHLY}/month, billed`} every month until
             cancelled, with a text before each bill. Tapin is not affiliated
             with Virginia Tech.
           </p>
