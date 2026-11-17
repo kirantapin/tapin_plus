@@ -884,7 +884,11 @@ function Sheet({
   /* What the claim will charge first: the cart's own total once it's built,
      the page's price before. */
   const first = (saved?.cart ?? cart)?.dueTodayCents ?? cents(price?.first);
-  const monthly = cents(price?.monthly);
+  /* A for-life price (the launch sale, routes/parents_kit.ts): every month
+     is the first month's, so there's no "then". The cart's own term once
+     it's built, the page's before. */
+  const life = ((saved?.cart ?? cart)?.discountDuration ?? price?.firstFor ?? null) === "forever";
+  const monthly = life ? first : cents(price?.monthly);
 
   /* No "save card" (Sam, 9 Nov 2026: "its $3.99 today, not when they
      claim it"). */
@@ -1026,14 +1030,23 @@ function Sheet({
      who it's for under the wallets' step (Effort E), where a wallet pays. */
   const rows = (
     <div className={flat ? "prc-e-rows" : "prc-module prc-rows"} data-ph-show="">
-      <div className="prc-row">
-        <span>First month</span>
-        <b className="tnum">{usd(first)}</b>
-      </div>
-      <div className="prc-row">
-        <span>Then</span>
-        <b className="tnum">{`${usd(monthly)} a month`}</b>
-      </div>
+      {life ? (
+        <div className="prc-row">
+          <span>Every month, for life</span>
+          <b className="tnum">{usd(first)}</b>
+        </div>
+      ) : (
+        <>
+          <div className="prc-row">
+            <span>First month</span>
+            <b className="tnum">{usd(first)}</b>
+          </div>
+          <div className="prc-row">
+            <span>Then</span>
+            <b className="tnum">{`${usd(monthly)} a month`}</b>
+          </div>
+        </>
+      )}
     </div>
   );
   /* The promise, right above the button (Sam, 7 Nov 2026: "go for it"):
@@ -1576,7 +1589,7 @@ function Terms({ first, monthly }: { first: number; monthly: number }) {
     <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"} data-ph-show="">
       {/* Short: the promise above the button carries cancelling (Sam, 7 Nov
           2026); this keeps the price, the renewal and the links. */}
-      {`${usd(first)} the first month, then ${usd(monthly)}/month until you cancel. `}
+      {first === monthly ? `${usd(first)} a month until you cancel. ` : `${usd(first)} the first month, then ${usd(monthly)}/month until you cancel. `}
       <Legal />
     </p>
   );
@@ -1706,27 +1719,34 @@ const WALLET_ELEMENTS: StripeElementsOptions = {
 function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
   const start = new Date();
   const next = nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0], start);
+  /* A for-life price is the same every month: one regular billing from
+     today, no first-month line (the launch sale, 17 Nov 2026). */
+  const flat = cents === monthlyCents;
   return {
     applePay: {
       recurringPaymentRequest: {
         paymentDescription: "Tapin Plus, a gift",
         managementURL: "https://plus.tapin.app/parents/account",
-        trialBilling: {
-          label: "First month",
-          amount: cents,
-          recurringPaymentStartDate: start,
-          recurringPaymentEndDate: next,
-          recurringPaymentIntervalUnit: "month",
-          recurringPaymentIntervalCount: 1,
-        },
+        ...(flat
+          ? {}
+          : {
+              trialBilling: {
+                label: "First month",
+                amount: cents,
+                recurringPaymentStartDate: start,
+                recurringPaymentEndDate: next,
+                recurringPaymentIntervalUnit: "month" as const,
+                recurringPaymentIntervalCount: 1,
+              },
+            }),
         regularBilling: {
           label: "Tapin Plus",
           amount: monthlyCents,
-          recurringPaymentStartDate: next,
+          recurringPaymentStartDate: flat ? start : next,
           recurringPaymentIntervalUnit: "month",
           recurringPaymentIntervalCount: 1,
         },
-        billingAgreement: `${usd(cents)} the first month, then ${usd(monthlyCents)} a month until you cancel. We text you before every bill; cancel anytime by replying, or by emailing support@tapin.app.`,
+        billingAgreement: `${flat ? `${usd(cents)} a month` : `${usd(cents)} the first month, then ${usd(monthlyCents)} a month`} until you cancel. We text you before every bill; cancel anytime by replying, or by emailing support@tapin.app.`,
       },
     },
   };
