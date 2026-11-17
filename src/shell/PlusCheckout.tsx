@@ -1280,10 +1280,9 @@ function PhoneGlyph() {
   );
 }
 
-/* On the list: the done screen's plate, then the one way in sooner that is
-   real, a parent's gift (/parents still sells; Sam, 17 Nov 2026). */
+/* On the list: the done screen's plate. No "a parent can gift you Plus"
+   line (Sam, 17 Nov 2026: removed). */
 function WaitlistDone() {
-  const { track } = useEventTracking();
   return (
     <div className="pck-body pck-done-body" role="status">
       <div className="pck-why">
@@ -1294,9 +1293,6 @@ function WaitlistDone() {
           </p>
         </div>
       </div>
-      <a className="pck-manage" href="/parents" onClick={() => track("plus_waitlist_parent_clicked", {})}>
-        Want in sooner? A parent can gift you Plus
-      </a>
     </div>
   );
 }
