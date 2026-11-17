@@ -1,5 +1,6 @@
 import { UgcRow, ugcOn } from "../shell/UgcRow";
 import { HokieLine } from "../shell/HokieLine";
+import { useMedia } from "../shell/useMedia";
 import { useAuth } from "../context/auth_context";
 import { Link } from "react-router-dom";
 import { Founders } from "../shell/Founders";
@@ -275,6 +276,7 @@ export default function ParentsHome() {
      price"). PRICE_HELD = true hides it until sign-in as before. */
   const { userSession } = useAuth();
   const held = PRICE_HELD && !userSession;
+  const desk = useMedia("(min-width: 1024px)");
   /* Real students on video, preview only (?ugc, shell/UgcRow). */
   const [ugc] = useState(ugcOn);
 
@@ -598,10 +600,14 @@ export default function ParentsHome() {
                 headline, then the terms as one set (the price, then the auto
                 refund), and on a computer the button beside them. It takes
                 the place of the $25 pill. */}
-            {/* Rob's line in the $25 line's place, as on the students page. */}
-            <HokieLine dark />
+            {/* Rob's line in the $25 line's place, as on the students page. On
+                a phone it sits under the header, as the students page has it
+                (Sam, 17 Nov 2026: "we can have rob show up like he does on the
+                main plus page, and the CTA be the white button overlaying the
+                banner image"). */}
+            {desk ? <HokieLine dark /> : null}
             <div className="tpu-act">
-              <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" onClick={(e) => signUp("band", e.currentTarget)}>
+              <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" data-page-cta="" onClick={(e) => signUp("band", e.currentTarget)}>
                 {cta}
               </button>
               <div className="tpu-terms">
@@ -682,6 +688,7 @@ export default function ParentsHome() {
       </header>
 
       <main className="tpa-sheet">
+        {desk ? null : <HokieLine />}
         {/* Real students on video (shell/UgcRow), right below the header
             (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
             parent page right below the header too"); preview only (?ugc)

@@ -3452,3 +3452,31 @@
       linear-gradient(0deg, rgba(10, 11, 12, 0.4) 0, rgba(10, 11, 12, 0) 40%);
   }
 }
+
+/* ══ THE PHONE HEADER, THE STUDENTS PAGE'S WAY (Sam, 17 Nov 2026: "rob show
+   up like he does on the main plus page, and the CTA be the white button
+   overlaying the banner image") ════════════════════════════════════════════
+   On a phone the photo card ends with the price and the auto refund, then
+   one white Build their care package across it; the black button under the
+   card goes, and Rob's line sits under the header (ParentsHome.tsx). */
+@media (max-width: 1023.98px) {
+  .tpp .tpp-band .tpu-act {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tpp .tpp-band .tpu-act .tpu-terms {
+    order: 1;
+  }
+  .tpp .tpp-band .tpu-act .tpp-head-cta {
+    order: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 18px 0 0;
+  }
+  .tpp .tpp-band .tpp-band-cta {
+    display: none;
+  }
+}
