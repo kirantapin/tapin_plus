@@ -657,7 +657,7 @@ export default function ParentsHome() {
             (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
             parent page right below the header too"); preview only (?ugc)
             until it ships. */}
-        {ugc ? <UgcRow title="VT students using it" /> : null}
+        {ugc ? <UgcRow title="VT students using it" without={["zoe"]} /> : null}
         {/* THE STUDENTS PAGE'S ORDER (Sam, 16 Nov 2026: "A lot of the sections
             are old, and the structure is off no?"): the places first, then
             Get, Earn, Save, what $5 looks like, the care package note, the

@@ -18,14 +18,15 @@ export const ugcOn = (): boolean => {
 
 const CLIPS = [
   { key: "grace", src: "ugc/grace-coffeeholics.mp4", poster: "ugc/grace-coffeeholics.jpg", who: "Grace", where: "at Coffeeholics" },
-  /* Zoe (Sam, 16 Nov 2026: "at the burg", "zoe"), Zoe P. of the student
-     voices, with a friend; her own clip, no captions. */
-  { key: "zoe", src: "ugc/zoe-theburg.mp4", poster: "ugc/zoe-theburg.jpg", who: "Zoe", where: "at The Burg" },
   /* Sam, 16 Nov 2026: "can you add this one": a student walking through the
      app on Sweetopia's page (iPhone HDR, tone-mapped with avconvert). Who
      it is: to ask Sam. */
   { key: "sweetopia", src: "ugc/sweetopia-app.mp4", poster: "ugc/sweetopia-app.jpg", who: "In the app", where: "at Sweetopia" },
   { key: "olaika", src: "ugc/olaika.mp4", poster: "ugc/olaika.jpg", who: "VT students", where: "at Olaika" },
+  /* Last on the main page, and not on /parents (Sam, 16 Nov 2026). */
+  /* Zoe (Sam, 16 Nov 2026: "at the burg", "zoe"), Zoe P. of the student
+     voices, with a friend; her own clip, no captions. */
+  { key: "zoe", src: "ugc/zoe-theburg.mp4", poster: "ugc/zoe-theburg.jpg", who: "Zoe", where: "at The Burg" },
 ];
 
 /* One clip at a time has sound: unmuting one mutes the rest. */
@@ -194,14 +195,14 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
 
 /** `title`: the parents page says whose students (Sam, 16 Nov 2026: "let's
  *  also add this to the parent's page please"). */
-export function UgcRow({ title = "Students using it" }: { title?: string } = {}) {
+export function UgcRow({ title = "Students using it", without = [] }: { title?: string; without?: string[] } = {}) {
   return (
     <section className="ugc" aria-labelledby="ugc-h">
       <h2 id="ugc-h" className="tpa-h2 tpa-h2-out">
         {title}
       </h2>
       <ul className="ugc-row">
-        {CLIPS.map((c) => (
+        {CLIPS.filter((c) => !without.includes(c.key)).map((c) => (
           <li key={c.key}>
             <Clip src={c.src} poster={c.poster} label={`${c.who} ${c.where}`} />
             <p>
