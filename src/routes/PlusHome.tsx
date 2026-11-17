@@ -1606,13 +1606,19 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     ask; this line stays. */}
                 {/* Rob's line in its place (Sam, 16 Nov 2026: "you can have rob's
                     thing replace the $25 to spend every month in the header"). */}
-                <HokieLine dark />
+                {memberHome && !desk ? null : <HokieLine dark />}
                 {/* The act: on a computer, Join with the terms beside it (the
                     held price card's Join sits under the first screen there);
                     on a phone, the terms alone, the dock carries Join. */}
                 {/* A member's act: the app, where the credit is, and that
                     Plus is on (in the visitor's Join row's place). */}
-                {memberHome ? (
+                {/* A member's phone header, as the waitlist's (Sam, 17 Nov
+                    2026: "yes do the same for the member header"): the
+                    headline and one white Get the Tapin app; Rob's line
+                    under the header. A computer keeps the button and plate. */}
+                {memberHome && !desk ? (
+                  <div className="tpu-act tpu-act-wl-phone">{getApp("member_band", true)}</div>
+                ) : memberHome ? (
                   <div className="tpu-act tpu-act-member">
                     {/* On a phone the dock carries the app button. */}
                     {desk ? getApp("member_band", true) : null}
@@ -1729,7 +1735,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Rob's line, under the header on a phone while Plus is invite
             only (Sam, 17 Nov 2026: "I think Rob comes down above the 'watch
             it in action'"). */}
-        {wait && !desk ? <HokieLine /> : null}
+        {(wait || memberHome) && !desk ? <HokieLine /> : null}
         {ugc ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (
           placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
