@@ -1,0 +1,356 @@
+/* ══ THE MEMBER'S PAGE: THE PASS (17 Nov 2026; routes/MembersPass.tsx)
+   Sam's pick of five. One light ground, ink type, money green only for "on"
+   and for the money itself; Gilroy throughout, 600 at most. */
+
+.mv {
+  --mv-g: 16px;
+  --mv-r: 16px;
+  --mv-green: #0b7a53;
+  --mv-live: #3ad08a;
+  min-height: 100vh;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+  background: var(--ground, #f0f0f0);
+  color: var(--ink, #141618);
+  font-family: "Gilroy", Arial, sans-serif;
+}
+.mv * {
+  box-sizing: border-box;
+}
+:where(.mv) :where(h1, h2, p, ul, ol) {
+  margin: 0;
+}
+:where(.mv) :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+.mv-back {
+  position: relative;
+  z-index: 2;
+}
+.mv-h2 {
+  font: 600 20px/26px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ── Shared pieces ───────────────────────────────────────────────────────── */
+.mv-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 54px;
+  border-radius: 14px;
+  font: 600 17px/1 "Gilroy", Arial, sans-serif;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s var(--ease, ease-out);
+}
+.mv-cta:active {
+  transform: scale(0.98);
+}
+.mv-cta-dark {
+  background: var(--ink, #141618);
+  color: #ffffff;
+}
+.mv-cta-light {
+  background: #ffffff;
+  color: var(--ink, #141618);
+}
+.mv-scan {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.mv-qr {
+  flex: none;
+  padding: 8px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair, rgba(20, 22, 24, 0.08));
+}
+.mv-scan p {
+  display: grid;
+  gap: 6px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+}
+.mv-scan b {
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 22px;
+}
+.mv-scan a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.mv-scan a:hover {
+  color: var(--ink);
+}
+.mv-scan-light b,
+.mv-scan-light a {
+  color: #ffffff;
+}
+.mv-scan-light a {
+  opacity: 0.82;
+}
+
+.mv-ben {
+  display: grid;
+}
+.mv-ben li {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  box-shadow: inset 0 -1px 0 var(--hair);
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+}
+.mv-ben li:last-child {
+  box-shadow: none;
+}
+.mv-ben b {
+  font-weight: 600;
+  color: var(--mv-green);
+}
+.mv-ben span {
+  color: var(--muted);
+}
+.mv-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mv-logos img {
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--hair);
+}
+
+.mv-acct {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.mv-acct button {
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.mv-foot {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+  font: 500 14px/20px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.mv-promise {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  color: var(--ink);
+}
+.mv-promise svg {
+  width: 20px;
+  height: 20px;
+  color: var(--mv-green);
+}
+.mv-promise b {
+  font-weight: 600;
+}
+.mv-promise span {
+  color: var(--muted);
+}
+.mv-promise span b {
+  color: var(--ink);
+}
+.mv-help a {
+  color: var(--ink);
+  font-weight: 600;
+}
+.mv-fine {
+  font-size: 13px;
+  line-height: 18px;
+}
+.mv-links {
+  display: flex;
+  gap: 18px;
+}
+.mv-links a {
+  color: var(--muted);
+}
+
+/* ── A · Pass ────────────────────────────────────────────────────────────── */
+.mv-a-top {
+  padding: calc(env(safe-area-inset-top) + 14px) var(--mv-g) 0;
+}
+.mv-a-top .mv-back {
+  background: rgba(20, 22, 24, 0.06);
+  color: var(--ink);
+  box-shadow: none;
+}
+.mv-a-grid {
+  display: grid;
+  gap: 28px;
+  padding: 18px var(--mv-g) 0;
+}
+.mv-a-left {
+  display: grid;
+  gap: 14px;
+}
+.mv-pass {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  aspect-ratio: 1.586;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: #141618;
+  color: #ffffff;
+  box-shadow: 0 24px 48px -24px rgba(20, 22, 24, 0.55), 0 2px 6px rgba(20, 22, 24, 0.18);
+}
+.mv-pass-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  opacity: 0.42;
+  filter: grayscale(1) contrast(1.1);
+  mix-blend-mode: luminosity;
+}
+.mv-pass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20, 22, 24, 0) 30%, rgba(20, 22, 24, 0.85) 100%);
+}
+.mv-pass-head,
+.mv-pass-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mv-pass-foot {
+  align-items: flex-end;
+}
+.mv-pass-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 22, 24, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+}
+.mv-pass-live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mv-live);
+  box-shadow: 0 0 0 3px rgba(58, 208, 138, 0.25);
+}
+.mv-pass-name {
+  display: grid;
+  font: 600 26px/28px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.mv-pass-name span {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.78);
+}
+.mv-pass-who {
+  display: grid;
+  justify-items: end;
+  font: 500 13px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.78);
+}
+.mv-pass-who b {
+  font: 600 17px/22px "Gilroy", Arial, sans-serif;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+.mv-a-acct {
+  padding: 0 4px;
+}
+.mv-a-right {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.mv-a-h {
+  font: 600 30px/34px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.mv-a-lede {
+  font: 500 17px/24px "Gilroy", Arial, sans-serif;
+  color: var(--muted);
+}
+.mv-a-right .mv-h2 {
+  margin-top: 14px;
+}
+@media (min-width: 1024px) {
+  .mv-a-top,
+  .mv-a-grid {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+  .mv-a-top {
+    padding-top: 28px;
+  }
+  .mv-a-grid {
+    grid-template-columns: 440px minmax(0, 1fr);
+    gap: 64px;
+    padding-top: 32px;
+  }
+  .mv-a-left {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+  }
+  .mv-a-h {
+    font-size: 44px;
+    line-height: 48px;
+  }
+  .mv-a-right .mv-scan {
+    padding: 18px;
+    border-radius: var(--mv-r);
+    background: #ffffff;
+  }
+  .mv-a-right .mv-qr {
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-cta {
+    transition: none;
+  }
+}
