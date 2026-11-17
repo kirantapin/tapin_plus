@@ -17,16 +17,20 @@ export const ugcOn = (): boolean => {
 };
 
 const CLIPS = [
-  { key: "grace", src: "ugc/grace-coffeeholics.mp4", poster: "ugc/grace-coffeeholics.jpg", who: "Grace", where: "at Coffeeholics" },
+  { key: "grace", src: "ugc/grace-coffeeholics.mp4", poster: "ugc/grace-coffeeholics.jpg", who: "Grace", where: "at Coffeeholics", place: "coffeeholicsva" },
+  /* Barg's Coffeeholics video (ugc-3, Sam, 16 Nov 2026), cut before its end
+     card, whose "$3.99 first month" the main page now holds back. Barg is
+     also the Sweetopia walkthrough. */
+  { key: "barg", src: "ugc/barg-coffeeholics.mp4", poster: "ugc/barg-coffeeholics.jpg", who: "Barg", where: "at Coffeeholics", place: "coffeeholicsva" },
   /* Sam, 16 Nov 2026: "can you add this one": a student walking through the
      app on Sweetopia's page (iPhone HDR, tone-mapped with avconvert). Who
      it is: to ask Sam. */
-  { key: "sweetopia", src: "ugc/sweetopia-app.mp4", poster: "ugc/sweetopia-app.jpg", who: "In the app", where: "at Sweetopia" },
-  { key: "olaika", src: "ugc/olaika.mp4", poster: "ugc/olaika.jpg", who: "VT students", where: "at Olaika" },
+  { key: "sweetopia", src: "ugc/sweetopia-app.mp4", poster: "ugc/sweetopia-app.jpg", who: "Barg", where: "at Sweetopia", place: "sweetopia" },
+  { key: "olaika", src: "ugc/olaika.mp4", poster: "ugc/olaika.jpg", who: "VT students", where: "at Olaika", place: "olaika" },
   /* Last on the main page, and not on /parents (Sam, 16 Nov 2026). */
   /* Zoe (Sam, 16 Nov 2026: "at the burg", "zoe"), Zoe P. of the student
      voices, with a friend; her own clip, no captions. */
-  { key: "zoe", src: "ugc/zoe-theburg.mp4", poster: "ugc/zoe-theburg.jpg", who: "Zoe", where: "at The Burg" },
+  { key: "zoe", src: "ugc/zoe-theburg.mp4", poster: "ugc/zoe-theburg.jpg", who: "Zoe", where: "at The Burg", place: "theburg" },
 ];
 
 /* One clip at a time has sound: unmuting one mutes the rest. */
@@ -195,14 +199,19 @@ function Clip({ src, poster, label }: { src: string; poster: string; label: stri
 
 /** `title`: the parents page says whose students (Sam, 16 Nov 2026: "let's
  *  also add this to the parent's page please"). */
-export function UgcRow({ title = "Students using it", without = [] }: { title?: string; without?: string[] } = {}) {
+/** `place`: a place's own page shows only that place's clips (Sam, 16 Nov
+ *  2026: "we should just show coffeeholics content on their page"), and
+ *  nothing when it has none. */
+export function UgcRow({ title = "Students using it", without = [], place }: { title?: string; without?: string[]; place?: string } = {}) {
+  const shown = CLIPS.filter((c) => !without.includes(c.key) && (!place || c.place === place));
+  if (!shown.length) return null;
   return (
     <section className="ugc" aria-labelledby="ugc-h">
       <h2 id="ugc-h" className="tpa-h2 tpa-h2-out">
         {title}
       </h2>
       <ul className="ugc-row">
-        {CLIPS.filter((c) => !without.includes(c.key)).map((c) => (
+        {shown.map((c) => (
           <li key={c.key}>
             <Clip src={c.src} poster={c.poster} label={`${c.who} ${c.where}`} />
             <p>

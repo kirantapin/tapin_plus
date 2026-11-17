@@ -1568,7 +1568,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             for members. */}
         {/* $5 bonus credit at each spot (shell/BonusSpots.tsx, shared with
             /parents). */}
-        {ugc && !member ? <UgcRow /> : null}
+        {ugc && !member ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (
           placesRail({ cls: "tpw tpw-a", lead: member ? undefined : <LadderLead /> })
         ) : wherev === "b" ? (
