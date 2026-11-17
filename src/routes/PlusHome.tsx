@@ -353,10 +353,6 @@ const WAITLIST_FAQ: ReadonlyArray<{ q: string; a: string }> = [
     q: "How does the waitlist work?",
     a: "Add your number and you’re in line. When a spot opens, we text you a link to join. You have 48 hours to claim it, then it goes to the next person.",
   },
-  {
-    q: "Can I get in sooner?",
-    a: "A parent can gift you Plus at plus.tapin.app/parents. Gifts don’t wait on the list.",
-  },
 ];
 
 const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: string }> => [
@@ -1801,9 +1797,6 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                 : "Spots open a few at a time. When yours does, we text you a link, and you have 48 hours to claim it."}
             </p>
             {joinCta("hero")}
-            <a className="tpu-wl-parent" href="/parents" onClick={() => track("plus_waitlist_parent_clicked", { where: "offer" })}>
-              Want in sooner? A parent can gift you Plus
-            </a>
           </section>
         ) : offer === "1" ? (
           <section className="tpa-module tpa-offer tpa-s1" aria-label="Tapin Plus">

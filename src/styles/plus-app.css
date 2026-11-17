@@ -9366,16 +9366,6 @@ a.tpu-plate:active {
   color: #4b4f55;
   text-wrap: pretty;
 }
-.tpu-wl-parent {
-  display: block;
-  margin-top: 14px;
-  font: 600 15px/20px "Gilroy", Arial, sans-serif;
-  color: var(--ink, #141618);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  text-align: center;
-}
 .tpa-dock .tpu-wl-dock .tpa-pbar-dot {
   margin: 0 2px 0 0;
   background: #0b7a53;
