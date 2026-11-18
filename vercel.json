@@ -7,12 +7,12 @@
     {
       "source": "/vtparents",
       "destination": "/parents?utm_source=facebook&utm_medium=group_post&utm_campaign=vt_parents_finals&utm_content=deedee_group",
-      "permanent": true
+      "statusCode": 301
     },
     {
       "source": "/hokies",
       "destination": "/parents?utm_source=hungry_hokies_guide&utm_medium=guide&utm_campaign=vt_parents_finals&utm_content=guide_entry",
-      "permanent": true
+      "statusCode": 301
     }
   ],
   "rewrites": [
