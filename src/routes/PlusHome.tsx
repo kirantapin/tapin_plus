@@ -1492,7 +1492,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                  what Plus is under it, then the one way in. The same
                  header on every student page. */
               <>
-                <h1 className="tpu-h1">Tapin Plus is invite only&nbsp;now</h1>
+                {/* Two lines at every width (Sam, 18 Nov 2026). */}
+                <h1 className="tpu-h1">Tapin Plus is<br />invite only&nbsp;now</h1>
                 <p className="tpu-sub">
                   {place ? (
                     <>${CREDIT} credit every month at {place.name} and {PLACES.length - 1} more Blacksburg spots, plus {PERCENT}% off. Join the waitlist to get&nbsp;in.</>
