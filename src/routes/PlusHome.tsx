@@ -48,6 +48,7 @@ import { PLACE_FOREVER_ENDS, PLACE_FOREVER_ENDS_LABEL } from "../model/campaign"
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
 import type { Group } from "../model/groups";
+import { REFUND_LEAD, REFUND_SHORT, refundAnswer, refundIf } from "../model/refundWords";
 import { GroupBar, GroupClock, GroupEnded, GroupHeadline, GroupLeftLine, GroupOffer, GroupSpots, groupTerm, useGroupSeats, useSaleEnded } from "../shell/GroupBits";
 
 /* ══ THE HOME PAGE, IN THE APP'S OWN LOOK (Sam, 3 Nov 2026) ═════════════════
@@ -296,7 +297,7 @@ const placeFaq = (MONTHLY: string, name: string, placeId: string): ReadonlyArray
   },
   {
     q: "How do I cancel and get a refund?",
-    a: "Cancel anytime in the Tapin app. Use at least one Tapin benefit each month, and if Plus saves you less than you paid that month, we refund the difference automatically. You don’t have to ask.",
+    a: `Cancel anytime in the Tapin app. ${refundAnswer("student")}`,
   },
   {
     q: "When do I get my credit?",
@@ -337,8 +338,8 @@ const TRY_FAQ = {
    (Sam, same day). */
 const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
   {
-    q: "How does the auto refund work?",
-    a: "Use at least one Tapin benefit each month. If Plus saves you less than you paid for the membership that month, we refund the difference automatically. You don’t have to ask.",
+    q: "How does the automatic refund work?",
+    a: refundAnswer("student"),
   },
   { q: "How do I cancel?", a: "Cancel anytime in the Tapin app." },
 ];
@@ -371,7 +372,7 @@ const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: st
   },
   {
     q: "How do I cancel and get a refund?",
-    a: "Cancel anytime in the Tapin app. Use at least one Tapin benefit each month, and if Plus saves you less than you paid that month, we refund the difference automatically. You don’t have to ask.",
+    a: `Cancel anytime in the Tapin app. ${refundAnswer("student")}`,
   },
   {
     /* The welcome credit is there at once (Sam, 9 Nov 2026: "the FAQ needs
@@ -845,6 +846,8 @@ const groupFaq = (g: Group, first: string, monthly: string): { q: string; a: str
 /* The refund line, said where the price is (the audit's take, ?audit=1):
    in the header on a phone, under Join in the price card on a computer. */
 function AuditPromise({ className }: { className?: string }) {
+  /* The dock holds one line on a phone, so it stops at "save". */
+  const dock = !!className?.includes("tpu-promise-dock");
   return (
     <p className={`tpu-promise${className ? ` ${className}` : ""}`}>
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -852,7 +855,7 @@ function AuditPromise({ className }: { className?: string }) {
         <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span>
-        <b>Auto refund</b> if you don't save what you&nbsp;pay
+        <b>{dock ? REFUND_SHORT : REFUND_LEAD}</b>{dock ? " if you don\u2019t save" : refundIf("student")}
       </span>
     </p>
   );
@@ -1497,6 +1500,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     <>One membership for all your favorites in Blacksburg. Join the waitlist to get&nbsp;in.</>
                   )}
                 </p>
+                {/* The refund at the top of every page (Sam, 18 Nov 2026). */}
+                <div className="tpu-terms tpu-terms-wl">
+                  <AuditPromise />
+                </div>
                 {/* Rob's line: on a computer its own card above "Watch it in
                     action" (17 Nov 2026), on a phone under the header. */}
                 {/* The waitlist line as the member's status plate (Sam, 17

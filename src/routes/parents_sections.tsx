@@ -9,6 +9,7 @@ import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
+import { REFUND_LEAD, REFUND_RULE, refundAnswer, refundIf } from "../model/refundWords";
 import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
@@ -129,7 +130,7 @@ export function UnderOffer({ audience = "parent" }: { audience?: Audience; month
       ? [
           { key: "points", d: GLYPHS.star, b: "Points", rest: " on everything" },
           /* The auto refund (Sam, 15–16 Nov 2026), in the site's one line. */
-          { key: "refund", d: GLYPHS.refund, b: "Auto refund", rest: " if you don\u2019t save what you pay" },
+          { key: "refund", d: GLYPHS.refund, b: REFUND_LEAD, rest: refundIf("student") },
           { key: "cancel", d: GLYPHS.phone, b: "Cancel anytime", rest: " in the Tapin app" },
         ]
       : [
@@ -321,7 +322,7 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
           </li>
           {/* Automatic since 16 Nov 2026, as on the student page. */}
           <li>
-            <b>Auto refund</b> if they don’t save what you&nbsp;pay.
+            <b>{REFUND_LEAD}</b>{refundIf("parent")}. {REFUND_RULE}
           </li>
           <li>
             <b>A text before every bill</b>, and you can cancel right from&nbsp;it.
@@ -463,7 +464,7 @@ export function BenefitCards() {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
       label: LIFE ? `A month, for life. Exclusive ${PARENT_RATE}, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
-      line: "A text before every bill. Cancel anytime. Auto refund if they don’t save what you pay.",
+      line: `A text before every bill. Cancel anytime. ${REFUND_LEAD}${refundIf("parent")}.`,
     },
   ];
   /* One dot per place the rail can stop, not per card: on a computer three
@@ -1512,13 +1513,13 @@ const B_TRACK = 12;
 const WHAT_IF: Record<Audience, { h: string; row: string; fine: string }> = {
   parent: {
     h: "What if they don\u2019t use it?",
-    row: "Auto refund.",
-    fine: "Every month counts on its own. If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. Cancel anytime, right from the text we send before every bill.",
+    row: `${REFUND_LEAD}.`,
+    fine: `${refundAnswer("parent")} Cancel anytime, right from the text we send before every bill.`,
   },
   student: {
     h: "What if I don\u2019t save?",
-    row: "Auto refund.",
-    fine: "Every month counts on its own. Use a Tapin benefit that month, and if Plus saves you less than you paid, we refund the difference automatically.",
+    row: `${REFUND_LEAD}.`,
+    fine: refundAnswer("student"),
   },
 };
 export function WhatIfUnused({ audience = "parent", monthly: monthlyProp }: { audience?: Audience; monthly?: string } = {}) {
@@ -1749,7 +1750,6 @@ export function ProofTurn({
   className,
   start,
   paused,
-  audience = "parent",
   noPlaces = false,
   lead = [],
 }: {
@@ -1763,7 +1763,6 @@ export function ProofTurn({
    *  deadline and spots, 10 Nov 2026). */
   lead?: ReadonlyArray<{ key: string; body: ReactNode }>;
 }) {
-  const student = audience === "student";
   const allLines: Array<{ key: string; body: ReactNode }> = [
     ...lead,
     {
@@ -1780,7 +1779,7 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          {student ? "Didn\u2019t save? Auto refund." : "Didn\u2019t save what you paid? Auto refund."}
+          Didn\u2019t save? We refund the difference.
         </>
       ),
     },

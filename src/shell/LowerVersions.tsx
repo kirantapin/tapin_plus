@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { GLYPHS, Glyph } from "../routes/parents_kit";
 import { KINDS, LockIco, MoreIco } from "./OfferVersions";
 import { usePlusSeats } from "./PlusSeats";
+import { REFUND_LEAD, REFUND_RULE, REFUND_SHORT, refundIf } from "../model/refundWords";
 import { PLUS_NEXT_PRICE, PLUS_SEAT_CAP } from "../model/seats";
 
 /* ══ THE LOWER HALF OF THE OFFER CARD, FIVE LAYOUTS (Sam, 11 Nov 2026: "We
@@ -99,7 +100,7 @@ export function LowerVersion({
           <li>
             <Tick />
             <span>
-              <b>Auto refund</b> if you don’t save what you&nbsp;pay
+              <b>{REFUND_LEAD}</b>{refundIf("student")}
             </span>
           </li>
           <li>
@@ -169,11 +170,11 @@ export function LowerVersion({
             <li>
               {autoRefund ? (
                 <>
-                  <b>Auto refund</b> of the difference if you use a Tapin benefit and still save less than you pay that&nbsp;month.
+                  <b>{REFUND_LEAD}</b>{refundIf("student")}. {REFUND_RULE}
                 </>
               ) : (
                 <>
-                  <b>Auto refund</b> if you don’t save what you&nbsp;pay.
+                  <b>{REFUND_LEAD}</b>{refundIf("student")}.
                 </>
               )}
             </li>
@@ -222,7 +223,7 @@ export function LowerVersion({
           </div>
           <div>
             <dt>If you don’t save</dt>
-            <dd>Auto refund</dd>
+            <dd>{REFUND_SHORT}</dd>
           </div>
           <div>
             <dt>Cancel</dt>
@@ -259,7 +260,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
           <b>Points</b> on everything
         </span>
         <span>
-          <b>Auto refund</b> if you don’t save
+          <b>{REFUND_SHORT}</b> if you don’t save
         </span>
         <span>
           <b>Cancel anytime</b> in the app
@@ -292,7 +293,7 @@ export function LowerAfter({ v, monthly }: { v: LowV; monthly: string }) {
           <li>
             <Glyph d={GLYPHS.refund} />
             <span>
-              <b>Auto refund</b> if you don’t save what you pay
+              <b>{REFUND_LEAD}</b>{refundIf("student")}
             </span>
           </li>
           <li>

@@ -37,6 +37,7 @@ import { GiftSentContext } from "./giftSent";
 import { nextBillingDate } from "../model/plus";
 import { GLYPHS, Glyph } from "../routes/parents_kit";
 import { lockScroll } from "./scrollLock";
+import { REFUND_SHORT } from "../model/refundWords";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, settle, type IslandOrigin, type IslandParts } from "./island";
 
 /* ══ THE PARENT CHECKOUT (Sam, 5 Nov 2026; wired to the real gift backend by
@@ -1057,7 +1058,7 @@ function Sheet({
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
-          <b>Didn’t save what you paid?</b> Auto refund.
+          <b>Didn’t save what you paid?</b> {REFUND_SHORT}.
         </span>
       </li>
       <li>

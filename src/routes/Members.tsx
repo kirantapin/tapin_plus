@@ -3,6 +3,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { AccountCard, AccountFrame, AppPanel, InfoPanel } from "../shell/AccountPage";
 import { openPlusSignIn } from "../shell/PlusCheckout";
 import { plusPageBack } from "../model/backTo";
+import { refundAnswer } from "../model/refundWords";
 import { MembersGuest, MembersPass } from "./MembersPass";
 
 /* ══ THE STUDENTS' ACCOUNT (/in) ════════════════════════════════════════════
@@ -50,7 +51,7 @@ export default function Members() {
       icon: Shield,
       title: "The Plus Promise",
       /* The auto refund (Sam, 16 Nov 2026): no asking. */
-      line: "Use a Tapin benefit each month. If Plus saves you less than you paid, we refund the difference automatically.",
+      line: refundAnswer("student"),
     },
     /* Early-access memberships bought here are not in the app yet (Sam, 3 Nov
        2026, after talking to Kiran): on file, and who to ask. */
