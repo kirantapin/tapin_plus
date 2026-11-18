@@ -24,6 +24,7 @@ import { GroupClock } from "./GroupBits";
 import { WELCOME_WEEK } from "../model/groups";
 import { InviteClock } from "./WelcomeOffer";
 import { islandAvoidKeyboard, islandClose, islandOpen, islandOrigin, islandTrackHeight, reducedMotion, settle, type IslandOrigin, type IslandParts } from "./island";
+import { REFUND_SHORT } from "../model/refundWords";
 import { lockScroll } from "./scrollLock";
 
 /* ══ THE PLUS CHECKOUT (3 Nov 2026) ═════════════════════════════════════════
@@ -705,7 +706,7 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
         <span className="pck-ico" aria-hidden="true">
           <ShieldGlyph />
         </span>
-        <b>{look === "c" ? "Money back" : "Money back if you don’t save"}</b>
+        <b>{look === "c" ? "Money back" : `${REFUND_SHORT} if you don’t save`}</b>
       </li>
       {/* Sam, 4 Nov 2026: "as we add more places the price doesn't go up for
           existing subscribers, but it does for new members. Pays to get in
@@ -1114,7 +1115,7 @@ function Review({
         <ul className="pck-sum-list tnum">
           <li>$25 to spend right after you join</li>
           <li>{usd(lasts === "forever" ? today : price.monthly)} a month, locked for life</li>
-          <li>Money back if you don’t save</li>
+          <li>{REFUND_SHORT} if you don’t save</li>
           <li>Cancel anytime in the app</li>
         </ul>
       </div>

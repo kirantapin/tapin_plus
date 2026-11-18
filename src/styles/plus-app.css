@@ -8699,6 +8699,36 @@ i[data-k="pts"] {
   margin-top: 0.5px;
   color: #3ccf8e;
 }
+/* The refund line in the invite-only header, on every student page: a
+   place's band and a group's aren't .tpu-band (Sam, 18 Nov 2026). */
+.tpa-band-title .tpu-terms-wl > p {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: start;
+  margin: 0;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.tpa-band-title .tpu-terms-wl > p > span {
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  text-shadow: inherit;
+  text-wrap: pretty;
+}
+.tpa-band-title .tpu-terms-wl b {
+  font-weight: 600;
+  color: #ffffff;
+}
+.tpa-band-title .tpu-terms-wl svg {
+  position: static;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.5px;
+  color: #3ccf8e;
+}
 /* The refund line, in the price card too (see below). */
 .tpu-promise {
   display: flex;

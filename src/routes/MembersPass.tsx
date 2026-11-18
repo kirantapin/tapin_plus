@@ -6,6 +6,7 @@ import { useEventTracking } from "../context/event_tracking_context";
 import { AppQr, AppleGlyph, appHref, device } from "../shell/GetTheApp";
 import { CREDIT, PERCENT, PLACES } from "./parents_kit";
 import { plusPageBack } from "../model/backTo";
+import { refundAnswer } from "../model/refundWords";
 import { openPlusSignIn } from "../shell/PlusCheckout";
 
 /* ══ THE MEMBER'S PAGE: THE PASS (Sam, 17 Nov 2026, picked A of five:
@@ -50,7 +51,7 @@ const BENEFITS_THEY = [
   { big: "Points", rest: "on everything." },
 ];
 const FINE = `Credit and ${PERCENT}% off don’t go toward alcohol. One per order: credit or ${PERCENT}% off.`;
-const PROMISE = "Use a Tapin benefit each month. If Plus saves you less than you paid, we refund the difference automatically.";
+const PROMISE = refundAnswer("student");
 
 export function Back({ to }: { to?: string } = {}) {
   return (

@@ -46,6 +46,7 @@ const PARENT_KIND: Record<string, string> = {
   themilkparlor: "Baskets",
 };
 import { LITE_PLACES } from "../model/lite";
+import { REFUND_LEAD, refundAnswer, refundIf } from "../model/refundWords";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 
 /* ══ THE PARENTS' LANDING PAGE (/parents; Sam, 5 Nov 2026) ═══════════════════
@@ -479,7 +480,12 @@ export default function ParentsHome() {
       /* No "unclaimed costs nothing" (Sam, 9 Nov 2026: "we have to remove
          the 'if it's unclaimed it costs nothing' thing"). */
       /* The auto refund (Sam, 16 Nov 2026), the student page's rule. */
-      a: `Their credit resets each month, so what they don’t use that month doesn’t carry over. If they use a Tapin benefit that month and Plus saves them less than you paid, we refund the difference automatically. You don’t have to ask. Cancel anytime.`,
+      a: `Their credit resets each month, so what they don’t use that month doesn’t carry over. Cancel anytime.`,
+    },
+    {
+      /* Sam's words, 18 Nov 2026 (model/refundWords.ts). */
+      q: "How does the automatic refund work?",
+      a: refundAnswer("parent"),
     },
     {
       q: "Can I see what they order?",
@@ -657,7 +663,7 @@ export default function ParentsHome() {
                     <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   <span>
-                    <b>Auto refund</b> if they don’t save what you&nbsp;pay
+                    <b>{REFUND_LEAD}</b>{refundIf("parent")}
                   </span>
                 </p>
               </div>
@@ -876,7 +882,7 @@ export default function ParentsHome() {
               student page. */}
           {/* The first month moved up under the price (Sam, 9 Nov 2026). */}
           <p className="tpp-under">
-            <span>Auto refund if they don’t save what you pay.</span>
+            <span>{REFUND_LEAD}{refundIf("parent")}.</span>
           </p>
             </>
           )}
