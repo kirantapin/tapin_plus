@@ -34,7 +34,7 @@ import { GiftPreview } from "./GiftPage";
 import { BonusSpots } from "../shell/BonusSpots";
 import { LiteMark } from "../shell/LiteMark";
 import { useTicker } from "../shell/useTicker";
-import { LiveCountdown, liveSoon } from "../shell/LiveSoon";
+import { liveSoon } from "../shell/LiveSoon";
 
 /* Each place's kind, short enough for the C3 card's strip, in the parents'
    food-first words (the pop-up keeps the longer line). */
@@ -798,7 +798,7 @@ export default function ParentsHome() {
                           >
                             <span className="tpa-place-shot">
                               <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" />
-                              {liveSoon(v.id) ? <LiveCountdown className="tpa-live" id={v.id} /> : null}
+                              {/* The countdown lives in the pop-up only (17 Nov 2026). */}
                             </span>
                             <span className="tpa-glass tpa-tag">
                               {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}

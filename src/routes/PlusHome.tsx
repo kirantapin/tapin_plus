@@ -43,7 +43,7 @@ import { LiteStory } from "../shell/LiteStory";
 import { LiteMark } from "../shell/LiteMark";
 import { rememberPlusPage } from "../model/backTo";
 import { pagePolicy } from "../model/pagePolicy";
-import { LiveCountdown, LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
+import { LiveLine, LiveOnPhoto, liveSoon, liveVersion } from "../shell/LiveSoon";
 import { PLACE_FOREVER_ENDS, PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { useTicker } from "../shell/useTicker";
 import { LITE_PLACES } from "../model/lite";
@@ -1382,7 +1382,10 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                                 plus' next Friday with a small countdown so it's
                                 clear"): a pill on the photo until the day, or
                                 one of its five takes (?livev=). */}
-                            {liveSoon(v.id) ? livev ? <LiveOnPhoto v={livev} id={v.id} /> : <LiveCountdown className="tpa-live" id={v.id} /> : null}
+                            {/* Gone from the cards, kept in the pop-up (Sam, 17
+                                Nov 2026: "can we remove the 'live in' from these
+                                cards but keep it on the pop up"). */}
+                            {liveSoon(v.id) && livev ? <LiveOnPhoto v={livev} id={v.id} /> : null}
                           </span>
                           <span className="tpa-glass tpa-tag">
                             {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
