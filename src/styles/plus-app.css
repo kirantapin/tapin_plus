@@ -8729,6 +8729,13 @@ i[data-k="pts"] {
   margin-top: 0.5px;
   color: #3ccf8e;
 }
+/* The two-line headline and that line need the room on a computer, or the
+   headline runs up into the town pill. */
+@media (min-width: 1024px) {
+  .tpa-home .tpa-band.tpu-band:has(.tpu-terms-wl) {
+    height: 540px;
+  }
+}
 /* The refund line, in the price card too (see below). */
 .tpu-promise {
   display: flex;
