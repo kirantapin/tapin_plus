@@ -29,7 +29,7 @@ import { CheckoutPhone } from "./parents_sections";
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const HOUR = 3_600_000;
 
-type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed" } | { kind: "none" };
+type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
 
 const PREVIEW_ENDS = Date.now() + (CLAIM_HOURS * HOUR - 61_000);
 
@@ -55,6 +55,7 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
 
   if (preview) {
     if (preview === "open") return [endedNow ? { kind: "ended" } : { kind: "open", invite: { openedMs: PREVIEW_ENDS - CLAIM_HOURS * HOUR, endsMs: PREVIEW_ENDS } }, onEnd];
+    if (preview === "listed") return [{ kind: "listed", since: Date.now() }, onEnd];
     return [{ kind: preview } as State, onEnd];
   }
   if (userSession === undefined) return [{ kind: "loading" }, onEnd];
@@ -66,7 +67,11 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
   if (subscribed === true) return [invite ? { kind: "claimed" } : { kind: "member" }, onEnd];
   if (invite && invite.endsMs > Date.now() && !endedNow) return [{ kind: "open", invite }, onEnd];
   if (invite) return [{ kind: "ended" }, onEnd];
-  return [{ kind: onWaitlist(fresh.user) ? "listed" : "none" }, onEnd];
+  if (onWaitlist(fresh.user)) {
+    const since = Date.parse(String(fresh.user?.waitlist_at ?? ""));
+    return [{ kind: "listed", since: Number.isFinite(since) ? since : undefined }, onEnd];
+  }
+  return [{ kind: "none" }, onEnd];
 }
 
 /** The page's ground and title, as the members' pages set them. */
@@ -745,6 +750,13 @@ export default function ClaimSeat() {
         <>
           <h1 className="cs-up-h">You’re in line.</h1>
           <p className="cs-lede">Your seat isn’t open yet. We’ll text you when it is, and you’ll have {CLAIM_HOURS} hours to claim&nbsp;it.</p>
+          {/* When they joined, from their own account (model/waitlist.ts). */}
+          {state.since ? (
+            <p className="cs-since tnum">
+              <i aria-hidden="true" />
+              On the list since {new Date(state.since).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+            </p>
+          ) : null}
         </>
       ) : (
         <>

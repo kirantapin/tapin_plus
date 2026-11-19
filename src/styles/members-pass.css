@@ -1055,3 +1055,25 @@
 .cs-offer > .cs-faq {
   margin-top: 24px;
 }
+/* "On the list since …" on the in-line status (19 Nov 2026). */
+.cs-since {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+}
+.cs-since i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cs-live);
+  box-shadow: 0 0 0 3px rgba(58, 208, 138, 0.25);
+}
+.pck-status {
+  margin-top: 12px;
+}
