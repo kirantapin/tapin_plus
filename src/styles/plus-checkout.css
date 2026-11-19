@@ -1597,3 +1597,12 @@
   /* Fill the field's width; only the orphan is avoided. */
   text-wrap: pretty;
 }
+/* ?wlpreview's note (19 Nov 2026). */
+.pck-preview-note {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #141618;
+  font: 600 13px/18px "Gilroy", Arial, sans-serif;
+  color: #3ad08a;
+}

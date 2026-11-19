@@ -20,6 +20,14 @@ import { supabase } from "../supabase";
    sells as before. An ended link falls back to the waitlist. */
 export const WAITLIST = true;
 
+/* ?wlpreview walks the waitlist sheet on the live site without joining
+   anyone (Sam, 19 Nov 2026: "can i preview ... the waitlist thing"): the
+   page shows as a visitor sees it, Continue goes to the code screen without
+   sending a text, and any six digits end on "You're on the list". Nothing
+   is written and no text is sent (shell/PlusCheckout.tsx). */
+export const waitlistPreview = (): boolean =>
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("wlpreview");
+
 export const waitlistOn = (): boolean => {
   if (!WAITLIST) return false;
   if (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("open")) return false;

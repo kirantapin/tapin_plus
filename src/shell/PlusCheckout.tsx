@@ -15,7 +15,7 @@ import { sendCode, verifyCode } from "./authEnv";
 import { PlaceSeats, PlusSeats } from "./PlusSeats";
 import { chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
-import { joinWaitlist, joinedThisVisit, onWaitlist } from "../model/waitlist";
+import { joinWaitlist, joinedThisVisit, onWaitlist, waitlistPreview } from "../model/waitlist";
 import { sendServerLead } from "../context/meta_pixel";
 import { priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
@@ -323,10 +323,14 @@ function PlusCheckoutSheet({
   const meta = userSession?.user?.user_metadata as Record<string, unknown> | undefined;
   const already = onWaitlist(meta) || joinedThisVisit();
   const [listed, setListed] = useState(false);
+  /* ?wlpreview (model/waitlist.ts): the sheet walks through without a text
+     or a join, whoever is signed in. */
+  const pv = waitlist && waitlistPreview();
+  const [pvListed, setPvListed] = useState(false);
   const [joinErr, setJoinErr] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (!waitlist || !signedIn || subscribed !== false || already || listed) return;
+    if (!waitlist || pv || !signedIn || subscribed !== false || already || listed) return;
     let live = true;
     setJoinErr(null);
     const page = typeof window !== "undefined" ? window.location.pathname : "/";
@@ -356,7 +360,9 @@ function PlusCheckoutSheet({
   }, [waitlist, signedIn, subscribed, already, listed, retry]);
   const onList = waitlist && (preview === "listed" || ((listed || already) && subscribed !== true));
   const body = waitlist ? (
-    onList ? (
+    pv ? (
+      pvListed ? <WaitlistDone /> : <SignIn onStage={setSignInStage} waitlist preview onPreviewDone={() => setPvListed(true)} />
+    ) : onList ? (
       <WaitlistDone />
     ) : userSession === undefined ? null : !signedIn ? (
       <SignIn onStage={setSignInStage} waitlist />
@@ -396,13 +402,14 @@ function PlusCheckoutSheet({
      view from the first screen (Sam, 3 Nov 2026: polish it up to the page's
      design). */
   /* Signing in only never turns into the member screen as it closes. */
-  const done = waitlist ? onList || (signedIn && subscribed === true) : !signInOnly && (preview === "done" || !!paid || subscribed === true);
+  const done = waitlist ? (pv ? pvListed : onList || (signedIn && subscribed === true)) : !signInOnly && (preview === "done" || !!paid || subscribed === true);
   const step = done ? 4 : preview === "pay" ? 3 : !signedIn ? (signInStage === "phone" ? 1 : 2) : 3;
   /* Once joined, the header is the moment: a tick that draws itself and
      "You're in" (or, for someone who already was, "You're a member"), in
      place of "Join Tapin Plus" and a price that no longer applies (Sam, 3 Nov
      2026: polish the post-purchase screen). */
-  const doneTitle = onList ? "You’re on the list" : paid || preview === "done" ? "You’re in" : "You’re a member";
+  const listedNow = onList || (pv && pvListed);
+  const doneTitle = listedNow ? "You’re on the list" : paid || preview === "done" ? "You’re in" : "You’re a member";
   const tick = useRef<SVGPathElement | null>(null);
   /* "You're in" gets focus, so a screen reader says it. */
   useEffect(() => {
@@ -438,7 +445,7 @@ function PlusCheckoutSheet({
                 <h2 id="pck-title" className="pck-title" tabIndex={-1}>
                   {doneTitle}
                 </h2>
-                <p className="pck-price">{onList ? "We’ll text you when your spot opens." : "Your Tapin Plus membership is active."}</p>
+                <p className="pck-price">{listedNow ? "We’ll text you when your spot opens." : "Your Tapin Plus membership is active."}</p>
               </div>
             </div>
           ) : waitlist ? (
@@ -527,7 +534,20 @@ const formatPhone = (d: string) =>
 const RESEND_S = 30;
 
 /* ── Sign in: the number, then the code ──────────────────────────────────── */
-function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage: "phone" | "code") => void; plain?: boolean; waitlist?: boolean }) {
+function SignIn({
+  onStage,
+  plain = false,
+  waitlist = false,
+  preview = false,
+  onPreviewDone,
+}: {
+  onStage: (stage: "phone" | "code") => void;
+  plain?: boolean;
+  waitlist?: boolean;
+  /** ?wlpreview: no text sent, no code checked, nothing joined. */
+  preview?: boolean;
+  onPreviewDone?: () => void;
+}) {
   const price = usePlusPrice();
   const { track } = useEventTracking();
   const look = signInLook();
@@ -604,6 +624,10 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
      land in the same tick, and the state would let both through. */
   const verifying = useRef(false);
   const verify = async (value: string) => {
+    if (preview) {
+      onPreviewDone?.();
+      return;
+    }
     if (verifying.current || previewCode) return;
     verifying.current = true;
     setBusy(true);
@@ -627,6 +651,11 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
     if (stage === "phone") {
       if (digits.length !== 10) return nudge(phoneBox.current);
       if (previewCode) return;
+      if (preview) {
+        setWait(RESEND_S);
+        setStage("code");
+        return;
+      }
       setBusy(true);
       setError(null);
       const ok = await send();
@@ -658,6 +687,10 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
   };
 
   const resend = async () => {
+    if (preview) {
+      setWait(RESEND_S);
+      return;
+    }
     if (wait > 0 || busy || previewCode) return;
     setBusy(true);
     setError(null);
@@ -825,6 +858,7 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
 
   return (
     <form className={`pck-body pck-look-${look}`} onSubmit={submit}>
+      {preview ? <p className="pck-preview-note">Preview: no text is sent and nothing is saved. Any number and any six digits work.</p> : null}
       {stage === "phone" ? (
         waitlist ? (
           <>
