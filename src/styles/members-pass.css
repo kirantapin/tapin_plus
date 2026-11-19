@@ -1446,3 +1446,19 @@
 .dk-you-dot {
   box-shadow: 0 0 0 10px rgba(58, 208, 138, 0.22);
 }
+/* The halo breathes with the line (19 Nov 2026, Sam: "can we give green
+   ring a subtle animation"): on the wave's own 2.8 s beat, it widens and
+   brightens a touch as the green pulse passes your seat (the seat beside
+   you lights at 1.6 s), then settles. Still with reduced motion. */
+.dk-you-dot {
+  animation: dk-halo 2.8s ease-in-out infinite;
+}
+@keyframes dk-halo {
+  0%, 44%, 80%, 100% { box-shadow: 0 0 0 10px rgba(58, 208, 138, 0.22); }
+  58% { box-shadow: 0 0 0 15px rgba(58, 208, 138, 0.3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dk-you-dot {
+    animation: none;
+  }
+}
