@@ -8,6 +8,7 @@ import PlusHome from "./routes/PlusHome";
 import { BREXX, SMITHS_LANDING, WELCOME_WEEK, vipGroup, type Group } from "./model/groups";
 import { setPagePolicy } from "./model/pagePolicy";
 import Members from "./routes/Members";
+import ClaimSeat from "./routes/ClaimSeat";
 import ParentsHome from "./routes/ParentsHome";
 import { PARENTS_LAUNCH_ENDS, PARENTS_LAUNCH_POLICY } from "./routes/parents_kit";
 import ParentAccount from "./routes/ParentAccount";
@@ -116,6 +117,8 @@ export default function App() {
             join (Sam, 14 Nov 2026), until 11:59pm ET Tue 1 Dec. */}
         <Route path="/vip" element={<VipPage />} />
         <Route path="/in" element={<Members />} />
+        {/* The texted link for an open waitlist seat (19 Nov 2026). */}
+        <Route path="/claim" element={<ClaimSeat />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
             gift, and their account, signed in. Outside the shell, in the

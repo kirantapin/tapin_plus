@@ -117,9 +117,10 @@ export function Account({ four, className = "" }: { four: string | null; classNa
 }
 
 /** The promise, a person, the terms: the page's last word in every version. */
-function Foot({ onMail }: { onMail: () => void }) {
+export function Foot({ onMail, promise = true }: { onMail: () => void; promise?: boolean }) {
   return (
     <footer className="mv-foot">
+      {promise ? (
       <p className="mv-promise">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
@@ -129,6 +130,7 @@ function Foot({ onMail }: { onMail: () => void }) {
           <b>The Plus Promise.</b> {PROMISE}
         </span>
       </p>
+      ) : null}
       <p className="mv-help">
         Questions about your plan, your credit or a refund?{" "}
         <a href={MAIL} onClick={onMail}>
@@ -173,18 +175,18 @@ export function Benefits({ className = "", they = false }: { className?: string;
   );
 }
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children, title = "Your account · Tapin Plus" }: { children: ReactNode; title?: string }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
     window.scrollTo(0, 0);
     const t = document.title;
-    document.title = "Your account · Tapin Plus";
+    document.title = title;
     return () => {
       delete root.dataset.surface;
       document.title = t;
     };
-  }, []);
+  }, [title]);
   return <div className="tpa mv mv-a">{children}</div>;
 }
 
