@@ -341,11 +341,189 @@ const Chevron = () => (
 
 /** What you pay beside what you get, the rest of it, what it's worth and
  *  the refund: the offer's middle, and the "You're up" page's below the fold. */
+/* ══ THE VALUE STACK, THREE TAKES (Sam, 19 Nov 2026, of the four stacked
+   cards: "need to /impeccable redesign this") ══════════════════════════════
+   Preview only, ?valv=a|b|c; with none, the four cards as shipped. Each says
+   the same true things in one piece: what you pay, what you get, what it's
+   worth (about $60, with its basis) and the refund.
+   A · Ledger: one white statement, pay at the top, what you get as rows
+       with their amounts on the right, the $60 as its total.
+   B · The math: $3.99 turns into $25, said as one line in big figures, the
+       weekly $5 and the 15% under it, the $60 in a dark band.
+   C · Dark card: pay beside get on the ink, the rest as ticked lines, the
+       $60 at its foot in the live green; the refund under it as a line. */
+type ValV = "a" | "b" | "c";
+const valVersion = (): ValV | null => {
+  if (typeof window === "undefined") return null;
+  const v = new URLSearchParams(window.location.search).get("valv");
+  return v === "a" || v === "b" || v === "c" ? v : null;
+};
+const TICK = (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 function Value() {
   const { price } = usePlusPriceLoad();
   const first = firstFigure(price);
   const monthly = usd(price?.monthly);
   const same = !!price && price.first === price.monthly;
+  const [valv] = useState(valVersion);
+  const hide = price ? undefined : { visibility: "hidden" as const };
+  const promiseLine = (
+    <p className="cv-promise">
+      {SHIELD}
+      <span>
+        <b>Save what you pay, or get the difference back.</b> {refundAnswer("student")}
+      </span>
+    </p>
+  );
+  if (valv === "a")
+    return (
+      <section className="cv cv-a tnum" aria-label="What you pay and what you get">
+        <div className="cv-a-pay" style={hide}>
+          <span>You pay</span>
+          <p>
+            <b>{same ? monthly : first}</b> {same ? "a month" : <>first month, then {monthly}</>}
+          </p>
+        </div>
+        <p className="cv-a-head">You get</p>
+        <ul className="cv-a-rows">
+          <li>
+            <span>
+              <b>$5 at each Plus spot</b>
+              <small>Every month, no minimum</small>
+            </span>
+            <em>$25</em>
+          </li>
+          <li>
+            <span>
+              <b>$5 back</b>
+              <small>Every week you spend $10</small>
+            </span>
+            <em>$5/wk</em>
+          </li>
+          <li>
+            <span>
+              <b>15% off</b>
+              <small>Your other orders, once a day</small>
+            </span>
+            <em>15%</em>
+          </li>
+          <li>
+            <span>
+              <b>Deals</b>
+              <small>Crumbl, Italiano’s and Playa Bowls</small>
+            </span>
+            <em>+3 spots</em>
+          </li>
+        </ul>
+        <div className="cv-a-total">
+          <span>
+            You save about<sup>*</sup>
+          </span>
+          <b>$60 a month</b>
+        </div>
+        <small className="cv-note">{WORTH_NOTE}</small>
+        {promiseLine}
+      </section>
+    );
+  if (valv === "b")
+    return (
+      <section className="cv cv-b tnum" aria-label="What you pay and what you get">
+        <div className="cv-b-math" style={hide}>
+          <div>
+            <small>You pay</small>
+            <b>{same ? monthly : first}</b>
+          </div>
+          <svg className="cv-b-arrow" viewBox="0 0 40 24" aria-hidden="true">
+            <path d="M2 12h34M28 4l8 8-8 8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="cv-b-get">
+            <small>You get</small>
+            <b>$25</b>
+          </div>
+        </div>
+        <p className="cv-b-say">
+          {same ? `${monthly} a month` : `${first} for your first month, then ${monthly}`}. Every month you get $5 to spend at each of the 5 Plus spots.
+        </p>
+        <ul className="cv-b-more">
+          <li>
+            {TICK}
+            <span>
+              <b>$5 back</b> every week you spend $10
+            </span>
+          </li>
+          <li>
+            {TICK}
+            <span>
+              <b>15% off</b> your other orders, once a day
+            </span>
+          </li>
+          <li>
+            {TICK}
+            <span>
+              <b>Deals</b> at Crumbl, Italiano’s and Playa Bowls
+            </span>
+          </li>
+        </ul>
+        <div className="cv-b-band">
+          <p>
+            Save about <b>$60 a month</b> at places you already go<sup>*</sup>
+          </p>
+          <small>{WORTH_NOTE}</small>
+        </div>
+        {promiseLine}
+      </section>
+    );
+  if (valv === "c")
+    return (
+      <>
+        <section className="cv cv-c tnum" aria-label="What you pay and what you get">
+          <div className="cv-c-pair" style={hide}>
+            <div>
+              <small>You pay</small>
+              <b>{same ? monthly : first}</b>
+              <span>{same ? "a month" : `first month, then ${monthly}`}</span>
+            </div>
+            <div className="cv-c-get">
+              <small>You get</small>
+              <b>$25</b>
+              <span>every month, $5 at each Plus spot</span>
+            </div>
+          </div>
+          <ul className="cv-c-more">
+            <li>
+              {TICK}
+              <span>
+                <b>$5 back</b> every week you spend $10
+              </span>
+            </li>
+            <li>
+              {TICK}
+              <span>
+                <b>15% off</b> your other orders, once a day
+              </span>
+            </li>
+            <li>
+              {TICK}
+              <span>
+                <b>Deals</b> at Crumbl, Italiano’s and Playa Bowls
+              </span>
+            </li>
+          </ul>
+          <div className="cv-c-worth">
+            <span>
+              Save about<sup>*</sup>
+            </span>
+            <b>$60 a month</b>
+            <small>{WORTH_NOTE}</small>
+          </div>
+        </section>
+        {promiseLine}
+      </>
+    );
   return (
     <>
       <div className="cs-vs tnum">
