@@ -130,7 +130,13 @@ const BURG_PHOTO = asset("/places/theburg-food.webp");
    the cups (they sit right of centre in the photo). */
 const photoFor = (v: Place) => (v.id === "theburg" ? BURG_PHOTO : v.hero);
 /** Where a place's photo is framed when it's cropped. */
-const PHOTO_POS: Record<string, string> = { coffeeholicsva: "56% 50%" };
+export const PHOTO_POS: Record<string, string> = { coffeeholicsva: "56% 50%" };
+/** Every card of the places row, Plus then Lite, as the main page has them
+ *  (/claim's row, 19 Nov 2026). */
+export const allRailCards = () => [
+  ...PLACES.map((v) => ({ id: v.id, name: v.name, kind: KIND[v.id] ?? v.category, photo: photoFor(v), logo: v.logo, lite: false, perk: "Get $5 · Earn $5 · Save 15%" })),
+  ...LITE_PLACES.map((v) => ({ id: v.id, name: v.name, kind: v.kind, photo: v.photo, logo: v.logo, lite: true, perk: v.short })),
+];
 
 /* ══ ORDERS THAT EARN IT, ONE AT EACH PLACE ═════════════════════════════════
    Real items at their menu prices, each at or over $10, all food (the $5 is
@@ -336,7 +342,7 @@ const TRY_FAQ = {
    anything". Replaces "How do I cancel and get a refund?" there, which said
    to email support; cancelling keeps its own answer. No worked example
    (Sam, same day). */
-const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
+export const refundFaq = (): ReadonlyArray<{ q: string; a: string }> => [
   {
     q: "How does the automatic refund work?",
     a: refundAnswer("student"),
@@ -357,7 +363,7 @@ const WAITLIST_FAQ: ReadonlyArray<{ q: string; a: string }> = [
   },
 ];
 
-const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: string }> => [
+export const faqFor = (MONTHLY: string, held = false): ReadonlyArray<{ q: string; a: string }> => [
   /* What customers actually asked, most asked first (Sam, 4 Nov 2026, from
      support: cancelling and refunds 5 of 6; The Burg 2, both of whom later
      cancelled; stacking 1). Cancel is in the app, refunds by email (Sam,

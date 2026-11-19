@@ -397,3 +397,327 @@
   padding-top: 16px;
   border-top: 0;
 }
+
+/* ══ /claim (19 Nov 2026, routes/ClaimSeat.tsx) ══════════════════════════════
+   Sam's picks of ten: signed out, "You're up" (the line of seats, theirs
+   lit); signed in, "Pay / get" (the time left as a bar, what you pay beside
+   what you get) over the main page's places row, benefits and questions.
+   The members' ground and type: ink, money green, white panels, Gilroy 600
+   at most. */
+.cs {
+  --cs-green: #0b7a53;
+  --cs-mint: #e3f3ec;
+  --cs-live: #3ad08a;
+  --cs-muted: #5d6166;
+  --cs-hair: rgba(20, 22, 24, 0.1);
+  min-height: 100vh;
+  background: var(--ground, #f0f0f0);
+  color: var(--ink, #141618);
+  font-family: "Gilroy", Arial, sans-serif;
+}
+.cs :where(h1, h2, p, ul) {
+  margin: 0;
+}
+.cs-top {
+  padding: calc(env(safe-area-inset-top) + 16px) 20px 0;
+}
+.cs-fine {
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  text-wrap: pretty;
+}
+.cs-lede {
+  font: 500 17px/24px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  text-wrap: pretty;
+}
+
+/* ── You're up ── */
+.cs-up {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 40px);
+}
+.cs-line {
+  display: block;
+  width: 100%;
+  max-width: 390px;
+  height: auto;
+  margin: 26px auto 0;
+}
+.cs-line-track {
+  stroke: #d6d7d8;
+  stroke-width: 2;
+  stroke-dasharray: 2 8;
+  stroke-linecap: round;
+}
+.cs-line-seat {
+  fill: #cfd1d3;
+}
+.cs-line-glow {
+  fill: var(--cs-live);
+  opacity: 0.22;
+}
+.cs-line-you,
+.cs-line-tag {
+  fill: var(--ink, #141618);
+}
+.cs-line-tick {
+  fill: none;
+  stroke: var(--cs-live);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cs-line-dot {
+  fill: #ffffff;
+}
+.cs-line-tag-t {
+  font: 600 14px "Gilroy", Arial, sans-serif;
+  fill: #ffffff;
+}
+.cs-line-door {
+  fill: #ffffff;
+  stroke: var(--ink, #141618);
+  stroke-width: 2;
+}
+.cs-up-body {
+  display: grid;
+  gap: 16px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 20px 0;
+}
+.cs-up-h {
+  font: 600 44px/46px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+/* ── Pay / get ── */
+.tpa.cs-offer {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 110px);
+}
+.cs-col {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.cs-col .cs-top {
+  padding: calc(env(safe-area-inset-top) + 16px) 0 4px;
+}
+.cs-held {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffffff;
+}
+.cs-held-t {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cs-held-t b {
+  font-weight: 600;
+  color: var(--ink, #141618);
+}
+.cs-held-track {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: #e7e7e8;
+  overflow: hidden;
+}
+.cs-held-track i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--ink, #141618);
+  transform-origin: left center;
+  transition: transform 1s linear;
+}
+.cs-h {
+  margin-top: 10px;
+  font: 600 32px/36px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.cs-vs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+.cs-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 168px;
+  padding: 18px 16px;
+  border-radius: 20px;
+}
+.cs-pay {
+  background: #ffffff;
+}
+.cs-get {
+  background: var(--cs-mint);
+  color: var(--cs-green);
+}
+.cs-tile small {
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+}
+.cs-tile b {
+  display: block;
+  font: 600 52px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.cs-tile span {
+  display: block;
+  margin-top: 6px;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  opacity: 0.86;
+}
+.cs-also {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  list-style: none;
+  font: 500 15px/20px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cs-also b {
+  font-weight: 600;
+  color: var(--cs-green);
+}
+.cs-worth {
+  display: grid;
+  gap: 8px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  background: var(--ink, #141618);
+  color: #ffffff;
+}
+.cs-worth p {
+  font: 500 20px/26px "Gilroy", Arial, sans-serif;
+  text-wrap: balance;
+}
+.cs-worth b {
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--cs-live);
+}
+.cs-worth sup {
+  font-size: 0.6em;
+}
+.cs-worth small {
+  font: 500 12.5px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.66);
+}
+.cs-promise {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #ffffff;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cs-promise svg {
+  width: 22px;
+  height: 22px;
+  color: var(--cs-green);
+}
+.cs-promise b {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+  color: var(--ink, #141618);
+}
+.cs-offer > .tpa-module,
+.cs-offer > .tps-unlock {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cs-foot {
+  min-height: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 20px;
+  background: none;
+}
+.cs-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  padding: 12px 16px calc(env(safe-area-inset-bottom) + 14px);
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -1px 0 var(--cs-hair), 0 -12px 32px -16px rgba(20, 22, 24, 0.25);
+}
+.cs-dock .mv-cta {
+  max-width: 528px;
+  margin: 0 auto;
+  border: 0;
+  cursor: pointer;
+}
+@media (min-width: 1024px) {
+  .cs-up-h {
+    font-size: 56px;
+    line-height: 58px;
+  }
+  .cs-line {
+    margin-top: 60px;
+  }
+}
+.cs .cs-back {
+  background: rgba(20, 22, 24, 0.06);
+  color: var(--ink, #141618);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.cs .mv-cta {
+  border: 0;
+  cursor: pointer;
+}
+.cs .mv-cta:focus-visible,
+.cs .cs-back:focus-visible {
+  outline: 3px solid var(--cs-green);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-held-track i {
+    transition: none;
+  }
+}
+/* Polish (19 Nov 2026): the line fades at its ends rather than cutting a
+   seat in half; the back pill sits on the column's edge on a computer; the
+   $60 doesn't push its line apart. */
+.cs-line {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+.cs-up .cs-top {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.cs-worth p {
+  display: grid;
+  gap: 2px;
+  font: 500 17px/22px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+}
+.cs-worth p b {
+  font: 600 40px/44px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--cs-live);
+}
