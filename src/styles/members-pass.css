@@ -721,3 +721,51 @@
   letter-spacing: -0.02em;
   color: var(--cs-live);
 }
+/* The places row at the top of the offer (19 Nov 2026): out to the screen's
+   edges on a phone, inside the column on a computer. */
+.cs-col > .cs-rail {
+  margin: 0 -20px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.cs-col > .cs-rail .cs-rail-bar {
+  padding: 0 20px;
+}
+.cs-col > .cs-rail .tpa-rail {
+  padding-left: 20px;
+  padding-right: 20px;
+  scroll-padding-left: 20px;
+}
+@media (min-width: 600px) {
+  .cs-col > .cs-rail {
+    margin: 0;
+  }
+  .cs-col > .cs-rail .cs-rail-bar,
+  .cs-col > .cs-rail .tpa-rail {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+.cs-col {
+  grid-template-columns: minmax(0, 1fr);
+}
+.cs-col > .cs-rail,
+.cs-col > .cs-rail .tpa-rail {
+  min-width: 0;
+}
+/* Shorter cards here, so the price is still on the first screen. */
+.cs-col > .cs-rail .tpa-rail {
+  grid-auto-columns: 168px;
+}
+.cs-col > .cs-rail .tpa-place {
+  height: 196px;
+}
+@media (min-width: 1024px) {
+  .cs-col > .cs-rail .tpa-rail {
+    grid-auto-columns: 196px;
+  }
+  .cs-col > .cs-rail .tpa-place {
+    height: 220px;
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import { asset } from "../asset";
@@ -10,6 +10,7 @@ import { firstFigure, usd, usePlusPriceLoad } from "../model/plus";
 import { refundAnswer } from "../model/refundWords";
 import { onWaitlist } from "../model/waitlist";
 import { liveSoon } from "../shell/LiveSoon";
+import { useTicker } from "../shell/useTicker";
 import { LiteMark } from "../shell/LiteMark";
 import { BonusSpots } from "../shell/BonusSpots";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
@@ -177,47 +178,73 @@ const SHIELD = (
    Swap in the real average once there are months of members. */
 const WORTH_NOTE = "*Our estimate for about $100 a month of orders at Plus spots: the $25 monthly credit, $5 back each week, 15% off and points.";
 
+/* The places row, at the top of the offer (Sam, 19 Nov 2026: "we should
+   have the list of merchants at the top I think, that carousel"): the main
+   page's cards, drifting as its ticker does (shell/useTicker.ts), drawn
+   twice so the drift wraps, with a pause. */
 function ClaimRail({ onOpen }: { onOpen: (p: PlacePopupPlace) => void }) {
   const cards = allRailCards();
+  const railRef = useRef<HTMLUListElement | null>(null);
+  const [paused, setPaused] = useState(false);
+  useTicker(railRef, true, paused, "claim");
   return (
-    <div className="tpa-places tpw tpw-b cs-rail">
-      <ul className="tpa-rail">
-        {cards.map((v) => (
-          <li key={v.id} className="tpa-place">
-            <button
-              type="button"
-              className="tpa-place-open"
-              aria-label={v.lite ? `What you get at ${v.name}` : `What Plus gets you at ${v.name}`}
-              onClick={(e) => {
-                const r = e.currentTarget.getBoundingClientRect();
-                onOpen({ id: v.id, name: v.name, kind: v.kind, photo: v.photo, lite: v.lite || undefined, liveSoon: liveSoon(v.id) || undefined, from: { x: r.left, y: r.top, w: r.width, h: r.height } });
-              }}
-            >
-              <span className="tpa-place-shot">
-                <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined} />
-              </span>
-              <span className="tpa-glass tpa-tag">
-                {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
-                {v.lite ? "Lite" : "Plus"}
-              </span>
-              <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <span className="tpa-place-name">
-                <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
-                <span className="tpa-place-words">
-                  <b>{v.name}</b>
-                  <small>{v.kind}</small>
-                  <small className="tpa-place-perk">{v.perk}</small>
+    <section className="tpa-places tpw tpw-b cs-rail" aria-label="Where you can use Plus">
+      <div className="tpa-rail-bar cs-rail-bar">
+        <p className="tpa-places-sub">8 Blacksburg spots. Open a card to see what Plus covers&nbsp;there.</p>
+        <div className="tpa-rail-arrows">
+          <button type="button" className="tpa-rail-arrow tpa-rail-pause" aria-label={paused ? "Play the places" : "Pause the places"} aria-pressed={paused} onClick={() => setPaused((v) => !v)}>
+            {paused ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+      <ul className="tpa-rail" ref={railRef} data-ticker="">
+        {[false, true].map((copy) =>
+          cards.map((v) => (
+            <li key={`${copy ? "copy-" : ""}${v.id}`} className="tpa-place" data-ticker-copy={copy ? "" : undefined} aria-hidden={copy || undefined}>
+              <button
+                type="button"
+                className="tpa-place-open"
+                tabIndex={copy ? -1 : undefined}
+                aria-label={v.lite ? `What you get at ${v.name}` : `What Plus gets you at ${v.name}`}
+                onClick={(e) => {
+                  const r = e.currentTarget.getBoundingClientRect();
+                  onOpen({ id: v.id, name: v.name, kind: v.kind, photo: v.photo, lite: v.lite || undefined, liveSoon: liveSoon(v.id) || undefined, from: { x: r.left, y: r.top, w: r.width, h: r.height } });
+                }}
+              >
+                <span className="tpa-place-shot">
+                  <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined} />
                 </span>
-              </span>
-            </button>
-          </li>
-        ))}
+                <span className="tpa-glass tpa-tag">
+                  {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
+                  {v.lite ? "Lite" : "Plus"}
+                </span>
+                <span className="tpa-glass tpa-place-more" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="tpa-place-name">
+                  <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
+                  <span className="tpa-place-words">
+                    <b>{v.name}</b>
+                    <small>{v.kind}</small>
+                    <small className="tpa-place-perk">{v.perk}</small>
+                  </span>
+                </span>
+              </button>
+            </li>
+          )),
+        )}
       </ul>
-    </div>
+    </section>
   );
 }
 
@@ -259,6 +286,7 @@ function Offer({ invite, onEnd }: { invite: SeatInvite; onEnd: () => void }) {
         </div>
         <Held endsMs={invite.endsMs} onEnd={onEnd} />
         <h1 className="cs-h">Claim your seat</h1>
+        <ClaimRail onOpen={setPlaceOpen} />
         <div className="cs-vs tnum">
           <div className="cs-tile cs-pay" style={price ? undefined : { visibility: "hidden" }}>
             <small>You pay</small>
@@ -306,7 +334,8 @@ function Offer({ invite, onEnd }: { invite: SeatInvite; onEnd: () => void }) {
         </section>
       </div>
 
-      <BonusSpots title="What and where can I use it?" rail={<ClaimRail onOpen={setPlaceOpen} />} />
+      {/* The ladder, without the logos: the places row is at the top now. */}
+      <BonusSpots title="What you get with Plus" logos={false} />
 
       <section className="tpa-module cs-faq" aria-labelledby="cs-faq-h">
         <h2 id="cs-faq-h" className="tpa-h2">
