@@ -635,38 +635,6 @@ export default function ParentsHome() {
               <button type="button" className="tpa-cta tpa-cta-white tpp-head-cta" data-page-cta="" onClick={(e) => signUp("band", e.currentTarget)}>
                 {cta}
               </button>
-              <div className="tpu-terms">
-                <p className="tpa-wline">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
-                    <circle cx="12" cy="12" r="3.6" fill="currentColor" />
-                  </svg>
-                  <span className="tnum">
-                    {held ? (
-                      <>
-                        <b>Holiday price</b> until January&nbsp;1
-                      </>
-                    ) : LIFE ? (
-                      <>
-                        <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
-                      </>
-                    ) : (
-                      <>
-                        <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
-                      </>
-                    )}
-                  </span>
-                </p>
-                <p className="tpu-promise">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
-                    <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span>
-                    <b>{REFUND_LEAD}</b>{refundIf("parent")}
-                  </span>
-                </p>
-              </div>
             </div>
             {/* A phone: the button and the price on the photo (Sam, 8 Nov
                 2026, picking preview 5, "just a bit more refined"); a
@@ -713,6 +681,40 @@ export default function ParentsHome() {
       </header>
 
       <main className="tpa-sheet">
+        {/* The terms under the header, in their own card (Sam, 19 Nov
+            2026: "bring these bullet points down below, for all pages"). */}
+        <section className="tpa-module tpu-terms-card" aria-label="Price and refund">
+          <p className="tpa-wline">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
+              <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+            </svg>
+            <span className="tnum">
+              {held ? (
+                <>
+                  <b>Holiday price</b> until January&nbsp;1
+                </>
+              ) : LIFE ? (
+                <>
+                  <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
+                </>
+              ) : (
+                <>
+                  <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
+                </>
+              )}
+            </span>
+          </p>
+          <p className="tpu-promise">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+              <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>
+              <b>{REFUND_LEAD}</b>{refundIf("parent")}
+            </span>
+          </p>
+        </section>
         {/* Rob's line: under the header on a phone, its own card on a
             computer (Sam, 17 Nov 2026), above "Watch it in action". */}
         <HokieLine card={desk} />
