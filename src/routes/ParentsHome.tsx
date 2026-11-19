@@ -529,6 +529,44 @@ export default function ParentsHome() {
       {cta}
     </button>
   );
+  /* The terms under the header, in their own card (Sam, 19 Nov 2026:
+     "bring these bullet points down below, for all pages"); on a computer
+     under the offer card. */
+  const termsCard = (
+    <section className="tpa-module tpu-terms-card" aria-label="Price and refund">
+      <p className="tpa-wline">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
+          <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+        </svg>
+        <span className="tnum">
+          {held ? (
+            <>
+              <b>Holiday price</b> until January&nbsp;1
+            </>
+          ) : LIFE ? (
+            <>
+              <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
+            </>
+          ) : (
+            <>
+              <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
+            </>
+          )}
+        </span>
+      </p>
+      <p className="tpu-promise">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
+          <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span>
+          <b>{REFUND_LEAD}</b>{refundIf("parent")}
+        </span>
+      </p>
+    </section>
+  );
+
   return (
     <div className="tpa tpa-home tpp">
       {/* The students line as the page's announcement bar, as on the main
@@ -681,40 +719,7 @@ export default function ParentsHome() {
       </header>
 
       <main className="tpa-sheet">
-        {/* The terms under the header, in their own card (Sam, 19 Nov
-            2026: "bring these bullet points down below, for all pages"). */}
-        <section className="tpa-module tpu-terms-card" aria-label="Price and refund">
-          <p className="tpa-wline">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.9" />
-              <circle cx="12" cy="12" r="3.6" fill="currentColor" />
-            </svg>
-            <span className="tnum">
-              {held ? (
-                <>
-                  <b>Holiday price</b> until January&nbsp;1
-                </>
-              ) : LIFE ? (
-                <>
-                  <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
-                </>
-              ) : (
-                <>
-                  <b>{FIRST} first month</b> · then {MONTHLY} a&nbsp;month
-                </>
-              )}
-            </span>
-          </p>
-          <p className="tpu-promise">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 3.2 5 5.9v5.6c0 4.3 2.9 8 7 9.1 4.1-1.1 7-4.8 7-9.1V5.9L12 3.2Z" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" />
-              <path d="m8.9 12.2 2.2 2.2 4.1-4.3" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span>
-              <b>{REFUND_LEAD}</b>{refundIf("parent")}
-            </span>
-          </p>
-        </section>
+        {desk ? null : termsCard}
         {/* Rob's line: under the header on a phone, its own card on a
             computer (Sam, 17 Nov 2026), above "Watch it in action". */}
         <HokieLine card={desk} />
@@ -898,6 +903,9 @@ export default function ParentsHome() {
             2026 polish: the chips and the promise lines were four objects
             in two styles). */}
         {count ? null : <UnderOffer />}
+        {/* On a computer the terms sit under the offer card (Sam, 19 Nov
+            2026: "on desktop, this can go below"). */}
+        {desk ? termsCard : null}
         </div>
 
         {/* C · parents' own words, straight after the envelope (Sam, 9 Nov

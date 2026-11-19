@@ -1765,7 +1765,9 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             it in action'"). */}
         {/* On a computer, Rob's line is a card here, above "Watch it in
             action" (Sam, 17 Nov 2026), whatever the page's state. */}
-        {termsCard}
+        {/* On a computer the terms sit under the offer card instead
+            (Sam, 19 Nov 2026: "on desktop, this can go below"). */}
+        {desk ? null : termsCard}
         {desk ? <HokieLine card /> : wait || memberHome ? <HokieLine /> : null}
         {ugc ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (
@@ -2112,6 +2114,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
         {/* Under the offer: the other benefits, then the promise (round 1
             and 2, Sam, 8 Nov 2026), in place of the "locked in" fold. */}
         {lowOn && lowv ? <LowerAfter v={lowv} monthly={MONTHLY} /> : <UnderOffer audience="student" monthly={MONTHLY} />}
+        {desk ? termsCard : null}
         </div>
 
         {/* HOW IT WORKS, FOUR STEPS ON A PHONE (round 2, Sam, 8 Nov 2026):

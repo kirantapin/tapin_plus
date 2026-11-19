@@ -9732,3 +9732,13 @@ a.hk-link:focus-visible {
   margin-top: 0.5px;
   color: #0b7a53;
 }
+
+/* The header's words fill the band's width on a phone (19 Nov 2026: "join
+   the waitlist button should be full width"): the block holding them took
+   its width from the longest line, so the white button stopped short of
+   the band's right edge. */
+@media (max-width: 1023.98px) {
+  .tpa-band .tpa-band-title > div:has(> .tpu-act-wl-phone) {
+    width: 100%;
+  }
+}
