@@ -17,6 +17,8 @@ import { FlatMark } from "./parents_kit";
 import { Foot, GetApp, Pass, useFour } from "./MembersPass";
 import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
 import { CheckoutPhone } from "./parents_sections";
+import { DeskReels, DeskRows, DeskSonar } from "./ClaimDesk";
+import { useMedia } from "../shell/useMedia";
 
 /* ══ /claim: THE TEXTED LINK FOR AN OPEN SEAT (Sam, 19 Nov 2026) ═══════════
    Sam picked two of ten takes: signed out, 1D "You're up" (a line of
@@ -187,6 +189,8 @@ function MoreArrow() {
  *  one action, said again at the end and on a place's pop-up. */
 function Up({ state, children, act }: { state: State["kind"]; children: ReactNode; act?: { label: string; go: () => void } }) {
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  /* A computer gets its own take of each part (routes/ClaimDesk.tsx). */
+  const desk = useMedia("(min-width: 1024px)");
   const { track } = useEventTracking();
   return (
     <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-up">
@@ -194,15 +198,15 @@ function Up({ state, children, act }: { state: State["kind"]; children: ReactNod
         <div className="cs-top">
           <BackPill />
         </div>
-        <Line state={state === "out" ? "up" : state === "ended" ? "back" : "wait"} />
+        {desk ? <DeskSonar up={state === "out"} /> : <Line state={state === "out" ? "up" : state === "ended" ? "back" : "wait"} />}
         <div className="cs-up-body">{children}</div>
         <MoreArrow />
       </div>
       <div id="cs-more" className="cs-more">
         <div className="cs-col">
           <h2 className="cs-h">What you get as a Blacksburg Plus member</h2>
-          <ClaimRail onOpen={setPlaceOpen} />
-          <Value />
+          {desk ? <DeskRows onOpen={setPlaceOpen} /> : <ClaimRail onOpen={setPlaceOpen} />}
+          <Value desk={desk} />
         </div>
         <Questions />
         {act ? (
@@ -359,13 +363,41 @@ const TICK = (
   </svg>
 );
 
-function Value() {
+function Value({ desk = false }: { desk?: boolean }) {
   const { price } = usePlusPriceLoad();
   const first = firstFigure(price);
   const monthly = usd(price?.monthly);
   const same = !!price && price.first === price.monthly;
+  const extras = (
+    <ul className="cv-c-more">
+      <li>
+        {TICK}
+        <span>
+          <b>$5 back</b> every week you spend $10
+        </span>
+      </li>
+      <li>
+        {TICK}
+        <span>
+          <b>15% off</b> your other orders, once a day
+        </span>
+      </li>
+      <li>
+        {TICK}
+        <span>
+          <b>Deals</b> at Crumbl, Italiano’s and Playa Bowls
+        </span>
+      </li>
+    </ul>
+  );
   return (
     <>
+      {desk ? (
+        <>
+          <DeskReels note={WORTH_NOTE} />
+          <div className="dk-extras">{extras}</div>
+        </>
+      ) : (
       <section className="cv cv-c tnum" aria-label="What you pay and what you get">
         <div className="cv-c-pair" style={price ? undefined : { visibility: "hidden" }}>
           <div>
@@ -407,6 +439,7 @@ function Value() {
           <small>{WORTH_NOTE}</small>
         </div>
       </section>
+      )}
       {/* The refund in one line; the full rule is in the questions. */}
       <p className="cv-promise">
         {SHIELD}
@@ -471,6 +504,7 @@ function Questions() {
 
 function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: () => void; onPreviewClaim?: () => void }) {
   const { track } = useEventTracking();
+  const desk = useMedia("(min-width: 1024px)");
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const claim = (where: string, el?: HTMLElement | null) => {
     /* A preview never reaches the checkout (model/claim.ts). */
@@ -489,8 +523,8 @@ function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: (
         </div>
         <Held endsMs={invite.endsMs} onEnd={onEnd} />
         <h1 className="cs-h">Claim your seat</h1>
-        <ClaimRail onOpen={setPlaceOpen} />
-        <Value />
+        {desk ? <DeskRows onOpen={setPlaceOpen} /> : <ClaimRail onOpen={setPlaceOpen} />}
+        <Value desk={desk} />
       </div>
 
 
