@@ -26,11 +26,16 @@ export function readInvite(meta: Record<string, unknown> | undefined | null): Se
   return { openedMs: Number.isFinite(opened) ? opened : ends - CLAIM_HOURS * 3_600_000, endsMs: ends };
 }
 
-/* Local dev only, ?claimv=out|open|ended|listed|none: each state of /claim
-   without signing in (local dev reads the real backend). Stripped from builds. */
-export type ClaimPreview = "out" | "open" | "ended" | "listed" | "none";
+/* ?claimv=out|listed|none|open|claimed|ended shows each state of /claim
+   without an account, on the live site too (Sam, 19 Nov 2026: "can I preview
+   the experience of signing in when my spot hasn't opened up yet, vs when it
+   has, and what it looks like after i've claimed it?"). A preview never
+   reaches the checkout: its Sign in goes to the open seat and its Claim to
+   the claimed moment, so nobody can buy their way past the waitlist with it. */
+export type ClaimPreview = "out" | "open" | "claimed" | "ended" | "listed" | "none";
+const PREVIEWS: ReadonlyArray<ClaimPreview> = ["out", "listed", "none", "open", "claimed", "ended"];
 export function claimPreview(): ClaimPreview | null {
-  if (!import.meta.env.DEV || typeof window === "undefined") return null;
+  if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("claimv");
-  return v === "out" || v === "open" || v === "ended" || v === "listed" || v === "none" ? v : null;
+  return PREVIEWS.find((p) => p === v) ?? null;
 }
