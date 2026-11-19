@@ -181,3 +181,63 @@ export function DeskReels({ note }: { note: string }) {
     </section>
   );
 }
+
+/* ══ SPLIT (Sam, 19 Nov 2026: "I love split! let's do that one"; layout 1
+   of five, artifact UFQ6qDm6DK6q6fzMZZtwEV) ════════════════════════════════
+   On a computer the status holds a dark left panel that never scrolls away,
+   the line running down it; the reasons scroll on the right. */
+
+/** The line standing up, for the dark panel: seats above and below yours,
+ *  the green wave running down them, your dot breathing as it passes. */
+export function DeskSonarV({ up = false }: { up?: boolean }) {
+  const seats = 15;
+  return (
+    <div className="spv" aria-hidden="true">
+      <div className="spv-line">
+        {Array.from({ length: seats }, (_, i) => (
+          <i key={i} className={i === Math.floor(seats / 2) ? "spv-gap" : undefined} style={{ animationDelay: `${(i * 0.12).toFixed(2)}s` }} />
+        ))}
+      </div>
+      <div className="spv-me">
+        <span className={`spv-dot${up ? " spv-up" : ""}`}>
+          {up ? (
+            <svg viewBox="0 0 24 24">
+              <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : null}
+        </span>
+        <span className="spv-tag">You</span>
+      </div>
+    </div>
+  );
+}
+
+/** All eight places as a grid of photo cards, each opening its pop-up. */
+export function DeskGrid({ onOpen }: { onOpen: (p: PlacePopupPlace) => void }) {
+  return (
+    <div className="spg">
+      {allRailCards().map((v) => (
+        <button
+          key={v.id}
+          type="button"
+          className="dk-card spg-card"
+          aria-label={v.lite ? `What you get at ${v.name}` : `What Plus gets you at ${v.name}`}
+          onClick={(e) => {
+            const b = e.currentTarget.getBoundingClientRect();
+            onOpen({ id: v.id, name: v.name, kind: v.kind, photo: v.photo, lite: v.lite || undefined, liveSoon: liveSoon(v.id) || undefined, from: { x: b.left, y: b.top, w: b.width, h: b.height } });
+          }}
+        >
+          <img src={v.photo} alt="" decoding="async" loading="lazy" style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined} />
+          <span className="tpa-glass tpa-tag dk-tagp">
+            {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
+            {v.lite ? "Lite" : "Plus"}
+          </span>
+          <span className="dk-card-name">
+            <b>{v.name}</b>
+            <small>{v.perk}</small>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}

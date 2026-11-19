@@ -17,7 +17,7 @@ import { FlatMark } from "./parents_kit";
 import { Foot, GetApp, Pass, useFour } from "./MembersPass";
 import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
 import { CheckoutPhone } from "./parents_sections";
-import { DeskReels, DeskRows, DeskSonar } from "./ClaimDesk";
+import { DeskGrid, DeskReels, DeskRows, DeskSonar, DeskSonarV } from "./ClaimDesk";
 import { useMedia } from "../shell/useMedia";
 
 /* ══ /claim: THE TEXTED LINK FOR AN OPEN SEAT (Sam, 19 Nov 2026) ═══════════
@@ -710,11 +710,89 @@ function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => voi
   );
 }
 
+/* ══ SPLIT, ON A COMPUTER (Sam, 19 Nov 2026: "I love split! let's do that
+   one") ═════════════════════════════════════════════════════════════════════
+   Every state of /claim from 1024px: the status in a dark panel on the left
+   that stays while the page scrolls (the line standing up beside the words,
+   the one action in white), and on the right the places, what you get, what
+   $5 looks like and the questions. The claimed moment keeps its own page. */
+type SplitCopy = { title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string };
+
+function Split({ copy }: { copy: SplitCopy }) {
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  const { track } = useEventTracking();
+  return (
+    <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-split">
+      <div className="sp">
+        <aside className="sp-left">
+          <Link className="sp-brand" to="/">
+            <img src={PAPER_MARK} alt="" width="40" height="32" />
+            Tapin Plus Blacksburg
+          </Link>
+          <div className="sp-mid">
+            <DeskSonarV up={copy.up} />
+            <div className="sp-txt">
+              {copy.held}
+              <h1 className="sp-h">{copy.title}</h1>
+              <p className="sp-lede">{copy.lede}</p>
+              {copy.since ? (
+                <p className="sp-since tnum">
+                  <i aria-hidden="true" />
+                  {copy.since}
+                </p>
+              ) : null}
+              {copy.act ? (
+                <button type="button" className="sp-cta" onClick={(e) => copy.act?.go(e.currentTarget)}>
+                  {copy.act.label}
+                </button>
+              ) : null}
+              {copy.fine ? <p className="sp-fine">{copy.fine}</p> : null}
+            </div>
+          </div>
+          <p className="sp-hint">Scroll for everything Plus gets you</p>
+        </aside>
+        <main className="sp-right">
+          <section className="sp-sec" aria-labelledby="sp-places">
+            <span className="sp-kick">8 Blacksburg spots</span>
+            <h2 id="sp-places" className="sp-h2">
+              Where your seat works
+            </h2>
+            <DeskGrid onOpen={setPlaceOpen} />
+          </section>
+          <section className="sp-sec" aria-labelledby="sp-get">
+            <span className="sp-kick">What you get</span>
+            <h2 id="sp-get" className="sp-h2">
+              Pay a little. Get a lot.
+            </h2>
+            <Value desk />
+          </section>
+          <Questions />
+          <div className="mv cs-foot">
+            <Foot promise={false} onMail={() => track("plus_claim_email")} />
+          </div>
+        </main>
+      </div>
+      {placeOpen ? (
+        <PlacePopup
+          place={placeOpen}
+          cta={copy.popupCta}
+          onClose={() => setPlaceOpen(null)}
+          onJoin={() => {
+            setPlaceOpen(null);
+            copy.act?.go(null);
+          }}
+        />
+      ) : null}
+    </Page>
+  );
+}
+
 export default function ClaimSeat() {
   const [pv, setPv] = useState<ClaimPreview | null>(claimPreview);
   const [state, onEnd] = useClaimState(pv);
   const { track } = useEventTracking();
   const navigate = useNavigate();
+  const desk = useMedia("(min-width: 1024px)");
   const kind = state.kind;
   useEffect(() => {
     if (kind !== "loading" && !pv) track("plus_claim_viewed", { state: kind });
@@ -729,6 +807,31 @@ export default function ClaimSeat() {
         <Claimed preview={!!pv} />
       </>
     );
+  if (state.kind === "open" && desk) {
+    const claimNow = (el?: HTMLElement | null) => {
+      if (pv) {
+        setPv("claimed");
+        return;
+      }
+      track("plus_claim_clicked", { where: "split" });
+      openPlusCheckout("claim", el ?? null);
+    };
+    return (
+      <>
+        {bar}
+        <Split
+          copy={{
+            title: "Claim your seat",
+            lede: `It’s held for you for ${CLAIM_HOURS} hours. After that, it goes to the next person on the waitlist.`,
+            up: true,
+            held: <Held endsMs={state.invite.endsMs} onEnd={onEnd} />,
+            act: { label: "Claim my seat", go: claimNow },
+            popupCta: "Claim my seat",
+          }}
+        />
+      </>
+    );
+  }
   if (state.kind === "open")
     return (
       <>
@@ -757,6 +860,29 @@ export default function ClaimSeat() {
             },
           }
         : undefined;
+
+  if (desk) {
+    const copy: SplitCopy =
+      state.kind === "out"
+        ? { title: "You’re up.", lede: "A Tapin Plus seat just opened for you. Sign in with the number you joined the waitlist with to claim it.", fine: `You have ${CLAIM_HOURS} hours. After that, the seat goes to the next person in line and you go back on the waitlist.`, up: true, act, popupCta: "Sign in to claim" }
+        : state.kind === "ended"
+          ? { title: `Your ${CLAIM_HOURS} hours ran out.`, lede: "Your seat went to the next person in line. You’re back on the waitlist, and we’ll text you when another seat opens.", up: false, popupCta: "Got it" }
+          : state.kind === "listed"
+            ? {
+                title: "You’re in line.",
+                lede: `Your seat isn’t open yet. We’ll text you when it is, and you’ll have ${CLAIM_HOURS} hours to claim it.`,
+                since: state.since ? `On the list since ${new Date(state.since).toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : undefined,
+                up: false,
+                popupCta: "Got it",
+              }
+            : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
+    return (
+      <>
+        {bar}
+        <Split copy={copy} />
+      </>
+    );
+  }
 
   return (
     <>
