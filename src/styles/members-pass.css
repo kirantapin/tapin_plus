@@ -1442,3 +1442,7 @@
 .dk-rows {
   grid-template-columns: minmax(0, 1fr);
 }
+/* The rings went (19 Nov 2026); the dot keeps a quiet halo. */
+.dk-you-dot {
+  box-shadow: 0 0 0 10px rgba(58, 208, 138, 0.22);
+}
