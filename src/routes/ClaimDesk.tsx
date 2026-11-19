@@ -9,8 +9,9 @@ import { PHOTO_POS, allRailCards } from "./PlusHome";
 /* ══ /claim ON A COMPUTER (Sam, 19 Nov 2026: "the desktop version should
    look a bit different"; picked from the twenty takes, artifact
    S5GwP4ceiHZTs74cWxxDKy) ═══════════════════════════════════════════════
-   Your status: D · Sonar. One big dot, yours, sending out rings, and a pulse
-     of green running down the line, again and again.
+   Your status: D · Sonar. One big dot, yours, and a pulse of green running
+     down the line, again and again (the rings went, Sam, 19 Nov 2026: "can we
+     get rid of the mass pulsing circle here?").
    The places: A · Two rows. All eight as two rows of photo cards drifting
      opposite ways; hovering or the pause button stops them.
    What you get: D · The reels. $3.99, $25 and about $60 spin like a counter
@@ -34,9 +35,6 @@ export function DeskSonar({ up = false }: { up?: boolean }) {
         ))}
       </div>
       <div className="dk-you">
-        <span className="dk-ring" />
-        <span className="dk-ring" />
-        <span className="dk-ring" />
         <span className={`dk-you-dot${up ? " dk-you-up" : ""}`}>
           {up ? (
             <svg viewBox="0 0 24 24">
