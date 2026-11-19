@@ -1005,3 +1005,292 @@
     margin: 0 auto;
   }
 }
+
+/* ══ The value stack's three takes (?valv=a|b|c, 19 Nov 2026) ══════════════ */
+.cv {
+  font-family: "Gilroy", Arial, sans-serif;
+}
+.cv sup {
+  font-size: 0.6em;
+}
+.cv-note {
+  display: block;
+  font: 500 12.5px/17px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  text-wrap: pretty;
+}
+.cv-promise {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  font: 500 14px/20px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-promise svg {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--cs-green);
+}
+.cv-promise b {
+  font-weight: 600;
+  color: var(--ink, #141618);
+}
+
+/* A · Ledger */
+.cv-a {
+  display: grid;
+  gap: 0;
+  padding: 20px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+.cv-a-pay {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--cs-hair);
+}
+.cv-a-pay > span,
+.cv-a-head {
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-a-pay p {
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-a-pay b {
+  font: 600 40px/44px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink, #141618);
+  margin-right: 4px;
+}
+.cv-a-head {
+  margin-top: 18px;
+}
+.cv-a-rows {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+}
+.cv-a-rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--cs-hair);
+}
+.cv-a-rows span {
+  display: grid;
+  gap: 2px;
+}
+.cv-a-rows b {
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+}
+.cv-a-rows small {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-a-rows em {
+  flex: none;
+  font: 600 20px/1 "Gilroy", Arial, sans-serif;
+  font-style: normal;
+  color: var(--cs-green);
+}
+.cv-a-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px -20px 10px;
+  padding: 16px 20px;
+  background: var(--cs-mint);
+  color: var(--cs-green);
+}
+.cv-a-total span {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+}
+.cv-a-total b {
+  font: 600 30px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.cv-a .cv-promise {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cs-hair);
+}
+
+/* B · The math */
+.cv-b {
+  display: grid;
+  gap: 16px;
+}
+.cv-b-math {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 12px;
+  padding: 22px 20px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+.cv-b-math > div {
+  display: grid;
+  gap: 4px;
+}
+.cv-b-math small {
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-b-math b {
+  font: 600 52px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.cv-b-get {
+  justify-items: end;
+  color: var(--cs-green);
+}
+.cv-b-get small {
+  color: var(--cs-green) !important;
+}
+.cv-b-arrow {
+  width: 40px;
+  height: 24px;
+  margin-bottom: 12px;
+  color: #b7b9bc;
+}
+.cv-b-say {
+  padding: 0 4px;
+  font: 500 16px/23px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  text-wrap: pretty;
+}
+.cv-b-more,
+.cv-c-more {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0 4px;
+  margin: 0;
+}
+.cv-b-more li,
+.cv-c-more li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cv-b-more svg,
+.cv-c-more svg {
+  width: 22px;
+  height: 22px;
+  color: var(--cs-green);
+}
+.cv-b-more b {
+  font-weight: 600;
+  color: var(--ink, #141618);
+}
+.cv-b-band {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: var(--ink, #141618);
+  color: #ffffff;
+}
+.cv-b-band p {
+  font: 500 18px/25px "Gilroy", Arial, sans-serif;
+  text-wrap: balance;
+}
+.cv-b-band b {
+  font-weight: 600;
+  color: var(--cs-live);
+}
+.cv-b-band small {
+  font: 500 12.5px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.66);
+}
+.cv-b .cv-promise {
+  padding: 0 4px;
+}
+
+/* C · Dark card */
+.cv-c {
+  display: grid;
+  gap: 18px;
+  padding: 22px 20px 20px;
+  border-radius: 20px;
+  background: var(--ink, #141618);
+  color: #ffffff;
+}
+.cv-c-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.cv-c-pair > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+.cv-c-pair > div + div {
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+.cv-c-pair small {
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+}
+.cv-c-pair b {
+  font: 600 44px/1.05 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+.cv-c-pair span {
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+}
+.cv-c-get b,
+.cv-c-get small {
+  color: var(--cs-live);
+}
+.cv-c-more {
+  padding: 16px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+.cv-c-more li {
+  color: rgba(255, 255, 255, 0.76);
+}
+.cv-c-more b {
+  font-weight: 600;
+  color: #ffffff;
+}
+.cv-c-more svg {
+  color: var(--cs-live);
+}
+.cv-c-worth {
+  display: grid;
+  gap: 2px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(58, 208, 138, 0.12);
+}
+.cv-c-worth span {
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-live);
+}
+.cv-c-worth b {
+  font: 600 34px/1.1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--cs-live);
+}
+.cv-c-worth small {
+  margin-top: 6px;
+  font: 500 12.5px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.62);
+}
+.cs-col > .cv-promise {
+  padding: 4px 4px 0;
+}
