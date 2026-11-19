@@ -25,7 +25,7 @@ import InviteHero from "../shell/InviteHero";
 import { WW_HEROES, wwHeroProps, wwHeroVariant } from "../model/wwHeroTest";
 import HowSheet from "../shell/HowSheet";
 import { openPlusCheckout, openPlusWaitlist, usePlusCheckoutOpen } from "../shell/PlusCheckout";
-import { WAITLIST_CTA, joinedThisVisit, onWaitlist, setWaitlistPage, waitlistCountLine, waitlistOn } from "../model/waitlist";
+import { WAITLIST_CTA, waitlistPreview, joinedThisVisit, onWaitlist, setWaitlistPage, waitlistCountLine, waitlistOn } from "../model/waitlist";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import AccountLine from "../shell/AccountLine";
@@ -969,7 +969,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
      the app card, and the welcome clock goes, as there is nothing to buy. */
   const { subscribed, userSession } = useAuth();
   /* ?member previews this on local dev only (stripped from builds). */
-  const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
+  const member = !waitlistPreview() && (subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member")));
   /* A PROMO LINK'S PAGE (5 Nov 2026). Kiran's ?l=<link id> (model/link.ts)
      prices the first month; a link with an audience also dresses the page
      for it (model/invite.ts): the Welcome Week link's free month wears the
@@ -1009,7 +1009,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
   const vipOpen = group?.id === "vip" && !saleEnded;
   const wait = waitlistOn() && !member && !invitedVisit && !vipOpen;
   setWaitlistPage(wait);
-  const listed = wait && (onWaitlist(userSession?.user?.user_metadata as Record<string, unknown> | undefined) || joinedThisVisit());
+  const listed = wait && !waitlistPreview() && (onWaitlist(userSession?.user?.user_metadata as Record<string, unknown> | undefined) || joinedThisVisit());
   const groupSeats = useGroupSeats(group);
   const gTerm = group ? groupTerm(group) : null;
   const TERM = firstTerm(price);
