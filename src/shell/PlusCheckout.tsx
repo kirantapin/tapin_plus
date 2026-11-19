@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { Elements, ExpressCheckoutElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js/pure";
@@ -327,6 +328,23 @@ function PlusCheckoutSheet({
      or a join, whoever is signed in. */
   const pv = waitlist && waitlistPreview();
   const [pvListed, setPvListed] = useState(false);
+  /* JOINED: TO THE STATUS PAGE (Sam, 19 Nov 2026: "once I've joined the
+     waitlist, it should take me to the page where I can monitor my
+     status"). A join made in this sheet shows "You're on the list" for a
+     moment, then goes to /claim, which says where they stand ("You're in
+     line", the seat when it opens, the 48 hours). The button goes at once.
+     A preview goes to /claim's own preview of that state. */
+  const navigate = useNavigate();
+  const justJoined = listed || pvListed;
+  const toStatus = useCallback(() => {
+    navigate(pv ? "/claim?claimv=listed" : "/claim");
+    close();
+  }, [navigate, pv, close]);
+  useEffect(() => {
+    if (!justJoined) return;
+    const t = window.setTimeout(toStatus, 2600);
+    return () => window.clearTimeout(t);
+  }, [justJoined, toStatus]);
   const [joinErr, setJoinErr] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   useEffect(() => {
@@ -361,9 +379,9 @@ function PlusCheckoutSheet({
   const onList = waitlist && (preview === "listed" || ((listed || already) && subscribed !== true));
   const body = waitlist ? (
     pv ? (
-      pvListed ? <WaitlistDone /> : <SignIn onStage={setSignInStage} waitlist preview onPreviewDone={() => setPvListed(true)} />
+      pvListed ? <WaitlistDone onStatus={toStatus} /> : <SignIn onStage={setSignInStage} waitlist preview onPreviewDone={() => setPvListed(true)} />
     ) : onList ? (
-      <WaitlistDone />
+      <WaitlistDone onStatus={toStatus} />
     ) : userSession === undefined ? null : !signedIn ? (
       <SignIn onStage={setSignInStage} waitlist />
     ) : subscribed === true ? (
@@ -1329,7 +1347,7 @@ function PhoneGlyph() {
 
 /* On the list: the done screen's plate. No "a parent can gift you Plus"
    line (Sam, 17 Nov 2026: removed). */
-function WaitlistDone() {
+function WaitlistDone({ onStatus }: { onStatus: () => void }) {
   return (
     <div className="pck-body pck-done-body" role="status">
       <div className="pck-why">
@@ -1340,6 +1358,9 @@ function WaitlistDone() {
           </p>
         </div>
       </div>
+      <button type="button" className="pck-cta pck-status" onClick={onStatus}>
+        See your place in line
+      </button>
     </div>
   );
 }
