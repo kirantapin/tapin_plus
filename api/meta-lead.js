@@ -1,17 +1,11 @@
 /* ══ THE WAITLIST LEAD, SERVER SIDE (Meta Conversions API, 17 Nov 2026) ══════
-   Two stages, each the server copy of a browser pixel event with the same
-   event id, so Meta counts each pair once (context/meta_pixel.ts).
-
-   stage "phone", no sign-in yet: the number was given and the code texted
-   (Sam, 17 Nov 2026: "can we just have it trigger when they provide their
-   phone number not a 2FA?"). Lead, the number hashed, event id
-   wlp_<first 32 hex of sha256("1"+number)>. Unauthenticated, so it only
-   takes a well-formed US number whose id matches it, from the site's pages.
-
-   Otherwise, with the student's Supabase access token: it asks Supabase who
-   the token belongs to, checks they are on the waitlist
-   (user_metadata.waitlist_at, written by model/waitlist.ts), and sends
-   CompleteRegistration with event id wl_<user id>.
+   The server copy of the browser pixel's Lead, with the same event id, so
+   Meta counts the pair once (context/meta_pixel.ts). With the student's
+   Supabase access token: it asks Supabase who the token belongs to, checks
+   they are on the waitlist (user_metadata.waitlist_at, written by
+   model/waitlist.ts), and sends Lead with event id wl_<user id>. Only a real
+   join calls it (Sam, 19 Nov 2026: a Lead at the number counted members
+   signing in), so each Lead is one new student.
 
    ENV (Vercel, Production): META_CAPI_TOKEN, a Conversions API access token
    from Events Manager for the pixel. Without it this answers 204 and sends
@@ -78,28 +72,7 @@ export default async function handler(req, res) {
   }
   const body = readBody(req);
 
-  /* ── The number given: Lead ── */
-  if (body.stage === "phone") {
-    const origin = String(req.headers.origin || req.headers.referer || "");
-    const digits = String(body.phone || "").replace(/\D/g, "");
-    const hashed = sha(`1${digits}`);
-    const id = `wlp_${hashed.slice(0, 32)}`;
-    if (!/^[2-9]\d{9}$/.test(digits) || body.event_id !== id || !SITE.test(origin.endsWith("/") ? origin : `${origin}/`)) {
-      res.status(400).json({ error: "Not a waitlist number" });
-      return;
-    }
-    await send(res, pixel, token, {
-      event_name: "Lead",
-      event_time: Math.floor(Date.now() / 1000),
-      event_id: id,
-      action_source: "website",
-      ...pageUrl(body),
-      user_data: { ph: [hashed], ...browserData(req, body) },
-    });
-    return;
-  }
-
-  /* ── On the list after the code: CompleteRegistration ── */
+  /* ── On the list after the code: Lead ── */
   const ref = process.env.VITE_PROJECT_REF;
   const anon = process.env.VITE_SUPABASE_ANON_KEY;
   if (!ref || !anon) {
@@ -131,7 +104,7 @@ export default async function handler(req, res) {
   }
   const phone = String(user.phone || "").replace(/\D/g, "");
   await send(res, pixel, token, {
-    event_name: "CompleteRegistration",
+    event_name: "Lead",
     event_time: at,
     event_id: `wl_${user.id}`,
     action_source: "website",
