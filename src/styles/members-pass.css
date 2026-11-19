@@ -1462,3 +1462,294 @@
     animation: none;
   }
 }
+
+/* ══ SPLIT on a computer (19 Nov 2026, Sam's pick of five layouts) ══════════
+   The status in a dark panel that stays on screen at the left, the line
+   standing up beside the words; the reasons scroll on the right. */
+.cs-split {
+  padding: 0;
+}
+.sp {
+  display: grid;
+  grid-template-columns: minmax(440px, 38%) minmax(0, 1fr);
+  min-height: 100vh;
+}
+.sp-left {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 28px;
+  padding: 44px 52px 36px;
+  background: var(--ink, #141618);
+  color: #ffffff;
+}
+.cs-pv ~ .cs .sp-left {
+  top: 46px;
+  height: calc(100vh - 46px);
+}
+.sp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  color: #ffffff;
+  font: 600 17px/1 "Gilroy", Arial, sans-serif;
+  text-decoration: none;
+}
+.sp-brand img {
+  width: 40px;
+  height: 32px;
+}
+.sp-brand:focus-visible,
+.sp-cta:focus-visible {
+  outline: 3px solid var(--cs-live);
+  outline-offset: 3px;
+}
+.sp-mid {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  min-height: 0;
+}
+.sp-txt {
+  display: grid;
+  gap: 18px;
+  align-content: center;
+}
+.sp-h {
+  margin: 0;
+  font: 600 60px/62px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.sp-lede {
+  margin: 0;
+  max-width: 34ch;
+  font: 500 18px/26px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+  text-wrap: pretty;
+}
+.sp-since {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font: 600 15px/20px "Gilroy", Arial, sans-serif;
+}
+.sp-since i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cs-live);
+  box-shadow: 0 0 0 3px rgba(58, 208, 138, 0.25);
+}
+.sp-cta {
+  justify-self: start;
+  height: 56px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: var(--ink, #141618);
+  font: 600 17px/1 "Gilroy", Arial, sans-serif;
+  cursor: pointer;
+  transition: transform 0.16s ease-out;
+}
+.sp-cta:active {
+  transform: scale(0.98);
+}
+.sp-fine,
+.sp-hint {
+  margin: 0;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.6);
+}
+.sp-txt .cs-held {
+  background: rgba(255, 255, 255, 0.08);
+}
+.sp-txt .cs-held-t {
+  color: rgba(255, 255, 255, 0.7);
+}
+.sp-txt .cs-held-t b {
+  color: #ffffff;
+}
+.sp-txt .cs-held-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+.sp-txt .cs-held-track i {
+  background: var(--cs-live);
+}
+
+/* The line standing up. */
+.spv {
+  position: relative;
+  height: min(520px, 62vh);
+}
+.spv-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.spv-line i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3a3d40;
+  animation: spv-wave 2.8s ease-in-out infinite;
+}
+.spv-line i.spv-gap {
+  visibility: hidden;
+}
+.spv-me {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+.spv-dot {
+  position: absolute;
+  left: -32px;
+  top: -32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  animation: dk-halo 2.8s ease-in-out infinite;
+}
+.spv-dot::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink, #141618);
+}
+.spv-up::after {
+  display: none;
+}
+.spv-up svg {
+  width: 30px;
+  height: 30px;
+  color: var(--cs-green);
+}
+.spv-tag {
+  position: absolute;
+  left: 0;
+  top: -46px;
+  transform: translate(-50%, -100%);
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--ink, #141618);
+  font: 600 14px/1 "Gilroy", Arial, sans-serif;
+  white-space: nowrap;
+}
+.spv-tag::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-bottom: 0;
+  border-top-color: #ffffff;
+}
+@keyframes spv-wave {
+  0%, 100% { background: #3a3d40; transform: scale(1); }
+  15% { background: var(--cs-live); transform: scale(1.35); }
+  30% { background: #3a3d40; transform: scale(1); }
+}
+
+/* The right side. */
+.sp-right {
+  display: grid;
+  align-content: start;
+  gap: 56px;
+  min-width: 0;
+  padding: 52px 52px 48px;
+}
+.sp-sec {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.sp-kick {
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--cs-green);
+}
+.sp-h2 {
+  margin: 0 0 4px;
+  font: 600 40px/44px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+.spg {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.spg .spg-card {
+  width: auto;
+  height: 180px;
+}
+.spg .dk-card-name b {
+  font-size: 17px;
+  line-height: 21px;
+}
+.spg .dk-card-name small {
+  font-size: 12.5px;
+  line-height: 16px;
+}
+.sp-right .dk-tile > b {
+  font-size: 58px;
+}
+.sp-right .cs-faq,
+.sp-right .cs-credit {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+.sp-right > .cs-foot {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+@media (max-width: 1279.98px) {
+  .spg {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sp-h {
+    font-size: 50px;
+    line-height: 52px;
+  }
+}
+@media (max-height: 760px) {
+  .spv {
+    height: 52vh;
+  }
+  .sp-h {
+    font-size: 46px;
+    line-height: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spv-line i,
+  .spv-dot {
+    animation: none;
+  }
+}
