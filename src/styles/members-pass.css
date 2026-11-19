@@ -855,3 +855,106 @@
   background: #ffffff;
   color: #141618;
 }
+
+/* ══ The first screen and what's below it (19 Nov 2026) ═════════════════════
+   "You're up" and its siblings fill the first screen, with an arrow at its
+   foot that goes down to what a Blacksburg Plus member gets. */
+.tpa.cs-up {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+}
+.cs-first {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.cs-pv ~ .cs .cs-first {
+  min-height: calc(100svh - 46px - env(safe-area-inset-top));
+}
+.cs-down {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: auto auto 0;
+  padding: 28px 16px calc(env(safe-area-inset-bottom) + 22px);
+  border: 0;
+  background: none;
+  font: 600 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  cursor: pointer;
+  transition: opacity 0.3s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.cs-down i {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--ink, #141618);
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.08), 0 10px 24px -12px rgba(20, 22, 24, 0.35);
+}
+.cs-down svg {
+  width: 22px;
+  height: 22px;
+}
+.cs-down:focus-visible {
+  outline: none;
+}
+.cs-down:focus-visible i {
+  outline: 3px solid var(--cs-green);
+  outline-offset: 3px;
+}
+.cs-down[data-gone] {
+  opacity: 0;
+  pointer-events: none;
+}
+.cs-more {
+  display: grid;
+  gap: 28px;
+  padding-top: 40px;
+  scroll-margin-top: 0;
+}
+.cs-pv ~ .cs .cs-more {
+  scroll-margin-top: 46px;
+}
+.cs-more > .tpa-module {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.cs-more .cs-h {
+  margin-top: 0;
+  text-wrap: balance;
+}
+.cs-again .mv-cta {
+  max-width: 560px;
+}
+@media (min-width: 1024px) {
+  .cs-more {
+    padding-top: 64px;
+  }
+}
+/* The first screen's words sit in the middle of the space above the arrow;
+   the back pill stays on the left. */
+.cs-first > .cs-top {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+.cs-first > .cs-line {
+  margin-top: auto;
+}
+.cs-first > .cs-up-body {
+  width: 100%;
+  margin-bottom: auto;
+}
+.cs-first > .cs-down {
+  margin-top: 24px;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 30px);
+}
+.cs-again .mv-cta {
+  width: 100%;
+  margin: 0 auto;
+}
