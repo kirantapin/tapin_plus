@@ -16,7 +16,7 @@ import { PlaceSeats, PlusSeats } from "./PlusSeats";
 import { chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
 import { joinWaitlist, joinedThisVisit, onWaitlist } from "../model/waitlist";
-import { sendPhoneLead, sendServerLead } from "../context/meta_pixel";
+import { sendServerLead } from "../context/meta_pixel";
 import { priceHidden } from "../model/priceGate";
 import { PLACE_FOREVER_ENDS_LABEL } from "../model/campaign";
 import { pagePolicy, pagePolicyPlace } from "../model/pagePolicy";
@@ -635,11 +635,12 @@ function SignIn({ onStage, plain = false, waitlist = false }: { onStage: (stage:
       /* Each step of the sheet, so a drop-off shows where it happened
          (Grok's audit, 3 Nov 2026). */
       track("plus_phone_submitted", { opt_in: waitlist || optIn, sign_in_only: plain, waitlist, look });
-      /* The waitlist's Lead goes when the number is given and the code is
-         texted, not after the code (Sam, 17 Nov 2026: "can we just have it
-         trigger when they provide their phone number not a 2FA?"). Browser
-         and server, one event id per number (context/meta_pixel.ts). */
-      if (waitlist) void sendPhoneLead(digits, track);
+      /* The number given on the waitlist: a PostHog step only. It was the
+         Meta Lead for a day (17 Nov 2026), but a member signing in gives
+         their number too, so Meta counted sign-ins as Leads (Sam, 19 Nov
+         2026: "if someone has already purchased tapin plus and they sign in
+         meta considers that a lead"). The Lead is the real join now. */
+      if (waitlist) track("plus_waitlist_phone_given", {});
       setWait(RESEND_S);
       setStage("code");
       return;
