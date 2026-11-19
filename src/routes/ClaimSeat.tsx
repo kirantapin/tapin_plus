@@ -4,7 +4,7 @@ import { supabase } from "../supabase";
 import { asset } from "../asset";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
-import { CLAIM_HOURS, claimPreview, readInvite, type SeatInvite } from "../model/claim";
+import { CLAIM_HOURS, claimPreview, readInvite, type ClaimPreview, type SeatInvite } from "../model/claim";
 import { useEndsAt } from "../model/deadline";
 import { firstFigure, usd, usePlusPriceLoad } from "../model/plus";
 import { refundAnswer } from "../model/refundWords";
@@ -16,7 +16,7 @@ import { BonusSpots } from "../shell/BonusSpots";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { openPlusCheckout, openPlusSignIn } from "../shell/PlusCheckout";
 import { FlatMark } from "./parents_kit";
-import { Foot } from "./MembersPass";
+import { Foot, GetApp, Pass, useFour } from "./MembersPass";
 import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
 
 /* ══ /claim: THE TEXTED LINK FOR AN OPEN SEAT (Sam, 19 Nov 2026) ═══════════
@@ -30,13 +30,12 @@ import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const HOUR = 3_600_000;
 
-type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed" } | { kind: "none" };
+type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed" } | { kind: "none" };
 
 const PREVIEW_ENDS = Date.now() + (CLAIM_HOURS * HOUR - 61_000);
 
-function useClaimState(): [State, () => void] {
+function useClaimState(preview: ClaimPreview | null): [State, () => void] {
   const { userSession, subscribed } = useAuth();
-  const preview = claimPreview();
   /* app_metadata as it is now, not as the session token had it: the seat
      can open after they signed in. */
   const [fresh, setFresh] = useState<{ app?: Record<string, unknown>; user?: Record<string, unknown> } | null>(null);
@@ -61,9 +60,11 @@ function useClaimState(): [State, () => void] {
   }
   if (userSession === undefined) return [{ kind: "loading" }, onEnd];
   if (!userSession) return [{ kind: "out" }, onEnd];
-  if (subscribed === true) return [{ kind: "member" }, onEnd];
   if (subscribed === null || !fresh) return [{ kind: "loading" }, onEnd];
   const invite = readInvite(fresh.app);
+  /* A member who came by a seat has just claimed it (or claimed it before):
+     the moment, then the way to the app. Any other member: their pass. */
+  if (subscribed === true) return [invite ? { kind: "claimed" } : { kind: "member" }, onEnd];
   if (invite && invite.endsMs > Date.now() && !endedNow) return [{ kind: "open", invite }, onEnd];
   if (invite) return [{ kind: "ended" }, onEnd];
   return [{ kind: onWaitlist(fresh.user) ? "listed" : "none" }, onEnd];
@@ -103,9 +104,12 @@ function Line({ state }: { state: "up" | "back" | "wait" }) {
   return (
     <svg className="cs-line" viewBox="0 0 390 132" aria-hidden="true">
       <line x1="0" y1="86" x2="390" y2="86" className="cs-line-track" />
-      {[-6, 34, 74, 114, 154, 194, 234, 274, 314].filter((x) => Math.abs(x - you) > 30 && (state !== "up" || x < you)).map((x) => (
-        <circle key={x} cx={x} cy="86" r="11" className="cs-line-seat" />
-      ))}
+      <g className="cs-line-behind">
+        {[-46, -6, 34, 74, 114, 154, 194, 234, 274, 314].filter((x) => Math.abs(x - you) > 30 && (state !== "up" || x < you)).map((x) => (
+          <circle key={x} cx={x} cy="86" r="11" className="cs-line-seat" />
+        ))}
+      </g>
+      <g className="cs-line-me">
       {state === "up" ? <circle cx={you} cy="86" r="30" className="cs-line-glow" /> : null}
       <circle cx={you} cy="86" r="20" className="cs-line-you" />
       {state === "up" ? (
@@ -120,11 +124,12 @@ function Line({ state }: { state: "up" | "back" | "wait" }) {
         </text>
         <path d="M24 30h12l-6 7z" className="cs-line-tag" />
       </g>
+      </g>
       {state === "up" ? (
-        <>
+        <g className="cs-line-doorg">
           <rect x="300" y="58" width="56" height="56" rx="16" className="cs-line-door" />
           <image href={PAPER_MARK} x="309" y="71" width="38" height="30" />
-        </>
+        </g>
       ) : null}
     </svg>
   );
@@ -254,7 +259,7 @@ const Chevron = () => (
   </svg>
 );
 
-function Offer({ invite, onEnd }: { invite: SeatInvite; onEnd: () => void }) {
+function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: () => void; onPreviewClaim?: () => void }) {
   const { track } = useEventTracking();
   const { price } = usePlusPriceLoad();
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
@@ -262,6 +267,11 @@ function Offer({ invite, onEnd }: { invite: SeatInvite; onEnd: () => void }) {
   const monthly = usd(price?.monthly);
   const same = !!price && price.first === price.monthly;
   const claim = (where: string, el?: HTMLElement | null) => {
+    /* A preview never reaches the checkout (model/claim.ts). */
+    if (onPreviewClaim) {
+      onPreviewClaim();
+      return;
+    }
     track("plus_claim_clicked", { where });
     openPlusCheckout("claim", el ?? null);
   };
@@ -378,19 +388,190 @@ function Offer({ invite, onEnd }: { invite: SeatInvite; onEnd: () => void }) {
   );
 }
 
+/* ══ CLAIMED: THE SEAT IS YOURS (Sam, 19 Nov 2026: "Maybe we have an
+   /impeccable delight animation when someone claims tapin plus") ══════════
+   The line from "You're up" plays out: your seat walks into the Plus door,
+   the line behind you moves up one, and the door opens into your members
+   pass. It waits for the checkout's "You're in" to close, plays once per
+   account on this phone (after that the pass is simply there), and with
+   reduced motion the pass is there from the start. Then the one thing to
+   do: the app, where the $25 is. */
+const stillMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/** Calls `go` once no checkout sheet is open (the sheet portals to the body). */
+function whenSheetGone(go: () => void): () => void {
+  const open = () => !!document.querySelector(".pck-layer");
+  let t = 0;
+  if (!open()) {
+    t = window.setTimeout(go, 300);
+    return () => window.clearTimeout(t);
+  }
+  const mo = new MutationObserver(() => {
+    if (open()) return;
+    mo.disconnect();
+    t = window.setTimeout(go, 350);
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
+  return () => {
+    mo.disconnect();
+    window.clearTimeout(t);
+  };
+}
+
+function playClaim(st: HTMLElement): Animation[] {
+  const out: Animation[] = [];
+  const run = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => {
+    if (el && typeof (el as HTMLElement).animate === "function") out.push((el as HTMLElement).animate(kf, { fill: "both", ...o }));
+  };
+  const OUT = "cubic-bezier(.22,1,.36,1)";
+  const pass = st.querySelector<HTMLElement>(".mv-pass");
+  const door = st.querySelector(".cs-line-door");
+  /* You walk into the door, and shrink into it. */
+  run(st.querySelector(".cs-line-me"), [{ transform: "translateX(0) scale(1)", opacity: 1 }, { offset: 0.8, opacity: 1 }, { transform: "translateX(92px) scale(.35)", opacity: 0 }], { duration: 660, easing: "cubic-bezier(.65,0,.35,1)" });
+  /* The line behind you moves up one seat. */
+  run(st.querySelector(".cs-line-behind"), [{ transform: "translateX(0)" }, { transform: "translateX(40px)" }], { duration: 720, delay: 200, easing: OUT });
+  /* The door takes you in. */
+  run(st.querySelector(".cs-line-doorg"), [{ transform: "scale(1)" }, { transform: "scale(1.14)" }, { transform: "scale(1)" }], { duration: 320, delay: 560, easing: "ease-out" });
+  /* And opens into your pass. */
+  if (pass && door) {
+    const pr = pass.getBoundingClientRect();
+    const dr = door.getBoundingClientRect();
+    const from = `inset(${Math.max(0, dr.top - pr.top)}px ${Math.max(0, pr.right - dr.right)}px ${Math.max(0, pr.bottom - dr.bottom)}px ${Math.max(0, dr.left - pr.left)}px round 16px)`;
+    run(pass, [{ clipPath: from, opacity: 1 }, { clipPath: "inset(0px 0px 0px 0px round 20px)", opacity: 1 }], { duration: 640, delay: 820, easing: OUT });
+    run(pass.querySelector(".mv-pass-live"), [{ transform: "scale(.6)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 440, delay: 1380, easing: "cubic-bezier(.34,1.56,.64,1)" });
+  }
+  run(st.querySelector(".cs-line"), [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 840, easing: "linear" });
+  st.parentElement?.querySelectorAll(".cs-claimed-after > *").forEach((el, i) =>
+    run(el, [{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, delay: 1360 + i * 90, easing: OUT }),
+  );
+  const last = out[out.length - 1];
+  if (last) last.onfinish = () => (st.dataset.done = "");
+  return out;
+}
+
+function Claimed({ preview }: { preview: boolean }) {
+  const four = useFour();
+  const { userSession } = useAuth();
+  const { track } = useEventTracking();
+  const stage = useRef<HTMLDivElement | null>(null);
+  const [round, setRound] = useState(0);
+  const uid = userSession?.user?.id;
+  useLayoutEffect(() => {
+    const st = stage.current;
+    if (!st) return;
+    let seen = false;
+    if (!preview) {
+      try {
+        const key = `tp_claimed_v1_${uid ?? "me"}`;
+        seen = localStorage.getItem(key) === "1";
+        localStorage.setItem(key, "1");
+      } catch {
+        /* Private mode: it plays again, which is fine. */
+      }
+    }
+    if (seen || stillMotion()) {
+      st.dataset.done = "";
+      return;
+    }
+    delete st.dataset.done;
+    let anims: Animation[] = [];
+    const stop = whenSheetGone(() => {
+      anims = playClaim(st);
+    });
+    return () => {
+      stop();
+      anims.forEach((a) => a.cancel());
+    };
+  }, [round, preview, uid]);
+  useEffect(() => {
+    if (!preview) track("plus_claim_claimed");
+  }, [preview, track]);
+  return (
+    <Page title="You’re in · Tapin Plus" className="tpa cs cs-up cs-claimed">
+      <div className="cs-up-body cs-claimed-body">
+        <div className="cs-stage" ref={stage}>
+          <Pass active who={four ? `••• ${four}` : undefined} whoLabel="Member" />
+          <Line state="up" />
+        </div>
+        <div className="cs-claimed-after">
+          <h1 className="cs-up-h">The seat is yours.</h1>
+          <p className="cs-lede">You’re a Tapin Plus member. Your $25 is ready to spend in the Tapin&nbsp;app.</p>
+          <GetApp where="claim_done" />
+          <Link className="cs-claimed-acct" to="/in">
+            Your account
+          </Link>
+          {preview ? (
+            <button type="button" className="cs-replay" onClick={() => setRound((n) => n + 1)}>
+              Play it again
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/** The preview's way between the states (?claimv=, model/claim.ts). */
+function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => void }) {
+  const steps: ReadonlyArray<[ClaimPreview, string]> = [
+    ["out", "Signed out"],
+    ["listed", "Not open yet"],
+    ["none", "Not in line"],
+    ["open", "Seat open"],
+    ["claimed", "Claimed"],
+    ["ended", "Ran out"],
+  ];
+  return (
+    <nav className="cs-pv" aria-label="Preview the claim page">
+      <b>Preview</b>
+      {steps.map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          aria-pressed={at === k}
+          onClick={() => {
+            go(k);
+            window.history.replaceState(null, "", `?claimv=${k}`);
+            window.scrollTo(0, 0);
+          }}
+        >
+          {label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 export default function ClaimSeat() {
-  const [state, onEnd] = useClaimState();
+  const [pv, setPv] = useState<ClaimPreview | null>(claimPreview);
+  const [state, onEnd] = useClaimState(pv);
   const { track } = useEventTracking();
   const kind = state.kind;
   useEffect(() => {
-    if (kind !== "loading") track("plus_claim_viewed", { state: kind });
-  }, [kind, track]);
+    if (kind !== "loading" && !pv) track("plus_claim_viewed", { state: kind });
+  }, [kind, pv, track]);
+  const bar = pv ? <PreviewBar at={pv} go={setPv} /> : null;
 
   if (state.kind === "member") return <Navigate to="/in" replace />;
-  if (state.kind === "open") return <Offer invite={state.invite} onEnd={onEnd} />;
+  if (state.kind === "claimed")
+    return (
+      <>
+        {bar}
+        <Claimed preview={!!pv} />
+      </>
+    );
+  if (state.kind === "open")
+    return (
+      <>
+        {bar}
+        <Offer invite={state.invite} onEnd={onEnd} onPreviewClaim={pv ? () => setPv("claimed") : undefined} />
+      </>
+    );
   if (state.kind === "loading") return <Page title="Claim your seat · Tapin Plus" className="tpa cs cs-up" children={null} />;
 
   return (
+    <>
+    {bar}
     <Up state={state.kind}>
       {state.kind === "out" ? (
         <>
@@ -400,6 +581,10 @@ export default function ClaimSeat() {
             type="button"
             className="mv-cta mv-cta-dark"
             onClick={() => {
+              if (pv) {
+                setPv("open");
+                return;
+              }
               track("plus_claim_signin");
               openPlusSignIn("claim");
             }}
@@ -428,5 +613,6 @@ export default function ClaimSeat() {
         </>
       )}
     </Up>
+    </>
   );
 }

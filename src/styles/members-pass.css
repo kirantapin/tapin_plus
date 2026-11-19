@@ -769,3 +769,89 @@
     height: 220px;
   }
 }
+
+/* ══ Claimed (19 Nov 2026): the line plays out into the pass ═══════════════ */
+.cs-claimed-body {
+  padding-top: calc(env(safe-area-inset-top) + 28px);
+}
+.cs-stage {
+  position: relative;
+}
+.cs-stage > .cs-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100%, 390px);
+  margin: 0;
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+}
+.cs-stage:not([data-done]) > .mv-pass {
+  opacity: 0;
+}
+.cs-stage[data-done] > .cs-line {
+  display: none;
+}
+.cs-stage:not([data-done]) + .cs-claimed-after > * {
+  opacity: 0;
+}
+.cs-line-me,
+.cs-line-doorg {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.cs-claimed-after {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+}
+.cs-claimed-acct {
+  justify-self: center;
+  font: 600 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cs-replay {
+  justify-self: center;
+  border: 0;
+  background: none;
+  font: 500 14px/18px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+  cursor: pointer;
+}
+
+/* The preview's switcher (?claimv=): a strip along the top. */
+.cs-pv {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  background: #141618;
+  scrollbar-width: none;
+}
+.cs-pv b {
+  flex: none;
+  margin-right: 4px;
+  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+  color: #3ad08a;
+}
+.cs-pv button {
+  flex: none;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font: 600 13px/1 "Gilroy", Arial, sans-serif;
+  color: #ffffff;
+  cursor: pointer;
+}
+.cs-pv button[aria-pressed="true"] {
+  background: #ffffff;
+  color: #141618;
+}
