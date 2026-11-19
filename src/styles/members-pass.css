@@ -958,3 +958,50 @@
   width: 100%;
   margin: 0 auto;
 }
+
+/* ── The lower half, polished (19 Nov 2026) ──────────────────────────────
+   The questions card sits in the same 20px margins as every card above it,
+   at the same radius; a question that wraps gets room to breathe; the last
+   button is the page's width, like the first; the promise's heading
+   doesn't strand a word. */
+.cs .cs-faq {
+  width: auto;
+  max-width: 560px;
+  margin: 0 20px;
+  padding: 20px 20px 8px;
+  border-radius: 20px;
+}
+.cs .cs-faq .tpa-qa summary {
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 14px 0;
+  line-height: 21px;
+  text-wrap: pretty;
+}
+.cs .cs-faq .tpa-qa summary svg {
+  flex: none;
+}
+.cs .cs-faq .tpa-qa:last-of-type {
+  border-bottom: 0;
+}
+.cs-more > .cs-col,
+.cs-more > .cs-foot {
+  width: 100%;
+  box-sizing: border-box;
+}
+.cs-again {
+  margin-top: 4px;
+}
+.cs-promise b {
+  text-wrap: balance;
+}
+.cs-more > .cs-foot {
+  padding-top: 8px;
+}
+@media (min-width: 600px) {
+  .cs .cs-faq {
+    width: 100%;
+    margin: 0 auto;
+  }
+}
