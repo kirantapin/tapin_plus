@@ -1424,6 +1424,28 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
     );
   };
 
+  /* THE TERMS, UNDER THE HEADER (Sam, 19 Nov 2026: "can we bring these
+     bullet points down below, for all pages, I think they go in their own
+     parent container below"): the price, then the refund, as one white card
+     right under the photo. Where the header carried them: the waitlist's
+     refund, the main page's price and refund. */
+  const termsCard = wait ? (
+    <section className="tpa-module tpu-terms-card" aria-label="The refund">
+      <AuditPromise />
+    </section>
+  ) : auditHome ? (
+    <section className="tpa-module tpu-terms-card" aria-label="Price and refund">
+      {/* Nothing until the price is in: "$–" read as "$0" and "$1" in the
+          recordings (PostHog, 16 Nov 2026). The space is held. */}
+      {linked || free ? null : (
+        <div style={price ? undefined : { visibility: "hidden" }}>
+          {hidePrice && !textsOn ? <SpotsLine /> : <WelcomeLine first={FIRST_MONTH} forever={placeForever || firstForever(price)} endsMs={placeEnds} strong was={textsOn ? MONTHLY : undefined} />}
+        </div>
+      )}
+      <AuditPromise />
+    </section>
+  ) : null;
+
   return (
     <div className="tpa tpa-home tps">
       {/* The welcome offer's clock (Sam, 3 Nov 2026: "do the welcome offer
@@ -1507,10 +1529,8 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                     <>One membership for all your favorites in Blacksburg. Join the waitlist to get&nbsp;in.</>
                   )}
                 </p>
-                {/* The refund at the top of every page (Sam, 18 Nov 2026). */}
-                <div className="tpu-terms tpu-terms-wl">
-                  <AuditPromise />
-                </div>
+                {/* The refund sits under the header now, in its own card
+                    (termsCard, Sam, 19 Nov 2026). */}
                 {/* Rob's line: on a computer its own card above "Watch it in
                     action" (17 Nov 2026), on a phone under the header. */}
                 {/* The waitlist line as the member's status plate (Sam, 17
@@ -1678,17 +1698,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
                       {joinLabel}
                     </button>
                   ) : null}
-                  {/* The terms, as one set: the price, then the refund. */}
-                  <div className="tpu-terms">
-                    {/* Nothing until the price is in: "$–" read as "$0" and "$1" in
-                        the recordings (PostHog, 16 Nov 2026). The space is held. */}
-                    {linked || free ? null : (
-                      <div style={price ? undefined : { visibility: "hidden" }}>
-                        {hidePrice && !textsOn ? <SpotsLine /> : <WelcomeLine first={FIRST_MONTH} forever={placeForever || firstForever(price)} endsMs={placeEnds} strong was={textsOn ? MONTHLY : undefined} />}
-                      </div>
-                    )}
-                    <AuditPromise />
-                  </div>
+                  {/* The terms moved under the header (termsCard). */}
                 </div>
                 )}
               </>
@@ -1755,6 +1765,7 @@ export default function PlusHome({ placeId, bandSrc, bandPos, group }: { placeId
             it in action'"). */}
         {/* On a computer, Rob's line is a card here, above "Watch it in
             action" (Sam, 17 Nov 2026), whatever the page's state. */}
+        {termsCard}
         {desk ? <HokieLine card /> : wait || memberHome ? <HokieLine /> : null}
         {ugc ? <UgcRow place={place?.id} /> : null}
         {wherev === "a" ? (

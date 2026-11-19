@@ -9685,3 +9685,50 @@ a.hk-link:focus-visible {
 .hk-card > .hk {
   margin: 0;
 }
+
+/* ══ THE TERMS, UNDER THE HEADER (19 Nov 2026) ════════════════════════════
+   The price and the refund as their own white card right under the photo,
+   on every page that had them in the header: one grid for both rows (icon,
+   then words), the lead words in ink 600, the rest muted, the icons in the
+   money green. */
+.tpu-terms-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px;
+}
+.tpu-terms-card > div {
+  display: contents;
+}
+.tpa .tpu-terms-card p {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--muted, #5d6166);
+  text-shadow: none;
+}
+.tpa .tpu-terms-card p > span {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-wrap: pretty;
+}
+.tpa .tpu-terms-card b {
+  font-weight: 600;
+  color: var(--ink, #141618);
+}
+.tpa .tpu-terms-card s {
+  color: var(--muted, #5d6166);
+}
+.tpa .tpu-terms-card svg {
+  position: static;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.5px;
+  color: #0b7a53;
+}
