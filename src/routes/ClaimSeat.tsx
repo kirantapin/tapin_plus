@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import { asset } from "../asset";
 import { useAuth } from "../context/auth_context";
@@ -135,14 +135,94 @@ function Line({ state }: { state: "up" | "back" | "wait" }) {
   );
 }
 
-function Up({ state, children }: { state: State["kind"]; children: ReactNode }) {
+/** The arrow at the foot of the first screen (Sam, 19 Nov 2026: "a centered
+ *  arrow at the bottom of the page that someone can click on that scrolls
+ *  down to see all the benefits of being a blacksburg plus member"). It
+ *  bobs gently until the page moves, then steps aside. */
+function MoreArrow() {
+  const ref = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const chev = el.querySelector("i");
+    const bob = !stillMotion() && chev && typeof chev.animate === "function"
+      ? chev.animate([{ transform: "translateY(0)" }, { transform: "translateY(5px)" }, { transform: "translateY(0)" }], { duration: 1600, iterations: Infinity, easing: "ease-in-out", delay: 1200 })
+      : null;
+    const onScroll = () => {
+      const gone = window.scrollY > 48;
+      if (gone) el.dataset.gone = "";
+      else delete el.dataset.gone;
+      if (bob) (gone ? bob.pause() : bob.play());
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      bob?.cancel();
+    };
+  }, []);
   return (
-    <Page title="Claim your seat · Tapin Plus" className="tpa cs cs-up">
-      <div className="cs-top">
-        <BackPill />
+    <button
+      ref={ref}
+      type="button"
+      className="cs-down"
+      onClick={() => document.getElementById("cs-more")?.scrollIntoView({ behavior: stillMotion() ? "auto" : "smooth", block: "start" })}
+    >
+      <span>See everything Plus gets you</span>
+      <i aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 5v13M6 12.5l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </i>
+    </button>
+  );
+}
+
+/** The "You're up" page and its siblings (in line, ran out, not in line):
+ *  the line and the words on the first screen, the arrow at its foot, and
+ *  everything a Blacksburg Plus member gets below it. `act` is the page's
+ *  one action, said again at the end and on a place's pop-up. */
+function Up({ state, children, act }: { state: State["kind"]; children: ReactNode; act?: { label: string; go: () => void } }) {
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  const { track } = useEventTracking();
+  return (
+    <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-up">
+      <div className="cs-first">
+        <div className="cs-top">
+          <BackPill />
+        </div>
+        <Line state={state === "out" ? "up" : state === "ended" ? "back" : "wait"} />
+        <div className="cs-up-body">{children}</div>
+        <MoreArrow />
       </div>
-      <Line state={state === "out" ? "up" : state === "ended" ? "back" : "wait"} />
-      <div className="cs-up-body">{children}</div>
+      <div id="cs-more" className="cs-more">
+        <div className="cs-col">
+          <h2 className="cs-h">What you get as a Blacksburg Plus member</h2>
+          <ClaimRail onOpen={setPlaceOpen} />
+          <Value />
+        </div>
+        <Questions />
+        {act ? (
+          <div className="cs-col cs-again">
+            <button type="button" className="mv-cta mv-cta-dark" onClick={act.go}>
+              {act.label}
+            </button>
+          </div>
+        ) : null}
+        <div className="mv cs-foot">
+          <Foot promise={false} onMail={() => track("plus_claim_email")} />
+        </div>
+      </div>
+      {placeOpen ? (
+        <PlacePopup
+          place={placeOpen}
+          cta={act?.label ?? "Got it"}
+          onClose={() => setPlaceOpen(null)}
+          onJoin={() => {
+            setPlaceOpen(null);
+            act?.go();
+          }}
+        />
+      ) : null}
     </Page>
   );
 }
@@ -259,22 +339,68 @@ const Chevron = () => (
   </svg>
 );
 
-function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: () => void; onPreviewClaim?: () => void }) {
-  const { track } = useEventTracking();
+/** What you pay beside what you get, the rest of it, what it's worth and
+ *  the refund: the offer's middle, and the "You're up" page's below the fold. */
+function Value() {
   const { price } = usePlusPriceLoad();
-  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const first = firstFigure(price);
   const monthly = usd(price?.monthly);
   const same = !!price && price.first === price.monthly;
-  const claim = (where: string, el?: HTMLElement | null) => {
-    /* A preview never reaches the checkout (model/claim.ts). */
-    if (onPreviewClaim) {
-      onPreviewClaim();
-      return;
-    }
-    track("plus_claim_clicked", { where });
-    openPlusCheckout("claim", el ?? null);
-  };
+  return (
+    <>
+      <div className="cs-vs tnum">
+        <div className="cs-tile cs-pay" style={price ? undefined : { visibility: "hidden" }}>
+          <small>You pay</small>
+          <div>
+            <b>{same ? monthly : first}</b>
+            <span>{same ? "a month" : `first month, then ${monthly}`}</span>
+          </div>
+        </div>
+        <div className="cs-tile cs-get">
+          <small>You get</small>
+          <div>
+            <b>$25</b>
+            <span>to spend every month, $5 at each Plus spot</span>
+          </div>
+        </div>
+      </div>
+      <ul className="cs-also">
+        <li>
+          <b>Earn $5 back</b> every week when you spend $10
+        </li>
+        <li>
+          <b>Save 15%</b> on your other orders, once a day
+        </li>
+        <li>
+          <b>Deals</b> at Crumbl, Italiano’s and Playa Bowls
+        </li>
+      </ul>
+      <section className="cs-worth" aria-label="What Plus is worth">
+        <p className="tnum">
+          <span>Save about</span>
+          <b>$60 a month</b>
+          <span>
+            at places you already&nbsp;go<sup>*</sup>
+          </span>
+        </p>
+        <small>{WORTH_NOTE}</small>
+      </section>
+      <section className="cs-promise" aria-label="The Plus Promise">
+        {SHIELD}
+        {/* Sam, 19 Nov 2026: "save what you pay or your money back"; the
+            difference, as every page says it (model/refundWords.ts). */}
+        <p>
+          <b>Save what you pay, or get the difference back.</b> {refundAnswer("student")}
+        </p>
+      </section>
+    </>
+  );
+}
+
+/** The questions, the main page's with the claim's first. */
+function Questions() {
+  const { price } = usePlusPriceLoad();
+  const monthly = usd(price?.monthly);
   const faq = [
     {
       q: "How does claiming my seat work?",
@@ -289,6 +415,37 @@ function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: (
     ),
   ];
   return (
+    <section className="tpa-module cs-faq" aria-labelledby="cs-faq-h">
+      <h2 id="cs-faq-h" className="tpa-h2">
+        Questions
+      </h2>
+      {faq.map((f) => (
+        <details key={f.q} className="tpa-qa">
+          <summary>
+            <span>{f.q}</span>
+            <Chevron />
+          </summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </section>
+
+  );
+}
+
+function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: () => void; onPreviewClaim?: () => void }) {
+  const { track } = useEventTracking();
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  const claim = (where: string, el?: HTMLElement | null) => {
+    /* A preview never reaches the checkout (model/claim.ts). */
+    if (onPreviewClaim) {
+      onPreviewClaim();
+      return;
+    }
+    track("plus_claim_clicked", { where });
+    openPlusCheckout("claim", el ?? null);
+  };
+  return (
     <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-offer">
       <div className="cs-col">
         <div className="cs-top">
@@ -297,70 +454,13 @@ function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: (
         <Held endsMs={invite.endsMs} onEnd={onEnd} />
         <h1 className="cs-h">Claim your seat</h1>
         <ClaimRail onOpen={setPlaceOpen} />
-        <div className="cs-vs tnum">
-          <div className="cs-tile cs-pay" style={price ? undefined : { visibility: "hidden" }}>
-            <small>You pay</small>
-            <div>
-              <b>{same ? monthly : first}</b>
-              <span>{same ? "a month" : `first month, then ${monthly}`}</span>
-            </div>
-          </div>
-          <div className="cs-tile cs-get">
-            <small>You get</small>
-            <div>
-              <b>$25</b>
-              <span>to spend every month, $5 at each Plus spot</span>
-            </div>
-          </div>
-        </div>
-        <ul className="cs-also">
-          <li>
-            <b>Earn $5 back</b> every week when you spend $10
-          </li>
-          <li>
-            <b>Save 15%</b> on your other orders, once a day
-          </li>
-          <li>
-            <b>Deals</b> at Crumbl, Italiano’s and Playa Bowls
-          </li>
-        </ul>
-        <section className="cs-worth" aria-label="What Plus is worth">
-          <p className="tnum">
-            <span>Save about</span>
-            <b>$60 a month</b>
-            <span>
-              at places you already&nbsp;go<sup>*</sup>
-            </span>
-          </p>
-          <small>{WORTH_NOTE}</small>
-        </section>
-        <section className="cs-promise" aria-label="The Plus Promise">
-          {SHIELD}
-          {/* Sam, 19 Nov 2026: "save what you pay or your money back"; the
-              difference, as every page says it (model/refundWords.ts). */}
-          <p>
-            <b>Save what you pay, or get the difference back.</b> {refundAnswer("student")}
-          </p>
-        </section>
+        <Value />
       </div>
 
       {/* The ladder, without the logos: the places row is at the top now. */}
       <BonusSpots title="What you get with Plus" logos={false} />
 
-      <section className="tpa-module cs-faq" aria-labelledby="cs-faq-h">
-        <h2 id="cs-faq-h" className="tpa-h2">
-          Questions
-        </h2>
-        {faq.map((f) => (
-          <details key={f.q} className="tpa-qa">
-            <summary>
-              <span>{f.q}</span>
-              <Chevron />
-            </summary>
-            <p>{f.a}</p>
-          </details>
-        ))}
-      </section>
+      <Questions />
 
       <div className="mv cs-foot">
         {/* The promise is its own card above; the foot keeps help and terms. */}
@@ -546,6 +646,7 @@ export default function ClaimSeat() {
   const [pv, setPv] = useState<ClaimPreview | null>(claimPreview);
   const [state, onEnd] = useClaimState(pv);
   const { track } = useEventTracking();
+  const navigate = useNavigate();
   const kind = state.kind;
   useEffect(() => {
     if (kind !== "loading" && !pv) track("plus_claim_viewed", { state: kind });
@@ -568,11 +669,31 @@ export default function ClaimSeat() {
       </>
     );
   if (state.kind === "loading") return <Page title="Claim your seat · Tapin Plus" className="tpa cs cs-up" children={null} />;
+  const signIn = () => {
+    if (pv) {
+      setPv("open");
+      return;
+    }
+    track("plus_claim_signin");
+    openPlusSignIn("claim");
+  };
+  const act =
+    state.kind === "out"
+      ? { label: "Sign in to claim", go: signIn }
+      : state.kind === "none"
+        ? {
+            label: "Join the waitlist",
+            go: () => {
+              track("plus_claim_to_waitlist");
+              navigate("/");
+            },
+          }
+        : undefined;
 
   return (
     <>
     {bar}
-    <Up state={state.kind}>
+    <Up state={state.kind} act={act}>
       {state.kind === "out" ? (
         <>
           <h1 className="cs-up-h">You’re up.</h1>
@@ -580,14 +701,7 @@ export default function ClaimSeat() {
           <button
             type="button"
             className="mv-cta mv-cta-dark"
-            onClick={() => {
-              if (pv) {
-                setPv("open");
-                return;
-              }
-              track("plus_claim_signin");
-              openPlusSignIn("claim");
-            }}
+            onClick={signIn}
           >
             Sign in to claim
           </button>
