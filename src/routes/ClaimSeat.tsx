@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
-import { asset } from "../asset";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
 import { CLAIM_HOURS, claimPreview, readInvite, type ClaimPreview, type SeatInvite } from "../model/claim";
@@ -28,7 +27,6 @@ import { useMedia } from "../shell/useMedia";
    it. Past the 48 hours (model/claim.ts): back of the line. No seat yet:
    on the list, or a way to join it. A member has nothing to claim: /in. */
 
-const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
 const HOUR = 3_600_000;
 
 type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
@@ -134,7 +132,9 @@ function Line({ state }: { state: "up" | "back" | "wait" }) {
       {state === "up" ? (
         <g className="cs-line-doorg">
           <rect x="300" y="58" width="56" height="56" rx="16" className="cs-line-door" />
-          <image href={PAPER_MARK} x="309" y="71" width="38" height="30" />
+          <svg x="312" y="70" width="32" height="32" className="cs-line-mark">
+            <FlatMark />
+          </svg>
         </g>
       ) : null}
     </svg>
@@ -726,7 +726,7 @@ function Split({ copy }: { copy: SplitCopy }) {
       <div className="sp">
         <aside className="sp-left">
           <Link className="sp-brand" to="/">
-            <img src={PAPER_MARK} alt="" width="40" height="32" />
+            <FlatMark className="sp-mark" />
             Tapin Plus Blacksburg
           </Link>
           <div className="sp-mid">
