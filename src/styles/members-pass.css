@@ -474,8 +474,11 @@
   font: 600 14px "Gilroy", Arial, sans-serif;
   fill: #ffffff;
 }
+.cs-line-mark {
+  color: #ffffff;
+}
 .cs-line-door {
-  fill: #ffffff;
+  fill: var(--ink, #141618);
   stroke: var(--ink, #141618);
   stroke-width: 2;
 }
@@ -1499,9 +1502,10 @@
   font: 600 17px/1 "Gilroy", Arial, sans-serif;
   text-decoration: none;
 }
-.sp-brand img {
-  width: 40px;
-  height: 32px;
+.sp-brand .sp-mark {
+  width: 34px;
+  height: 34px;
+  color: #ffffff;
 }
 .sp-brand:focus-visible,
 .sp-cta:focus-visible {
