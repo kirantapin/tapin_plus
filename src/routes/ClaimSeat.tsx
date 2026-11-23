@@ -13,7 +13,7 @@ import { LiteMark } from "../shell/LiteMark";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { openPlusCheckout, openPlusSignIn } from "../shell/PlusCheckout";
 import { FlatMark } from "./parents_kit";
-import { Foot, GetApp, Pass, useFour } from "./MembersPass";
+import { Benefits, Foot, GetApp, Pass, useFour } from "./MembersPass";
 import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
 import { CheckoutPhone } from "./parents_sections";
 import { DeskGrid, DeskReels, DeskRows, DeskSonar, DeskSonarV } from "./ClaimDesk";
@@ -467,14 +467,15 @@ function Value({ desk = false }: { desk?: boolean }) {
 }
 
 /** The questions, the main page's with the claim's first. */
-function Questions() {
+function Questions({ member = false }: { member?: boolean } = {}) {
   const { price } = usePlusPriceLoad();
   const monthly = usd(price?.monthly);
   const faq = [
-    {
+    /* A member has claimed already: nothing to explain about claiming. */
+    ...(member ? [] : [{
       q: "How does claiming my seat work?",
       a: `Your seat is held for ${CLAIM_HOURS} hours from our text. Claim it here and it’s yours. If the ${CLAIM_HOURS} hours run out, it goes to the next person in line and you go back on the waitlist.`,
-    },
+    }]),
     ...faqFor(monthly).flatMap((f) =>
       f.q === "How do I cancel and get a refund?"
         ? refundFaq()
@@ -556,14 +557,19 @@ function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: (
   );
 }
 
-/* ══ CLAIMED: THE SEAT IS YOURS (Sam, 19 Nov 2026: "Maybe we have an
-   /impeccable delight animation when someone claims tapin plus") ══════════
-   The line from "You're up" plays out: your seat walks into the Plus door,
-   the line behind you moves up one, and the door opens into your members
-   pass. It waits for the checkout's "You're in" to close, plays once per
-   account on this phone (after that the pass is simply there), and with
-   reduced motion the pass is there from the start. Then the one thing to
-   do: the app, where the $25 is. */
+/* ══ CLAIMED: THE SEAT IS YOURS, IN THE SPLIT (Sam, 23 Nov 2026: "this page
+   should also be updated, and the animation when I claim my seat should be
+   updated") ═════════════════════════════════════════════════════════════════
+   The same dark panel as every other state of /claim, now on a phone too
+   (stacked: the panel, then the rest). The line you stood in ends at a door
+   with the Plus mark on it. You step through it, the line behind you moves
+   up one, and the door opens out into your pass. On a computer the line
+   stands up beside the words and stays, the door lit; on a phone it runs
+   across the card's place and clears once the pass is out. It waits for the
+   checkout's "You're in" to close, plays once per account on this phone,
+   and with reduced motion the pass is simply there. The right side turns
+   from selling to using: three steps to the first $5, the places, what's
+   theirs every month, the questions. */
 const stillMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /** Calls `go` once no checkout sheet is open (the sheet portals to the body). */
@@ -586,47 +592,99 @@ function whenSheetGone(go: () => void): () => void {
   };
 }
 
-function playClaim(st: HTMLElement): Animation[] {
+/** The line, ending at the door: standing up on a computer (door on top),
+ *  across on a phone (door on the right). */
+function DoorLine({ dir }: { dir: "up" | "across" }) {
+  return (
+    <div className={`cl-line cl-${dir}`} aria-hidden="true">
+      <span className="cl-door">
+        <FlatMark />
+      </span>
+      <span className="cl-me">
+        <svg viewBox="0 0 24 24">
+          <path d="m6.5 12.5 3.6 3.6 7.4-7.6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className="cl-behind">
+        {Array.from({ length: dir === "up" ? 7 : 6 }, (_, i) => (
+          <i key={i} style={{ animationDelay: `${(i * 0.12).toFixed(2)}s` }} />
+        ))}
+      </span>
+    </div>
+  );
+}
+
+const centre = (r: DOMRect) => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+
+function playClaimed(root: HTMLElement): Animation[] {
   const out: Animation[] = [];
   const run = (el: Element | null | undefined, kf: Keyframe[], o: KeyframeAnimationOptions) => {
     if (el && typeof (el as HTMLElement).animate === "function") out.push((el as HTMLElement).animate(kf, { fill: "both", ...o }));
   };
   const OUT = "cubic-bezier(.22,1,.36,1)";
-  const pass = st.querySelector<HTMLElement>(".mv-pass");
-  const door = st.querySelector(".cs-line-door");
-  /* You walk into the door, and shrink into it. */
-  run(st.querySelector(".cs-line-me"), [{ transform: "translateX(0) scale(1)", opacity: 1 }, { offset: 0.8, opacity: 1 }, { transform: "translateX(92px) scale(.35)", opacity: 0 }], { duration: 660, easing: "cubic-bezier(.65,0,.35,1)" });
-  /* The line behind you moves up one seat. */
-  run(st.querySelector(".cs-line-behind"), [{ transform: "translateX(0)" }, { transform: "translateX(40px)" }], { duration: 720, delay: 200, easing: OUT });
-  /* The door takes you in. */
-  run(st.querySelector(".cs-line-doorg"), [{ transform: "scale(1)" }, { transform: "scale(1.14)" }, { transform: "scale(1)" }], { duration: 320, delay: 560, easing: "ease-out" });
-  /* And opens into your pass. */
-  if (pass && door) {
-    const pr = pass.getBoundingClientRect();
-    const dr = door.getBoundingClientRect();
-    const from = `inset(${Math.max(0, dr.top - pr.top)}px ${Math.max(0, pr.right - dr.right)}px ${Math.max(0, pr.bottom - dr.bottom)}px ${Math.max(0, dr.left - pr.left)}px round 16px)`;
-    run(pass, [{ clipPath: from, opacity: 1 }, { clipPath: "inset(0px 0px 0px 0px round 20px)", opacity: 1 }], { duration: 640, delay: 820, easing: OUT });
-    run(pass.querySelector(".mv-pass-live"), [{ transform: "scale(.6)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 440, delay: 1380, easing: "cubic-bezier(.34,1.56,.64,1)" });
+  const me = root.querySelector<HTMLElement>(".cl-me");
+  const door = root.querySelector<HTMLElement>(".cl-door");
+  const behind = root.querySelector<HTMLElement>(".cl-behind");
+  const pass = root.querySelector<HTMLElement>(".cl-stage .mv-pass");
+  if (!me || !door || !pass) return out;
+  const m = centre(me.getBoundingClientRect());
+  const d = centre(door.getBoundingClientRect());
+  /* You step through the door, shrinking into it. */
+  run(me, [{ transform: "translate(0,0) scale(1)", opacity: 1 }, { offset: 0.78, opacity: 1 }, { transform: `translate(${d.x - m.x}px,${d.y - m.y}px) scale(.3)`, opacity: 0 }], { duration: 640, delay: 120, easing: "cubic-bezier(.65,0,.35,1)" });
+  /* The line behind you moves up one. */
+  const first = behind?.firstElementChild;
+  if (behind && first) {
+    const f = centre(first.getBoundingClientRect());
+    run(behind, [{ transform: "translate(0,0)" }, { transform: `translate(${m.x - f.x}px,${m.y - f.y}px)` }], { duration: 760, delay: 320, easing: OUT });
   }
-  run(st.querySelector(".cs-line"), [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 840, easing: "linear" });
-  st.parentElement?.querySelectorAll(".cs-claimed-after > *").forEach((el, i) =>
-    run(el, [{ transform: "translateY(10px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 480, delay: 1360 + i * 90, easing: OUT }),
+  /* The door takes you in: a nudge, and the green ring going out from it. */
+  run(door, [{ transform: "scale(1)" }, { transform: "scale(1.16)" }, { transform: "scale(1)" }], { duration: 340, delay: 640, easing: "ease-out" });
+  run(door, [{ boxShadow: "0 0 0 0 rgba(58,208,138,.55)" }, { boxShadow: "0 0 0 22px rgba(58,208,138,0)" }], { duration: 720, delay: 700, easing: "ease-out", fill: "none" });
+  /* And opens out into your pass: the card starts as the door, where the
+     door is, and grows into its place. */
+  const pr = pass.getBoundingClientRect();
+  const dr = door.getBoundingClientRect();
+  const s = dr.width / pr.width;
+  const c = centre(pr);
+  run(
+    pass,
+    [
+      { transform: `translate(${d.x - c.x}px,${d.y - c.y}px) scale(${s})`, opacity: 0, borderRadius: `${16 / s}px` },
+      { offset: 0.14, opacity: 1 },
+      { transform: "translate(0,0) scale(1)", opacity: 1, borderRadius: "20px" },
+    ],
+    { duration: 760, delay: 860, easing: "cubic-bezier(.2,.9,.25,1)" },
   );
-  const last = out[out.length - 1];
-  if (last) last.onfinish = () => (st.dataset.done = "");
+  run(pass.querySelector(".mv-pass-live"), [{ transform: "scale(.6)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: 440, delay: 1520, easing: "cubic-bezier(.34,1.56,.64,1)" });
+  /* Across a phone the line was standing in the card's place: it clears. */
+  if (root.querySelector(".cl-across")) run(root.querySelector(".cl-across"), [{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: 900, easing: "linear" });
+  root.querySelectorAll(".cl-after > *").forEach((el, i) =>
+    run(el, [{ transform: "translateY(12px)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 520, delay: 1480 + i * 90, easing: OUT }),
+  );
   return out;
 }
+
+/** The first $5, from here: a real order of things to do. */
+const FIRST_STEPS = [
+  { h: "Get the Tapin app", p: "Sign in with the number you used here. Your credit is waiting." },
+  { h: "Pick a Plus spot", p: "Order in the app, or show your phone at the counter." },
+  { h: "Your $5 comes off", p: "At each Plus spot, every month. On other orders, 15% off once a day." },
+];
 
 function Claimed({ preview }: { preview: boolean }) {
   const four = useFour();
   const { userSession } = useAuth();
   const { track } = useEventTracking();
-  const stage = useRef<HTMLDivElement | null>(null);
+  const desk = useMedia("(min-width: 1024px)");
+  /* The line stands up beside the words only where there is room for both. */
+  const wide = useMedia("(min-width: 1280px)");
+  const root = useRef<HTMLDivElement | null>(null);
   const [round, setRound] = useState(0);
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const uid = userSession?.user?.id;
   useLayoutEffect(() => {
-    const st = stage.current;
-    if (!st) return;
+    const el = root.current;
+    if (!el) return;
     let seen = false;
     if (!preview) {
       try {
@@ -637,44 +695,93 @@ function Claimed({ preview }: { preview: boolean }) {
         /* Private mode: it plays again, which is fine. */
       }
     }
-    if (seen || stillMotion()) {
-      st.dataset.done = "";
-      return;
-    }
-    delete st.dataset.done;
+    if (seen || stillMotion()) return;
+    /* Hidden only while it's about to play, so the page is whole without it. */
+    el.dataset.play = "";
     let anims: Animation[] = [];
     const stop = whenSheetGone(() => {
-      anims = playClaim(st);
+      anims = playClaimed(el);
+      const last = anims[anims.length - 1];
+      if (last) last.onfinish = () => delete el.dataset.play;
+      else delete el.dataset.play;
     });
     return () => {
       stop();
       anims.forEach((a) => a.cancel());
+      delete el.dataset.play;
     };
-  }, [round, preview, uid]);
+  }, [round, preview, uid, wide]);
   useEffect(() => {
     if (!preview) track("plus_claim_claimed");
   }, [preview, track]);
   return (
-    <Page title="You’re in · Tapin Plus" className="tpa cs cs-up cs-claimed">
-      <div className="cs-up-body cs-claimed-body">
-        <div className="cs-stage" ref={stage}>
-          <Pass active who={four ? `••• ${four}` : undefined} whoLabel="Member" />
-          <Line state="up" />
-        </div>
-        <div className="cs-claimed-after">
-          <h1 className="cs-up-h">The seat is yours.</h1>
-          <p className="cs-lede">You’re a Tapin Plus member. Your $25 is ready to spend in the Tapin&nbsp;app.</p>
-          <GetApp where="claim_done" />
-          <Link className="cs-claimed-acct" to="/in">
-            Your account
+    <Page title="You’re in · Tapin Plus" className="tpa tpa-home tps cs cs-split cs-claimed">
+      <div className="sp" ref={root}>
+        <aside className="sp-left">
+          <Link className="sp-brand" to="/">
+            <FlatMark className="sp-mark" />
+            Tapin Plus Blacksburg
           </Link>
-          {preview ? (
-            <button type="button" className="cs-replay" onClick={() => setRound((n) => n + 1)}>
-              Play it again
-            </button>
-          ) : null}
-        </div>
+          <div className="sp-mid">
+            {wide ? <DoorLine dir="up" /> : null}
+            <div className="sp-txt cl-txt">
+              <div className="cl-stage">
+                <Pass active who={four ? `••• ${four}` : undefined} whoLabel="Member" />
+                {wide ? null : <DoorLine dir="across" />}
+              </div>
+              <div className="cl-after">
+                <h1 className="sp-h">The seat is yours.</h1>
+                <p className="sp-lede">You’re a Tapin Plus member. Your $25 is ready to spend in the Tapin&nbsp;app.</p>
+                <GetApp where="claim_done" tone="light" />
+                <p className="cl-links">
+                  <Link to="/in">Your account</Link>
+                  {preview ? (
+                    <button type="button" onClick={() => setRound((n) => n + 1)}>
+                      Play it again
+                    </button>
+                  ) : null}
+                </p>
+              </div>
+            </div>
+          </div>
+          {desk ? <p className="sp-hint">Scroll for how to use it</p> : null}
+        </aside>
+        <main className="sp-right">
+          <section className="sp-sec" aria-labelledby="cl-start">
+            <span className="sp-kick">Start here</span>
+            <h2 id="cl-start" className="sp-h2">
+              Your first $5, in three steps
+            </h2>
+            <ol className="cl-steps">
+              {FIRST_STEPS.map((s) => (
+                <li key={s.h}>
+                  <b>{s.h}</b>
+                  <span>{s.p}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+          <section className="sp-sec" aria-labelledby="cl-places">
+            <span className="sp-kick">8 Blacksburg spots</span>
+            <h2 id="cl-places" className="sp-h2">
+              Where your membership works
+            </h2>
+            <DeskGrid onOpen={setPlaceOpen} />
+          </section>
+          <section className="sp-sec" aria-labelledby="cl-month">
+            <span className="sp-kick">Every month</span>
+            <h2 id="cl-month" className="sp-h2">
+              What’s yours now
+            </h2>
+            <Benefits className="cl-ben" />
+          </section>
+          <Questions member />
+          <div className="mv cs-foot">
+            <Foot onMail={() => track("plus_claim_email")} />
+          </div>
+        </main>
       </div>
+      {placeOpen ? <PlacePopup place={placeOpen} cta="Got it" onClose={() => setPlaceOpen(null)} onJoin={() => setPlaceOpen(null)} /> : null}
     </Page>
   );
 }

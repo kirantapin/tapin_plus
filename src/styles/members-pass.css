@@ -667,55 +667,271 @@
   }
 }
 
-/* ══ Claimed (19 Nov 2026): the line plays out into the pass ═══════════════ */
-.cs-claimed-body {
-  padding-top: calc(env(safe-area-inset-top) + 28px);
+/* ══ Claimed, in the Split (23 Nov 2026): you step through the door and it
+   opens out into your pass. The panel stacks above the rest on a phone. ══ */
+.cl-txt {
+  gap: 22px;
 }
-.cs-stage {
+.cl-stage {
   position: relative;
 }
-.cs-stage > .cs-line {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(100%, 390px);
-  margin: 0;
-  transform: translate(-50%, -58%);
-  pointer-events: none;
+.cl-stage .mv-pass {
+  width: 100%;
+  max-width: 420px;
 }
-.cs-stage:not([data-done]) > .mv-pass {
-  opacity: 0;
-}
-.cs-stage[data-done] > .cs-line {
-  display: none;
-}
-.cs-stage:not([data-done]) + .cs-claimed-after > * {
-  opacity: 0;
-}
-.cs-line-me,
-.cs-line-doorg {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.cs-claimed-after {
+.cl-after {
   display: grid;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 18px;
 }
-.cs-claimed-acct {
-  justify-self: center;
+.cl-after .sp-h {
+  margin: 4px 0 0;
+}
+.cl-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 22px;
+  margin: 0;
+}
+.cl-links a {
+  color: #ffffff;
   font: 600 16px/22px "Gilroy", Arial, sans-serif;
-  color: var(--ink, #141618);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.cs-replay {
-  justify-self: center;
+.cl-links button {
+  padding: 0;
   border: 0;
   background: none;
+  color: rgba(255, 255, 255, 0.6);
   font: 500 14px/18px "Gilroy", Arial, sans-serif;
-  color: var(--cs-muted);
   cursor: pointer;
+}
+.cl-links a:focus-visible,
+.cl-links button:focus-visible {
+  outline: 3px solid var(--cs-live);
+  outline-offset: 3px;
+}
+/* Hidden only while the moment is about to play (data-play). */
+.sp[data-play] .cl-stage .mv-pass,
+.sp[data-play] .cl-after > * {
+  opacity: 0;
+}
+
+/* The line, ending at the door. */
+.cl-line {
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.cl-door {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #26292c;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  transition: box-shadow 0.4s ease-out;
+}
+.cl-door svg {
+  width: 30px;
+  height: 30px;
+}
+.cl-me {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--cs-green);
+  box-shadow: 0 0 0 10px rgba(58, 208, 138, 0.22);
+}
+.cl-me svg {
+  width: 26px;
+  height: 26px;
+}
+.cl-behind {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.cl-behind i {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3a3d40;
+  animation: spv-wave 2.8s ease-in-out infinite;
+}
+/* Standing up beside the words (a wide computer): the door on top, and it
+   stays, lit, once you're through. */
+.cl-up {
+  flex-direction: column;
+  justify-self: center;
+  align-self: center;
+  gap: 22px;
+}
+.cl-up .cl-behind {
+  flex-direction: column;
+}
+.sp:not([data-play]) .cl-up .cl-me {
+  visibility: hidden;
+}
+.sp:not([data-play]) .cl-up .cl-behind {
+  /* Up one seat: the middle of your circle to the middle of the first seat. */
+  transform: translateY(-59px);
+}
+.sp:not([data-play]) .cl-up .cl-door {
+  box-shadow: inset 0 0 0 2px var(--cs-live);
+}
+/* Across the card's place (a phone or a narrow computer): the door on the
+   right, the line clearing once the pass is out. */
+.cl-across {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  padding-right: 6%;
+  overflow: hidden;
+  gap: 20px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 22%);
+}
+.cl-across .cl-behind {
+  flex-direction: row-reverse;
+}
+.sp[data-play] .cl-across {
+  display: flex;
+}
+
+/* The right side: from selling to using. */
+.cl-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: cl;
+}
+.cl-steps li {
+  counter-increment: cl;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--hair, rgba(20, 22, 24, 0.08));
+}
+.cl-steps li::before {
+  content: counter(cl);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--ink, #141618);
+  color: #ffffff;
+  font: 600 15px/1 "Gilroy", Arial, sans-serif;
+}
+.cl-steps b {
+  font: 600 19px/24px "Gilroy", Arial, sans-serif;
+}
+.cl-steps span {
+  font: 500 15px/21px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted);
+}
+.cl-ben li {
+  padding: 16px 0;
+  font-size: 17px;
+  line-height: 23px;
+}
+.cl-ben b {
+  font-size: 20px;
+}
+.cs-claimed .sp-left {
+  overflow-y: auto;
+}
+@media (max-width: 1279.98px) {
+  .cl-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cl-steps li {
+    grid-template-columns: 30px minmax(0, 1fr);
+    column-gap: 14px;
+  }
+  .cl-steps li::before {
+    grid-row: span 2;
+    margin: 0;
+  }
+  .cs-claimed .sp-mid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-height: 820px) and (min-width: 1024px) {
+  .cl-stage .mv-pass {
+    max-width: 320px;
+  }
+}
+/* A phone: the panel first, then the rest, one column. */
+@media (max-width: 1023.98px) {
+  .cs-claimed .sp {
+    display: block;
+    min-height: 0;
+  }
+  .cs-claimed .sp-left,
+  .cs-pv ~ .cs-claimed .sp-left {
+    position: static;
+    top: auto;
+    height: auto;
+    overflow: visible;
+    grid-template-rows: auto auto;
+    gap: 26px;
+    padding: calc(env(safe-area-inset-top) + 20px) 20px 36px;
+  }
+  .cs-claimed .sp-brand {
+    font-size: 16px;
+  }
+  .cs-claimed .sp-brand .sp-mark {
+    width: 30px;
+    height: 30px;
+  }
+  .cl-stage .mv-pass {
+    max-width: none;
+  }
+  .cs-claimed .sp-h {
+    font-size: 40px;
+    line-height: 44px;
+  }
+  .cs-claimed .sp-lede {
+    font-size: 17px;
+    line-height: 24px;
+  }
+  .cs-claimed .sp-right {
+    gap: 44px;
+    padding: 36px 20px 32px;
+  }
+  .cs-claimed .sp-h2 {
+    font-size: 30px;
+    line-height: 34px;
+  }
+  .cs-claimed .spg .spg-card {
+    height: 160px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-behind i {
+    animation: none;
+  }
 }
 
 /* The preview's switcher (?claimv=): a strip along the top. */
