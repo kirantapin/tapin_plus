@@ -7,16 +7,13 @@ import { CLAIM_HOURS, claimPreview, readInvite, type ClaimPreview, type SeatInvi
 import { useEndsAt } from "../model/deadline";
 import { firstFigure, usd, usePlusPriceLoad } from "../model/plus";
 import { onWaitlist } from "../model/waitlist";
-import { liveSoon } from "../shell/LiveSoon";
-import { useTicker } from "../shell/useTicker";
-import { LiteMark } from "../shell/LiteMark";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { openPlusCheckout, openPlusSignIn } from "../shell/PlusCheckout";
 import { FlatMark } from "./parents_kit";
 import { Benefits, Foot, GetApp, Pass, useFour } from "./MembersPass";
-import { PHOTO_POS, allRailCards, faqFor, refundFaq } from "./PlusHome";
+import { faqFor, refundFaq } from "./PlusHome";
 import { CheckoutPhone } from "./parents_sections";
-import { DeskGrid, DeskReels, DeskRows, DeskSonar, DeskSonarV } from "./ClaimDesk";
+import { DeskGrid, DeskReels, DeskSonarV } from "./ClaimDesk";
 import { useMedia } from "../shell/useMedia";
 
 /* ══ /claim: THE TEXTED LINK FOR AN OPEN SEAT (Sam, 19 Nov 2026) ═══════════
@@ -90,151 +87,6 @@ function Page({ title, className, children }: { title: string; className: string
   return <div className={className}>{children}</div>;
 }
 
-function BackPill() {
-  return (
-    <Link className="tpa-glass tpa-signin mv-back cs-back" to="/">
-      <svg className="tpa-back" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      Tapin Plus
-    </Link>
-  );
-}
-
-/* ── 1D · You're up: the line of seats, theirs lit. The seats are a
-   picture of the line, not a count. ── */
-function Line({ state }: { state: "up" | "back" | "wait" }) {
-  const you = state === "up" ? 236 : state === "back" ? 340 : 196;
-  return (
-    <svg className="cs-line" viewBox="0 0 390 132" aria-hidden="true">
-      <line x1="0" y1="86" x2="390" y2="86" className="cs-line-track" />
-      <g className="cs-line-behind">
-        {[-46, -6, 34, 74, 114, 154, 194, 234, 274, 314].filter((x) => Math.abs(x - you) > 30 && (state !== "up" || x < you)).map((x) => (
-          <circle key={x} cx={x} cy="86" r="11" className="cs-line-seat" />
-        ))}
-      </g>
-      <g className="cs-line-me">
-      {state === "up" ? <circle cx={you} cy="86" r="30" className="cs-line-glow" /> : null}
-      <circle cx={you} cy="86" r="20" className="cs-line-you" />
-      {state === "up" ? (
-        <path d={`m${you - 8} 86 6 6 11-12`} className="cs-line-tick" />
-      ) : (
-        <circle cx={you} cy="86" r="5" className="cs-line-dot" />
-      )}
-      <g transform={`translate(${you - 30} 16)`}>
-        <rect width="60" height="30" rx="8" className="cs-line-tag" />
-        <text x="30" y="20" textAnchor="middle" className="cs-line-tag-t">
-          You
-        </text>
-        <path d="M24 30h12l-6 7z" className="cs-line-tag" />
-      </g>
-      </g>
-      {state === "up" ? (
-        <g className="cs-line-doorg">
-          <rect x="300" y="58" width="56" height="56" rx="16" className="cs-line-door" />
-          <svg x="312" y="70" width="32" height="32" className="cs-line-mark">
-            <FlatMark />
-          </svg>
-        </g>
-      ) : null}
-    </svg>
-  );
-}
-
-/** The arrow at the foot of the first screen (Sam, 19 Nov 2026: "a centered
- *  arrow at the bottom of the page that someone can click on that scrolls
- *  down to see all the benefits of being a blacksburg plus member"). It
- *  bobs gently until the page moves, then steps aside. */
-function MoreArrow() {
-  const ref = useRef<HTMLButtonElement | null>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const chev = el.querySelector("i");
-    const bob = !stillMotion() && chev && typeof chev.animate === "function"
-      ? chev.animate([{ transform: "translateY(0)" }, { transform: "translateY(5px)" }, { transform: "translateY(0)" }], { duration: 1600, iterations: Infinity, easing: "ease-in-out", delay: 1200 })
-      : null;
-    const onScroll = () => {
-      const gone = window.scrollY > 48;
-      if (gone) el.dataset.gone = "";
-      else delete el.dataset.gone;
-      if (bob) (gone ? bob.pause() : bob.play());
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      bob?.cancel();
-    };
-  }, []);
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className="cs-down"
-      onClick={() => document.getElementById("cs-more")?.scrollIntoView({ behavior: stillMotion() ? "auto" : "smooth", block: "start" })}
-    >
-      <span>See everything Plus gets you</span>
-      <i aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 5v13M6 12.5l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </i>
-    </button>
-  );
-}
-
-/** The "You're up" page and its siblings (in line, ran out, not in line):
- *  the line and the words on the first screen, the arrow at its foot, and
- *  everything a Blacksburg Plus member gets below it. `act` is the page's
- *  one action, said again at the end and on a place's pop-up. */
-function Up({ state, children, act }: { state: State["kind"]; children: ReactNode; act?: { label: string; go: () => void } }) {
-  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
-  /* A computer gets its own take of each part (routes/ClaimDesk.tsx). */
-  const desk = useMedia("(min-width: 1024px)");
-  const { track } = useEventTracking();
-  return (
-    <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-up">
-      <div className="cs-first">
-        <div className="cs-top">
-          <BackPill />
-        </div>
-        {desk ? <DeskSonar up={state === "out"} /> : <Line state={state === "out" ? "up" : state === "ended" ? "back" : "wait"} />}
-        <div className="cs-up-body">{children}</div>
-        <MoreArrow />
-      </div>
-      <div id="cs-more" className="cs-more">
-        <div className="cs-col">
-          <h2 className="cs-h">What you get as a Blacksburg Plus member</h2>
-          {desk ? <DeskRows onOpen={setPlaceOpen} /> : <ClaimRail onOpen={setPlaceOpen} />}
-          <Value desk={desk} />
-        </div>
-        <Questions />
-        {act ? (
-          <div className="cs-col cs-again">
-            <button type="button" className="mv-cta mv-cta-dark" onClick={act.go}>
-              {act.label}
-            </button>
-          </div>
-        ) : null}
-        <div className="mv cs-foot">
-          <Foot promise={false} onMail={() => track("plus_claim_email")} />
-        </div>
-      </div>
-      {placeOpen ? (
-        <PlacePopup
-          place={placeOpen}
-          cta={act?.label ?? "Got it"}
-          onClose={() => setPlaceOpen(null)}
-          onJoin={() => {
-            setPlaceOpen(null);
-            act?.go();
-          }}
-        />
-      ) : null}
-    </Page>
-  );
-}
-
 /* ── 2D · Pay / get ── */
 const two = (n: number) => String(n).padStart(2, "0");
 
@@ -270,76 +122,6 @@ const SHIELD = (
    it's our estimate, not a measured member average (Plus is weeks old).
    Swap in the real average once there are months of members. */
 const WORTH_NOTE = "*Our estimate for about $100 a month of orders at Plus spots.";
-
-/* The places row, at the top of the offer (Sam, 19 Nov 2026: "we should
-   have the list of merchants at the top I think, that carousel"): the main
-   page's cards, drifting as its ticker does (shell/useTicker.ts), drawn
-   twice so the drift wraps, with a pause. */
-function ClaimRail({ onOpen }: { onOpen: (p: PlacePopupPlace) => void }) {
-  const cards = allRailCards();
-  const railRef = useRef<HTMLUListElement | null>(null);
-  const [paused, setPaused] = useState(false);
-  useTicker(railRef, true, paused, "claim");
-  return (
-    <section className="tpa-places tpw tpw-b cs-rail" aria-label="Where you can use Plus">
-      <div className="tpa-rail-bar cs-rail-bar">
-        <p className="tpa-places-sub">8 Blacksburg spots. Open a card to see what Plus covers&nbsp;there.</p>
-        <div className="tpa-rail-arrows">
-          <button type="button" className="tpa-rail-arrow tpa-rail-pause" aria-label={paused ? "Play the places" : "Pause the places"} aria-pressed={paused} onClick={() => setPaused((v) => !v)}>
-            {paused ? (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 5.5v13l10.5-6.5Z" fill="currentColor" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8.5 6v12M15.5 6v12" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
-      <ul className="tpa-rail" ref={railRef} data-ticker="">
-        {[false, true].map((copy) =>
-          cards.map((v) => (
-            <li key={`${copy ? "copy-" : ""}${v.id}`} className="tpa-place" data-ticker-copy={copy ? "" : undefined} aria-hidden={copy || undefined}>
-              <button
-                type="button"
-                className="tpa-place-open"
-                tabIndex={copy ? -1 : undefined}
-                aria-label={v.lite ? `What you get at ${v.name}` : `What Plus gets you at ${v.name}`}
-                onClick={(e) => {
-                  const r = e.currentTarget.getBoundingClientRect();
-                  onOpen({ id: v.id, name: v.name, kind: v.kind, photo: v.photo, lite: v.lite || undefined, liveSoon: liveSoon(v.id) || undefined, from: { x: r.left, y: r.top, w: r.width, h: r.height } });
-                }}
-              >
-                <span className="tpa-place-shot">
-                  <img className="tpa-place-photo" src={v.photo} alt="" decoding="async" loading="lazy" style={PHOTO_POS[v.id] ? { objectPosition: PHOTO_POS[v.id] } : undefined} />
-                </span>
-                <span className="tpa-glass tpa-tag">
-                  {v.lite ? <LiteMark className="tpa-tag-mark" /> : <FlatMark className="tpa-tag-mark" />}
-                  {v.lite ? "Lite" : "Plus"}
-                </span>
-                <span className="tpa-glass tpa-place-more" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M8 16 16 8M9.5 8H16v6.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="tpa-place-name">
-                  <img className="tpa-place-logo" src={v.logo} alt="" decoding="async" loading="lazy" />
-                  <span className="tpa-place-words">
-                    <b>{v.name}</b>
-                    <small>{v.kind}</small>
-                    <small className="tpa-place-perk">{v.perk}</small>
-                  </span>
-                </span>
-              </button>
-            </li>
-          )),
-        )}
-      </ul>
-    </section>
-  );
-}
 
 const Chevron = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -500,60 +282,6 @@ function Questions({ member = false }: { member?: boolean } = {}) {
       ))}
     </section>
 
-  );
-}
-
-function Offer({ invite, onEnd, onPreviewClaim }: { invite: SeatInvite; onEnd: () => void; onPreviewClaim?: () => void }) {
-  const { track } = useEventTracking();
-  const desk = useMedia("(min-width: 1024px)");
-  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
-  const claim = (where: string, el?: HTMLElement | null) => {
-    /* A preview never reaches the checkout (model/claim.ts). */
-    if (onPreviewClaim) {
-      onPreviewClaim();
-      return;
-    }
-    track("plus_claim_clicked", { where });
-    openPlusCheckout("claim", el ?? null);
-  };
-  return (
-    <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-offer">
-      <div className="cs-col">
-        <div className="cs-top">
-          <BackPill />
-        </div>
-        <Held endsMs={invite.endsMs} onEnd={onEnd} />
-        <h1 className="cs-h">Claim your seat</h1>
-        {desk ? <DeskRows onOpen={setPlaceOpen} /> : <ClaimRail onOpen={setPlaceOpen} />}
-        <Value desk={desk} />
-      </div>
-
-
-      <Questions />
-
-      <div className="mv cs-foot">
-        {/* The promise is its own card above; the foot keeps help and terms. */}
-        <Foot promise={false} onMail={() => track("plus_claim_email")} />
-      </div>
-
-      <div className="cs-dock">
-        <button type="button" className="mv-cta mv-cta-dark" onClick={(e) => claim("dock", e.currentTarget)}>
-          Claim my seat
-        </button>
-      </div>
-
-      {placeOpen ? (
-        <PlacePopup
-          place={placeOpen}
-          cta="Claim my seat"
-          onClose={() => setPlaceOpen(null)}
-          onJoin={() => {
-            setPlaceOpen(null);
-            claim("place_popup");
-          }}
-        />
-      ) : null}
-    </Page>
   );
 }
 
@@ -817,19 +545,40 @@ function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => voi
   );
 }
 
-/* ══ SPLIT, ON A COMPUTER (Sam, 19 Nov 2026: "I love split! let's do that
-   one") ═════════════════════════════════════════════════════════════════════
-   Every state of /claim from 1024px: the status in a dark panel on the left
-   that stays while the page scrolls (the line standing up beside the words,
-   the one action in white), and on the right the places, what you get, what
-   $5 looks like and the questions. The claimed moment keeps its own page. */
-type SplitCopy = { title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string };
+/* ══ SPLIT (Sam, 19 Nov 2026: "I love split! let's do that one"; on phones
+   too, 23 Nov 2026: "now do /claim on phones in the split style") ══════════
+   Every state of /claim: the status in a dark panel, the one action in
+   white, then the places, what you get, what $5 looks like and the
+   questions. From 1024px the panel stays on the left while the right
+   scrolls, the line standing up beside the words. On a phone the panel is
+   the first screen's top, the line running across above the words, and the
+   rest follows in one column; an open seat's "Claim my seat" docks at the
+   bottom once the panel's button has scrolled away. The claimed moment
+   keeps its own page. */
+type SplitCopy = { title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string; dock?: boolean };
+
+/** True once `el` has scrolled up out of view (never true before it has
+ *  been seen, so the dock doesn't flash in on load). */
+function usePastTop(ref: { current: HTMLElement | null }, on: boolean): boolean {
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!on || !el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setPast(!e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, on]);
+  return on && past;
+}
 
 function Split({ copy }: { copy: SplitCopy }) {
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const { track } = useEventTracking();
+  const desk = useMedia("(min-width: 1024px)");
+  const cta = useRef<HTMLButtonElement | null>(null);
+  const docked = usePastTop(cta, !desk && !!copy.dock && !!copy.act);
   return (
-    <Page title="Claim your seat · Tapin Plus" className="tpa tpa-home tps cs cs-split">
+    <Page title="Claim your seat · Tapin Plus" className={`tpa tpa-home tps cs cs-split${copy.dock ? " cs-docks" : ""}`}>
       <div className="sp">
         <aside className="sp-left">
           <Link className="sp-brand" to="/">
@@ -837,7 +586,7 @@ function Split({ copy }: { copy: SplitCopy }) {
             Tapin Plus Blacksburg
           </Link>
           <div className="sp-mid">
-            <DeskSonarV up={copy.up} />
+            <DeskSonarV up={copy.up} across={!desk} />
             <div className="sp-txt">
               {copy.held}
               <h1 className="sp-h">{copy.title}</h1>
@@ -849,14 +598,14 @@ function Split({ copy }: { copy: SplitCopy }) {
                 </p>
               ) : null}
               {copy.act ? (
-                <button type="button" className="sp-cta" onClick={(e) => copy.act?.go(e.currentTarget)}>
+                <button ref={cta} type="button" className="sp-cta" onClick={(e) => copy.act?.go(e.currentTarget)}>
                   {copy.act.label}
                 </button>
               ) : null}
               {copy.fine ? <p className="sp-fine">{copy.fine}</p> : null}
             </div>
           </div>
-          <p className="sp-hint">Scroll for everything Plus gets you</p>
+          {desk ? <p className="sp-hint">Scroll for everything Plus gets you</p> : null}
         </aside>
         <main className="sp-right">
           <section className="sp-sec" aria-labelledby="sp-places">
@@ -871,14 +620,26 @@ function Split({ copy }: { copy: SplitCopy }) {
             <h2 id="sp-get" className="sp-h2">
               Pay a little. Get a lot.
             </h2>
-            <Value desk />
+            <Value desk={desk} />
           </section>
           <Questions />
+          {copy.act && !copy.dock && !desk ? (
+            <button type="button" className="mv-cta mv-cta-dark sp-again" onClick={(e) => copy.act?.go(e.currentTarget)}>
+              {copy.act.label}
+            </button>
+          ) : null}
           <div className="mv cs-foot">
             <Foot promise={false} onMail={() => track("plus_claim_email")} />
           </div>
         </main>
       </div>
+      {copy.dock && copy.act && !desk ? (
+        <div className="cs-dock sp-dock" data-on={docked ? "" : undefined} aria-hidden={docked ? undefined : true}>
+          <button type="button" className="mv-cta mv-cta-dark" tabIndex={docked ? undefined : -1} onClick={(e) => copy.act?.go(e.currentTarget)}>
+            {copy.act.label}
+          </button>
+        </div>
+      ) : null}
       {placeOpen ? (
         <PlacePopup
           place={placeOpen}
@@ -899,7 +660,6 @@ export default function ClaimSeat() {
   const [state, onEnd] = useClaimState(pv);
   const { track } = useEventTracking();
   const navigate = useNavigate();
-  const desk = useMedia("(min-width: 1024px)");
   const kind = state.kind;
   useEffect(() => {
     if (kind !== "loading" && !pv) track("plus_claim_viewed", { state: kind });
@@ -914,7 +674,7 @@ export default function ClaimSeat() {
         <Claimed preview={!!pv} />
       </>
     );
-  if (state.kind === "open" && desk) {
+  if (state.kind === "open") {
     const claimNow = (el?: HTMLElement | null) => {
       if (pv) {
         setPv("claimed");
@@ -934,19 +694,21 @@ export default function ClaimSeat() {
             held: <Held endsMs={state.invite.endsMs} onEnd={onEnd} />,
             act: { label: "Claim my seat", go: claimNow },
             popupCta: "Claim my seat",
+            dock: true,
           }}
         />
       </>
     );
   }
-  if (state.kind === "open")
+  /* The panel's ground while the account loads, so the page doesn't flash light. */
+  if (state.kind === "loading")
     return (
-      <>
-        {bar}
-        <Offer invite={state.invite} onEnd={onEnd} onPreviewClaim={pv ? () => setPv("claimed") : undefined} />
-      </>
+      <Page title="Claim your seat · Tapin Plus" className="tpa cs cs-split">
+        <div className="sp">
+          <aside className="sp-left" />
+        </div>
+      </Page>
     );
-  if (state.kind === "loading") return <Page title="Claim your seat · Tapin Plus" className="tpa cs cs-up" children={null} />;
   const signIn = () => {
     if (pv) {
       setPv("open");
@@ -968,73 +730,24 @@ export default function ClaimSeat() {
           }
         : undefined;
 
-  if (desk) {
-    const copy: SplitCopy =
-      state.kind === "out"
-        ? { title: "You’re up.", lede: "A Tapin Plus seat just opened for you. Sign in with the number you joined the waitlist with to claim it.", fine: `You have ${CLAIM_HOURS} hours. After that, the seat goes to the next person in line and you go back on the waitlist.`, up: true, act, popupCta: "Sign in to claim" }
-        : state.kind === "ended"
-          ? { title: `Your ${CLAIM_HOURS} hours ran out.`, lede: "Your seat went to the next person in line. You’re back on the waitlist, and we’ll text you when another seat opens.", up: false, popupCta: "Got it" }
-          : state.kind === "listed"
-            ? {
-                title: "You’re in line.",
-                lede: `Your seat isn’t open yet. We’ll text you when it is, and you’ll have ${CLAIM_HOURS} hours to claim it.`,
-                since: state.since ? `On the list since ${new Date(state.since).toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : undefined,
-                up: false,
-                popupCta: "Got it",
-              }
-            : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
-    return (
-      <>
-        {bar}
-        <Split copy={copy} />
-      </>
-    );
-  }
-
+  const copy: SplitCopy =
+    state.kind === "out"
+      ? { title: "You’re up.", lede: "A Tapin Plus seat just opened for you. Sign in with the number you joined the waitlist with to claim it.", fine: `You have ${CLAIM_HOURS} hours. After that, the seat goes to the next person in line and you go back on the waitlist.`, up: true, act, popupCta: "Sign in to claim" }
+      : state.kind === "ended"
+        ? { title: `Your ${CLAIM_HOURS} hours ran out.`, lede: "Your seat went to the next person in line. You’re back on the waitlist, and we’ll text you when another seat opens.", up: false, popupCta: "Got it" }
+        : state.kind === "listed"
+          ? {
+              title: "You’re in line.",
+              lede: `Your seat isn’t open yet. We’ll text you when it is, and you’ll have ${CLAIM_HOURS} hours to claim it.`,
+              since: state.since ? `On the list since ${new Date(state.since).toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : undefined,
+              up: false,
+              popupCta: "Got it",
+            }
+          : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
   return (
     <>
-    {bar}
-    <Up state={state.kind} act={act}>
-      {state.kind === "out" ? (
-        <>
-          <h1 className="cs-up-h">You’re up.</h1>
-          <p className="cs-lede">A Tapin Plus seat just opened for you. Sign in with the number you joined the waitlist with to claim&nbsp;it.</p>
-          <button
-            type="button"
-            className="mv-cta mv-cta-dark"
-            onClick={signIn}
-          >
-            Sign in to claim
-          </button>
-          <p className="cs-fine">You have {CLAIM_HOURS} hours. After that, the seat goes to the next person in line and you go back on the&nbsp;waitlist.</p>
-        </>
-      ) : state.kind === "ended" ? (
-        <>
-          <h1 className="cs-up-h">Your {CLAIM_HOURS} hours ran out.</h1>
-          <p className="cs-lede">Your seat went to the next person in line. You’re back on the waitlist, and we’ll text you when another seat&nbsp;opens.</p>
-        </>
-      ) : state.kind === "listed" ? (
-        <>
-          <h1 className="cs-up-h">You’re in line.</h1>
-          <p className="cs-lede">Your seat isn’t open yet. We’ll text you when it is, and you’ll have {CLAIM_HOURS} hours to claim&nbsp;it.</p>
-          {/* When they joined, from their own account (model/waitlist.ts). */}
-          {state.since ? (
-            <p className="cs-since tnum">
-              <i aria-hidden="true" />
-              On the list since {new Date(state.since).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
-            </p>
-          ) : null}
-        </>
-      ) : (
-        <>
-          <h1 className="cs-up-h">You’re not in line yet.</h1>
-          <p className="cs-lede">Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat&nbsp;opens.</p>
-          <Link className="mv-cta mv-cta-dark" to="/" onClick={() => track("plus_claim_to_waitlist")}>
-            Join the waitlist
-          </Link>
-        </>
-      )}
-    </Up>
+      {bar}
+      <Split copy={copy} />
     </>
   );
 }

@@ -882,14 +882,15 @@
     max-width: 320px;
   }
 }
-/* A phone: the panel first, then the rest, one column. */
+/* A phone, every state of /claim (23 Nov 2026): the panel first, then the
+   rest, one column. */
 @media (max-width: 1023.98px) {
-  .cs-claimed .sp {
+  .cs-split .sp {
     display: block;
     min-height: 0;
   }
-  .cs-claimed .sp-left,
-  .cs-pv ~ .cs-claimed .sp-left {
+  .cs-split .sp-left,
+  .cs-pv ~ .cs.cs-split .sp-left {
     position: static;
     top: auto;
     height: auto;
@@ -898,34 +899,116 @@
     gap: 26px;
     padding: calc(env(safe-area-inset-top) + 20px) 20px 36px;
   }
-  .cs-claimed .sp-brand {
+  .cs-split .sp-left:empty {
+    min-height: 100svh;
+  }
+  .cs-split .sp-brand {
     font-size: 16px;
   }
-  .cs-claimed .sp-brand .sp-mark {
+  .cs-split .sp-brand .sp-mark {
     width: 30px;
     height: 30px;
+  }
+  .cs-split .sp-mid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
   .cl-stage .mv-pass {
     max-width: none;
   }
-  .cs-claimed .sp-h {
+  .cs-split .sp-h {
     font-size: 40px;
     line-height: 44px;
   }
-  .cs-claimed .sp-lede {
+  .cs-split .sp-lede {
+    max-width: none;
     font-size: 17px;
     line-height: 24px;
   }
-  .cs-claimed .sp-right {
+  .cs-split .sp-txt {
+    gap: 16px;
+    max-width: 560px;
+  }
+  .cs-split .sp-cta {
+    justify-self: stretch;
+    width: 100%;
+  }
+  .cs-split .sp-right {
     gap: 44px;
     padding: 36px 20px 32px;
   }
-  .cs-claimed .sp-h2 {
+  .cs-split .sp-h2 {
     font-size: 30px;
     line-height: 34px;
   }
-  .cs-claimed .spg .spg-card {
+  .cs-split .spg .spg-card {
     height: 160px;
+  }
+  .cs-split .sp-again {
+    width: 100%;
+  }
+  /* An open seat: room under the questions for the dock. */
+  .cs-docks .sp-right {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 112px);
+  }
+}
+/* The line across the phone's panel: seats either side of yours, running
+   to the panel's edges and fading there. */
+.spv.spv-x {
+  height: 132px;
+  margin: 0 -20px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+}
+.spv-x .spv-line {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 34px;
+  transform: none;
+  flex-direction: row;
+  padding: 0 4px;
+}
+.spv-x .spv-line i {
+  width: 14px;
+  height: 14px;
+}
+.spv-x .spv-me {
+  top: auto;
+  bottom: 41px;
+}
+.spv-x .spv-dot {
+  left: -28px;
+  top: -28px;
+  width: 56px;
+  height: 56px;
+}
+.spv-x .spv-dot::after {
+  width: 17px;
+  height: 17px;
+}
+.spv-x .spv-up svg {
+  width: 26px;
+  height: 26px;
+}
+.spv-x .spv-tag {
+  top: -38px;
+}
+/* The dock rises once the panel's button has scrolled away. */
+.sp-dock {
+  transform: translateY(110%);
+  visibility: hidden;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.32s;
+}
+.sp-dock[data-on] {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-dock,
+  .sp-dock[data-on] {
+    transition: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
