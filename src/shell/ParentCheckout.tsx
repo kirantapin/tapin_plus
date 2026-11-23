@@ -29,6 +29,7 @@ import { clearGiftDraft, getGiftDraft, setGiftDraft, useGiftDraft } from "../mod
 import { dropResume, keepFields, keptFields, keptQuick, keptStep, type ResumeStep } from "../model/checkoutResume";
 import { DEFAULT_NOTE, SCENE_ORDER, giftWho } from "../model/gift";
 import { refreshPlusPrice, usePlusPrice } from "../model/plus";
+import { ONE_MONTH_CENTS, ONE_MONTH_LIVE, oneMonthShown, setGiftTerm, useGiftTerm } from "../model/giftTerm";
 import { GIFT_TEXTS_RATE, chooseTextsRate, setTextsConsent, textsRateChosen, textsRateOn } from "../model/textsRate";
 import { TextsRateBox } from "./TextsRateBox";
 import { ResumeContext, ResumeLine } from "./ResumeLine";
@@ -315,6 +316,14 @@ function Sheet({
      closed. */
   const paying = useRef(false);
   const price = usePlusPrice();
+  /* Every month or just one (model/giftTerm.ts): the choice only where it's
+     on (live, or ?gterm=1). Until the backend has one-month gifts, one can't
+     go out (it would be sent as a monthly one): no wallet, no send. */
+  const offerOnce = oneMonthShown();
+  const term = useGiftTerm();
+  const once = offerOnce && term === "once";
+  const onceHeld = once && !ONE_MONTH_LIVE;
+  const walletPay = walletsShown && !onceHeld;
 
   const layer = useRef<HTMLDivElement | null>(null);
   const scrim = useRef<HTMLDivElement | null>(null);
@@ -817,6 +826,7 @@ function Sheet({
      to show. */
   const photoPath = useRef<string | null>(null);
   const sendGift = async () => {
+    if (onceHeld) throw new Error("A one-month gift can’t be sent yet.");
     const s = saved;
     if (!s) throw new Error("Something went wrong. Please try again.");
     const { data } = await supabase.auth.getSession();
@@ -840,6 +850,7 @@ function Sheet({
         recipientPhone: s.phone,
         recipientFirstName: s.who,
         metadata,
+        oneMonth: once,
       }),
     );
   };
@@ -851,6 +862,8 @@ function Sheet({
   /* Who it went to, kept as the charge cleared (a resumed payment's fields
      are empty). The student's number is only known when the parent typed it:
      an ask link's is masked. */
+  /* Whether what went out was one month (the done step's promise). */
+  const [sentOnce, setSentOnce] = useState(false);
   const [sentTo, setSentTo] = useState<{ who: string; masked: string; phone: string } | null>(null);
   const finished = useRef(false);
   const onSent = (res: { giftId: string; expiresAt: string }) => {
@@ -861,7 +874,8 @@ function Sheet({
     const to = { who: s?.who ?? who, masked: s?.masked ?? masked, phone: s?.phone ?? (toE164(phoneD) as string) };
     saved = null;
     photoPath.current = null;
-    track("parent_gift_sent", { source, gift_id: res.giftId, value: first / 100, currency: "USD" });
+    track("parent_gift_sent", { source, gift_id: res.giftId, value: first / 100, currency: "USD", term: once ? "once" : "monthly" });
+    setSentOnce(once);
     finished.current = true;
     /* The preview measures the drawer before it moves, so first. */
     tickAt.current = host ? host.sent({ who: cap(to.who), texted: true }) : null;
@@ -884,12 +898,14 @@ function Sheet({
   const masked = saved?.masked ?? maskDigits(phoneD);
   /* What the claim will charge first: the cart's own total once it's built,
      the page's price before. */
-  const first = (saved?.cart ?? cart)?.dueTodayCents ?? cents(price?.first);
+  const subFirst = (saved?.cart ?? cart)?.dueTodayCents ?? cents(price?.first);
   /* A for-life price (the launch sale, routes/parents_kit.ts): every month
      is the first month's, so there's no "then". The cart's own term once
      it's built, the page's before. */
   const life = ((saved?.cart ?? cart)?.discountDuration ?? price?.firstFor ?? null) === "forever";
-  const monthly = life ? first : cents(price?.monthly);
+  const monthly = life ? subFirst : cents(price?.monthly);
+  /* What this gift charges first: one month's price when that's the pick. */
+  const first = once ? ONE_MONTH_CENTS : subFirst;
 
   /* No "save card" (Sam, 9 Nov 2026: "its $3.99 today, not when they
      claim it"). */
@@ -1029,7 +1045,7 @@ function Sheet({
 
   /* What's due, and the promise: on the card step above the card, and on
      who it's for under the wallets' step (Effort E), where a wallet pays. */
-  const rows = (
+  const termRows = (
     <div className={flat ? "prc-e-rows" : "prc-module prc-rows"} data-ph-show="">
       {life ? (
         <div className="prc-row">
@@ -1050,6 +1066,30 @@ function Sheet({
       )}
     </div>
   );
+  /* With the one-month choice on, the two ways to give it are the rows: each
+     its price and what happens after. Fixed once the card is saved. */
+  const rows = offerOnce ? (
+    <div className={flat ? "prc-term prc-term-flat" : "prc-module prc-term"} role="radiogroup" aria-label="How long to give Plus" data-ph-show="">
+      <TermOption
+        on={!once}
+        disabled={cardSaved || busy}
+        onPick={() => setGiftTerm("monthly")}
+        title="Every month"
+        price={usd(subFirst)}
+        note={life ? "A month, the same for life. Cancel anytime." : `The first month, then ${usd(monthly)} a month. Cancel anytime.`}
+      />
+      <TermOption
+        on={once}
+        disabled={cardSaved || busy}
+        onPick={() => setGiftTerm("once")}
+        title="Just one month"
+        price={usd(ONE_MONTH_CENTS)}
+        note="One month, charged once. It doesn’t renew."
+      />
+    </div>
+  ) : (
+    termRows
+  );
   /* The promise, right above the button (Sam, 7 Nov 2026: "go for it"):
      what a hesitating parent needs at it. A gift nobody claims costs
      nothing; cancelling is by support until the account page does it. */
@@ -1063,9 +1103,15 @@ function Sheet({
       </li>
       <li>
         <Glyph d={GLYPHS.bell} />
-        <span>
-          <b>A text before every bill.</b> Cancel right from it.
-        </span>
+        {once ? (
+          <span>
+            <b>No subscription.</b> It ends on its own after a month.
+          </span>
+        ) : (
+          <span>
+            <b>A text before every bill.</b> Cancel right from it.
+          </span>
+        )}
       </li>
     </ul>
   );
@@ -1211,7 +1257,7 @@ function Sheet({
             {studentConsent || walletsShown ? (
               <div className="prc-e-legal">
                 {studentConsent}
-                {walletsShown ? <Terms first={first} monthly={monthly} /> : null}
+                {walletsShown ? <Terms first={first} monthly={monthly} once={once} /> : null}
               </div>
             ) : null}
             {errorLine(formError)}
@@ -1220,7 +1266,7 @@ function Sheet({
             {/* Sticky, right above the wallets and the back arrow (Sam, 8 Nov
                 2026: "the pay by card instead be sticky, right above the
                 google pay and the back arrow"). */}
-            {walletsShown ? (
+            {walletPay ? (
               <button type="button" className="prc-e-bycard prc-e-bycard-foot" data-ph-show="" onClick={() => void submit()} disabled={busy}>
                 Use a card instead
               </button>
@@ -1232,12 +1278,12 @@ function Sheet({
             <div className="prc-e-footmain" data-ph-show="">
               {/* The wallets only once signed in: a wallet's sheet can't sign
                   the parent in. */}
-              {signedIn ? (
+              {signedIn && !onceHeld ? (
                 <Elements stripe={getStripe()} options={WALLET_ELEMENTS}>
-                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} cents={first} monthlyCents={monthly} />
+                  <LiveWallets state={wallets} ready={!firstBad()} onState={setWallets} onClick={walletReady} onConfirm={payByWallet} cents={first} monthlyCents={monthly} once={once} />
                 </Elements>
               ) : null}
-              {walletsShown ? null : (
+              {walletPay ? null : (
                 <button type="submit" className={cta} data-island-cta="" disabled={busy}>
                   {busy
                     ? "One moment…"
@@ -1261,7 +1307,7 @@ function Sheet({
        2026: "wouldn't we want a back button here?"), with everything kept;
        once the card is saved there's no going back. A card saved earlier
        (a wallet's, or a reopen) only needs the gift sent. */
-    const pay = { paying, onBusy: setBusy, send: sendGift, onDone: close, label: payLabel, frame, rows, promise, onBack: () => toStep("who"), backDisabled: cardSaved || busy, first, monthly, startError: payError };
+    const pay = { paying, onBusy: setBusy, send: sendGift, onDone: close, label: payLabel, frame, rows, promise, onBack: () => toStep("who"), backDisabled: cardSaved || busy, first, monthly, once, held: onceHeld ? "Preview only: a one-month gift can’t be sent yet. Pick Every month to send one." : null, startError: payError };
     view =
       clientSecret && cart ? (
         <Elements stripe={getStripe()} options={{ clientSecret, appearance: APPEARANCE, fonts: FONTS }}>
@@ -1326,9 +1372,15 @@ function Sheet({
       <ul className="prc-promise prc-done-promise" aria-label="Our promise">
         <li>
           <Glyph d={GLYPHS.mail} />
-          <span>
-            <b>Cancel anytime</b>, right from the text we send before every bill, or by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
-          </span>
+          {sentOnce ? (
+            <span>
+              <b>Nothing to cancel.</b> Their Plus ends on its own a month after they claim it.
+            </span>
+          ) : (
+            <span>
+              <b>Cancel anytime</b>, right from the text we send before every bill, or by emailing <a href="mailto:support@tapin.app">support@tapin.app</a>
+            </span>
+          )}
         </li>
         <li className="prc-done-how-row">
           <Link className="prc-done-how" to="/parents/account">
@@ -1584,13 +1636,17 @@ function Legal() {
 
 /* ── The terms, right by the button that charges ─────────────────────────── */
 
-function Terms({ first, monthly }: { first: number; monthly: number }) {
+function Terms({ first, monthly, once = false }: { first: number; monthly: number; once?: boolean }) {
   const flat = useContext(FlatLook);
   return (
     <p className={flat ? "prc-fine prc-e-terms tnum" : "prc-terms tnum"} data-ph-show="">
       {/* Short: the promise above the button carries cancelling (Sam, 7 Nov
           2026); this keeps the price, the renewal and the links. */}
-      {first === monthly ? `${usd(first)} a month until you cancel. ` : `${usd(first)} the first month, then ${usd(monthly)}/month until you cancel. `}
+      {once
+        ? `${usd(first)} once, for one month of Plus. It doesn’t renew. `
+        : first === monthly
+          ? `${usd(first)} a month until you cancel. `
+          : `${usd(first)} the first month, then ${usd(monthly)}/month until you cancel. `}
       <Legal />
     </p>
   );
@@ -1645,6 +1701,11 @@ type PayProps = {
   /** What the claim charges first, and monthly after. */
   first: number;
   monthly: number;
+  /** Just one month (model/giftTerm.ts). */
+  once: boolean;
+  /** Why it can't be sent yet (a one-month gift before the backend has
+   *  them), shown in place of sending. */
+  held: string | null;
   /** Why the gift wasn't sent last time, if a wallet saved the card. */
   startError: string | null;
   /** Lays the body and the foot out for where the sheet is. */
@@ -1717,7 +1778,9 @@ const WALLET_ELEMENTS: StripeElementsOptions = {
    Pay its recurring-payment request, so the sheet itself says what the claim
    charges and that it renews monthly. Google Pay's sheet has no recurring
    field; the step's own rows say it. */
-function walletSheet(cents: number, monthlyCents: number): ClickResolveDetails {
+function walletSheet(cents: number, monthlyCents: number, once = false): ClickResolveDetails {
+  /* Just one month: nothing recurring for Apple's sheet to describe. */
+  if (once) return {};
   const start = new Date();
   const next = nextBillingDate({ interval: "month", interval_count: 1 } as Parameters<typeof nextBillingDate>[0], start);
   /* A for-life price is the same every month: one regular billing from
@@ -1761,6 +1824,7 @@ function LiveWallets({
   onConfirm,
   cents,
   monthlyCents,
+  once = false,
 }: {
   state: "pending" | "shown" | "none";
   /** The step's fields are all filled: the buttons at full strength. */
@@ -1772,6 +1836,8 @@ function LiveWallets({
   /** Today's charge and the monthly one after it, for the wallet's sheet. */
   cents: number;
   monthlyCents: number;
+  /** Just one month: the sheet shows no renewal. */
+  once?: boolean;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -1795,7 +1861,7 @@ function LiveWallets({
         options={WALLET_OPTIONS}
         onReady={({ availablePaymentMethods: m }) => onState(m && (m.applePay || m.googlePay) ? "shown" : "none")}
         onLoadError={() => onState("none")}
-        onClick={(e) => (onClick() ? e.resolve(walletSheet(cents, monthlyCents)) : e.reject())}
+        onClick={(e) => (onClick() ? e.resolve(walletSheet(cents, monthlyCents, once)) : e.reject())}
         onConfirm={(e) => onConfirm(e, stripe, elements)}
       />
     </div>
@@ -1812,6 +1878,8 @@ function StripePay({
   label,
   first,
   monthly,
+  once,
+  held,
   startError,
   frame,
   rows,
@@ -1875,10 +1943,10 @@ function StripePay({
       {!ready && !error && !isSaved.current ? <div className="prc-pay-wait" aria-busy="true" /> : null}
     </div>
   );
-  const terms = <Terms first={first} monthly={monthly} />;
-  const errorLine = error ? (
+  const terms = <Terms first={first} monthly={monthly} once={once} />;
+  const errorLine = error || held ? (
     <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
-      {error}
+      {error ?? held}
     </p>
   ) : null;
   return (
@@ -1902,7 +1970,7 @@ function StripePay({
         </>,
         <PayFoot
           busy={busy}
-          disabled={busy || (!isSaved.current && (!ready || !stripe))}
+          disabled={busy || !!held || (!isSaved.current && (!ready || !stripe))}
           label={busy ? "Sending…" : isSaved.current ? "Finish" : label}
           onPay={() => void confirm()}
           onBack={onBack}
@@ -1915,7 +1983,7 @@ function StripePay({
 
 /* A card saved earlier (a wallet's whose gift didn't send, or a reopen):
    only the gift is left to send. */
-function SendOnly({ paying, onBusy, send, first, monthly, startError, frame, rows, promise, onBack }: PayProps) {
+function SendOnly({ paying, onBusy, send, first, monthly, once, held, startError, frame, rows, promise, onBack }: PayProps) {
   const flat = useContext(FlatLook);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(startError);
@@ -1939,15 +2007,15 @@ function SendOnly({ paying, onBusy, send, first, monthly, startError, frame, row
   return frame(
     <>
       {rows}
-      <Terms first={first} monthly={monthly} />
+      <Terms first={first} monthly={monthly} once={once} />
       {promise}
-      {error ? (
+      {error || held ? (
         <p className={flat ? "gft-pp-error" : "prc-error"} role="alert">
-          {error}
+          {error ?? held}
         </p>
       ) : null}
     </>,
-    <PayFoot busy={busy} disabled={busy} label={busy ? "Sending…" : "Finish"} onPay={() => void finish()} onBack={onBack} backDisabled />,
+    <PayFoot busy={busy} disabled={busy || !!held} label={busy ? "Sending…" : "Finish"} onPay={() => void finish()} onBack={onBack} backDisabled />,
   );
 }
 
@@ -1986,5 +2054,19 @@ function RingTick({ at }: { at: number | null }) {
         <path ref={path} d="m6.5 12.5 3.6 3.6 7.4-7.6" pathLength={20} strokeDasharray={20} fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </span>
+  );
+}
+
+/* ── Every month, or just one (model/giftTerm.ts) ─────────────────────────── */
+function TermOption({ on, disabled, onPick, title, price, note }: { on: boolean; disabled: boolean; onPick: () => void; title: string; price: string; note: string }) {
+  return (
+    <button type="button" role="radio" aria-checked={on} className="prc-term-opt" data-on={on ? "" : undefined} disabled={disabled} onClick={onPick}>
+      <i className="prc-term-dot" aria-hidden="true" />
+      <span className="prc-term-txt">
+        <b>{title}</b>
+        <small>{note}</small>
+      </span>
+      <b className="prc-term-price tnum">{price}</b>
+    </button>
   );
 }
