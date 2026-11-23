@@ -1479,3 +1479,78 @@ fieldset.prc-module {
   order: 2;
   flex: 1 0 100%;
 }
+
+/* ── Every month, or just one (Sam, 23 Nov 2026; model/giftTerm.ts) ──────────
+   The two ways to give Plus as the price rows: each a row to tap, its price
+   on the right, the picked one ringed in ink. */
+.prc-term {
+  display: grid;
+  gap: 8px;
+}
+/* On the sheet's grey ground the options are the white modules themselves. */
+.prc-module.prc-term {
+  gap: 8px;
+  padding: 0;
+  background: none;
+}
+.prc-term-opt {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1.5px var(--hair, rgba(20, 22, 24, 0.12));
+  color: var(--ink, #141618);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.16s ease-out;
+}
+.prc-term-flat .prc-term-opt {
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.12);
+}
+.prc-term-opt[data-on] {
+  box-shadow: inset 0 0 0 2px var(--ink, #141618);
+}
+.prc-term-opt:disabled {
+  cursor: default;
+}
+.prc-term-opt:disabled:not([data-on]) {
+  opacity: 0.5;
+}
+.prc-term-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(20, 22, 24, 0.3);
+  transition: box-shadow 0.16s ease-out;
+}
+.prc-term-opt[data-on] .prc-term-dot {
+  box-shadow: inset 0 0 0 6px var(--ink, #141618);
+}
+.prc-term-txt {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.prc-term-txt b {
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+}
+.prc-term-txt small {
+  font: 500 13.5px/18px "Gilroy", Arial, sans-serif;
+  color: var(--muted, rgba(20, 22, 24, 0.62));
+}
+.prc-term-price {
+  font: 600 16px/21px "Gilroy", Arial, sans-serif;
+  text-align: right;
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-term-opt,
+  .prc-term-dot {
+    transition: none;
+  }
+}

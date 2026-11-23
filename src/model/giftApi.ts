@@ -91,6 +91,9 @@ export async function createGift(input: {
   recipientPhone: string;
   recipientFirstName: string;
   metadata: GiftMetadata;
+  /** Just one month (model/giftTerm.ts): the claim ends it after the month.
+   *  Sent only once the backend has it (ONE_MONTH_LIVE). */
+  oneMonth?: boolean;
 }): Promise<{ giftId: string; expiresAt: string }> {
   const { cart } = input;
   const { data, error } = await supabase.functions.invoke("create_gift", {
@@ -105,6 +108,7 @@ export async function createGift(input: {
       recipient_phone: input.recipientPhone,
       recipient_first_name: input.recipientFirstName,
       metadata: input.metadata,
+      ...(input.oneMonth ? { one_month: true } : {}),
     },
   });
   if (error || !data?.gift_id) {
