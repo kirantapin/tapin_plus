@@ -189,10 +189,11 @@ export function DeskReels({ note }: { note: string }) {
 
 /** The line standing up, for the dark panel: seats above and below yours,
  *  the green wave running down them, your dot breathing as it passes. */
-export function DeskSonarV({ up = false }: { up?: boolean }) {
-  const seats = 15;
+export function DeskSonarV({ up = false, across = false }: { up?: boolean; across?: boolean }) {
+  /* On a phone the line runs across the panel above the words instead. */
+  const seats = across ? 13 : 15;
   return (
-    <div className="spv" aria-hidden="true">
+    <div className={across ? "spv spv-x" : "spv"} aria-hidden="true">
       <div className="spv-line">
         {Array.from({ length: seats }, (_, i) => (
           <i key={i} className={i === Math.floor(seats / 2) ? "spv-gap" : undefined} style={{ animationDelay: `${(i * 0.12).toFixed(2)}s` }} />
