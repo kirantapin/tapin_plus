@@ -952,6 +952,24 @@
     padding-bottom: calc(env(safe-area-inset-bottom) + 112px);
   }
 }
+/* /in in the Split (24 Nov 2026): who's signed in, on the dark panel. */
+.sp-acct {
+  justify-content: flex-start;
+  gap: 16px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+.sp-acct button {
+  color: #ffffff;
+}
+/* No line beside the words on /in: the words take the panel. */
+.mv-split .sp-mid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.sp-acct button:focus-visible {
+  outline: 3px solid var(--cs-live);
+  outline-offset: 3px;
+}
 /* The line across the phone's panel: seats either side of yours, running
    to the panel's edges and fading there. */
 .spv.spv-x {

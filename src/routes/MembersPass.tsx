@@ -7,7 +7,6 @@ import { AppQr, AppleGlyph, appHref, device } from "../shell/GetTheApp";
 import { CREDIT, PERCENT, PLACES } from "./parents_kit";
 import { plusPageBack } from "../model/backTo";
 import { refundAnswer } from "../model/refundWords";
-import { openPlusSignIn } from "../shell/PlusCheckout";
 
 /* ══ THE MEMBER'S PAGE: THE PASS (Sam, 17 Nov 2026, picked A of five:
    "this one") ══════════════════════════════════════════════════════════════
@@ -20,7 +19,9 @@ import { openPlusSignIn } from "../shell/PlusCheckout";
    everything; the Promise, a person to email, the terms. On a computer the
    card holds the left side and the rest reads beside it.
    The other four takes (Spots, One thing, Home, Start here) were previews
-   and went with the pick. Styles: styles/members-v.css. */
+   and went with the pick. Since 24 Nov 2026 /in itself is the Split
+   (routes/MembersSplit.tsx); this file keeps the pieces it, /claim and the
+   parents' account share. */
 
 const COLLAGE = asset("/collage/blacksburg.webp");
 const PAPER_MARK = asset("/brand/plus-paper-mark.svg");
@@ -220,95 +221,4 @@ export function Pass({ active, who, whoLabel }: { active: boolean; who?: string;
       </div>
     </section>
   );
-}
-
-function VersionA({ four, onMail }: { four: string | null; onMail: () => void }) {
-  return (
-    <Shell>
-      <div className="mv-a-top">
-        <Back />
-      </div>
-      <div className="mv-a-grid">
-        <div className="mv-a-left">
-          <Pass active who={four ? `••• ${four}` : "Signed in"} whoLabel="Member" />
-          <Account four={four} className="mv-a-acct" />
-        </div>
-        <div className="mv-a-right">
-          <h1 className="mv-a-h">You’re a Plus member</h1>
-          <p className="mv-a-lede">Your credit, {PERCENT}% off and points live in the Tapin app. Sign in there with the number you joined with.</p>
-          <GetApp where="members_pass" />
-          <h2 className="mv-h2">Every month with Plus</h2>
-          <Benefits />
-          <Logos />
-          <Foot onMail={onMail} />
-        </div>
-      </div>
-    </Shell>
-  );
-}
-
-/* ══ /in FOR EVERYONE ELSE (Sam, 17 Nov 2026: "the signed out version of
-   this would look more like the signed in version") ══════════════════════
-   The pass's page for someone who isn't (or isn't yet shown as) a member:
-   the same card without Active or a number, and beside it Your account and
-   the one thing to do. Signed out, that's signing in with the number they
-   joined with; signed in and not a member, who's signed in and that early
-   access is on file. Then the app, what Plus gets every month, the foot. */
-export function MembersGuest() {
-  const { userSession, subscribed } = useAuth();
-  const four = useFour();
-  const { track } = useEventTracking();
-  const signedIn = !!userSession;
-  const loading = userSession === undefined || (signedIn && subscribed === null);
-  return (
-    <Shell>
-      <div className="mv-a-top">
-        <Back />
-      </div>
-      <div className="mv-a-grid">
-        <div className="mv-a-left">
-          <Pass active={false} who={signedIn ? (four ? `••• ${four}` : "Signed in") : undefined} whoLabel="Signed in" />
-          {signedIn ? <Account four={four} className="mv-a-acct" /> : null}
-        </div>
-        <div className="mv-a-right">
-          <h1 className="mv-a-h">Your account</h1>
-          {signedIn ? (
-            loading ? null : (
-              <p className="mv-a-lede">Joined early access? You’re on file. For anything about your plan, your credit or a refund, email us below.</p>
-            )
-          ) : (
-            <>
-              <p className="mv-a-lede">Sign in with the mobile number you joined with.</p>
-              {loading ? null : (
-                <button
-                  type="button"
-                  className="mv-cta mv-cta-dark mv-signin"
-                  onClick={() => {
-                    track("members_signin");
-                    openPlusSignIn("members");
-                  }}
-                >
-                  Sign in with your mobile
-                </button>
-              )}
-            </>
-          )}
-          <h2 className="mv-h2">In the Tapin app</h2>
-          {/* The QR as on the member's page; on a phone a light button,
-              so the sign-in stays the one dark one. */}
-          <GetApp where="members_guest" tone={device() === "desktop" ? "dark" : "light"} />
-          <h2 className="mv-h2">Every month with Plus</h2>
-          <Benefits />
-          <Logos />
-          <Foot onMail={() => track("members_email")} />
-        </div>
-      </div>
-    </Shell>
-  );
-}
-
-export function MembersPass() {
-  const four = useFour();
-  const { track } = useEventTracking();
-  return <VersionA four={four} onMail={() => track("members_email")} />;
 }
