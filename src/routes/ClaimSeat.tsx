@@ -72,7 +72,7 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
 }
 
 /** The page's ground and title, as the members' pages set them. */
-function Page({ title, className, children }: { title: string; className: string; children: ReactNode }) {
+export function Page({ title, className, children }: { title: string; className: string; children: ReactNode }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.surface = "tpa";
@@ -249,7 +249,7 @@ function Value({ desk = false }: { desk?: boolean }) {
 }
 
 /** The questions, the main page's with the claim's first. */
-function Questions({ member = false }: { member?: boolean } = {}) {
+export function Questions({ member = false }: { member?: boolean } = {}) {
   const { price } = usePlusPriceLoad();
   const monthly = usd(price?.monthly);
   const faq = [
@@ -399,6 +399,51 @@ const FIRST_STEPS = [
   { h: "Your $5 comes off", p: "At each Plus spot, every month. On other orders, 15% off once a day." },
 ];
 
+/** A member's right side, on the claimed moment and on /in: three steps to
+ *  the first $5, the places, what's theirs every month, the questions. */
+export function MemberRight({ onMail }: { onMail: () => void }) {
+  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
+  return (
+    <>
+      <main className="sp-right">
+        <section className="sp-sec" aria-labelledby="cl-start">
+          <span className="sp-kick">Start here</span>
+          <h2 id="cl-start" className="sp-h2">
+            Your first $5, in three steps
+          </h2>
+          <ol className="cl-steps">
+            {FIRST_STEPS.map((s) => (
+              <li key={s.h}>
+                <b>{s.h}</b>
+                <span>{s.p}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section className="sp-sec" aria-labelledby="cl-places">
+          <span className="sp-kick">8 Blacksburg spots</span>
+          <h2 id="cl-places" className="sp-h2">
+            Where your membership works
+          </h2>
+          <DeskGrid onOpen={setPlaceOpen} />
+        </section>
+        <section className="sp-sec" aria-labelledby="cl-month">
+          <span className="sp-kick">Every month</span>
+          <h2 id="cl-month" className="sp-h2">
+            What’s yours now
+          </h2>
+          <Benefits className="cl-ben" />
+        </section>
+        <Questions member />
+        <div className="mv cs-foot">
+          <Foot onMail={onMail} />
+        </div>
+      </main>
+      {placeOpen ? <PlacePopup place={placeOpen} cta="Got it" onClose={() => setPlaceOpen(null)} onJoin={() => setPlaceOpen(null)} /> : null}
+    </>
+  );
+}
+
 function Claimed({ preview }: { preview: boolean }) {
   const four = useFour();
   const { userSession } = useAuth();
@@ -408,7 +453,6 @@ function Claimed({ preview }: { preview: boolean }) {
   const wide = useMedia("(min-width: 1280px)");
   const root = useRef<HTMLDivElement | null>(null);
   const [round, setRound] = useState(0);
-  const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const uid = userSession?.user?.id;
   useLayoutEffect(() => {
     const el = root.current;
@@ -474,42 +518,8 @@ function Claimed({ preview }: { preview: boolean }) {
           </div>
           {desk ? <p className="sp-hint">Scroll for how to use it</p> : null}
         </aside>
-        <main className="sp-right">
-          <section className="sp-sec" aria-labelledby="cl-start">
-            <span className="sp-kick">Start here</span>
-            <h2 id="cl-start" className="sp-h2">
-              Your first $5, in three steps
-            </h2>
-            <ol className="cl-steps">
-              {FIRST_STEPS.map((s) => (
-                <li key={s.h}>
-                  <b>{s.h}</b>
-                  <span>{s.p}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
-          <section className="sp-sec" aria-labelledby="cl-places">
-            <span className="sp-kick">8 Blacksburg spots</span>
-            <h2 id="cl-places" className="sp-h2">
-              Where your membership works
-            </h2>
-            <DeskGrid onOpen={setPlaceOpen} />
-          </section>
-          <section className="sp-sec" aria-labelledby="cl-month">
-            <span className="sp-kick">Every month</span>
-            <h2 id="cl-month" className="sp-h2">
-              What’s yours now
-            </h2>
-            <Benefits className="cl-ben" />
-          </section>
-          <Questions member />
-          <div className="mv cs-foot">
-            <Foot onMail={() => track("plus_claim_email")} />
-          </div>
-        </main>
+        <MemberRight onMail={() => track("plus_claim_email")} />
       </div>
-      {placeOpen ? <PlacePopup place={placeOpen} cta="Got it" onClose={() => setPlaceOpen(null)} onJoin={() => setPlaceOpen(null)} /> : null}
     </Page>
   );
 }

@@ -4,7 +4,7 @@ import { AccountCard, AccountFrame, AppPanel, InfoPanel } from "../shell/Account
 import { openPlusSignIn } from "../shell/PlusCheckout";
 import { plusPageBack } from "../model/backTo";
 import { refundAnswer } from "../model/refundWords";
-import { MembersGuest, MembersPass } from "./MembersPass";
+import { GuestSplit, MemberSplit } from "./MembersSplit";
 
 /* ══ THE STUDENTS' ACCOUNT (/in) ════════════════════════════════════════════
    Was the presale's receipt, then "Members" in the home page's band and
@@ -37,13 +37,13 @@ export default function Members() {
   /* A signed-in member sees their status; ?member previews it, local dev only. */
   const member = subscribed === true || (import.meta.env.DEV && typeof window !== "undefined" && new URLSearchParams(window.location.search).has("member"));
   const signedIn = !!userSession;
-  /* A member's page is the pass (Sam, 17 Nov 2026, A of five: "this one");
-     signed out or not a member, the account frame below as before. */
-  if (member) return <MembersPass />;
+  /* A member's page is the pass (Sam, 17 Nov 2026, A of five: "this one"),
+     in /claim's Split since 24 Nov 2026 (routes/MembersSplit.tsx). */
+  if (member) return <MemberSplit />;
   /* Everyone else gets the pass's page too (Sam, 17 Nov 2026: "the signed
      out version of this would look more like the signed in version"). The
      account frame below is kept for MEMBERS_FRAME = true. */
-  if (!MEMBERS_FRAME) return <MembersGuest />;
+  if (!MEMBERS_FRAME) return <GuestSplit />;
 
   const rows = [
     {
