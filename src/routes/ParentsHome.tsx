@@ -14,7 +14,8 @@ import { asset } from "../asset";
 import { useEventTracking } from "../context/event_tracking_context";
 import { captureUtm } from "../model/parents";
 import ParentCheckout, { hasSavedGiftCard, resumeStep } from "../shell/ParentCheckout";
-import { hydrateGiftDraft } from "../model/giftDraft";
+import { getGiftDraft, hydrateGiftDraft, setGiftDraft } from "../model/giftDraft";
+import { askedFor } from "../model/askParent";
 import { useDockPulse } from "../shell/dockPulse";
 import { DockArrow } from "../shell/DockArrow";
 import {
@@ -292,6 +293,13 @@ export default function ParentsHome() {
      (model/checkoutResume.ts): before anything draws, so the band and the
      builder open on their pick. */
   useState(hydrateGiftDraft);
+  /* Sent by their student from /ask (model/askParent.ts): the bar says who
+     asked, and the gift starts on their name unless one's already typed. */
+  const [askedBy] = useState(() => {
+    const name = askedFor();
+    if (name && !getGiftDraft().to.trim()) setGiftDraft({ to: name });
+    return name;
+  });
   const [hero] = useState(parentHero);
   const [photo] = useState(heroPhoto);
   const [chips] = useState(headerChips);
@@ -596,6 +604,13 @@ export default function ParentsHome() {
           page (Sam, 9 Nov 2026: "for parents, I think we can have the 500
           credit be an announcement banner like on the main, instead of on
           this hero container - for desktop and mobile"). */}
+      {askedBy ? (
+        <aside className="tpa-wbar tpa-pbar tpp-asked" aria-label="Who asked">
+          <i className="tpa-pbar-dot" aria-hidden="true" />
+          <span>{askedBy} asked for Tapin Plus this holiday season 🎁</span>
+        </aside>
+      ) : null}
+{askedBy ? null : (
       <aside className="tpa-wbar tpa-pbar" aria-label="Tapin Plus students">
         <i className="tpa-pbar-dot" aria-hidden="true" />
         {/* The short line on a phone (Sam, 9 Nov 2026: "this looks a bit
@@ -603,6 +618,7 @@ export default function ParentsHome() {
         <span className="tpa-pbar-long">{PROOF_STUDENTS}</span>
         <span className="tpa-pbar-short">{NAME_VT ? "500+ Virginia Tech students on Plus" : "500+ Blacksburg students on Plus"}</span>
       </aside>
+      )}
       <header
         className="tpa-band tpp-band tpu-band"
         data-hero="parents"

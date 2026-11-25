@@ -10,6 +10,7 @@ import { setPagePolicy } from "./model/pagePolicy";
 import { WAITLIST_SALE_ENDS, WAITLIST_SALE_POLICY, waitlistSaleOn } from "./model/claim";
 import Members from "./routes/Members";
 import ClaimSeat from "./routes/ClaimSeat";
+import AskParents from "./routes/AskParents";
 import ParentsHome from "./routes/ParentsHome";
 import { PARENTS_LAUNCH_ENDS, PARENTS_LAUNCH_POLICY } from "./routes/parents_kit";
 import ParentAccount from "./routes/ParentAccount";
@@ -120,6 +121,7 @@ export default function App() {
         <Route path="/in" element={<Members />} />
         {/* The texted link for an open waitlist seat (19 Nov 2026). */}
         <Route path="/claim" element={<ClaimPage />} />
+        <Route path="/ask" element={<AskParents />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
             gift, and their account, signed in. Outside the shell, in the
