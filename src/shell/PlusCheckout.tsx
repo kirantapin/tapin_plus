@@ -1179,6 +1179,10 @@ function Review({
         </p>
         <ul className="pck-sum-list tnum">
           <li>$25 to spend right after you join</li>
+          {/* Said before Pay (Sam, 25 Nov 2026: "at checkout they should see
+              that they'll get a link to download the app right after to start
+              using their benefits"); the paid screen says it was sent. */}
+          <li>The Tapin app link, texted right after, to start using your benefits</li>
           <li>
             {saving ? (
               <>
