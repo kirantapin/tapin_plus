@@ -3560,3 +3560,8 @@
 .tpa .tpu-terms-card .tpp-bf-line .tpa-clock {
   top: 0;
 }
+.tpp .bf-then {
+  margin: 0;
+  font: 500 14px/19px "Gilroy", Arial, sans-serif;
+  color: var(--muted, #5d6166);
+}

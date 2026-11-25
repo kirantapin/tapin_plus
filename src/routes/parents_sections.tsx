@@ -11,7 +11,7 @@ import { AppLink } from "../shell/GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { REFUND_LEAD, refundAnswer, refundIf, refundRule } from "../model/refundWords";
 import { useEndsAt, shortClock, spokenClock } from "../model/deadline";
-import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PARENTS_LAUNCH_ENDS, PARENTS_SALE_FROM, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PARENT_REGULAR, PARENTS_LAUNCH_ENDS, PARENTS_SALE_FROM, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -288,6 +288,7 @@ const two = (n: number) => String(n).padStart(2, "0");
  *  drains to the end. */
 export function BfcmClock() {
   const left = useBfcmLeft();
+  const { MONTHLY } = useParentPrice();
   if (!left) return null;
   const ms = ((left.days * 24 + left.hours) * 60 + left.minutes) * 60_000 + left.seconds * 1000;
   const share = Math.max(0, Math.min(1, ms / (PARENTS_LAUNCH_ENDS - PARENTS_SALE_FROM)));
@@ -311,6 +312,11 @@ export function BfcmClock() {
       <span className="lw-bar" aria-hidden="true">
         <i style={{ transform: `scaleX(${share})` }} />
       </span>
+      {/* What comes after (Sam, 25 Nov 2026: "yes add then $14.99 after
+          Cyber Monday"). */}
+      <p className="bf-then">
+        Then {money(PARENT_REGULAR)} a month for new gifts after Cyber&nbsp;Monday. Their {MONTHLY} stays for&nbsp;life.
+      </p>
     </div>
   );
 }
@@ -327,7 +333,7 @@ export function BfcmLine({ short = false }: { short?: boolean }) {
         </>
       ) : (
         <>
-          <b>Ends after Cyber Monday</b> · {shortClock(left)} left
+          <b>Ends after Cyber Monday</b>, then {money(PARENT_REGULAR)} a month · {shortClock(left)} left
         </>
       )}
     </span>
