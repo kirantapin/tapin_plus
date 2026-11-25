@@ -1098,7 +1098,7 @@ function Sheet({
       <li>
         <Glyph d={GLYPHS.refund} />
         <span className="tnum">
-          <b>Didn’t save what you paid?</b> {REFUND_SHORT}.
+          <b>They didn’t save what you paid?</b> {REFUND_SHORT}, automatically.
         </span>
       </li>
       <li>
