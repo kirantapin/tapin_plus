@@ -341,7 +341,7 @@ export function Questions({ member = false, sale = false }: { member?: boolean; 
    across the card's place and clears once the pass is out. It waits for the
    checkout's "You're in" to close, plays once per account on this phone,
    and with reduced motion the pass is simply there. The right side turns
-   from selling to using: three steps to the first $5, the places, what's
+   from selling to using: four steps to the first $5, the places, what's
    theirs every month, the questions. */
 const stillMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
@@ -438,13 +438,17 @@ function playClaimed(root: HTMLElement): Animation[] {
 }
 
 /** The first $5, from here: a real order of things to do. */
+/* Downloading and signing in, each its own step (Sam, 25 Nov 2026: "the how
+   to claim your first $5 should include downloading the tapin app and
+   signing in"). */
 const FIRST_STEPS = [
-  { h: "Get the Tapin app", p: "Sign in with the number you used here. Your credit is waiting." },
+  { h: "Download the Tapin app", p: "Free on the App Store (on Android, use tapin.app). We texted you the link." },
+  { h: "Sign in", p: "With the same number you used here. Your $25 in credit is waiting." },
   { h: "Pick a Plus spot", p: "Order in the app, or show your phone at the counter." },
   { h: "Your $5 comes off", p: "At each Plus spot, every month. On other orders, 15% off once a day." },
 ];
 
-/** A member's right side, on the claimed moment and on /in: three steps to
+/** A member's right side, on the claimed moment and on /in: four steps to
  *  the first $5, the places, what's theirs every month, the questions. */
 export function MemberRight({ onMail }: { onMail: () => void }) {
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
@@ -454,7 +458,7 @@ export function MemberRight({ onMail }: { onMail: () => void }) {
         <section className="sp-sec" aria-labelledby="cl-start">
           <span className="sp-kick">Start here</span>
           <h2 id="cl-start" className="sp-h2">
-            Your first $5, in three steps
+            Your first $5, in four steps
           </h2>
           <ol className="cl-steps">
             {FIRST_STEPS.map((s) => (
