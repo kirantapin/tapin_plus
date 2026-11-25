@@ -8,7 +8,6 @@ import {
   WAITLIST_SALE_ENDS,
   WAITLIST_SALE_POLICY,
   claimPreview,
-  listedForSale,
   markSaleClaim,
   openSaleSeat,
   readInvite,
@@ -70,7 +69,7 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
      the first signed-in visit by someone it's for. */
   const [seatStart, setSeatStart] = useState<number | null>(null);
   const saleFor =
-    !preview && !!uid && !!fresh && subscribed === false && waitlistSaleOn() && onWaitlist(fresh.user) && !readInvite(fresh.app);
+    !preview && !!uid && !!fresh && subscribed === false && waitlistSaleOn() && !readInvite(fresh.app);
   useEffect(() => {
     if (!saleFor || !uid || seatStart !== null) return;
     setSeatStart(saleSeatStart(uid, fresh?.user) ?? openSaleSeat(uid));
@@ -91,16 +90,18 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
   if (subscribed === true) return [invite || saleClaimHere() ? { kind: "claimed" } : { kind: "member" }, onEnd];
   if (invite && invite.endsMs > Date.now() && !endedNow) return [{ kind: "open", invite }, onEnd];
   if (invite) return [{ kind: "ended" }, onEnd];
+  /* The Black Friday–Cyber Monday price (model/claim.ts): anyone with the
+     link who isn't a member, for now (Sam, 25 Nov 2026: "Anyone with the
+     link should be able to claim at the moment since the actual waitlist
+     hasn't been fully set up yet"). */
+  if (waitlistSaleOn()) {
+    if (seatStart === null) return [{ kind: "loading" }, onEnd];
+    const endsMs = saleSeatEnds(seatStart);
+    return [endedNow || Date.now() >= endsMs ? { kind: "ended" } : { kind: "sale", endsMs }, onEnd];
+  }
   if (onWaitlist(fresh.user)) {
     const parsed = Date.parse(String(fresh.user?.waitlist_at ?? ""));
-    const since = Number.isFinite(parsed) ? parsed : undefined;
-    /* The waitlist's Black Friday–Cyber Monday price (model/claim.ts). */
-    if (waitlistSaleOn() && listedForSale(since)) {
-      if (seatStart === null) return [{ kind: "loading" }, onEnd];
-      const endsMs = saleSeatEnds(seatStart);
-      return [endedNow || Date.now() >= endsMs ? { kind: "ended" } : { kind: "sale", endsMs }, onEnd];
-    }
-    return [{ kind: "listed", since }, onEnd];
+    return [{ kind: "listed", since: Number.isFinite(parsed) ? parsed : undefined }, onEnd];
   }
   return [{ kind: "none" }, onEnd];
 }
@@ -295,7 +296,7 @@ export function Questions({ member = false, sale = false }: { member?: boolean; 
     ...(sale
       ? [{
           q: "Who gets the Black Friday price?",
-          a: `Everyone on the Tapin Plus waitlist, until 11:59pm Eastern on Tuesday, December 1. Your seat is held for ${CLAIM_HOURS} hours from when you first open it signed in. Claim it in time and your price is locked in for as long as you’re a member, even as more places join. You’ll see it before you pay. Cancel anytime in the Tapin app.`,
+          a: `Everyone we sent this link to, until 11:59pm Eastern on Tuesday, December 1. Your seat is held for ${CLAIM_HOURS} hours from when you first open it signed in. Claim it in time and your price is locked in for as long as you’re a member, even as more places join. You’ll see it before you pay. Cancel anytime in the Tapin app.`,
         }]
       : []),
     /* A member has claimed already: nothing to explain about claiming. */
@@ -797,7 +798,7 @@ export default function ClaimSeat() {
             sale: true,
             title: "You’re off the waitlist.",
             lede: `Your Tapin Plus seat is held for ${CLAIM_HOURS} hours, at a Black Friday price that’s locked in for life. After that, it goes to the next person in line.`,
-            fine: "Only for people on the waitlist. Cancel anytime in the Tapin app.",
+            fine: "Cancel anytime in the Tapin app.",
             up: true,
             held: <Held endsMs={state.endsMs} onEnd={onEnd} />,
             act: { label: "Claim my Black Friday offer", go: claimNow },
@@ -843,7 +844,7 @@ export default function ClaimSeat() {
       ? {
           sale: true,
           title: "Your Black Friday offer is here.",
-          lede: `You’re off the waitlist, with a Tapin Plus price locked in for life. Sign in with the number you joined with. Your seat is held for ${CLAIM_HOURS} hours from then.`,
+          lede: `You’re off the waitlist, with a Tapin Plus price locked in for life. Sign in with your mobile number. Your seat is held for ${CLAIM_HOURS} hours from then.`,
           up: true,
           act,
           popupCta: "Sign in to claim",
