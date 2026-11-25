@@ -802,13 +802,13 @@ export default function ClaimSeat() {
         <Split
           copy={{
             sale: true,
-            title: "Your seat is open.",
-            lede: "For Black Friday through Cyber Monday, the waitlist gets Tapin Plus at a special price, locked in for life. Claim it by 11:59pm Tuesday, December 1.",
+            title: "You’re off the waitlist.",
+            lede: "Your Tapin Plus seat is open, at a Black Friday price that’s locked in for life. Claim it by 11:59pm Tuesday, December 1.",
             fine: "Only for people on the waitlist. Cancel anytime in the Tapin app.",
             up: true,
             held: <SaleHeld onEnd={onEnd} />,
-            act: { label: "Claim my seat", go: claimNow },
-            popupCta: "Claim my seat",
+            act: { label: "Claim my Black Friday offer", go: claimNow },
+            popupCta: "Claim my Black Friday offer",
             dock: true,
           }}
         />
@@ -849,8 +849,8 @@ export default function ClaimSeat() {
     state.kind === "out" && sale
       ? {
           sale: true,
-          title: "Black Friday, for the waitlist.",
-          lede: "A Tapin Plus price just for the waitlist, locked in for life, until 11:59pm Tuesday, December 1. Sign in with the number you joined the waitlist with.",
+          title: "Your Black Friday offer is here.",
+          lede: "You’re off the waitlist for Black Friday through Cyber Monday, with a Tapin Plus price locked in for life. Sign in with the number you joined with to claim it by 11:59pm Tuesday, December 1.",
           held: <SaleHeld onEnd={onEnd} />,
           up: true,
           act,
