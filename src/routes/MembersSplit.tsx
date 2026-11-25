@@ -17,7 +17,7 @@ import { FlatMark, PERCENT } from "./parents_kit";
    The account page wears /claim's Split. A member's is the claimed page at
    rest: in the dark panel their pass (Active, their last four), You're a
    Plus member, the Tapin app (the QR on a computer, a white button on a
-   phone) and who's signed in; on the right the first $5 in three steps, the
+   phone) and who's signed in; on the right the first $5 in four steps, the
    places, what's theirs every month, the questions. Everyone else gets the
    same panel with the pass not yet theirs and, signed out, signing in with
    the number they joined with in white; on the right the app, the places,
