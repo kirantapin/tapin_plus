@@ -135,6 +135,10 @@ const devPrice = (): PlusPrice | null => {
   /* The texts rate, ticked (model/textsRate.ts). */
   if (textsRatePreview()) return { ...base, first: 4.99, firstFor: "forever", linkId: null, policyId: "textspreview" };
   if (q.has("pricepreview")) return { ...base, first: 3.99, linkId: null };
+  /* The parents' Black Friday–Cyber Monday special, $4.99 for life, which
+     the local database doesn't have; off once its end has passed. */
+  if (q.has("bfcmpreview") && pagePolicy() !== null && window.location.pathname.startsWith("/parents"))
+    return { ...base, first: 4.99, firstFor: "forever", linkId: null };
   /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
   if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "slpreview" };
   /* Brexx's for-life link (model/groups.ts BREXX) before Kiran's exists. */

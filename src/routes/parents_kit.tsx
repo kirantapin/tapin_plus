@@ -45,13 +45,27 @@ export const PARENTS_LAUNCH_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
 /* What the rate is called (Sam, 17 Nov 2026: "for the parents group, we
    should call the rate an exclusive VT Parent Group / Hungry Hokies rate,
    rather than a launch price"). */
-export const PARENT_RATE = "VT Parent Group / Hungry Hokies rate";
+/* Now the Black Friday–Cyber Monday special (Sam, 25 Nov 2026: "this
+   should be the BFCM special, the $4.99 discounted from $14.99 should be
+   ending after Cyber Monday. We need a countdown timer"). */
+export const PARENT_RATE = "Black Friday–Cyber Monday special";
 /* The parents' regular price, struck beside the rate (Sam, 17 Nov 2026:
    "let's make the regular price $14.99 btw on the parents page", choosing to
    cross out $14.99 now). True only while a parent without the group rate is
    charged $14.99 a month: Kiran sets that price on the backend. */
 export const PARENT_REGULAR = 14.99;
-export const PARENTS_LAUNCH_ENDS = Date.parse("2027-01-01T00:00:00-05:00");
+/* The end of Cyber Monday, 30 November, Blacksburg time (EST): past it
+   pagePolicy() stops applying the rate, so the page and the gift's cart both
+   sell the ordinary offer (was January 1). ?bfcmend=<ISO> moves it in local
+   dev only, to see the last hours and the end. */
+const BFCM_ENDS = Date.parse("2026-12-01T00:00:00-05:00");
+export const PARENTS_LAUNCH_ENDS = (() => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return BFCM_ENDS;
+  const t = Date.parse(new URLSearchParams(window.location.search).get("bfcmend") ?? "");
+  return Number.isFinite(t) ? t : BFCM_ENDS;
+})();
+/** When the countdown's bar starts draining: the special's announcement. */
+export const PARENTS_SALE_FROM = Date.parse("2026-11-25T00:00:00-05:00");
 
 /* ══ WHAT A LUNCH COSTS (COPY.md v2) ═════════════════════════════════════════
    One meal priced four ways, never a plan. The door rate is VT Dining's
