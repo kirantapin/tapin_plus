@@ -1126,6 +1126,8 @@ function Review({
   const months = lasts && lasts !== "forever" ? lasts.periods : 1;
   const lasting = lasts === "forever" || months > 1;
   const { period } = price;
+  /* For life and under the ordinary price: the ordinary price is shown struck. */
+  const saving = lasts === "forever" && today > 0 && today < price.monthly;
   const thenRow =
     lasts === "forever"
       ? `${usd(today)} every ${period}, from ${renewsOn(price)}`
@@ -1145,7 +1147,17 @@ function Review({
       <ul className="pck-rows">
         <li>
           <b>Due today</b>
-          <span className="tnum">{usd(today)}</span>
+          <span className="tnum">
+            {/* A price for life, set against the ordinary monthly price (Sam,
+                25 Nov 2026: "$4.99 for life compared against $7.99 ... per
+                month for both"). */}
+            {saving ? (
+              <>
+                <s className="pck-was">{usd(price.monthly)}</s>{" "}
+              </>
+            ) : null}
+            {usd(today)}
+          </span>
         </li>
         <li>
           <b>Then</b>
@@ -1167,7 +1179,14 @@ function Review({
         </p>
         <ul className="pck-sum-list tnum">
           <li>$25 to spend right after you join</li>
-          <li>{usd(lasts === "forever" ? today : price.monthly)} a month, locked for life</li>
+          <li>
+            {saving ? (
+              <>
+                <s className="pck-was">{usd(price.monthly)}</s>{" "}
+              </>
+            ) : null}
+            {usd(lasts === "forever" ? today : price.monthly)} a month, locked for life
+          </li>
           <li>{REFUND_SHORT} if you don’t save</li>
           <li>Cancel anytime in the app</li>
         </ul>
