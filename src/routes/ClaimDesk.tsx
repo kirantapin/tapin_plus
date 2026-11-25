@@ -1,3 +1,4 @@
+import { device } from "../shell/GetTheApp";
 import { priceHidden } from "../model/priceGate";
 import { useEffect, useRef, useState } from "react";
 import { firstFigure, usePlusPriceLoad } from "../model/plus";
@@ -219,8 +220,13 @@ export function DeskSonarV({ up = false, across = false }: { up?: boolean; acros
 }
 
 /** All eight places as a grid of photo cards, each opening its pop-up. */
+/* The cards carry the name only; what Plus covers is one tap away (Sam,
+   25 Nov 2026: "get rid of all the micro text here, and just have a
+   subheader for 'click to view what plus covers at each'"). */
 export function DeskGrid({ onOpen }: { onOpen: (p: PlacePopupPlace) => void }) {
   return (
+    <>
+    <p className="spg-hint">{device() === "desktop" ? "Click" : "Tap"} a place to see what Plus covers there.</p>
     <div className="spg">
       {allRailCards().map((v) => (
         <button
@@ -240,10 +246,10 @@ export function DeskGrid({ onOpen }: { onOpen: (p: PlacePopupPlace) => void }) {
           </span>
           <span className="dk-card-name">
             <b>{v.name}</b>
-            <small>{v.perk}</small>
           </span>
         </button>
       ))}
     </div>
+    </>
   );
 }

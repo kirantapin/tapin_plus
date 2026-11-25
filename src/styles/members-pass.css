@@ -2142,3 +2142,10 @@
   font: 500 13px/17px "Gilroy", Arial, sans-serif;
   color: rgba(255, 255, 255, 0.66);
 }
+
+/* The places grid's one line, under its heading (names only on the cards). */
+.spg-hint {
+  margin: -6px 0 14px;
+  font: 500 16px/22px "Gilroy", Arial, sans-serif;
+  color: var(--cs-muted, rgba(20, 22, 24, 0.6));
+}
