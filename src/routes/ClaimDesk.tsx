@@ -1,3 +1,4 @@
+import { priceHidden } from "../model/priceGate";
 import { useEffect, useRef, useState } from "react";
 import { firstFigure, usePlusPriceLoad } from "../model/plus";
 import { liveSoon } from "../shell/LiveSoon";
@@ -139,6 +140,8 @@ export function DeskReels({ note }: { note: string }) {
   const monthly = price ? `$${price.monthly.toFixed(2)}` : "";
   const same = !!price && price.first === price.monthly;
   const pay = same ? monthly : first;
+  /* No price said on the page during the Black Friday sale (model/priceGate.ts). */
+  const hidePay = priceHidden();
   const box = useRef<HTMLDivElement | null>(null);
   const [round, setRound] = useState(0);
   const [seen, setSeen] = useState(false);
@@ -161,12 +164,14 @@ export function DeskReels({ note }: { note: string }) {
   }, []);
   const roll = seen && !still();
   return (
-    <section className="dk-reels tnum" aria-label="What you pay and what you get" ref={box}>
-      <div className="dk-tile" style={price ? undefined : { visibility: "hidden" }}>
-        <small>You pay</small>
-        <b aria-label={pay}>{roll ? <Reel text={pay} delay={0} round={round} /> : pay}</b>
-        <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
-      </div>
+    <section className="dk-reels tnum" aria-label="What you pay and what you get" ref={box} data-nopay={hidePay ? "" : undefined}>
+      {hidePay ? null : (
+        <div className="dk-tile" style={price ? undefined : { visibility: "hidden" }}>
+          <small>You pay</small>
+          <b aria-label={pay}>{roll ? <Reel text={pay} delay={0} round={round} /> : pay}</b>
+          <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
+        </div>
+      )}
       <div className="dk-tile dk-tile-get">
         <small>You get</small>
         <b aria-label="$25">{roll ? <Reel text="$25" delay={0.25} round={round} /> : "$25"}</b>

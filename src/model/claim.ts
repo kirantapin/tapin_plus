@@ -51,16 +51,15 @@ export function claimPreview(): ClaimPreview | null {
    /claim alone (model/pagePolicy.ts).
 
    THE LIST IS THE GATE. Signed out, /claim asks for the number they joined
-   the waitlist with. Only an account whose `waitlist_at` is before
-   WAITLIST_SALE_LISTED_BY gets the price, so a forwarded link can't join
-   the list tonight and buy in. Anyone else sees that it's the waitlist's.
+   the waitlist with. An account on the list (`waitlist_at`) gets the price,
+   including anyone who joins during the sale (Sam, 25 Nov 2026: "let people
+   who join the waitlist during the sale get it too"): a join goes to /claim,
+   which opens their seat. Not on the list: the way to join.
    The backend doesn't check the list (the policy is public), so the gate is
    the page's, as it is for /vip. */
 export const WAITLIST_SALE_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
 /* When the page went up, for the bar that drains to the end. */
 export const WAITLIST_SALE_FROM = Date.UTC(2026, 10, 25, 19, 0, 0); // Wed 25 Nov, 2pm EST
-/* On the list by the end of Wednesday 25 Nov, the day the text goes out. */
-export const WAITLIST_SALE_LISTED_BY = Date.UTC(2026, 10, 26, 4, 59, 59); // Wed 25 Nov, 11:59pm EST
 export const WAITLIST_SALE_ENDS = (() => {
   const end = Date.UTC(2026, 11, 2, 4, 59, 0); // Tue 1 Dec, 11:59pm EST
   /* Local dev: ?wsends=<ISO> moves the end, to see it close. */
@@ -73,10 +72,10 @@ export const WAITLIST_SALE_ENDS = (() => {
 
 export const waitlistSaleOn = (): boolean => Date.now() < WAITLIST_SALE_ENDS;
 
-/** On the list in time for the sale (a join with no readable time counts:
- *  it was written before the time was kept). */
+/** On the list in time for the sale: any join before it ends (one with no
+ *  readable time counts: it was written before the time was kept). */
 export const listedForSale = (sinceMs: number | undefined): boolean =>
-  sinceMs === undefined || sinceMs <= WAITLIST_SALE_LISTED_BY;
+  sinceMs === undefined || sinceMs < WAITLIST_SALE_ENDS;
 
 /* A purchase from the sale, so the page plays the claimed moment rather
    than sending a new member straight to /in (a seat from the list has no

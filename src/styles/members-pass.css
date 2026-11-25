@@ -2074,3 +2074,11 @@
     animation: none;
   }
 }
+
+/* The Black Friday sale says no price on /claim: what you get stands alone. */
+.cv-c-pair[data-solo] {
+  grid-template-columns: 1fr;
+}
+.dk-reels[data-nopay] {
+  grid-template-columns: repeat(2, 1fr);
+}
