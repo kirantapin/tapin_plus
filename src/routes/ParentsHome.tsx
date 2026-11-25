@@ -727,10 +727,6 @@ export default function ParentsHome() {
             (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
             parent page right below the header too"); preview only (?ugc)
             until it ships. */}
-        {/* The care package band right above "Watch it in action" (Sam, 17
-            Nov 2026: "can we make this right below the watch it in action
-            for the parents page", then "actually right above it"). */}
-        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
         {ugc ? <UgcRow without={["zoe"]} still /> : null}
         {/* THE STUDENTS PAGE'S ORDER (Sam, 16 Nov 2026: "A lot of the sections
             are old, and the structure is off no?"): the places first, then
@@ -855,6 +851,12 @@ export default function ParentsHome() {
           </h2>
           <CheckoutPhone />
         </section>
+
+        {/* The care package after what Plus is (Sam, 25 Nov 2026: "they just
+            see the build their care package and that's it"): the places,
+            Get, Earn and Save, and what $5 looks like come first, so a
+            parent knows what Tapin is within seconds. */}
+        <GiftEnvelope onSend={(el) => signUp("gift", el)} />
 
         {/* THE OFFER: what it is, the price, the button. Right under the band
             on a phone; on a computer, the card held on the right

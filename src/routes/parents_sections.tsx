@@ -1779,7 +1779,7 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          Didn\u2019t save? We refund the difference.
+          Didn’t save? We refund the difference.
         </>
       ),
     },
