@@ -621,7 +621,33 @@ function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => voi
    rest follows in one column; an open seat's "Claim my seat" docks at the
    bottom once the panel's button has scrolled away. The claimed moment
    keeps its own page. */
-type SplitCopy = { sale?: boolean; title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string; dock?: boolean };
+type SplitCopy = { proof?: boolean; sale?: boolean; title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string; dock?: boolean };
+
+/* ══ PROOF UNDER THE BUTTON (Sam, 25 Nov 2026: "Do we want to have some
+   kind of social proof in there? Like 500 students on plus, saves an average
+   of $60 a month, and $25 to spend each month?") ══════════════════════════
+   Three figures where the decision is made. 500+ is Sam's member count
+   (model/proof.ts, said site-wide). $25 is the monthly credit. $60 is our
+   estimate, not a measured average (WORTH_NOTE), so it says "est." here;
+   change it to an average only once there's real member data. */
+function Proof() {
+  return (
+    <ul className="sp-proof tnum" aria-label="Tapin Plus in numbers">
+      <li>
+        <b>500+</b>
+        <span>VT students on Plus</span>
+      </li>
+      <li>
+        <b>$25</b>
+        <span>to spend every month</span>
+      </li>
+      <li>
+        <b>~$60</b>
+        <span>saved a month (est.)</span>
+      </li>
+    </ul>
+  );
+}
 
 /** True once `el` has scrolled up out of view (never true before it has
  *  been seen, so the dock doesn't flash in on load). */
@@ -668,6 +694,7 @@ function Split({ copy }: { copy: SplitCopy }) {
                   {copy.act.label}
                 </button>
               ) : null}
+              {copy.proof ? <Proof /> : null}
               {copy.fine ? <p className="sp-fine">{copy.fine}</p> : null}
             </div>
           </div>
@@ -801,6 +828,7 @@ export default function ClaimSeat() {
         <Split
           copy={{
             sale: true,
+            proof: true,
             title: "You’re off the waitlist.",
             lede: `Your Tapin Plus seat is held for ${CLAIM_HOURS} hours, at a Black Friday price that’s locked in for life. After that, it goes to the next person in line.`,
             fine: "Cancel anytime in the Tapin app.",
@@ -848,6 +876,7 @@ export default function ClaimSeat() {
     state.kind === "out" && sale
       ? {
           sale: true,
+          proof: true,
           title: "Your Black Friday offer is here.",
           lede: `You’re off the waitlist, with a Tapin Plus price locked in for life. Sign in with your mobile number. Your seat is held for ${CLAIM_HOURS} hours from then.`,
           up: true,
