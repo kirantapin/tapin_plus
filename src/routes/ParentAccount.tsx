@@ -8,7 +8,7 @@ import { cancelGiftedPlus, revokeGift } from "../model/giftApi";
 import { type Tone } from "../shell/AccountPage";
 import { Account, Back, Benefits, GetApp, Logos, Pass, Shell, useFour } from "./MembersPass";
 import { device } from "../shell/GetTheApp";
-import { REFUND_RULE } from "../model/refundWords";
+import { refundRule } from "../model/refundWords";
 import { GLYPHS, Glyph } from "./parents_kit";
 
 /* ══ THE PARENT'S ACCOUNT PAGE (/parents/account; Sam, 6 Nov 2026: "add a
@@ -30,7 +30,7 @@ const MAIL = `mailto:support@tapin.app?subject=${encodeURIComponent("My student�
 
 const ROWS: ReadonlyArray<{ glyph: keyof typeof GLYPHS; title: string; line?: string }> = [
   { glyph: "bell", title: "A text before every bill", line: "Cancel right from it, or here." },
-  { glyph: "refund", title: "Didn’t save what you spent?", line: `The difference is automatically refunded. ${REFUND_RULE}` },
+  { glyph: "refund", title: "They didn’t save what you paid?", line: `The difference is automatically refunded. ${refundRule("parent")}` },
   { glyph: "calendar", title: "Cancel anytime, here", line: "A gift before it’s claimed, or their Plus after." },
 ];
 

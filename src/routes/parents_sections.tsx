@@ -9,7 +9,7 @@ import { parentMock } from "../model/parents";
 import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "../model/voices";
 import { AppLink } from "../shell/GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
-import { REFUND_LEAD, REFUND_RULE, refundAnswer, refundIf } from "../model/refundWords";
+import { REFUND_LEAD, refundAnswer, refundIf, refundRule } from "../model/refundWords";
 import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
@@ -322,7 +322,7 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
           </li>
           {/* Automatic since 16 Nov 2026, as on the student page. */}
           <li>
-            <b>{REFUND_LEAD}</b>{refundIf("parent")}. {REFUND_RULE}
+            <b>{REFUND_LEAD}</b>{refundIf("parent")}. {refundRule("parent")}
           </li>
           <li>
             <b>A text before every bill</b>, and you can cancel right from&nbsp;it.
@@ -1750,6 +1750,7 @@ export function ProofTurn({
   className,
   start,
   paused,
+  audience = "parent",
   noPlaces = false,
   lead = [],
 }: {
@@ -1779,7 +1780,8 @@ export function ProofTurn({
       body: (
         <>
           <Glyph d={GLYPHS.refund} className="tpp-pt-ico" />
-          Didn’t save? We refund the difference.
+          {/* The parent pays and their student saves (Sam, 25 Nov 2026). */}
+          {audience === "parent" ? "Difference refunded if they don’t save" : "Didn’t save? We refund the difference."}
         </>
       ),
     },
