@@ -3,10 +3,24 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
 import { useAuth } from "../context/auth_context";
 import { useEventTracking } from "../context/event_tracking_context";
-import { CLAIM_HOURS, claimPreview, readInvite, type ClaimPreview, type SeatInvite } from "../model/claim";
+import {
+  CLAIM_HOURS,
+  WAITLIST_SALE_ENDS,
+  WAITLIST_SALE_FROM,
+  WAITLIST_SALE_POLICY,
+  claimPreview,
+  listedForSale,
+  markSaleClaim,
+  readInvite,
+  saleClaimHere,
+  waitlistSaleOn,
+  type ClaimPreview,
+  type SeatInvite,
+} from "../model/claim";
 import { useEndsAt } from "../model/deadline";
-import { firstFigure, usd, usePlusPriceLoad } from "../model/plus";
-import { onWaitlist } from "../model/waitlist";
+import { firstFigure, refreshPlusPrice, usd, usePlusPriceLoad } from "../model/plus";
+import { onWaitlist, setWaitlistPage } from "../model/waitlist";
+import { pagePolicy, setPagePolicy } from "../model/pagePolicy";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { openPlusCheckout, openPlusSignIn } from "../shell/PlusCheckout";
 import { FlatMark } from "./parents_kit";
@@ -26,7 +40,7 @@ import { useMedia } from "../shell/useMedia";
 
 const HOUR = 3_600_000;
 
-type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
+type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "sale" } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
 
 const PREVIEW_ENDS = Date.now() + (CLAIM_HOURS * HOUR - 61_000);
 
@@ -53,6 +67,7 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
   if (preview) {
     if (preview === "open") return [endedNow ? { kind: "ended" } : { kind: "open", invite: { openedMs: PREVIEW_ENDS - CLAIM_HOURS * HOUR, endsMs: PREVIEW_ENDS } }, onEnd];
     if (preview === "listed") return [{ kind: "listed", since: Date.now() }, onEnd];
+    if (preview === "sale") return [endedNow || !waitlistSaleOn() ? { kind: "listed", since: Date.now() } : { kind: "sale" }, onEnd];
     return [{ kind: preview } as State, onEnd];
   }
   if (userSession === undefined) return [{ kind: "loading" }, onEnd];
@@ -61,12 +76,15 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
   const invite = readInvite(fresh.app);
   /* A member who came by a seat has just claimed it (or claimed it before):
      the moment, then the way to the app. Any other member: their pass. */
-  if (subscribed === true) return [invite ? { kind: "claimed" } : { kind: "member" }, onEnd];
+  if (subscribed === true) return [invite || saleClaimHere() ? { kind: "claimed" } : { kind: "member" }, onEnd];
   if (invite && invite.endsMs > Date.now() && !endedNow) return [{ kind: "open", invite }, onEnd];
   if (invite) return [{ kind: "ended" }, onEnd];
   if (onWaitlist(fresh.user)) {
-    const since = Date.parse(String(fresh.user?.waitlist_at ?? ""));
-    return [{ kind: "listed", since: Number.isFinite(since) ? since : undefined }, onEnd];
+    const parsed = Date.parse(String(fresh.user?.waitlist_at ?? ""));
+    const since = Number.isFinite(parsed) ? parsed : undefined;
+    /* The waitlist's Black Friday–Cyber Monday price (model/claim.ts). */
+    if (waitlistSaleOn() && !endedNow && listedForSale(since)) return [{ kind: "sale" }, onEnd];
+    return [{ kind: "listed", since }, onEnd];
   }
   return [{ kind: "none" }, onEnd];
 }
@@ -105,6 +123,32 @@ function Held({ endsMs, onEnd }: { endsMs: number; onEnd: () => void }) {
       </p>
       <span className="cs-held-track">
         <i style={{ transform: `scaleX(${Math.max(0, Math.min(1, left / (CLAIM_HOURS * HOUR)))})` }} />
+      </span>
+    </div>
+  );
+}
+
+/* The sale's clock, in the held bar's place: days to go, draining from
+   when the page went up to 11:59pm Tuesday. */
+function SaleHeld({ onEnd }: { onEnd: () => void }) {
+  const r = useEndsAt(WAITLIST_SALE_ENDS);
+  useEffect(() => {
+    if (r === null) {
+      refreshPlusPrice();
+      onEnd();
+    }
+  }, [r === null, onEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+  const left = Math.max(0, WAITLIST_SALE_ENDS - Date.now());
+  const span = Math.max(1, WAITLIST_SALE_ENDS - WAITLIST_SALE_FROM);
+  const clock = r ? `${r.days ? `${r.days}d ` : ""}${r.days ? two(r.hours) : r.hours}h ${two(r.minutes)}m ${two(r.seconds)}s` : "";
+  return (
+    <div className="cs-held" role="timer" aria-label={r ? `${r.days} days, ${r.hours} hours and ${r.minutes} minutes left at this price` : "This price has ended"}>
+      <p className="cs-held-t tnum">
+        <span>Black Friday–Cyber Monday</span>
+        <b>{r ? `${clock} left` : "Ended"}</b>
+      </p>
+      <span className="cs-held-track">
+        <i style={{ transform: `scaleX(${Math.min(1, left / span)})` }} />
       </span>
     </div>
   );
@@ -185,7 +229,7 @@ function Value({ desk = false }: { desk?: boolean }) {
           <div>
             <small>You pay</small>
             <b>{same ? monthly : first}</b>
-            <span>{same ? "a month" : `first month, then ${monthly}`}</span>
+            <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
           </div>
           <div className="cv-c-get">
             <small>You get</small>
@@ -249,12 +293,19 @@ function Value({ desk = false }: { desk?: boolean }) {
 }
 
 /** The questions, the main page's with the claim's first. */
-export function Questions({ member = false }: { member?: boolean } = {}) {
+export function Questions({ member = false, sale = false }: { member?: boolean; sale?: boolean } = {}) {
   const { price } = usePlusPriceLoad();
   const monthly = usd(price?.monthly);
+  const rate = price?.firstFor === "forever" ? usd(price.first) : "$4.99";
   const faq = [
+    ...(sale
+      ? [{
+          q: `Who gets ${rate} a month for life?`,
+          a: `Everyone on the Tapin Plus waitlist, from Black Friday through Cyber Monday, until 11:59pm Eastern on Tuesday, December 1. Claim your seat before then and you pay ${rate} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month. Cancel anytime in the Tapin app.`,
+        }]
+      : []),
     /* A member has claimed already: nothing to explain about claiming. */
-    ...(member ? [] : [{
+    ...(member || sale ? [] : [{
       q: "How does claiming my seat work?",
       a: `Your seat is held for ${CLAIM_HOURS} hours from our text. Claim it here and it’s yours. If the ${CLAIM_HOURS} hours run out, it goes to the next person in line and you go back on the waitlist.`,
     }]),
@@ -530,6 +581,7 @@ function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => voi
     ["out", "Signed out"],
     ["listed", "Not open yet"],
     ["none", "Not in line"],
+    ["sale", "Black Friday"],
     ["open", "Seat open"],
     ["claimed", "Claimed"],
     ["ended", "Ran out"],
@@ -565,7 +617,7 @@ function PreviewBar({ at, go }: { at: ClaimPreview; go: (v: ClaimPreview) => voi
    rest follows in one column; an open seat's "Claim my seat" docks at the
    bottom once the panel's button has scrolled away. The claimed moment
    keeps its own page. */
-type SplitCopy = { title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string; dock?: boolean };
+type SplitCopy = { sale?: boolean; title: string; lede: string; since?: string; fine?: string; up: boolean; act?: { label: string; go: (el?: HTMLElement | null) => void }; held?: ReactNode; popupCta: string; dock?: boolean };
 
 /** True once `el` has scrolled up out of view (never true before it has
  *  been seen, so the dock doesn't flash in on load). */
@@ -632,7 +684,7 @@ function Split({ copy }: { copy: SplitCopy }) {
             </h2>
             <Value desk={desk} />
           </section>
-          <Questions />
+          <Questions sale={copy.sale} />
           {copy.act && !copy.dock && !desk ? (
             <button type="button" className="mv-cta mv-cta-dark sp-again" onClick={(e) => copy.act?.go(e.currentTarget)}>
               {copy.act.label}
@@ -675,6 +727,22 @@ export default function ClaimSeat() {
     if (kind !== "loading" && !pv) track("plus_claim_viewed", { state: kind });
   }, [kind, pv, track]);
   const bar = pv ? <PreviewBar at={pv} go={setPv} /> : null;
+  /* Coming from a page that takes waitlist joins, the pop-ups would still
+     say Join the waitlist: /claim sells its own seat. */
+  setWaitlistPage(false);
+  const { price } = usePlusPriceLoad();
+  const saleRate = price?.firstFor === "forever" ? usd(price.first) : "$4.99";
+  const sale = waitlistSaleOn();
+  /* The waitlist's price shows only where it's theirs to take: a seat, or
+     signed out (the text's pitch). Anyone not on the list, or listed too
+     late, sees the ordinary price; the page's policy goes (model/pagePolicy.ts). */
+  useLayoutEffect(() => {
+    if (kind === "loading" || kind === "member") return;
+    const want = sale && kind !== "listed" && kind !== "none" && kind !== "ended";
+    if (want === (pagePolicy() !== null)) return;
+    setPagePolicy(WAITLIST_SALE_POLICY, want ? WAITLIST_SALE_ENDS : 0);
+    refreshPlusPrice();
+  }, [kind, sale]);
 
   if (state.kind === "member") return <Navigate to="/in" replace />;
   if (state.kind === "claimed")
@@ -702,6 +770,35 @@ export default function ClaimSeat() {
             lede: `It’s held for you for ${CLAIM_HOURS} hours. After that, it goes to the next person on the waitlist.`,
             up: true,
             held: <Held endsMs={state.invite.endsMs} onEnd={onEnd} />,
+            act: { label: "Claim my seat", go: claimNow },
+            popupCta: "Claim my seat",
+            dock: true,
+          }}
+        />
+      </>
+    );
+  }
+  if (state.kind === "sale") {
+    const claimNow = (el?: HTMLElement | null) => {
+      if (pv) {
+        setPv("claimed");
+        return;
+      }
+      track("plus_claim_clicked", { where: "split", offer: "waitlist_bfcm" });
+      markSaleClaim();
+      openPlusCheckout("claim", el ?? null);
+    };
+    return (
+      <>
+        {bar}
+        <Split
+          copy={{
+            sale: true,
+            title: "Your seat is open.",
+            lede: `For Black Friday through Cyber Monday, the waitlist gets Tapin Plus at ${saleRate} a month for life. Claim it by 11:59pm Tuesday, December 1.`,
+            fine: "Only for people on the waitlist. Cancel anytime in the Tapin app.",
+            up: true,
+            held: <SaleHeld onEnd={onEnd} />,
             act: { label: "Claim my seat", go: claimNow },
             popupCta: "Claim my seat",
             dock: true,
@@ -741,7 +838,17 @@ export default function ClaimSeat() {
         : undefined;
 
   const copy: SplitCopy =
-    state.kind === "out"
+    state.kind === "out" && sale
+      ? {
+          sale: true,
+          title: "Black Friday, for the waitlist.",
+          lede: `Tapin Plus at ${saleRate} a month for life, only for people on the waitlist, until 11:59pm Tuesday, December 1. Sign in with the number you joined the waitlist with.`,
+          held: <SaleHeld onEnd={onEnd} />,
+          up: true,
+          act,
+          popupCta: "Sign in to claim",
+        }
+      : state.kind === "out"
       ? { title: "You’re up.", lede: "A Tapin Plus seat just opened for you. Sign in with the number you joined the waitlist with to claim it.", fine: `You have ${CLAIM_HOURS} hours. After that, the seat goes to the next person in line and you go back on the waitlist.`, up: true, act, popupCta: "Sign in to claim" }
       : state.kind === "ended"
         ? { title: `Your ${CLAIM_HOURS} hours ran out.`, lede: "Your seat went to the next person in line. You’re back on the waitlist, and we’ll text you when another seat opens.", up: false, popupCta: "Got it" }
@@ -753,7 +860,9 @@ export default function ClaimSeat() {
               up: false,
               popupCta: "Got it",
             }
-          : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
+          : sale
+            ? { title: "This price is for the waitlist.", lede: "It’s for people who were already on the waitlist. Signed in with a different number? Use the one you joined with. Or join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" }
+            : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
   return (
     <>
       {bar}

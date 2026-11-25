@@ -7,6 +7,7 @@ import { useEventTracking } from "./context/event_tracking_context";
 import PlusHome from "./routes/PlusHome";
 import { BREXX, SMITHS_LANDING, WELCOME_WEEK, vipGroup, type Group } from "./model/groups";
 import { setPagePolicy } from "./model/pagePolicy";
+import { WAITLIST_SALE_ENDS, WAITLIST_SALE_POLICY, waitlistSaleOn } from "./model/claim";
 import Members from "./routes/Members";
 import ClaimSeat from "./routes/ClaimSeat";
 import ParentsHome from "./routes/ParentsHome";
@@ -118,7 +119,7 @@ export default function App() {
         <Route path="/vip" element={<VipPage />} />
         <Route path="/in" element={<Members />} />
         {/* The texted link for an open waitlist seat (19 Nov 2026). */}
-        <Route path="/claim" element={<ClaimSeat />} />
+        <Route path="/claim" element={<ClaimPage />} />
         {/* THE PARENTS FLOW (Sam, 5 Nov 2026; wired to the gift backend, 8 Nov
             2026): the parents' landing page, where a parent sends Plus as a
             gift, and their account, signed in. Outside the shell, in the
@@ -199,6 +200,16 @@ function ParentsPage() {
     if (typeof window !== "undefined") setPagePolicy(PARENTS_LAUNCH_POLICY, PARENTS_LAUNCH_ENDS);
   });
   return <ParentsHome />;
+}
+
+/* /claim carries the waitlist's Black Friday–Cyber Monday price (model/
+   claim.ts): its policy is named before the page's first render reads the
+   price. The page sells it only to an account on the list. */
+function ClaimPage() {
+  useState(() => {
+    if (typeof window !== "undefined" && waitlistSaleOn()) setPagePolicy(WAITLIST_SALE_POLICY, WAITLIST_SALE_ENDS);
+  });
+  return <ClaimSeat />;
 }
 
 /* The VIP group (model/groups.ts). */

@@ -26,16 +26,73 @@ export function readInvite(meta: Record<string, unknown> | undefined | null): Se
   return { openedMs: Number.isFinite(opened) ? opened : ends - CLAIM_HOURS * 3_600_000, endsMs: ends };
 }
 
-/* ?claimv=out|listed|none|open|claimed|ended shows each state of /claim
+/* ?claimv=out|listed|none|sale|open|claimed|ended shows each state of /claim
    without an account, on the live site too (Sam, 19 Nov 2026: "can I preview
    the experience of signing in when my spot hasn't opened up yet, vs when it
    has, and what it looks like after i've claimed it?"). A preview never
    reaches the checkout: its Sign in goes to the open seat and its Claim to
    the claimed moment, so nobody can buy their way past the waitlist with it. */
-export type ClaimPreview = "out" | "open" | "claimed" | "ended" | "listed" | "none";
-const PREVIEWS: ReadonlyArray<ClaimPreview> = ["out", "listed", "none", "open", "claimed", "ended"];
+export type ClaimPreview = "out" | "open" | "sale" | "claimed" | "ended" | "listed" | "none";
+const PREVIEWS: ReadonlyArray<ClaimPreview> = ["out", "listed", "none", "sale", "open", "claimed", "ended"];
 export function claimPreview(): ClaimPreview | null {
   if (typeof window === "undefined") return null;
   const v = new URLSearchParams(window.location.search).get("claimv");
   return PREVIEWS.find((p) => p === v) ?? null;
 }
+
+/* ══ THE WAITLIST'S BLACK FRIDAY–CYBER MONDAY PRICE (Sam, 25 Nov 2026:
+   "let's get a BFCM offer going for those who are on our waitlist. It'd be
+   $4.99 for life, ending on Tuesday after cyber monday. I'd like this to be
+   just for our waitlisted people"; "Then we'll get a text going") ═════════
+   Until 11:59pm Eastern on Tuesday 1 December (Cyber Monday is 30 Nov, the
+   same end as /vip), everyone already on the list has an open seat on
+   /claim, the link in the text, at $4.99 a month for life: the public
+   policy 2220e5ff ($3 off $7.99, forever; the parents' rate), applied on
+   /claim alone (model/pagePolicy.ts).
+
+   THE LIST IS THE GATE. Signed out, /claim asks for the number they joined
+   the waitlist with. Only an account whose `waitlist_at` is before
+   WAITLIST_SALE_LISTED_BY gets the price, so a forwarded link can't join
+   the list tonight and buy in. Anyone else sees that it's the waitlist's.
+   The backend doesn't check the list (the policy is public), so the gate is
+   the page's, as it is for /vip. */
+export const WAITLIST_SALE_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
+/* When the page went up, for the bar that drains to the end. */
+export const WAITLIST_SALE_FROM = Date.UTC(2026, 10, 25, 19, 0, 0); // Wed 25 Nov, 2pm EST
+/* On the list by the end of Wednesday 25 Nov, the day the text goes out. */
+export const WAITLIST_SALE_LISTED_BY = Date.UTC(2026, 10, 26, 4, 59, 59); // Wed 25 Nov, 11:59pm EST
+export const WAITLIST_SALE_ENDS = (() => {
+  const end = Date.UTC(2026, 11, 2, 4, 59, 0); // Tue 1 Dec, 11:59pm EST
+  /* Local dev: ?wsends=<ISO> moves the end, to see it close. */
+  if (import.meta.env.DEV && typeof window !== "undefined") {
+    const q = Date.parse(new URLSearchParams(window.location.search).get("wsends") ?? "");
+    if (Number.isFinite(q)) return q;
+  }
+  return end;
+})();
+
+export const waitlistSaleOn = (): boolean => Date.now() < WAITLIST_SALE_ENDS;
+
+/** On the list in time for the sale (a join with no readable time counts:
+ *  it was written before the time was kept). */
+export const listedForSale = (sinceMs: number | undefined): boolean =>
+  sinceMs === undefined || sinceMs <= WAITLIST_SALE_LISTED_BY;
+
+/* A purchase from the sale, so the page plays the claimed moment rather
+   than sending a new member straight to /in (a seat from the list has no
+   plus_invite on the account). */
+const SALE_KEY = "tp_claim_sale_v1";
+export const markSaleClaim = () => {
+  try {
+    sessionStorage.setItem(SALE_KEY, "1");
+  } catch {
+    /* Private mode: they land on /in, which is fine. */
+  }
+};
+export const saleClaimHere = (): boolean => {
+  try {
+    return sessionStorage.getItem(SALE_KEY) === "1";
+  } catch {
+    return false;
+  }
+};

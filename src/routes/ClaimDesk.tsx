@@ -165,7 +165,7 @@ export function DeskReels({ note }: { note: string }) {
       <div className="dk-tile" style={price ? undefined : { visibility: "hidden" }}>
         <small>You pay</small>
         <b aria-label={pay}>{roll ? <Reel text={pay} delay={0} round={round} /> : pay}</b>
-        <span>{same ? "a month" : `first month, then ${monthly}`}</span>
+        <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
       </div>
       <div className="dk-tile dk-tile-get">
         <small>You get</small>
