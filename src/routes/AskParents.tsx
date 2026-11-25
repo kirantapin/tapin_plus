@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useEventTracking } from "../context/event_tracking_context";
-import { askMessage, cleanFirstName, smsHref, usMobile } from "../model/askParent";
+import { ASK_ERRORS, askMessage, cleanFirstName, sendAsk, smsHref, tapinAskText, usMobile } from "../model/askParent";
+import { useAuth } from "../context/auth_context";
+import { supabase } from "../supabase";
+import { openPlusSignIn } from "../shell/PlusCheckout";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { device } from "../shell/GetTheApp";
 import { DeskGrid } from "./ClaimDesk";
@@ -12,53 +15,83 @@ import { FlatMark } from "./parents_kit";
 /* ══ /ask: ASK A PARENT FOR PLUS (Sam, 25 Nov 2026: "a page where students
    can request to have their parents gift them tapin plus ... Basically it'd
    be what we have for parents but inversed") ═══════════════════════════════
-   /claim's Split: on the dark panel, their first name and (if they like) a
-   parent's number, then one button that opens their own Messages with the
-   ask written and addressed (model/askParent.ts). The parent's link is
-   /parents?for=<name>, which greets them and starts the gift on that name.
-   A computer can't always send a text, so the message can be copied too.
+   /claim's Split: on the dark panel, their first name, a parent's number and
+   a tick that the parent is OK with one text; Send signs them in if needed,
+   then Tapin texts the parent (api/ask-parent.js, Sam's pick: "Tapin texts
+   the parent"). The parent's link is /parents?for=<name>, which greets them
+   and starts the gift on that name. "Or text it yourself" opens their own
+   Messages with the ask, for when ours can't go.
    On the right: what they're asking for, the places, and how the gift works. */
 
 const STEPS = [
-  { h: "You send the ask", p: "From your own phone, so it comes from you." },
+  { h: "We text your parent", p: "Once, with your first name and a link to send you Plus." },
   { h: "They send it with a note", p: "Your parent pays on plus.tapin.app/parents and writes you a note." },
   { h: "You get a text", p: "Open it, and your Plus is on: $25 to spend at Blacksburg spots every month." },
 ];
 
 export default function AskParents() {
   const { track } = useEventTracking();
+  const { userSession, subscribed } = useAuth();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [okd, setOkd] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<{ masked: string; left: number } | null>(null);
+  /* Signed out when they pressed Send: it goes once they're signed in. */
+  const [pending, setPending] = useState(false);
   const [placeOpen, setPlaceOpen] = useState<PlacePopupPlace | null>(null);
   const first = cleanFirstName(name);
-  const to = phone.trim() ? usMobile(phone) : null;
-  const ready = !!first && (!phone.trim() || !!to);
+  const to = usMobile(phone);
 
   const check = (): boolean => {
-    if (!first) {
-      setError("Add your first name, so they know it’s you.");
-      return false;
-    }
-    if (phone.trim() && !to) {
-      setError("That number doesn’t look right. Use a US mobile, or leave it blank.");
+    if (!first) return fail("name");
+    if (!to) return fail("number");
+    if (!okd) {
+      setError("Tick the box to say they’re your parent and OK with one text.");
       return false;
     }
     setError(null);
     return true;
   };
+  function fail(code: string): false {
+    setError(ASK_ERRORS[code] ?? ASK_ERRORS.try_again);
+    return false;
+  }
 
-  const copy = async () => {
-    if (!check()) return;
-    try {
-      await navigator.clipboard.writeText(askMessage(first));
-      setCopied(true);
-      track("ask_parent_copied");
-      window.setTimeout(() => setCopied(false), 2400);
-    } catch {
-      setError("Couldn’t copy here. Select the message below and copy it.");
+  const send = async () => {
+    if (!check() || !to || sending) return;
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) {
+      setPending(true);
+      track("ask_parent_signin");
+      openPlusSignIn("ask");
+      return;
     }
+    setSending(true);
+    const r = await sendAsk(token, first, to);
+    setSending(false);
+    if (r.ok) {
+      setSent({ masked: r.masked, left: r.left });
+      track("ask_parent_sent", { left: r.left });
+    } else {
+      fail(r.error);
+      track("ask_parent_failed", { reason: r.error });
+    }
+  };
+
+  /* Signed in from the Send button: send it now. */
+  useEffect(() => {
+    if (!pending || !userSession) return;
+    setPending(false);
+    void send();
+  }, [pending, userSession]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const again = () => {
+    setSent(null);
+    setPhone("");
+    setOkd(false);
   };
 
   return (
@@ -71,80 +104,102 @@ export default function AskParents() {
           </Link>
           <div className="sp-mid">
             <div className="sp-txt">
-              <h1 className="sp-h">Ask your parents for Plus.</h1>
-              <p className="sp-lede">Send them a text from your phone. They can gift you Tapin Plus this holiday season, with a note from them.</p>
-              <form
-                className="ask-form ph-no-capture"
-                noValidate
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <label className="ask-field">
-                  <span>Your first name</span>
-                  <input
-                    type="text"
-                    autoComplete="given-name"
-                    autoCapitalize="words"
-                    maxLength={24}
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      setError(null);
-                    }}
-                    placeholder="Maya"
-                  />
-                </label>
-                <label className="ask-field">
-                  <span>
-                    Your parent’s mobile <small>(optional)</small>
-                  </span>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="off"
-                    value={phone}
-                    onChange={(e) => {
-                      setPhone(e.target.value);
-                      setError(null);
-                    }}
-                    placeholder="(540) 555-0123"
-                  />
-                </label>
-                {error ? (
-                  <p className="ask-error" role="alert">
-                    {error}
+              {sent ? (
+                <>
+                  <h1 className="sp-h">Asked.</h1>
+                  <p className="sp-lede">
+                    We texted your parent at <span className="ph-no-capture">{sent.masked}</span>. When they send it, you’ll get a text with your Tapin Plus.
                   </p>
-                ) : null}
-                <div className="ask-acts">
-                  <a
-                    className="sp-cta ask-send"
-                    href={ready ? smsHref(to, askMessage(first)) : "#"}
-                    aria-disabled={!ready}
-                    onClick={(e) => {
-                      if (!check()) {
-                        e.preventDefault();
-                        return;
-                      }
-                      track("ask_parent_texted", { has_number: !!to, device: device() });
+                  {sent.left > 0 ? (
+                    <button type="button" className="sp-cta" onClick={again}>
+                      Ask another parent
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <h1 className="sp-h">Ask your parents for Plus.</h1>
+                  <p className="sp-lede">Add their number and we’ll text them your ask. They can gift you Tapin Plus this holiday season, with a note from them.</p>
+                  {subscribed === true ? <p className="sp-fine">You’re already a Plus member, so there’s nothing to ask for.</p> : null}
+                  <form
+                    className="ask-form ph-no-capture"
+                    noValidate
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void send();
                     }}
                   >
-                    Text my parent
-                  </a>
-                  <button type="button" className="ask-copy" onClick={copy}>
-                    {copied ? "Copied" : "Copy the message"}
-                  </button>
-                </div>
-                <p className="sp-fine">
-                  It opens your Messages with the text written. You send it, from your number. We don’t text your parent.
-                </p>
-              </form>
-              {first ? (
-                <figure className="ask-preview ph-no-capture" aria-label="Your text">
-                  <figcaption>Your text</figcaption>
-                  <p>{askMessage(first)}</p>
-                </figure>
-              ) : null}
+                    <label className="ask-field">
+                      <span>Your first name</span>
+                      <input
+                        type="text"
+                        autoComplete="given-name"
+                        autoCapitalize="words"
+                        maxLength={24}
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          setError(null);
+                        }}
+                        placeholder="Maya"
+                      />
+                    </label>
+                    <label className="ask-field">
+                      <span>Your parent’s mobile</span>
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="off"
+                        value={phone}
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                          setError(null);
+                        }}
+                        placeholder="(540) 555-0123"
+                      />
+                    </label>
+                    <label className="ask-ok">
+                      <input
+                        type="checkbox"
+                        checked={okd}
+                        onChange={(e) => {
+                          setOkd(e.target.checked);
+                          setError(null);
+                        }}
+                      />
+                      <span>This is my parent, and they’re OK with one text from Tapin about it.</span>
+                    </label>
+                    {error ? (
+                      <p className="ask-error" role="alert">
+                        {error}
+                      </p>
+                    ) : null}
+                    <div className="ask-acts">
+                      <button type="submit" className="sp-cta ask-send" disabled={sending || subscribed === true} aria-busy={sending || undefined}>
+                        {sending ? "Sending…" : userSession ? "Send to my parent" : "Sign in and send"}
+                      </button>
+                      {first ? (
+                        <a
+                          className="ask-copy"
+                          href={smsHref(to, askMessage(first))}
+                          onClick={() => track("ask_parent_texted_self", { device: device() })}
+                        >
+                          Or text it yourself
+                        </a>
+                      ) : null}
+                    </div>
+                    <p className="sp-fine">
+                      {userSession ? "" : "You’ll sign in with your number first, so they know it’s really you. "}We text them once, from Tapin, with your first name. They can reply STOP.
+                    </p>
+                  </form>
+                  {first ? (
+                    <figure className="ask-preview ph-no-capture" aria-label="What they’ll get">
+                      <figcaption>What they’ll get</figcaption>
+                      <p>{tapinAskText(first)}</p>
+                    </figure>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </aside>
