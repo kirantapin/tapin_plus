@@ -30,6 +30,7 @@ import { Benefits, Foot, GetApp, Pass, useFour } from "./MembersPass";
 import { faqFor, refundFaq } from "./PlusHome";
 import { CheckoutPhone } from "./parents_sections";
 import { DeskGrid, DeskReels, DeskSonarV } from "./ClaimDesk";
+import { AppLink } from "../shell/GetTheApp";
 import { useMedia } from "../shell/useMedia";
 
 /* ══ /claim: THE TEXTED LINK FOR AN OPEN SEAT (Sam, 19 Nov 2026) ═══════════
@@ -443,7 +444,7 @@ function playClaimed(root: HTMLElement): Animation[] {
    to claim your first $5 should include downloading the tapin app and
    signing in"). */
 const FIRST_STEPS = [
-  { h: "Download the Tapin app", p: "Free on the App Store (on Android, use tapin.app). We texted you the link." },
+  { h: "Download the Tapin app", p: "Free on the App Store (on Android, use tapin.app). We texted you the link too.", app: true },
   { h: "Sign in", p: "With the same number you used here. Your $25 in credit is waiting." },
   { h: "Pick a Plus spot", p: "Order in the app, or show your phone at the counter." },
   { h: "Your $5 comes off", p: "At each Plus spot, every month. On other orders, 15% off once a day." },
@@ -466,6 +467,10 @@ export function MemberRight({ onMail }: { onMail: () => void }) {
               <li key={s.h}>
                 <b>{s.h}</b>
                 <span>{s.p}</span>
+                {/* The link itself, Apple logo and all (Sam, 25 Nov 2026: "we
+                    should have the link to the tapin app, with the apple logo
+                    here"); the web app on Android. */}
+                {s.app ? <AppLink where="claim_steps" className="cl-step-app" glyph /> : null}
               </li>
             ))}
           </ol>

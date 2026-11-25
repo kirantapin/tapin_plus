@@ -96,6 +96,14 @@
 .mv-scan-light a {
   opacity: 0.82;
 }
+/* On the dark panel the hover stays white (it turned ink, the panel's own
+   colour, and the link vanished: Sam, 25 Nov 2026). */
+.mv-scan-light a:hover {
+  color: #ffffff;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 .mv-ben {
   display: grid;
@@ -813,7 +821,7 @@
 /* The right side: from selling to using. */
 .cl-steps {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin: 0;
   padding: 0;
@@ -872,6 +880,9 @@
   .cl-steps li::before {
     grid-row: span 2;
     margin: 0;
+  }
+  .cl-steps .cl-step-app {
+    grid-column: 2;
   }
   .cs-claimed .sp-mid {
     grid-template-columns: minmax(0, 1fr);
@@ -2081,4 +2092,22 @@
 }
 .dk-reels[data-nopay] {
   grid-template-columns: repeat(2, 1fr);
+}
+
+/* Step one's link to the app, the Apple logo on it (the web app on Android). */
+.cl-steps .cl-step-app {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px 16px 10px 14px;
+  border-radius: 999px;
+  background: var(--ink, #141618);
+  color: #ffffff;
+  font: 600 15px/18px "Gilroy", Arial, sans-serif;
+  text-decoration: none;
+}
+.cl-steps .cl-step-app svg {
+  margin-top: -2px;
 }
