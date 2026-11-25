@@ -727,7 +727,6 @@ export default function ParentsHome() {
             (Sam, 16 Nov 2026: "the kids using tapin ugc should be on the
             parent page right below the header too"); preview only (?ugc)
             until it ships. */}
-        {ugc ? <UgcRow without={["zoe"]} still /> : null}
         {/* THE STUDENTS PAGE'S ORDER (Sam, 16 Nov 2026: "A lot of the sections
             are old, and the structure is off no?"): the places first, then
             Get, Earn, Save, what $5 looks like, the care package note, the
@@ -851,6 +850,11 @@ export default function ParentsHome() {
           </h2>
           <CheckoutPhone />
         </section>
+
+        {/* The videos after what Plus is too (Sam, 25 Nov 2026: "yes move
+            the videos below too"), so Get, Earn and Save sit right under
+            the header. */}
+        {ugc ? <UgcRow without={["zoe"]} still /> : null}
 
         {/* The care package after what Plus is (Sam, 25 Nov 2026: "they just
             see the build their care package and that's it"): the places,
