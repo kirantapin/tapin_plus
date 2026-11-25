@@ -6,12 +6,14 @@ import { useEventTracking } from "../context/event_tracking_context";
 import {
   CLAIM_HOURS,
   WAITLIST_SALE_ENDS,
-  WAITLIST_SALE_FROM,
   WAITLIST_SALE_POLICY,
   claimPreview,
   listedForSale,
   markSaleClaim,
+  openSaleSeat,
   readInvite,
+  saleSeatEnds,
+  saleSeatStart,
   saleClaimHere,
   waitlistSaleOn,
   type ClaimPreview,
@@ -41,7 +43,7 @@ import { useMedia } from "../shell/useMedia";
 
 const HOUR = 3_600_000;
 
-type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "sale" } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
+type State = { kind: "loading" } | { kind: "out" } | { kind: "member" } | { kind: "claimed" } | { kind: "open"; invite: SeatInvite } | { kind: "sale"; endsMs: number } | { kind: "ended" } | { kind: "listed"; since?: number } | { kind: "none" };
 
 const PREVIEW_ENDS = Date.now() + (CLAIM_HOURS * HOUR - 61_000);
 
@@ -64,11 +66,20 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
     };
   }, [uid]); // eslint-disable-line react-hooks/exhaustive-deps
   const onEnd = useCallback(() => setEndedNow(true), []);
+  /* The Black Friday seat's start (model/claim.ts): kept, or opened now on
+     the first signed-in visit by someone it's for. */
+  const [seatStart, setSeatStart] = useState<number | null>(null);
+  const saleFor =
+    !preview && !!uid && !!fresh && subscribed === false && waitlistSaleOn() && onWaitlist(fresh.user) && !readInvite(fresh.app);
+  useEffect(() => {
+    if (!saleFor || !uid || seatStart !== null) return;
+    setSeatStart(saleSeatStart(uid, fresh?.user) ?? openSaleSeat(uid));
+  }, [saleFor, uid, seatStart, fresh]);
 
   if (preview) {
     if (preview === "open") return [endedNow ? { kind: "ended" } : { kind: "open", invite: { openedMs: PREVIEW_ENDS - CLAIM_HOURS * HOUR, endsMs: PREVIEW_ENDS } }, onEnd];
     if (preview === "listed") return [{ kind: "listed", since: Date.now() }, onEnd];
-    if (preview === "sale") return [endedNow || !waitlistSaleOn() ? { kind: "listed", since: Date.now() } : { kind: "sale" }, onEnd];
+    if (preview === "sale") return [endedNow || !waitlistSaleOn() ? { kind: "ended" } : { kind: "sale", endsMs: saleSeatEnds(PREVIEW_ENDS - CLAIM_HOURS * HOUR) }, onEnd];
     return [{ kind: preview } as State, onEnd];
   }
   if (userSession === undefined) return [{ kind: "loading" }, onEnd];
@@ -84,7 +95,11 @@ function useClaimState(preview: ClaimPreview | null): [State, () => void] {
     const parsed = Date.parse(String(fresh.user?.waitlist_at ?? ""));
     const since = Number.isFinite(parsed) ? parsed : undefined;
     /* The waitlist's Black Friday–Cyber Monday price (model/claim.ts). */
-    if (waitlistSaleOn() && !endedNow && listedForSale(since)) return [{ kind: "sale" }, onEnd];
+    if (waitlistSaleOn() && listedForSale(since)) {
+      if (seatStart === null) return [{ kind: "loading" }, onEnd];
+      const endsMs = saleSeatEnds(seatStart);
+      return [endedNow || Date.now() >= endsMs ? { kind: "ended" } : { kind: "sale", endsMs }, onEnd];
+    }
     return [{ kind: "listed", since }, onEnd];
   }
   return [{ kind: "none" }, onEnd];
@@ -124,32 +139,6 @@ function Held({ endsMs, onEnd }: { endsMs: number; onEnd: () => void }) {
       </p>
       <span className="cs-held-track">
         <i style={{ transform: `scaleX(${Math.max(0, Math.min(1, left / (CLAIM_HOURS * HOUR)))})` }} />
-      </span>
-    </div>
-  );
-}
-
-/* The sale's clock, in the held bar's place: days to go, draining from
-   when the page went up to 11:59pm Tuesday. */
-function SaleHeld({ onEnd }: { onEnd: () => void }) {
-  const r = useEndsAt(WAITLIST_SALE_ENDS);
-  useEffect(() => {
-    if (r === null) {
-      refreshPlusPrice();
-      onEnd();
-    }
-  }, [r === null, onEnd]); // eslint-disable-line react-hooks/exhaustive-deps
-  const left = Math.max(0, WAITLIST_SALE_ENDS - Date.now());
-  const span = Math.max(1, WAITLIST_SALE_ENDS - WAITLIST_SALE_FROM);
-  const clock = r ? `${r.days ? `${r.days}d ` : ""}${r.days ? two(r.hours) : r.hours}h ${two(r.minutes)}m ${two(r.seconds)}s` : "";
-  return (
-    <div className="cs-held" role="timer" aria-label={r ? `${r.days} days, ${r.hours} hours and ${r.minutes} minutes left at this price` : "This price has ended"}>
-      <p className="cs-held-t tnum">
-        <span>Black Friday–Cyber Monday</span>
-        <b>{r ? `${clock} left` : "Ended"}</b>
-      </p>
-      <span className="cs-held-track">
-        <i style={{ transform: `scaleX(${Math.min(1, left / span)})` }} />
       </span>
     </div>
   );
@@ -306,7 +295,7 @@ export function Questions({ member = false, sale = false }: { member?: boolean; 
     ...(sale
       ? [{
           q: "Who gets the Black Friday price?",
-          a: "Everyone on the Tapin Plus waitlist, from Black Friday through Cyber Monday, until 11:59pm Eastern on Tuesday, December 1. Claim your seat before then and your price is locked in for as long as you’re a member, even as more places join. You’ll see it before you pay. Cancel anytime in the Tapin app.",
+          a: `Everyone on the Tapin Plus waitlist, until 11:59pm Eastern on Tuesday, December 1. Your seat is held for ${CLAIM_HOURS} hours from when you first open it signed in. Claim it in time and your price is locked in for as long as you’re a member, even as more places join. You’ll see it before you pay. Cancel anytime in the Tapin app.`,
         }]
       : []),
     /* A member has claimed already: nothing to explain about claiming. */
@@ -803,10 +792,10 @@ export default function ClaimSeat() {
           copy={{
             sale: true,
             title: "You’re off the waitlist.",
-            lede: "Your Tapin Plus seat is open, at a Black Friday price that’s locked in for life. Claim it by 11:59pm Tuesday, December 1.",
+            lede: `Your Tapin Plus seat is held for ${CLAIM_HOURS} hours, at a Black Friday price that’s locked in for life. After that, it goes to the next person in line.`,
             fine: "Only for people on the waitlist. Cancel anytime in the Tapin app.",
             up: true,
-            held: <SaleHeld onEnd={onEnd} />,
+            held: <Held endsMs={state.endsMs} onEnd={onEnd} />,
             act: { label: "Claim my Black Friday offer", go: claimNow },
             popupCta: "Claim my Black Friday offer",
             dock: true,
@@ -850,8 +839,7 @@ export default function ClaimSeat() {
       ? {
           sale: true,
           title: "Your Black Friday offer is here.",
-          lede: "You’re off the waitlist for Black Friday through Cyber Monday, with a Tapin Plus price locked in for life. Sign in with the number you joined with to claim it by 11:59pm Tuesday, December 1.",
-          held: <SaleHeld onEnd={onEnd} />,
+          lede: `You’re off the waitlist, with a Tapin Plus price locked in for life. Sign in with the number you joined with. Your seat is held for ${CLAIM_HOURS} hours from then.`,
           up: true,
           act,
           popupCta: "Sign in to claim",
@@ -869,7 +857,7 @@ export default function ClaimSeat() {
               popupCta: "Got it",
             }
           : sale
-            ? { sale: true, title: "This offer is for the waitlist.", lede: "Join the waitlist by 11:59pm Tuesday, December 1, and your seat opens at the Black Friday price, locked in for life. Already joined with a different number? Sign in with that one.", held: <SaleHeld onEnd={onEnd} />, up: false, act, popupCta: "Join the waitlist" }
+            ? { sale: true, title: "This offer is for the waitlist.", lede: `Join the waitlist by 11:59pm Tuesday, December 1, and your seat opens right away, held for ${CLAIM_HOURS} hours at the Black Friday price. Already joined with a different number? Sign in with that one.`, up: false, act, popupCta: "Join the waitlist" }
             : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
   return (
     <>

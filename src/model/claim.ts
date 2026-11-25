@@ -1,3 +1,4 @@
+import { supabase } from "../supabase";
 /* ══ CLAIMING A SEAT FROM THE WAITLIST (Sam, 19 Nov 2026) ══════════════════
    "when it does open up, they have 48 hours to claim it before their seat
    is no longer available ... a page where they can claim their seat, there'd
@@ -58,8 +59,6 @@ export function claimPreview(): ClaimPreview | null {
    The backend doesn't check the list (the policy is public), so the gate is
    the page's, as it is for /vip. */
 export const WAITLIST_SALE_POLICY = "2220e5ff-12b4-422b-9c18-36be156d4021";
-/* When the page went up, for the bar that drains to the end. */
-export const WAITLIST_SALE_FROM = Date.UTC(2026, 10, 25, 19, 0, 0); // Wed 25 Nov, 2pm EST
 export const WAITLIST_SALE_ENDS = (() => {
   const end = Date.UTC(2026, 11, 2, 4, 59, 0); // Tue 1 Dec, 11:59pm EST
   /* Local dev: ?wsends=<ISO> moves the end, to see it close. */
@@ -95,3 +94,40 @@ export const saleClaimHere = (): boolean => {
     return false;
   }
 };
+
+/* ══ 48 HOURS EACH (Sam, 25 Nov 2026: "I think we still make the window 48
+   hours even though the promo ends on Tuesday") ═══════════════════════════
+   Each person's Black Friday seat is held for CLAIM_HOURS from the first
+   time they open /claim signed in, never past the sale's end. The start is
+   kept on their own account (user_metadata.bfcm_seat_at, the way the
+   waitlist join is), and on this phone as a fallback; it doesn't have to be
+   airtight (Sam). Past it: their time ran out, back on the waitlist. */
+const SEAT_KEY = (uid: string) => `tp_bfcm_seat_v1_${uid}`;
+
+/** When this account's sale seat opened, if it has. */
+export function saleSeatStart(uid: string, meta: Record<string, unknown> | undefined | null): number | null {
+  const fromMeta = typeof meta?.bfcm_seat_at === "string" ? Date.parse(meta.bfcm_seat_at) : NaN;
+  if (Number.isFinite(fromMeta)) return fromMeta;
+  try {
+    const kept = Number(localStorage.getItem(SEAT_KEY(uid)));
+    if (kept > 0) return kept;
+  } catch {
+    /* Private mode: no fallback. */
+  }
+  return null;
+}
+
+/** Opens it now: on this phone at once, on the account in the background. */
+export function openSaleSeat(uid: string): number {
+  const now = Date.now();
+  try {
+    localStorage.setItem(SEAT_KEY(uid), String(now));
+  } catch {
+    /* Private mode: the account keeps it. */
+  }
+  void supabase.auth.updateUser({ data: { bfcm_seat_at: new Date(now).toISOString() } }).catch(() => undefined);
+  return now;
+}
+
+/** When the seat stops being held: 48 hours on, or the sale's end. */
+export const saleSeatEnds = (startMs: number): number => Math.min(startMs + CLAIM_HOURS * 3_600_000, WAITLIST_SALE_ENDS);
