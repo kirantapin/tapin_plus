@@ -3520,3 +3520,43 @@
     white-space: nowrap;
   }
 }
+
+/* ══ THE BLACK FRIDAY–CYBER MONDAY CLOCK (Sam, 25 Nov 2026) ══════════════════
+   In the offer card (parents_sections BfcmClock): four flat tiles, days to
+   seconds, then the bar draining to the end of Cyber Monday. */
+.tpp .bf {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.tpp .bf-h {
+  margin: 0;
+  font: 600 16px/20px "Gilroy", Arial, sans-serif;
+  color: var(--ink, #141618);
+}
+.tpp .bf-clock {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.tpp .bf-clock span {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 0 9px;
+  border-radius: 14px;
+  background: #f2f2f4;
+}
+.tpp .bf-clock b {
+  font: 600 28px/1 "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--ink, #141618);
+}
+.tpp .bf-clock small {
+  font: 500 12px/14px "Gilroy", Arial, sans-serif;
+  color: var(--muted, #5d6166);
+}
+/* The terms card's third line: the clock face in the card's green. */
+.tpa .tpu-terms-card .tpp-bf-line .tpa-clock {
+  top: 0;
+}

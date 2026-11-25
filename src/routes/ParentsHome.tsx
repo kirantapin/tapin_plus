@@ -27,7 +27,8 @@ import {
   FlatMark,
   PARENT_RATE,
 } from "./parents_kit";
-import { CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices } from "./parents_sections";
+import { BfcmLine, CheckoutPhone, HowPhone, ParentsCount, PayGetLead, ProofTurn, UnderOffer, Voices, useBfcmOn } from "./parents_sections";
+import { Clock } from "../shell/WelcomeOffer";
 import { lowerVersion } from "../shell/LowerVersions";
 import { GiftEnvelope } from "./parents_gift";
 import { GiftPreview } from "./GiftPage";
@@ -532,6 +533,7 @@ export default function ParentsHome() {
   /* The terms under the header, in their own card (Sam, 19 Nov 2026:
      "bring these bullet points down below, for all pages"); on a computer
      under the offer card. */
+  const bfcm = useBfcmOn();
   const termsCard = (
     <section className="tpa-module tpu-terms-card" aria-label="Price and refund">
       <p className="tpa-wline">
@@ -546,7 +548,7 @@ export default function ParentsHome() {
             </>
           ) : LIFE ? (
             <>
-              <b>{FIRST}/month for life</b> <s>{WAS}</s> · exclusive {PARENT_RATE}
+              <b>{FIRST}/month for life</b> <s>{WAS}</s> · {PARENT_RATE}
             </>
           ) : (
             <>
@@ -564,8 +566,29 @@ export default function ParentsHome() {
           <b>{REFUND_LEAD}</b>{refundIf("parent")}
         </span>
       </p>
+      {/* The special's clock, at the top on a phone (Sam, 25 Nov 2026). */}
+      {bfcm ? (
+        <p className="tpa-wline tpp-bf-line">
+          <Clock />
+          <BfcmLine />
+        </p>
+      ) : null}
     </section>
   );
+  /* The dock opens on the clock while the special is on. */
+  const dockLead = bfcm
+    ? [
+        {
+          key: "bfcm",
+          body: (
+            <>
+              <Clock />
+              <BfcmLine short />
+            </>
+          ),
+        },
+      ]
+    : [];
 
   return (
     <div className="tpa tpa-home tpp">
@@ -983,7 +1006,7 @@ export default function ParentsHome() {
             {held
               ? "See it when you add their number. We text you before every bill. Cancel anytime."
               : LIFE
-                ? `Exclusive ${PARENT_RATE}, usually ${WAS}. We text you before every bill. Cancel anytime.`
+                ? `${PARENT_RATE}, usually ${WAS}. We text you before every bill. Cancel anytime.`
                 : `Then ${MONTHLY}/month. We text you before every bill. Cancel anytime.`}
           </p>
           <button
@@ -1026,7 +1049,7 @@ export default function ParentsHome() {
       <div ref={dockRef} className="tpa-dock tpp-dock" data-island-origin="" hidden>
         {/* The bar above says the students line, so the dock starts on the
             promise. */}
-        <ProofTurn className="tpp-pt-dock" start="refund" paused={building} />
+        <ProofTurn key={bfcm ? "bfcm" : "refund"} className="tpp-pt-dock" start={bfcm ? "bfcm" : "refund"} paused={building} lead={dockLead} />
         <button
           type="button"
           className="tpa-cta tpa-dock-cta"

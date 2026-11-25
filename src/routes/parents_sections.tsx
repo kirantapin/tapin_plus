@@ -10,7 +10,8 @@ import { PREVIEW_STUDENT_VOICES, PREVIEW_VOICES, STUDENT_VOICES, VOICES } from "
 import { AppLink } from "../shell/GetTheApp";
 import { useEventTracking } from "../context/event_tracking_context";
 import { REFUND_LEAD, refundAnswer, refundIf, refundRule } from "../model/refundWords";
-import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
+import { useEndsAt, shortClock, spokenClock } from "../model/deadline";
+import { CREDIT, Chevron, DOOR, FlatMark, GLYPHS, Glyph, LUNCH, PARENT_RATE, PARENTS_LAUNCH_ENDS, PARENTS_SALE_FROM, PERCENT, PLACES, lineLabel, money, money0, reducedMotion, useParentPrice, type Audience, type PhoneOrder } from "./parents_kit";
 
 /* ══ FOUR SECTIONS OF /parents, AS SAM PICKED THEM (6 Nov 2026) ══════════════
    From three design variations each ("build these and push"):
@@ -256,6 +257,83 @@ export function PayGetLead({ lower = false, held = false }: { lower?: boolean; h
    and the struck price agree. */
 export const AFTER_HOLIDAY = 14.99;
 
+/* ══ THE BLACK FRIDAY–CYBER MONDAY CLOCK (Sam, 25 Nov 2026: "the $4.99
+   discounted from $14.99 should be ending after Cyber Monday. We need a
+   countdown timer") ═════════════════════════════════════════════════════════
+   A real end (PARENTS_LAUNCH_ENDS, the end of Cyber Monday): past it the page
+   stops applying the rate, so every clock here renders nothing. Shown only
+   while the rate is the price (LIFE). */
+export function useBfcmLeft() {
+  const { LIFE } = useParentPrice();
+  return useEndsAt(LIFE ? PARENTS_LAUNCH_ENDS : null);
+}
+
+/** True until the special ends; flips once, at the end (no per-second
+ *  render for whoever reads it). */
+export function useBfcmOn(): boolean {
+  const { LIFE } = useParentPrice();
+  const [on, setOn] = useState(() => Date.now() < PARENTS_LAUNCH_ENDS);
+  useEffect(() => {
+    const wait = PARENTS_LAUNCH_ENDS - Date.now();
+    if (wait <= 0) return setOn(false);
+    const t = window.setTimeout(() => setOn(false), Math.min(wait, 2_147_000_000));
+    return () => window.clearTimeout(t);
+  }, []);
+  return LIFE && on;
+}
+
+const two = (n: number) => String(n).padStart(2, "0");
+
+/** The offer card's clock: days, hours, minutes, seconds, and a bar that
+ *  drains to the end. */
+export function BfcmClock() {
+  const left = useBfcmLeft();
+  if (!left) return null;
+  const ms = ((left.days * 24 + left.hours) * 60 + left.minutes) * 60_000 + left.seconds * 1000;
+  const share = Math.max(0, Math.min(1, ms / (PARENTS_LAUNCH_ENDS - PARENTS_SALE_FROM)));
+  const cells: Array<[string, string]> = [
+    [String(left.days), left.days === 1 ? "day" : "days"],
+    [two(left.hours), "hrs"],
+    [two(left.minutes), "min"],
+    [two(left.seconds), "sec"],
+  ];
+  return (
+    <div className="bf" data-ph-show="">
+      <p className="bf-h">Black Friday–Cyber Monday special</p>
+      <div className="bf-clock tnum" role="timer" aria-label={`Ends in ${spokenClock(left)}`}>
+        {cells.map(([n, u]) => (
+          <span key={u} aria-hidden="true">
+            <b>{n}</b>
+            <small>{u}</small>
+          </span>
+        ))}
+      </div>
+      <span className="lw-bar" aria-hidden="true">
+        <i style={{ transform: `scaleX(${share})` }} />
+      </span>
+    </div>
+  );
+}
+
+/** One line, ticking: the terms card and the dock. */
+export function BfcmLine({ short = false }: { short?: boolean }) {
+  const left = useBfcmLeft();
+  if (!left) return null;
+  return (
+    <span className="tnum" aria-label={`Black Friday–Cyber Monday special, ends in ${spokenClock(left)}`}>
+      {short ? (
+        <>
+          Cyber Monday price ends in <b>{shortClock(left)}</b>
+        </>
+      ) : (
+        <>
+          <b>Ends after Cyber Monday</b> · {shortClock(left)} left
+        </>
+      )}
+    </span>
+  );
+}
+
 /* ══ COUNT, IN THE PARENTS' TERMS (Sam, 12 Nov 2026: "port the count layout
    to the parents page too") ═══════════════════════════════════════════════
    The students card's lower half (shell/LowerVersions.tsx, 3 · Count): one
@@ -279,9 +357,14 @@ export function ParentsCount({ join, held = false }: { join: ReactNode; held?: b
   const left = HOLIDAY_ENDS - now;
   const days = Math.floor(left / 86_400_000);
   const share = Math.max(0, Math.min(1, left / (HOLIDAY_ENDS - HOLIDAY_FROM)));
+  /* The special's clock while it's on; its rate stays for life, so there is
+     no January line under it. */
+  const bfcm = useBfcmOn();
   return (
     <div className="lw lw-3 tpp-lw">
-      {left > 0 ? (
+      {bfcm ? (
+        <BfcmClock />
+      ) : left > 0 ? (
         <>
           <div className="lw-3-count tnum">
             {days >= 1 ? <b>{days}</b> : null}
@@ -364,7 +447,7 @@ export function PriceLead() {
       <p className="tpp-price-then tnum">
         {LIFE ? (
           <>
-            Exclusive {PARENT_RATE}, usually <s>{WAS}</s>
+            {PARENT_RATE}, usually <s>{WAS}</s>
           </>
         ) : (
           <>
@@ -463,7 +546,7 @@ export function BenefitCards() {
     {
       key: "price",
       art: <b className="tpp-card-fig">{FIRST}</b>,
-      label: LIFE ? `A month, for life. Exclusive ${PARENT_RATE}, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
+      label: LIFE ? `A month, for life. ${PARENT_RATE}, usually ${WAS}` : `First month, then ${MONTHLY} a month`,
       line: `A text before every bill. Cancel anytime. ${REFUND_LEAD}${refundIf("parent")}.`,
     },
   ];
