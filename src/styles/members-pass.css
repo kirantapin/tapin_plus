@@ -2111,3 +2111,34 @@
 .cl-steps .cl-step-app svg {
   margin-top: -2px;
 }
+
+/* Three figures under the claim button (ClaimSeat Proof). */
+.sp-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 440px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sp-proof li {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px 12px 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.sp-proof b {
+  font: 600 24px/28px "Gilroy", Arial, sans-serif;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+.sp-proof li:first-child b {
+  color: var(--cs-live, #3ad08a);
+}
+.sp-proof span {
+  font: 500 13px/17px "Gilroy", Arial, sans-serif;
+  color: rgba(255, 255, 255, 0.66);
+}
