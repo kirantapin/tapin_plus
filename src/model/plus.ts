@@ -139,6 +139,9 @@ const devPrice = (): PlusPrice | null => {
      the local database doesn't have; off once its end has passed. */
   if (q.has("bfcmpreview") && pagePolicy() !== null && window.location.pathname.startsWith("/parents"))
     return { ...base, first: 4.99, firstFor: "forever", linkId: null };
+  /* The waitlist's Black Friday–Cyber Monday price on /claim (model/claim.ts). */
+  if (window.location.pathname.startsWith("/claim") && pagePolicy() !== null)
+    return { ...base, first: 4.99, firstFor: "forever", linkId: null };
   /* A group's year-long link (model/groups.ts) before Kiran's link exists. */
   if (q.has("slpreview")) return { ...base, first: 3.99, firstFor: "forever", linkId: "slpreview" };
   /* Brexx's for-life link (model/groups.ts BREXX) before Kiran's exists. */
