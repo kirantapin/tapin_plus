@@ -21,6 +21,7 @@ import { useEndsAt } from "../model/deadline";
 import { firstFigure, refreshPlusPrice, usd, usePlusPriceLoad } from "../model/plus";
 import { onWaitlist, setWaitlistPage } from "../model/waitlist";
 import { pagePolicy, setPagePolicy } from "../model/pagePolicy";
+import { priceHidden, setPriceHidden } from "../model/priceGate";
 import PlacePopup, { type PlacePopupPlace } from "../shell/PlacePopup";
 import { openPlusCheckout, openPlusSignIn } from "../shell/PlusCheckout";
 import { FlatMark } from "./parents_kit";
@@ -194,6 +195,9 @@ function Value({ desk = false }: { desk?: boolean }) {
   const first = firstFigure(price);
   const monthly = usd(price?.monthly);
   const same = !!price && price.first === price.monthly;
+  /* The Black Friday price isn't said on the page; the checkout shows it at
+     the pay step (model/priceGate.ts). */
+  const hidePay = priceHidden();
   const extras = (
     <ul className="cv-c-more">
       <li>
@@ -225,12 +229,14 @@ function Value({ desk = false }: { desk?: boolean }) {
         </>
       ) : (
       <section className="cv cv-c tnum" aria-label="What you pay and what you get">
-        <div className="cv-c-pair" style={price ? undefined : { visibility: "hidden" }}>
-          <div>
-            <small>You pay</small>
-            <b>{same ? monthly : first}</b>
-            <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
-          </div>
+        <div className="cv-c-pair" data-solo={hidePay ? "" : undefined} style={price ? undefined : { visibility: "hidden" }}>
+          {hidePay ? null : (
+            <div>
+              <small>You pay</small>
+              <b>{same ? monthly : first}</b>
+              <span>{same ? "a month" : price?.firstFor === "forever" ? "a month, for life" : `first month, then ${monthly}`}</span>
+            </div>
+          )}
           <div className="cv-c-get">
             <small>You get</small>
             <b>$25</b>
@@ -296,12 +302,11 @@ function Value({ desk = false }: { desk?: boolean }) {
 export function Questions({ member = false, sale = false }: { member?: boolean; sale?: boolean } = {}) {
   const { price } = usePlusPriceLoad();
   const monthly = usd(price?.monthly);
-  const rate = price?.firstFor === "forever" ? usd(price.first) : "$4.99";
   const faq = [
     ...(sale
       ? [{
-          q: `Who gets ${rate} a month for life?`,
-          a: `Everyone on the Tapin Plus waitlist, from Black Friday through Cyber Monday, until 11:59pm Eastern on Tuesday, December 1. Claim your seat before then and you pay ${rate} a month for as long as you’re a member, even as more places join. Everyone else pays ${monthly} a month. Cancel anytime in the Tapin app.`,
+          q: "Who gets the Black Friday price?",
+          a: "Everyone on the Tapin Plus waitlist, from Black Friday through Cyber Monday, until 11:59pm Eastern on Tuesday, December 1. Claim your seat before then and your price is locked in for as long as you’re a member, even as more places join. You’ll see it before you pay. Cancel anytime in the Tapin app.",
         }]
       : []),
     /* A member has claimed already: nothing to explain about claiming. */
@@ -730,15 +735,18 @@ export default function ClaimSeat() {
   /* Coming from a page that takes waitlist joins, the pop-ups would still
      say Join the waitlist: /claim sells its own seat. */
   setWaitlistPage(false);
-  const { price } = usePlusPriceLoad();
-  const saleRate = price?.firstFor === "forever" ? usd(price.first) : "$4.99";
   const sale = waitlistSaleOn();
-  /* The waitlist's price shows only where it's theirs to take: a seat, or
-     signed out (the text's pitch). Anyone not on the list, or listed too
-     late, sees the ordinary price; the page's policy goes (model/pagePolicy.ts). */
+  /* The Black Friday price isn't said on the page (Sam, 25 Nov 2026: "For
+     the black friday sale, we shouldn't mention the price I don't think"):
+     the checkout shows it at the pay step, after the number. */
+  setPriceHidden(sale && kind !== "listed" && kind !== "ended" && kind !== "loading");
+  /* The waitlist's price shows while it's theirs to take: a seat, signed
+     out, or not on the list yet (joining opens their seat). A seat that ran
+     out, or the list after the sale, sees the ordinary price; the page's
+     policy goes (model/pagePolicy.ts). */
   useLayoutEffect(() => {
     if (kind === "loading" || kind === "member") return;
-    const want = sale && kind !== "listed" && kind !== "none" && kind !== "ended";
+    const want = sale && kind !== "listed" && kind !== "ended";
     if (want === (pagePolicy() !== null)) return;
     setPagePolicy(WAITLIST_SALE_POLICY, want ? WAITLIST_SALE_ENDS : 0);
     refreshPlusPrice();
@@ -795,7 +803,7 @@ export default function ClaimSeat() {
           copy={{
             sale: true,
             title: "Your seat is open.",
-            lede: `For Black Friday through Cyber Monday, the waitlist gets Tapin Plus at ${saleRate} a month for life. Claim it by 11:59pm Tuesday, December 1.`,
+            lede: "For Black Friday through Cyber Monday, the waitlist gets Tapin Plus at a special price, locked in for life. Claim it by 11:59pm Tuesday, December 1.",
             fine: "Only for people on the waitlist. Cancel anytime in the Tapin app.",
             up: true,
             held: <SaleHeld onEnd={onEnd} />,
@@ -842,7 +850,7 @@ export default function ClaimSeat() {
       ? {
           sale: true,
           title: "Black Friday, for the waitlist.",
-          lede: `Tapin Plus at ${saleRate} a month for life, only for people on the waitlist, until 11:59pm Tuesday, December 1. Sign in with the number you joined the waitlist with.`,
+          lede: "A Tapin Plus price just for the waitlist, locked in for life, until 11:59pm Tuesday, December 1. Sign in with the number you joined the waitlist with.",
           held: <SaleHeld onEnd={onEnd} />,
           up: true,
           act,
@@ -861,7 +869,7 @@ export default function ClaimSeat() {
               popupCta: "Got it",
             }
           : sale
-            ? { title: "This price is for the waitlist.", lede: "It’s for people who were already on the waitlist. Signed in with a different number? Use the one you joined with. Or join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" }
+            ? { sale: true, title: "This offer is for the waitlist.", lede: "Join the waitlist by 11:59pm Tuesday, December 1, and your seat opens at the Black Friday price, locked in for life. Already joined with a different number? Sign in with that one.", held: <SaleHeld onEnd={onEnd} />, up: false, act, popupCta: "Join the waitlist" }
             : { title: "You’re not in line yet.", lede: "Tapin Plus is invite only. Join the waitlist and we’ll text you when your seat opens.", up: false, act, popupCta: "Join the waitlist" };
   return (
     <>
