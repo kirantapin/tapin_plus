@@ -48,3 +48,38 @@ export function usMobile(raw: string): string | null {
 /** Opens Messages with the text written, to the parent's number if given.
  *  "?&body=" is read by both iPhone and Android. */
 export const smsHref = (to: string | null, body: string) => `sms:${to ?? ""}?&body=${encodeURIComponent(body)}`;
+
+/** The text Tapin sends the parent (api/ask-parent.js writes the same). */
+export const tapinAskText = (name: string) =>
+  `Tapin: ${name} asked for Tapin Plus this holiday season 🎁 Send it to them with a note attached: ${askLink(name)}\nReply STOP to opt out`;
+
+export type AskResult = { ok: true; masked: string; left: number } | { ok: false; error: string };
+
+/** Sends the ask through Tapin (api/ask-parent.js), as the signed-in student. */
+export async function sendAsk(accessToken: string, name: string, to: string): Promise<AskResult> {
+  try {
+    const r = await fetch("/api/ask-parent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ name, to }),
+    });
+    const body = (await r.json().catch(() => ({}))) as { ok?: boolean; masked?: string; left?: number; error?: string };
+    if (r.ok && body.ok) return { ok: true, masked: body.masked ?? "", left: body.left ?? 0 };
+    return { ok: false, error: body.error ?? (r.status === 503 ? "not_configured" : "try_again") };
+  } catch {
+    return { ok: false, error: "try_again" };
+  }
+}
+
+/** What each refusal says to the student. */
+export const ASK_ERRORS: Record<string, string> = {
+  name: "Add your first name, so they know it’s you.",
+  number: "That number doesn’t look right. Use your parent’s US mobile.",
+  own_number: "That’s your own number. Add your parent’s.",
+  already_asked: "You’ve already asked that number. Give them a little time.",
+  limit: "You’ve sent 3 asks, the most we send for one person.",
+  opted_out: "That number has turned off texts from Tapin. You can text them yourself below.",
+  signin: "Sign in first, so they know it’s really you.",
+  not_configured: "We can’t send texts right now. You can text them yourself below.",
+  try_again: "That didn’t go through. Try again in a moment.",
+};
